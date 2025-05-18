@@ -6,7 +6,7 @@
 export const theme = {
   colors: {
     // Base colors
-    background: "#0F172A", // Deep navy (cool, elegant dark base)
+    background: "#1E293B", // Changed from #0F172A to a lighter steel dark gray
     primaryText: "#F8FAFC", // Almost white (clean on dark)
     secondaryText: "#94A3B8", // Soft gray-blue (subtext, paragraph)
     

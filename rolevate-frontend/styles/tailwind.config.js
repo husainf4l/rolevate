@@ -5,7 +5,7 @@ module.exports = {
     extend: {
       colors: {
         rolevate: {
-          background: "#0F172A",
+          background: "#1E293B", // Changed from #0F172A
           primaryText: "#F8FAFC",
           secondaryText: "#94A3B8",
           primaryAccent: "#00C6AD",
