@@ -1,5 +1,6 @@
 "use client";
 
+
 import "@livekit/components-styles";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -24,7 +25,7 @@ const visualizerStyles = `
   }
 `;
 
-export default function RoomPage() {
+function RoomContent() {
   const searchParams = useSearchParams();
   const phone = searchParams.get("phone");
   const [room] = useState(() => new Room());
@@ -230,4 +231,8 @@ function AudioVisualizer() {
       />
     </div>
   );
+}
+
+export default function RoomPage() {
+  return <RoomContent />;
 }
