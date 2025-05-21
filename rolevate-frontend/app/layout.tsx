@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Rolevate - AI-Powered Banking Recruitment",
-  description: "Rolevate helps banking institutions optimize their HR workflow with AI-powered recruitment solutions tailored for the banking industry.",
+  description:
+    "Rolevate helps banking institutions optimize their HR workflow with AI-powered recruitment solutions tailored for the banking industry.",
 };
 
 export default function RootLayout({
@@ -29,9 +31,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        {children}
-        <Footer />
+        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>
     </html>
   );

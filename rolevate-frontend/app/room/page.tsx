@@ -1,14 +1,12 @@
 "use client";
 
 import "@livekit/components-styles";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Room, RoomEvent } from "livekit-client";
 import {
   RoomContext,
-  useLocalParticipant,
   RoomAudioRenderer,
-  useRoomContext,
   useVoiceAssistant,
   BarVisualizer,
 } from "@livekit/components-react";
@@ -32,12 +30,10 @@ export default function RoomPage() {
   const [room] = useState(() => new Room());
 
   const [isCallActive, setIsCallActive] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [interviewStatus, setInterviewStatus] = useState<
     "ready" | "connecting" | "waiting" | "active" | "completed"
   >("ready");
-  const [typedMessage, setTypedMessage] = useState("");
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
@@ -67,7 +63,6 @@ export default function RoomPage() {
   const startInterview = async () => {
     setInterviewStatus("connecting");
     try {
-      // Use the existing connection-details API
       const url = new URL("/api/connection-details", window.location.origin);
       const response = await fetch(url.toString());
       const connectionDetails = await response.json();
@@ -79,18 +74,15 @@ export default function RoomPage() {
       await room.localParticipant.setMicrophoneEnabled(true);
       setIsCallActive(true);
 
-      // Set to waiting state for 3 seconds before marking as active
       setInterviewStatus("waiting");
       setTimeout(() => {
         setInterviewStatus("active");
-      }, 3000); // 3 second delay
+      }, 3000);
     } catch (err) {
       console.error(err);
       setInterviewStatus("ready");
     }
   };
-
-  const toggleMute = () => setIsMuted(!isMuted);
 
   const formatTime = (s: number): string => {
     return `${Math.floor(s / 60)}:${("0" + (s % 60)).slice(-2)}`;
@@ -98,7 +90,7 @@ export default function RoomPage() {
 
   if (!phone) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+      <div className="h-screen bg-slate-900 text-white flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-xl font-semibold">Invalid Interview Link</p>
           <Link href="/" className="text-blue-400 underline">
@@ -114,90 +106,105 @@ export default function RoomPage() {
       <style jsx global>
         {visualizerStyles}
       </style>
-      <div className="min-h-screen bg-slate-900 text-white p-6">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <header className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Interview Session</h1>
-            {isCallActive && (
-              <div className="text-sm bg-red-500 px-3 py-1 rounded-full animate-pulse">
-                {formatTime(callDuration)}
+      <div className="h-screen bg-slate-900 text-white flex flex-col">
+        {/* Interview Content */}
+        <div className="flex-1 flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-slate-800 rounded-lg shadow-xl overflow-hidden">
+            {/* Status Bar */}
+            <div className="bg-slate-700 p-3 flex justify-between items-center">
+              <span className="text-sm font-medium">
+                Laila (AI Interviewer)
+              </span>
+              <div className="flex items-center space-x-3">
+                <span className="text-xs font-medium">
+                  {interviewStatus.toUpperCase()}
+                </span>
+                {isCallActive && (
+                  <div className="text-xs bg-red-500 px-2 py-0.5 rounded-full animate-pulse">
+                    {formatTime(callDuration)}
+                  </div>
+                )}
               </div>
-            )}
-          </header>
-
-          <div className="bg-slate-800 p-6 rounded-lg shadow-lg space-y-6">
-            <div className="text-sm flex justify-between">
-              <span>Laila (AI Interviewer)</span>
-              <span>{interviewStatus.toUpperCase()}</span>
             </div>
-            <div className="flex justify-center flex-col items-center">
-              <InterviewerAvatar isSpeaking={false} isActive={isCallActive} />
+
+            {/* Main content */}
+            <div className="p-6 flex flex-col items-center space-y-6">
+              {/* Interviewer Avatar */}
+              <div className="mb-2">
+                <InterviewerAvatar isSpeaking={false} isActive={isCallActive} />
+              </div>
 
               {/* Audio visualization */}
               {isCallActive && <AudioVisualizer />}
-            </div>
 
-            {/* Add TranscriptionView to display the conversation */}
-            {isCallActive && (
-              <div className="mt-6">
-                <TranscriptionView />
-              </div>
-            )}
+              {/* Transcription */}
+              {isCallActive && <TranscriptionView />}
 
-            <div className="flex justify-center gap-4 mt-4">
-              {interviewStatus === "ready" && (
-                <button
-                  className="bg-green-500 px-6 py-2 rounded hover:bg-green-600"
-                  onClick={startInterview}
-                >
-                  Start Interview
-                </button>
-              )}
-              {interviewStatus === "connecting" && (
-                <div className="text-white px-6 py-2">Connecting...</div>
-              )}
-              {interviewStatus === "waiting" && (
-                <div className="text-yellow-300 px-6 py-2 flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-yellow-300"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
+              {/* Controls */}
+              <div className="w-full flex justify-center mt-6">
+                {interviewStatus === "ready" && (
+                  <button
+                    className="bg-green-500 px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                    onClick={startInterview}
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Getting Ready...
-                </div>
-              )}
-              {interviewStatus === "active" && (
-                <button
-                  className="bg-red-500 px-6 py-2 rounded hover:bg-red-600"
-                  onClick={() => {
-                    room.disconnect();
-                    setIsCallActive(false);
-                    setInterviewStatus("completed");
-                  }}
-                >
-                  End Interview
-                </button>
-              )}
-              {interviewStatus === "completed" && (
-                <Link href="/" className="text-blue-400 underline">
-                  Return to Home
-                </Link>
-              )}
+                    Start Interview
+                  </button>
+                )}
+
+                {interviewStatus === "connecting" && (
+                  <div className="text-white px-6 py-2 flex items-center">
+                    <span className="animate-pulse">Connecting...</span>
+                  </div>
+                )}
+
+                {interviewStatus === "waiting" && (
+                  <div className="text-yellow-300 px-6 py-2 flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-yellow-300"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Getting Ready...
+                  </div>
+                )}
+
+                {interviewStatus === "active" && (
+                  <button
+                    className="bg-red-500 px-6 py-2 rounded-lg hover:bg-red-600 transition-colors"
+                    onClick={() => {
+                      room.disconnect();
+                      setIsCallActive(false);
+                      setInterviewStatus("completed");
+                    }}
+                  >
+                    End Interview
+                  </button>
+                )}
+
+                {interviewStatus === "completed" && (
+                  <Link
+                    href="/"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                  >
+                    Return to Home
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -213,7 +220,7 @@ function AudioVisualizer() {
   const { state: agentState, audioTrack } = useVoiceAssistant();
 
   return (
-    <div className="mt-4 w-full max-w-[300px] h-[150px]">
+    <div className="w-full max-w-[300px] h-[100px] mb-4">
       <BarVisualizer
         state={agentState}
         barCount={5}
