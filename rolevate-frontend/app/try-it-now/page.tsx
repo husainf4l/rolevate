@@ -116,7 +116,7 @@ export default function TryItNowPage() {
                       name="phone"
                       value={phoneNumber}
                       onChange={handlePhoneChange}
-                      placeholder="e.g. +971 50 123 4567"
+                      placeholder="e.g. 971501234567"
                       className="w-full bg-[#0F172A] border border-[#334155] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent text-[#F8FAFC]"
                       required
                     />
