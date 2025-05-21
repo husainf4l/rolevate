@@ -1,7 +1,7 @@
 "use client";
 
 import "@livekit/components-styles";
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Room, RoomEvent } from "livekit-client";
 import {
@@ -14,7 +14,9 @@ import {
 } from "@livekit/components-react";
 import { InterviewerAvatar } from "@/components/interview/InterviewerAvatar";
 import Link from "next/link";
+import { ConnectionDetails } from "@/app/api/connection-details/route";
 import TranscriptionView from "@/components/TranscriptionView";
+import useCombinedTranscriptions from "@/hooks/useCombinedTranscriptions";
 
 // Add some global styles for the visualizer
 const visualizerStyles = `
@@ -37,7 +39,6 @@ export default function RoomPage() {
   const [interviewStatus, setInterviewStatus] = useState<
     "ready" | "connecting" | "waiting" | "active" | "completed"
   >("ready");
-  const [typedMessage, setTypedMessage] = useState("");
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
@@ -78,7 +79,7 @@ export default function RoomPage() {
       );
       await room.localParticipant.setMicrophoneEnabled(true);
       setIsCallActive(true);
-
+      
       // Set to waiting state for 3 seconds before marking as active
       setInterviewStatus("waiting");
       setTimeout(() => {
@@ -154,29 +155,15 @@ export default function RoomPage() {
                 </button>
               )}
               {interviewStatus === "connecting" && (
-                <div className="text-white px-6 py-2">Connecting...</div>
+                <div className="text-white px-6 py-2">
+                  Connecting...
+                </div>
               )}
               {interviewStatus === "waiting" && (
                 <div className="text-yellow-300 px-6 py-2 flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-yellow-300"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-yellow-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   Getting Ready...
                 </div>
@@ -184,11 +171,7 @@ export default function RoomPage() {
               {interviewStatus === "active" && (
                 <button
                   className="bg-red-500 px-6 py-2 rounded hover:bg-red-600"
-                  onClick={() => {
-                    room.disconnect();
-                    setIsCallActive(false);
-                    setInterviewStatus("completed");
-                  }}
+                  onClick={() => setInterviewStatus("completed")}
                 >
                   End Interview
                 </button>

@@ -5,16 +5,32 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Room, RoomEvent } from "livekit-client";
 import {
-  RoomContext,
-  useLocalParticipant,
+  Rfunction UserSpeechIndicator(): React.ReactNode {
+  const { microphoneTrack } = useLocalParticipant();
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!microphoneTrack?.audioTrack) return;
+
+    const audioAnalyzer = new AudioAnalyzer(microphoneTrack.audioTrack);
+    audioAnalyzer.on("speaking", () => setIsSpeaking(true));
+    audioAnalyzer.on("stopped_speaking", () => setIsSpeaking(false));
+
+    return () => {
+      audioAnalyzer.destroy();
+    };
+  }, [microphoneTrack]);seLocalParticipant,
   RoomAudioRenderer,
   useRoomContext,
   useVoiceAssistant,
   BarVisualizer,
 } from "@livekit/components-react";
+import { AudioAnalyzer } from "@/utils/AudioAnalyzer";
 import { InterviewerAvatar } from "@/components/interview/InterviewerAvatar";
 import Link from "next/link";
+import { ConnectionDetails } from "@/app/api/connection-details/route";
 import TranscriptionView from "@/components/TranscriptionView";
+import useCombinedTranscriptions from "@/hooks/useCombinedTranscriptions";
 
 // Add some global styles for the visualizer
 const visualizerStyles = `
@@ -37,7 +53,6 @@ export default function RoomPage() {
   const [interviewStatus, setInterviewStatus] = useState<
     "ready" | "connecting" | "waiting" | "active" | "completed"
   >("ready");
-  const [typedMessage, setTypedMessage] = useState("");
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
@@ -70,7 +85,7 @@ export default function RoomPage() {
       // Use the existing connection-details API
       const url = new URL("/api/connection-details", window.location.origin);
       const response = await fetch(url.toString());
-      const connectionDetails = await response.json();
+      const connectionDetails = await response.json() as ConnectionDetails;
 
       await room.connect(
         connectionDetails.serverUrl,
@@ -204,6 +219,7 @@ export default function RoomPage() {
 
         {/* Audio renderer for LiveKit */}
         <RoomAudioRenderer />
+        <UserSpeechIndicator />
       </div>
     </RoomContext.Provider>
   );
@@ -221,6 +237,43 @@ function AudioVisualizer() {
         className="agent-visualizer"
         options={{ minHeight: 24 }}
       />
+    </div>
+  );
+}
+
+function UserSpeechIndicator(): JSX.Element | null {
+  const { microphoneTrack } = useLocalParticipant();
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!microphoneTrack?.audioTrack) return;
+
+    const audioAnalyzer = new AudioAnalyzer(microphoneTrack.audioTrack);
+    audioAnalyzer.on("speaking", () => setIsSpeaking(true));
+    audioAnalyzer.on("stopped_speaking", () => setIsSpeaking(false));
+
+    return () => {
+      audioAnalyzer.destroy();
+    };
+  }, [microphoneTrack]);
+
+  if (!isSpeaking) return null;
+
+  return (
+    <div className="fixed bottom-6 right-6 bg-green-500 text-white px-4 py-2 rounded-full flex items-center shadow-lg z-50 animate-pulse">
+      <svg
+        className="w-5 h-5 mr-2"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fillRule="evenodd"
+          d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+          clipRule="evenodd"
+        ></path>
+      </svg>
+      You're speaking...
     </div>
   );
 }

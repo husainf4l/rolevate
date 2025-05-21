@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@livekit/components-react": "^2.9.4",
+    "@livekit/components-styles": "^1.1.5",
+    "framer-motion": "^12.12.1",
     "livekit-client": "^2.13.0",
     "livekit-server-sdk": "^2.13.0",
     "lucide-react": "^0.511.0",

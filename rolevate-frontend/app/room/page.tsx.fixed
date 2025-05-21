@@ -1,30 +1,11 @@
 "use client";
 
-import "@livekit/components-styles";
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Room, RoomEvent } from "livekit-client";
-import {
-  RoomContext,
-  useLocalParticipant,
-  RoomAudioRenderer,
-  useRoomContext,
-  useVoiceAssistant,
-  BarVisualizer,
-} from "@livekit/components-react";
+import { RoomContext } from "@livekit/components-react";
 import { InterviewerAvatar } from "@/components/interview/InterviewerAvatar";
 import Link from "next/link";
-import TranscriptionView from "@/components/TranscriptionView";
-
-// Add some global styles for the visualizer
-const visualizerStyles = `
-  .agent-visualizer {
-    --bar-color: #ffffff;
-    --bar-color-active: #22c55e;
-    width: 100%;
-    height: 100%;
-  }
-`;
 
 export default function RoomPage() {
   const searchParams = useSearchParams();
@@ -34,10 +15,7 @@ export default function RoomPage() {
   const [isCallActive, setIsCallActive] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
-  const [interviewStatus, setInterviewStatus] = useState<
-    "ready" | "connecting" | "waiting" | "active" | "completed"
-  >("ready");
-  const [typedMessage, setTypedMessage] = useState("");
+  const [interviewStatus, setInterviewStatus] = useState<"ready" | "connecting" | "active" | "completed">("ready");
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
@@ -54,9 +32,7 @@ export default function RoomPage() {
   useEffect(() => {
     const handleError = (error: Error) => {
       console.error("LiveKit Error:", error);
-      alert(
-        "Error acquiring camera or microphone permissions. Please make sure you grant the necessary permissions in your browser and reload the tab"
-      );
+      alert("Audio/Video permissions issue or server error");
     };
     room.on(RoomEvent.MediaDevicesError, handleError);
     return () => {
@@ -67,23 +43,18 @@ export default function RoomPage() {
   const startInterview = async () => {
     setInterviewStatus("connecting");
     try {
-      // Use the existing connection-details API
-      const url = new URL("/api/connection-details", window.location.origin);
-      const response = await fetch(url.toString());
-      const connectionDetails = await response.json();
-
-      await room.connect(
-        connectionDetails.serverUrl,
-        connectionDetails.participantToken
-      );
+      const response = await fetch(`/api/livekit-token?phone=${phone}`);
+      const data = await response.json();
+      const livekitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+      
+      if (!livekitUrl) {
+        throw new Error("LiveKit URL is not defined");
+      }
+      
+      await room.connect(livekitUrl, data.token);
       await room.localParticipant.setMicrophoneEnabled(true);
       setIsCallActive(true);
-
-      // Set to waiting state for 3 seconds before marking as active
-      setInterviewStatus("waiting");
-      setTimeout(() => {
-        setInterviewStatus("active");
-      }, 3000); // 3 second delay
+      setInterviewStatus("active");
     } catch (err) {
       console.error(err);
       setInterviewStatus("ready");
@@ -91,7 +62,7 @@ export default function RoomPage() {
   };
 
   const toggleMute = () => setIsMuted(!isMuted);
-
+  
   const formatTime = (s: number): string => {
     return `${Math.floor(s / 60)}:${("0" + (s % 60)).slice(-2)}`;
   };
@@ -111,9 +82,6 @@ export default function RoomPage() {
 
   return (
     <RoomContext.Provider value={room}>
-      <style jsx global>
-        {visualizerStyles}
-      </style>
       <div className="min-h-screen bg-slate-900 text-white p-6">
         <div className="max-w-3xl mx-auto space-y-6">
           <header className="flex justify-between items-center">
@@ -130,19 +98,9 @@ export default function RoomPage() {
               <span>Laila (AI Interviewer)</span>
               <span>{interviewStatus.toUpperCase()}</span>
             </div>
-            <div className="flex justify-center flex-col items-center">
+            <div className="flex justify-center">
               <InterviewerAvatar isSpeaking={false} isActive={isCallActive} />
-
-              {/* Audio visualization */}
-              {isCallActive && <AudioVisualizer />}
             </div>
-
-            {/* Add TranscriptionView to display the conversation */}
-            {isCallActive && (
-              <div className="mt-6">
-                <TranscriptionView />
-              </div>
-            )}
 
             <div className="flex justify-center gap-4 mt-4">
               {interviewStatus === "ready" && (
@@ -153,42 +111,10 @@ export default function RoomPage() {
                   Start Interview
                 </button>
               )}
-              {interviewStatus === "connecting" && (
-                <div className="text-white px-6 py-2">Connecting...</div>
-              )}
-              {interviewStatus === "waiting" && (
-                <div className="text-yellow-300 px-6 py-2 flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-yellow-300"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Getting Ready...
-                </div>
-              )}
               {interviewStatus === "active" && (
                 <button
                   className="bg-red-500 px-6 py-2 rounded hover:bg-red-600"
-                  onClick={() => {
-                    room.disconnect();
-                    setIsCallActive(false);
-                    setInterviewStatus("completed");
-                  }}
+                  onClick={() => setInterviewStatus("completed")}
                 >
                   End Interview
                 </button>
@@ -201,26 +127,7 @@ export default function RoomPage() {
             </div>
           </div>
         </div>
-
-        {/* Audio renderer for LiveKit */}
-        <RoomAudioRenderer />
       </div>
     </RoomContext.Provider>
-  );
-}
-
-function AudioVisualizer() {
-  const { state: agentState, audioTrack } = useVoiceAssistant();
-
-  return (
-    <div className="mt-4 w-full max-w-[300px] h-[150px]">
-      <BarVisualizer
-        state={agentState}
-        barCount={5}
-        trackRef={audioTrack}
-        className="agent-visualizer"
-        options={{ minHeight: 24 }}
-      />
-    </div>
   );
 }
