@@ -30,7 +30,7 @@ export default function Navbar() {
               href="/try-it-now"
               className="group relative overflow-hidden bg-[#00C6AD] text-[#022B25] font-semibold px-6 py-2.5 rounded-lg"
             >
-              <span className="relative z-10 transition-colors duration-300">
+              <span className="relative z-10 transition-colors duration-300 group-hover:text-[#F8FAFC]">
                 Try Demo
               </span>
               <span className="absolute inset-0 bg-[#0F172A] transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>

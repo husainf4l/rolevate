@@ -12,7 +12,11 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative text-[#F8FAFC] overflow-hidden bg-[#0F172A] lg:h-[calc(100vh-4rem)] lg:flex lg:items-center py-16 md:py-20 lg:py-0">
+    <section
+      className="relative text-[#F8FAFC] overflow-hidden bg-[#0F172A] lg:h-[calc(100vh-4rem)] lg:flex lg:items-center py-16 md:py-20 lg:py-0"
+      itemScope
+      itemType="http://schema.org/Service"
+    >
       {/* Full background image - DESKTOP ONLY */}
       <div className="hidden lg:block absolute inset-0 w-full h-full z-0">
         <Image
@@ -31,7 +35,9 @@ export default function Hero() {
           {/* Text content block (glassmorphism card) */}
           <div
             className={`lg:col-span-1 backdrop-blur-lg bg-slate-800/30 rounded-2xl shadow-2xl border border-slate-700/50 p-6 sm:p-8 md:p-10 transition-all duration-700 ease-in-out ${
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
             }`} // Reduced padding for a more standard size
           >
             <div className="inline-flex items-center bg-slate-700/50 rounded-full px-4 py-2 border border-slate-600/70 mb-5 shadow-md">
@@ -47,9 +53,10 @@ export default function Hero() {
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-slate-300 mb-8 max-w-xl leading-relaxed">
-              Rolevate is a secure, AI-driven interview system engineered for banks
-              — automating CV screening, top-talent outreach via WhatsApp, and
-              bilingual interviews that score and shortlist candidates instantly.
+              Rolevate is a secure, AI-driven interview system engineered for
+              banks — automating CV screening, top-talent outreach via WhatsApp,
+              and bilingual interviews that score and shortlist candidates
+              instantly.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
@@ -102,43 +109,3 @@ export default function Hero() {
     </section>
   );
 }
-
-/* Add these keyframes to your global CSS (e.g., globals.css or tailwind.config.js):
-@keyframes gradient-move {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-.animate-gradient-move {
-  background-size: 200% 200%;
-  animation: gradient-move 8s ease-in-out infinite;
-}
-@keyframes blob-slow {
-  0%, 100% { transform: scale(1) translateY(0); }
-  50% { transform: scale(1.1) translateY(-20px); }
-}
-.animate-blob-slow { animation: blob-slow 12s ease-in-out infinite; }
-@keyframes blob-fast {
-  0%, 100% { transform: scale(1) translateY(0); }
-  50% { transform: scale(1.15) translateY(20px); }
-}
-.animate-blob-fast { animation: blob-fast 8s ease-in-out infinite; }
-*/
-
-/* Add this to your tailwind.config.js for text-shadow (if not already there via a plugin):
-theme: {
-  extend: {
-    textShadow: {
-      'lg': '0 2px 10px rgba(0, 0, 0, 0.3)',
-    },
-  },
-},
-plugins: [
-  function({ addUtilities, theme, e }) {
-    const newUtilities = {};
-    Object.entries(theme('textShadow')).forEach(([key, value]) => {
-      newUtilities[`.${e(`text-shadow-${key}`)}`] = { textShadow: value };
-    });
-    addUtilities(newUtilities, ['responsive', 'hover']);
-  }
-],
-*/

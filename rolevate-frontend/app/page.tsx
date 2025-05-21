@@ -8,13 +8,16 @@ import CallToAction from "@/components/CallToAction";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Rolevate AI | Automated Interview Platform for Banking & Finance",
+  title: "Rolevate | AI Interview Platform for Banking & Financial Services",
   description:
-    "Rolevate AI streamlines hiring for banks and financial institutions with automated interviews, AI scoring, and compliance-ready workflows.",
+    "Rolevate AI helps optimize hiring for banks and financial institutions with automated interviews, AI-powered candidate assessment, and compliance-ready recruitment workflows.",
+  keywords:
+    "AI interview platform, banking recruitment, financial services hiring, automated interviews, recruitment technology, compliance hiring, candidate assessment, HR technology, AI hiring tools, banking talent acquisition",
   openGraph: {
-    title: "Rolevate AI | Automated Interview Platform for Banking & Finance",
+    title:
+      "Rolevate AI | AI Interview Platform for Banking & Financial Services",
     description:
-      "Rolevate AI streamlines hiring for banks and financial institutions with automated interviews, AI scoring, and compliance-ready workflows.",
+      "Rolevate AI helps optimize hiring for banks and financial institutions with automated interviews, AI-powered candidate assessment, and compliance-ready recruitment workflows.",
     url: "https://rolevate.com/",
     siteName: "Rolevate AI",
     images: [
@@ -22,7 +25,7 @@ export const metadata: Metadata = {
         url: "/images/rolevate-logo.png",
         width: 512,
         height: 128,
-        alt: "Rolevate AI Logo",
+        alt: "Rolevate AI - Banking Recruitment Platform",
       },
     ],
     locale: "en_US",
@@ -30,10 +33,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rolevate AI | Automated Interview Platform for Banking & Finance",
+    title:
+      "Rolevate AI | AI Interview Platform for Banking & Financial Services",
     description:
-      "Rolevate AI streamlines hiring for banks and financial institutions with automated interviews, AI scoring, and compliance-ready workflows.",
+      "Rolevate AI helps optimize hiring for banks and financial institutions with automated interviews, AI-powered candidate assessment, and compliance-ready recruitment workflows.",
     images: ["/images/rolevate-logo.png"],
+  },
+  alternates: {
+    canonical: "https://rolevate.com",
   },
 };
 
@@ -50,7 +57,7 @@ export default function Home() {
             name: "Rolevate AI",
             url: "https://rolevate.com/",
             description:
-              "Rolevate AI streamlines hiring for banks and financial institutions with automated interviews, AI scoring, and compliance-ready workflows.",
+              "Rolevate AI helps optimize hiring for banks and financial institutions with automated interviews, AI-powered candidate assessment, and compliance-ready recruitment workflows.",
             publisher: {
               "@type": "Organization",
               name: "Rolevate AI",
@@ -58,11 +65,48 @@ export default function Home() {
                 "@type": "ImageObject",
                 url: "https://rolevate.com/images/rolevate-logo.png",
               },
+              sameAs: [
+                "https://www.linkedin.com/company/rolevate",
+                "https://twitter.com/rolevateai",
+              ],
             },
             potentialAction: {
               "@type": "SearchAction",
               target: "https://rolevate.com/search?q={search_term_string}",
               "query-input": "required name=search_term_string",
+            },
+            keywords:
+              "AI interview platform, banking recruitment, financial services hiring, automated interviews, recruitment technology, compliance hiring, candidate assessment, HR technology, banking talent acquisition",
+            offers: {
+              "@type": "Offer",
+              priceCurrency: "USD",
+              availability: "https://schema.org/InStock",
+              description:
+                "Request a demo of Rolevate AI's banking interview platform today",
+            },
+          }),
+        }}
+      />
+
+      {/* Additional Organization Schema for better SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "@id": "https://rolevate.com",
+            name: "Rolevate AI",
+            url: "https://rolevate.com/",
+            logo: "https://rolevate.com/images/rolevate-logo.png",
+            description:
+              "An AI-powered interview platform for banks and financial institutions. Streamline your hiring process with automated interviews and compliance-ready workflows.",
+            /* Removed address information until confirmed */
+            contactPoint: {
+              "@type": "ContactPoint",
+              contactType: "customer support",
+              email: "support@rolevate.com",
+              url: "https://rolevate.com/contact",
             },
           }),
         }}

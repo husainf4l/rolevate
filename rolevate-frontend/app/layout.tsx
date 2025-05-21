@@ -16,9 +16,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rolevate - AI-Powered Banking Recruitment",
+  metadataBase: new URL("https://rolevate.com"),
+  title: {
+    default: "Rolevate AI - Banking Recruitment Platform",
+    template: "%s | Rolevate AI",
+  },
   description:
     "Rolevate helps banking institutions optimize their HR workflow with AI-powered recruitment solutions tailored for the banking industry.",
+  keywords:
+    "banking recruitment, AI interview platform, financial hiring, automated HR, bank compliance hiring",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
+  verification: {
+    google: "verification_token",
+  },
 };
 
 export default function RootLayout({
@@ -27,11 +50,41 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" itemScope itemType="http://schema.org/WebPage">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="canonical" href="https://rolevate.com" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="google-site-verification"
+          content="your-verification-code"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Google Tag Manager Script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','GTM-XXXXXXX');
+            `,
+          }}
+        />
         <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+        {/* Preconnect to essential third-party domains for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
       </body>
     </html>
   );
