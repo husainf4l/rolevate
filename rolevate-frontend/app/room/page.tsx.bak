@@ -2,7 +2,7 @@
 
 
 import "@livekit/components-styles";
-import React, { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Room, RoomEvent } from "livekit-client";
 import {
@@ -235,7 +235,7 @@ function AudioVisualizer() {
 
 export default function RoomPage() {
   return (
-    <Suspense fallback={<div className="h-screen bg-slate-900 text-white flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#0F172A] text-[#F8FAFC] flex items-center justify-center px-4">Loading...</div>}>
       <RoomContent />
     </Suspense>
   );
