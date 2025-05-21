@@ -25,7 +25,7 @@ export default function Button({
   const baseClasses = "px-8 py-3 rounded-lg font-medium transition duration-300 flex items-center justify-center shadow-md";
   
   const variantClasses = {
-    primary: "bg-[#00A99D] hover:bg-[#008F85] text-white focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:ring-opacity-50",
+    primary: "bg-[#00A99D] hover:bg-[#008F85] text-[#022B25] focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:ring-opacity-50",
     secondary: "bg-[#172232] border-2 border-[#334155] hover:border-[#00A99D] hover:bg-[#131D2A] text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#334155] focus:ring-opacity-50"
   };
   

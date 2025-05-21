@@ -51,6 +51,9 @@ const BankIndustryFocus = () => {
             Rolevate was built with banking HR in mind — high-volume hiring, strict compliance, and bilingual candidate pools. 
             Whether you're hiring branch-level staff or corporate managers, Rolevate brings speed, accuracy, and professionalism.
           </p>
+          <p className="mt-4 text-sm text-slate-200">
+            Built for Banks. Powered by AI. Rolevate solves the hiring bottleneck in banks…
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">

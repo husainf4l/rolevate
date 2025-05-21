@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -72,7 +71,7 @@ export default function WhatIsRolevate() {
             <span className="text-[#00C6AD] text-2xl font-bold">&rarr;</span>
             <div className="p-3 bg-slate-700/50 rounded-lg shadow-md border border-slate-600/70">Score Report</div>
           </div>
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-slate-200">
             (This represents the automated flow. A micro-animation could visually demonstrate this sequence.)
           </p>
         </div>

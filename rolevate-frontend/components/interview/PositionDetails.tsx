@@ -12,7 +12,7 @@ export const PositionDetails = ({
   skills,
 }: PositionDetailsProps) => {
   // Map skills to background colors
-  const skillColors = {
+  const skillColors: { [key: string]: string } = {
     "Client Relations": "bg-blue-900/50 text-blue-300",
     "Financial Analysis": "bg-green-900/50 text-green-300",
     "Corporate Banking": "bg-purple-900/50 text-purple-300",
