@@ -40,3 +40,4 @@ build/
 # Credentials
 **/*.json
 !**/sample*.json
+*.env
