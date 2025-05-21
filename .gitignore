@@ -1,0 +1,42 @@
+# Environment variables
+.env
+**/.env
+
+# Python virtual environment
+.venv/
+**/.venv/
+venv/
+**/venv/
+env/
+**/env/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+**/*.py[cod]
+*$py.class
+**/*$py.class
+
+# Logs
+*.log
+**/logs/
+KMS/logs/
+
+# Distribution / packaging
+dist/
+**/dist/
+build/
+**/build/
+*.egg-info/
+**/*.egg-info/
+
+# Local development settings
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+
+# Credentials
+**/*.json
+!**/sample*.json
