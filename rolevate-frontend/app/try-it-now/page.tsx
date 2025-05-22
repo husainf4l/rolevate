@@ -19,15 +19,43 @@ export default function TryItNowPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Get the form and file input
+      const form = e.currentTarget;
+      const fileInput = form.querySelector('input[type="file"]') as HTMLInputElement;
+      
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        alert('Please select a CV file');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Create FormData to send the file and phone number
+      const formData = new FormData();
+      formData.append('phone', phoneNumber);
+      formData.append('file', fileInput.files[0]);
+      
+      // Send the data to the API
+      const response = await fetch('https://widd.ai/webhook/rovate-cv-upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`API response error: ${response.status}`);
+      }
+
       setIsSubmitting(false);
       setIsSuccess(true);
-    }, 1500);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred while submitting the form. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
   const startJobApplication = () => {
