@@ -10,10 +10,10 @@ import {
   HttpStatus,
   Query
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { LivekitService } from './livekit.service';
 import { TokenDto } from './dto/token.dto';
 import { RoomDto } from './dto/room.dto';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('livekit')
 export class LivekitController {

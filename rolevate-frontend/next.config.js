@@ -3,12 +3,9 @@ const nextConfig = {
   /* config options here */
   reactStrictMode: true,
   poweredByHeader: false,  // Remove X-Powered-By header for security
-  swcMinify: true,         // Enable SWC minification
   compress: true,          // Enable gzip compression
-  i18n: {
-    locales: ['en'],
-    defaultLocale: 'en',
-  },
+  // Note: i18n config has been removed as it's not supported in App Router
+  // Use middleware.js for internationalization in App Router instead
   images: {
     domains: ['rolevate.com'],
   },

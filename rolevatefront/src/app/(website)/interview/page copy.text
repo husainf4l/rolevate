@@ -1,0 +1,359 @@
+// "use client";
+
+// import Link from "next/link";
+// import { useState, useEffect } from "react";
+// import { Mic, MicOff, Phone, PhoneOff, Volume2 } from "lucide-react";
+// import Image from "next/image";
+
+// export default function InterviewPage() {
+//   const [isCallActive, setIsCallActive] = useState(false);
+//   const [isMuted, setIsMuted] = useState(false);
+//   const [isAiResponding, setIsAiResponding] = useState(false);
+//   const [callDuration, setCallDuration] = useState(0);
+//   const [interviewStatus, setInterviewStatus] = useState("ready"); // ready, connecting, active, completed
+//   const [pulseAnimation, setPulseAnimation] = useState(false);
+//   const [currentQuestion, setCurrentQuestion] = useState("");
+
+//   // LiveKit integration would be implemented here
+//   const startInterview = () => {
+//     setInterviewStatus("connecting");
+//     setPulseAnimation(true);
+
+//     // Simulate connection delay
+//     setTimeout(() => {
+//       setIsCallActive(true);
+//       setInterviewStatus("active");
+//       setIsAiResponding(true);
+
+//       setTimeout(() => {
+//         setIsAiResponding(false);
+//         setCurrentQuestion(
+//           "Hello, I'm Laila from the engineering team. Thank you for joining this interview today. Could you please introduce yourself and tell me about your relevant experience?"
+//         );
+//       }, 2000);
+
+//       // Start timer for call duration
+//       startCallTimer();
+//     }, 2000);
+//   };
+
+//   const endInterview = () => {
+//     setIsCallActive(false);
+//     setInterviewStatus("completed");
+//   };
+
+//   const toggleMute = () => {
+//     setIsMuted(!isMuted);
+//   };
+
+//   const startCallTimer = () => {
+//     const timerInterval = setInterval(() => {
+//       setCallDuration((prev) => prev + 1);
+//     }, 1000);
+
+//     // Store interval ID for cleanup
+//     return () => clearInterval(timerInterval);
+//   };
+
+//   // Format time in MM:SS
+//   const formatTime = (seconds: number) => {
+//     const minutes = Math.floor(seconds / 60);
+//     const remainingSeconds = seconds % 60;
+//     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+//       .toString()
+//       .padStart(2, "0")}`;
+//   };
+
+//   // Simulate AI responses during the interview
+//   useEffect(() => {
+//     if (!isCallActive) return;
+
+//     // Predefined interview questions
+//     const questions = [
+//       "Could you tell me about a challenging project you've worked on recently?",
+//       "How do you approach problem-solving when faced with a complex technical issue?",
+//       "Can you describe your experience with team collaboration and how you handle disagreements?",
+//       "What technologies or frameworks are you most experienced with?",
+//       "How do you stay updated with the latest industry trends and technologies?",
+//     ];
+
+//     // Simulate AI asking questions periodically
+//     const questionInterval = setInterval(() => {
+//       if (Math.random() > 0.7) {
+//         // Randomly decide to ask a new question
+//         setIsAiResponding(true);
+//         setPulseAnimation(true);
+
+//         setTimeout(() => {
+//           setIsAiResponding(false);
+//           const randomQuestion =
+//             questions[Math.floor(Math.random() * questions.length)];
+//           setCurrentQuestion(randomQuestion);
+//         }, 3000);
+//       }
+//     }, 20000); // Every 20 seconds there's a chance for a new question
+
+//     return () => clearInterval(questionInterval);
+//   }, [isCallActive]);
+
+//   // Add animation effect for the interviewer
+//   useEffect(() => {
+//     if (isAiResponding) {
+//       const animationInterval = setInterval(() => {
+//         setPulseAnimation((prev) => !prev);
+//       }, 800);
+
+//       return () => clearInterval(animationInterval);
+//     }
+//   }, [isAiResponding]);
+
+//   return (
+//     <div className="min-h-screen bg-[#0F172A] text-rolevate-primaryText p-8">
+//       <div className="max-w-4xl mx-auto">
+//         <div className="flex justify-between items-center mb-6">
+//           <h1 className="text-3xl font-bold">Live Interview Session</h1>
+//           {isCallActive && (
+//             <div className="bg-slate-700 px-4 py-2 rounded-full flex items-center">
+//               <div className="h-2 w-2 rounded-full bg-red-500 mr-2 animate-pulse"></div>
+//               <span>{formatTime(callDuration)}</span>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Call UI */}
+//         <div className="bg-slate-800 rounded-lg p-6 mb-8">
+//           {/* Participant info */}
+//           <div className="flex justify-between items-center mb-6">
+//             <div className="flex items-center">
+//               {isCallActive ? (
+//                 <div className="bg-green-500 h-3 w-3 rounded-full mr-2"></div>
+//               ) : (
+//                 <div className="bg-gray-500 h-3 w-3 rounded-full mr-2"></div>
+//               )}
+//               <span className="font-medium">Laila (AI Interviewer)</span>
+//               {isAiResponding && (
+//                 <div className="ml-3 text-blue-400 text-sm">Speaking...</div>
+//               )}
+//             </div>
+//             <div className="text-sm text-gray-400">
+//               {interviewStatus === "ready" && "Waiting to start"}
+//               {interviewStatus === "connecting" && "Connecting..."}
+//               {interviewStatus === "active" && "In call"}
+//               {interviewStatus === "completed" && "Interview completed"}
+//             </div>
+//           </div>
+
+//           {/* Animated Interviewer */}
+//           <div className="flex flex-col items-center mb-8">
+//             <div
+//               className={`relative ${pulseAnimation ? "animate-pulse" : ""}`}
+//             >
+//               <div className="h-40 w-40 rounded-full overflow-hidden border-4 border-blue-500 relative">
+//                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/70 z-10"></div>
+//                 <Image
+//                   src="/images/lailaherohr.png"
+//                   alt="AI Interviewer Laila"
+//                   width={160}
+//                   height={160}
+//                   className={`object-cover transition-transform duration-500 ${
+//                     isAiResponding ? "scale-110" : "scale-100"
+//                   }`}
+//                 />
+//               </div>
+
+//               {isCallActive && (
+//                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-xs text-white px-2 py-0.5 rounded-full">
+//                   Live
+//                 </div>
+//               )}
+
+//               {isAiResponding && (
+//                 <div className="absolute -top-1 -right-1 h-5 w-5">
+//                   <span className="animate-ping absolute h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+//                   <span className="absolute h-full w-full rounded-full bg-blue-500"></span>
+//                 </div>
+//               )}
+//             </div>
+
+//             {/* Sound wave animation when speaking */}
+//             {isAiResponding && (
+//               <div className="mt-4 flex items-center justify-center space-x-1">
+//                 {[...Array(5)].map((_, i) => (
+//                   <div
+//                     key={i}
+//                     className="h-8 w-1 bg-blue-500 rounded-full"
+//                     style={{
+//                       animation: `soundWave 1s infinite ${i * 0.1}s`,
+//                       height: `${Math.random() * 16 + 8}px`,
+//                     }}
+//                   ></div>
+//                 ))}
+//               </div>
+//             )}
+
+//             {/* Current question display */}
+//             {currentQuestion && (
+//               <div className="mt-6 bg-slate-700 p-4 rounded-lg max-w-lg text-center shadow-lg border border-slate-600">
+//                 <p className="italic text-gray-300">
+//                   &ldquo;{currentQuestion}&rdquo;
+//                 </p>
+//               </div>
+//             )}
+//           </div>
+
+//           {/* Call Controls */}
+//           <div className="flex justify-center items-center gap-6 mt-8">
+//             {/* Mute button */}
+//             <button
+//               onClick={toggleMute}
+//               className={`group flex flex-col items-center justify-center transition-all duration-300 ${
+//                 isMuted
+//                   ? "text-red-400 hover:text-red-300"
+//                   : "text-gray-300 hover:text-white"
+//               }`}
+//             >
+//               <div
+//                 className={`p-4 rounded-full mb-2 transform transition-all duration-300 ${
+//                   isMuted
+//                     ? "bg-red-600/20 group-hover:bg-red-600/30 group-active:scale-90"
+//                     : "bg-slate-700/40 group-hover:bg-slate-700/60 group-active:scale-90"
+//                 }`}
+//               >
+//                 {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+//               </div>
+//               <span className="text-xs font-medium">
+//                 {isMuted ? "Unmute" : "Mute"}
+//               </span>
+//             </button>
+
+//             {/* Start/End Call Button - Larger and more prominent */}
+//             {!isCallActive ? (
+//               <button
+//                 onClick={startInterview}
+//                 className="group flex flex-col items-center justify-center transition-all duration-300 text-green-400 hover:text-green-300"
+//               >
+//                 <div className="p-5 rounded-full mb-2 bg-green-600/30 group-hover:bg-green-600/40 transform transition-all duration-300 group-hover:shadow-lg group-hover:shadow-green-900/20 group-active:scale-95">
+//                   <Phone size={32} />
+//                 </div>
+//                 <span className="text-sm font-medium">Start Interview</span>
+//               </button>
+//             ) : (
+//               <button
+//                 onClick={endInterview}
+//                 className="group flex flex-col items-center justify-center transition-all duration-300 text-red-400 hover:text-red-300"
+//               >
+//                 <div className="p-5 rounded-full mb-2 bg-red-600/30 group-hover:bg-red-600/40 transform transition-all duration-300 group-hover:shadow-lg group-hover:shadow-red-900/20 group-active:scale-95 border border-red-500/30">
+//                   <PhoneOff size={32} />
+//                 </div>
+//                 <span className="text-sm font-medium">End Interview</span>
+//               </button>
+//             )}
+
+//             {/* Volume control */}
+//             <button className="group flex flex-col items-center justify-center transition-all duration-300 text-gray-300 hover:text-white">
+//               <div className="p-4 rounded-full mb-2 bg-slate-700/40 group-hover:bg-slate-700/60 transform transition-all duration-300 group-active:scale-90">
+//                 <Volume2 size={24} />
+//               </div>
+//               <span className="text-xs font-medium">Volume</span>
+//             </button>
+//           </div>
+
+//           {/* Interview Information Panel */}
+//           <div className="mt-10 border-t border-slate-700 pt-6 text-gray-300">
+//             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//               {/* Bank Information */}
+//               <div className="bg-slate-900/40 p-4 rounded-lg">
+//                 <h3 className="text-sm font-semibold uppercase text-gray-400 mb-2">
+//                   Bank Details
+//                 </h3>
+//                 <div className="space-y-1">
+//                   <p className="text-md font-medium">Roxate Bank</p>
+//                   <p className="text-sm text-gray-400">Corporate Division</p>
+//                   <div className="flex items-center mt-2">
+//                     <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+//                     <span className="text-xs">Global Banking Institution</span>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Position Information */}
+//               <div className="bg-slate-900/40 p-4 rounded-lg">
+//                 <h3 className="text-sm font-semibold uppercase text-gray-400 mb-2">
+//                   Position
+//                 </h3>
+//                 <div className="space-y-1">
+//                   <p className="text-md font-medium">
+//                     Senior Relationship Manager
+//                   </p>
+//                   <p className="text-sm text-gray-400">
+//                     Corporate Client Services
+//                   </p>
+//                   <div className="mt-2 flex flex-wrap gap-2">
+//                     <span className="text-xs bg-blue-900/50 text-blue-300 px-2 py-0.5 rounded-full">
+//                       Client Relations
+//                     </span>
+//                     <span className="text-xs bg-green-900/50 text-green-300 px-2 py-0.5 rounded-full">
+//                       Financial Analysis
+//                     </span>
+//                     <span className="text-xs bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded-full">
+//                       Corporate Banking
+//                     </span>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Interview Progress */}
+//               <div className="bg-slate-900/40 p-4 rounded-lg">
+//                 <h3 className="text-sm font-semibold uppercase text-gray-400 mb-2">
+//                   Interview Progress
+//                 </h3>
+//                 <div className="space-y-3">
+//                   <div>
+//                     <div className="flex justify-between text-xs mb-1">
+//                       <span>Elapsed Time</span>
+//                       <span>{formatTime(callDuration)}</span>
+//                     </div>
+//                     <div className="w-full bg-slate-700 rounded-full h-1.5">
+//                       <div
+//                         className="bg-blue-500 h-1.5 rounded-full"
+//                         style={{
+//                           width: `${Math.min(
+//                             (callDuration / 1800) * 100,
+//                             100
+//                           )}%`,
+//                         }}
+//                       ></div>
+//                     </div>
+//                   </div>
+
+//                   <div>
+//                     <div className="flex justify-between text-xs mb-1">
+//                       <span>Estimated Remaining</span>
+//                       <span>
+//                         {formatTime(Math.max(1800 - callDuration, 0))}
+//                       </span>
+//                     </div>
+//                   </div>
+
+//                   <div className="flex items-center mt-1 text-xs">
+//                     <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+//                     <span>Technical interview in progress</span>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="flex justify-start mt-4">
+//           <Link href="/app">
+//             <button className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors duration-300">
+//               <span>←</span>
+//               <span>Back to Dashboard</span>
+//             </button>
+//           </Link>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }

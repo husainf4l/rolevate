@@ -5,6 +5,9 @@ import { AppService } from './app.service';
 import { LivekitModule } from './livekit/livekit.module';
 import { AiInterviewerModule } from './ai-interviewer/ai-interviewer.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -13,6 +16,10 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     }),
     LivekitModule,
     AiInterviewerModule,
+    PrismaModule, 
+    AuthModule, 
+    UsersModule
+
   ],
   controllers: [AppController],
   providers: [AppService],
