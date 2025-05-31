@@ -1,9 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Logo from '@/components/logo/logo'
+import { logout } from '@/services/auth.service'
 
 // Navigation item component
 interface NavItemProps {
@@ -42,9 +43,32 @@ const NavItem = ({ href, text, icon, badge }: NavItemProps) => {
   );
 };
 
-type Props = {}
+type Props = Record<string, never>
 
-const Sidebar = (props: Props) => {
+const Sidebar = (_props: Props) => {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      setIsLoggingOut(true);
+      console.log('[Sidebar] Starting logout process...');
+      
+      // Call the logout service
+      await logout();
+      console.log('[Sidebar] Logout service completed, redirecting...');
+      
+      // Use window.location for complete page refresh and cache clearing
+      // This ensures all client-side state is cleared and middleware runs fresh
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('[Sidebar] Sign out error:', error);
+      // Even if logout fails, redirect for security (this is the right approach)
+      console.log('[Sidebar] Redirecting despite error for security...');
+      window.location.href = '/login';
+    }
+    // No finally block needed since we're navigating away
+  };
   return (
     <div className="flex h-screen bg-gray-900">
       {/* Sidebar */}
@@ -141,13 +165,14 @@ const Sidebar = (props: Props) => {
           <div className="p-4 border-t border-gray-700/30">
             {/* Sign Out Button */}
             <button 
-              onClick={() => console.log('Sign out clicked')} 
-              className="w-full flex items-center px-4 py-3 text-sm font-medium text-red-400 rounded-xl hover:bg-red-500/10 hover:text-red-300 group transition-all duration-200"
+              onClick={handleSignOut}
+              disabled={isLoggingOut}
+              className="w-full flex items-center px-4 py-3 text-sm font-medium text-red-400 rounded-xl hover:bg-red-500/10 hover:text-red-300 group transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="mr-4 h-5 w-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              Sign Out
+              {isLoggingOut ? 'Signing Out...' : 'Sign Out'}
             </button>
             
             {/* User Info */}

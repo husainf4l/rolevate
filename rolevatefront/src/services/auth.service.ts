@@ -1,4 +1,5 @@
 import { API_URL } from "@/utils/env";
+import { getAuthDebugInfo } from "@/utils/debug-auth";
 
 const REQUEST_TIMEOUT = 10000; // 10 seconds timeout
 
@@ -114,22 +115,80 @@ export async function login(credentials: LoginCredentials): Promise<User> {
 
 /**
  * Log out the current user
+ * For HTTP-only authentication, this must send credentials to authenticate the logout request
  */
 export async function logout(): Promise<void> {
   try {
-    await fetchWithAuth<Record<string, never>>(`${API_URL}/auth/logout`, {
+    const debugInfo = getAuthDebugInfo();
+    console.log('[AuthService] Starting logout process...');
+    console.log('[AuthService] Debug info:', debugInfo);
+    
+    // First attempt: Try with standard logout request
+    const response = await fetch(`${API_URL}/auth/logout`, {
       method: 'POST',
+      credentials: 'include', // Critical: ensure HTTP-only cookies are sent
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Accept': 'application/json',
+        // Add explicit origin header for CORS
+        'Origin': debugInfo.origin,
+      },
     });
     
-    // Clear auth cache on logout
-    authCache = { isAuthenticated: false, timestamp: Date.now() };
-  } catch (error: unknown) { // Added type annotation
-    console.error('Logout error:', error instanceof Error ? error.message : error); // Log appropriately
-    if (error instanceof AuthError) { // Type check
-      throw error;
+    console.log('[AuthService] Logout response status:', response.status);
+    console.log('[AuthService] Response headers:', Object.fromEntries(response.headers.entries()));
+    
+    // Handle different response codes
+    if (response.status === 204 || response.status === 200) {
+      console.log('[AuthService] Logout successful - server confirmed');
+    } else if (response.status === 401) {
+      console.log('[AuthService] Got 401 on logout - treating as success (user was already logged out)');
+      // 401 on logout means user was already logged out - this is OK
+    } else if (response.status === 403) {
+      console.log('[AuthService] Got 403 on logout - treating as success (permission issue but logout intent clear)');
+      // 403 might mean the logout endpoint doesn't accept the current auth state - still OK to proceed
+    } else {
+      // For other error codes, log but don't fail the logout process
+      console.warn('[AuthService] Logout returned unexpected status:', response.status);
+      try {
+        const errorText = await response.text();
+        console.warn('[AuthService] Error response body:', errorText);
+      } catch {
+        console.warn('[AuthService] Could not read error response body');
+      }
+      // Continue with logout process even if server reports an error
+      console.log('[AuthService] Continuing with logout despite server error (security best practice)');
     }
-    const message = error instanceof Error ? error.message : 'Logout failed due to an unexpected error.';
-    throw new AuthError(message, 500);
+    
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.warn('[AuthService] Network error during logout:', error.message);
+    } else {
+      console.warn('[AuthService] Unknown error during logout:', String(error));
+    }
+    // Network errors shouldn't prevent logout for security reasons
+    console.log('[AuthService] Continuing with logout despite network error (security best practice)');
+  }
+  
+  // ALWAYS clear auth cache and client state, regardless of server response
+  // This is critical for security - even if server fails, client should log out
+  authCache = { isAuthenticated: false, timestamp: Date.now() };
+  console.log('[AuthService] Auth cache cleared - client logout complete');
+  
+  // Additional client-side cleanup for HTTP-only cookies
+  // Try to clear any visible cookies (though HTTP-only ones can't be cleared from JS)
+  try {
+    // Clear any non-HTTP-only auth-related cookies
+    const cookiesToClear = ['token', 'auth', 'session', 'access_token', 'refresh_token'];
+    cookiesToClear.forEach(cookieName => {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    });
+    console.log('[AuthService] Attempted to clear visible auth cookies');
+  } catch (error) {
+    console.log('[AuthService] Cookie clearing had no effect (expected for HTTP-only cookies)');
   }
 }
 
@@ -139,43 +198,28 @@ export async function logout(): Promise<void> {
  */
 export async function isAuthenticated(): Promise<boolean> {
   const now = Date.now();
-  console.log(`[AuthService] isAuthenticated called at ${new Date(now).toISOString()}. Cache:`, JSON.stringify(authCache));
-
+  
   if (
     authCache.isAuthenticated !== undefined && 
     authCache.timestamp && 
     (now - authCache.timestamp < AUTH_CACHE_TTL)
   ) {
-    console.log(`[AuthService] Using cached auth status: ${authCache.isAuthenticated}. Cache timestamp: ${new Date(authCache.timestamp).toISOString()}`);
     return authCache.isAuthenticated;
   }
-
-  if (authCache.isAuthenticated !== undefined && authCache.timestamp) {
-    console.log(`[AuthService] Cache expired. Age: ${now - authCache.timestamp}ms, TTL: ${AUTH_CACHE_TTL}ms.`);
-  } else {
-    console.log('[AuthService] Cache miss or no timestamp.');
-  }
   
-  console.log('[AuthService] Fetching /users/me to verify authentication.');
   try {
     await fetchWithAuth<User>(`${API_URL}/users/me`, {
       method: 'GET',
     });
     
-    console.log('[AuthService] /users/me call successful. User is authenticated.');
     authCache = { isAuthenticated: true, timestamp: Date.now() };
-    console.log('[AuthService] Updated authCache:', JSON.stringify(authCache));
     return true;
-  } catch (error: unknown) { // Added type annotation
-    console.error('[AuthService] /users/me call failed or resulted in auth error:', error);
+  } catch (error: unknown) {
     if (error instanceof AuthError && (error.status === 401 || error.status === 403)) {
-      console.log(`[AuthService] AuthError status ${error.status}. User is not authenticated.`);
       authCache = { isAuthenticated: false, timestamp: Date.now() };
     } else {
-      console.log('[AuthService] Non-AuthError or other status. Defaulting to not authenticated for safety.');
       authCache = { isAuthenticated: false, timestamp: Date.now() }; 
     }
-    console.log('[AuthService] Updated authCache due to error:', JSON.stringify(authCache));
     return false;
   }
 }
@@ -184,27 +228,22 @@ export async function isAuthenticated(): Promise<boolean> {
  * Get the current user profile (if authenticated)
  */
 export async function getCurrentUser(): Promise<User | null> {
-  console.log(`[AuthService] getCurrentUser called at ${new Date().toISOString()}.`);
   try {
-    // Use fetchWithAuth for consistency and robust error handling
     const user = await fetchWithAuth<User>(`${API_URL}/users/me`, {
       method: 'GET',
     });
-    // If fetchWithAuth is successful, user is authenticated. Update cache.
     authCache = { isAuthenticated: true, timestamp: Date.now() };
-    console.log('[AuthService] getCurrentUser: success. Updated authCache:', JSON.stringify(authCache));
     return user;
-  } catch (error: unknown) { // Added type annotation
-    console.error('[AuthService] getCurrentUser: error.', error);
+  } catch (error: unknown) {
     if (error instanceof AuthError && (error.status === 401 || error.status === 403)) {
       authCache = { isAuthenticated: false, timestamp: Date.now() };
     } else {
-      // For other errors, we might not want to aggressively set isAuthenticated to false
-      // if the cache was previously true and this is a transient network issue.
-      // However, if /users/me fails, we can't confirm user identity.
-      console.error('Error fetching current user:', error instanceof Error ? error.message : error);
+      if (error instanceof Error) {
+        console.error('Error fetching current user:', error.message);
+      } else {
+        console.error('Error fetching current user:', String(error));
+      }
     }
-    console.log('[AuthService] getCurrentUser: error. Updated authCache (if applicable):', JSON.stringify(authCache));
     return null;
   }
 }

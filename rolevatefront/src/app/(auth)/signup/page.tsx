@@ -9,7 +9,7 @@ import Logo from "@/components/logo/logo";
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get("from") || "/";
+  const redirectPath = searchParams.get("from") || "/dashboard";
 
   const [formData, setFormData] = useState({
     username: "",
