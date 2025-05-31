@@ -1,46 +1,28 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
+import Logo from "@/components/logo/logo";
 
 export default function Navbar() {
   return (
     <header className="relative">
-      <nav className="bg-[#1E293B]/95 backdrop-blur-sm text-[#F8FAFC] px-6 py-4 shadow-xl fixed top-0 left-0 right-0 z-50 border-b border-[#334155]">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Logo and Brand */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 group relative z-20"
-          >
-            <div className="relative w-36 h-8 flex items-center justify-center">
-              <Image
-                src="/images/rolevate-logo.png"
-                alt="Rolevate AI Logo"
-                width={128}
-                height={128}
-                loading="eager"
-                className="relative z-10 rounded-full"
-              />
-            </div>
-          </Link>
+      <nav className="bg-gray-900/90 backdrop-blur-xl text-white px-6 py-3 fixed top-0 left-0 right-0 z-50 border-b border-gray-800/50">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <Logo size={32} textColorLight="#ffffff" textColorAccent="#2DD4BF" />
 
-          {/* CTA Button - visible on all devices */}
+          {/* CTA Button */}
           <div>
             <Link
               href="/try-it-now"
-              className="group relative overflow-hidden bg-[#00C6AD] text-[#022B25] font-semibold px-6 py-2.5 rounded-lg"
+              className="group bg-teal-600 hover:bg-teal-500 text-white font-medium px-5 py-2 rounded-full text-sm transition-all duration-200 ease-out transform hover:scale-105 active:scale-95"
             >
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-[#F8FAFC]">
-                Try Demo
-              </span>
-              <span className="absolute inset-0 bg-[#0F172A] transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+              Try Demo
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Add padding to prevent content from hiding behind the fixed navbar */}
-      <div className="h-16"></div>
+      {/* Spacer for fixed navbar */}
+      <div className="h-14"></div>
     </header>
   );
 }

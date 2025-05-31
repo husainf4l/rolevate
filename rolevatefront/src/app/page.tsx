@@ -6,6 +6,8 @@ import ProblemVsSolution from "@/components/ProblemVsSolution";
 import BankIndustryFocus from "@/components/BankIndustryFocus";
 import CallToAction from "@/components/CallToAction";
 import type { Metadata } from "next";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Rolevate | AI Interview Platform for Banking & Financial Services",
@@ -112,12 +114,14 @@ export default function Home() {
         }}
       />
       <div className="min-h-screen">
+        <Navbar/>
         <Hero />
         <WhatIsRolevate />
         <HowItWorks />
         <ProblemVsSolution />
         <BankIndustryFocus />
         <CallToAction />
+        <Footer/>
       </div>
     </>
   );

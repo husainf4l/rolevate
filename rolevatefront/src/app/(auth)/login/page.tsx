@@ -70,7 +70,7 @@ function LoginPageContent() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="w-16 h-16 border-4 border-red-600 border-solid rounded-full border-t-transparent animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-teal-600 border-solid rounded-full border-t-transparent animate-spin"></div>
       </div>
     );
   }
@@ -78,7 +78,7 @@ function LoginPageContent() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-[#1D1D1F] dark:text-white">
       {/* Top accent bar with gradient */}
-      <div className="h-1.5 bg-gradient-to-r from-red-500 via-red-600 to-red-700 w-full"></div>
+      <div className="h-1.5 bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 w-full"></div>
 
       <main className="flex flex-1 items-center justify-center py-10 px-4 sm:px-6 lg:px-8">
         <div className="flex w-full max-w-6xl rounded-3xl overflow-hidden bg-white dark:bg-gray-800 shadow-2xl">
@@ -86,18 +86,19 @@ function LoginPageContent() {
           <div className="w-full lg:w-1/2 p-8 md:p-12 flex flex-col justify-center">
             <div className="mx-auto w-full max-w-md">
               {/* Logo and title */}
-              <div className="text-center mb-10">
+              <div className="text-center mb-10 flex flex-col items-center">
                 <div className="flex flex-col justify-start border-b border-gray-200/50 dark:border-gray-700/50">
-                  <Logo />
+                                  <Logo />
+    
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 mt-5 ">
-                  Please sign in to access the AI intelligence system
+                <p className="text-gray-500 dark:text-gray-400 ">
+                  access the AI intelligence system
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                  <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm">
+                  <div className="p-3 rounded-md bg-teal-50 border border-teal-200 text-teal-600 text-sm">
                     {error}
                   </div>
                 )}
@@ -116,7 +117,7 @@ function LoginPageContent() {
                     required
                     value={formData.username}
                     onChange={handleChange}
-                    className="appearance-none block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-gray-700 dark:text-white"
+                    className="appearance-none block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 dark:text-white"
                     placeholder="username"
                   />
                 </div>
@@ -131,7 +132,7 @@ function LoginPageContent() {
                     </label>
                     <a
                       href="#"
-                      className="text-sm font-medium text-red-600 hover:text-red-500"
+                      className="text-sm font-medium text-teal-600 hover:text-teal-500"
                     >
                       Forgot password?
                     </a>
@@ -144,7 +145,7 @@ function LoginPageContent() {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="appearance-none block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-gray-700 dark:text-white"
+                    className="appearance-none block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 dark:text-white"
                     placeholder="••••••••"
                   />
                 </div>
@@ -154,7 +155,7 @@ function LoginPageContent() {
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
                   />
                   <label
                     htmlFor="remember-me"
@@ -168,7 +169,7 @@ function LoginPageContent() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
+                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-150 ease-in-out"
                   >
                     {isLoading ? (
                       <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-safe:animate-spin"></span>
@@ -181,7 +182,7 @@ function LoginPageContent() {
 
               {error && (
                 <div className="mt-4 text-center">
-                  <p className="text-sm text-red-600 dark:text-red-400">
+                  <p className="text-sm text-teal-600 dark:text-teal-400">
                     {error}
                   </p>
                 </div>
@@ -192,10 +193,10 @@ function LoginPageContent() {
           {/* Right side - Image/visual */}
           <div className="hidden lg:block lg:w-1/2 relative">
             {/* Enhanced overlay with multiple layers for better opacity and depth */}
-            <div className="absolute inset-0 bg-gradient-to-br from-red-700/95 to-red-950/95 mix-blend-multiply"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-700/95 to-teal-950/95 mix-blend-multiply"></div>
             <div className="absolute inset-0 bg-black/40"></div>
             <Image
-              src="/images/login.webp"
+              src="/images/lailafullhero2.png"
               alt="AI Intelligence"
               fill
               sizes="(max-width: 1023px) 0px, 50vw"
@@ -213,7 +214,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="w-16 h-16 border-4 border-red-600 border-solid rounded-full border-t-transparent animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-teal-600 border-solid rounded-full border-t-transparent animate-spin"></div>
       </div>
     }>
       <LoginPageContent />

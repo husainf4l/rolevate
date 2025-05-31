@@ -17,6 +17,9 @@ module.exports = {
           error: "#EF4444",
         },
       },
+      fontFamily: {
+        sans: ['"Inter"', 'sans-serif'], // or Geist, SF Pro, etc.
+      },
     },
   },
   // ...rest of your Tailwind config

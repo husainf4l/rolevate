@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Logo from '@/components/logo/logo';
 
 const Footer = () => {
   return (
@@ -8,15 +9,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <div className="mb-6 md:mb-0">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/images/rolevate-logo.png"
-                alt="Rolevate Logo"
-                width={120}
-                height={35}
-                className="h-8 w-auto"
-              />
-            </Link>
+            <Logo   />
           </div>
           
           <div className="flex flex-wrap gap-8 justify-center md:justify-end">
