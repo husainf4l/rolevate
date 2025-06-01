@@ -4,6 +4,8 @@
 .env
 **/.env
 .env*
+!.env.example
+!**/.env.example
 
 # dependencies
 /node_modules
@@ -71,6 +73,9 @@ build/
 # Credentials
 **/*.json
 !**/sample*.json
+!**/package.json
+!**/package-lock.json
+!**/tsconfig.json
 *.json.key
 *-[a-zA-Z0-9]*[a-zA-Z0-9].json
 # Specific files
