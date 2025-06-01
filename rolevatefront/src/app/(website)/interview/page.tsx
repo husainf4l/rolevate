@@ -5,14 +5,14 @@ import { useState, useEffect, useRef } from "react";
 import { Participant } from "livekit-client";
 import { Mic, MicOff, Phone, PhoneOff, Volume2 } from "lucide-react";
 import Image from "next/image";
-import { InterviewerAvatar } from "@/components/interview/InterviewerAvatar";
-import { CallControls } from "@/components/interview/CallControls";
-import { BankDetails } from "@/components/interview/BankDetails";
-import { PositionDetails } from "@/components/interview/PositionDetails";
-import { InterviewProgress } from "@/components/interview/InterviewProgress";
-import { QuestionDisplay } from "@/components/interview/QuestionDisplay";
-import { LiveKitRoom } from "@/components/interview/LiveKitRoom";
-import livekitService from "@/services/livekit-service";
+import livekitService from "../../../services/livekit-service";
+import { LiveKitRoom } from "@livekit/components-react";
+import { InterviewerAvatar } from "../../../components/interview/InterviewerAvatar";
+import { QuestionDisplay } from "../../../components/interview/QuestionDisplay";
+import { CallControls } from "../../../components/interview/CallControls";
+import { BankDetails } from "../../../components/interview/BankDetails";
+import { PositionDetails } from "../../../components/interview/PositionDetails";
+import { InterviewProgress } from "../../../components/interview/InterviewProgress";
 
 export default function InterviewPage() {
   // State for LiveKit
@@ -520,10 +520,6 @@ export default function InterviewPage() {
             <LiveKitRoom
               token={token}
               serverUrl={serverUrl}
-              onConnectionStateChanged={handleConnectionStateChanged}
-              onParticipantConnected={handleParticipantConnected}
-              onParticipantDisconnected={handleParticipantDisconnected}
-              onDataReceived={handleDataReceived}
               onError={(error) => console.error("LiveKit error:", error)}
             >
               <div className="flex flex-col items-center mb-8">

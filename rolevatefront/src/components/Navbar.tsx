@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import Logo from "@/components/logo/logo";
+import Logo from "./logo/logo";
 
 export default function Navbar() {
   return (

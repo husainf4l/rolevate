@@ -1,5 +1,5 @@
-import { API_URL } from "@/utils/env";
-import { getAuthDebugInfo } from "@/utils/debug-auth";
+import { getAuthDebugInfo } from "../utils/debug-auth";
+import { API_URL } from "../utils/env";
 
 const REQUEST_TIMEOUT = 10000; // 10 seconds timeout
 

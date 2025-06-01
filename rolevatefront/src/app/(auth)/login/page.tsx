@@ -3,8 +3,8 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { login, isAuthenticated, AuthError } from "@/services/auth.service";
-import Logo from "@/components/logo/logo";
+import { AuthError, isAuthenticated, login } from "../../../services/auth.service";
+import Logo from "../../../components/logo/logo";
 
 function LoginPageContent() {
   const router = useRouter();

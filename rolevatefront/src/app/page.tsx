@@ -2,12 +2,12 @@ import Image from "next/image";
 import Hero from "../components/Hero";
 import WhatIsRolevate from "../components/WhatIsRolevate";
 import HowItWorks from "../components/HowItWorks";
-import ProblemVsSolution from "@/components/ProblemVsSolution";
-import BankIndustryFocus from "@/components/BankIndustryFocus";
-import CallToAction from "@/components/CallToAction";
 import type { Metadata } from "next";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "../components/Navbar";
+import ProblemVsSolution from "../components/ProblemVsSolution";
+import BankIndustryFocus from "../components/BankIndustryFocus";
+import CallToAction from "../components/CallToAction";
+import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
   title: "Rolevate | AI Interview Platform for Banking & Financial Services",

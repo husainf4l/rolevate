@@ -3,8 +3,8 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import Logo from '@/components/logo/logo'
-import { logout } from '@/services/auth.service'
+import { logout } from '../../../services/auth.service';
+import Logo from '../../../components/logo/logo';
 
 // Navigation item component
 interface NavItemProps {
