@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  livekit-agent:
+    image: yourusername/livekit-agent:latest
+    volumes:
+      - ./widd-459718-7e011203dde7.json:/app/widd-459718-7e011203dde7.json:ro
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+    # Uncomment below if you need to expose any ports
+    # ports:
+    #   - "8080:8080"

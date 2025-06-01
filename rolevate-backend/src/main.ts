@@ -58,6 +58,9 @@ async function bootstrap() {
   // Apply global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
   
+  // Set global prefix for all routes
+  app.setGlobalPrefix('api');
+  
   // Serve static files from the audio-output directory
   app.useStaticAssets(path.join(__dirname, '..', 'audio-output'), {
     prefix: '/audio-files',

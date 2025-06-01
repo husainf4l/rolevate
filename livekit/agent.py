@@ -8,6 +8,7 @@ from livekit.plugins.elevenlabs import TTS as ElevenLabsTTS
 from livekit.plugins.google import STT as GoogleSTT
 from db_logic import save_interview_history, create_history_table
 import asyncio
+import os
 
 
 load_dotenv()
@@ -112,11 +113,29 @@ async def poll_and_save_history(session):
 
 async def entrypoint(ctx: JobContext):
     create_history_table()
+    # In Docker container, the file is mounted at /app/widd-459718-7e011203dde7.json
+    cred_path = "/app/widd-459718-7e011203dde7.json" 
+    openai_key = os.getenv('OPENAI_API_KEY')
+    print(f"[DEBUG] Google credentials path: {cred_path}")
+    print(f"[DEBUG] File exists: {os.path.exists(cred_path)}")
+    print(f"[DEBUG] OpenAI API Key: {openai_key[:10]}...{openai_key[-5:]}")
+    
+    # Force reload environment variables
+    with open('.env', 'r') as f:
+        for line in f:
+            if line.strip() and not line.startswith('#') and not line.startswith('//'):
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+                if key == 'OPENAI_API_KEY':
+                    print(f"[DEBUG] Directly loaded OpenAI key: {value[:10]}...{value[-5:]}")
+                    openai_key = value
+    
     session = AgentSession(
-        stt=GoogleSTT(),
+        stt=GoogleSTT(credentials_file=cred_path),
         llm=openai.LLM(
             model="gpt-4o",
-            temperature=0.5
+            temperature=0.5,
+            api_key=openai_key  # Explicitly pass the API key
         ),
         tts=ElevenLabsTTS(voice_id="21m00Tcm4TlvDq8ikWAM"),  # Rachel (female)
         vad=VAD.load(),
@@ -137,4 +156,10 @@ async def entrypoint(ctx: JobContext):
     # Do NOT call generate_reply again after this; let the agent/LLM handle the flow
 
 if __name__ == "__main__":
-    agents.cli.run_app(agents.WorkerOptions(entrypoint_fnc=entrypoint))
+    port = int(os.getenv('LIVEKIT_AGENT_PORT', '8005'))  # Default to port 8005
+    options = agents.WorkerOptions(
+        entrypoint_fnc=entrypoint,
+        port=port
+    )
+    print(f"[INFO] Starting LiveKit agent on port {port}")
+    agents.cli.run_app(options)

@@ -11,9 +11,9 @@ import {
   useVoiceAssistant,
   BarVisualizer,
 } from "@livekit/components-react";
-import { InterviewerAvatar } from "@/components/interview/InterviewerAvatar";
 import Link from "next/link";
-import TranscriptionView from "@/components/TranscriptionView";
+import { InterviewerAvatar } from "../../../components/interview/InterviewerAvatar";
+import TranscriptionView from "../../../components/TranscriptionView";
 
 // Add some global styles for the visualizer
 const visualizerStyles = `

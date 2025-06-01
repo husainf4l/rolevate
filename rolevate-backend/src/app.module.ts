@@ -8,6 +8,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ConnectionDetailsModule } from './connection-details/connection-details.module';
 
 @Module({
   imports: [
@@ -15,11 +16,11 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
     }),
     LivekitModule,
-    AiInterviewerModule,
+    AiInterviewerModule, 
     PrismaModule, 
     AuthModule, 
-    UsersModule
-
+    UsersModule,
+    ConnectionDetailsModule
   ],
   controllers: [AppController],
   providers: [AppService],

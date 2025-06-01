@@ -1,12 +1,17 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 DB_CONFIG = {
-    'host': '149.200.251.12',
-    'port': 5432,
-    'database': 'rolevate',
-    'user': 'husain',
-    'password': 'tt55oo77',
+    'host': os.getenv('DB_HOST', '192.168.1.64'),
+    'port': int(os.getenv('DB_PORT', '5432')),
+    'database': os.getenv('DB_NAME', 'rolevateinter'),
+    'user': os.getenv('DB_USER', 'husain'),
+    'password': os.getenv('DB_PASSWORD', 'tt55oo77'),
 }
 
 def get_db_connection():

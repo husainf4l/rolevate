@@ -1,9 +1,10 @@
-# Environment variables
-.env
+# Git
+.git
+.gitignore
 
-# Python virtual environment
-.venv
+# Virtual environment
 venv/
+.venv/
 env/
 
 # Python cache
@@ -24,5 +25,7 @@ build/
 .idea/
 .vscode/
 
-# Environment variables
-.env
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -1,5 +1,5 @@
-import useCombinedTranscriptions from "@/hooks/useCombinedTranscriptions";
 import * as React from "react";
+import useCombinedTranscriptions from "../hooks/useCombinedTranscriptions";
 
 export default function TranscriptionView() {
   const combinedTranscriptions = useCombinedTranscriptions();
