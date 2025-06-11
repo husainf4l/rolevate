@@ -1,6 +1,6 @@
 import { getAuthDebugInfo } from "../utils/debug-auth";
-import { API_URL } from "../utils/env";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
 const REQUEST_TIMEOUT = 10000; // 10 seconds timeout
 
 // Authentication response types
@@ -93,7 +93,7 @@ const AUTH_CACHE_TTL = 30000; // 30 seconds
  */
 export async function login(credentials: LoginCredentials): Promise<User> {
   try {
-    const data = await fetchWithAuth<AuthResponse>(`${API_URL}/auth/login`, {
+    const data = await fetchWithAuth<AuthResponse>(`${API_URL}/api/auth/login`, {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -124,7 +124,7 @@ export async function logout(): Promise<void> {
     console.log('[AuthService] Debug info:', debugInfo);
     
     // First attempt: Try with standard logout request
-    const response = await fetch(`${API_URL}/auth/logout`, {
+    const response = await fetch(`${API_URL}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include', // Critical: ensure HTTP-only cookies are sent
       headers: {
@@ -208,7 +208,7 @@ export async function isAuthenticated(): Promise<boolean> {
   }
   
   try {
-    await fetchWithAuth<User>(`${API_URL}/users/me`, {
+    await fetchWithAuth<User>(`${API_URL}/api/auth/users/me`, {
       method: 'GET',
     });
     
@@ -229,7 +229,7 @@ export async function isAuthenticated(): Promise<boolean> {
  */
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    const user = await fetchWithAuth<User>(`${API_URL}/users/me`, {
+    const user = await fetchWithAuth<User>(`${API_URL}/api/auth/users/me`, {
       method: 'GET',
     });
     authCache = { isAuthenticated: true, timestamp: Date.now() };
@@ -256,7 +256,7 @@ export interface Generate2FAResponse {
 }
 
 export async function generate2FA(): Promise<Generate2FAResponse> {
-  return fetchWithAuth<Generate2FAResponse>(`${API_URL}/auth/2fa/generate`, {
+  return fetchWithAuth<Generate2FAResponse>(`${API_URL}/api/auth/2fa/generate`, {
     method: 'POST',
   });
 }
@@ -266,7 +266,7 @@ export interface Verify2FAResponse {
 }
 
 export async function verify2FA(code: string): Promise<Verify2FAResponse> {
-  return fetchWithAuth<Verify2FAResponse>(`${API_URL}/auth/2fa/verify`, {
+  return fetchWithAuth<Verify2FAResponse>(`${API_URL}/api/auth/2fa/verify`, {
     method: 'POST',
     body: JSON.stringify({ code }),
   });

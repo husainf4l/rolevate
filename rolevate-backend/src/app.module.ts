@@ -2,25 +2,25 @@ import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/c
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LivekitModule } from './livekit/livekit.module';
-import { AiInterviewerModule } from './ai-interviewer/ai-interviewer.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { ConnectionDetailsModule } from './connection-details/connection-details.module';
+import { LiveKitModule } from './livekit/livekit.module';
+import { PublicInterviewModule } from './public-interview/public-interview.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    LivekitModule,
-    AiInterviewerModule, 
     PrismaModule, 
     AuthModule, 
     UsersModule,
-    ConnectionDetailsModule
+    LiveKitModule,
+    PublicInterviewModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

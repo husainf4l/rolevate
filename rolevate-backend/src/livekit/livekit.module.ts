@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { LivekitService } from './livekit.service';
-import { LivekitController } from './livekit.controller';
-import { DebugController } from './debug.controller';
+import { LiveKitController } from './livekit.controller';
+import { LiveKitService } from './livekit.service';
 
 @Module({
-  providers: [LivekitService],
-  controllers: [LivekitController, DebugController],
-  exports: [LivekitService],
+  controllers: [LiveKitController],
+  providers: [LiveKitService],
+  exports: [LiveKitService],
 })
-export class LivekitModule {}
+export class LiveKitModule {}

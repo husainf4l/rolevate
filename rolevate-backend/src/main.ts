@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe, LogLevel } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { HttpExceptionFilter } from './filters/http-exception.filter';
+ import * as cookieParser from 'cookie-parser';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -39,6 +39,9 @@ async function bootstrap() {
   ensureDirectoryExists(path.join(__dirname, '..', 'uploads'));
   ensureDirectoryExists(path.join(__dirname, '..', 'public'));
   
+  // Add cookie parser middleware
+  app.use(cookieParser());
+  
   // Configure CORS for frontend integration
   app.enableCors({
     origin: true,
@@ -55,8 +58,6 @@ async function bootstrap() {
     }),
   );
   
-  // Apply global exception filter
-  app.useGlobalFilters(new HttpExceptionFilter());
   
   // Set global prefix for all routes
   app.setGlobalPrefix('api');

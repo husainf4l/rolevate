@@ -10,7 +10,7 @@ export class UsersService {
     return this.prisma.user.findMany();
   }
 
-  async findOne(id: number): Promise<User | null> {
+  async findOne(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { id },
     });
@@ -22,7 +22,7 @@ export class UsersService {
     });
   }
 
-  async update(id: number, data: Partial<User>): Promise<User> {
+  async update(id: string, data: Partial<User>): Promise<User> {
     return this.prisma.user.update({
       where: { id },
       data,

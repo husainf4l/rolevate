@@ -9,6 +9,22 @@ export default function Navbar() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Logo size={32} textColorLight="#ffffff" textColorAccent="#2DD4BF" />
 
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link
+              href="/jobs"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Jobs
+            </Link>
+            <Link
+              href="/jobs?isFeatured=true"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Featured
+            </Link>
+          </div>
+
           {/* CTA Button */}
           <div>
             <Link

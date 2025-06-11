@@ -15,7 +15,7 @@ export class LiveKitService {
   private baseUrl: string;
 
   private constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
   }
 
   public static getInstance(): LiveKitService {
@@ -27,7 +27,7 @@ export class LiveKitService {
 
   async createRoom(roomName: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/livekit/room`, {
+      const response = await fetch(`${this.baseUrl}/api/livekit/room`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export class LiveKitService {
 
   async getToken(roomName: string, identity: string, name?: string): Promise<LiveKitToken> {
     try {
-      let url = `${this.baseUrl}/livekit/token?identity=${identity}&room=${roomName}`;
+      let url = `${this.baseUrl}/api/livekit/token?identity=${identity}&room=${roomName}`;
       if (name) {
         url += `&name=${encodeURIComponent(name)}`;
       }
@@ -90,7 +90,7 @@ export class LiveKitService {
         requestBody.name = name;
       }
       
-      const response = await fetch(`${this.baseUrl}/livekit/token`, {
+      const response = await fetch(`${this.baseUrl}/api/livekit/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

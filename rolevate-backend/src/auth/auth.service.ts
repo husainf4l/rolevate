@@ -38,7 +38,7 @@ export class AuthService {
     };
   }
 
-  async generateTwoFactorSecret(user: { id: number; email: string }) {
+  async generateTwoFactorSecret(user: { id: string; email: string }) {
     const secret = speakeasy.generateSecret({
       name: `BalsanGroup (${user.email})`,
     });
@@ -51,7 +51,7 @@ export class AuthService {
     return { secret: secret.base32, otpauthUrl, qrCodeDataURL };
   }
 
-  async verifyTwoFactorCode(userId: number, code: string): Promise<boolean> {
+  async verifyTwoFactorCode(userId: string, code: string): Promise<boolean> {
     const user = await this.usersService.findOne(userId);
     if (!user || !user.twoFactorSecret) return false;
     return speakeasy.totp.verify({
@@ -62,7 +62,7 @@ export class AuthService {
     });
   }
 
-  async getProfile(userId: number) {
+  async getProfile(userId: string) {
     const user = await this.usersService.findOne(userId);
 
     if (!user) {

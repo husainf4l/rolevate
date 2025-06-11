@@ -13,15 +13,409 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id                 Int      @id @default(autoincrement())
-  email              String   @unique
-  username           String   @unique
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  username           String    @unique
   name               String?
+  firstName          String?
+  lastName           String?
   password           String
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  phoneNumber        String?
+  whatsappNumber     String?
+  profileImage       String?
+  bio                String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastLoginAt        DateTime?
+  isActive           Boolean   @default(true)
   twoFactorSecret    String?
-  isTwoFactorEnabled Boolean  @default(false)
+  isTwoFactorEnabled Boolean   @default(false)
+  role               UserRole  @default(CANDIDATE)
+  companyId          String?
+
+  // Relations
+  company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  jobPosts      JobPost[]      @relation("JobPostCreator")
+  applications  Application[]  @relation("CandidateApplications")
+  interviews    Interview[]    @relation("InterviewCandidate")
+  cvAnalyses    CvAnalysis[]   @relation("CvAnalysisCandidate")
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Company {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  displayName String?
+  industry    String?
+  description String?
+  website     String?
+  logo        String?
+  location    String?
+  country     String?
+  city        String?
+  size        CompanySize?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  isActive    Boolean      @default(true)
+
+  // Relations
+  users    User[]
+  jobPosts JobPost[]
+
+  @@map("companies")
+}
+
+model JobPost {
+  id               String          @id @default(uuid())
+  title            String
+  description      String
+  requirements     String
+  responsibilities String?
+  benefits         String?
+  skills           String[] // Array of required skills
+  experienceLevel  ExperienceLevel
+  location         String?
+  workType         WorkType        @default(ONSITE)
+  salaryMin        Decimal?
+  salaryMax        Decimal?
+  currency         String?         @default("USD")
+  isActive         Boolean         @default(true)
+  isFeatured       Boolean         @default(false)
+  viewCount        Int             @default(0)
+  applicationCount Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  expiresAt        DateTime?
+  publishedAt      DateTime?
+
+  // AI Interview Configuration
+  enableAiInterview   Boolean             @default(true)
+  interviewLanguages  InterviewLanguage[] @default([ENGLISH])
+  interviewDuration   Int                 @default(30) // minutes
+  technicalQuestions  Json? // Store custom questions
+  behavioralQuestions Json?
+
+  // Foreign keys
+  companyId   String
+  createdById String
+
+  // Relations
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy    User          @relation("JobPostCreator", fields: [createdById], references: [id])
+  applications Application[]
+
+  @@map("job_posts")
+}
+
+model Application {
+  id        String            @id @default(uuid())
+  status    ApplicationStatus @default(PENDING)
+  appliedAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  // WhatsApp Integration
+  whatsappSent      Boolean         @default(false)
+  whatsappSentAt    DateTime?
+  whatsappMessageId String?
+  whatsappStatus    WhatsappStatus?
+
+  // CV Information
+  cvUrl       String?
+  cvFileName  String?
+  coverLetter String?
+
+  // Screening
+  isScreeningPassed Boolean?
+  screeningNotes    String?
+
+  // Final Decision
+  rejectionReason String?
+  hiredAt         DateTime?
+  startDate       DateTime?
+
+  // Foreign keys
+  jobPostId   String
+  candidateId String
+
+  // Relations
+  jobPost       JobPost        @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+  candidate     User           @relation("CandidateApplications", fields: [candidateId], references: [id])
+  cvAnalysis    CvAnalysis?
+  interviews    Interview[]
+  fitScore      FitScore?
+  notifications Notification[]
+
+  @@unique([jobPostId, candidateId])
+  @@map("applications")
+}
+
+model CvAnalysis {
+  id            String  @id @default(uuid())
+  cvUrl         String
+  extractedText String?
+
+  // Overall Scoring (0-100)
+  overallScore       Float
+  skillsScore        Float
+  experienceScore    Float
+  educationScore     Float
+  languageScore      Float?
+  certificationScore Float?
+
+  // Detailed Analysis
+  summary               String
+  strengths             String[]
+  weaknesses            String[]
+  suggestedImprovements String[]
+
+  // Extracted Information
+  skills         String[]
+  experience     Json? // Structured work experience
+  education      Json? // Structured education
+  certifications String[]
+  languages      Json? // Language proficiency
+
+  // AI Analysis Metadata
+  aiModel        String? // Which AI model was used
+  processingTime Int? // Processing time in milliseconds
+  analyzedAt     DateTime @default(now())
+
+  // Foreign keys
+  applicationId String @unique
+  candidateId   String
+
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate   User        @relation("CvAnalysisCandidate", fields: [candidateId], references: [id])
+
+  @@map("cv_analyses")
+}
+
+model Interview {
+  id       String            @id @default(uuid())
+  type     InterviewType     @default(AI_SCREENING)
+  language InterviewLanguage @default(ENGLISH)
+  status   InterviewStatus   @default(SCHEDULED)
+
+  // Scheduling
+  scheduledAt      DateTime
+  startedAt        DateTime?
+  completedAt      DateTime?
+  duration         Int? // Actual duration in minutes
+  expectedDuration Int       @default(30)
+
+  // LiveKit Integration
+  roomName         String  @unique
+  roomCode         String? @unique // Public access code for candidates
+  roomId           String?
+  accessToken      String?
+  participantToken String?
+  recordingEnabled Boolean @default(true)
+  recordingUrl     String?
+
+  // Candidate Information (for public access)
+  candidatePhone String?
+  candidateName  String?
+  instructions   String?
+  maxDuration    Int?      @default(1800) // Max interview duration in seconds
+  endedAt        DateTime?
+
+  // AI Analysis Scores (0-100)
+  overallScore       Float?
+  communicationScore Float?
+  technicalScore     Float?
+  behavioralScore    Float?
+  confidenceScore    Float?
+  clarityScore       Float?
+  responseTimeScore  Float?
+
+  // Detailed Analysis
+  summary             String?
+  keyHighlights       String[] @default([])
+  areasForImprovement String[] @default([])
+  recommendations     String?
+
+  // Interview Content
+  questionsAsked    Json? // Questions and answers
+  transcription     String?
+  sentimentAnalysis Json?
+
+  // AI Metadata
+  aiModel        String?
+  processingTime Int?
+
+  // Foreign keys
+  applicationId String
+  candidateId   String
+
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate   User        @relation("InterviewCandidate", fields: [candidateId], references: [id])
+
+  @@map("interviews")
+}
+
+model FitScore {
+  id String @id @default(uuid())
+
+  // Combined Scoring
+  overallScore    Float // Final weighted score (0-100)
+  cvWeight        Float @default(0.4)
+  interviewWeight Float @default(0.6)
+
+  // Component Scores
+  cvScore        Float?
+  interviewScore Float?
+
+  // Recommendation
+  recommendation FitRecommendation
+  confidence     Float // Confidence in recommendation (0-1)
+  reasoning      String
+
+  // Ranking
+  rankInPool Int? // Rank among all candidates for this job
+  percentile Float? // Percentile score
+
+  // Metadata
+  calculatedAt  DateTime @default(now())
+  lastUpdatedAt DateTime @updatedAt
+  version       String   @default("1.0") // Algorithm version
+
+  // Foreign keys
+  applicationId String @unique
+
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("fit_scores")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  data      Json? // Additional data for the notification
+
+  // Foreign keys
+  userId        String
+  applicationId String?
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// Enums
+enum UserRole {
+  SUPER_ADMIN
+  COMPANY_ADMIN
+  HR_MANAGER
+  RECRUITER
+  CANDIDATE
+}
+
+enum CompanySize {
+  STARTUP // 1-10
+  SMALL // 11-50
+  MEDIUM // 51-200
+  LARGE // 201-1000
+  ENTERPRISE // 1000+
+}
+
+enum ExperienceLevel {
+  ENTRY_LEVEL
+  JUNIOR
+  MID_LEVEL
+  SENIOR
+  LEAD
+  PRINCIPAL
+  EXECUTIVE
+}
+
+enum WorkType {
+  ONSITE
+  REMOTE
+  HYBRID
+}
+
+enum ApplicationStatus {
+  PENDING
+  CV_SCREENING
+  CV_APPROVED
+  CV_REJECTED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_IN_PROGRESS
+  INTERVIEW_COMPLETED
+  UNDER_REVIEW
+  SHORTLISTED
+  FINAL_INTERVIEW
+  OFFER_EXTENDED
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+  HIRED
+  REJECTED
+  WITHDRAWN
+  ON_HOLD
+}
+
+enum WhatsappStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  REPLIED
+}
+
+enum InterviewLanguage {
+  ENGLISH
+  ARABIC
+  BILINGUAL
+}
+
+enum InterviewType {
+  AI_SCREENING
+  TECHNICAL
+  BEHAVIORAL
+  FINAL
+  CUSTOM
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  READY_TO_START
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  TECHNICAL_ISSUES
+  RESCHEDULED
+}
+
+enum FitRecommendation {
+  STRONG_HIRE
+  HIRE
+  CONSIDER
+  NO_HIRE
+  STRONG_NO_HIRE
+}
+
+enum NotificationType {
+  APPLICATION_RECEIVED
+  CV_ANALYZED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_REMINDER
+  INTERVIEW_COMPLETED
+  APPLICATION_STATUS_CHANGED
+  NEW_MESSAGE
+  SYSTEM_UPDATE
 }

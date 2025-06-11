@@ -3,13 +3,18 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AuthError, isAuthenticated, login } from "../../../services/auth.service";
+import {
+  AuthError,
+  isAuthenticated,
+  login,
+} from "../../../services/auth.service";
 import Logo from "../../../components/logo/logo";
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("from") || "/dashboard";
+  const reason = searchParams.get("reason");
 
   const [formData, setFormData] = useState({
     username: "",
@@ -37,12 +42,17 @@ function LoginPageContent() {
       }
     };
 
+    // Set appropriate error message based on reason
+    if (reason === "session_expired") {
+      setError("Your session has expired. Please sign in again.");
+    }
+
     checkAuthStatus();
 
     return () => {
       isMounted = false;
     };
-  }, [router, redirectPath]);
+  }, [router, redirectPath, reason]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,8 +98,7 @@ function LoginPageContent() {
               {/* Logo and title */}
               <div className="text-center mb-10 flex flex-col items-center">
                 <div className="flex flex-col justify-start border-b border-gray-200/50 dark:border-gray-700/50">
-                                  <Logo />
-    
+                  <Logo />
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 ">
                   access the AI intelligence system
@@ -212,11 +221,13 @@ function LoginPageContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="w-16 h-16 border-4 border-teal-600 border-solid rounded-full border-t-transparent animate-spin"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <div className="w-16 h-16 border-4 border-teal-600 border-solid rounded-full border-t-transparent animate-spin"></div>
+        </div>
+      }
+    >
       <LoginPageContent />
     </Suspense>
   );

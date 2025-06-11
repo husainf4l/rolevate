@@ -7,12 +7,12 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  async getProfile(@CurrentUser() user: { id: number; email: string }) {
+  async getProfile(@CurrentUser() user: { id: string; email: string }) {
     return this.usersService.findOne(user.id);
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: string) {
     return this.usersService.findOne(id);
   }
 }

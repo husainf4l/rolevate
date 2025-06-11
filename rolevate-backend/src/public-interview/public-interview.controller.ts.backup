@@ -1,0 +1,256 @@
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  BadRequestException,
+  UseGuards,
+} from '@nestjs/common';
+import { LiveKitService } from '../livekit/livekit.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JoinInterviewDto, CreateInterviewRoomDto } from './dto/public-interview.dto';
+
+@Controller('public/interview')
+export class PublicInterviewController {
+  constructor(
+    private readonly liveKitService: LiveKitService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  /**
+   * Create an interview room (used by HR/authenticated users)
+   * This creates a room and returns a shareable interview code
+   */
+  @Post('room/create')
+  @UseGuards(JwtAuthGuard)
+  async createInterviewRoom(@Body() createRoomDto: CreateInterviewRoomDto) {
+    const { jobPostId, interviewType, maxDuration, instructions, customRoomCode, maxCandidates } = createRoomDto;
+    
+    // Verify job post exists
+    const jobPost = await this.prisma.jobPost.findUnique({
+      where: { id: jobPostId },
+      include: { company: true },
+    });
+
+    if (!jobPost) {
+      throw new BadRequestException('Job post not found');
+    }
+    
+    // Use custom room code or generate unique one
+    const roomCode = customRoomCode || this.generateRoomCode();
+    const roomName = `interview_${roomCode}`;
+    
+    try {
+      // Create room in LiveKit
+      await this.liveKitService.createRoom(
+        roomName,
+        maxDuration || 1800, // 30 minutes default
+        maxCandidates || 50 // Allow multiple candidates by default
+      );
+
+      // Store interview session in database (job-based, no specific application needed)
+      const interviewSession = await this.prisma.interview.create({
+        data: {
+          roomName,
+          roomCode,
+          type: interviewType,
+          status: 'SCHEDULED',
+          scheduledAt: new Date(),
+          maxDuration: maxDuration || 1800,
+          instructions: instructions || 'Welcome to your interview. Please speak clearly and answer questions to the best of your ability.',
+          // Create a temporary application record for the job post
+          application: {
+            create: {
+              status: 'PENDING',
+              jobPostId: jobPostId,
+              candidate: {
+                create: {
+                  email: `temp-${roomCode}@interview.temp`,
+                  username: `temp-${roomCode}`,
+                  name: 'Interview Candidate',
+                  firstName: 'Interview',
+                  lastName: 'Candidate',
+                  password: 'temp-password',
+                  role: 'CANDIDATE',
+                }
+              }
+            }
+          },
+          candidate: {
+            create: {
+              email: `temp-${roomCode}@interview.temp`,
+              username: `temp-${roomCode}`,
+              name: 'Interview Candidate',
+              firstName: 'Interview',
+              lastName: 'Candidate', 
+              password: 'temp-password',
+              role: 'CANDIDATE',
+            }
+          },
+        },
+      });
+
+      return {
+        roomCode,
+        roomName,
+        joinUrl: `/interview/join/${roomCode}`,
+        instructions: instructions || 'Welcome to your interview. Please speak clearly and answer questions to the best of your ability.',
+        maxDuration: maxDuration || 1800,
+        maxCandidates: maxCandidates || 50,
+        sessionId: interviewSession.id,
+        jobTitle: jobPost.title,
+        companyName: jobPost.company.name,
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to create interview room');
+    }
+  }
+
+  /**
+   * Join interview room with phone number (PUBLIC - no authentication required)
+   */
+  @Post('join/:roomCode')
+  @HttpCode(HttpStatus.OK)
+  async joinInterview(
+    @Param('roomCode') roomCode: string,
+    @Body() joinDto: JoinInterviewDto,
+  ) {
+    const { phoneNumber, firstName, lastName } = joinDto;
+
+    // Find interview session
+    const interviewSession = await this.prisma.interview.findUnique({
+      where: { roomCode },
+      include: { 
+        application: { 
+          include: { jobPost: true } 
+        } 
+      },
+    });
+
+    if (!interviewSession) {
+      throw new BadRequestException('Interview session not found');
+    }
+
+    if (interviewSession.status === 'COMPLETED') {
+      throw new BadRequestException('This interview session has already been completed');
+    }
+
+    // Create participant identity using phone number
+    const participantName = `${firstName} ${lastName}`.trim();
+    const identity = `candidate_${phoneNumber.replace(/\D/g, '')}`; // Remove non-digits
+    
+    try {
+      // Generate LiveKit token
+      const tokenData = await this.liveKitService.generateToken(
+        identity,
+        interviewSession.roomName,
+        participantName,
+      );
+
+      // Update interview session with candidate info
+      await this.prisma.interview.update({
+        where: { id: interviewSession.id },
+        data: {
+          candidatePhone: phoneNumber,
+          candidateName: participantName,
+          status: 'IN_PROGRESS',
+          startedAt: new Date(),
+        },
+      });
+
+      return {
+        ...tokenData,
+        roomCode,
+        participantName,
+        jobTitle: interviewSession.application?.jobPost?.title,
+        instructions: interviewSession.instructions,
+        maxDuration: interviewSession.maxDuration,
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to join interview');
+    }
+  }
+
+  /**
+   * Get interview room info (PUBLIC)
+   */
+  @Get('room/:roomCode')
+  async getInterviewRoomInfo(@Param('roomCode') roomCode: string) {
+    const interviewSession = await this.prisma.interview.findUnique({
+      where: { roomCode },
+      include: { 
+        application: { 
+          include: { 
+            jobPost: { 
+              include: { company: { select: { name: true } } } 
+            } 
+          } 
+        } 
+      },
+    });
+
+    if (!interviewSession) {
+      throw new BadRequestException('Interview session not found');
+    }
+
+    return {
+      roomCode,
+      jobTitle: interviewSession.application?.jobPost?.title,
+      companyName: interviewSession.application?.jobPost?.company?.name,
+      instructions: interviewSession.instructions,
+      maxDuration: interviewSession.maxDuration,
+      status: interviewSession.status,
+      interviewType: interviewSession.type,
+    };
+  }
+
+  /**
+   * End interview session (can be called by candidate or system)
+   */
+  @Post('room/:roomCode/end')
+  @HttpCode(HttpStatus.OK)
+  async endInterview(@Param('roomCode') roomCode: string) {
+    const interviewSession = await this.prisma.interview.findUnique({
+      where: { roomCode },
+    });
+
+    if (!interviewSession) {
+      throw new BadRequestException('Interview session not found');
+    }
+
+    // Update interview status
+    await this.prisma.interview.update({
+      where: { id: interviewSession.id },
+      data: {
+        status: 'COMPLETED',
+        endedAt: new Date(),
+      },
+    });
+
+    // Delete LiveKit room
+    try {
+      await this.liveKitService.deleteRoom(interviewSession.roomName);
+    } catch (error) {
+      console.warn(`Failed to delete room ${interviewSession.roomName}:`, error);
+    }
+
+    return { message: 'Interview session ended successfully' };
+  }
+
+  /**
+   * Generate unique room code
+   */
+  private generateRoomCode(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+}
