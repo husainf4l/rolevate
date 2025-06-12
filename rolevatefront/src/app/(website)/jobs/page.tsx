@@ -47,30 +47,16 @@ const JobsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <BriefcaseIcon className="h-8 w-8 text-[#00C6AD]" />
-            <h1 className="text-3xl font-bold text-white">Browse Jobs</h1>
-          </div>
-          <p className="text-gray-400 text-lg">
-            Discover amazing career opportunities with top companies
-          </p>
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Main Title - Left-aligned, Apple Style */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+            Demo Jobs
+          </h1>
+          <div className="w-16 h-1 bg-[#00C6AD] mt-3"></div>
         </div>
 
-        {/* Job Statistics */}
-        <JobStats showHeader={false} className="mb-8" />
-
-        {/* Filters */}
-        <JobFilters
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onSearch={handleSearch}
-        />
-
-        {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -109,7 +95,7 @@ const JobsPage: React.FC = () => {
             )}
 
             {/* Jobs Grid */}
-            {jobs.length > 0 ? (
+            {(jobs?.length ?? 0) > 0 ? (
               <div className="jobs-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {jobs.map((job) => (
                   <JobCard

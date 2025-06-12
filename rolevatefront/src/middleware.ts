@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const AUTH_COOKIE_NAME = 'token'; 
-
 const PUBLIC_ROUTES = ['/login', '/signup', '/', '/about', '/contact', '/interview', '/room', '/room2', '/schedule-meeting', '/try-it-now', '/jobs']; 
 
 export function middleware(request: NextRequest) {
@@ -12,11 +10,16 @@ export function middleware(request: NextRequest) {
                       pathname.startsWith('/api') ||
                       pathname.startsWith('/jobs/'); // Allow dynamic job routes
   const isProtectedRoute = pathname.startsWith('/dashboard');
-  const isAuthenticated = request.cookies.has(AUTH_COOKIE_NAME);
+  
+  // For JWT tokens in localStorage, we need to check on the client side
+  // The middleware will allow the request to go through and let the client-side
+  // authentication check handle the redirect
+  const authHeader = request.headers.get('authorization');
+  const isAuthenticated = authHeader && authHeader.startsWith('Bearer ');
 
   console.log(`[Middleware] ${pathname} - isAuth: ${isAuthenticated}, isPublic: ${isPublicPage}, isProtected: ${isProtectedRoute}`);
 
-  // ✅ 1. Authenticated User
+  // ✅ 1. Authenticated User (if we can detect it)
   if (isAuthenticated) {
     if (pathname === '/login') {
       console.log('[Middleware] Authenticated user accessing login, redirecting to dashboard');
@@ -25,22 +28,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ✅ 2. Unauthenticated User
-  if (!isAuthenticated) {
-    // Allow access to public pages
-    if (isPublicPage) {
-      return NextResponse.next();
-    }
+  // ✅ 2. Public routes are always allowed
+  if (isPublicPage) {
+    return NextResponse.next();
+  }
 
-    // Protect dashboard routes
-    if (isProtectedRoute) {
-      console.log('[Middleware] Unauthenticated user accessing protected route, redirecting to login');
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('from', pathname); 
-      return NextResponse.redirect(loginUrl);
-    }
-
-    // Allow other routes (like static assets, etc.)
+  // ✅ 3. Protected routes - we'll let the client-side auth check handle this
+  // since we can't reliably check localStorage from middleware
+  if (isProtectedRoute) {
+    // Allow the request to go through - the AuthChecker component will handle the redirect
     return NextResponse.next();
   }
 

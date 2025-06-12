@@ -1,4 +1,5 @@
 import { Room, RoomEvent, DataPacket_Kind, RemoteParticipant } from 'livekit-client';
+import { getAccessToken } from './auth.service';
 
 export interface LiveKitToken {
   token: string;
@@ -27,11 +28,18 @@ export class LiveKitService {
 
   async createRoom(roomName: string): Promise<boolean> {
     try {
+      const token = getAccessToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${this.baseUrl}/api/livekit/room`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           name: roomName,
           emptyTimeout: 10,
@@ -57,11 +65,18 @@ export class LiveKitService {
         url += `&name=${encodeURIComponent(name)}`;
       }
       
+      const token = getAccessToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {
@@ -90,11 +105,18 @@ export class LiveKitService {
         requestBody.name = name;
       }
       
+      const token = getAccessToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(`${this.baseUrl}/api/livekit/token`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(requestBody),
       });
 

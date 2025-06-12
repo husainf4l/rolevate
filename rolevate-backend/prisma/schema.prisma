@@ -14,25 +14,23 @@ datasource db {
 }
 
 model User {
-  id                 String    @id @default(uuid())
-  email              String    @unique
-  username           String    @unique
-  name               String?
-  firstName          String?
-  lastName           String?
-  password           String
-  phoneNumber        String?
-  whatsappNumber     String?
-  profileImage       String?
-  bio                String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  lastLoginAt        DateTime?
-  isActive           Boolean   @default(true)
-  twoFactorSecret    String?
-  isTwoFactorEnabled Boolean   @default(false)
-  role               UserRole  @default(RECRUITER)
-  companyId          String?
+  id             String    @id @default(uuid())
+  email          String    @unique
+  username       String    @unique
+  name           String?
+  firstName      String?
+  lastName       String?
+  password       String
+  phoneNumber    String?
+  whatsappNumber String?
+  profileImage   String?
+  bio            String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastLoginAt    DateTime?
+  isActive       Boolean   @default(true)
+  role           UserRole  @default(RECRUITER)
+  companyId      String?
 
   // Relations
   company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
@@ -59,8 +57,9 @@ model Company {
   isActive    Boolean      @default(true)
 
   // Relations
-  users    User[]
-  jobPosts JobPost[]
+  users        User[]
+  jobPosts     JobPost[]
+  subscription Subscription?
 
   @@map("companies")
 }
@@ -106,6 +105,7 @@ model JobPost {
   createdBy        User               @relation("JobPostCreator", fields: [createdById], references: [id])
   applications     Application[]
   InterviewHistory InterviewHistory[]
+  applies          Apply[]
 
   @@map("job_posts")
 }
@@ -153,10 +153,15 @@ model Application {
 }
 
 model CvAnalysis {
-  id            String  @id @default(uuid())
-  cvUrl         String
-  extractedText String?
-
+  id                 String  @id @default(uuid())
+  cvUrl              String
+  extractedText      String?
+  candidateName      String? // Extracted from CV by LLM
+  candidateEmail     String? // Extracted from CV by LLM  
+  candidatePhone     String? // Required input (phone number)
+  jobId              String? // Required input (job ID)
+  status             String? @default("pending") // pending, analyzing, completed, failed
+  whatsappLink       String?
   // Overall Scoring (0-100)
   overallScore       Float
   skillsScore        Float
@@ -327,10 +332,12 @@ model Candidate {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   isActive           Boolean            @default(true)
+  cvUrl              String?
   applications       Application[]
   interviews         Interview[]
   cvAnalyses         CvAnalysis[]
   interviewHistories InterviewHistory[]
+  applies            Apply[]
 
   @@map("candidates")
 }
@@ -347,6 +354,56 @@ model InterviewHistory {
   candidate    Candidate? @relation(fields: [candidate_id], references: [id], onDelete: SetNull)
 
   @@map("interview_history")
+}
+
+model Subscription {
+  id     String             @id @default(uuid())
+  plan   SubscriptionPlan   @default(FREE)
+  status SubscriptionStatus @default(ACTIVE)
+
+  // Billing cycle
+  startDate   DateTime
+  endDate     DateTime
+  renewsAt    DateTime?
+  cancelledAt DateTime?
+
+  // Features & Limits
+  jobPostLimit   Int @default(5) // Number of job posts allowed
+  candidateLimit Int @default(100) // Number of candidates allowed
+  interviewLimit Int @default(50) // Number of interviews per month
+
+  // Payment information
+  priceAmount  Decimal? // Amount paid
+  currency     String       @default("USD")
+  billingCycle BillingCycle @default(MONTHLY)
+
+  // Stripe integration (optional)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripePriceId        String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign keys
+  companyId String @unique
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Apply {
+  id          String    @id @default(uuid())
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  candidateId String
+  jobPost     JobPost   @relation(fields: [jobPostId], references: [id])
+  jobPostId   String
+  cvUrl       String
+  coverLetter String?
+  createdAt   DateTime  @default(now())
 }
 
 // Enums
@@ -452,4 +509,26 @@ enum NotificationType {
   APPLICATION_STATUS_CHANGED
   NEW_MESSAGE
   SYSTEM_UPDATE
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  CANCELLED
+  PAST_DUE
+  TRIALING
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  YEARLY
 }

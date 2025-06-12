@@ -6,6 +6,7 @@ import Image from "next/image";
 import {
   getJobStats,
   getJobs,
+  getMyCompanyJobs,
   getFeaturedJobs,
   JobStats,
   Job,
@@ -64,7 +65,7 @@ const StatCard = ({
   trend?: "up" | "down";
   changePercentage?: number;
 }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 m-2">
     <div className="flex items-center justify-between">
       <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
         <span className="text-2xl">{icon}</span>
@@ -115,7 +116,7 @@ const JobCard = ({ job }: { job: Job }) => {
 
   return (
     <Link href={`/jobs/${job.id}`}>
-      <div className="flex items-start p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+      <div className="flex items-start p-4 m-2 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer">
         <div className="flex-shrink-0 mr-4">
           {job.company.logo && !imageError ? (
             <Image
@@ -180,6 +181,10 @@ const JobCard = ({ job }: { job: Job }) => {
 };
 
 export default function Dashboard() {
+  return <DashboardContent />;
+}
+
+function DashboardContent() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     stats: null,
     recentJobs: [],
@@ -193,19 +198,28 @@ export default function Dashboard() {
       try {
         setDashboardData((prev) => ({ ...prev, loading: true, error: null }));
 
-        // Fetch all data in parallel
+        // Fetch all data in parallel - using company-specific jobs only
         const [statsData, recentJobsData, featuredJobsData] = await Promise.all(
           [
             getJobStats(),
-            getJobs({ limit: 10, sortBy: "createdAt", sortOrder: "desc" }),
-            getFeaturedJobs(6),
+            getMyCompanyJobs({
+              limit: 10,
+              sortBy: "createdAt",
+              sortOrder: "desc",
+            }),
+            getMyCompanyJobs({
+              limit: 6,
+              isFeatured: true,
+              sortBy: "createdAt",
+              sortOrder: "desc",
+            }),
           ]
         );
 
         setDashboardData({
           stats: statsData,
           recentJobs: recentJobsData.jobs,
-          featuredJobs: featuredJobsData,
+          featuredJobs: featuredJobsData.jobs, // Ensure we're getting the jobs array from response
           loading: false,
           error: null,
         });
@@ -400,7 +414,7 @@ export default function Dashboard() {
             <h3 className="text-md font-medium text-gray-900 dark:text-white mb-4">
               By Experience Level
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {stats?.distribution.byExperience.map((item, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -431,7 +445,7 @@ export default function Dashboard() {
             <h3 className="text-md font-medium text-gray-900 dark:text-white mb-4">
               By Work Type
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {stats?.distribution.byWorkType.map((item, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -474,7 +488,7 @@ export default function Dashboard() {
               View all
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {dashboardData.recentJobs.slice(0, 5).map((job) => (
               <JobCard key={job.id} job={job} />
             ))}
@@ -499,7 +513,7 @@ export default function Dashboard() {
               View all
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {dashboardData.featuredJobs.slice(0, 5).map((job) => (
               <JobCard key={job.id} job={job} />
             ))}

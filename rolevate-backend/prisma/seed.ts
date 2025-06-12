@@ -54,7 +54,6 @@ async function main() {
       role: 'SUPER_ADMIN',
       companyId: roxateCompany.id,
       isActive: true,
-      isTwoFactorEnabled: false,
     },
   });
 

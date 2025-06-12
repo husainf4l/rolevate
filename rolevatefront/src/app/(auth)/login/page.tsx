@@ -3,10 +3,12 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   AuthError,
   isAuthenticated,
   login,
+  getCurrentUser,
 } from "../../../services/auth.service";
 import Logo from "../../../components/logo/logo";
 
@@ -17,7 +19,7 @@ function LoginPageContent() {
   const reason = searchParams.get("reason");
 
   const [formData, setFormData] = useState({
-    username: "",
+    emailOrUsername: "",
     password: "",
   });
   const [error, setError] = useState("");
@@ -31,7 +33,16 @@ function LoginPageContent() {
       try {
         const authenticated = await isAuthenticated();
         if (authenticated && isMounted) {
-          router.replace(redirectPath);
+          // If already authenticated, check if they have a company
+          const user = await getCurrentUser();
+
+          if (!user.companyId || !user.company) {
+            // No company - redirect to company setup
+            router.replace("/company-setup");
+          } else {
+            // Has company - redirect to intended destination
+            router.replace(redirectPath);
+          }
         }
       } catch (err) {
         console.error("Auth check error on login page:", err);
@@ -61,7 +72,17 @@ function LoginPageContent() {
 
     try {
       await login(formData);
-      router.push(redirectPath);
+
+      // Check if user has a company after login
+      const user = await getCurrentUser();
+
+      if (!user.companyId || !user.company) {
+        // No company - redirect to company setup
+        router.push("/company-setup");
+      } else {
+        // Has company - redirect to dashboard
+        router.push(redirectPath);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof AuthError
@@ -113,21 +134,21 @@ function LoginPageContent() {
                 )}
                 <div>
                   <label
-                    htmlFor="username"
+                    htmlFor="emailOrUsername"
                     className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                   >
-                    Username
+                    Email or Username
                   </label>
                   <input
-                    id="username"
-                    name="username"
-                    type="username"
+                    id="emailOrUsername"
+                    name="emailOrUsername"
+                    type="text"
                     autoComplete="username"
                     required
-                    value={formData.username}
+                    value={formData.emailOrUsername}
                     onChange={handleChange}
                     className="appearance-none block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 dark:text-white"
-                    placeholder="username"
+                    placeholder="Enter email or username"
                   />
                 </div>
 
@@ -189,13 +210,17 @@ function LoginPageContent() {
                 </div>
               </form>
 
-              {error && (
-                <div className="mt-4 text-center">
-                  <p className="text-sm text-teal-600 dark:text-teal-400">
-                    {error}
-                  </p>
-                </div>
-              )}
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Don't have an account?{" "}
+                  <Link
+                    href="/signup"
+                    className="font-medium text-teal-600 hover:text-teal-500"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
 

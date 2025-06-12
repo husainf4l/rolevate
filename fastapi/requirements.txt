@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+langgraph
+langchain
+langchain-openai
+pydantic
+sqlalchemy
+psycopg2-binary
+alembic
+python-multipart
+python-dotenv
+httpx
+pywhatkit
+PyPDF2
+pdfplumber

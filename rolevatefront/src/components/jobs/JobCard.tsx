@@ -69,9 +69,12 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onViewDetails }) => {
       </div>
 
       {/* Description */}
-      <p className="description text-gray-300 text-sm mb-4 line-clamp-3">
-        {job.description.substring(0, 150)}...
-      </p>
+      <div className="description mb-4">
+        <p className="text-gray-300 dark:text-gray-300 text-sm leading-relaxed line-clamp-3 prose prose-sm max-w-none">
+          {job.description.substring(0, 500)}
+          {job.description.length > 500 ? "..." : ""}
+        </p>
+      </div>
 
       {/* Skills */}
       <div className="skills mb-4">
@@ -92,36 +95,14 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onViewDetails }) => {
         </div>
       </div>
 
-      {/* Salary */}
-      {job.salaryMin && job.salaryMax && (
-        <div className="salary mb-4">
-          <span className="text-[#00C6AD] font-semibold">
-            {job.currency} {job.salaryMin.toLocaleString()} -{" "}
-            {job.salaryMax.toLocaleString()}
-          </span>
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="job-footer flex items-center justify-between pt-4 border-t border-gray-700">
-        <div className="flex items-center gap-4 text-sm text-gray-400">
-          <div className="flex items-center gap-1">
-            <UserGroupIcon className="h-4 w-4" />
-            <span className="applications">
-              {job.applicationCount} applications
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <EyeIcon className="h-4 w-4" />
-            <span className="views">{job.viewCount} views</span>
-          </div>
-        </div>
+      <div className="job-footer flex items-center justify-between pt-4">
+        <div className="flex items-center gap-4 text-sm text-gray-400"></div>
 
         <button
           onClick={handleViewDetails}
-          className="bg-[#00C6AD] hover:bg-[#14B8A6] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
         >
-          View Details
+          View Demo
         </button>
       </div>
     </div>

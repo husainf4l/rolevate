@@ -6,10 +6,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import * as path from 'path';
 import * as fs from 'fs';
 
-/**
- * Ensures a directory exists, creating it if necessary
- * @param dirPath path to the directory
- */
+
 function ensureDirectoryExists(dirPath: string): void {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
@@ -77,7 +74,7 @@ async function bootstrap() {
     prefix: '/public',
   });
   
-  const port = process.env.PORT || 4003;
+  const port = process.env.PORT || 4005;
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`);
 }

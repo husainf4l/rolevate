@@ -11,7 +11,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import { getJobs, Job, JobFilters } from "@/services/jobs.service";
+import { getJobs, getMyCompanyJobs, Job, JobFilters } from "@/services/jobs.service";
 
 type JobPostStatus = "active" | "paused" | "draft" | "completed";
 
@@ -99,7 +99,7 @@ const JobPostDashboard = (props: Props) => {
           sortOrder: "desc",
         };
 
-        const response = await getJobs(filters);
+        const response = await getMyCompanyJobs(filters);
         const mappedJobs = response.jobs.map(mapJobToDisplay);
         setJobs(mappedJobs);
         setFilteredJobs(mappedJobs);

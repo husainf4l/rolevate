@@ -3,23 +3,126 @@ import { getAuthDebugInfo } from "../utils/debug-auth";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
 const REQUEST_TIMEOUT = 10000; // 10 seconds timeout
 
+// Token storage keys
+const ACCESS_TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
+
 // Authentication response types
 export interface LoginCredentials {
-  username: string;
+  emailOrUsername: string;
   password: string;
 }
 
+export interface RegisterCredentials {
+  email: string;
+  username: string;
+  password: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  role: 'RECRUITER' | 'HR_MANAGER' | 'ADMIN';
+  createCompany?: boolean;
+  companyId?: string;
+  companyData?: CompanyData;
+}
+
+export interface CompanyData {
+  name: string;
+  displayName: string;
+  industry: string;
+  description: string;
+  website: string;
+  location: string;
+  country: string;
+  city: string;
+  size: 'SMALL' | 'MEDIUM' | 'LARGE' | 'ENTERPRISE';
+  subscriptionPlan: 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE';
+}
+
 export interface AuthResponse {
+  access_token: string;
   user: User;
-  message?: string;
 }
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
-  name: string;
   username: string;
-  isTwoFactorEnabled: boolean;
+  name: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  role: string;
+  companyId: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt: string | null;
+  company?: Company;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  displayName: string;
+  industry: string;
+  subscription: {
+    plan: string;
+    status: string;
+    endDate: string;
+  };
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface SubscriptionStatus {
+  plan: string;
+  status: string;
+  endDate: string;
+  features: string[];
+}
+
+export interface SubscriptionLimits {
+  jobPosts: {
+    used: number;
+    limit: number;
+  };
+  interviews: {
+    used: number;
+    limit: number;
+  };
+  users: {
+    used: number;
+    limit: number;
+  };
+}
+
+// Token management functions
+export function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+export function getRefreshToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+export function setTokens(accessToken: string): void {
+  if (typeof window === 'undefined') return;
+  
+  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+}
+
+export function clearTokens(): void {
+  if (typeof window === 'undefined') return;
+  
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
 }
 
 // Authentication error type
@@ -44,12 +147,14 @@ async function fetchWithAuth<T>(
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
   
   try {
+    const token = getAccessToken();
+    
     const response = await fetch(url, {
       ...options,
-      credentials: 'include',
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers,
       },
     });
@@ -59,6 +164,12 @@ async function fetchWithAuth<T>(
     const data = response.status !== 204 ? await response.json() : {};
     
     if (!response.ok) {
+      // Handle 401 errors by clearing tokens
+      if (response.status === 401) {
+        clearTokens();
+        authCache = { isAuthenticated: false, user: null, timestamp: Date.now() };
+      }
+      
       throw new AuthError(
         data.message || `Request failed with status ${response.status}`,
         response.status
@@ -66,130 +177,152 @@ async function fetchWithAuth<T>(
     }
     
     return data as T;
-  } catch (error: unknown) { // Added type annotation
+  } catch (error: unknown) {
     clearTimeout(timeoutId);
     
     if (error instanceof AuthError) {
       throw error;
     }
     
-    if (error instanceof Error && error.name === 'AbortError') { // Check if error is an instance of Error
+    if (error instanceof Error && error.name === 'AbortError') {
       throw new AuthError('Request timeout exceeded', 408);
     }
     
-    // Handle other error types or provide a generic message
     const message = error instanceof Error ? error.message : 'An unknown network error occurred';
     throw new AuthError(message);
   }
 }
 
 // Authentication cache to avoid repeated requests
-let authCache: { isAuthenticated?: boolean; timestamp?: number } = {};
+let authCache: { 
+  isAuthenticated?: boolean; 
+  user?: User | null;
+  timestamp?: number;
+} = {};
 const AUTH_CACHE_TTL = 30000; // 30 seconds
 
+// Track pending requests to prevent duplicate API calls
+let pendingUserRequest: Promise<User | null> | null = null;
+
 /**
- * Log in a user with username and password
+ * Log in a user with email/username and password
  * @returns User object on successful login
  */
 export async function login(credentials: LoginCredentials): Promise<User> {
   try {
-    const data = await fetchWithAuth<AuthResponse>(`${API_URL}/api/auth/login`, {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(credentials),
     });
     
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new AuthError(
+        errorData.message || `Login failed with status ${response.status}`,
+        response.status
+      );
+    }
+    
+    const data: AuthResponse = await response.json();
+    
+    // Store tokens
+    setTokens(data.access_token);
+    
     // Reset auth cache on successful login
-    authCache = { isAuthenticated: true, timestamp: Date.now() };
+    authCache = { isAuthenticated: true, user: data.user, timestamp: Date.now() };
     return data.user;
-  } catch (error: unknown) { // Added type annotation
+  } catch (error: unknown) {
     // Clear auth cache on login error
-    authCache = {};
-    if (error instanceof AuthError) { // Type check
+    authCache = { isAuthenticated: false, user: null, timestamp: Date.now() };
+    clearTokens();
+    
+    if (error instanceof AuthError) {
       throw error;
     }
-    // Fallback for other error types
+    
     const message = error instanceof Error ? error.message : 'Login failed due to an unexpected error.';
-    throw new AuthError(message, 500); // Assuming 500 for unexpected server/network issues
+    throw new AuthError(message, 500);
+  }
+}
+
+/**
+ * Register a new user
+ * @returns User object on successful registration
+ */
+export async function register(credentials: RegisterCredentials): Promise<User> {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new AuthError(
+        errorData.message || `Registration failed with status ${response.status}`,
+        response.status
+      );
+    }
+    
+    const data: AuthResponse = await response.json();
+    
+    // Store tokens for automatic login after registration
+    setTokens(data.access_token);
+    
+    // Reset auth cache on successful registration
+    authCache = { isAuthenticated: true, user: data.user, timestamp: Date.now() };
+    return data.user;
+  } catch (error: unknown) {
+    if (error instanceof AuthError) {
+      throw error;
+    }
+    
+    const message = error instanceof Error ? error.message : 'Registration failed due to an unexpected error.';
+    throw new AuthError(message, 500);
   }
 }
 
 /**
  * Log out the current user
- * For HTTP-only authentication, this must send credentials to authenticate the logout request
  */
 export async function logout(): Promise<void> {
   try {
-    const debugInfo = getAuthDebugInfo();
     console.log('[AuthService] Starting logout process...');
-    console.log('[AuthService] Debug info:', debugInfo);
     
-    // First attempt: Try with standard logout request
-    const response = await fetch(`${API_URL}/api/auth/logout`, {
-      method: 'POST',
-      credentials: 'include', // Critical: ensure HTTP-only cookies are sent
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Accept': 'application/json',
-        // Add explicit origin header for CORS
-        'Origin': debugInfo.origin,
-      },
-    });
-    
-    console.log('[AuthService] Logout response status:', response.status);
-    console.log('[AuthService] Response headers:', Object.fromEntries(response.headers.entries()));
-    
-    // Handle different response codes
-    if (response.status === 204 || response.status === 200) {
-      console.log('[AuthService] Logout successful - server confirmed');
-    } else if (response.status === 401) {
-      console.log('[AuthService] Got 401 on logout - treating as success (user was already logged out)');
-      // 401 on logout means user was already logged out - this is OK
-    } else if (response.status === 403) {
-      console.log('[AuthService] Got 403 on logout - treating as success (permission issue but logout intent clear)');
-      // 403 might mean the logout endpoint doesn't accept the current auth state - still OK to proceed
-    } else {
-      // For other error codes, log but don't fail the logout process
-      console.warn('[AuthService] Logout returned unexpected status:', response.status);
+    // Optional: Notify backend about logout (if you have a logout endpoint)
+    const token = getAccessToken();
+    if (token) {
       try {
-        const errorText = await response.text();
-        console.warn('[AuthService] Error response body:', errorText);
-      } catch {
-        console.warn('[AuthService] Could not read error response body');
+        await fetch(`${API_URL}/api/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        console.log('[AuthService] Backend logout successful');
+      } catch (error) {
+        console.log('[AuthService] Backend logout failed, continuing with client logout:', error);
       }
-      // Continue with logout process even if server reports an error
-      console.log('[AuthService] Continuing with logout despite server error (security best practice)');
     }
-    
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.warn('[AuthService] Network error during logout:', error.message);
     } else {
       console.warn('[AuthService] Unknown error during logout:', String(error));
     }
-    // Network errors shouldn't prevent logout for security reasons
-    console.log('[AuthService] Continuing with logout despite network error (security best practice)');
   }
   
-  // ALWAYS clear auth cache and client state, regardless of server response
-  // This is critical for security - even if server fails, client should log out
-  authCache = { isAuthenticated: false, timestamp: Date.now() };
-  console.log('[AuthService] Auth cache cleared - client logout complete');
-  
-  // Additional client-side cleanup for HTTP-only cookies
-  // Try to clear any visible cookies (though HTTP-only ones can't be cleared from JS)
-  try {
-    // Clear any non-HTTP-only auth-related cookies
-    const cookiesToClear = ['token', 'auth', 'session', 'access_token', 'refresh_token'];
-    cookiesToClear.forEach(cookieName => {
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    });
-    console.log('[AuthService] Attempted to clear visible auth cookies');
-  } catch (error) {
-    console.log('[AuthService] Cookie clearing had no effect (expected for HTTP-only cookies)');
-  }
+  // ALWAYS clear tokens and client state
+  clearTokens();
+  authCache = { isAuthenticated: false, user: null, timestamp: Date.now() };
+  console.log('[AuthService] Client logout complete');
 }
 
 /**
@@ -207,45 +340,70 @@ export async function isAuthenticated(): Promise<boolean> {
     return authCache.isAuthenticated;
   }
   
-  try {
-    await fetchWithAuth<User>(`${API_URL}/api/auth/users/me`, {
-      method: 'GET',
-    });
-    
-    authCache = { isAuthenticated: true, timestamp: Date.now() };
-    return true;
-  } catch (error: unknown) {
-    if (error instanceof AuthError && (error.status === 401 || error.status === 403)) {
-      authCache = { isAuthenticated: false, timestamp: Date.now() };
-    } else {
-      authCache = { isAuthenticated: false, timestamp: Date.now() }; 
-    }
+  // Check if we have a token
+  const token = getAccessToken();
+  if (!token) {
+    authCache = { isAuthenticated: false, user: null, timestamp: Date.now() };
     return false;
   }
+  
+  // Use getCurrentUser to check authentication and cache the user
+  const user = await getCurrentUser();
+  return user !== null;
 }
 
 /**
  * Get the current user profile (if authenticated)
  */
 export async function getCurrentUser(): Promise<User | null> {
-  try {
-    const user = await fetchWithAuth<User>(`${API_URL}/api/auth/users/me`, {
-      method: 'GET',
-    });
-    authCache = { isAuthenticated: true, timestamp: Date.now() };
-    return user;
-  } catch (error: unknown) {
-    if (error instanceof AuthError && (error.status === 401 || error.status === 403)) {
-      authCache = { isAuthenticated: false, timestamp: Date.now() };
-    } else {
-      if (error instanceof Error) {
-        console.error('Error fetching current user:', error.message);
-      } else {
-        console.error('Error fetching current user:', String(error));
-      }
-    }
+  const now = Date.now();
+  
+  // Return cached user if available and not expired
+  if (
+    authCache.user !== undefined && 
+    authCache.timestamp && 
+    (now - authCache.timestamp < AUTH_CACHE_TTL)
+  ) {
+    return authCache.user;
+  }
+  
+  // If there's already a pending request, wait for it
+  if (pendingUserRequest) {
+    return await pendingUserRequest;
+  }
+  
+  const token = getAccessToken();
+  if (!token) {
+    authCache = { isAuthenticated: false, user: null, timestamp: Date.now() };
     return null;
   }
+  
+  // Create a new pending request
+  pendingUserRequest = (async (): Promise<User | null> => {
+    try {
+      const user = await fetchWithAuth<User>(`${API_URL}/api/auth/profile`, {
+        method: 'GET',
+      });
+      authCache = { isAuthenticated: true, user, timestamp: Date.now() };
+      return user;
+    } catch (error: unknown) {
+      if (error instanceof AuthError && (error.status === 401 || error.status === 403)) {
+        authCache = { isAuthenticated: false, user: null, timestamp: Date.now() };
+        clearTokens();
+      } else {
+        if (error instanceof Error) {
+          console.error('Error fetching current user:', error.message);
+        } else {
+          console.error('Error fetching current user:', String(error));
+        }
+      }
+      return null;
+    } finally {
+      pendingUserRequest = null; // Clear the pending request
+    }
+  })();
+  
+  return await pendingUserRequest;
 }
 
 // 2FA Functions
@@ -271,3 +429,122 @@ export async function verify2FA(code: string): Promise<Verify2FAResponse> {
     body: JSON.stringify({ code }),
   });
 }
+
+/**
+ * Refresh the access token
+ */
+export async function refreshAccessToken(): Promise<string | null> {
+  const token = getAccessToken();
+  if (!token) {
+    console.log('[AuthService] No access token available');
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.log('[AuthService] Token refresh failed');
+      clearTokens();
+      return null;
+    }
+
+    const data = await response.json();
+    setTokens(data.access_token);
+    console.log('[AuthService] Token refreshed successfully');
+    return data.access_token;
+  } catch (error) {
+    console.error('[AuthService] Error refreshing token:', error);
+    clearTokens();
+    return null;
+  }
+}
+
+/**
+ * Enhanced fetchWithAuth that handles token refresh automatically
+ */
+async function fetchWithAutoRefresh<T>(
+  url: string, 
+  options: RequestInit = {}
+): Promise<T> {
+  try {
+    return await fetchWithAuth<T>(url, options);
+  } catch (error) {
+    if (error instanceof AuthError && error.status === 401) {
+      console.log('[AuthService] Access token expired, attempting refresh...');
+      
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        // Retry the request with the new token
+        return await fetchWithAuth<T>(url, options);
+      }
+    }
+    throw error;
+  }
+}
+
+/**
+ * Change user password
+ */
+export async function changePassword(passwordData: ChangePasswordRequest): Promise<{ message: string }> {
+  return fetchWithAuth<{ message: string }>(`${API_URL}/api/auth/change-password`, {
+    method: 'PATCH',
+    body: JSON.stringify(passwordData),
+  });
+}
+
+/**
+ * Get company information
+ */
+export async function getCompany(): Promise<Company> {
+  return fetchWithAuth<Company>(`${API_URL}/api/auth/company`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get subscription status
+ */
+export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
+  return fetchWithAuth<SubscriptionStatus>(`${API_URL}/api/auth/subscription/status`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Get subscription limits
+ */
+export async function getSubscriptionLimits(): Promise<SubscriptionLimits> {
+  return fetchWithAuth<SubscriptionLimits>(`${API_URL}/api/auth/subscription/limits`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * Upgrade subscription plan
+ */
+export async function upgradeSubscription(plan: string): Promise<{ message: string }> {
+  return fetchWithAuth<{ message: string }>(`${API_URL}/api/auth/subscription/upgrade`, {
+    method: 'POST',
+    body: JSON.stringify({ plan }),
+  });
+}
+
+/**
+ * Create a company for the current user
+ */
+export async function createCompany(companyData: CompanyData): Promise<Company> {
+  return fetchWithAuth<Company>(`${API_URL}/api/auth/create-company`, {
+    method: 'POST',
+    body: JSON.stringify(companyData),
+  });
+}
+
+// Legacy compatibility - keep signup function for backward compatibility
+export const signup = register;

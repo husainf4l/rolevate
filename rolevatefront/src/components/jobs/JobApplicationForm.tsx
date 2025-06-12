@@ -123,13 +123,10 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
 
   if (success) {
     return (
-      <div
-        className={`bg-gradient-to-br from-emerald-900/40 via-emerald-800/30 to-teal-900/40 backdrop-blur-sm border border-emerald-600/30 rounded-2xl p-8 shadow-2xl ${className}`}
-      >
+      <div className={`bg-gray-800 rounded-2xl p-8 shadow-2xl ${className}`}>
         <div className="text-center relative">
           {/* Success Animation */}
           <div className="relative mb-6">
-            <div className="absolute inset-0 bg-emerald-400/20 rounded-full animate-ping"></div>
             <div className="relative bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full p-4 mx-auto w-fit">
               <CheckCircleIcon className="h-12 w-12 text-white" />
             </div>
@@ -138,7 +135,7 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
           {/* Success Message */}
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white mb-3">
-              🎉 Application Submitted Successfully!
+              Application Submitted Successfully!
             </h3>
             <p className="text-emerald-100/90 mb-4 leading-relaxed">
               Your application for{" "}
@@ -152,29 +149,49 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
           </div>
 
           {/* Next Steps */}
-          <div className="bg-emerald-800/30 border border-emerald-600/30 rounded-xl p-6 text-left">
-            <h4 className="text-emerald-300 font-semibold mb-3 flex items-center gap-2">
-              <SparklesIcon className="h-5 w-5" />
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-left">
+            <h4 className="text-[#00C6AD] font-semibold mb-3 flex items-center gap-2">
+              <SparklesIcon className="h-5 w-5 text-[#00C6AD]" />
               What happens next?
             </h4>
-            <ul className="space-y-2 text-emerald-100/80 text-sm">
+            <ul className="space-y-2 text-gray-700 dark:text-gray-200 text-sm">
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-2 flex-shrink-0"></div>
+                <span className="w-1.5 h-1.5 bg-[#00C6AD] rounded-full mt-2 flex-shrink-0 inline-block"></span>
                 <span>
-                  You'll receive a confirmation email within 5 minutes
+                  You'll receive a confirmation WhatsApp within 5 minutes.
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-2 flex-shrink-0"></div>
+                <span className="w-1.5 h-1.5 bg-[#00C6AD] rounded-full mt-2 flex-shrink-0 inline-block"></span>
+                <span>
+                  We're preparing your interview. You’ll receive a link once
+                  it’s ready.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-1.5 h-1.5 bg-[#00C6AD] rounded-full mt-2 flex-shrink-0 inline-block"></span>
+                <span>
+                  The interview will be recorded for review by our HR team.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-1.5 h-1.5 bg-[#00C6AD] rounded-full mt-2 flex-shrink-0 inline-block"></span>
+                <span>
+                  Please make sure you’re in a quiet place when joining the
+                  interview.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-1.5 h-1.5 bg-[#00C6AD] rounded-full mt-2 flex-shrink-0 inline-block"></span>
                 <span>
                   Our HR team will review your application within 2-3 business
-                  days
+                  days.
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-2 flex-shrink-0"></div>
+                <span className="w-1.5 h-1.5 bg-[#00C6AD] rounded-full mt-2 flex-shrink-0 inline-block"></span>
                 <span>
-                  If selected, we'll contact you via phone for next steps
+                  If selected, we'll contact you via phone for next steps.
                 </span>
               </li>
             </ul>
@@ -238,10 +255,38 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
                 required
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2 flex items-center gap-2">
-              <div className="w-1 h-1 bg-[#00C6AD] rounded-full"></div>
+            <div className="text-xs text-gray-500 mt-2 flex items-center gap-2">
+              <span className="w-1 h-1 bg-[#00C6AD] rounded-full inline-block"></span>
               Enter your Jordan mobile number in the format +962XXXXXXXXX
-            </p>
+            </div>
+          </div>
+        </div>
+        {/* Cover Letter Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-teal-500/20 rounded-lg flex items-center justify-center">
+              <DocumentTextIcon className="h-4 w-4 text-teal-400" />
+            </div>
+            <h4 className="text-lg font-semibold text-white">
+              Cover Letter{" "}
+              <span className="text-gray-400 text-sm font-normal">
+                (Optional)
+              </span>
+            </h4>
+          </div>
+
+          <div className="relative">
+            <textarea
+              name="coverLetter"
+              value={formData.coverLetter}
+              onChange={handleInputChange}
+              rows={6}
+              className="w-full px-4 py-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all duration-200 hover:border-gray-500"
+              placeholder="Tell us why you're interested in this position and what makes you a great fit for this role. Highlight your relevant experience, skills, and enthusiasm for joining the team..."
+            />
+            <div className="absolute bottom-3 right-3 text-xs text-gray-500">
+              {formData.coverLetter.length}/1000
+            </div>
           </div>
         </div>
 
@@ -312,40 +357,6 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
           </div>
         </div>
 
-        {/* Cover Letter Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-              <DocumentTextIcon className="h-4 w-4 text-purple-400" />
-            </div>
-            <h4 className="text-lg font-semibold text-white">
-              Cover Letter{" "}
-              <span className="text-gray-400 text-sm font-normal">
-                (Optional)
-              </span>
-            </h4>
-          </div>
-
-          <div className="relative">
-            <textarea
-              name="coverLetter"
-              value={formData.coverLetter}
-              onChange={handleInputChange}
-              rows={6}
-              className="w-full px-4 py-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-all duration-200 hover:border-gray-500"
-              placeholder="Tell us why you're interested in this position and what makes you a great fit for this role. Highlight your relevant experience, skills, and enthusiasm for joining the team..."
-            />
-            <div className="absolute bottom-3 right-3 text-xs text-gray-500">
-              {formData.coverLetter.length}/1000
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 flex items-center gap-2">
-            <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
-            Share your motivation and highlight relevant experience or skills
-          </p>
-        </div>
-
-        {/* Error Display */}
         {error && (
           <div className="flex items-start gap-3 text-red-300 bg-red-900/30 border border-red-600/30 rounded-xl p-4 backdrop-blur-sm">
             <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
@@ -356,41 +367,6 @@ export const JobApplicationForm: React.FC<JobApplicationFormProps> = ({
           </div>
         )}
 
-        {/* Application Guidelines */}
-        <div className="bg-gradient-to-r from-blue-900/20 via-indigo-900/20 to-purple-900/20 border border-blue-600/20 rounded-xl p-6">
-          <h4 className="text-blue-300 font-semibold mb-3 flex items-center gap-2">
-            <SparklesIcon className="h-5 w-5" />
-            Quick Application Tips
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-blue-100/80">
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-              <span>Upload a current, professional CV/Resume</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-              <span>Double-check your phone number format</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-              <span>Be specific about your relevant skills</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-              <span>Show enthusiasm for the company</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-              <span>CV file size should be under 5MB</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-              <span>Keep your message concise but impactful</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Submit Button */}
         <div className="pt-4">
           <button
             type="submit"

@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getCurrentUser, logout } from "../services/auth.service";
+import { useRouter, usePathname } from "next/navigation";
+import {
+  getCurrentUser,
+  logout,
+  getAccessToken,
+} from "../services/auth.service";
 
 /**
  * AuthChecker component that validates user authentication on mount/refresh
@@ -14,6 +18,7 @@ export default function AuthChecker({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -21,6 +26,14 @@ export default function AuthChecker({
     const checkAuthentication = async () => {
       try {
         console.log("[AuthChecker] Verifying authentication on page load...");
+
+        // First check if we have a token
+        const token = getAccessToken();
+        if (!token) {
+          console.log("[AuthChecker] No access token found");
+          await handleAuthFailure();
+          return;
+        }
 
         // Try to get current user to verify token validity
         const user = await getCurrentUser();
@@ -52,13 +65,22 @@ export default function AuthChecker({
         // Continue with redirect even if logout fails
       }
 
-      // Redirect to login page
+      // Redirect to login page with current path for redirect after login
       console.log("[AuthChecker] Redirecting to login page");
-      router.replace("/login?reason=session_expired");
+      const loginUrl = `/login?reason=session_expired&from=${encodeURIComponent(
+        pathname
+      )}`;
+      router.replace(loginUrl);
     };
 
-    checkAuthentication();
-  }, [router]);
+    // Only check authentication for protected routes
+    if (pathname.startsWith("/dashboard")) {
+      checkAuthentication();
+    } else {
+      setIsChecking(false);
+      setIsAuthenticated(true); // Allow non-protected routes
+    }
+  }, [router, pathname]);
 
   // Show loading state while checking authentication
   if (isChecking) {
