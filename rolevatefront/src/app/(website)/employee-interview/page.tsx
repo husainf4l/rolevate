@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import PublicInterviewService, {
   PublicInterviewRoomInfo,
   InterviewJoinResponse,
-} from "@/services/PublicInterviewService";
+} from "@/services/public-interview.service";
 
 export default function EmployeeInterviewPage() {
   const router = useRouter();

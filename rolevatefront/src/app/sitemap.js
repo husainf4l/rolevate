@@ -4,6 +4,7 @@ export default function sitemap() {
   // Core pages
   const routes = [
     "",
+    "/jobs",
     "/try-it-now",
     "/schedule-meeting",
   ].map((route) => ({

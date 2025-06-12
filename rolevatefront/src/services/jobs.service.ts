@@ -104,15 +104,8 @@ export interface JobStats {
 
 export interface JobApplication {
   jobId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
   phoneNumber: string;
   coverLetter?: string;
-}
-
-export interface JobApplicationWithFile extends JobApplication {
-  cvFile: File;
 }
 
 export interface JobApplicationResponse {
@@ -194,29 +187,66 @@ export const getJobDetails = async (jobId: string): Promise<Job> => {
   return response.json();
 };
 
-// Apply to a job with CV file upload
+// Apply to a job with CV upload
 export const applyToJob = async (jobId: string, applicationData: Omit<JobApplication, 'jobId'>, cvFile: File): Promise<JobApplicationResponse> => {
   const formData = new FormData();
   
-  // Add CV file
-  formData.append('cv', cvFile);
-  
   // Add form data
   formData.append('jobId', jobId);
-  formData.append('firstName', applicationData.firstName);
-  formData.append('lastName', applicationData.lastName);
-  formData.append('email', applicationData.email);
   formData.append('phoneNumber', applicationData.phoneNumber);
   formData.append('coverLetter', applicationData.coverLetter || '');
+  formData.append('cv', cvFile); // Add CV file
 
   const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/apply`, {
     method: 'POST',
-    body: formData, // No Content-Type header needed for FormData
+    body: formData,
   });
 
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || 'Failed to submit application');
+  }
+
+  return response.json();
+};
+
+// Create a new job
+export interface CreateJobData {
+  title: string;
+  department: string;
+  description: string;
+  requirements: string;
+  responsibilities?: string;
+  benefits?: string;
+  skills: string[];
+  experienceLevel: 'ENTRY_LEVEL' | 'JUNIOR' | 'MID_LEVEL' | 'SENIOR' | 'LEAD' | 'PRINCIPAL' | 'EXECUTIVE';
+  location: string;
+  workType: 'ONSITE' | 'REMOTE' | 'HYBRID';
+  salaryMin?: number;
+  salaryMax?: number;
+  currency?: string;
+  enableAiInterview?: boolean;
+  interviewDuration?: number;
+  isActive?: boolean;
+  isFeatured?: boolean;
+}
+
+export interface CreateJobResponse {
+  success: boolean;
+  message: string;
+  job: Job;
+}
+
+export const createJob = async (jobData: CreateJobData): Promise<CreateJobResponse> => {
+  const response = await fetch(`${API_BASE_URL}/jobs`, {
+    method: 'POST',
+    headers: defaultHeaders,
+    body: JSON.stringify(jobData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create job');
   }
 
   return response.json();

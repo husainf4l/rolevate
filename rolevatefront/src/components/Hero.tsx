@@ -60,9 +60,9 @@ export default function Hero() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                href="/try-it-now"
+                href="/jobs"
                 variant="primary"
-                aria-label="Try ROLEVATE AI now"
+                aria-label="Try ROLEVATE AI now - Browse Jobs"
               >
                 Try Demo
                 <svg

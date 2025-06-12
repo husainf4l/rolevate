@@ -76,52 +76,43 @@ async function main() {
     },
   });
 
-  // Create candidate users
-  const candidate1 = await prisma.user.create({
+  // Create candidates
+  const candidate1 = await prisma.candidate.create({
     data: {
       email: 'ahmed.hassan@email.com',
-      username: 'ahmed.hassan',
       name: 'Ahmed Hassan',
       firstName: 'Ahmed',
       lastName: 'Hassan',
-      password: hashedPassword,
       phoneNumber: '+971509876543',
       whatsappNumber: '+971509876543',
       profileImage: 'https://example.com/ahmed-avatar.jpg',
       bio: 'Senior Software Engineer with 8 years experience in fintech',
-      role: 'CANDIDATE',
     },
   });
 
-  const candidate2 = await prisma.user.create({
+  const candidate2 = await prisma.candidate.create({
     data: {
       email: 'fatima.al-zahra@email.com',
-      username: 'fatima.alzahra',
       name: 'Fatima Al-Zahra',
       firstName: 'Fatima',
       lastName: 'Al-Zahra',
-      password: hashedPassword,
       phoneNumber: '+966509876543',
       whatsappNumber: '+966509876543',
       profileImage: 'https://example.com/fatima-avatar.jpg',
       bio: 'Data Scientist specializing in AI and machine learning for banking',
-      role: 'CANDIDATE',
     },
   });
 
-  const candidate3 = await prisma.user.create({
+  const candidate3 = await prisma.candidate.create({
     data: {
       email: 'omar.mahmoud@email.com',
-      username: 'omar.mahmoud',
       name: 'Omar Mahmoud',
       firstName: 'Omar',
       lastName: 'Mahmoud',
-      password: hashedPassword,
       phoneNumber: '+20109876543',
       whatsappNumber: '+20109876543',
       profileImage: 'https://example.com/omar-avatar.jpg',
       bio: 'Cybersecurity specialist with focus on financial systems',
-      role: 'CANDIDATE',
     },
   });
 

@@ -30,7 +30,8 @@ const visualizerStyles = `
 
 function RoomContent() {
   const searchParams = useSearchParams();
-  const roomCode = searchParams.get("roomCode");
+  const phoneNumber = searchParams.get("phoneNumber");
+  const jobId = searchParams.get("jobId");
   const [room] = useState(() => new Room());
 
   // Room and interview state
@@ -55,8 +56,8 @@ function RoomContent() {
   const [candidateDetails, setCandidateDetails] =
     useState<CandidateJoinRequest>({
       phoneNumber: "",
-      firstName: "",
-      lastName: "",
+      firstName: "", // Not used but keeping for interface compatibility
+      lastName: "", // Not used but keeping for interface compatibility
     });
   const [joinResponse, setJoinResponse] =
     useState<InterviewJoinResponse | null>(null);
@@ -67,100 +68,51 @@ function RoomContent() {
   const [submitting, setSubmitting] = useState(false);
 
   const loadRoomInfo = useCallback(async () => {
-    if (!roomCode) return;
+    if (!phoneNumber || !jobId) return;
 
     try {
       setLoading(true);
-      const info = await publicInterviewService.getRoomInfo(roomCode);
-      setRoomInfo(info);
 
-      // Check if the interview is available for joining
-      if (info.status === "COMPLETED" || info.status === "CANCELLED") {
-        setError("This interview session is no longer available");
-        setInterviewStatus("error");
-      } else if (
-        info.status === "SCHEDULED" ||
-        info.status === "ACTIVE" ||
-        info.status === "IN_PROGRESS"
-      ) {
-        setInterviewStatus("join_form");
-      } else {
-        setError("Interview status not recognized");
-        setInterviewStatus("error");
-      }
+      // For non-demo, we'll let createAndJoinRoom handle everything
+      setInterviewStatus("join_form");
     } catch (err) {
       console.error("Error loading room info:", err);
-
-      // If backend is not available and we have the demo room code, show demo data
-      if (roomCode === "44FZU9BV") {
-        console.log(
-          "Backend not available, showing demo data for room:",
-          roomCode
-        );
-        setRoomInfo({
-          roomCode: "44FZU9BV",
-          jobTitle: "Senior Backend Developer - Fintech",
-          companyName: "MENA Bank",
-          instructions:
-            "Welcome to your technical interview for Banking position. Please speak clearly and answer the questions to the best of your ability.",
-          maxDuration: 1800,
-          status: "IN_PROGRESS",
-          interviewType: "TECHNICAL",
-        });
-        setInterviewStatus("join_form");
-        setError(
-          "Demo mode: Backend not available. You can still test the interface."
-        );
-      } else {
-        setError(
-          err instanceof Error ? err.message : "Failed to load interview room"
-        );
-        setInterviewStatus("error");
-      }
+      setError(
+        err instanceof Error ? err.message : "Failed to load interview room"
+      );
+      setInterviewStatus("error");
     } finally {
       setLoading(false);
     }
-  }, [roomCode]);
+  }, [phoneNumber, jobId]);
 
   // Load room info on mount
   useEffect(() => {
-    if (!roomCode) {
-      setError("No room code provided");
+    if (!phoneNumber || !jobId) {
+      setError("Missing phone number or job ID in URL");
       setInterviewStatus("error");
       setLoading(false);
       return;
     }
 
-    if (!publicInterviewService.validateRoomCode(roomCode)) {
-      setError("Invalid room code format");
-      setInterviewStatus("error");
-      setLoading(false);
-      return;
-    }
+    // Pre-fill phone number from URL
+    setCandidateDetails((prev) => ({
+      ...prev,
+      phoneNumber: phoneNumber,
+    }));
 
     loadRoomInfo();
-  }, [roomCode, loadRoomInfo]);
+  }, [phoneNumber, jobId, loadRoomInfo]);
 
   // Handle candidate join form submission
   const handleJoinInterview = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!roomCode || !roomInfo) return;
+    if (!phoneNumber || !jobId) return;
 
     // Validate form
-    if (
-      !candidateDetails.firstName.trim() ||
-      !candidateDetails.lastName.trim() ||
-      !candidateDetails.phoneNumber.trim()
-    ) {
-      setError("Please fill in all fields");
-      return;
-    }
-
-    if (
-      !publicInterviewService.validatePhoneNumber(candidateDetails.phoneNumber)
-    ) {
-      setError("Please enter a valid phone number");
+    if (!candidateDetails.phoneNumber.trim()) {
+      setError("Phone number is required");
       return;
     }
 
@@ -168,60 +120,56 @@ function RoomContent() {
       setSubmitting(true);
       setError(null);
 
+      console.log("=== STARTING INTERVIEW JOIN PROCESS ===");
+      console.log("Job ID from URL:", jobId);
+      console.log("Phone Number from URL:", candidateDetails.phoneNumber);
+
       // Format phone number
       const formattedPhone = publicInterviewService.formatPhoneNumber(
         candidateDetails.phoneNumber
       );
+      console.log("Formatted phone number:", formattedPhone);
 
-      const joinDetails: CandidateJoinRequest = {
-        ...candidateDetails,
+      // Single API call - create room and get access
+      console.log("Calling createAndJoinRoom API...");
+      const response = await publicInterviewService.createAndJoinRoom({
+        jobPostId: jobId, // Use jobId from URL parameter
         phoneNumber: formattedPhone,
-      };
+      });
 
-      try {
-        const response = await publicInterviewService.joinInterview(
-          roomCode,
-          joinDetails
-        );
+      console.log("=== BACKEND RESPONSE RECEIVED ===");
+      console.log("Response:", response);
+      console.log("Backend says room name:", response.roomName);
+      console.log("Backend says server URL (old):", response.serverUrl);
+      console.log("Backend says WS URL (new):", response.wsUrl);
+      console.log("Backend says identity:", response.identity);
+      console.log("Backend says status:", response.status);
+      console.log(
+        "Backend says token:",
+        response.token ? "present" : "missing"
+      );
+      console.log(
+        "Backend says participantToken:",
+        response.participantToken ? "present" : "missing"
+      );
+      console.log("===================================");
 
-        // If we get a response with token and serverUrl, it means joining was successful
-        if (response.token && response.serverUrl) {
-          setJoinResponse(response);
-          setCandidateJoined(true);
-          setInterviewStatus("ready");
-        } else {
-          setError("Failed to join interview - invalid response");
-        }
-      } catch (apiError) {
-        // If backend is not available and this is the demo room, create a mock response
-        if (roomCode === "44FZU9BV") {
-          console.log("Backend not available, creating demo join response");
-          const mockResponse: InterviewJoinResponse = {
-            token: "demo-token-123",
-            serverUrl: "wss://demo-server.com",
-            participantToken: "demo-participant-token-123",
-            roomName: "interview_44FZU9BV",
-            identity: `candidate_${Date.now()}`,
-            roomCode: "44FZU9BV",
-            participantName: `${candidateDetails.firstName} ${candidateDetails.lastName}`,
-            jobTitle: "Senior Backend Developer - Fintech",
-            instructions:
-              "Welcome to your technical interview for Banking position. Please speak clearly and answer the questions to the best of your ability.",
-            maxDuration: 1800,
-          };
+      // Update room info from response
+      setRoomInfo({
+        roomCode: response.roomCode,
+        jobTitle: response.jobTitle,
+        companyName: response.companyName,
+        instructions: response.instructions,
+        maxDuration: response.maxDuration,
+        status: "IN_PROGRESS",
+        interviewType: "TECHNICAL",
+      });
 
-          setJoinResponse(mockResponse);
-          setCandidateJoined(true);
-          setInterviewStatus("ready");
-          setError(
-            "Demo mode: Backend not available. Interview interface will be shown without video connection."
-          );
-        } else {
-          throw apiError;
-        }
-      }
+      setJoinResponse(response);
+      setCandidateJoined(true);
+      setInterviewStatus("ready");
     } catch (err) {
-      console.error("Error joining interview:", err);
+      console.error("Error creating and joining interview:", err);
       setError(err instanceof Error ? err.message : "Failed to join interview");
     } finally {
       setSubmitting(false);
@@ -259,28 +207,207 @@ function RoomContent() {
       return;
     }
 
+    console.log("=== BACKEND RESPONSE DEBUG ===");
+    console.log("Full joinResponse:", joinResponse);
+    console.log("Room Name:", joinResponse.roomName);
+    console.log("Server URL (old format):", joinResponse.serverUrl);
+    console.log("WS URL (new format):", joinResponse.wsUrl);
+    console.log(
+      "Final server URL:",
+      joinResponse.wsUrl || joinResponse.serverUrl
+    );
+    console.log("Identity:", joinResponse.identity);
+    console.log("Participant Token:", joinResponse.participantToken);
+    console.log("Token:", joinResponse.token);
+    console.log(
+      "Final token:",
+      joinResponse.participantToken || joinResponse.token
+    );
+    console.log(
+      "Token === ParticipantToken:",
+      joinResponse.token === joinResponse.participantToken
+    );
+    console.log("===============================");
+
     setInterviewStatus("connecting");
     try {
-      await room.connect(
-        joinResponse.serverUrl,
-        joinResponse.participantToken // Use the participant token for LiveKit connection
-      );
-      await room.localParticipant.setMicrophoneEnabled(true);
-      setIsCallActive(true);
+      // Add event listeners before connecting
+      console.log("Setting up room event listeners...");
 
+      room.on("participantConnected", (participant) => {
+        console.log(
+          "🔗 Participant connected:",
+          participant.identity,
+          participant.name
+        );
+        console.log("Participant metadata:", participant.metadata);
+        if (participant.metadata) {
+          try {
+            const parsedMetadata = JSON.parse(participant.metadata);
+            console.log("Parsed participant metadata:", parsedMetadata);
+          } catch (e) {
+            console.log(
+              "Participant metadata (raw string):",
+              participant.metadata
+            );
+          }
+        }
+        console.log("Is agent:", participant.isAgent);
+
+        // Check if this is an AI agent
+        if (participant.isAgent) {
+          console.log("✅ AI Agent joined the room!");
+          setInterviewStatus("active");
+        }
+      });
+
+      room.on("participantDisconnected", (participant) => {
+        console.log("🚪 Participant disconnected:", participant.identity);
+      });
+
+      room.on("roomMetadataChanged", (metadata) => {
+        console.log("📝 Room metadata changed:", metadata);
+        try {
+          const parsedMetadata = JSON.parse(metadata || "{}");
+          console.log("📝 Parsed room metadata:", parsedMetadata);
+        } catch (e) {
+          console.log("📝 Room metadata (raw string):", metadata);
+        }
+      });
+
+      room.on("participantMetadataChanged", (metadata, participant) => {
+        console.log(
+          "👤 Participant metadata changed:",
+          participant?.identity,
+          metadata
+        );
+        try {
+          const parsedMetadata = JSON.parse(metadata || "{}");
+          console.log("👤 Parsed participant metadata:", parsedMetadata);
+        } catch (e) {
+          console.log("👤 Participant metadata (raw string):", metadata);
+        }
+      });
+
+      room.on("disconnected", (reason) => {
+        console.log("❌ Room disconnected:", reason);
+      });
+
+      // Connect to the room
+      console.log("Connecting to LiveKit room...");
+
+      // Handle both old and new response formats
+      const serverUrl = joinResponse.wsUrl || joinResponse.serverUrl;
+      const token = joinResponse.participantToken || joinResponse.token;
+
+      console.log("Using server:", serverUrl);
+      console.log("Using room:", joinResponse.roomName);
+      console.log("Using identity:", joinResponse.identity);
+      console.log(
+        "Using token type:",
+        joinResponse.participantToken ? "participantToken" : "token"
+      );
+
+      await room.connect(serverUrl, token);
+
+      console.log("✅ Successfully connected to room!");
+      console.log("Room name:", room.name);
+      console.log("Room state:", room.state);
+      console.log("My participant identity:", room.localParticipant.identity);
+      console.log("My participant name:", room.localParticipant.name);
+      console.log("My participant metadata:", room.localParticipant.metadata);
+
+      // Log initial room metadata
+      console.log("=== INITIAL ROOM METADATA ===");
+      console.log("Room metadata:", room.metadata);
+      if (room.metadata) {
+        try {
+          const parsedRoomMetadata = JSON.parse(room.metadata);
+          console.log("Parsed room metadata:", parsedRoomMetadata);
+        } catch (e) {
+          console.log("Room metadata (raw string):", room.metadata);
+        }
+      } else {
+        console.log("No initial room metadata found");
+      }
+      console.log("============================");
+
+      // Log all current participants
+      console.log("=== CURRENT ROOM PARTICIPANTS ===");
+      console.log("Total participants:", room.numParticipants);
+      room.remoteParticipants.forEach((participant, key) => {
+        console.log(`Participant ${key}:`, {
+          identity: participant.identity,
+          name: participant.name,
+          metadata: participant.metadata,
+          isAgent: participant.isAgent,
+          isSpeaking: participant.isSpeaking,
+          connectionQuality: participant.connectionQuality,
+        });
+
+        // Parse and log metadata if it exists
+        if (participant.metadata) {
+          try {
+            const parsedMetadata = JSON.parse(participant.metadata);
+            console.log(`Participant ${key} parsed metadata:`, parsedMetadata);
+          } catch (e) {
+            console.log(
+              `Participant ${key} metadata (raw):`,
+              participant.metadata
+            );
+          }
+        }
+      });
+      console.log("================================");
+
+      // Enable microphone
+      console.log("Enabling microphone...");
+      await room.localParticipant.setMicrophoneEnabled(true);
+      console.log("Microphone enabled");
+
+      setIsCallActive(true);
       setInterviewStatus("waiting");
+
+      // Check for AI agent after a brief delay
       setTimeout(() => {
-        setInterviewStatus("active");
+        const agentParticipants = Array.from(
+          room.remoteParticipants.values()
+        ).filter((p) => p.isAgent);
+        console.log("AI Agent participants found:", agentParticipants.length);
+        agentParticipants.forEach((agent) => {
+          console.log("Agent details:", {
+            identity: agent.identity,
+            name: agent.name,
+            metadata: agent.metadata,
+          });
+        });
+
+        if (agentParticipants.length > 0) {
+          console.log("✅ AI Agent found - interview ready!");
+          setInterviewStatus("active");
+        } else {
+          console.log("⚠️ No AI Agent found yet - still waiting...");
+          console.log(
+            "Expected room name from backend:",
+            joinResponse.roomName
+          );
+          console.log("Actual connected room name:", room.name);
+          console.log("Room names match:", joinResponse.roomName === room.name);
+        }
       }, 3000);
     } catch (err) {
-      console.error(err);
-      setError("Failed to connect to interview");
+      console.error("Connection error:", err);
+      setError(
+        `Failed to connect to interview: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
       setInterviewStatus("ready");
     }
   };
 
   const endInterview = async () => {
-    if (!roomCode || !joinResponse) return;
+    if (!jobId || !joinResponse) return;
 
     try {
       // Disconnect from the room first
@@ -289,7 +416,7 @@ function RoomContent() {
       }
 
       // Notify backend
-      await publicInterviewService.endInterview(roomCode, {
+      await publicInterviewService.endInterview(jobId, {
         sessionId: joinResponse.roomName, // Use roomName as session identifier
         candidateId: joinResponse.identity, // Use the identity from the response
       });
@@ -321,7 +448,7 @@ function RoomContent() {
   }
 
   // Show error state
-  if (interviewStatus === "error" || (!roomCode && !loading)) {
+  if (interviewStatus === "error" || ((!phoneNumber || !jobId) && !loading)) {
     return (
       <div className="h-screen bg-slate-900 text-white flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -337,20 +464,29 @@ function RoomContent() {
   }
 
   // Show join form
-  if (interviewStatus === "join_form" && roomInfo && !candidateJoined) {
+  if (interviewStatus === "join_form" && !candidateJoined) {
     return (
       <div className="h-screen bg-slate-900 text-white flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-slate-800 rounded-lg shadow-xl p-6">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold mb-2">Join Interview</h1>
-            <div className="space-y-1 text-gray-300">
-              <p className="font-medium">{roomInfo.jobTitle}</p>
-              <p className="text-sm">{roomInfo.companyName}</p>
-              <p className="text-xs text-gray-400">
-                {roomInfo.interviewType} • ~
-                {Math.floor(roomInfo.maxDuration / 60)} minutes
-              </p>
-            </div>
+            {roomInfo && (
+              <div className="space-y-1 text-gray-300">
+                <p className="font-medium">{roomInfo.jobTitle}</p>
+                <p className="text-sm">{roomInfo.companyName}</p>
+                <p className="text-xs text-gray-400">
+                  {roomInfo.interviewType} • ~
+                  {Math.floor(roomInfo.maxDuration / 60)} minutes
+                </p>
+              </div>
+            )}
+            {!roomInfo && (
+              <div className="space-y-1 text-gray-300">
+                <p className="text-sm">
+                  Please enter your details to join the interview
+                </p>
+              </div>
+            )}
           </div>
 
           {error && (
@@ -359,74 +495,7 @@ function RoomContent() {
             </div>
           )}
 
-          {/* Demo Fill Button */}
-          {roomCode === "44FZU9BV" && (
-            <div className="mb-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setCandidateDetails({
-                    phoneNumber: "+962798765432",
-                    firstName: "New",
-                    lastName: "Employee",
-                  });
-                }}
-                className="w-full text-sm bg-blue-600/20 border border-blue-500/50 text-blue-300 py-2 px-3 rounded-lg hover:bg-blue-600/30 transition-colors"
-              >
-                🚀 Quick Fill Demo Data
-              </button>
-            </div>
-          )}
-
           <form onSubmit={handleJoinInterview} className="space-y-4">
-            <div>
-              <label
-                htmlFor="firstName"
-                className="block text-sm font-medium mb-1"
-              >
-                First Name
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                value={candidateDetails.firstName}
-                onChange={(e) =>
-                  setCandidateDetails((prev) => ({
-                    ...prev,
-                    firstName: e.target.value,
-                  }))
-                }
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your first name"
-                required
-                disabled={submitting}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="lastName"
-                className="block text-sm font-medium mb-1"
-              >
-                Last Name
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                value={candidateDetails.lastName}
-                onChange={(e) =>
-                  setCandidateDetails((prev) => ({
-                    ...prev,
-                    lastName: e.target.value,
-                  }))
-                }
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your last name"
-                required
-                disabled={submitting}
-              />
-            </div>
-
             <div>
               <label htmlFor="phone" className="block text-sm font-medium mb-1">
                 Phone Number
@@ -435,26 +504,19 @@ function RoomContent() {
                 type="tel"
                 id="phone"
                 value={candidateDetails.phoneNumber}
-                onChange={(e) =>
-                  setCandidateDetails((prev) => ({
-                    ...prev,
-                    phoneNumber: e.target.value,
-                  }))
-                }
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                readOnly
+                className="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-gray-300 cursor-not-allowed"
                 placeholder="e.g., +971501234567"
-                required
-                disabled={submitting}
               />
               <p className="text-xs text-gray-400 mt-1">
-                Include country code (e.g., +971 for UAE)
+                Your phone number from the invitation link
               </p>
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors font-semibold"
             >
               {submitting ? "Joining..." : "Join Interview"}
             </button>

@@ -16,17 +16,31 @@ export interface CandidateJoinRequest {
   lastName: string;
 }
 
+export interface CreateAndJoinRequest {
+  jobPostId: string;
+  phoneNumber: string;
+  firstName?: string;
+  lastName?: string;
+}
+
 export interface InterviewJoinResponse {
   token: string;
-  serverUrl: string;
-  participantToken: string;
+  wsUrl: string; // Updated to match backend documentation
+  participantToken?: string; // Keep for backward compatibility
+  serverUrl?: string; // Keep for backward compatibility 
   roomName: string;
   identity: string;
   roomCode: string;
   participantName: string;
   jobTitle: string;
-  instructions: string;
+  companyName: string;
+  instructions?: string;
   maxDuration: number;
+  interviewId: string;
+  candidateId: string;
+  applicationId: string;
+  jobPostId: string;
+  status: string;
 }
 
 export interface InterviewEndRequest {
@@ -101,11 +115,58 @@ export class PublicInterviewService {
   }
 
   /**
+   * Create and join a room with a single API call
+   */
+  async createAndJoinRoom(request: CreateAndJoinRequest): Promise<InterviewJoinResponse> {
+    try {
+      console.log("=== API REQUEST DEBUG ===");
+      console.log("Request URL:", `${this.baseUrl}/api/interview/create`);
+      console.log("Request method: POST");
+      console.log("Request headers:", { 'Content-Type': 'application/json' });
+      console.log("Request payload:", request);
+      console.log("Request payload stringified:", JSON.stringify(request));
+      console.log("jobPostId value:", request.jobPostId);
+      console.log("phoneNumber value:", request.phoneNumber);
+      console.log("========================");
+
+      const response = await fetch(`${this.baseUrl}/api/interview/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      console.log("=== API RESPONSE DEBUG ===");
+      console.log("Response status:", response.status);
+      console.log("Response statusText:", response.statusText);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+      console.log("==========================");
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API Error response:", errorData);
+        throw new Error(errorData.message || `Failed to create and join room: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("=== API SUCCESS RESPONSE ===");
+      console.log("Response data:", responseData);
+      console.log("============================");
+
+      return responseData;
+    } catch (error) {
+      console.error('Error creating and joining room:', error);
+      throw error;
+    }
+  }
+
+  /**
    * End an interview session
    */
-  async endInterview(roomCode: string, endDetails: InterviewEndRequest): Promise<boolean> {
+  async endInterview(jobId: string, endDetails: InterviewEndRequest): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/public/interview/room/${roomCode}/end`, {
+      const response = await fetch(`${this.baseUrl}/api/public/interview/job/${jobId}/end`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,14 +194,6 @@ export class PublicInterviewService {
     return roomCodeRegex.test(roomCode);
   }
 
-  /**
-   * Validate phone number format
-   */
-  validatePhoneNumber(phone: string): boolean {
-    // Jordan phone validation - must be +962XXXXXXXXX format
-    const jordanPhoneRegex = /^\+962[7-9]\d{8}$/;
-    return jordanPhoneRegex.test(phone.replace(/\s/g, ''));
-  }
 
   /**
    * Format phone number for display

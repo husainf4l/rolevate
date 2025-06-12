@@ -17,6 +17,11 @@ import {
   type N8NJobData,
   type N8NProcessRequest,
 } from "../../../../services/n8n.service";
+import {
+  createJob,
+  CreateJobData,
+  handleApiError,
+} from "@/services/jobs.service";
 
 type JobType = "full-time" | "part-time" | "contract";
 
@@ -60,6 +65,9 @@ const NewJobPost = () => {
 
   const [currentMessage, setCurrentMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [apiLoading, setApiLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [createdJobId, setCreatedJobId] = useState<string | null>(null);
 
   const [chatState, setChatState] = useState<ChatState>({
     currentStep: "greeting",
@@ -84,6 +92,61 @@ const NewJobPost = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatState.messages]);
+
+  // Convert N8N job data to CreateJobData format
+  const convertToCreateJobData = (
+    n8nData: Partial<N8NJobData>
+  ): CreateJobData => {
+    // Map job type to work type (N8N uses different format)
+    let workType: "ONSITE" | "REMOTE" | "HYBRID" = "ONSITE";
+    if (n8nData.location?.toLowerCase().includes("remote")) {
+      workType = "REMOTE";
+    } else if (n8nData.location?.toLowerCase().includes("hybrid")) {
+      workType = "HYBRID";
+    }
+
+    return {
+      title: n8nData.title || "",
+      department: n8nData.department || "",
+      description: n8nData.description || "",
+      requirements: n8nData.requirements?.join("\n") || "",
+      responsibilities: "", // N8N data doesn't include this, could be extracted later
+      benefits: n8nData.benefits?.join("\n") || "",
+      skills: n8nData.requirements || [], // Using requirements as skills for now
+      experienceLevel: "MID_LEVEL", // Default, could be extracted from description
+      location: n8nData.location || "",
+      workType,
+      salaryMin: undefined,
+      salaryMax: undefined,
+      currency: "USD",
+      enableAiInterview: true, // Default to true for all conversational jobs
+      interviewDuration: 30,
+      isActive: true,
+      isFeatured: false,
+    };
+  };
+
+  // Create job via API when conversation is completed
+  const createJobFromConversation = async (jobData: Partial<N8NJobData>) => {
+    setApiLoading(true);
+    setApiError(null);
+
+    try {
+      const createJobData = convertToCreateJobData(jobData);
+      const response = await createJob(createJobData);
+
+      console.log("Job created successfully:", response);
+      setCreatedJobId(response.job.id);
+
+      return response.job;
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setApiError(errorMessage);
+      throw err;
+    } finally {
+      setApiLoading(false);
+    }
+  };
 
   // Process user message through n8n
   const processUserMessage = async (message: string) => {
@@ -140,22 +203,42 @@ const NewJobPost = () => {
           confidence,
         }));
 
-        // If completed, show success message after a delay
+        // If completed, show success message and create the job
         if (nextStep === "completed") {
-          setTimeout(() => {
-            const completionMessage: ChatMessage = {
-              id: (Date.now() + 1).toString(),
-              type: "assistant",
-              content:
-                "🎉 Perfect! I've successfully collected all the information and your job post has been created automatically. You can now view it in your job posts dashboard or create another one.",
-              timestamp: new Date(),
-            };
+          // First, create the job via API
+          try {
+            const createdJob = await createJobFromConversation(extractedData);
 
-            setChatState((prev) => ({
-              ...prev,
-              messages: [...prev.messages, completionMessage],
-            }));
-          }, 2000);
+            setTimeout(() => {
+              const completionMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: "assistant",
+                content: `🎉 Perfect! I've successfully created your job post "${createdJob.title}". The job has been saved and is now active. You can view it in your job posts dashboard or create another one.`,
+                timestamp: new Date(),
+              };
+
+              setChatState((prev) => ({
+                ...prev,
+                messages: [...prev.messages, completionMessage],
+              }));
+            }, 1000);
+          } catch (error) {
+            // Show error message if job creation fails
+            setTimeout(() => {
+              const errorMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: "assistant",
+                content: `❌ I collected all the information successfully, but there was an error creating the job post: ${apiError}. Please try again or contact support.`,
+                timestamp: new Date(),
+              };
+
+              setChatState((prev) => ({
+                ...prev,
+                messages: [...prev.messages, errorMessage],
+                currentStep: "greeting", // Reset to allow retry
+              }));
+            }, 1000);
+          }
         }
       } else {
         throw new Error(response.error || "Failed to process message");
@@ -254,6 +337,9 @@ const NewJobPost = () => {
       confidence: 0,
     });
     setCurrentMessage("");
+    setApiError(null);
+    setCreatedJobId(null);
+    setApiLoading(false);
   };
 
   const getStepProgress = () => {
@@ -436,6 +522,16 @@ const NewJobPost = () => {
                     >
                       View Job Posts
                     </button>
+                    {createdJobId && (
+                      <button
+                        onClick={() =>
+                          router.push(`/dashboard/jobpost/${createdJobId}`)
+                        }
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                      >
+                        View Created Job
+                      </button>
+                    )}
                     <button
                       onClick={handleNewJobPost}
                       className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"

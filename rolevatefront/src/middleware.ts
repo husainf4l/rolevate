@@ -3,11 +3,14 @@ import type { NextRequest } from 'next/server';
 
 const AUTH_COOKIE_NAME = 'token'; 
 
-const PUBLIC_ROUTES = ['/login', '/signup', '/', '/about', '/contact', '/interview', '/room', '/room2', '/schedule-meeting', '/try-it-now']; 
+const PUBLIC_ROUTES = ['/login', '/signup', '/', '/about', '/contact', '/interview', '/room', '/room2', '/schedule-meeting', '/try-it-now', '/jobs']; 
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublicPage = PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/_next') || pathname.startsWith('/api');
+  const isPublicPage = PUBLIC_ROUTES.includes(pathname) || 
+                      pathname.startsWith('/_next') || 
+                      pathname.startsWith('/api') ||
+                      pathname.startsWith('/jobs/'); // Allow dynamic job routes
   const isProtectedRoute = pathname.startsWith('/dashboard');
   const isAuthenticated = request.cookies.has(AUTH_COOKIE_NAME);
 

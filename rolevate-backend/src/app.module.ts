@@ -4,23 +4,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { LiveKitModule } from './livekit/livekit.module';
-import { PublicInterviewModule } from './public-interview/public-interview.module';
-import { JobsModule } from './jobs/jobs.module';
+import { InterviewModule } from './interview/interview.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    PrismaModule, 
-    AuthModule, 
-    UsersModule,
-    LiveKitModule,
-    PublicInterviewModule,
-    JobsModule,
+    PrismaModule,
+    InterviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],

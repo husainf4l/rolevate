@@ -11,12 +11,24 @@ export class AppController {
   }
 
   @Get('health')
-  getHealth(): any {
-    return this.appService.getHealth();
+  getHealth() {
+    return { 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      service: 'rolevate-interview-api'
+    };
   }
 
   @Get('info')
-  getInfo(): any {
-    return this.appService.getInfo();
+  getInfo() {
+    return {
+      name: 'Rolevate Interview API',
+      version: '1.0.0',
+      description: 'Simplified interview management system',
+      endpoints: {
+        'POST /api/interview/create': 'Create interview session and get LiveKit token'
+      },
+      testPage: '/public/interview-test.html'
+    };
   }
 }

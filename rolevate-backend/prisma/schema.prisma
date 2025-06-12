@@ -31,15 +31,12 @@ model User {
   isActive           Boolean   @default(true)
   twoFactorSecret    String?
   isTwoFactorEnabled Boolean   @default(false)
-  role               UserRole  @default(CANDIDATE)
+  role               UserRole  @default(RECRUITER)
   companyId          String?
 
   // Relations
   company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
   jobPosts      JobPost[]      @relation("JobPostCreator")
-  applications  Application[]  @relation("CandidateApplications")
-  interviews    Interview[]    @relation("InterviewCandidate")
-  cvAnalyses    CvAnalysis[]   @relation("CvAnalysisCandidate")
   notifications Notification[]
 
   @@map("users")
@@ -95,6 +92,8 @@ model JobPost {
   enableAiInterview   Boolean             @default(true)
   interviewLanguages  InterviewLanguage[] @default([ENGLISH])
   interviewDuration   Int                 @default(30) // minutes
+  aiPrompt            String? // Custom AI interviewer prompt/instructions
+  aiInstructions      String? // Additional instructions for AI interview
   technicalQuestions  Json? // Store custom questions
   behavioralQuestions Json?
 
@@ -103,9 +102,10 @@ model JobPost {
   createdById String
 
   // Relations
-  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdBy    User          @relation("JobPostCreator", fields: [createdById], references: [id])
-  applications Application[]
+  company          Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy        User               @relation("JobPostCreator", fields: [createdById], references: [id])
+  applications     Application[]
+  InterviewHistory InterviewHistory[]
 
   @@map("job_posts")
 }
@@ -142,7 +142,7 @@ model Application {
 
   // Relations
   jobPost       JobPost        @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
-  candidate     User           @relation("CandidateApplications", fields: [candidateId], references: [id])
+  candidate     Candidate      @relation(fields: [candidateId], references: [id])
   cvAnalysis    CvAnalysis?
   interviews    Interview[]
   fitScore      FitScore?
@@ -189,7 +189,7 @@ model CvAnalysis {
 
   // Relations
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  candidate   User        @relation("CvAnalysisCandidate", fields: [candidateId], references: [id])
+  candidate   Candidate   @relation(fields: [candidateId], references: [id])
 
   @@map("cv_analyses")
 }
@@ -253,7 +253,7 @@ model Interview {
 
   // Relations
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  candidate   User        @relation("InterviewCandidate", fields: [candidateId], references: [id])
+  candidate   Candidate   @relation(fields: [candidateId], references: [id])
 
   @@map("interviews")
 }
@@ -314,13 +314,47 @@ model Notification {
   @@map("notifications")
 }
 
+model Candidate {
+  id                 String             @id @default(uuid())
+  phoneNumber        String             @unique
+  email              String?
+  name               String?
+  firstName          String?
+  lastName           String?
+  whatsappNumber     String?
+  profileImage       String?
+  bio                String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  isActive           Boolean            @default(true)
+  applications       Application[]
+  interviews         Interview[]
+  cvAnalyses         CvAnalysis[]
+  interviewHistories InterviewHistory[]
+
+  @@map("candidates")
+}
+
+model InterviewHistory {
+  id           Int        @id @default(autoincrement())
+  candidate_id String?    @db.VarChar(64)
+  ai           String?    @db.Text
+  user         String?    @db.Text
+  language     String?    @db.VarChar(8)
+  created_at   DateTime   @default(now()) @db.Timestamp
+  job          JobPost?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId        String?    @db.VarChar(64)
+  candidate    Candidate? @relation(fields: [candidate_id], references: [id], onDelete: SetNull)
+
+  @@map("interview_history")
+}
+
 // Enums
 enum UserRole {
   SUPER_ADMIN
   COMPANY_ADMIN
   HR_MANAGER
   RECRUITER
-  CANDIDATE
 }
 
 enum CompanySize {

@@ -28,7 +28,7 @@ export default function Navbar() {
           {/* CTA Button */}
           <div>
             <Link
-              href="/try-it-now"
+              href="/jobs"
               className="group bg-teal-600 hover:bg-teal-500 text-white font-medium px-5 py-2 rounded-full text-sm transition-all duration-200 ease-out transform hover:scale-105 active:scale-95"
             >
               Try Demo

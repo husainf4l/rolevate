@@ -1,165 +1,198 @@
 from dotenv import load_dotenv
 from livekit import agents
 from livekit.agents import Agent, AgentSession, RoomInputOptions, JobContext
-from livekit.plugins import openai, google
+from livekit.plugins import openai
 from livekit.plugins.noise_cancellation import BVC
 from livekit.plugins.silero import VAD
-from livekit.plugins.elevenlabs import TTS as ElevenLabsTTS
 from livekit.plugins.google import STT as GoogleSTT
-from db_logic import save_interview_history, create_history_table
+from db_logic import save_interview_history, get_job_ai_config
 import asyncio
 import os
-
+import json
 
 load_dotenv()
 
-def read_file_content(path):
-    with open(path, 'r', encoding='utf-8') as f:
-        return f.read()
-
 class Assistant(Agent):
-    def __init__(self):
-        instructions = read_file_content('agent_instructions.txt')
+    def __init__(self, candidate_id=None, job_id=None, instructions=None):
+        if not instructions:
+            raise ValueError("❌ No AI instructions provided - cannot start interview")
+        
         super().__init__(instructions=instructions)
+        self.candidate_id = candidate_id
+        self.job_id = job_id
+        self.has_greeted = False
+        print(f"[INFO] ✅ Assistant initialized with instructions ({len(instructions)} chars)")
 
-    async def on_message(self, message, session, participant):
-        print("[DEBUG] on_message called")
-        print(f"[DEBUG] message: {message}")
-        print(f"[DEBUG] message role: {getattr(message, 'role', None)}")
-        print(f"[DEBUG] session.history: {session.history}")
-        # Only process and respond to user messages
-        if hasattr(message, 'role') and message.role == 'user':
-            if session.history and len(session.history) >= 2:
-                last_agent = session.history[-2]
-                last_user = session.history[-1]
-                print(f"[DEBUG] last_agent: {last_agent}")
-                print(f"[DEBUG] last_user: {last_user}")
-                if last_agent.get('role') == 'assistant' and last_user.get('role') == 'user':
-                    user_id = str(participant.identity) if participant and hasattr(participant, 'identity') else None
-                    question = last_agent.get('content')
-                    answer = last_user.get('content')
-                    language = getattr(session.stt, 'language', None)
-                    print(f"[DEBUG] Attempting to save to DB: user_id={user_id}, question={question}, answer={answer}, language={language}")
-                    try:
-                        save_interview_history(user_id, question, answer, language)
-                        print("[DEBUG] Saved to DB successfully.")
-                    except Exception as e:
-                        print(f"[ERROR] Failed to save to DB: {e}")
-            else:
-                print("[DEBUG] session.history does not have enough entries or is missing.")
-            # Respond immediately to user
-            return await super().on_message(message, session, participant)
-        else:
-            print("[DEBUG] Ignoring non-user message in on_message.")
-            return None
-
-    async def on_user_message(self, message, session, participant):
-        print("[DEBUG] on_user_message called")
-        print(f"[DEBUG] message: {message}")
-        print(f"[DEBUG] session.history: {session.history}")
-        # Try to get the last agent message as the question
-        if session.history and len(session.history) >= 1:
-            last_agent = session.history[-1] if session.history[-1].get('role') == 'assistant' else None
-            if last_agent:
-                user_id = str(participant.identity) if participant and hasattr(participant, 'identity') else None
-                question = last_agent.get('content')
-                answer = message.get('content') if isinstance(message, dict) else str(message)
-                language = getattr(session.stt, 'language', None)
-                print(f"[DEBUG] Attempting to save to DB (on_user_message): user_id={user_id}, question={question}, answer={answer}, language={language}")
-                try:
-                    save_interview_history(user_id, question, answer, language)
-                    print("[DEBUG] Saved to DB successfully (on_user_message).")
-                except Exception as e:
-                    print(f"[ERROR] Failed to save to DB (on_user_message): {e}")
-        else:
-            print("[DEBUG] session.history does not have enough entries or is missing (on_user_message).")
-        # Call super if needed
-        if hasattr(super(), 'on_user_message'):
-            return await super().on_user_message(message, session, participant)
-        return None
-
-async def poll_and_save_history(session):
-    print("[DEBUG] Starting poll_and_save_history task")
-    saved_pairs = set()
-    while True:
-        history = getattr(session, 'history', None)
-        if history is not None and hasattr(history, 'items'):
-            messages = history.items  # FIX: items is a list, not a method
-            print(f"[DEBUG] session.history.items: {messages}")
-            # Look for Q&A pairs
-            for i in range(1, len(messages)):
-                prev_msg = messages[i-1]
-                curr_msg = messages[i]
-                # Fix: ChatMessage content is a list, get first element or join if needed
-                prev_content = prev_msg.content[0] if prev_msg.content else ''
-                curr_content = curr_msg.content[0] if curr_msg.content else ''
-                if prev_msg.role == 'assistant' and curr_msg.role == 'user':
-                    pair_key = (prev_content, curr_content)
-                    if pair_key not in saved_pairs:
-                        user_id = None  # You can improve this if you have participant info
-                        question = prev_content
-                        answer = curr_content
-                        language = getattr(session.stt, 'language', None)
-                        print(f"[DEBUG] Poll: Saving Q&A to DB: {question} | {answer}")
-                        try:
-                            save_interview_history(user_id, question, answer, language)
-                            saved_pairs.add(pair_key)
-                            print("[DEBUG] Poll: Saved to DB successfully.")
-                        except Exception as e:
-                            print(f"[ERROR] Poll: Failed to save to DB: {e}")
-        else:
-            print("[DEBUG] session.history has no items attribute or is None.")
-        await asyncio.sleep(2)
+    def _extract_greeting(self):
+        """Extract greeting from instructions - simple approach"""
+        instructions = self.instructions
+        
+        # Look for greeting after "Start the interview with:"
+        if 'Start the interview with:' in instructions:
+            start_idx = instructions.find('Start the interview with:') + len('Start the interview with:')
+            text_after = instructions[start_idx:].strip()
+            
+            # Remove quotes and find end of greeting
+            text_after = text_after.strip('\'"')
+            end_markers = ['" You are', "' You are", '\n\nYou are', '. You are']
+            
+            greeting = text_after
+            for marker in end_markers:
+                if marker in greeting:
+                    greeting = greeting.split(marker)[0]
+                    break
+            
+            greeting = greeting.replace('\\n', '. ').strip().strip('\'"')
+            
+            if len(greeting) > 20 and len(greeting) < 300:
+                print(f"[DEBUG] ✅ Extracted greeting from instructions")
+                return greeting
+        
+        # Fallback greeting
+        print(f"[DEBUG] Using fallback greeting")
+        return "Hello and welcome to your interview. I'm here to conduct your interview today. Let's begin."
 
 async def entrypoint(ctx: JobContext):
-    create_history_table()
-    # In Docker container, the file is mounted at /app/widd-459718-7e011203dde7.json
-    cred_path = "/app/widd-459718-7e011203dde7.json" 
+    """Main entry point - simplified approach following LiveKit best practices"""
+    print(f"[INFO] 🚀 Starting interview session...")
+    
+    # Extract metadata from room
+    metadata = {}
+    if hasattr(ctx, 'job') and ctx.job and hasattr(ctx.job, 'room'):
+        try:
+            metadata = json.loads(ctx.job.room.metadata) if ctx.job.room.metadata else {}
+        except Exception as e:
+            print(f"[ERROR] Failed to parse metadata: {e}")
+    
+    candidate_id = metadata.get('candidate_id')
+    job_id = metadata.get('job_id')
+    candidate_name = metadata.get('candidate_name', 'Unknown')
+    job_title = metadata.get('job_title', 'Unknown Position')
+    
+    print(f"[INFO] Interview: {candidate_name} for {job_title}")
+    print(f"[INFO] IDs - candidate: {candidate_id}, job: {job_id}")
+    
+    # Get AI configuration from database
+    print(f"[INFO] Fetching AI config for job_id: {job_id}")
+    job_ai_config = get_job_ai_config(job_id)
+    
+    # Check if we have valid AI instructions
+    if not job_ai_config or (not job_ai_config.get('prompt') and not job_ai_config.get('instructions')):
+        print(f"[ERROR] ❌ No AI instructions found for job_id: {job_id}")
+        print(f"[ERROR] 🛑 Cannot start interview without AI configuration")
+        return  # Stop the interview
+    
+    # Combine AI prompt and instructions
+    ai_instructions = ""
+    if job_ai_config.get('prompt') and job_ai_config.get('instructions'):
+        ai_instructions = f"{job_ai_config['prompt']}\n\n{job_ai_config['instructions']}"
+        print(f"[INFO] ✅ Using combined AI prompt + instructions ({len(ai_instructions)} chars)")
+    elif job_ai_config.get('prompt'):
+        ai_instructions = job_ai_config['prompt']
+        print(f"[INFO] ✅ Using AI prompt ({len(ai_instructions)} chars)")
+    elif job_ai_config.get('instructions'):
+        ai_instructions = job_ai_config['instructions']
+        print(f"[INFO] ✅ Using AI instructions ({len(ai_instructions)} chars)")
+    
+    # Setup credentials
     openai_key = os.getenv('OPENAI_API_KEY')
-    print(f"[DEBUG] Google credentials path: {cred_path}")
-    print(f"[DEBUG] File exists: {os.path.exists(cred_path)}")
-    print(f"[DEBUG] OpenAI API Key: {openai_key[:10]}...{openai_key[-5:]}")
+    cred_path = "/app/widd.json" if os.path.exists("/app/widd.json") else "widd.json"
     
-    # Force reload environment variables
-    with open('.env', 'r') as f:
-        for line in f:
-            if line.strip() and not line.startswith('#') and not line.startswith('//'):
-                key, value = line.strip().split('=', 1)
-                os.environ[key] = value
-                if key == 'OPENAI_API_KEY':
-                    print(f"[DEBUG] Directly loaded OpenAI key: {value[:10]}...{value[-5:]}")
-                    openai_key = value
+    if not os.path.exists(cred_path):
+        print(f"[ERROR] Google credentials not found at: {cred_path}")
+        return
     
+    # Create assistant with AI instructions
+    try:
+        print(f"[DEBUG] Creating assistant with instructions preview: {ai_instructions[:200]}...")
+        assistant = Assistant(
+            candidate_id=candidate_id,
+            job_id=job_id,
+            instructions=ai_instructions
+        )
+    except ValueError as e:
+        print(f"[ERROR] {e}")
+        return
+    
+    # Create session
     session = AgentSession(
         stt=GoogleSTT(credentials_file=cred_path),
-        llm=openai.LLM(
-            model="gpt-4o",
-            temperature=0.5,
-            api_key=openai_key  # Explicitly pass the API key
-        ),
-        tts=ElevenLabsTTS(voice_id="21m00Tcm4TlvDq8ikWAM"),  # Rachel (female)
+        llm=openai.LLM(model="gpt-4o", temperature=0.5, api_key=openai_key),
+        tts=openai.TTS(voice="nova"),
         vad=VAD.load(),
     )
-    # Start polling in the background
-    asyncio.create_task(poll_and_save_history(session))
+    
+    await ctx.connect()
+    print(f"[INFO] ✅ Connected to room: {ctx.room.name}")
+    
+    # Set up event handler for new participants
+    def on_participant_connected(participant):
+        print(f"[INFO] 🎯 Participant connected: {participant.identity}")
+        
+        # Auto-greet new participants (not agent itself)
+        if (not assistant.has_greeted and 
+            participant.identity != "agent" and 
+            participant.identity != "" and
+            hasattr(participant, 'kind')):
+            
+            print(f"[INFO] ✅ Starting auto-greeting for: {participant.identity}")
+            assistant.has_greeted = True
+            
+            # Create async task for greeting
+            async def send_greeting():
+                try:
+                    greeting = assistant._extract_greeting()
+                    print(f"[DEBUG] Sending greeting: {greeting[:100]}...")
+                    await session.say(greeting)
+                    print(f"[INFO] ✅ Interview started successfully!")
+                except Exception as e:
+                    print(f"[ERROR] Failed to send greeting: {e}")
+            
+            # Use asyncio.create_task as recommended by the error
+            asyncio.create_task(send_greeting())
+    
+    ctx.room.on("participant_connected", on_participant_connected)
+    
+    # Start the session
     await session.start(
         room=ctx.room,
-        agent=Assistant(),
-        room_input_options=RoomInputOptions(
-            noise_cancellation=BVC(),
-        ),
+        agent=assistant,
+        room_input_options=RoomInputOptions(noise_cancellation=BVC()),
     )
-    await ctx.connect()
-    # Only inject the system message ONCE at the start
-    system_message = read_file_content('agent_system_message.txt')
-    await session.generate_reply(instructions=system_message)
-    # Do NOT call generate_reply again after this; let the agent/LLM handle the flow
+    
+    print(f"[INFO] ✅ Interview session active - waiting for participants...")
+    
+    # Check for existing participants (in case they joined before event handler was set)
+    await asyncio.sleep(1)  # Brief delay for room initialization
+    
+    participants = [p for p in ctx.room.remote_participants.values() 
+                   if p.identity != "agent" and p.identity != "" and hasattr(p, 'kind')]
+    
+    if participants and not assistant.has_greeted:
+        print(f"[INFO] Found existing participant: {participants[0].identity}")
+        assistant.has_greeted = True
+        
+        try:
+            greeting = assistant._extract_greeting()
+            print(f"[DEBUG] Sending greeting to existing participant: {greeting[:100]}...")
+            await session.say(greeting)
+            print(f"[INFO] ✅ Interview started for existing participant!")
+        except Exception as e:
+            print(f"[ERROR] Failed to greet existing participant: {e}")
+    
+    # Keep the session alive
+    try:
+        while True:
+            await asyncio.sleep(1)
+            # Check if room is still connected
+            if not ctx.room or ctx.room.connection_state != "connected":
+                print(f"[INFO] Room disconnected, ending session")
+                break
+    except Exception as e:
+        print(f"[INFO] Session ended: {e}")
 
 if __name__ == "__main__":
-    port = int(os.getenv('LIVEKIT_AGENT_PORT', '8005'))  # Default to port 8005
-    options = agents.WorkerOptions(
-        entrypoint_fnc=entrypoint,
-        port=port
-    )
-    print(f"[INFO] Starting LiveKit agent on port {port}")
+    port = int(os.getenv('LIVEKIT_AGENT_PORT', '8005'))
+    options = agents.WorkerOptions(entrypoint_fnc=entrypoint, port=port)
+    print(f"[INFO] Starting LiveKit Interview Agent on port {port}")
     agents.cli.run_app(options)
