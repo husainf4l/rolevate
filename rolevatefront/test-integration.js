@@ -5,7 +5,7 @@
  * Tests all API endpoints to ensure frontend-backend compatibility
  */
 
-const API_BASE = 'http://localhost:4005';
+const API_BASE = 'https://rolevate.com/api';
 
 // Test utilities
 const colors = {
@@ -179,7 +179,7 @@ async function testBackendConnection() {
     }
   } catch (error) {
     log.error(`Backend connection failed: ${error.message}`);
-    log.info('Make sure the backend is running on http://localhost:4005');
+    log.info('Make sure the backend is running on https://rolevate.com/api');
   }
 }
 

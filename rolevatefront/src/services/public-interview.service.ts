@@ -53,7 +53,7 @@ export class PublicInterviewService {
   private baseUrl: string;
 
   private constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://rolevate.com/api';
   }
 
   public static getInstance(): PublicInterviewService {

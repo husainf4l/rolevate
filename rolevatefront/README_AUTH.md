@@ -4,7 +4,7 @@ This document provides a comprehensive overview of the updated authentication sy
 
 ## 🚀 Quick Start
 
-1. **Backend Setup**: Ensure your backend API is running on `http://localhost:4005` (or update `NEXT_PUBLIC_API_URL`)
+1. **Backend Setup**: Ensure your backend API is running on `https://rolevate.com/api` (or update `NEXT_PUBLIC_API_URL`)
 2. **Test the Demo**: Visit `/auth-demo` to test all authentication features
 3. **Integration**: Use the provided components and hooks in your application
 
@@ -262,7 +262,7 @@ The service works with these backend endpoints:
 ### Environment Variables
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4005
+NEXT_PUBLIC_API_URL=https://rolevate.com/api
 ```
 
 ### Backend API Base URL
@@ -270,7 +270,7 @@ NEXT_PUBLIC_API_URL=http://localhost:4005
 Update in `auth.service.ts` if needed:
 
 ```typescript
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4005";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://rolevate.com/api";
 ```
 
 ## 🎨 Demo Page

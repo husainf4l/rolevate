@@ -36,15 +36,7 @@ async function bootstrap() {
   ensureDirectoryExists(path.join(__dirname, '..', 'uploads'));
   ensureDirectoryExists(path.join(__dirname, '..', 'public'));
   
-  // Add cookie parser middleware
-  app.use(cookieParser());
-  
-  // Configure CORS for frontend integration
-  app.enableCors({
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    credentials: true,
-  });
+
   
   // Apply global validation pipe
   app.useGlobalPipes(

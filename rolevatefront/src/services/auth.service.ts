@@ -1,6 +1,6 @@
 import { getAuthDebugInfo } from "../utils/debug-auth";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://rolevate.com/api';
 const REQUEST_TIMEOUT = 10000; // 10 seconds timeout
 
 // Token storage keys
@@ -210,7 +210,7 @@ let pendingUserRequest: Promise<User | null> | null = null;
  */
 export async function login(credentials: LoginCredentials): Promise<User> {
   try {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -254,7 +254,7 @@ export async function login(credentials: LoginCredentials): Promise<User> {
  */
 export async function register(credentials: RegisterCredentials): Promise<User> {
   try {
-    const response = await fetch(`${API_URL}/api/auth/register`, {
+    const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -299,7 +299,7 @@ export async function logout(): Promise<void> {
     const token = getAccessToken();
     if (token) {
       try {
-        await fetch(`${API_URL}/api/auth/logout`, {
+        await fetch(`${API_URL}/auth/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -381,7 +381,7 @@ export async function getCurrentUser(): Promise<User | null> {
   // Create a new pending request
   pendingUserRequest = (async (): Promise<User | null> => {
     try {
-      const user = await fetchWithAuth<User>(`${API_URL}/api/auth/profile`, {
+      const user = await fetchWithAuth<User>(`${API_URL}/auth/profile`, {
         method: 'GET',
       });
       authCache = { isAuthenticated: true, user, timestamp: Date.now() };
@@ -414,7 +414,7 @@ export interface Generate2FAResponse {
 }
 
 export async function generate2FA(): Promise<Generate2FAResponse> {
-  return fetchWithAuth<Generate2FAResponse>(`${API_URL}/api/auth/2fa/generate`, {
+  return fetchWithAuth<Generate2FAResponse>(`${API_URL}/auth/2fa/generate`, {
     method: 'POST',
   });
 }
@@ -424,7 +424,7 @@ export interface Verify2FAResponse {
 }
 
 export async function verify2FA(code: string): Promise<Verify2FAResponse> {
-  return fetchWithAuth<Verify2FAResponse>(`${API_URL}/api/auth/2fa/verify`, {
+  return fetchWithAuth<Verify2FAResponse>(`${API_URL}/auth/2fa/verify`, {
     method: 'POST',
     body: JSON.stringify({ code }),
   });
@@ -441,7 +441,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/auth/refresh`, {
+    const response = await fetch(`${API_URL}/auth/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -493,7 +493,7 @@ async function fetchWithAutoRefresh<T>(
  * Change user password
  */
 export async function changePassword(passwordData: ChangePasswordRequest): Promise<{ message: string }> {
-  return fetchWithAuth<{ message: string }>(`${API_URL}/api/auth/change-password`, {
+  return fetchWithAuth<{ message: string }>(`${API_URL}/auth/change-password`, {
     method: 'PATCH',
     body: JSON.stringify(passwordData),
   });
@@ -503,7 +503,7 @@ export async function changePassword(passwordData: ChangePasswordRequest): Promi
  * Get company information
  */
 export async function getCompany(): Promise<Company> {
-  return fetchWithAuth<Company>(`${API_URL}/api/auth/company`, {
+  return fetchWithAuth<Company>(`${API_URL}/auth/company`, {
     method: 'GET',
   });
 }
@@ -512,7 +512,7 @@ export async function getCompany(): Promise<Company> {
  * Get subscription status
  */
 export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
-  return fetchWithAuth<SubscriptionStatus>(`${API_URL}/api/auth/subscription/status`, {
+  return fetchWithAuth<SubscriptionStatus>(`${API_URL}/auth/subscription/status`, {
     method: 'GET',
   });
 }
@@ -521,7 +521,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
  * Get subscription limits
  */
 export async function getSubscriptionLimits(): Promise<SubscriptionLimits> {
-  return fetchWithAuth<SubscriptionLimits>(`${API_URL}/api/auth/subscription/limits`, {
+  return fetchWithAuth<SubscriptionLimits>(`${API_URL}/auth/subscription/limits`, {
     method: 'GET',
   });
 }
@@ -530,7 +530,7 @@ export async function getSubscriptionLimits(): Promise<SubscriptionLimits> {
  * Upgrade subscription plan
  */
 export async function upgradeSubscription(plan: string): Promise<{ message: string }> {
-  return fetchWithAuth<{ message: string }>(`${API_URL}/api/auth/subscription/upgrade`, {
+  return fetchWithAuth<{ message: string }>(`${API_URL}/auth/subscription/upgrade`, {
     method: 'POST',
     body: JSON.stringify({ plan }),
   });
@@ -540,7 +540,7 @@ export async function upgradeSubscription(plan: string): Promise<{ message: stri
  * Create a company for the current user
  */
 export async function createCompany(companyData: CompanyData): Promise<Company> {
-  return fetchWithAuth<Company>(`${API_URL}/api/auth/create-company`, {
+  return fetchWithAuth<Company>(`${API_URL}/auth/create-company`, {
     method: 'POST',
     body: JSON.stringify(companyData),
   });

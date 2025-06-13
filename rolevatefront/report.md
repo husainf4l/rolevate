@@ -1,6 +1,6 @@
 # Rolevate Backend API Documentation
 
-**Base URL:** `http://localhost:4005/api`
+**Base URL:** `https://rolevate.com/api`
 
 This document provides a comprehensive overview of all available API endpoints and their corresponding DTOs for the Rolevate frontend application.
 
@@ -814,4 +814,4 @@ Most list endpoints support filtering and pagination through query parameters:
 
 **Last Updated:** June 12, 2025
 **API Version:** 1.0.0
-**Base URL:** http://localhost:4005/api
+**Base URL:** https://rolevate.com/api

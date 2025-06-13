@@ -4,7 +4,7 @@ import { getMyCompanyApplications, getApplicationStats } from './applications.se
 import { getCandidateStats } from './candidates.service';
 import { getMyNotifications } from './notifications.service';
 
-const API_BASE_URL = 'http://localhost:4005/api';
+const API_BASE_URL = 'https://rolevate.com/api';
 
 // Auth token helper
 const getAuthHeaders = () => {

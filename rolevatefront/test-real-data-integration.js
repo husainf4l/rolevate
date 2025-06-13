@@ -5,7 +5,7 @@
  * Tests the job post detail page with real API data instead of mock data
  */
 
-const API_BASE_URL = 'http://localhost:4005/api';
+const API_BASE_URL = 'https://rolevate.com/api';
 
 async function testRealDataIntegration() {
   console.log('🧪 Testing Real Data Integration for Job Post Detail Page...\n');

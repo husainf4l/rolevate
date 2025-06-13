@@ -1,5 +1,5 @@
 // CV Analysis API Service
-const API_BASE_URL = 'http://localhost:4005/api';
+const API_BASE_URL = 'https://rolevate.com/api';
 
 // Auth token helper
 const getAuthHeaders = () => {
