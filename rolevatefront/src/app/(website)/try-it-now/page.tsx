@@ -257,7 +257,7 @@ export default function TryItNowPage() {
                     </span>
                     You are applying for the {selectedInterview.position}{" "}
                     position at {selectedInterview.company}. After submission,
-                    you'll experience ROLEVATE AI's interview process.
+                    you&apos;ll experience ROLEVATE AI&apos;s interview process.
                   </p>
                 </div>
               </div>
@@ -390,7 +390,7 @@ export default function TryItNowPage() {
                     Application Submitted!
                   </h4>
                   <p className="text-[#94A3B8] mb-6">
-                    You'll receive a WhatsApp message in the next{" "}
+                    You&apos;ll receive a WhatsApp message in the next{" "}
                     <span className="text-[#00C6AD] font-medium">
                       5 minutes
                     </span>{" "}

@@ -8,7 +8,6 @@ import ProblemVsSolution from "../components/ProblemVsSolution";
 import BankIndustryFocus from "../components/BankIndustryFocus";
 import CallToAction from "../components/CallToAction";
 import Footer from "../components/Footer";
-import { FeaturedJobs } from "../components/jobs/FeaturedJobs";
 
 export const metadata: Metadata = {
   title: "Rolevate | AI Interview Platform for Banking & Financial Services",

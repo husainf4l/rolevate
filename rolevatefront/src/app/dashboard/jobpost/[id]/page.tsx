@@ -7,31 +7,15 @@ import {
   PencilIcon,
   PlayIcon,
   PauseIcon,
-  CogIcon,
   DocumentTextIcon,
   ChatBubbleLeftRightIcon,
-  DevicePhoneMobileIcon,
   UserGroupIcon,
   CalendarIcon,
   ClockIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  ChartBarIcon,
-  BellIcon,
-  ShareIcon,
   EyeIcon,
-  TrashIcon,
-  CloudArrowUpIcon,
-  DocumentDuplicateIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
   StarIcon,
-  XMarkIcon,
-  InformationCircleIcon,
-  SparklesIcon,
-  MicrophoneIcon,
-  StopIcon,
-  SpeakerWaveIcon,
   BriefcaseIcon,
 } from "@heroicons/react/24/outline";
 import { getJobDetails, Job } from "@/services/jobs.service";
@@ -178,9 +162,6 @@ const JobPostDetail = () => {
   const [activeTab, setActiveTab] = useState<
     "overview" | "agents" | "candidates" | "analytics"
   >("overview");
-  const [selectedAgent, setSelectedAgent] = useState<
-    "cvAnalysis" | "interview" | "whatsapp" | null
-  >(null);
   const [candidateFilter, setCandidateFilter] = useState<
     CandidateStatus | "all"
   >("all");
@@ -194,12 +175,6 @@ const JobPostDetail = () => {
       message: string;
     }>
   >([]);
-  const [showPromptGenerator, setShowPromptGenerator] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState<
-    Array<{ role: "hr" | "ai"; message: string; timestamp: Date }>
-  >([]);
-  const [currentInput, setCurrentInput] = useState("");
 
   // Fetch applications for this job post
   const fetchApplications = async (jobId: string) => {
@@ -683,15 +658,6 @@ const JobPostDetail = () => {
     );
   };
 
-  const toggleAgentStatus = (
-    agentType: "cvAnalysis" | "interview" | "whatsapp",
-    newStatus: AgentStatus
-  ) => {
-    console.log(`Setting ${agentType} to ${newStatus}`);
-    // In a full implementation, this would call an API to update agent status
-    // and then update state locally after success
-  };
-
   const getCandidateStatusBadge = (status: CandidateStatus) => {
     const statusConfig = {
       applied: {
@@ -837,7 +803,13 @@ const JobPostDetail = () => {
             </div>
             <div className="flex items-center gap-4">
               {getStatusBadge(jobPost.status)}
-              <button className="p-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700">
+              <button
+                onClick={() =>
+                  router.push(`/dashboard/jobpost/edit/${jobPost.id}`)
+                }
+                className="p-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                title="Edit Job Post"
+              >
                 <PencilIcon className="h-5 w-5" />
               </button>
               <button

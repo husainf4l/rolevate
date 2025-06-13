@@ -6,7 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import {
   getApplicationById,
   Application,
-  updateApplication,
   ApplicationStatus,
 } from "@/services/applications.service";
 import {
@@ -730,9 +729,19 @@ const ApplicationDetailPage = () => {
                             const experience = JSON.parse(
                               cvAnalysis.experience
                             );
-                            return experience.positions
-                              ?.slice(0, 3)
-                              .map((position: any, index: number) => (
+                            return experience.positions?.slice(0, 3).map(
+                              (
+                                position: {
+                                  title: string;
+                                  duration?: string;
+                                  description?: string;
+                                  startDate?: string;
+                                  endDate?: string;
+                                  company?: string;
+                                  location?: string;
+                                },
+                                index: number
+                              ) => (
                                 <div
                                   key={index}
                                   className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg"
@@ -759,8 +768,9 @@ const ApplicationDetailPage = () => {
                                     </p>
                                   )}
                                 </div>
-                              ));
-                          } catch (e) {
+                              )
+                            );
+                          } catch {
                             return (
                               <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Experience data available but could not be
@@ -783,7 +793,16 @@ const ApplicationDetailPage = () => {
                           try {
                             const education = JSON.parse(cvAnalysis.education);
                             return education.degrees?.map(
-                              (degree: any, index: number) => (
+                              (
+                                degree: {
+                                  degree: string;
+                                  institution?: string;
+                                  location?: string;
+                                  startDate?: string;
+                                  endDate?: string;
+                                },
+                                index: number
+                              ) => (
                                 <div
                                   key={index}
                                   className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg"
@@ -807,7 +826,7 @@ const ApplicationDetailPage = () => {
                                 </div>
                               )
                             );
-                          } catch (e) {
+                          } catch {
                             return (
                               <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Education data available but could not be
@@ -1060,7 +1079,7 @@ const ApplicationDetailPage = () => {
               </h3>
 
               <div className="space-y-4">
-                {application.interviews.map((interview, index) => (
+                {application.interviews.map((interview) => (
                   <div
                     key={interview.id}
                     className="p-6 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-600"

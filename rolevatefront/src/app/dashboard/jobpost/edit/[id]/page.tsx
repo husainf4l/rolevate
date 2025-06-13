@@ -1,13 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
-  PlusIcon,
+  PencilIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  ArrowLeftIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
-import { createJob, CreateJobData } from "@/services/jobs.service";
+import { 
+  getJobDetails, 
+  updateJobPost, 
+  UpdateJobPostDto,
+  ExperienceLevel,
+  WorkType 
+} from "@/services/jobs.service";
 import {
   JobFormData,
   JobInformation,
@@ -15,13 +23,16 @@ import {
   SkillsManagement,
   AIInterviewSettings,
   JobPreview,
-  FormHeader,
   JobCreationTips,
 } from "@/components/job-creation";
 
-const NewJobPost = () => {
+const EditJobPost = () => {
+  const params = useParams();
   const router = useRouter();
+  const jobId = params.id as string;
+  
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -72,39 +83,19 @@ const NewJobPost = () => {
     "Banking",
     "Finance",
     "Risk Management",
-    "Compliance",
-    "Customer Service",
-    "Sales",
-    "Marketing",
-    "Data Analysis",
-    "SQL",
-    "Excel",
-    "PowerBI",
-    "Tableau",
   ]);
 
-  // AI Prompt Templates
-  const generateAiPrompt = (
-    jobTitle: string,
-    department: string,
-    requirements: string
-  ) => {
-    return `System: You are Laila AlNoor, a friendly and professional AI HR assistant for Capital Bank. You are conducting a structured interview for the ${jobTitle} position in ${department}.
+  // Auto-generate AI prompt and instructions when job details change
+  const generateAiPrompt = (title: string, department: string, requirements: string) => {
+    return `You are interviewing candidates for the ${title} position in the ${department} department. 
 
-Your behavior:
-- Ask one focused question at a time
-- Listen respectfully and keep a professional but warm tone
-- Never explain answers or offer feedback
-- Use brief, polite transitions like "Thanks for sharing that" or "Got it, let's move on"
-- Wait for complete answers before asking the next question
-
-Interview sequence:
-1. Welcome and introduction
-2. Relevant experience for this role
-3. Technical skills and expertise
-4. Previous achievements and accomplishments
-5. Problem-solving approach
-6. Team collaboration experience
+Your goal is to evaluate candidates comprehensively across these areas:
+1. Technical skills and experience relevant to the role
+2. Problem-solving and analytical thinking abilities
+3. Communication and interpersonal skills
+4. Cultural fit and alignment with company values
+5. Leadership potential and teamwork capabilities
+6. Domain knowledge and industry understanding
 7. Goals and career aspirations
 8. Availability and work preferences
 9. Salary expectations
@@ -126,6 +117,50 @@ Interview Guidelines:
 - Allow natural conversation flow while covering all key areas
 - End with clear next steps information`;
   };
+
+  // Load job data
+  useEffect(() => {
+    const loadJobData = async () => {
+      if (!jobId) return;
+
+      try {
+        setInitialLoading(true);
+        setError(null);
+
+        const job = await getJobDetails(jobId);
+        
+        // Map API job data to form data
+        const mappedFormData: JobFormData = {
+          title: job.title || "",
+          department: job.company?.industry || "",
+          location: job.location || "",
+          workType: (job.workType as JobFormData['workType']) || "ONSITE",
+          experienceLevel: (job.experienceLevel as JobFormData['experienceLevel']) || "MID_LEVEL",
+          description: job.description || "",
+          requirements: job.requirements || "",
+          responsibilities: job.responsibilities || "",
+          benefits: job.benefits || "",
+          skills: job.skills || [],
+          currency: job.currency || "JOD",
+          salaryMin: job.salaryMin,
+          salaryMax: job.salaryMax,
+          enableAiInterview: job.enableAiInterview || false,
+          interviewDuration: job.interviewDuration || 30,
+          aiPrompt: job.aiPrompt || "",
+          aiInstructions: job.aiInstructions || "",
+        };
+
+        setFormData(mappedFormData);
+      } catch (err) {
+        console.error("Error loading job data:", err);
+        setError(err instanceof Error ? err.message : "Failed to load job data");
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    loadJobData();
+  }, [jobId]);
 
   // Auto-generate AI prompt and instructions when job details change
   useEffect(() => {
@@ -164,19 +199,19 @@ Interview Guidelines:
     if (isDirty && autoSaveStatus !== "saving") {
       setAutoSaveStatus("saving");
       const timer = setTimeout(() => {
-        localStorage.setItem("job_draft", JSON.stringify(formData));
+        localStorage.setItem(`job_edit_draft_${jobId}`, JSON.stringify(formData));
         setAutoSaveStatus("saved");
         setIsDirty(false);
       }, 2000);
 
       return () => clearTimeout(timer);
     }
-  }, [formData, isDirty, autoSaveStatus]);
+  }, [formData, isDirty, autoSaveStatus, jobId]);
 
   // Load draft on component mount
   useEffect(() => {
-    const savedDraft = localStorage.getItem("job_draft");
-    if (savedDraft) {
+    const savedDraft = localStorage.getItem(`job_edit_draft_${jobId}`);
+    if (savedDraft && !initialLoading) {
       try {
         const parsedDraft = JSON.parse(savedDraft);
         if (parsedDraft.title) {
@@ -186,12 +221,13 @@ Interview Guidelines:
         console.error("Error loading draft:", err);
       }
     }
-  }, []);
+  }, [jobId, initialLoading]);
 
   // Real-time validation
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   const validateField = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (name: string, value: any) => {
       const errors: { [key: string]: string } = {};
 
@@ -246,8 +282,8 @@ Interview Guidelines:
           if (formData.enableAiInterview && (!value || !value.trim())) {
             errors.aiPrompt =
               "AI prompt is required when AI interview is enabled";
-          } else if (value && value.length > 2000) {
-            errors.aiPrompt = "AI prompt must be less than 2000 characters";
+          } else if (value && value.length > 5000) {
+            errors.aiPrompt = "AI prompt must be less than 5000 characters";
           }
           break;
         case "aiInstructions":
@@ -423,17 +459,16 @@ Interview Guidelines:
     setError(null);
 
     try {
-      const jobData: CreateJobData = {
+      const updateData: UpdateJobPostDto = {
         title: formData.title,
-        department: formData.department,
         description: formData.description,
         requirements: formData.requirements,
         responsibilities: formData.responsibilities || undefined,
         benefits: formData.benefits || undefined,
         skills: formData.skills,
-        experienceLevel: formData.experienceLevel as any,
+        experienceLevel: formData.experienceLevel as ExperienceLevel,
         location: formData.location,
-        workType: formData.workType as any,
+        workType: formData.workType as WorkType,
         salaryMin: formData.salaryMin,
         salaryMax: formData.salaryMax,
         currency: formData.currency,
@@ -445,13 +480,13 @@ Interview Guidelines:
           : undefined,
       };
 
-      const response = await createJob(jobData);
-      console.log("Job created successfully:", response);
+      const response = await updateJobPost(jobId, updateData);
+      console.log("Job updated successfully:", response);
       setSuccess(true);
-      localStorage.removeItem("job_draft");
+      localStorage.removeItem(`job_edit_draft_${jobId}`);
 
       setTimeout(() => {
-        router.push("/dashboard/jobpost");
+        router.push(`/dashboard/jobpost/${jobId}`);
       }, 2000);
     } catch (err) {
       const errorMessage = handleApiError(err);
@@ -489,36 +524,17 @@ Interview Guidelines:
       );
       if (!confirmed) return;
     }
-    localStorage.removeItem("job_draft");
-    router.push("/dashboard/jobpost");
+    localStorage.removeItem(`job_edit_draft_${jobId}`);
+    router.push(`/dashboard/jobpost/${jobId}`);
   };
 
   const clearDraft = () => {
     const confirmed = window.confirm(
-      "Are you sure you want to clear all form data?"
+      "Are you sure you want to clear all changes and reset to original values?"
     );
     if (confirmed) {
-      localStorage.removeItem("job_draft");
-      setFormData({
-        title: "",
-        department: "",
-        location: "",
-        workType: "ONSITE",
-        experienceLevel: "MID_LEVEL",
-        description: "",
-        requirements: "",
-        responsibilities: "",
-        benefits: "",
-        skills: [],
-        currency: "JOD",
-        enableAiInterview: true,
-        interviewDuration: 30,
-        aiPrompt: "",
-        aiInstructions: "",
-      });
-      setFieldErrors({});
-      setIsDirty(false);
-      setAutoSaveStatus("saved");
+      localStorage.removeItem(`job_edit_draft_${jobId}`);
+      window.location.reload(); // Reload to get original data
     }
   };
 
@@ -557,6 +573,19 @@ Interview Guidelines:
 
   const progress = calculateProgress();
 
+  // Loading state
+  if (initialLoading) {
+    return (
+      <div className="flex-1 min-h-screen bg-gray-900 flex items-center justify-center px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6AD] mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading job data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Success state
   if (success) {
     return (
       <div className="flex-1 min-h-screen bg-gray-900 flex items-center justify-center px-4">
@@ -566,54 +595,46 @@ Interview Guidelines:
               <CheckCircleIcon className="h-10 w-10 text-green-400" />
             </div>
             <h2 className="text-3xl font-bold text-white mb-3">
-              Job Post Created Successfully! 🎉
+              Job Post Updated Successfully! ✨
             </h2>
             <p className="text-gray-400 mb-6">
-              Your job post &ldquo;
+              Your job post &quot;
               <span className="text-[#00C6AD] font-medium">
                 {formData.title}
               </span>
-              &rdquo; has been created and is now live on the platform.
+              &quot; has been updated and your changes are now live.
               {formData.enableAiInterview &&
-                " AI interviews are ready to screen candidates automatically."}
+                " AI interview settings have been updated as well."}
             </p>
 
             <div className="bg-gray-750 rounded-lg p-4 mb-6 text-left">
-              <h3 className="text-white font-medium mb-2">
-                What happens next?
-              </h3>
-              <ul className="text-sm text-gray-400 space-y-1">
-                <li>✅ Job is immediately visible to candidates</li>
-                <li>
-                  📧 You&apos;ll receive email notifications for new
-                  applications
-                </li>
-                {formData.enableAiInterview && (
-                  <li>🤖 AI will conduct initial interviews automatically</li>
-                )}
-                <li>📊 Track performance in your dashboard</li>
+              <h3 className="text-white font-medium mb-2">What&apos;s Next?</h3>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• View your updated job post</li>
+                <li>• Monitor candidate applications</li>
+                <li>• Review AI interview results</li>
+                <li>• Manage recruitment pipeline</li>
               </ul>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex gap-3">
+              <button
+                onClick={() => router.push(`/dashboard/jobpost/${jobId}`)}
+                className="flex-1 px-6 py-3 bg-[#00C6AD] text-white rounded-lg hover:bg-[#14B8A6] transition-colors font-medium"
+              >
+                View Job Post
+              </button>
               <button
                 onClick={() => router.push("/dashboard/jobpost")}
-                className="px-6 py-3 bg-[#00C6AD] text-white rounded-lg hover:bg-[#14B8A6] transition-colors font-medium"
+                className="flex-1 px-6 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
               >
-                View All Job Posts
-              </button>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                Create Another Job
+                All Jobs
               </button>
             </div>
+            <p className="text-sm text-gray-500 text-center mt-6">
+              Redirecting to job details in a few seconds...
+            </p>
           </div>
-
-          <p className="text-sm text-gray-500 text-center mt-6">
-            Redirecting to dashboard in a few seconds...
-          </p>
         </div>
       </div>
     );
@@ -622,14 +643,81 @@ Interview Guidelines:
   return (
     <div className="flex-1 min-h-screen bg-gray-900">
       <div className="px-6 md:px-20 py-6 md:py-20">
-        <FormHeader
-          progress={progress}
-          autoSaveStatus={autoSaveStatus}
-          showPreview={showPreview}
-          onCancel={handleCancel}
-          onTogglePreview={() => setShowPreview(!showPreview)}
-          onClearDraft={clearDraft}
-        />
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={handleCancel}
+            className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            <ArrowLeftIcon className="h-6 w-6 text-gray-400" />
+          </button>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <PencilIcon className="h-8 w-8 text-[#00C6AD]" />
+              Edit Job Post
+            </h1>
+            <p className="text-gray-400 mt-1">
+              Update your job posting details and requirements
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-sm text-gray-400">Progress</div>
+              <div className="text-2xl font-bold text-[#00C6AD]">
+                {progress}%
+              </div>
+            </div>
+            <div className="w-12 h-12 rounded-full border-4 border-gray-700 relative">
+              <div
+                className="absolute inset-0 rounded-full border-4 border-[#00C6AD] transition-all duration-300"
+                style={{
+                  clipPath: `conic-gradient(from 0deg, transparent ${
+                    100 - progress
+                  }%, white 0%)`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Auto-save Status */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {autoSaveStatus === "saving" && (
+              <div className="flex items-center gap-2 text-yellow-400">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-yellow-400 border-t-transparent"></div>
+                <span className="text-sm">Saving draft...</span>
+              </div>
+            )}
+            {autoSaveStatus === "saved" && (
+              <div className="flex items-center gap-2 text-green-400">
+                <CheckCircleIcon className="h-4 w-4" />
+                <span className="text-sm">Draft saved</span>
+              </div>
+            )}
+            {autoSaveStatus === "unsaved" && isDirty && (
+              <div className="flex items-center gap-2 text-gray-400">
+                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <span className="text-sm">Unsaved changes</span>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors text-sm flex items-center gap-2"
+            >
+              <EyeIcon className="h-4 w-4" />
+              {showPreview ? "Hide Preview" : "Preview"}
+            </button>
+            <button
+              onClick={clearDraft}
+              className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+            >
+              Reset Changes
+            </button>
+          </div>
+        </div>
 
         {/* Error Message */}
         {error && (
@@ -647,7 +735,7 @@ Interview Guidelines:
           <div className="max-w-4xl">
             <JobPreview formData={formData} />
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 mt-8">
               <button
                 onClick={() => setShowPreview(false)}
                 className="px-6 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
@@ -662,12 +750,12 @@ Interview Guidelines:
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                    Creating...
+                    Updating...
                   </>
                 ) : (
                   <>
-                    <PlusIcon className="h-5 w-5" />
-                    Create Job Post
+                    <PencilIcon className="h-5 w-5" />
+                    Update Job Post
                   </>
                 )}
               </button>
@@ -710,7 +798,7 @@ Interview Guidelines:
             <JobCreationTips />
 
             {/* Form Actions */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 mt-8">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -726,12 +814,12 @@ Interview Guidelines:
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                    Creating...
+                    Updating...
                   </>
                 ) : (
                   <>
-                    <PlusIcon className="h-5 w-5" />
-                    Create Job Post
+                    <PencilIcon className="h-5 w-5" />
+                    Update Job Post
                   </>
                 )}
               </button>
@@ -743,4 +831,4 @@ Interview Guidelines:
   );
 };
 
-export default NewJobPost;
+export default EditJobPost;

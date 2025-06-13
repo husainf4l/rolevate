@@ -193,6 +193,25 @@ const JobPostDashboard = (props: Props) => {
           </div>
           <div className="flex gap-3">
             <button
+              onClick={() => router.push("/dashboard/jobpost/ai-create")}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm font-medium"
+            >
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              AI Create
+            </button>
+            <button
               onClick={handleNewJob}
               className="bg-[#00C6AD] hover:bg-[#14B8A6] text-white px-5 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm font-medium"
             >

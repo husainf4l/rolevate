@@ -245,7 +245,7 @@ function RoomContent() {
           try {
             const parsedMetadata = JSON.parse(participant.metadata);
             console.log("Parsed participant metadata:", parsedMetadata);
-          } catch (e) {
+          } catch {
             console.log(
               "Participant metadata (raw string):",
               participant.metadata
@@ -270,7 +270,7 @@ function RoomContent() {
         try {
           const parsedMetadata = JSON.parse(metadata || "{}");
           console.log("📝 Parsed room metadata:", parsedMetadata);
-        } catch (e) {
+        } catch {
           console.log("📝 Room metadata (raw string):", metadata);
         }
       });
@@ -284,7 +284,7 @@ function RoomContent() {
         try {
           const parsedMetadata = JSON.parse(metadata || "{}");
           console.log("👤 Parsed participant metadata:", parsedMetadata);
-        } catch (e) {
+        } catch {
           console.log("👤 Participant metadata (raw string):", metadata);
         }
       });
@@ -324,7 +324,7 @@ function RoomContent() {
         try {
           const parsedRoomMetadata = JSON.parse(room.metadata);
           console.log("Parsed room metadata:", parsedRoomMetadata);
-        } catch (e) {
+        } catch {
           console.log("Room metadata (raw string):", room.metadata);
         }
       } else {
@@ -350,7 +350,7 @@ function RoomContent() {
           try {
             const parsedMetadata = JSON.parse(participant.metadata);
             console.log(`Participant ${key} parsed metadata:`, parsedMetadata);
-          } catch (e) {
+          } catch {
             console.log(
               `Participant ${key} metadata (raw):`,
               participant.metadata

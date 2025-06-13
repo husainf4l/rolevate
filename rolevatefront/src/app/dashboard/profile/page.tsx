@@ -4,9 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  User,
   Company,
-  ChangePasswordRequest,
   changePassword,
   getCompany,
   getSubscriptionStatus,
@@ -563,7 +561,7 @@ const ProfilePage = () => {
                       Include numbers, symbols, and both uppercase and lowercase
                       letters
                     </li>
-                    <li>Don't reuse passwords from other websites</li>
+                    <li>Don&apos;t reuse passwords from other websites</li>
                     <li>
                       Consider using a password manager for better security
                     </li>

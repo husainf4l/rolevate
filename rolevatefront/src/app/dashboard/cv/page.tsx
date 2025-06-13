@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   getMyCompanyApplications,
   Application,
   ApplicationStatus,
 } from "@/services/applications.service";
-import { getJobs, getMyCompanyJobs, Job } from "@/services/jobs.service";
+import { getMyCompanyJobs, Job } from "@/services/jobs.service";
 
 // Define our interface for the page data
 interface CVManagerData {
@@ -81,7 +80,13 @@ const CVManager = () => {
     };
 
     fetchData();
-  }, [data.filters.status, data.filters.jobId, sortBy, sortOrder]);
+  }, [
+    data.filters.status,
+    data.filters.jobId,
+    data.filters,
+    sortBy,
+    sortOrder,
+  ]);
 
   // Handle filter changes
   const handleStatusFilterChange = (status: ApplicationStatus | "ALL") => {

@@ -5,9 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   getJobStats,
-  getJobs,
   getMyCompanyJobs,
-  getFeaturedJobs,
   JobStats,
   Job,
 } from "@/services/jobs.service";
@@ -20,36 +18,6 @@ interface DashboardData {
   loading: boolean;
   error: string | null;
 }
-
-// Function to generate initials avatar from name
-const getInitials = (name: string) => {
-  const nameParts = name.split(" ");
-  return nameParts.length > 1
-    ? `${nameParts[0][0]}${nameParts[1][0]}`
-    : nameParts[0].substring(0, 2);
-};
-
-// Function to get a consistent color based on name
-const getAvatarColor = (name: string) => {
-  const colors = [
-    "bg-blue-500",
-    "bg-green-500",
-    "bg-yellow-500",
-    "bg-red-500",
-    "bg-indigo-500",
-    "bg-purple-500",
-    "bg-pink-500",
-    "bg-teal-500",
-  ];
-
-  // Simple hash function to get a consistent color for a name
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  return colors[Math.abs(hash) % colors.length];
-};
 
 // Component for stat card
 const StatCard = ({

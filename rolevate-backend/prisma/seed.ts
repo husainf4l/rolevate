@@ -1,564 +1,1003 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, UserRole, ExperienceLevel, WorkType, InterviewLanguage, ApplicationStatus, FitRecommendation, InterviewStatus, InterviewType, CompanySize, SubscriptionPlan, BillingCycle, WhatsappStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 10;
+  return bcrypt.hash(password, saltRounds);
+}
+
 async function main() {
-  // Hash password for demo users
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  console.log('Seeding database...');
 
-  // Create demo companies
-  const roxateCompany = await prisma.company.create({
-    data: {
-      name: 'Roxate Ltd',
-      displayName: 'Roxate Limited',
-      industry: 'Technology',
-      description: 'AI-powered solutions for the banking and financial services sector',
-      website: 'https://roxate.com',
-      location: 'Dubai, UAE',
-      country: 'UAE',
-      city: 'Dubai',
-      size: 'MEDIUM',
-      logo: 'https://example.com/roxate-logo.png',
-    },
-  });
+  // Clean up existing data
+  await prisma.interviewHistory.deleteMany({});
+  await prisma.notification.deleteMany({});
+  await prisma.fitScore.deleteMany({});
+  await prisma.interview.deleteMany({});
+  await prisma.cvAnalysis.deleteMany({});
+  await prisma.application.deleteMany({});
+  await prisma.apply.deleteMany({});
+  await prisma.jobPost.deleteMany({});
+  await prisma.subscription.deleteMany({});
+  await prisma.user.deleteMany({});
+  await prisma.company.deleteMany({});
+  await prisma.candidate.deleteMany({});
 
-  const bankCompany = await prisma.company.create({
-    data: {
-      name: 'MENA Bank',
-      displayName: 'MENA Commercial Bank',
-      industry: 'Banking & Financial Services',
-      description: 'Leading commercial bank in the MENA region',
-      website: 'https://menabank.com',
-      location: 'Riyadh, Saudi Arabia',
-      country: 'Saudi Arabia',
-      city: 'Riyadh',
-      size: 'ENTERPRISE',
-      logo: 'https://example.com/menabank-logo.png',
-    },
-  });
+  console.log('Database cleaned. Creating new seed data...');
 
-  // Create main user - Husain (Super Admin at Roxate)
-  const husainUser = await prisma.user.create({
+  // Create companies
+  const capitalBank = await prisma.company.create({
     data: {
-      email: 'husain@roxate.com',
-      username: 'husain',
-      name: 'Husain Abdullah',
-      firstName: 'Husain',
-      lastName: 'Abdullah',
-      password: hashedPassword,
-      phoneNumber: '+971501234567',
-      whatsappNumber: '+971501234567',
-      profileImage: 'https://example.com/husain-avatar.jpg',
-      bio: 'CEO and Founder of Roxate Ltd, passionate about AI in recruitment',
-      role: 'SUPER_ADMIN',
-      companyId: roxateCompany.id,
+      name: 'Capital Bank',
+      displayName: 'Capital Bank',
+      industry: 'Banking',
+      description: 'Leading financial institution in the Middle East',
+      website: 'https://www.capitalbank.jo',
+      location: 'Jordan',
+      country: 'Jordan',
+      city: 'Amman',
+      size: CompanySize.LARGE,
       isActive: true,
     },
   });
 
-  // Create HR Manager at MENA Bank
-  const hrManager = await prisma.user.create({
+  const abuKhader = await prisma.company.create({
     data: {
-      email: 'sarah.al-rashid@menabank.com',
-      username: 'sarah.alrashid',
-      name: 'Sarah Al-Rashid',
-      firstName: 'Sarah',
-      lastName: 'Al-Rashid',
+      name: 'Abu Khader Automotive',
+      displayName: 'Abu Khader Automotive',
+      industry: 'Automotive',
+      description: 'Leading automotive dealer and service provider',
+      website: 'https://www.abukhader.com',
+      location: 'Jordan',
+      country: 'Jordan',
+      city: 'Amman',
+      size: CompanySize.LARGE,
+      isActive: true,
+    },
+  });
+
+  const menaitech = await prisma.company.create({
+    data: {
+      name: 'Menaitech Jordan',
+      displayName: 'Menaitech',
+      industry: 'Technology',
+      description: 'HR and talent management software solutions provider',
+      website: 'https://www.menaitech.com',
+      location: 'Jordan',
+      country: 'Jordan',
+      city: 'Amman',
+      size: CompanySize.MEDIUM,
+      isActive: true,
+    },
+  });
+  
+  // Additional companies
+  const orangeJordan = await prisma.company.create({
+    data: {
+      name: 'Orange Jordan',
+      displayName: 'Orange Telecom',
+      industry: 'Telecommunications',
+      description: 'Leading telecommunications provider in Jordan',
+      website: 'https://www.orange.jo',
+      location: 'Jordan',
+      country: 'Jordan',
+      city: 'Amman',
+      size: CompanySize.LARGE,
+      isActive: true,
+    },
+  });
+  
+  const techCrunch = await prisma.company.create({
+    data: {
+      name: 'TechCrunch Software',
+      displayName: 'TechCrunch',
+      industry: 'Software Development',
+      description: 'Innovative software development company specializing in mobile applications',
+      website: 'https://www.techcrunch-jo.com',
+      location: 'Jordan',
+      country: 'Jordan',
+      city: 'Irbid',
+      size: CompanySize.SMALL,
+      isActive: true,
+    },
+  });
+  
+  const jordanHospital = await prisma.company.create({
+    data: {
+      name: 'Jordan Hospital',
+      displayName: 'Jordan Hospital',
+      industry: 'Healthcare',
+      description: 'Leading healthcare provider offering comprehensive medical services',
+      website: 'https://www.jordanhospital.com',
+      location: 'Jordan',
+      country: 'Jordan',
+      city: 'Amman',
+      size: CompanySize.LARGE,
+      isActive: true,
+    },
+  });
+
+  console.log('Companies created');
+
+  // Create users
+  const hashedPassword = await hashPassword('tt55oo77');
+
+  const widdUser = await prisma.user.create({
+    data: {
+      email: 'widd@capitalbank.com',
+      username: 'widd',
+      name: 'Widd',
+      firstName: 'Widd',
+      lastName: 'Recruiter',
       password: hashedPassword,
-      phoneNumber: '+966501234567',
-      whatsappNumber: '+966501234567',
-      profileImage: 'https://example.com/sarah-avatar.jpg',
-      bio: 'Senior HR Manager specializing in digital transformation recruitment',
-      role: 'HR_MANAGER',
-      companyId: bankCompany.id,
+      role: UserRole.RECRUITER,
+      companyId: capitalBank.id,
+      isActive: true,
+    },
+  });
+  
+  // Additional Capital Bank users
+  const capitalHRManager = await prisma.user.create({
+    data: {
+      email: 'hr.manager@capitalbank.com',
+      username: 'capital_hr_manager',
+      name: 'Sarah Johnson',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      password: hashedPassword,
+      role: UserRole.HR_MANAGER,
+      companyId: capitalBank.id,
+      isActive: true,
+    },
+  });
+  
+  const capitalAdmin = await prisma.user.create({
+    data: {
+      email: 'admin@capitalbank.com',
+      username: 'capital_admin',
+      name: 'Mohammed Al-Qasem',
+      firstName: 'Mohammed',
+      lastName: 'Al-Qasem',
+      password: hashedPassword,
+      role: UserRole.COMPANY_ADMIN,
+      companyId: capitalBank.id,
+      isActive: true,
     },
   });
 
-  // Create candidates
-  const candidate1 = await prisma.candidate.create({
+  const abuKhaderUser = await prisma.user.create({
     data: {
-      email: 'ahmed.hassan@email.com',
-      name: 'Ahmed Hassan',
-      firstName: 'Ahmed',
-      lastName: 'Hassan',
-      phoneNumber: '+971509876543',
-      whatsappNumber: '+971509876543',
-      profileImage: 'https://example.com/ahmed-avatar.jpg',
-      bio: 'Senior Software Engineer with 8 years experience in fintech',
+      email: 'recruiter@abukhader.com',
+      username: 'abukhader_hr',
+      name: 'Abu Khader HR',
+      firstName: 'HR',
+      lastName: 'Manager',
+      password: hashedPassword,
+      role: UserRole.HR_MANAGER,
+      companyId: abuKhader.id,
+      isActive: true,
+    },
+  });
+  
+  // Additional Abu Khader users
+  const abuKhaderRecruiter = await prisma.user.create({
+    data: {
+      email: 'talent@abukhader.com',
+      username: 'abukhader_talent',
+      name: 'Layla Nasr',
+      firstName: 'Layla',
+      lastName: 'Nasr',
+      password: hashedPassword,
+      role: UserRole.RECRUITER,
+      companyId: abuKhader.id,
+      isActive: true,
     },
   });
 
-  const candidate2 = await prisma.candidate.create({
+  const menaitechUser = await prisma.user.create({
     data: {
-      email: 'fatima.al-zahra@email.com',
-      name: 'Fatima Al-Zahra',
-      firstName: 'Fatima',
-      lastName: 'Al-Zahra',
-      phoneNumber: '+966509876543',
-      whatsappNumber: '+966509876543',
-      profileImage: 'https://example.com/fatima-avatar.jpg',
-      bio: 'Data Scientist specializing in AI and machine learning for banking',
+      email: 'recruiter@menaitech.com',
+      username: 'menaitech_hr',
+      name: 'Menaitech HR',
+      firstName: 'HR',
+      lastName: 'Lead',
+      password: hashedPassword,
+      role: UserRole.HR_MANAGER,
+      companyId: menaitech.id,
+      isActive: true,
+    },
+  });
+  
+  // Additional company users
+  const orangeHRManager = await prisma.user.create({
+    data: {
+      email: 'hr@orange.jo',
+      username: 'orange_hr',
+      name: 'Rami Haddad',
+      firstName: 'Rami',
+      lastName: 'Haddad',
+      password: hashedPassword,
+      role: UserRole.HR_MANAGER,
+      companyId: orangeJordan.id,
+      isActive: true,
+    },
+  });
+  
+  const techCrunchRecruiter = await prisma.user.create({
+    data: {
+      email: 'jobs@techcrunch-jo.com',
+      username: 'techcrunch_recruiter',
+      name: 'Nour Al-Masri',
+      firstName: 'Nour',
+      lastName: 'Al-Masri',
+      password: hashedPassword,
+      role: UserRole.RECRUITER,
+      companyId: techCrunch.id,
+      isActive: true,
+    },
+  });
+  
+  const hospitalHR = await prisma.user.create({
+    data: {
+      email: 'hr@jordanhospital.com',
+      username: 'hospital_hr',
+      name: 'Dina Khalil',
+      firstName: 'Dina',
+      lastName: 'Khalil',
+      password: hashedPassword,
+      role: UserRole.HR_MANAGER,
+      companyId: jordanHospital.id,
+      isActive: true,
+    },
+  });
+  
+  // Super Admin
+  const superAdmin = await prisma.user.create({
+    data: {
+      email: 'admin@rolevate.io',
+      username: 'admin',
+      name: 'System Admin',
+      firstName: 'System',
+      lastName: 'Admin',
+      password: hashedPassword,
+      role: UserRole.SUPER_ADMIN,
+      isActive: true,
     },
   });
 
-  const candidate3 = await prisma.candidate.create({
+  console.log('Users created');
+
+  // Create subscriptions for each company
+  await prisma.subscription.create({
     data: {
-      email: 'omar.mahmoud@email.com',
-      name: 'Omar Mahmoud',
-      firstName: 'Omar',
-      lastName: 'Mahmoud',
-      phoneNumber: '+20109876543',
-      whatsappNumber: '+20109876543',
-      profileImage: 'https://example.com/omar-avatar.jpg',
-      bio: 'Cybersecurity specialist with focus on financial systems',
+      plan: SubscriptionPlan.FREE,
+      status: 'ACTIVE',
+      startDate: new Date(),
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      jobPostLimit: 10,
+      candidateLimit: 200,
+      interviewLimit: 100,
+      companyId: capitalBank.id,
     },
   });
+
+  await prisma.subscription.create({
+    data: {
+      plan: SubscriptionPlan.FREE,
+      status: 'ACTIVE',
+      startDate: new Date(),
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      jobPostLimit: 10,
+      candidateLimit: 200,
+      interviewLimit: 100,
+      companyId: abuKhader.id,
+    },
+  });
+
+  await prisma.subscription.create({
+    data: {
+      plan: SubscriptionPlan.FREE,
+      status: 'ACTIVE',
+      startDate: new Date(),
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      jobPostLimit: 10,
+      candidateLimit: 200,
+      interviewLimit: 100,
+      companyId: menaitech.id,
+    },
+  });
+  
+  // Additional subscriptions
+  await prisma.subscription.create({
+    data: {
+      plan: SubscriptionPlan.FREE,
+      status: 'ACTIVE',
+      startDate: new Date(),
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      jobPostLimit: 10,
+      candidateLimit: 200,
+      interviewLimit: 100,
+      companyId: orangeJordan.id,
+    },
+  });
+  
+  await prisma.subscription.create({
+    data: {
+      plan: SubscriptionPlan.FREE,
+      status: 'ACTIVE',
+      startDate: new Date(),
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      jobPostLimit: 5,
+      candidateLimit: 100,
+      interviewLimit: 50,
+      companyId: techCrunch.id,
+    },
+  });
+  
+  await prisma.subscription.create({
+    data: {
+      plan: SubscriptionPlan.FREE,
+      status: 'ACTIVE',
+      startDate: new Date(),
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      jobPostLimit: 15,
+      candidateLimit: 300,
+      interviewLimit: 150,
+      companyId: jordanHospital.id,
+      billingCycle: BillingCycle.MONTHLY,
+    },
+  });
+
+  console.log('Subscriptions created');
 
   // Create job posts
-  const jobPost1 = await prisma.jobPost.create({
+  const relationshipManagerJob = await prisma.jobPost.create({
     data: {
-      title: 'Senior Backend Developer - Fintech',
-      description: 'We are looking for a skilled Senior Backend Developer to join our fintech team. You will be responsible for developing and maintaining our core banking APIs and microservices.',
-      requirements: 'Bachelor\'s degree in Computer Science or related field. 5+ years of experience in backend development. Strong knowledge of Node.js, TypeScript, PostgreSQL, and microservices architecture.',
-      responsibilities: 'Design and implement scalable APIs, collaborate with frontend teams, ensure security best practices, optimize database performance, mentor junior developers.',
-      benefits: 'Competitive salary, health insurance, flexible working hours, professional development budget, annual bonus.',
-      skills: ['Node.js', 'TypeScript', 'PostgreSQL', 'Docker', 'Kubernetes', 'Redis', 'REST APIs', 'Microservices'],
-      experienceLevel: 'SENIOR',
-      location: 'Riyadh, Saudi Arabia',
-      workType: 'HYBRID',
-      salaryMin: 15000,
-      salaryMax: 25000,
-      currency: 'SAR',
-      companyId: bankCompany.id,
-      createdById: hrManager.id,
+      title: 'Senior Relationship Manager',
+      description: 'We are looking for a Senior Relationship Manager to join our Corporate Banking team.',
+      requirements: 'Minimum 5 years of experience in corporate banking, excellent communication skills, and strong financial analysis capabilities.',
+      responsibilities: 'Manage key client relationships, develop new business opportunities, and provide financial solutions to corporate clients.',
+      benefits: 'Competitive salary, health insurance, and career advancement opportunities.',
+      skills: ['Corporate Banking', 'Relationship Management', 'Financial Analysis', 'Credit Assessment', 'Client Acquisition'],
+      experienceLevel: ExperienceLevel.SENIOR,
+      location: 'Amman, Jordan',
+      workType: WorkType.ONSITE,
+      salaryMin: 2000,
+      salaryMax: 3500,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: true,
       enableAiInterview: true,
-      interviewLanguages: ['ENGLISH', 'ARABIC'],
-      interviewDuration: 45,
-      technicalQuestions: {
-        questions: [
-          {
-            id: 1,
-            question: 'Explain the difference between microservices and monolithic architecture in banking systems.',
-            category: 'Architecture',
-            difficulty: 'Medium'
-          },
-          {
-            id: 2,
-            question: 'How would you implement secure API authentication for a banking application?',
-            category: 'Security',
-            difficulty: 'Hard'
-          }
-        ]
-      },
-      behavioralQuestions: {
-        questions: [
-          {
-            id: 1,
-            question: 'Describe a time when you had to work under pressure to meet a critical deadline.',
-            category: 'Stress Management',
-            difficulty: 'Medium'
-          },
-          {
-            id: 2,
-            question: 'How do you ensure code quality when working in a team?',
-            category: 'Teamwork',
-            difficulty: 'Easy'
-          }
-        ]
-      },
-      publishedAt: new Date(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-    },
-  });
-
-  const jobPost2 = await prisma.jobPost.create({
-    data: {
-      title: 'AI/ML Engineer - Risk Analytics',
-      description: 'Join our AI team to develop machine learning models for risk assessment and fraud detection in banking operations.',
-      requirements: 'Master\'s degree in Data Science, Computer Science, or related field. 3+ years of experience in ML/AI. Strong knowledge of Python, TensorFlow, scikit-learn, and SQL.',
-      responsibilities: 'Develop and deploy ML models, analyze large datasets, collaborate with risk management teams, ensure model accuracy and performance.',
-      benefits: 'Competitive salary, health insurance, learning budget, conference attendance, stock options.',
-      skills: ['Python', 'TensorFlow', 'scikit-learn', 'SQL', 'Docker', 'AWS', 'Risk Analytics', 'Statistics'],
-      experienceLevel: 'MID_LEVEL',
-      location: 'Dubai, UAE',
-      workType: 'REMOTE',
-      salaryMin: 12000,
-      salaryMax: 18000,
-      currency: 'AED',
-      companyId: bankCompany.id,
-      createdById: hrManager.id,
-      enableAiInterview: true,
-      interviewLanguages: ['ENGLISH'],
-      interviewDuration: 60,
-      publishedAt: new Date(),
-      expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 days from now
-    },
-  });
-
-  const jobPost3 = await prisma.jobPost.create({
-    data: {
-      title: 'Cybersecurity Analyst',
-      description: 'Protect our banking infrastructure from cyber threats. Monitor, detect, and respond to security incidents.',
-      requirements: 'Bachelor\'s degree in Cybersecurity or related field. 2+ years of experience in cybersecurity. Knowledge of SIEM tools, penetration testing, and compliance frameworks.',
-      responsibilities: 'Monitor security events, conduct vulnerability assessments, implement security controls, respond to incidents, maintain compliance documentation.',
-      benefits: 'Competitive salary, health insurance, security certifications budget, flexible schedule.',
-      skills: ['SIEM', 'Penetration Testing', 'ISO 27001', 'PCI DSS', 'Network Security', 'Incident Response'],
-      experienceLevel: 'JUNIOR',
-      location: 'Cairo, Egypt',
-      workType: 'ONSITE',
-      salaryMin: 8000,
-      salaryMax: 12000,
-      currency: 'EGP',
-      companyId: bankCompany.id,
-      createdById: hrManager.id,
-      enableAiInterview: true,
-      interviewLanguages: ['BILINGUAL'],
+      interviewLanguages: [InterviewLanguage.ENGLISH],
       interviewDuration: 30,
+      aiPrompt: `System: You are Laila Al Noor — a friendly and professional AI HR assistant for Capital Bank.
+You are guiding a candidate through a structured interview for the role of Senior Relationship Manager in Corporate Banking.
+
+Your job is to ask one question at a time, listen respectfully, and keep the tone professional but warm. Never explain answers or offer feedback. Use short, natural transitions to maintain a conversational flow.
+
+Follow this sequence:
+1. Welcome and introduction
+2. Experience in corporate/commercial banking
+3. Sectors and client types
+4. Portfolio size, growth, and retention
+5. Credit prep and client evaluation
+6. Collaboration with risk and credit departments
+7. KPIs and performance achievements
+8. Client acquisition and cross-selling
+9. Use of banking systems and CRM tools
+10. Internal coordination with teams
+11. Salary expectations and workplace preferences
+
+Close the interview with a polite thank-you message.`,
+      companyId: capitalBank.id,
+      createdById: widdUser.id,
       publishedAt: new Date(),
-      expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
+    },
+  });
+  
+  // Additional Capital Bank job posts
+  const creditAnalystJob = await prisma.jobPost.create({
+    data: {
+      title: 'Credit Risk Analyst',
+      description: 'Capital Bank is seeking a Credit Risk Analyst to join our Risk Management team.',
+      requirements: 'Bachelor\'s degree in Finance, Economics, or related field. 2+ years of experience in credit risk analysis in a banking environment.',
+      responsibilities: 'Analyze loan applications, review financial statements, assess creditworthiness, and prepare risk assessment reports.',
+      benefits: 'Competitive salary, health insurance, and professional development opportunities.',
+      skills: ['Credit Analysis', 'Risk Management', 'Financial Modeling', 'Basel Regulations', 'Banking'],
+      experienceLevel: ExperienceLevel.MID_LEVEL,
+      location: 'Amman, Jordan',
+      workType: WorkType.ONSITE,
+      salaryMin: 1200,
+      salaryMax: 1800,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: false,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ENGLISH],
+      interviewDuration: 25,
+      companyId: capitalBank.id,
+      createdById: widdUser.id,
+      publishedAt: new Date(new Date().setDate(new Date().getDate() - 15)),
+    },
+  });
+  
+  const digitalBankingOfficerJob = await prisma.jobPost.create({
+    data: {
+      title: 'Digital Banking Officer',
+      description: 'Join our Digital Banking team to drive innovation and enhance our digital offerings.',
+      requirements: 'Bachelor\'s degree in Computer Science, IT, or related field. 3+ years of experience in digital banking solutions.',
+      responsibilities: 'Manage digital banking initiatives, enhance customer experience, and collaborate with IT for platform improvements.',
+      benefits: 'Competitive salary, health insurance, and flexible work arrangements.',
+      skills: ['Digital Banking', 'FinTech', 'Project Management', 'User Experience', 'Customer Journey Mapping'],
+      experienceLevel: ExperienceLevel.MID_LEVEL,
+      location: 'Amman, Jordan',
+      workType: WorkType.HYBRID,
+      salaryMin: 1500,
+      salaryMax: 2200,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: true,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ENGLISH],
+      interviewDuration: 30,
+      companyId: capitalBank.id,
+      createdById: capitalHRManager.id,
+      publishedAt: new Date(new Date().setDate(new Date().getDate() - 5)),
     },
   });
 
+  const salesRepJob = await prisma.jobPost.create({
+    data: {
+      title: 'Sales Representative',
+      description: 'Abu Khader Automotive is seeking a motivated Sales Representative to join our team.',
+      requirements: 'Proven sales experience, excellent communication skills, and passion for automotive industry.',
+      responsibilities: 'Present and sell vehicles to prospects, handle customer inquiries, and maintain relationships with existing customers.',
+      benefits: 'Competitive commission structure, training programs, and growth opportunities.',
+      skills: ['Automotive Sales', 'Customer Service', 'Negotiation', 'Product Knowledge', 'CRM'],
+      experienceLevel: ExperienceLevel.MID_LEVEL,
+      location: 'Amman, Jordan',
+      workType: WorkType.ONSITE,
+      salaryMin: 800,
+      salaryMax: 1500,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: false,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ARABIC, InterviewLanguage.ENGLISH],
+      interviewDuration: 25,
+      companyId: abuKhader.id,
+      createdById: abuKhaderUser.id,
+      publishedAt: new Date(),
+    },
+  });
+  
+  // Additional Abu Khader job posts
+  const serviceAdvisorJob = await prisma.jobPost.create({
+    data: {
+      title: 'Service Advisor',
+      description: 'Join our service team to provide exceptional customer service and technical guidance.',
+      requirements: 'Technical knowledge of automotive systems, customer service experience, and strong communication skills.',
+      responsibilities: 'Advise customers on maintenance needs, prepare service orders, and coordinate with technicians.',
+      benefits: 'Competitive salary, training opportunities, and employee discount program.',
+      skills: ['Customer Service', 'Automotive Knowledge', 'Service Management', 'Technical Communication', 'Problem Solving'],
+      experienceLevel: ExperienceLevel.MID_LEVEL,
+      location: 'Amman, Jordan',
+      workType: WorkType.ONSITE,
+      salaryMin: 700,
+      salaryMax: 1100,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: false,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ARABIC],
+      interviewDuration: 20,
+      companyId: abuKhader.id,
+      createdById: abuKhaderUser.id,
+      publishedAt: new Date(new Date().setDate(new Date().getDate() - 10)),
+    },
+  });
+
+  const dotNetDevJob = await prisma.jobPost.create({
+    data: {
+      title: '.NET Developer',
+      description: 'Menaitech is looking for a skilled .NET Developer to join our software development team.',
+      requirements: 'Minimum 3 years of experience in .NET development, proficiency in C#, and familiarity with web services and SQL Server.',
+      responsibilities: 'Design and implement new features, maintain existing code, and participate in code reviews.',
+      benefits: 'Competitive salary, flexible working hours, and professional development opportunities.',
+      skills: ['.NET', 'C#', 'SQL Server', 'Web APIs', 'Azure'],
+      experienceLevel: ExperienceLevel.MID_LEVEL,
+      location: 'Amman, Jordan',
+      workType: WorkType.HYBRID,
+      salaryMin: 1200,
+      salaryMax: 2000,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: false,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ENGLISH],
+      interviewDuration: 45,
+      companyId: menaitech.id,
+      createdById: menaitechUser.id,
+      publishedAt: new Date(),
+    },
+  });
+
+  const hrManagerJob = await prisma.jobPost.create({
+    data: {
+      title: 'HR Talent Manager',
+      description: 'Menaitech is seeking an experienced HR Talent Manager to oversee our talent acquisition and management processes.',
+      requirements: 'Minimum 5 years of experience in HR management, strong interpersonal skills, and experience with HRMS systems.',
+      responsibilities: 'Develop and implement recruitment strategies, manage the talent acquisition process, and provide guidance on HR best practices.',
+      benefits: 'Competitive salary, health insurance, and professional development opportunities.',
+      skills: ['Talent Acquisition', 'HR Management', 'HRMS', 'Interviewing', 'Onboarding'],
+      experienceLevel: ExperienceLevel.SENIOR,
+      location: 'Amman, Jordan',
+      workType: WorkType.ONSITE,
+      salaryMin: 1500,
+      salaryMax: 2500,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: true,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ENGLISH, InterviewLanguage.ARABIC],
+      interviewDuration: 35,
+      companyId: menaitech.id,
+      createdById: menaitechUser.id,
+      publishedAt: new Date(),
+    },
+  });
+  
+  // Additional job posts for other companies
+  const networkEngineerJob = await prisma.jobPost.create({
+    data: {
+      title: 'Network Engineer',
+      description: 'Orange Jordan is looking for a Network Engineer to join our infrastructure team.',
+      requirements: 'Bachelor\'s degree in IT, Computer Science, or related field. 3+ years of experience with network infrastructure.',
+      responsibilities: 'Manage and maintain network infrastructure, implement network solutions, and troubleshoot network issues.',
+      benefits: 'Competitive salary, health insurance, and career growth opportunities.',
+      skills: ['Network Administration', 'Cisco', 'Routing', 'Switching', 'Network Security'],
+      experienceLevel: ExperienceLevel.MID_LEVEL,
+      location: 'Amman, Jordan',
+      workType: WorkType.ONSITE,
+      salaryMin: 1100,
+      salaryMax: 1800,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: false,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ENGLISH],
+      interviewDuration: 30,
+      companyId: orangeJordan.id,
+      createdById: orangeHRManager.id,
+      publishedAt: new Date(new Date().setDate(new Date().getDate() - 3)),
+    },
+  });
+  
+  const mobileDevJob = await prisma.jobPost.create({
+    data: {
+      title: 'Mobile App Developer',
+      description: 'TechCrunch Software is hiring a Mobile App Developer to create cutting-edge applications.',
+      requirements: 'Experience with React Native or Flutter, knowledge of mobile app development lifecycle, and portfolio of published apps.',
+      responsibilities: 'Develop and maintain mobile applications, implement new features, and ensure app performance.',
+      benefits: 'Competitive salary, flexible working hours, and remote work options.',
+      skills: ['React Native', 'Flutter', 'Mobile Development', 'API Integration', 'UI/UX'],
+      experienceLevel: ExperienceLevel.MID_LEVEL,
+      location: 'Irbid, Jordan',
+      workType: WorkType.HYBRID,
+      salaryMin: 1000,
+      salaryMax: 1700,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: true,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ENGLISH],
+      interviewDuration: 40,
+      companyId: techCrunch.id,
+      createdById: techCrunchRecruiter.id,
+      publishedAt: new Date(new Date().setDate(new Date().getDate() - 7)),
+    },
+  });
+  
+  const nurseJob = await prisma.jobPost.create({
+    data: {
+      title: 'Registered Nurse',
+      description: 'Jordan Hospital is hiring Registered Nurses to join our dedicated healthcare team.',
+      requirements: 'Bachelor\'s degree in Nursing, valid nursing license, and 2+ years of clinical experience.',
+      responsibilities: 'Provide direct patient care, administer medications, and coordinate with healthcare team members.',
+      benefits: 'Competitive salary, health insurance, and continuing education support.',
+      skills: ['Patient Care', 'Medical Records', 'Medication Administration', 'Clinical Assessment', 'Healthcare Protocols'],
+      experienceLevel: ExperienceLevel.MID_LEVEL,
+      location: 'Amman, Jordan',
+      workType: WorkType.ONSITE,
+      salaryMin: 900,
+      salaryMax: 1400,
+      currency: 'JOD',
+      isActive: true,
+      isFeatured: false,
+      enableAiInterview: true,
+      interviewLanguages: [InterviewLanguage.ARABIC, InterviewLanguage.ENGLISH],
+      interviewDuration: 25,
+      companyId: jordanHospital.id,
+      createdById: hospitalHR.id,
+      publishedAt: new Date(new Date().setDate(new Date().getDate() - 12)),
+    },
+  });
+
+  console.log('Job posts created');
+  
+  // Create candidates
+  const candidates: any[] = [];
+  
+  // Create 20 candidates with different profiles
+  for (let i = 1; i <= 20; i++) {
+    const candidate = await prisma.candidate.create({
+      data: {
+        phoneNumber: `+96279${100000 + i}`,
+        email: `candidate${i}@example.com`,
+        name: `Candidate ${i}`,
+        firstName: `First${i}`,
+        lastName: `Last${i}`,
+        whatsappNumber: `+96279${100000 + i}`,
+        isActive: true,
+        cvUrl: i <= 10 ? `https://example.com/cvs/candidate${i}.pdf` : null,
+      },
+    });
+    
+    candidates.push(candidate);
+  }
+  
+  console.log('Candidates created');
+  
   // Create applications
-  const application1 = await prisma.application.create({
-    data: {
-      jobPostId: jobPost1.id,
-      candidateId: candidate1.id,
-      status: 'INTERVIEW_COMPLETED',
-      cvUrl: 'https://example.com/cvs/ahmed-hassan-cv.pdf',
-      cvFileName: 'ahmed-hassan-cv.pdf',
-      coverLetter: 'I am excited to apply for the Senior Backend Developer position. With my extensive experience in fintech and Node.js development, I believe I would be a valuable addition to your team.',
-      whatsappSent: true,
-      whatsappSentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      whatsappStatus: 'REPLIED',
-      isScreeningPassed: true,
-      screeningNotes: 'Strong technical background, good communication skills',
-    },
-  });
-
-  const application2 = await prisma.application.create({
-    data: {
-      jobPostId: jobPost2.id,
-      candidateId: candidate2.id,
-      status: 'CV_APPROVED',
-      cvUrl: 'https://example.com/cvs/fatima-alzahra-cv.pdf',
-      cvFileName: 'fatima-alzahra-cv.pdf',
-      coverLetter: 'As a data scientist with a passion for AI in banking, I am thrilled to apply for this ML Engineer position.',
-      whatsappSent: true,
-      whatsappSentAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      whatsappStatus: 'DELIVERED',
-      isScreeningPassed: true,
-      screeningNotes: 'Excellent ML background, relevant experience',
-    },
-  });
-
-  const application3 = await prisma.application.create({
-    data: {
-      jobPostId: jobPost3.id,
-      candidateId: candidate3.id,
-      status: 'PENDING',
-      cvUrl: 'https://example.com/cvs/omar-mahmoud-cv.pdf',
-      cvFileName: 'omar-mahmoud-cv.pdf',
-      coverLetter: 'I am interested in the Cybersecurity Analyst position and believe my experience aligns well with your requirements.',
-      whatsappSent: false,
-    },
-  });
-
-  // Create CV analyses
-  const cvAnalysis1 = await prisma.cvAnalysis.create({
-    data: {
-      applicationId: application1.id,
-      candidateId: candidate1.id,
-      cvUrl: 'https://example.com/cvs/ahmed-hassan-cv.pdf',
-      extractedText: 'Ahmed Hassan\nSenior Software Engineer\n8 years experience in fintech...',
-      overallScore: 88.5,
-      skillsScore: 92.0,
-      experienceScore: 89.0,
-      educationScore: 85.0,
-      languageScore: 90.0,
-      certificationScore: 80.0,
-      summary: 'Strong candidate with excellent technical skills and relevant fintech experience. Demonstrates proficiency in required technologies.',
-      strengths: [
-        'Extensive Node.js and TypeScript experience',
-        'Strong understanding of microservices architecture',
-        'Previous fintech experience',
-        'Good communication skills',
-        'Leadership experience'
-      ],
-      weaknesses: [
-        'Limited Kubernetes experience',
-        'Could benefit from more cloud certifications'
-      ],
-      suggestedImprovements: [
-        'Consider obtaining AWS/Azure certifications',
-        'Expand Kubernetes knowledge',
-        'Add more details about scalability achievements'
-      ],
-      skills: ['Node.js', 'TypeScript', 'PostgreSQL', 'Docker', 'Redis', 'REST APIs', 'Microservices', 'Git'],
-      experience: {
-        positions: [
-          {
-            title: 'Senior Software Engineer',
-            company: 'FinTech Solutions',
-            duration: '2020-2024',
-            responsibilities: ['Led backend development team', 'Designed microservices architecture', 'Improved API performance by 40%']
-          },
-          {
-            title: 'Software Engineer',
-            company: 'Banking Corp',
-            duration: '2018-2020',
-            responsibilities: ['Developed core banking APIs', 'Implemented security features', 'Worked with payment systems']
-          }
-        ]
-      },
-      education: {
-        degrees: [
-          {
-            degree: 'Bachelor of Computer Science',
-            university: 'UAE University',
-            year: '2016',
-            gpa: '3.7'
-          }
-        ]
-      },
-      certifications: ['AWS Developer Associate', 'Certified Kubernetes Application Developer'],
-      languages: {
-        english: 'Fluent',
-        arabic: 'Native'
-      },
-      aiModel: 'gpt-4-turbo',
-      processingTime: 2500,
-    },
-  });
-
-  const cvAnalysis2 = await prisma.cvAnalysis.create({
-    data: {
-      applicationId: application2.id,
-      candidateId: candidate2.id,
-      cvUrl: 'https://example.com/cvs/fatima-alzahra-cv.pdf',
-      extractedText: 'Fatima Al-Zahra\nData Scientist\n5 years experience in AI/ML...',
-      overallScore: 91.2,
-      skillsScore: 94.0,
-      experienceScore: 88.0,
-      educationScore: 95.0,
-      languageScore: 85.0,
-      certificationScore: 92.0,
-      summary: 'Outstanding candidate with strong ML background and proven track record in banking AI applications.',
-      strengths: [
-        'Advanced ML/AI expertise',
-        'Strong mathematical background',
-        'Experience with banking data',
-        'Published research papers',
-        'TensorFlow and PyTorch proficiency'
-      ],
-      weaknesses: [
-        'Limited production deployment experience',
-        'Could improve software engineering practices'
-      ],
-      suggestedImprovements: [
-        'Gain more MLOps experience',
-        'Learn Docker and Kubernetes',
-        'Improve software engineering skills'
-      ],
-      skills: ['Python', 'TensorFlow', 'PyTorch', 'scikit-learn', 'SQL', 'R', 'Statistics', 'Deep Learning'],
-      experience: {
-        positions: [
-          {
-            title: 'Senior Data Scientist',
-            company: 'AI Banking Solutions',
-            duration: '2021-2024',
-            responsibilities: ['Developed fraud detection models', 'Improved risk assessment accuracy by 25%', 'Led ML team of 4 people']
-          },
-          {
-            title: 'Data Scientist',
-            company: 'Tech Analytics',
-            duration: '2019-2021',
-            responsibilities: ['Built recommendation systems', 'Analyzed customer behavior', 'Created ML pipelines']
-          }
-        ]
-      },
-      education: {
-        degrees: [
-          {
-            degree: 'Master of Data Science',
-            university: 'King Abdullah University',
-            year: '2019',
-            gpa: '3.9'
-          },
-          {
-            degree: 'Bachelor of Mathematics',
-            university: 'Cairo University',
-            year: '2017',
-            gpa: '3.8'
-          }
-        ]
-      },
-      certifications: ['Google Cloud ML Engineer', 'AWS ML Specialty', 'TensorFlow Developer'],
-      languages: {
-        english: 'Fluent',
-        arabic: 'Native'
-      },
-      aiModel: 'gpt-4-turbo',
-      processingTime: 2800,
-    },
-  });
-
-  // Create interviews
-  const interview1 = await prisma.interview.create({
-    data: {
-      applicationId: application1.id,
-      candidateId: candidate1.id,
-      type: 'AI_SCREENING',
-      language: 'ENGLISH',
-      status: 'COMPLETED',
-      scheduledAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      startedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 + 60000),
-      completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 + 2700000),
-      duration: 45,
-      expectedDuration: 45,
-      roomName: `interview-${application1.id}-${Date.now()}`,
-      roomId: 'room_abc123',
-      recordingEnabled: true,
-      recordingUrl: 'https://example.com/recordings/interview1.mp4',
-      overallScore: 85.5,
-      communicationScore: 88.0,
-      technicalScore: 89.0,
-      behavioralScore: 82.0,
-      confidenceScore: 87.0,
-      clarityScore: 90.0,
-      responseTimeScore: 83.0,
-      summary: 'Strong technical candidate with good communication skills. Demonstrated deep understanding of backend architecture and fintech domain.',
-      keyHighlights: [
-        'Excellent technical knowledge',
-        'Clear communication',
-        'Relevant experience',
-        'Problem-solving skills'
-      ],
-      areasForImprovement: [
-        'Could be more confident in answers',
-        'Provide more specific examples'
-      ],
-      recommendations: 'Proceed to technical interview. Strong candidate for the role.',
-      questionsAsked: {
-        questions: [
-          {
-            question: 'Explain microservices architecture in banking',
-            answer: 'Microservices allow banks to break down monolithic systems...',
-            score: 90
-          },
-          {
-            question: 'How do you handle API security?',
-            answer: 'I implement OAuth 2.0, JWT tokens, rate limiting...',
-            score: 85
-          }
-        ]
-      },
-      transcription: 'Interview transcript: Hello Ahmed, thank you for joining us today...',
-      sentimentAnalysis: {
-        overall: 'positive',
-        confidence: 0.85,
-        emotions: ['confident', 'enthusiastic', 'professional']
-      },
-      aiModel: 'gpt-4-turbo',
-      processingTime: 3200,
-    },
-  });
-
-  // Create fit scores
-  const fitScore1 = await prisma.fitScore.create({
-    data: {
-      applicationId: application1.id,
-      overallScore: 86.7,
-      cvWeight: 0.4,
-      interviewWeight: 0.6,
-      cvScore: 88.5,
-      interviewScore: 85.5,
-      recommendation: 'HIRE',
-      confidence: 0.87,
-      reasoning: 'Strong technical candidate with excellent CV and good interview performance. Demonstrates relevant experience and skills for the role.',
-      rankInPool: 1,
-      percentile: 95.0,
-      version: '1.0',
-    },
-  });
-
-  const fitScore2 = await prisma.fitScore.create({
-    data: {
-      applicationId: application2.id,
-      overallScore: 91.2,
-      cvWeight: 0.4,
-      interviewWeight: 0.6,
-      cvScore: 91.2,
-      interviewScore: null, // No interview yet
-      recommendation: 'STRONG_HIRE',
-      confidence: 0.92,
-      reasoning: 'Outstanding candidate with exceptional ML background and perfect fit for the AI role. CV demonstrates all required skills and more.',
-      rankInPool: 1,
-      percentile: 98.0,
-      version: '1.0',
-    },
-  });
-
-  // Create notifications
-  await prisma.notification.create({
-    data: {
-      userId: husainUser.id,
-      applicationId: application1.id,
-      type: 'INTERVIEW_COMPLETED',
-      title: 'Interview Completed',
-      message: 'Ahmed Hassan has completed the AI screening interview for Senior Backend Developer position.',
+  // Apply candidates to various jobs
+  const applications: any[] = [];
+  
+  // Relationship Manager job applications
+  for (let i = 0; i < 5; i++) {
+    const applicationStatus = [
+      ApplicationStatus.PENDING,
+      ApplicationStatus.CV_SCREENING,
+      ApplicationStatus.CV_APPROVED,
+      ApplicationStatus.INTERVIEW_SCHEDULED,
+      ApplicationStatus.INTERVIEW_COMPLETED
+    ][i];
+    
+    const application = await prisma.application.create({
       data: {
-        score: 85.5,
-        recommendation: 'HIRE'
+        status: applicationStatus,
+        appliedAt: new Date(new Date().setDate(new Date().getDate() - (20 - i))),
+        updatedAt: new Date(),
+        cvUrl: `https://example.com/cvs/candidate${i+1}.pdf`,
+        cvFileName: `resume_${i+1}.pdf`,
+        coverLetter: `I am excited to apply for the Senior Relationship Manager position at Capital Bank...`,
+        jobPostId: relationshipManagerJob.id,
+        candidateId: candidates[i].id,
+        whatsappSent: i > 0,
+        whatsappSentAt: i > 0 ? new Date(new Date().setDate(new Date().getDate() - (19 - i))) : null,
       },
-    },
-  });
-
-  await prisma.notification.create({
-    data: {
-      userId: hrManager.id,
-      applicationId: application2.id,
-      type: 'CV_ANALYZED',
-      title: 'CV Analysis Complete',
-      message: 'Fatima Al-Zahra\'s CV has been analyzed with a score of 91.2/100.',
+    });
+    
+    applications.push(application);
+  }
+  
+  // Sales Representative job applications
+  for (let i = 5; i < 8; i++) {
+    const applicationStatus = [
+      ApplicationStatus.CV_APPROVED,
+      ApplicationStatus.INTERVIEW_SCHEDULED,
+      ApplicationStatus.SHORTLISTED
+    ][i-5];
+    
+    const application = await prisma.application.create({
       data: {
-        score: 91.2,
-        recommendation: 'STRONG_HIRE'
+        status: applicationStatus,
+        appliedAt: new Date(new Date().setDate(new Date().getDate() - (15 - i))),
+        updatedAt: new Date(),
+        cvUrl: `https://example.com/cvs/candidate${i+1}.pdf`,
+        cvFileName: `resume_${i+1}.pdf`,
+        coverLetter: `I am writing to express my interest in the Sales Representative position at Abu Khader Automotive...`,
+        jobPostId: salesRepJob.id,
+        candidateId: candidates[i].id,
+        whatsappSent: true,
+        whatsappSentAt: new Date(new Date().setDate(new Date().getDate() - (14 - i))),
       },
-    },
-  });
+    });
+    
+    applications.push(application);
+  }
+  
+  // .NET Developer job applications
+  for (let i = 8; i < 12; i++) {
+    const applicationStatus = [
+      ApplicationStatus.CV_SCREENING,
+      ApplicationStatus.CV_APPROVED,
+      ApplicationStatus.INTERVIEW_COMPLETED,
+      ApplicationStatus.FINAL_INTERVIEW
+    ][i-8];
+    
+    const application = await prisma.application.create({
+      data: {
+        status: applicationStatus,
+        appliedAt: new Date(new Date().setDate(new Date().getDate() - (18 - i))),
+        updatedAt: new Date(),
+        cvUrl: `https://example.com/cvs/candidate${i+1}.pdf`,
+        cvFileName: `resume_${i+1}.pdf`,
+        coverLetter: `I am applying for the .NET Developer position at Menaitech with 5+ years of experience...`,
+        jobPostId: dotNetDevJob.id,
+        candidateId: candidates[i].id,
+        whatsappSent: i > 9,
+        whatsappSentAt: i > 9 ? new Date(new Date().setDate(new Date().getDate() - (16 - i))) : null,
+      },
+    });
+    
+    applications.push(application);
+  }
+  
+  // HR Talent Manager job applications
+  for (let i = 12; i < 15; i++) {
+    const applicationStatus = [
+      ApplicationStatus.CV_APPROVED,
+      ApplicationStatus.INTERVIEW_SCHEDULED,
+      ApplicationStatus.OFFER_EXTENDED
+    ][i-12];
+    
+    const application = await prisma.application.create({
+      data: {
+        status: applicationStatus,
+        appliedAt: new Date(new Date().setDate(new Date().getDate() - (25 - i))),
+        updatedAt: new Date(),
+        cvUrl: `https://example.com/cvs/candidate${i+1}.pdf`,
+        cvFileName: `resume_${i+1}.pdf`,
+        coverLetter: `I am excited to apply for the HR Talent Manager role at Menaitech with my extensive HR experience...`,
+        jobPostId: hrManagerJob.id,
+        candidateId: candidates[i].id,
+        whatsappSent: true,
+        whatsappSentAt: new Date(new Date().setDate(new Date().getDate() - (24 - i))),
+      },
+    });
+    
+    applications.push(application);
+  }
+  
+  console.log('Applications created');
+  
+  // Create CV Analysis
+  for (let i = 0; i < applications.length; i++) {
+    if (i < 15) { // Create CV analysis for the first 15 applications
+      await prisma.cvAnalysis.create({
+        data: {
+          cvUrl: applications[i].cvUrl || `https://example.com/cvs/candidate${i+1}.pdf`,
+          extractedText: `Resume content for candidate ${i+1}...`,
+          candidateName: candidates[i].name,
+          candidateEmail: candidates[i].email,
+          candidatePhone: candidates[i].phoneNumber,
+          status: 'completed',
+          overallScore: 65 + Math.floor(Math.random() * 25),
+          skillsScore: 60 + Math.floor(Math.random() * 30),
+          experienceScore: 70 + Math.floor(Math.random() * 20),
+          educationScore: 75 + Math.floor(Math.random() * 15),
+          languageScore: 80 + Math.floor(Math.random() * 20),
+          summary: `Candidate has ${3 + Math.floor(Math.random() * 7)} years of relevant experience in the field.`,
+          strengths: [
+            'Strong communication skills',
+            'Relevant industry experience',
+            'Technical proficiency'
+          ],
+          weaknesses: [
+            'Limited leadership experience',
+            'Some skill gaps in required areas'
+          ],
+          suggestedImprovements: [
+            'Gain more experience in leadership roles',
+            'Enhance technical certifications'
+          ],
+          skills: ['Communication', 'Project Management', 'Technical Writing'],
+          certifications: ['Certified Professional', 'Industry Certification'],
+          applicationId: applications[i].id,
+          candidateId: candidates[i].id,
+          aiModel: 'gpt-4',
+          processingTime: 15000 + Math.floor(Math.random() * 10000),
+        }
+      });
+    }
+  }
+  
+  console.log('CV Analyses created');
+  
+  // Create Interviews
+  const interviews: any[] = [];
+  
+  // Create interviews for applications that have advanced to interview stages
+  for (let i = 0; i < applications.length; i++) {
+    if ([
+      ApplicationStatus.INTERVIEW_SCHEDULED,
+      ApplicationStatus.INTERVIEW_IN_PROGRESS,
+      ApplicationStatus.INTERVIEW_COMPLETED,
+      ApplicationStatus.FINAL_INTERVIEW,
+      ApplicationStatus.OFFER_EXTENDED
+    ].includes(applications[i].status)) {
+      
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(10 + i % 6, 0, 0, 0);
+      
+      const interviewStatus = applications[i].status === ApplicationStatus.INTERVIEW_SCHEDULED ? 
+        InterviewStatus.SCHEDULED : 
+        (applications[i].status === ApplicationStatus.INTERVIEW_IN_PROGRESS ? 
+          InterviewStatus.IN_PROGRESS : 
+          InterviewStatus.COMPLETED);
+      
+      const interview = await prisma.interview.create({
+        data: {
+          type: InterviewType.AI_SCREENING,
+          language: InterviewLanguage.ENGLISH,
+          status: interviewStatus,
+          scheduledAt: tomorrow,
+          startedAt: interviewStatus !== InterviewStatus.SCHEDULED ? new Date() : null,
+          completedAt: interviewStatus === InterviewStatus.COMPLETED ? new Date() : null,
+          duration: interviewStatus === InterviewStatus.COMPLETED ? 25 + Math.floor(Math.random() * 20) : null,
+          expectedDuration: 30,
+          roomName: `interview-${applications[i].id}`,
+          roomCode: `code-${Math.floor(100000 + Math.random() * 900000)}`,
+          roomId: `room-${applications[i].id}`,
+          accessToken: `token-${applications[i].id}`,
+          participantToken: `participant-token-${applications[i].id}`,
+          recordingEnabled: true,
+          candidatePhone: candidates[i].phoneNumber,
+          candidateName: candidates[i].name,
+          instructions: `Please join the interview at the scheduled time. Be prepared to discuss your experience and skills.`,
+          maxDuration: 1800,
+          applicationId: applications[i].id,
+          candidateId: candidates[i].id,
+          overallScore: interviewStatus === InterviewStatus.COMPLETED ? 70 + Math.floor(Math.random() * 20) : null,
+          communicationScore: interviewStatus === InterviewStatus.COMPLETED ? 75 + Math.floor(Math.random() * 15) : null,
+          technicalScore: interviewStatus === InterviewStatus.COMPLETED ? 65 + Math.floor(Math.random() * 25) : null,
+          behavioralScore: interviewStatus === InterviewStatus.COMPLETED ? 80 + Math.floor(Math.random() * 15) : null,
+          summary: interviewStatus === InterviewStatus.COMPLETED ? 
+            `The candidate demonstrated strong knowledge in their field and communicated well during the interview.` : null,
+        }
+      });
+      
+      interviews.push(interview);
+    }
+  }
+  
+  console.log('Interviews created');
+  
+  // Create Fit Scores for completed interviews
+  for (let i = 0; i < interviews.length; i++) {
+    if (interviews[i].status === InterviewStatus.COMPLETED) {
+      const overallScore = 70 + Math.floor(Math.random() * 20);
+      const recommendation = overallScore >= 85 ? 
+        FitRecommendation.STRONG_HIRE : 
+        (overallScore >= 75 ? 
+          FitRecommendation.HIRE : 
+          (overallScore >= 65 ? 
+            FitRecommendation.CONSIDER : 
+            FitRecommendation.NO_HIRE));
+      
+      await prisma.fitScore.create({
+        data: {
+          overallScore: overallScore,
+          cvWeight: 0.4,
+          interviewWeight: 0.6,
+          cvScore: 65 + Math.floor(Math.random() * 25),
+          interviewScore: interviews[i].overallScore,
+          recommendation: recommendation,
+          confidence: 0.7 + Math.random() * 0.25,
+          reasoning: `Based on the candidate's performance in the interview and CV review, they appear to be ${
+            recommendation === FitRecommendation.STRONG_HIRE ? 
+              'an exceptional' : 
+              (recommendation === FitRecommendation.HIRE ? 
+                'a strong' : 
+                (recommendation === FitRecommendation.CONSIDER ? 
+                  'a decent' : 
+                  'a weak'))
+          } match for this position.`,
+          rankInPool: i + 1,
+          percentile: Math.round((100 - ((i + 1) / interviews.length * 100)) * 10) / 10,
+          applicationId: interviews[i].applicationId,
+        }
+      });
+    }
+  }
+  
+  console.log('Fit Scores created');
+  
+  // Create Notifications
+  for (let i = 0; i < applications.length; i++) {
+    // Notification for new applications
+    await prisma.notification.create({
+      data: {
+        type: "APPLICATION_RECEIVED",
+        title: 'New Application Received',
+        message: `A new application has been received for the position of ${
+          applications[i].jobPostId === relationshipManagerJob.id ? 'Senior Relationship Manager' :
+          (applications[i].jobPostId === salesRepJob.id ? 'Sales Representative' :
+          (applications[i].jobPostId === dotNetDevJob.id ? '.NET Developer' :
+          'HR Talent Manager'))
+        }`,
+        isRead: Math.random() > 0.5,
+        readAt: Math.random() > 0.5 ? new Date() : null,
+        createdAt: applications[i].appliedAt,
+        userId: applications[i].jobPostId === relationshipManagerJob.id ? widdUser.id :
+               (applications[i].jobPostId === salesRepJob.id ? abuKhaderUser.id :
+               menaitechUser.id),
+        applicationId: applications[i].id,
+        data: {
+          applicationId: applications[i].id,
+          candidateName: candidates[i].name
+        },
+      }
+    });
+    
+    // Notification for interview scheduled (where applicable)
+    if ([
+      ApplicationStatus.INTERVIEW_SCHEDULED,
+      ApplicationStatus.INTERVIEW_IN_PROGRESS,
+      ApplicationStatus.INTERVIEW_COMPLETED,
+      ApplicationStatus.FINAL_INTERVIEW,
+      ApplicationStatus.OFFER_EXTENDED
+    ].includes(applications[i].status)) {
+      await prisma.notification.create({
+        data: {
+          type: "INTERVIEW_SCHEDULED" as any,
+          title: 'Interview Scheduled',
+          message: `An interview has been scheduled with ${candidates[i].name} for the ${
+            applications[i].jobPostId === relationshipManagerJob.id ? 'Senior Relationship Manager' :
+            (applications[i].jobPostId === salesRepJob.id ? 'Sales Representative' :
+            (applications[i].jobPostId === dotNetDevJob.id ? '.NET Developer' :
+            'HR Talent Manager'))
+          } position.`,
+          isRead: Math.random() > 0.7,
+          readAt: Math.random() > 0.7 ? new Date() : null,
+          createdAt: new Date(new Date().setDate(new Date().getDate() - (5 - (i % 5)))),
+          userId: applications[i].jobPostId === relationshipManagerJob.id ? widdUser.id :
+                (applications[i].jobPostId === salesRepJob.id ? abuKhaderUser.id :
+                menaitechUser.id),
+          applicationId: applications[i].id,
+          data: {
+            applicationId: applications[i].id,
+            candidateName: candidates[i].name,
+            interviewDate: new Date(new Date().setDate(new Date().getDate() + 1 + (i % 5)))
+          },
+        }
+      });
+    }
+  }
+  
+  console.log('Notifications created');
+  
+  // Create Interview History entries
+  for (let i = 0; i < interviews.length; i++) {
+    if (interviews[i].status === InterviewStatus.COMPLETED) {
+      await prisma.interviewHistory.create({
+        data: {
+          candidate_id: interviews[i].candidateId,
+          ai: "What experience do you have in this field?",
+          user: "I have 5 years of experience working in similar roles, with a focus on project management and team leadership.",
+          language: "en",
+          jobId: applications.find(a => a.id === interviews[i].applicationId)?.jobPostId,
+        }
+      });
+      
+      await prisma.interviewHistory.create({
+        data: {
+          candidate_id: interviews[i].candidateId,
+          ai: "Can you describe a challenging situation you faced in your previous role and how you handled it?",
+          user: "In my previous role, we had a tight deadline for a major client project. I organized the team into focused work streams, prioritized tasks, and we delivered successfully ahead of schedule.",
+          language: "en",
+          jobId: applications.find(a => a.id === interviews[i].applicationId)?.jobPostId,
+        }
+      });
+    }
+  }
+  
+  console.log('Interview History created');
 
-  await prisma.notification.create({
-    data: {
-      userId: hrManager.id,
-      applicationId: application3.id,
-      type: 'APPLICATION_RECEIVED',
-      title: 'New Application',
-      message: 'Omar Mahmoud has applied for the Cybersecurity Analyst position.',
-      isRead: false,
-    },
-  });
-
-  console.log('🌱 Seed data created successfully!');
-  console.log('📧 Demo login credentials:');
-  console.log('   Email: husain@roxate.com');
-  console.log('   Password: password123');
-  console.log('   Role: SUPER_ADMIN');
-  console.log('');
-  console.log('🏢 Demo companies created:');
-  console.log('   - Roxate Ltd (Technology)');
-  console.log('   - MENA Bank (Banking & Financial Services)');
-  console.log('');
-  console.log('💼 Demo job posts created:');
-  console.log('   - Senior Backend Developer - Fintech');
-  console.log('   - AI/ML Engineer - Risk Analytics');
-  console.log('   - Cybersecurity Analyst');
-  console.log('');
-  console.log('👥 Demo candidates with applications:');
-  console.log('   - Ahmed Hassan (Interview Completed)');
-  console.log('   - Fatima Al-Zahra (CV Approved)');
-  console.log('   - Omar Mahmoud (Pending)');
+  console.log('Database seeded successfully!');
 }
 
 main()

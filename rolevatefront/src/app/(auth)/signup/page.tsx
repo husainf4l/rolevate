@@ -89,7 +89,7 @@ function SignupPageContent() {
         role: formData.role,
       };
 
-      const user = await register(registrationData);
+      await register(registrationData);
       setSuccess("Account created successfully! You are now logged in.");
       // Redirect to dashboard after successful registration (user is now logged in)
       setTimeout(() => {

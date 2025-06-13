@@ -2,7 +2,6 @@
 
 import Button from "../../../components/ui/Button";
 
-
 export default function ScheduleMeetingPage() {
   return (
     <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC]">
@@ -13,8 +12,8 @@ export default function ScheduleMeetingPage() {
           </h1>
           <p className="text-lg text-[#94A3B8] max-w-2xl mx-auto">
             Ready to implement{" "}
-            <span className="text-[#00C6AD] font-medium">ROLEVATE AI</span> in your
-            organization? Connect with our financial solutions specialist
+            <span className="text-[#00C6AD] font-medium">ROLEVATE AI</span> in
+            your organization? Connect with our financial solutions specialist
           </p>
         </div>
 
@@ -29,10 +28,12 @@ export default function ScheduleMeetingPage() {
                 ✓
               </div>
               <div>
-                <h4 className="font-semibold mb-1">Streamlined Implementation</h4>
+                <h4 className="font-semibold mb-1">
+                  Streamlined Implementation
+                </h4>
                 <p className="text-[#94A3B8] text-sm">
-                  Quick deployment with minimal disruption to your existing hiring
-                  workflow
+                  Quick deployment with minimal disruption to your existing
+                  hiring workflow
                 </p>
               </div>
             </div>
@@ -44,8 +45,8 @@ export default function ScheduleMeetingPage() {
               <div>
                 <h4 className="font-semibold mb-1">Customized Pricing</h4>
                 <p className="text-[#94A3B8] text-sm">
-                  Flexible plans designed specifically for financial institutions of
-                  all sizes
+                  Flexible plans designed specifically for financial
+                  institutions of all sizes
                 </p>
               </div>
             </div>
@@ -65,16 +66,15 @@ export default function ScheduleMeetingPage() {
           </div>
 
           <div className="p-6 bg-[#0F172A] rounded-lg border border-[#334155] text-center">
-            <h4 className="font-bold mb-4">Ready to Transform Your Hiring Process?</h4>
-            <Button 
-              variant="primary" 
-              className="w-full mb-3"
-            >
+            <h4 className="font-bold mb-4">
+              Ready to Transform Your Hiring Process?
+            </h4>
+            <Button variant="primary" className="w-full mb-3">
               Request Consultation
             </Button>
             <p className="text-xs text-[#94A3B8]">
               Our specialists will prepare a tailored solution based on your
-              organization's requirements
+              organization&apos;s requirements
             </p>
           </div>
         </div>

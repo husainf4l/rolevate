@@ -159,8 +159,29 @@ export interface CreateJobPostDto {
   aiInstructions?: string;
 }
 
-// Update Job Post DTO
-export interface UpdateJobPostDto extends Partial<CreateJobPostDto> {}
+// Update Job Post DTO - matches backend expectations
+export interface UpdateJobPostDto {
+  title?: string;
+  description?: string;
+  requirements?: string;
+  responsibilities?: string;
+  benefits?: string;
+  skills?: string[];
+  experienceLevel?: ExperienceLevel;
+  location?: string;
+  workType?: WorkType;
+  salaryMin?: number;
+  salaryMax?: number;
+  currency?: string;
+  isActive?: boolean;
+  isFeatured?: boolean;
+  expiresAt?: string;
+  enableAiInterview?: boolean;
+  interviewLanguages?: InterviewLanguage[];
+  interviewDuration?: number;
+  aiPrompt?: string;
+  aiInstructions?: string;
+}
 
 // Application DTOs
 export interface JobApplication {
@@ -368,15 +389,32 @@ export const createJobPost = async (jobData: CreateJobPostDto): Promise<Job> => 
 
 // Update job post (authenticated)
 export const updateJobPost = async (jobId: string, jobData: UpdateJobPostDto): Promise<Job> => {
+  // Transform salary numbers to strings for backend decimal validation
+  const transformedData = {
+    ...jobData,
+    // Only include salary fields if they exist and convert to string for @IsDecimal
+    ...(jobData.salaryMin !== undefined && { salaryMin: jobData.salaryMin }),
+    ...(jobData.salaryMax !== undefined && { salaryMax: jobData.salaryMax }),
+  };
+
+  console.log('Sending update data:', transformedData);
+
   const response = await fetch(`${API_BASE_URL}/jobposts/${jobId}`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
-    body: JSON.stringify(jobData),
+    body: JSON.stringify(transformedData),
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update job post');
+    const errorText = await response.text();
+    console.error('Update job post error:', errorText);
+    
+    try {
+      const error = JSON.parse(errorText);
+      throw new Error(error.message || 'Failed to update job post');
+    } catch {
+      throw new Error(`Failed to update job post: ${response.status} ${response.statusText}`);
+    }
   }
 
   return response.json();

@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useJobs } from "@/hooks/useJobs";
 import { JobCard } from "@/components/jobs/JobCard";
-import { JobFilters } from "@/components/jobs/JobFilters";
-import { JobStats } from "@/components/jobs/JobStats";
 import { Pagination } from "@/components/jobs/Pagination";
 import { JobFilters as JobFiltersType } from "@/services/jobs.service";
 import {
@@ -24,18 +22,6 @@ const JobsPage: React.FC = () => {
 
   const { jobs, pagination, loading, error, refetch } = useJobs(filters);
 
-  const handleFilterChange = (key: keyof JobFiltersType, value: any) => {
-    const newFilters = { ...filters, [key]: value, page: 1 };
-    setFilters(newFilters);
-    refetch(newFilters);
-  };
-
-  const handleSearch = (searchTerm: string) => {
-    const newFilters = { ...filters, search: searchTerm, page: 1 };
-    setFilters(newFilters);
-    refetch(newFilters);
-  };
-
   const handlePageChange = (page: number) => {
     const newFilters = { ...filters, page };
     setFilters(newFilters);
@@ -47,11 +33,11 @@ const JobsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Main Title - Left-aligned, Apple Style */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+          <h1 className="text-4xl font-bold text-white tracking-tight">
             Demo Jobs
           </h1>
           <div className="w-16 h-1 bg-[#00C6AD] mt-3"></div>

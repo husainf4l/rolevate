@@ -4,6 +4,17 @@
 
 The Job Post Creation Agent is an intelligent HR expert system that helps users create compelling job posts through conversational AI. It uses GPT-4 to provide expert guidance and best practices for crafting job descriptions that attract top talent.
 
+## 🆕 NEW: Session Management Support
+
+The agent now includes **full chat ID session management** for maintaining conversation state across multiple API requests. This enables true conversational experiences where users can:
+
+- Resume conversations after interruptions
+- Build job posts incrementally over multiple sessions
+- Maintain context and progress across server restarts
+- Have natural, multi-turn conversations
+
+For detailed session management documentation, see [SESSION_MANAGEMENT_README.md](SESSION_MANAGEMENT_README.md).
+
 ## Features
 
 - 🤖 **AI HR Expert**: Powered by GPT-4 with 15+ years of HR expertise
@@ -11,10 +22,13 @@ The Job Post Creation Agent is an intelligent HR expert system that helps users 
 - 🎯 **Best Practices**: Provides tips and suggestions for optimal job descriptions
 - 🔗 **NestJS Integration**: Automatically sends completed job posts to your backend
 - 📝 **Comprehensive Data Collection**: Collects all essential job post information
+- 🆕 **Session Management**: Maintains conversation state across requests
+- 🆕 **Resume Capability**: Users can return to incomplete job posts
+- 🆕 **Intelligent Completion**: Automatically detects when ready to finalize
 
 ## API Endpoints
 
-### 1. Create Job Post (Initial)
+### 1. Create Job Post with Session Management
 
 **Endpoint:** `POST /create-job-post`
 
@@ -25,8 +39,9 @@ The Job Post Creation Agent is an intelligent HR expert system that helps users 
 - `message` (required): Initial message about the job post
 - `company_id` (required): UUID of the company creating the job post
 - `company_name` (optional): Name of the company
+- `session_id` (optional): **NEW** - Session ID to resume existing conversation
 
-**Example Request:**
+**Example Request (New Session):**
 
 ```bash
 curl -X POST "http://localhost:8000/create-job-post" \
@@ -35,19 +50,115 @@ curl -X POST "http://localhost:8000/create-job-post" \
   -F "company_name=TechCorp Solutions"
 ```
 
+**Example Request (Resume Session):**
+
+```bash
+curl -X POST "http://localhost:8000/create-job-post" \
+  -F "message=hello" \
+  -F "company_id=123e4567-e89b-12d3-a456-426614174000" \
+  -F "company_name=TechCorp Solutions" \
+  -F "session_id=90c811b9-ff13-4d19-a752-a94cf04de1aa"
+```
+
 **Example Response:**
 
 ```json
 {
   "status": "success",
+  "session_id": "90c811b9-ff13-4d19-a752-a94cf04de1aa",
   "company_id": "123e4567-e89b-12d3-a456-426614174000",
   "company_name": "TechCorp Solutions",
   "agent_response": "👋 Hello! I'm your AI HR Expert, and I'm excited to help you create an outstanding job post for TechCorp Solutions!...",
-  "message_count": 2
+  "is_complete": false,
+  "job_data": {
+    "title": "",
+    "experienceLevel": "",
+    "skills": []
+    // ... other job fields
+  },
+  "current_step": "getting_basic_info"
 }
 ```
 
-### 2. Job Post Chat (Continue Conversation)
+**Endpoint:** `POST /job-post-chat`
+
+**Content-Type:** `multipart/form-data`
+
+**Parameters:**
+
+- `message` (required): Continuation message for the conversation
+- `session_id` (required): **NEW** - Session ID for conversation continuity
+- `company_id` (optional): Company identifier for validation
+- `company_name` (optional): Company name
+
+**Example Request:**
+
+```bash
+curl -X POST "http://localhost:8000/job-post-chat" \
+  -F "message=Senior level with 5+ years experience in React and Node.js" \
+  -F "session_id=90c811b9-ff13-4d19-a752-a94cf04de1aa"
+```
+
+**Example Response:**
+
+```json
+{
+  "status": "success",
+  "session_id": "90c811b9-ff13-4d19-a752-a94cf04de1aa",
+  "agent_response": "Excellent! A senior developer with React and Node.js experience is a great choice...",
+  "is_complete": false,
+  "job_data": {
+    "title": "Senior Software Engineer",
+    "experienceLevel": "senior",
+    "skills": ["react", "node.js"]
+    // ... updated job fields
+  },
+  "current_step": "collecting_details"
+}
+```
+
+### 3. Get Session Information
+
+**Endpoint:** `GET /job-post-session/{session_id}`
+
+**Example Request:**
+
+```bash
+curl -X GET "http://localhost:8000/job-post-session/90c811b9-ff13-4d19-a752-a94cf04de1aa"
+```
+
+**Example Response:**
+
+```json
+{
+  "status": "success",
+  "session_id": "90c811b9-ff13-4d19-a752-a94cf04de1aa",
+  "company_id": "123e4567-e89b-12d3-a456-426614174000",
+  "company_name": "TechCorp Solutions",
+  "created_at": "2025-06-13T15:55:59.947583",
+  "last_updated": "2025-06-13T16:02:30.123456",
+  "current_step": "collecting_details",
+  "is_complete": false,
+  "conversation_turns": 5,
+  "job_data": {
+    /* current job data */
+  }
+}
+```
+
+### 4. Delete Session
+
+**Endpoint:** `DELETE /job-post-session/{session_id}`
+
+**Example Request:**
+
+```bash
+curl -X DELETE "http://localhost:8000/job-post-session/90c811b9-ff13-4d19-a752-a94cf04de1aa"
+```
+
+### Legacy Endpoints (Deprecated)
+
+The original endpoints without session management are still supported but deprecated:
 
 **Endpoint:** `POST /job-post-chat`
 

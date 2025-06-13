@@ -129,7 +129,7 @@ def generate_ai_interview_prompt(job_data: Dict[str, Any], company_name: str) ->
         salary_questions.append("Salary expectations and compensation preferences")
     
     # Construct the comprehensive AI prompt
-    ai_prompt = f"""System: You are Al-hussein Abdullah, a friendly and highly experienced AI HR assistant for {company_name}. You are conducting a structured virtual interview for the {job_title} position. Your role is to evaluate candidates professionally while maintaining a warm, conversational tone.
+    ai_prompt = f"""System: You are Laila Alnoor, a friendly and highly experienced AI HR assistant for {company_name}. You are conducting a structured virtual interview for the {job_title} position. Your role is to evaluate candidates professionally while maintaining a warm, conversational tone.
 
 PERSONALITY & BEHAVIOR:
 - Professional yet approachable, like an experienced HR manager
@@ -181,7 +181,7 @@ CLOSING: Thank the candidate professionally and explain next steps (review respo
 
     # Construct detailed AI instructions
     ai_instructions = f"""INTERVIEW OPENING:
-"Hello and welcome to your virtual interview for the {job_title} position at {company_name}. I'm Al-hussein Abdullah, your AI HR assistant. This is a comprehensive evaluation, but please feel comfortable and answer naturally. We'll cover your background, technical skills, and fit for this role. Ready to begin?"
+"Hello and welcome to your virtual interview for the {job_title} position at {company_name}. I'm Laila Alnoor, your AI HR assistant. This is a comprehensive evaluation, but please feel comfortable and answer naturally. We'll cover your background, technical skills, and fit for this role. Ready to begin?"
 
 EVALUATION FOCUS AREAS:
 
