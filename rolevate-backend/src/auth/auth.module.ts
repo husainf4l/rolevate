@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -7,11 +7,14 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { SubscriptionGuard } from './guards/subscription.guard';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AuthSubscriptionAdapter } from './auth-subscription.service';
+import { SubscriptionModule } from '../subscription/subscription.module';
 @Module({
   imports: [
     PrismaModule,
     PassportModule,
     ConfigModule,
+    forwardRef(() => SubscriptionModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -24,7 +27,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, SubscriptionGuard],
-  exports: [AuthService, SubscriptionGuard],
+  providers: [AuthService, JwtStrategy, SubscriptionGuard, AuthSubscriptionAdapter],
+  exports: [AuthService, SubscriptionGuard, AuthSubscriptionAdapter],
 })
 export class AuthModule {}

@@ -36,6 +36,11 @@ export class SubscriptionGuard implements CanActivate {
       throw new ForbiddenException('Company membership required');
     }
 
+    // Super admin can bypass subscription checks
+    if (user.role === 'SUPER_ADMIN') {
+      return true;
+    }
+    
     const { isActive, subscription } = await this.authService.checkSubscriptionStatus(user.companyId);
 
     if (!isActive || !subscription) {

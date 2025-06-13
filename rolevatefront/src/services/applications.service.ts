@@ -15,9 +15,39 @@ export enum ApplicationStatus {
   PENDING = 'PENDING',
   SCREENING = 'SCREENING',
   INTERVIEWED = 'INTERVIEWED',
+  INTERVIEW_SCHEDULED = 'INTERVIEW_SCHEDULED',
   SHORTLISTED = 'SHORTLISTED',
   REJECTED = 'REJECTED',
   HIRED = 'HIRED',
+}
+
+// Interview interface
+export interface Interview {
+  id: string;
+  type: 'AI_SCREENING' | 'HUMAN' | string;
+  language: 'ENGLISH' | 'ARABIC' | 'FRENCH' | 'SPANISH' | string;
+  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | string;
+  scheduledAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  duration?: number;
+  expectedDuration: number;
+  roomName?: string;
+  roomCode?: string;
+  roomId?: string;
+  accessToken?: string;
+  participantToken?: string;
+  recordingEnabled?: boolean;
+  recordingUrl?: string;
+  candidateName?: string;
+  candidatePhone?: string;
+  instructions?: string;
+  applicationId?: string;
+  candidateId?: string;
+  application?: {
+    id: string;
+    status: ApplicationStatus;
+  };
 }
 
 // Interfaces
@@ -46,6 +76,8 @@ export interface Application {
     fullName?: string;
     email?: string;
   };
+  interviews?: Interview[];
+  cvAnalysis?: any;
 }
 
 export interface CreateApplicationDto {

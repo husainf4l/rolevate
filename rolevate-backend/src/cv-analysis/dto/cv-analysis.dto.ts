@@ -8,6 +8,30 @@ export class CreateCvAnalysisDto {
   @IsOptional()
   @IsString()
   extractedText?: string;
+  
+  @IsOptional()
+  @IsString()
+  candidateName?: string;
+  
+  @IsOptional()
+  @IsString()
+  candidateEmail?: string;
+  
+  @IsOptional()
+  @IsString()
+  candidatePhone?: string;
+  
+  @IsOptional()
+  @IsString()
+  jobId?: string;
+  
+  @IsOptional()
+  @IsString()
+  status?: string;
+  
+  @IsOptional()
+  @IsString()
+  whatsappLink?: string;
 
   @IsNumber()
   @Min(0)
@@ -99,6 +123,30 @@ export class UpdateCvAnalysisDto {
   @IsOptional()
   @IsString()
   extractedText?: string;
+  
+  @IsOptional()
+  @IsString()
+  candidateName?: string;
+  
+  @IsOptional()
+  @IsString()
+  candidateEmail?: string;
+  
+  @IsOptional()
+  @IsString()
+  candidatePhone?: string;
+  
+  @IsOptional()
+  @IsString()
+  jobId?: string;
+  
+  @IsOptional()
+  @IsString()
+  status?: string;
+  
+  @IsOptional()
+  @IsString()
+  whatsappLink?: string;
 
   @IsOptional()
   @IsNumber()

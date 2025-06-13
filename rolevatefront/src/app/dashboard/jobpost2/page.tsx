@@ -11,7 +11,12 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import { getJobs, getMyCompanyJobs, Job, JobFilters } from "@/services/jobs.service";
+import {
+  getJobs,
+  getMyCompanyJobs,
+  Job,
+  JobFilters,
+} from "@/services/jobs.service";
 
 type JobPostStatus = "active" | "paused" | "draft" | "completed";
 

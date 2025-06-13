@@ -56,8 +56,20 @@ export class ApplyController {
       },
     });
 
+    // Create Application record (which is used by cv-analysis)
+    const application = await this.prisma.application.create({
+      data: {
+        candidateId: candidate.id,
+        jobPostId,
+        cvUrl,
+        coverLetter,
+        status: 'PENDING',
+      },
+    });
+
     // Send to fastabi server (do not block or throw if it fails)
     axios.post(`${process.env.FASTABI_URL || 'http://localhost:8000'}/apply`, {
+      applicationId: application.id, // Send the application ID, not the apply ID
       jobPostId,
       candidateId: candidate.id,
       cvUrl,
@@ -67,6 +79,6 @@ export class ApplyController {
       console.error('Failed to notify fastabi server:', err.message);
     });
 
-    return { success: true, apply };
+    return { success: true, apply, application };
   }
 }

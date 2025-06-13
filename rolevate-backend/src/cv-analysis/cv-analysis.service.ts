@@ -35,6 +35,12 @@ export class CvAnalysisService {
       data: {
         cvUrl: createCvAnalysisDto.cvUrl,
         extractedText: createCvAnalysisDto.extractedText,
+        candidateName: createCvAnalysisDto.candidateName,
+        candidateEmail: createCvAnalysisDto.candidateEmail,
+        candidatePhone: createCvAnalysisDto.candidatePhone,
+        jobId: createCvAnalysisDto.jobId,
+        status: createCvAnalysisDto.status,
+        whatsappLink: createCvAnalysisDto.whatsappLink,
         overallScore: createCvAnalysisDto.overallScore,
         skillsScore: createCvAnalysisDto.skillsScore,
         experienceScore: createCvAnalysisDto.experienceScore,

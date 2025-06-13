@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, BadRequestException, forwardRef, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, CreateCompanyDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole, Company, Subscription, SubscriptionPlan, SubscriptionStatus } from '@prisma/client';
+import { AuthSubscriptionAdapter } from './auth-subscription.service';
 
 export interface JwtPayload {
   sub: string;
@@ -23,6 +24,8 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => AuthSubscriptionAdapter))
+    private readonly subscriptionAdapter?: AuthSubscriptionAdapter,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResult> {
@@ -480,6 +483,12 @@ export class AuthService {
   }
 
   async checkSubscriptionStatus(companyId: string): Promise<{ isActive: boolean; subscription?: Subscription }> {
+    // Use adapter if available, otherwise fall back to original implementation
+    if (this.subscriptionAdapter) {
+      return this.subscriptionAdapter.checkSubscriptionStatus(companyId);
+    }
+
+    // Legacy implementation (can be removed once adapter is fully integrated)
     const subscription = await this.prisma.subscription.findUnique({
       where: { companyId },
     });
@@ -531,6 +540,12 @@ export class AuthService {
   }
 
   async canCreateJobPost(companyId: string): Promise<boolean> {
+    // Use adapter if available, otherwise fall back to original implementation
+    if (this.subscriptionAdapter) {
+      return this.subscriptionAdapter.canCreateJobPost(companyId);
+    }
+    
+    // Legacy implementation (can be removed once adapter is fully integrated)
     const company = await this.prisma.company.findUnique({
       where: { id: companyId },
       include: {
@@ -551,6 +566,12 @@ export class AuthService {
   }
 
   async canProcessInterview(companyId: string): Promise<boolean> {
+    // Use adapter if available, otherwise fall back to original implementation
+    if (this.subscriptionAdapter) {
+      return this.subscriptionAdapter.canProcessInterview(companyId);
+    }
+    
+    // Legacy implementation (can be removed once adapter is fully integrated)
     const company = await this.prisma.company.findUnique({
       where: { id: companyId },
       include: {

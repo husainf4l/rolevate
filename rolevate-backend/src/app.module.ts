@@ -12,6 +12,7 @@ import { NotificationModule } from './notification/notification.module';
 import { CompanyModule } from './company/company.module';
 import { CandidateModule } from './candidate/candidate.module';
 import { ApplyModule } from './apply/apply.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ApplyModule } from './apply/apply.module';
     CompanyModule,
     CandidateModule,
     ApplyModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
