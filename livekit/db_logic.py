@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
+    'host': os.getenv('DB_HOST', '192.168.1.64'),
     'port': int(os.getenv('DB_PORT', '5432')),
     'database': os.getenv('DB_NAME', 'rolevatedb'),
-    'user': os.getenv('DB_USER', 'al-husseinabdullah'),
+    'user': os.getenv('DB_USER', 'husain'),
     'password': os.getenv('DB_PASSWORD', 'tt55oo77'),
 }
 

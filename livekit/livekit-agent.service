@@ -1,0 +1,16 @@
+[Unit]
+Description=LiveKit Interview Agent
+After=network.target
+
+[Service]
+Type=simple
+User=husain
+WorkingDirectory=/home/husain/rolevate/livekit
+ExecStart=/home/husain/rolevate/livekit/start_agent.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -120,7 +120,7 @@ export class PublicInterviewService {
   async createAndJoinRoom(request: CreateAndJoinRequest): Promise<InterviewJoinResponse> {
     try {
       console.log("=== API REQUEST DEBUG ===");
-      console.log("Request URL:", `${this.baseUrl}/api/interview/create`);
+      console.log("Request URL:", `${this.baseUrl}/interview/create`);
       console.log("Request method: POST");
       console.log("Request headers:", { 'Content-Type': 'application/json' });
       console.log("Request payload:", request);
@@ -129,7 +129,7 @@ export class PublicInterviewService {
       console.log("phoneNumber value:", request.phoneNumber);
       console.log("========================");
 
-      const response = await fetch(`${this.baseUrl}/api/interview/create`, {
+      const response = await fetch(`${this.baseUrl}/interview/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
