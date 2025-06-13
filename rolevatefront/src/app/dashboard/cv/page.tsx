@@ -141,6 +141,8 @@ const CVManager = () => {
         return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
       case ApplicationStatus.SCREENING:
         return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300";
+      case ApplicationStatus.INTERVIEW_SCHEDULED:
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
       case ApplicationStatus.INTERVIEWED:
         return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
       case ApplicationStatus.SHORTLISTED:

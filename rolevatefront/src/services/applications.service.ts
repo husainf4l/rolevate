@@ -14,8 +14,8 @@ const getAuthHeaders = () => {
 export enum ApplicationStatus {
   PENDING = 'PENDING',
   SCREENING = 'SCREENING',
-  INTERVIEWED = 'INTERVIEWED',
   INTERVIEW_SCHEDULED = 'INTERVIEW_SCHEDULED',
+  INTERVIEWED = 'INTERVIEWED',
   SHORTLISTED = 'SHORTLISTED',
   REJECTED = 'REJECTED',
   HIRED = 'HIRED',
@@ -154,11 +154,33 @@ export const getApplications = async (query: ApplicationQueryDto = {}): Promise<
 
   const data = await response.json();
   
+  // Handle different response formats
   if (Array.isArray(data)) {
     return { applications: data };
   }
 
-  return data;
+  // Handle { data: [...], meta: {...} } format
+  if (data.data && Array.isArray(data.data)) {
+    return {
+      applications: data.data,
+      pagination: data.meta ? {
+        total: data.meta.total,
+        page: data.meta.page,
+        limit: data.meta.limit,
+        totalPages: data.meta.totalPages,
+        hasNext: data.meta.hasNext,
+        hasPrev: data.meta.hasPrev,
+      } : undefined
+    };
+  }
+
+  // Handle { applications: [...], pagination: {...} } format
+  if (data.applications) {
+    return data;
+  }
+
+  // Fallback: treat as applications array
+  return { applications: Array.isArray(data) ? data : [] };
 };
 
 // Get company applications (authenticated)
@@ -182,11 +204,33 @@ export const getMyCompanyApplications = async (query: ApplicationQueryDto = {}):
 
   const data = await response.json();
   
+  // Handle different response formats
   if (Array.isArray(data)) {
     return { applications: data };
   }
 
-  return data;
+  // Handle { data: [...], meta: {...} } format
+  if (data.data && Array.isArray(data.data)) {
+    return {
+      applications: data.data,
+      pagination: data.meta ? {
+        total: data.meta.total,
+        page: data.meta.page,
+        limit: data.meta.limit,
+        totalPages: data.meta.totalPages,
+        hasNext: data.meta.hasNext,
+        hasPrev: data.meta.hasPrev,
+      } : undefined
+    };
+  }
+
+  // Handle { applications: [...], pagination: {...} } format
+  if (data.applications) {
+    return data;
+  }
+
+  // Fallback: treat as applications array
+  return { applications: Array.isArray(data) ? data : [] };
 };
 
 // Get applications by candidate ID

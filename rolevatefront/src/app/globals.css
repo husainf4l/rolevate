@@ -41,3 +41,36 @@ body {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+/* Line clamp utilities */
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/* CV Analysis animations */
+@keyframes drawCircle {
+  from {
+    stroke-dashoffset: 339.29; /* 2 * Math.PI * 54 */
+  }
+  to {
+    stroke-dashoffset: var(--dash-offset);
+  }
+}
+
+.cv-score-circle {
+  animation: drawCircle 1.5s ease-out forwards;
+}
+
+/* Progress bar animations */
+@keyframes progressBar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}

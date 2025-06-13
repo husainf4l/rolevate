@@ -13,24 +13,43 @@ const getAuthHeaders = () => {
 // Interfaces
 export interface CVAnalysis {
   id: string;
-  applicationId: string;
-  candidateId: string;
-  jobPostId: string;
-  overallScore: number;
-  skillsScore: number;
-  experienceScore: number;
-  educationScore: number;
+  cvUrl?: string;
+  extractedText?: string;
+  candidateName?: string;
+  candidateEmail?: string;
+  candidatePhone?: string;
+  jobId?: string;
+  status?: string;
+  whatsappLink?: string;
+  overallScore?: number;
+  skillsScore?: number;
+  experienceScore?: number;
+  educationScore?: number;
   languageScore?: number;
-  strengths: string[];
-  weaknesses: string[];
-  suggestedImprovements?: string[];
+  certificationScore?: number;
   summary?: string;
+  strengths?: string[];
+  weaknesses?: string[];
+  suggestedImprovements?: string[];
   skills?: string[];
-  recommendation?: string;
+  experience?: string;
+  education?: string;
+  certifications?: string[];
+  languages?: string;
+  aiModel?: string;
+  processingTime?: number;
   analyzedAt?: string;
-  generatedAt?: string;
-  createdAt: string;
-  updatedAt: string;
+  applicationId?: string;
+  candidateId?: string;
+  candidate?: {
+    id: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    profileImage?: string;
+  };
 }
 
 export interface CreateCvAnalysisDto {
@@ -172,7 +191,20 @@ export const getCvAnalysesByApplication = async (applicationId: string): Promise
     throw new Error(`Failed to fetch application CV analyses: ${response.status}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  
+  // Handle array response directly
+  if (Array.isArray(data)) {
+    return data;
+  }
+  
+  // Handle object response with data property
+  if (data.data && Array.isArray(data.data)) {
+    return data.data;
+  }
+  
+  // Fallback: return empty array if no valid data
+  return [];
 };
 
 // Get CV analysis by ID
@@ -256,14 +288,11 @@ export const generateCvAnalysis = async (applicationId: string): Promise<CVAnaly
   // Sample summary
   const summary = "This candidate has extensive experience in web development with a strong focus on modern JavaScript frameworks. Their background aligns well with the position requirements.";
   
-  const recommendation = "This candidate has a strong profile with relevant skills and experience for the position. Recommended to proceed to the interview stage.";
-  
   // For now, return a mock response that matches the new interface structure
   return {
     id: "mock-analysis-" + applicationId,
     applicationId,
     candidateId: "mock-candidate-id",
-    jobPostId: "mock-job-id",
     overallScore,
     skillsScore,
     experienceScore,
@@ -274,9 +303,6 @@ export const generateCvAnalysis = async (applicationId: string): Promise<CVAnaly
     suggestedImprovements,
     summary,
     skills,
-    recommendation,
-    analyzedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    analyzedAt: new Date().toISOString()
   };
 };
