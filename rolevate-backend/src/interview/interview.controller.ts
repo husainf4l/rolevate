@@ -21,9 +21,6 @@ export class InterviewController {
   constructor(private readonly interviewService: InterviewService) {}
 
   @Post('create')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN, UserRole.COMPANY_ADMIN, UserRole.HR_MANAGER, UserRole.RECRUITER)
   async createInterview(
     @Body() createInterviewDto: CreateInterviewDto,
     @GetUser() user: any,

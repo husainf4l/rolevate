@@ -11,6 +11,8 @@ from langgraph.graph import StateGraph, START, END
 import operator
 from .tools.pdf_extractor import extract_text_from_pdf
 from .tools.cv_analysis_api import send_cv_analysis_to_api
+from .nodes.whatsapp_notification import send_whatsapp_notification_node
+import re
 
 # Define the state type for the graph with clear typing
 class AgentState(TypedDict):
@@ -52,29 +54,33 @@ def process_input_node(state: AgentState) -> AgentState:
                 "context": {}
             }
             
-        content = last_message.content
+        content = last_message.content # No need to strip here if regex handles it
         context = state.get("context", {})
         
-        # Extract candidate_id and job_post_id from the input
-        for line in content.split("\n"):
-            if "Candidate ID:" in line:
-                candidate_id = line.split("Candidate ID:")[-1].strip()
-                context["candidate_id"] = candidate_id
-            elif "Job Post ID:" in line:
-                job_post_id = line.split("Job Post ID:")[-1].strip()
-                context["job_post_id"] = job_post_id
-        
-        # Extract PDF file path - more robust pattern matching
+        print(f"DEBUG: process_input_node - Received content: {content[:250]}...") # Log beginning of content
+
+        # Extract candidate_id, job_post_id, and candidate_phone from the input
+        candidate_id = None
+        job_post_id = None
+        candidate_phone = None
         file_path = None
-        for line in content.split("\n"):
-            if "CV:" in line:
-                # Extract filename, assuming it's after "CV: "
-                possible_path = line.split("CV:")[-1].strip()
-                if possible_path and ".pdf" in possible_path:
-                    file_path = possible_path
-                    break
-        
+
+        # Using regex to extract Candidate ID, Job Post ID, Candidate Phone, and CV path
+        # Added re.MULTILINE and ^\s* to handle leading whitespace on lines
+        candidate_id_match = re.search(r"^\s*- Candidate ID\s*:\s*(.*?)$", content, re.MULTILINE)
+        job_post_id_match = re.search(r"^\s*- Job Post ID\s*:\s*(.*?)$", content, re.MULTILINE)
+        candidate_phone_match = re.search(r"^\s*- Candidate Phone\s*:\s*(.*?)$", content, re.MULTILINE)
+        pdf_path_match = re.search(r"^\s*- CV\s*:\s*(.*?)$", content, re.MULTILINE)
+
+        candidate_id = candidate_id_match.group(1).strip() if candidate_id_match else None
+        job_post_id = job_post_id_match.group(1).strip() if job_post_id_match else None
+        candidate_phone = candidate_phone_match.group(1).strip() if candidate_phone_match else None # Extract phone
+        file_path = pdf_path_match.group(1).strip() if pdf_path_match else None
+
+        print(f"DEBUG: process_input_node - Extracted Candidate ID: {candidate_id}, Job Post ID: {job_post_id}, Candidate Phone: {candidate_phone}") # Added phone to log
+
         if not file_path:
+            print("ERROR: process_input_node - No PDF file path found")
             return {
                 "messages": [AIMessage(content="No PDF file path found in the input.")],
                 "next": END,
@@ -94,7 +100,12 @@ def process_input_node(state: AgentState) -> AgentState:
             # Store extracted text and file path in context
             context["pdf_content"] = extracted_text
             context["pdf_path"] = file_path
+            context["candidate_id"] = candidate_id
+            context["job_post_id"] = job_post_id
+            context["candidate_phone"] = candidate_phone  # Add phone to context
             
+            print(f"DEBUG: process_input_node - PDF Path: {file_path}, Extracted Text Length: {len(extracted_text)}")
+
             # Generate success response
             response = (f"Successfully processed the PDF from: {file_path}\n"
                       f"Extracted {len(extracted_text)} characters of content.")
@@ -135,9 +146,18 @@ def analyze_content(state: AgentState) -> AgentState:
     """
     context = state.get("context", {})
     pdf_content = context.get("pdf_content", "")
-    
+    candidate_id = context.get("candidate_id", "")
+    job_post_id = context.get("job_post_id", "")
+    candidate_phone = context.get("candidate_phone", "") # Retrieve phone from context
+
+    print(f"DEBUG: analyze_content - Received PDF content length: {len(pdf_content)}")
+    print(f"DEBUG: analyze_content - Context keys: {list(context.keys())}")
+    # Ensure candidate_phone is in the log if present
+    print(f"DEBUG: analyze_content - Candidate ID: {candidate_id}, Job Post ID: {job_post_id}, Candidate Phone: {candidate_phone}")
+
     if not pdf_content:
         response = "No PDF content available for analysis."
+        print("ERROR: analyze_content - No PDF content available")
         return {
             "messages": [AIMessage(content=response)],
             "next": END,
@@ -191,6 +211,8 @@ def analyze_content(state: AgentState) -> AgentState:
         # Extract the analysis from the response
         cv_analysis = response.choices[0].message.content
         
+        print(f"DEBUG: analyze_content - CV Analysis received, length: {len(cv_analysis)}")
+
         # Add the analysis to the context
         context["cv_analysis"] = cv_analysis
         
@@ -291,6 +313,8 @@ def send_analysis_to_api_node(state: AgentState) -> AgentState:
                 f"- Candidate ID: {candidate_id}\n"
                 f"- API Response: {api_response.get('status_code')}"
             )
+            # Continue to the WhatsApp notification node if successful
+            next_node = "send_whatsapp_notification"
         else:
             error_detail = api_response.get('error', 'Unknown error')
             
@@ -327,14 +351,15 @@ def send_analysis_to_api_node(state: AgentState) -> AgentState:
                     f"- Error: {error_detail}\n"
                     f"- Status Code: {api_response.get('status_code', 'Unknown')}"
                 )
-        
+            # End the workflow if API call fails
+            next_node = END
         # Add API response to context
         context["api_response"] = api_response
         context["application_id"] = application_id
         
         return {
             "messages": [AIMessage(content=response_message)],
-            "next": END,
+            "next": next_node,
             "context": context
         }
         
@@ -345,6 +370,8 @@ def send_analysis_to_api_node(state: AgentState) -> AgentState:
             "next": END,
             "context": context
         }
+
+
 
 # Create the CV analysis graph
 def create_graph() -> StateGraph:
@@ -360,12 +387,14 @@ def create_graph() -> StateGraph:
     workflow.add_node("process_input", process_input_node)
     workflow.add_node("analyze_content", analyze_content)
     workflow.add_node("send_to_api", send_analysis_to_api_node)
+    workflow.add_node("send_whatsapp_notification", send_whatsapp_notification_node)
     
     # Set up the edges
     workflow.add_edge(START, "process_input")
     workflow.add_edge("process_input", "analyze_content")
     workflow.add_edge("analyze_content", "send_to_api")
-    workflow.add_edge("send_to_api", END)
+    workflow.add_edge("send_to_api", "send_whatsapp_notification")
+    workflow.add_edge("send_whatsapp_notification", END)
     
     # Compile the graph
     return workflow.compile()

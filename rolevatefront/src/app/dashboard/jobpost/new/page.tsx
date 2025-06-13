@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeftIcon,
@@ -8,11 +8,15 @@ import {
   PlusIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  EyeIcon,
+  DocumentTextIcon,
+  LightBulbIcon,
+  ClockIcon,
+  BookmarkIcon,
 } from "@heroicons/react/24/outline";
 import {
   createJob,
   CreateJobData,
-  handleApiError,
 } from "@/services/jobs.service";
 
 interface JobFormData {
@@ -38,6 +42,8 @@ interface JobFormData {
   currency: string;
   enableAiInterview: boolean;
   interviewDuration?: number;
+  aiPrompt?: string;
+  aiInstructions?: string;
 }
 
 const NewJobPost = () => {
@@ -45,6 +51,9 @@ const NewJobPost = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
 
   const [formData, setFormData] = useState<JobFormData>({
     title: "",
@@ -60,9 +69,207 @@ const NewJobPost = () => {
     currency: "AED", // Default to AED for UAE market
     enableAiInterview: true, // Default to enabled
     interviewDuration: 30,
+    aiPrompt: "",
+    aiInstructions: "",
   });
 
   const [skillInput, setSkillInput] = useState("");
+  const [skillSuggestions] = useState([
+    "JavaScript",
+    "React.js",
+    "Node.js",
+    "Python",
+    "TypeScript",
+    "Next.js",
+    "Express.js",
+    "MongoDB",
+    "PostgreSQL",
+    "AWS",
+    "Docker",
+    "Kubernetes",
+    "Project Management",
+    "Agile/Scrum",
+    "Leadership",
+    "Communication",
+    "Problem Solving",
+    "Arabic",
+    "English",
+    "Banking",
+    "Finance",
+    "Risk Management",
+    "Compliance",
+    "Customer Service",
+    "Sales",
+    "Marketing",
+    "Data Analysis",
+    "SQL",
+    "Excel",
+    "PowerBI",
+    "Tableau",
+  ]);
+
+  // AI Prompt Templates
+  const generateAiPrompt = (jobTitle: string, department: string, requirements: string) => {
+    return `System: You are Al-hussein Abdullah, a friendly and professional AI HR assistant for Capital Bank. You are conducting a structured interview for the ${jobTitle} position in ${department}.
+
+Your behavior:
+- Ask one focused question at a time
+- Listen respectfully and keep a professional but warm tone
+- Never explain answers or offer feedback
+- Use brief, polite transitions like "Thanks for sharing that" or "Got it, let's move on"
+- Wait for complete answers before asking the next question
+
+Interview sequence:
+1. Welcome and introduction
+2. Relevant experience for this role
+3. Technical skills and expertise
+4. Previous achievements and accomplishments
+5. Problem-solving approach
+6. Team collaboration experience
+7. Goals and career aspirations
+8. Availability and work preferences
+9. Salary expectations
+10. Questions about the role or company
+
+Close the interview with a polite thank-you message.
+
+Key requirements to assess: ${requirements.slice(0, 200)}...`;
+  };
+
+  const generateAiInstructions = (jobTitle: string) => {
+    return `Start the interview with: "Hello and welcome to your official virtual interview for the ${jobTitle} position at Capital Bank. I'm Al-hussein Abdullah, your virtual HR assistant. This is a formal evaluation, but please feel comfortable and answer naturally. Let's begin."
+
+Interview Guidelines:
+- Maintain a professional yet welcoming tone throughout
+- Ask follow-up questions when answers are too brief
+- Take note of specific examples and achievements
+- Assess both technical skills and cultural fit
+- Allow natural conversation flow while covering all key areas
+- End with clear next steps information`;
+  };
+
+  // Auto-generate AI prompt and instructions when job details change
+  useEffect(() => {
+    if (formData.title && formData.department && formData.requirements && formData.enableAiInterview) {
+      const newAiPrompt = generateAiPrompt(formData.title, formData.department, formData.requirements);
+      const newAiInstructions = generateAiInstructions(formData.title);
+      
+      // Only update if they're empty or significantly different (to avoid overwriting manual edits)
+      if (!formData.aiPrompt || formData.aiPrompt.length < 50) {
+        setFormData(prev => ({ ...prev, aiPrompt: newAiPrompt }));
+      }
+      if (!formData.aiInstructions || formData.aiInstructions.length < 50) {
+        setFormData(prev => ({ ...prev, aiInstructions: newAiInstructions }));
+      }
+    }
+  }, [formData.title, formData.department, formData.requirements, formData.enableAiInterview]);
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (isDirty && autoSaveStatus !== 'saving') {
+      setAutoSaveStatus('saving');
+      const timer = setTimeout(() => {
+        // Save to localStorage
+        localStorage.setItem('job_draft', JSON.stringify(formData));
+        setAutoSaveStatus('saved');
+        setIsDirty(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [formData, isDirty, autoSaveStatus]);
+
+  // Load draft on component mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('job_draft');
+    if (savedDraft) {
+      try {
+        const parsedDraft = JSON.parse(savedDraft);
+        if (parsedDraft.title) { // Only load if it has content
+          setFormData(parsedDraft);
+        }
+      } catch (err) {
+        console.error('Error loading draft:', err);
+      }
+    }
+  }, []);
+
+  // Real-time validation
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+
+  const validateField = useCallback((name: string, value: any) => {
+    const errors: {[key: string]: string} = {};
+    
+    switch (name) {
+      case 'title':
+        if (!value.trim()) {
+          errors.title = 'Job title is required';
+        } else if (value.length < 3) {
+          errors.title = 'Job title must be at least 3 characters';
+        } else if (value.length > 100) {
+          errors.title = 'Job title must be less than 100 characters';
+        }
+        break;
+      case 'department':
+        if (!value.trim()) {
+          errors.department = 'Department is required';
+        }
+        break;
+      case 'location':
+        if (!value.trim()) {
+          errors.location = 'Location is required';
+        }
+        break;
+      case 'description':
+        if (!value.trim()) {
+          errors.description = 'Job description is required';
+        } else if (value.length < 50) {
+          errors.description = 'Description should be at least 50 characters';
+        }
+        break;
+      case 'requirements':
+        if (!value.trim()) {
+          errors.requirements = 'Requirements are required';
+        }
+        break;
+      case 'skills':
+        if (!Array.isArray(value) || value.length === 0) {
+          errors.skills = 'At least one skill is required';
+        }
+        break;
+      case 'salaryMin':
+        if (value && formData.salaryMax && value >= formData.salaryMax) {
+          errors.salaryMin = 'Minimum salary must be less than maximum';
+        }
+        break;
+      case 'salaryMax':
+        if (value && formData.salaryMin && value <= formData.salaryMin) {
+          errors.salaryMax = 'Maximum salary must be greater than minimum';
+        }
+        break;
+      case 'aiPrompt':
+        if (formData.enableAiInterview && (!value || !value.trim())) {
+          errors.aiPrompt = 'AI prompt is required when AI interview is enabled';
+        } else if (value && value.length > 2000) {
+          errors.aiPrompt = 'AI prompt must be less than 2000 characters';
+        }
+        break;
+      case 'aiInstructions':
+        if (formData.enableAiInterview && (!value || !value.trim())) {
+          errors.aiInstructions = 'AI instructions are required when AI interview is enabled';
+        } else if (value && value.length > 1500) {
+          errors.aiInstructions = 'AI instructions must be less than 1500 characters';
+        }
+        break;
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: errors[name] || ''
+    }));
+
+    return Object.keys(errors).length === 0;
+  }, [formData.salaryMin, formData.salaryMax, formData.enableAiInterview]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -88,23 +295,37 @@ const NewJobPost = () => {
         [name]: value,
       }));
     }
+
+    // Mark as dirty and validate field
+    setIsDirty(true);
+    setAutoSaveStatus('unsaved');
+    validateField(name, type === "checkbox" ? (e.target as HTMLInputElement).checked : 
+                        type === "number" ? (value ? Number(value) : undefined) : value);
   };
 
   const handleAddSkill = () => {
     if (skillInput.trim() && !formData.skills.includes(skillInput.trim())) {
+      const newSkills = [...formData.skills, skillInput.trim()];
       setFormData((prev) => ({
         ...prev,
-        skills: [...prev.skills, skillInput.trim()],
+        skills: newSkills,
       }));
       setSkillInput("");
+      setIsDirty(true);
+      setAutoSaveStatus('unsaved');
+      validateField('skills', newSkills);
     }
   };
 
   const handleRemoveSkill = (skillToRemove: string) => {
+    const newSkills = formData.skills.filter((skill) => skill !== skillToRemove);
     setFormData((prev) => ({
       ...prev,
-      skills: prev.skills.filter((skill) => skill !== skillToRemove),
+      skills: newSkills,
     }));
+    setIsDirty(true);
+    setAutoSaveStatus('unsaved');
+    validateField('skills', newSkills);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -115,70 +336,70 @@ const NewJobPost = () => {
   };
 
   const validateForm = (): boolean => {
+    let isValid = true;
+    const errors: {[key: string]: string} = {};
+
+    // Validate all required fields
     if (!formData.title.trim()) {
-      setError(
-        "Job title is required. Please provide a clear and descriptive job title."
-      );
-      return false;
+      errors.title = "Job title is required";
+      isValid = false;
     }
     if (formData.title.length < 3) {
-      setError("Job title must be at least 3 characters long.");
-      return false;
+      errors.title = "Job title must be at least 3 characters long";
+      isValid = false;
     }
     if (!formData.department.trim()) {
-      setError(
-        "Department is required. Please specify which department this role belongs to."
-      );
-      return false;
+      errors.department = "Department is required";
+      isValid = false;
     }
     if (!formData.location.trim()) {
-      setError(
-        "Location is required. Please specify the job location (e.g., Dubai, UAE)."
-      );
-      return false;
+      errors.location = "Location is required";
+      isValid = false;
     }
     if (!formData.description.trim()) {
-      setError(
-        "Job description is required. Please provide a detailed description of the role."
-      );
-      return false;
+      errors.description = "Job description is required";
+      isValid = false;
     }
     if (formData.description.length < 50) {
-      setError(
-        "Job description should be at least 50 characters long for better candidate understanding."
-      );
-      return false;
+      errors.description = "Job description should be at least 50 characters long";
+      isValid = false;
     }
     if (!formData.requirements.trim()) {
-      setError(
-        "Job requirements are required. Please list the key qualifications and skills needed."
-      );
-      return false;
+      errors.requirements = "Job requirements are required";
+      isValid = false;
     }
     if (formData.skills.length === 0) {
-      setError(
-        "At least one skill is required. Please add relevant skills for this position."
-      );
-      return false;
+      errors.skills = "At least one skill is required";
+      isValid = false;
     }
     if (
       formData.salaryMin &&
       formData.salaryMax &&
       formData.salaryMin >= formData.salaryMax
     ) {
-      setError("Maximum salary must be greater than minimum salary.");
-      return false;
+      errors.salaryMax = "Maximum salary must be greater than minimum salary";
+      isValid = false;
     }
     if (
       formData.enableAiInterview &&
       (!formData.interviewDuration || formData.interviewDuration < 10)
     ) {
-      setError(
-        "Interview duration must be at least 10 minutes when AI interview is enabled."
-      );
-      return false;
+      errors.interviewDuration = "Interview duration must be at least 10 minutes when AI interview is enabled";
+      isValid = false;
     }
-    return true;
+
+    setFieldErrors(errors);
+    if (!isValid) {
+      setError("Please fix the errors above before submitting");
+    }
+    return isValid;
+  };
+
+  const handleApiError = (err: unknown): string => {
+    if (err instanceof Error) {
+      return err.message;
+    }
+    return "An unexpected error occurred";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -201,16 +422,17 @@ const NewJobPost = () => {
         responsibilities: formData.responsibilities || undefined,
         benefits: formData.benefits || undefined,
         skills: formData.skills,
-        experienceLevel: formData.experienceLevel,
+        experienceLevel: formData.experienceLevel as any,
         location: formData.location,
-        workType: formData.workType,
+        workType: formData.workType as any,
         salaryMin: formData.salaryMin,
         salaryMax: formData.salaryMax,
         currency: formData.currency,
         enableAiInterview: formData.enableAiInterview,
         interviewDuration: formData.interviewDuration,
-        isActive: true, // Default to active
-        isFeatured: false, // Default to not featured
+        // Use the form data AI fields (which are auto-generated but can be customized)
+        aiPrompt: formData.enableAiInterview ? formData.aiPrompt : undefined,
+        aiInstructions: formData.enableAiInterview ? formData.aiInstructions : undefined,
       };
 
       // Call the real API
@@ -218,6 +440,9 @@ const NewJobPost = () => {
 
       console.log("Job created successfully:", response);
       setSuccess(true);
+
+      // Clear draft
+      localStorage.removeItem('job_draft');
 
       // Redirect to job posts after a delay
       setTimeout(() => {
@@ -240,13 +465,73 @@ const NewJobPost = () => {
       formData.requirements.trim(),
       formData.skills.length > 0,
     ];
+    
+    // Add AI fields if AI interview is enabled
+    if (formData.enableAiInterview) {
+      requiredFields.push(
+        formData.aiPrompt?.trim() || false,
+        formData.aiInstructions?.trim() || false
+      );
+    }
+    
     const completedFields = requiredFields.filter(Boolean).length;
     return Math.round((completedFields / requiredFields.length) * 100);
   };
 
   const handleCancel = () => {
+    if (isDirty) {
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to leave?"
+      );
+      if (!confirmed) return;
+    }
+    localStorage.removeItem('job_draft');
     router.push("/dashboard/jobpost");
   };
+
+  const clearDraft = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to clear all form data?"
+    );
+    if (confirmed) {
+      localStorage.removeItem('job_draft');
+      setFormData({
+        title: "",
+        department: "",
+        location: "",
+        workType: "ONSITE",
+        experienceLevel: "MID_LEVEL",
+        description: "",
+        requirements: "",
+        responsibilities: "",
+        benefits: "",
+        skills: [],
+        currency: "AED",
+        enableAiInterview: true,
+        interviewDuration: 30,
+        aiPrompt: "",
+        aiInstructions: "",
+      });
+      setFieldErrors({});
+      setIsDirty(false);
+      setAutoSaveStatus('saved');
+    }
+  };
+
+  const handleSkillSuggestionClick = (skill: string) => {
+    if (!formData.skills.includes(skill)) {
+      const newSkills = [...formData.skills, skill];
+      setFormData((prev) => ({
+        ...prev,
+        skills: newSkills,
+      }));
+      setIsDirty(true);
+      setAutoSaveStatus('unsaved');
+      validateField('skills', newSkills);
+    }
+  };
+
+  const progress = calculateProgress();
 
   if (success) {
     return (
@@ -320,7 +605,7 @@ const NewJobPost = () => {
           >
             <ArrowLeftIcon className="h-6 w-6 text-gray-400" />
           </button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <BriefcaseIcon className="h-8 w-8 text-[#00C6AD]" />
               Create New Job Post
@@ -328,6 +613,57 @@ const NewJobPost = () => {
             <p className="text-gray-400 mt-1">
               Fill in the details below to create a new job posting
             </p>
+          </div>
+          <div className="flex items-center gap-4">
+            {/* Auto-save status */}
+            <div className="flex items-center gap-2 text-sm">
+              {autoSaveStatus === 'saving' && (
+                <>
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                  <span className="text-yellow-400">Saving...</span>
+                </>
+              )}
+              {autoSaveStatus === 'saved' && (
+                <>
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <span className="text-green-400">Saved</span>
+                </>
+              )}
+              {autoSaveStatus === 'unsaved' && (
+                <>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <span className="text-gray-400">Unsaved changes</span>
+                </>
+              )}
+            </div>
+            
+            {/* Progress indicator */}
+            <div className="flex items-center gap-3">
+              <div className="w-32 bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-[#00C6AD] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+              <span className="text-sm text-gray-400">{progress}%</span>
+            </div>
+
+            {/* Action buttons */}
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              <EyeIcon className="h-4 w-4" />
+              {showPreview ? 'Edit' : 'Preview'}
+            </button>
+            
+            <button
+              onClick={clearDraft}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              <DocumentTextIcon className="h-4 w-4" />
+              Clear
+            </button>
           </div>
         </div>
 
@@ -342,7 +678,152 @@ const NewJobPost = () => {
           </div>
         )}
 
-        {/* Form */}
+        {/* Preview Mode */}
+        {showPreview ? (
+          <div className="max-w-4xl">
+            <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-white">Job Preview</h2>
+                <span className="px-3 py-1 bg-[#00C6AD]/20 text-[#00C6AD] rounded-full text-sm">
+                  Preview Mode
+                </span>
+              </div>
+              
+              {/* Job Header */}
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold text-white mb-2">
+                  {formData.title || "Job Title"}
+                </h1>
+                <div className="flex flex-wrap gap-4 text-gray-400">
+                  <span>{formData.department || "Department"}</span>
+                  <span>•</span>
+                  <span>{formData.location || "Location"}</span>
+                  <span>•</span>
+                  <span className="capitalize">{formData.workType.toLowerCase()}</span>
+                  <span>•</span>
+                  <span>{formData.experienceLevel.replace('_', ' ')}</span>
+                </div>
+                {(formData.salaryMin || formData.salaryMax) && (
+                  <div className="mt-2">
+                    <span className="text-[#00C6AD] font-medium">
+                      {formData.currency} {formData.salaryMin?.toLocaleString()} - {formData.salaryMax?.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Job Content */}
+              <div className="space-y-6">
+                {formData.description && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">Job Description</h3>
+                    <p className="text-gray-300 whitespace-pre-wrap">{formData.description}</p>
+                  </div>
+                )}
+
+                {formData.requirements && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">Requirements</h3>
+                    <p className="text-gray-300 whitespace-pre-wrap">{formData.requirements}</p>
+                  </div>
+                )}
+
+                {formData.responsibilities && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">Responsibilities</h3>
+                    <p className="text-gray-300 whitespace-pre-wrap">{formData.responsibilities}</p>
+                  </div>
+                )}
+
+                {formData.benefits && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">Benefits</h3>
+                    <p className="text-gray-300 whitespace-pre-wrap">{formData.benefits}</p>
+                  </div>
+                )}
+
+                {formData.skills.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">Required Skills</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.skills.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-[#00C6AD]/20 text-[#00C6AD] rounded-full text-sm"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {formData.enableAiInterview && (
+                  <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
+                    <h3 className="text-blue-300 font-semibold mb-2 flex items-center gap-2">
+                      <DocumentTextIcon className="h-5 w-5" />
+                      AI Interview Configuration
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <p className="text-blue-200">
+                        <strong>Duration:</strong> {formData.interviewDuration} minutes
+                      </p>
+                      <p className="text-blue-200">
+                        <strong>Language Support:</strong> Arabic & English
+                      </p>
+                      {formData.aiPrompt && (
+                        <div>
+                          <p className="text-blue-200 font-medium mb-1">AI Interviewer Prompt:</p>
+                          <div className="bg-blue-900/30 rounded p-2 text-blue-100 text-xs max-h-20 overflow-y-auto">
+                            {formData.aiPrompt.substring(0, 150)}...
+                          </div>
+                        </div>
+                      )}
+                      {formData.aiInstructions && (
+                        <div>
+                          <p className="text-blue-200 font-medium mb-1">Interview Instructions:</p>
+                          <div className="bg-blue-900/30 rounded p-2 text-blue-100 text-xs max-h-20 overflow-y-auto">
+                            {formData.aiInstructions.substring(0, 150)}...
+                          </div>
+                        </div>
+                      )}
+                      <p className="text-blue-200 text-xs italic">
+                        Qualified candidates will be automatically invited to complete an AI-powered interview.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowPreview(false)}
+                className="px-6 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Back to Edit
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={loading || progress < 100}
+                className="px-6 py-3 bg-[#00C6AD] text-white rounded-lg hover:bg-[#14B8A6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon className="h-5 w-5" />
+                    Create Job Post
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Form Mode */
         <form onSubmit={handleSubmit} className="max-w-4xl">
           <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6">
             <h2 className="text-xl font-semibold text-white mb-6">
@@ -360,10 +841,15 @@ const NewJobPost = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
+                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                    fieldErrors.title ? 'border-red-500' : 'border-gray-600'
+                  }`}
                   placeholder="e.g. Senior Full Stack Developer, Banking Operations Manager, Data Analyst"
                   required
                 />
+                {fieldErrors.title && (
+                  <p className="text-red-400 text-sm mt-1">{fieldErrors.title}</p>
+                )}
               </div>
 
               {/* Department */}
@@ -376,10 +862,15 @@ const NewJobPost = () => {
                   name="department"
                   value={formData.department}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
+                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                    fieldErrors.department ? 'border-red-500' : 'border-gray-600'
+                  }`}
                   placeholder="e.g. Engineering, Finance, Marketing, Operations, HR"
                   required
                 />
+                {fieldErrors.department && (
+                  <p className="text-red-400 text-sm mt-1">{fieldErrors.department}</p>
+                )}
               </div>
 
               {/* Location */}
@@ -392,10 +883,15 @@ const NewJobPost = () => {
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
+                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                    fieldErrors.location ? 'border-red-500' : 'border-gray-600'
+                  }`}
                   placeholder="e.g. Dubai, UAE / Abu Dhabi, UAE / Riyadh, Saudi Arabia"
                   required
                 />
+                {fieldErrors.location && (
+                  <p className="text-red-400 text-sm mt-1">{fieldErrors.location}</p>
+                )}
               </div>
 
               {/* Work Type */}
@@ -470,11 +966,16 @@ const NewJobPost = () => {
                   name="salaryMin"
                   value={formData.salaryMin || ""}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
+                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                    fieldErrors.salaryMin ? 'border-red-500' : 'border-gray-600'
+                  }`}
                   placeholder="e.g. 15000 (monthly)"
                   min="0"
                   step="500"
                 />
+                {fieldErrors.salaryMin && (
+                  <p className="text-red-400 text-sm mt-1">{fieldErrors.salaryMin}</p>
+                )}
               </div>
 
               <div>
@@ -486,11 +987,16 @@ const NewJobPost = () => {
                   name="salaryMax"
                   value={formData.salaryMax || ""}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
+                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                    fieldErrors.salaryMax ? 'border-red-500' : 'border-gray-600'
+                  }`}
                   placeholder="e.g. 25000 (monthly)"
                   min="0"
                   step="500"
                 />
+                {fieldErrors.salaryMax && (
+                  <p className="text-red-400 text-sm mt-1">{fieldErrors.salaryMax}</p>
+                )}
               </div>
             </div>
           </div>
@@ -506,15 +1012,28 @@ const NewJobPost = () => {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Job Description *
               </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
-                placeholder="Provide a comprehensive overview of the role. Include: what the candidate will do day-to-day, the team they'll work with, growth opportunities, company culture, and what makes this position unique and exciting. Be specific about the impact they'll have on the organization."
-                required
-              />
+              <div className="relative">
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                    fieldErrors.description ? 'border-red-500' : 'border-gray-600'
+                  }`}
+                  placeholder="Provide a comprehensive overview of the role. Include: what the candidate will do day-to-day, the team they'll work with, growth opportunities, company culture, and what makes this position unique and exciting. Be specific about the impact they'll have on the organization."
+                  required
+                />
+                <div className="absolute bottom-3 right-3 text-xs text-gray-500">
+                  {formData.description.length}/2000
+                </div>
+              </div>
+              {fieldErrors.description && (
+                <p className="text-red-400 text-sm mt-1">{fieldErrors.description}</p>
+              )}
+              {formData.description.length >= 50 && (
+                <p className="text-green-400 text-sm mt-1">✓ Good description length</p>
+              )}
             </div>
 
             {/* Requirements */}
@@ -522,15 +1041,25 @@ const NewJobPost = () => {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Requirements *
               </label>
-              <textarea
-                name="requirements"
-                value={formData.requirements}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
-                placeholder="List essential qualifications, experience, and skills. Include: years of experience, specific technologies, education requirements, certifications, language skills, and any industry-specific knowledge. Be clear about what's required vs. preferred."
-                required
-              />
+              <div className="relative">
+                <textarea
+                  name="requirements"
+                  value={formData.requirements}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                    fieldErrors.requirements ? 'border-red-500' : 'border-gray-600'
+                  }`}
+                  placeholder="List essential qualifications, experience, and skills. Include: years of experience, specific technologies, education requirements, certifications, language skills, and any industry-specific knowledge. Be clear about what's required vs. preferred."
+                  required
+                />
+                <div className="absolute bottom-3 right-3 text-xs text-gray-500">
+                  {formData.requirements.length}/1500
+                </div>
+              </div>
+              {fieldErrors.requirements && (
+                <p className="text-red-400 text-sm mt-1">{fieldErrors.requirements}</p>
+              )}
             </div>
 
             {/* Responsibilities */}
@@ -579,7 +1108,9 @@ const NewJobPost = () => {
                     value={skillInput}
                     onChange={(e) => setSkillInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
+                    className={`flex-1 px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                      fieldErrors.skills ? 'border-red-500' : 'border-gray-600'
+                    }`}
                     placeholder="Type a skill and press Enter or click Add..."
                   />
                   <button
@@ -592,10 +1123,38 @@ const NewJobPost = () => {
                     Add
                   </button>
                 </div>
+                {fieldErrors.skills && (
+                  <p className="text-red-400 text-sm mt-1">{fieldErrors.skills}</p>
+                )}
               </div>
 
+              {/* Smart Skills Suggestions */}
+              {skillInput.length > 2 && (
+                <div className="mb-4">
+                  <p className="text-xs text-gray-400 mb-2">Suggestions:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {skillSuggestions
+                      .filter(skill => 
+                        skill.toLowerCase().includes(skillInput.toLowerCase()) &&
+                        !formData.skills.includes(skill)
+                      )
+                      .slice(0, 6)
+                      .map((skill) => (
+                        <button
+                          key={skill}
+                          type="button"
+                          onClick={() => handleSkillSuggestionClick(skill)}
+                          className="px-3 py-1 text-xs bg-gray-600 text-gray-300 rounded-full hover:bg-[#00C6AD] hover:text-white transition-colors"
+                        >
+                          + {skill}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               {/* Popular Skills Suggestions */}
-              {formData.skills.length === 0 && (
+              {formData.skills.length === 0 && skillInput.length === 0 && (
                 <div className="mb-4">
                   <p className="text-xs text-gray-400 mb-2">
                     Popular skills to get you started:
@@ -616,14 +1175,7 @@ const NewJobPost = () => {
                       <button
                         key={skill}
                         type="button"
-                        onClick={() => {
-                          if (!formData.skills.includes(skill)) {
-                            setFormData((prev) => ({
-                              ...prev,
-                              skills: [...prev.skills, skill],
-                            }));
-                          }
-                        }}
+                        onClick={() => handleSkillSuggestionClick(skill)}
                         className="px-3 py-1 text-xs bg-gray-600 text-gray-300 rounded-full hover:bg-[#00C6AD] hover:text-white transition-colors"
                       >
                         + {skill}
@@ -654,9 +1206,8 @@ const NewJobPost = () => {
               </div>
 
               {formData.skills.length > 0 && (
-                <p className="text-xs text-gray-400 mt-2">
-                  {formData.skills.length} skill
-                  {formData.skills.length !== 1 ? "s" : ""} added
+                <p className="text-green-400 text-sm mt-2">
+                  ✓ {formData.skills.length} skill{formData.skills.length !== 1 ? "s" : ""} added
                 </p>
               )}
             </div>
@@ -700,7 +1251,9 @@ const NewJobPost = () => {
                       name="interviewDuration"
                       value={formData.interviewDuration || 30}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent"
+                      className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                        fieldErrors.interviewDuration ? 'border-red-500' : 'border-gray-600'
+                      }`}
                     >
                       <option value={15}>15 minutes (Quick screening)</option>
                       <option value={30}>30 minutes (Standard)</option>
@@ -709,6 +1262,9 @@ const NewJobPost = () => {
                         60 minutes (Detailed assessment)
                       </option>
                     </select>
+                    {fieldErrors.interviewDuration && (
+                      <p className="text-red-400 text-sm mt-1">{fieldErrors.interviewDuration}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -724,11 +1280,93 @@ const NewJobPost = () => {
                     </select>
                   </div>
                 </div>
-                <div className="mt-3">
+                
+                {/* AI Prompt Configuration */}
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      AI Interview Prompt
+                      <span className="text-xs text-gray-400 ml-2">(Auto-generated, but you can customize)</span>
+                    </label>
+                    <textarea
+                      name="aiPrompt"
+                      value={formData.aiPrompt || ''}
+                      onChange={handleInputChange}
+                      rows={8}
+                      className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                        fieldErrors.aiPrompt ? 'border-red-500' : 'border-gray-600'
+                      }`}
+                      placeholder="AI prompt will be auto-generated based on job details..."
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {fieldErrors.aiPrompt && (
+                        <p className="text-red-400 text-sm">{fieldErrors.aiPrompt}</p>
+                      )}
+                      <p className="text-xs text-gray-400 ml-auto">
+                        {formData.aiPrompt?.length || 0}/2000 characters
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newPrompt = generateAiPrompt(
+                          formData.title || 'Position',
+                          formData.department || 'Department',
+                          formData.requirements || 'Requirements'
+                        );
+                        setFormData(prev => ({ ...prev, aiPrompt: newPrompt }));
+                        setIsDirty(true);
+                        setAutoSaveStatus('unsaved');
+                      }}
+                      className="mt-2 text-xs bg-[#00C6AD]/20 text-[#00C6AD] px-3 py-1 rounded-md hover:bg-[#00C6AD]/30 transition-colors"
+                    >
+                      🔄 Regenerate Prompt
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      AI Interview Instructions
+                      <span className="text-xs text-gray-400 ml-2">(Guidelines for the AI interviewer)</span>
+                    </label>
+                    <textarea
+                      name="aiInstructions"
+                      value={formData.aiInstructions || ''}
+                      onChange={handleInputChange}
+                      rows={6}
+                      className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00C6AD] focus:border-transparent transition-colors ${
+                        fieldErrors.aiInstructions ? 'border-red-500' : 'border-gray-600'
+                      }`}
+                      placeholder="AI instructions will be auto-generated based on job details..."
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {fieldErrors.aiInstructions && (
+                        <p className="text-red-400 text-sm">{fieldErrors.aiInstructions}</p>
+                      )}
+                      <p className="text-xs text-gray-400 ml-auto">
+                        {formData.aiInstructions?.length || 0}/1500 characters
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newInstructions = generateAiInstructions(formData.title || 'Position');
+                        setFormData(prev => ({ ...prev, aiInstructions: newInstructions }));
+                        setIsDirty(true);
+                        setAutoSaveStatus('unsaved');
+                      }}
+                      className="mt-2 text-xs bg-[#00C6AD]/20 text-[#00C6AD] px-3 py-1 rounded-md hover:bg-[#00C6AD]/30 transition-colors"
+                    >
+                      🔄 Regenerate Instructions
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-4">
                   <p className="text-xs text-gray-400">
                     💡 AI interviews are automatically scheduled after
-                    candidates pass initial screening. Questions are tailored to
-                    the job requirements and skills you've specified.
+                    candidates pass initial screening. The prompt and instructions
+                    are auto-generated but can be customized to match your specific requirements.
                   </p>
                 </div>
               </div>

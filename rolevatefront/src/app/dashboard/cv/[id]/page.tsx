@@ -285,31 +285,12 @@ const ApplicationDetailPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* Breadcrumb */}
-      <nav className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href="/dashboard"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Dashboard
-        </Link>
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
+    <div className="max-w-7xl mx-auto p-6 space-y-10">
+      {/* Breadcrumb navigation with increased spacing */}
+      <nav className="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400 py-2">
         <Link
           href="/dashboard/cv"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
+          className="hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           Applications
         </Link>
@@ -333,11 +314,11 @@ const ApplicationDetailPage = () => {
         </span>
       </nav>
 
-      {/* Modern header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      {/* Modern header with enhanced spacing and shadow */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="flex items-start md:items-center gap-5">
           <Link href="/dashboard/cv">
-            <button className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-xl transition-all duration-200 hover:shadow-md">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -351,7 +332,7 @@ const ApplicationDetailPage = () => {
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              Back
+              <span>Back</span>
             </button>
           </Link>
           <div>
@@ -360,42 +341,76 @@ const ApplicationDetailPage = () => {
                 application.candidate.firstName ||
                 "Candidate"}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Applied for {application.jobPost.title} at{" "}
-              {application.jobPost.company.displayName ||
-                application.jobPost.company.name}
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Applied for{" "}
+              <span className="font-medium">{application.jobPost.title}</span>{" "}
+              at{" "}
+              <span className="font-medium">
+                {application.jobPost.company.displayName ||
+                  application.jobPost.company.name}
+              </span>
             </p>
           </div>
         </div>
         <button
           onClick={handleScheduleInterview}
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm"
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2"
         >
-          {application.status === ApplicationStatus.INTERVIEW_SCHEDULED
-            ? "View Interview"
-            : "Schedule Interview"}
+          {application.status === ApplicationStatus.INTERVIEW_SCHEDULED ? (
+            <>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span>View Interview</span>
+            </>
+          ) : (
+            <>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span>Schedule Interview</span>
+            </>
+          )}
         </button>
       </div>
 
-      {/* Main content grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      {/* Main content grid with increased gap */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
         {/* Primary content */}
-
-        {/* Sidebar: CV Analysis */}
-        <div className="xl:col-span-2 space-y-8">
+        <div className="xl:col-span-2 space-y-10">
           {cvAnalysis && (
             <>
-              {/* CV Score Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+              {/* CV Score Card with enhanced spacing */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-300">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-8">
                   CV Analysis
                 </h3>
 
-                <div className="text-center mb-8">
-                  <div className="relative inline-flex items-center justify-center w-32 h-32 mb-4">
+                <div className="text-center mb-10">
+                  <div className="relative inline-flex items-center justify-center w-36 h-36 mb-5">
                     {/* Circular progress background */}
                     <svg
-                      className="w-32 h-32 transform -rotate-90"
+                      className="w-36 h-36 transform -rotate-90"
                       viewBox="0 0 120 120"
                     >
                       <circle
@@ -403,7 +418,7 @@ const ApplicationDetailPage = () => {
                         cy="60"
                         r="54"
                         stroke="currentColor"
-                        strokeWidth="6"
+                        strokeWidth="8"
                         fill="transparent"
                         className="text-gray-200 dark:text-gray-700"
                       />
@@ -412,7 +427,7 @@ const ApplicationDetailPage = () => {
                         cy="60"
                         r="54"
                         stroke="currentColor"
-                        strokeWidth="6"
+                        strokeWidth="8"
                         fill="transparent"
                         strokeDasharray={`${2 * Math.PI * 54}`}
                         strokeDashoffset={`${
@@ -421,16 +436,16 @@ const ApplicationDetailPage = () => {
                           54 *
                           (1 - (cvAnalysis.overallScore || 0) / 100)
                         }`}
-                        className={getScoreStrokeColor(
+                        className={`${getScoreStrokeColor(
                           cvAnalysis.overallScore || 0
-                        )}
+                        )} transition-all duration-1000 ease-out cv-score-circle`}
                         strokeLinecap="round"
                       />
                     </svg>
                     {/* Score text */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div
-                        className={`text-3xl font-bold ${getScoreColor(
+                        className={`text-4xl font-bold ${getScoreColor(
                           cvAnalysis.overallScore || 0
                         )}`}
                       >
@@ -438,7 +453,7 @@ const ApplicationDetailPage = () => {
                       </div>
                     </div>
                   </div>
-                  <p className="text-gray-500 dark:text-gray-400 font-medium">
+                  <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">
                     Overall Match Score
                   </p>
                 </div>
@@ -453,9 +468,9 @@ const ApplicationDetailPage = () => {
                         {cvAnalysis.skillsScore || 0}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-1000 ease-out"
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all duration-1000 ease-out"
                         style={{ width: `${cvAnalysis.skillsScore || 0}%` }}
                       />
                     </div>
@@ -470,9 +485,9 @@ const ApplicationDetailPage = () => {
                         {cvAnalysis.experienceScore || 0}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-3 rounded-full transition-all duration-1000 ease-out delay-150"
+                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-4 rounded-full transition-all duration-1000 ease-out delay-150"
                         style={{ width: `${cvAnalysis.experienceScore || 0}%` }}
                       />
                     </div>
@@ -487,9 +502,9 @@ const ApplicationDetailPage = () => {
                         {cvAnalysis.educationScore || 0}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-1000 ease-out delay-300"
+                        className="bg-gradient-to-r from-purple-500 to-purple-600 h-4 rounded-full transition-all duration-1000 ease-out delay-300"
                         style={{ width: `${cvAnalysis.educationScore || 0}%` }}
                       />
                     </div>
@@ -497,7 +512,7 @@ const ApplicationDetailPage = () => {
 
                   {cvAnalysis.certificationScore && (
                     <div>
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex justify-between items-center mb-3">
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                           Certifications
                         </span>
@@ -505,9 +520,9 @@ const ApplicationDetailPage = () => {
                           {cvAnalysis.certificationScore}%
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-yellow-500 to-yellow-600 h-3 rounded-full transition-all duration-1000 ease-out delay-450"
+                          className="bg-gradient-to-r from-yellow-500 to-yellow-600 h-4 rounded-full transition-all duration-1000 ease-out delay-450"
                           style={{ width: `${cvAnalysis.certificationScore}%` }}
                         />
                       </div>
@@ -516,7 +531,7 @@ const ApplicationDetailPage = () => {
 
                   {cvAnalysis.languageScore && (
                     <div>
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex justify-between items-center mb-3">
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                           Languages
                         </span>
@@ -524,9 +539,9 @@ const ApplicationDetailPage = () => {
                           {cvAnalysis.languageScore}%
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-teal-500 to-teal-600 h-3 rounded-full transition-all duration-1000 ease-out delay-600"
+                          className="bg-gradient-to-r from-teal-500 to-teal-600 h-4 rounded-full transition-all duration-1000 ease-out delay-600"
                           style={{ width: `${cvAnalysis.languageScore}%` }}
                         />
                       </div>
@@ -535,35 +550,49 @@ const ApplicationDetailPage = () => {
                 </div>
               </div>
 
-              {/* Skills & Insights */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+              {/* Skills & Insights with improved spacing and visuals */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-300">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-8">
                   Key Insights
                 </h3>
 
                 {cvAnalysis.summary && (
-                  <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                  <div className="mb-8 p-5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800 hover:shadow-inner transition-all duration-300">
                     <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
                       Summary
                     </h4>
-                    <p className="text-sm text-blue-700 dark:text-blue-200">
+                    <p className="text-sm text-blue-700 dark:text-blue-200 leading-relaxed">
                       {cvAnalysis.summary}
                     </p>
                   </div>
                 )}
 
                 {cvAnalysis.strengths && cvAnalysis.strengths.length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-3">
+                  <div className="mb-8">
+                    <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-4 flex items-center">
+                      <svg
+                        className="w-5 h-5 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                       Strengths
                     </h4>
-                    <div className="space-y-2">
+                    <div className="space-y-3 ml-2">
                       {cvAnalysis.strengths
                         .slice(0, 3)
                         .map((strength, index) => (
-                          <div key={index} className="flex items-start gap-2">
+                          <div
+                            key={index}
+                            className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg border border-green-100 dark:border-green-800/30"
+                          >
                             <svg
-                              className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"
+                              className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >
@@ -583,17 +612,31 @@ const ApplicationDetailPage = () => {
                 )}
 
                 {cvAnalysis.weaknesses && cvAnalysis.weaknesses.length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-sm font-medium text-orange-600 dark:text-orange-400 mb-3">
+                  <div className="mb-8">
+                    <h4 className="text-sm font-medium text-orange-600 dark:text-orange-400 mb-4 flex items-center">
+                      <svg
+                        className="w-5 h-5 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                       Areas for Improvement
                     </h4>
-                    <div className="space-y-2">
+                    <div className="space-y-3 ml-2">
                       {cvAnalysis.weaknesses
                         .slice(0, 3)
                         .map((weakness, index) => (
-                          <div key={index} className="flex items-start gap-2">
+                          <div
+                            key={index}
+                            className="flex items-start gap-3 p-3 bg-orange-50 dark:bg-orange-900/10 rounded-lg border border-orange-100 dark:border-orange-800/30"
+                          >
                             <svg
-                              className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0"
+                              className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0"
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >

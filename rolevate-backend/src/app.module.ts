@@ -13,6 +13,7 @@ import { CompanyModule } from './company/company.module';
 import { CandidateModule } from './candidate/candidate.module';
 import { ApplyModule } from './apply/apply.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     CandidateModule,
     ApplyModule,
     SubscriptionModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

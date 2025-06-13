@@ -66,7 +66,12 @@ async function bootstrap() {
   
   // Serve static files from the uploads directory
   app.useStaticAssets(path.join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads',
+    prefix: '/uploads', // Keep original for backward compatibility
+  });
+  
+  // Add specific route for CV files to be accessible at /api/upload (singular)
+  app.useStaticAssets(path.join(__dirname, '..', 'uploads/cvs'), {
+    prefix: '/api/upload', // Changed from /api/uploads to /api/upload to match the expected URL
   });
   
   // Serve static files from the public directory

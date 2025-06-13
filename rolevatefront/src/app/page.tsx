@@ -119,7 +119,6 @@ export default function Home() {
         <Hero />
         <WhatIsRolevate />
         <HowItWorks />
-        <FeaturedJobs limit={6} showHeader={true} showViewAll={true} />
         <ProblemVsSolution />
         <BankIndustryFocus />
         <CallToAction />
