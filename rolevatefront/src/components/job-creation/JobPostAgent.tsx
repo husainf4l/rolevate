@@ -81,7 +81,7 @@ export const JobPostAgent: React.FC<JobPostAgentProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const apiBaseUrl =
-    process.env.NEXT_PUBLIC_JOB_POST_API_URL || "http://localhost:8000";
+    process.env.NEXT_PUBLIC_JOB_POST_API_URL || "https://rolevate.com/fastapi";
   const companyId = user?.companyId || "";
   const companyName = user?.company?.name || user?.company?.displayName || "";
 

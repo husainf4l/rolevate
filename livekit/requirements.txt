@@ -6,3 +6,5 @@ livekit-plugins-silero
 livekit-plugins-google
 psycopg2-binary
 python-dotenv
+livekit-plugins-cartesia
+livekit-plugins-vad

@@ -11,17 +11,9 @@ from dotenv import load_dotenv
 def map_experience_level(level: str) -> str:
     """Map experience level to backend enum format."""
     level_mapping = {
-        "entry": "ENTRY_LEVEL",
-        "entry level": "ENTRY_LEVEL",
-        "entrylevel": "ENTRY_LEVEL",
         "junior": "JUNIOR",
         "mid": "MID_LEVEL", 
-        "middle": "MID_LEVEL",
-        "mid level": "MID_LEVEL",
-        "midlevel": "MID_LEVEL",
         "senior": "SENIOR",
-        "lead": "LEAD",
-        "principal": "PRINCIPAL",
         "executive": "EXECUTIVE"
     }
     return level_mapping.get(level.lower(), "MID_LEVEL")
@@ -282,42 +274,6 @@ def send_job_post_to_api(
         print(f"DEBUG: Generated AI Interview Prompt (length: {len(ai_prompt)})")
         print(f"DEBUG: Generated AI Instructions (length: {len(ai_instructions)})")
         
-        # First validate and clean the job data to ensure it matches schema requirements
-        validate_result = validate_job_post_data(job_data)
-        
-        # If validation failed, return the errors
-        if not validate_result["valid"]:
-            return {
-                "success": False,
-                "status_code": 400,
-                "validation_errors": validate_result["errors"],
-                "details": "Validation failed"
-            }
-        
-        # Make sure experienceLevel is properly formatted
-        experience_level = job_data.get("experienceLevel", "")
-        valid_experience_levels = ["ENTRY_LEVEL", "JUNIOR", "MID_LEVEL", "SENIOR", "LEAD", "PRINCIPAL", "EXECUTIVE"]
-        if experience_level.upper() not in valid_experience_levels:
-            # Map to a valid value
-            experience_level = map_experience_level(experience_level)
-        else:
-            experience_level = experience_level.upper()
-        
-        # Ensure salary values are integers as required
-        salary_min = None
-        if job_data.get("salaryMin") is not None:
-            try:
-                salary_min = int(float(job_data["salaryMin"]))
-            except (ValueError, TypeError):
-                salary_min = 0
-                
-        salary_max = None
-        if job_data.get("salaryMax") is not None:
-            try:
-                salary_max = int(float(job_data["salaryMax"]))
-            except (ValueError, TypeError):
-                salary_max = 0
-        
         # Prepare the job post payload to match CreateJobPostDto + AI endpoint requirements
         payload = {
             "title": job_data.get("title", ""),
@@ -326,11 +282,11 @@ def send_job_post_to_api(
             "responsibilities": responsibilities_text if responsibilities_text else None,
             "benefits": benefits_text if benefits_text else None,
             "skills": job_data.get("skills", []),
-            "experienceLevel": experience_level,
+            "experienceLevel": map_experience_level(job_data.get("experienceLevel", "")),
             "location": job_data.get("location", None),
             "workType": map_work_type(job_data.get("workType", "")),
-            "salaryMin": salary_min,
-            "salaryMax": salary_max,
+            "salaryMin": job_data.get("salaryMin", None),
+            "salaryMax": job_data.get("salaryMax", None),
             "currency": job_data.get("currency", None),
             "isFeatured": job_data.get("isFeatured", False),
             "expiresAt": job_data.get("expiresAt", None),
@@ -345,10 +301,6 @@ def send_job_post_to_api(
             "userId": user_id or "ai-agent",  # Default to "ai-agent" if no user_id provided
             "createdBy": "AI Job Post Agent"
         }
-        
-        # Ensure department field is not included
-        if "department" in payload:
-            payload.pop("department")
         
         # Remove None values to keep payload clean
         payload = {k: v for k, v in payload.items() if v is not None}
@@ -389,20 +341,6 @@ def send_job_post_to_api(
             # Error
             try:
                 error_data = response.json()
-                
-                # Check for NestJS validation errors which come in a specific format
-                if response.status_code == 400 and isinstance(error_data, dict):
-                    if "message" in error_data and isinstance(error_data["message"], list):
-                        # Extract the detailed validation error messages
-                        validation_errors = error_data["message"]
-                        return {
-                            "success": False,
-                            "status_code": response.status_code,
-                            "error": "Validation error",
-                            "validation_errors": validation_errors,
-                            "details": "The job post data failed validation"
-                        }
-                
                 error_message = error_data.get("message", "Unknown error")
             except json.JSONDecodeError:
                 error_message = response.text or f"HTTP {response.status_code} error"
@@ -459,17 +397,9 @@ def validate_job_post_data(job_data: Dict[str, Any]) -> Dict[str, Any]:
     errors = []
     warnings = []
     
-    # Check if API URL is properly formatted
-    load_dotenv()
-    api_base_url = os.getenv("NESTJS_API_BASE_URL", "")
-    if not api_base_url.startswith("http"):
-        warnings.append("API URL may be incorrectly configured")
-    
     # Check if department field exists (it shouldn't)
     if "department" in job_data:
         errors.append("property department should not exist")
-        # Remove it from the job_data to avoid sending it to the API
-        job_data.pop("department")
     
     # Required fields according to CreateJobPostDto
     required_fields = ["title", "description", "requirements"]
@@ -480,37 +410,17 @@ def validate_job_post_data(job_data: Dict[str, Any]) -> Dict[str, Any]:
     # Validate experience level enum values
     experience_level = job_data.get("experienceLevel", "").upper()
     valid_experience_levels = ["ENTRY_LEVEL", "JUNIOR", "MID_LEVEL", "SENIOR", "LEAD", "PRINCIPAL", "EXECUTIVE"]
-    
-    # Map common variations to valid values to increase acceptance rate
-    experience_mapping = {
-        "ENTRY": "ENTRY_LEVEL",
-        "JUNIOR": "JUNIOR", 
-        "MID": "MID_LEVEL",
-        "MIDDLE": "MID_LEVEL",
-        "SENIOR": "SENIOR",
-        "LEAD": "LEAD",
-        "PRINCIPAL": "PRINCIPAL",
-        "EXECUTIVE": "EXECUTIVE"
-    }
-    
-    if experience_level in experience_mapping:
-        # Update the job_data with the mapped value
-        job_data["experienceLevel"] = experience_mapping[experience_level]
-    elif experience_level and experience_level not in valid_experience_levels:
+    if experience_level and experience_level not in valid_experience_levels:
         errors.append(f"experienceLevel must be one of the following values: {', '.join(valid_experience_levels)}")
     
-    # Validate salary values - ensure they're integers as required by schema
+    # Validate salary values
     try:
-        if "salaryMin" in job_data:
-            salary_min = float(job_data.get("salaryMin", 0))
-            job_data["salaryMin"] = int(salary_min)  # Convert to integer
+        salary_min = float(job_data.get("salaryMin", 0))
     except (ValueError, TypeError):
         errors.append("salaryMin is not a valid decimal number")
         
     try:
-        if "salaryMax" in job_data:
-            salary_max = float(job_data.get("salaryMax", 0))
-            job_data["salaryMax"] = int(salary_max)  # Convert to integer
+        salary_max = float(job_data.get("salaryMax", 0))
     except (ValueError, TypeError):
         errors.append("salaryMax is not a valid decimal number")
     

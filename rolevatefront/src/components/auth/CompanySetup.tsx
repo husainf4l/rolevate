@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   CompanyData,
   createCompany,
   AuthError,
+  getCurrentUser,
 } from "../../services/auth.service";
 
 interface CompanySetupProps {
@@ -14,9 +15,39 @@ interface CompanySetupProps {
 
 export default function CompanySetup({ onCompanyCreated }: CompanySetupProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading while checking auth status
   const [error, setError] = useState("");
   const [step, setStep] = useState(1); // 1: Company Info, 2: Subscription Plan
+
+  // Check if the user is logged in and doesn't have a company yet
+  useEffect(() => {
+    async function checkUserAndCompany() {
+      try {
+        const user = await getCurrentUser();
+        
+        if (!user) {
+          // User is not logged in, redirect to login
+          router.push('/login');
+          return;
+        }
+        
+        if (user.companyId) {
+          // User already has a company, redirect to dashboard
+          router.push('/dashboard');
+          return;
+        }
+        
+        // User is logged in but doesn't have a company, allow setup
+        setLoading(false);
+      } catch (error) {
+        console.error('Error checking user status:', error);
+        // On error, redirect to login
+        router.push('/login');
+      }
+    }
+    
+    checkUserAndCompany();
+  }, [router]);
 
   const [companyData, setCompanyData] = useState<CompanyData>({
     name: "",
@@ -167,6 +198,18 @@ export default function CompanySetup({ onCompanyCreated }: CompanySetupProps) {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#1E293B] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C6AD] mx-auto"></div>
+          <p className="mt-4 text-gray-300">Loading your account information...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#1E293B] py-12 px-4 sm:px-6 lg:px-8">

@@ -42,7 +42,7 @@ export interface ApiResponse<T = any> {
 export class JobPostAPI {
   private baseUrl: string;
 
-  constructor(baseUrl: string = 'http://localhost:8000') {
+  constructor(baseUrl: string = '/fastapi') {
     this.baseUrl = baseUrl;
   }
 

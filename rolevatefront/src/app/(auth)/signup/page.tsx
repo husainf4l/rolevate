@@ -89,12 +89,20 @@ function SignupPageContent() {
         role: formData.role,
       };
 
-      await register(registrationData);
+      const user = await register(registrationData);
       setSuccess("Account created successfully! You are now logged in.");
-      // Redirect to dashboard after successful registration (user is now logged in)
-      setTimeout(() => {
-        router.push(redirectPath);
-      }, 2000);
+      
+      // Check if user has a company, if not redirect to company setup page
+      if (!user.companyId) {
+        setTimeout(() => {
+          router.push("/company-setup");
+        }, 2000);
+      } else {
+        // If user already has a company, redirect to dashboard
+        setTimeout(() => {
+          router.push(redirectPath);
+        }, 2000);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof AuthError

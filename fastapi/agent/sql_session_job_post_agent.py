@@ -714,32 +714,66 @@ Or simply say **"looks good"** and I'll finalize everything for you! 🎯"""
                 "experienceLevel": experience_level,
                 "location": session.job_data.get("location", ""),
                 "workType": work_type,
-                "salaryMin": salary_min,
-                "salaryMax": salary_max,
+                "salaryMin": int(salary_min) if isinstance(salary_min, (int, float)) else 0,
+                "salaryMax": int(salary_max) if isinstance(salary_max, (int, float)) else 0,
                 "currency": session.job_data.get("currency", "JOD"),
                 "enableAiInterview": session.job_data.get("enableAiInterview", False),
                 "isFeatured": session.job_data.get("isFeatured", False),
                 "companyId": session.company_id
             }
             
-            # Post to API
+            # Ensure "department" field is not included in the final API payload
+            if "department" in api_job_data:
+                api_job_data.pop("department")
+                
+            # Also ensure it's not in the session job data when sending to API
+            if "department" in session.job_data:
+                # Remove from session data copy only for API submission
+                session_data_copy = session.job_data.copy()
+                session_data_copy.pop("department")
+                # Don't modify the original session.job_data as it's used elsewhere
+            else:
+                session_data_copy = session.job_data
+            
+            # Post to API (ensure we're sending the validated data without the department field)
             api_response = send_job_post_to_api(
                 job_data=api_job_data,
                 company_id=session.company_id,
                 company_name=session.company_name
             )
             
-            if api_response.get("success"):
+            # Check for validation errors
+            if api_response.get("validation_errors"):
+                error_message = api_response.get("validation_errors", "Unknown validation error")
+                
+                # Format error message to be more user-friendly
+                formatted_error = error_message
+                if isinstance(error_message, list):
+                    formatted_error = "\n".join([f"- {err}" for err in error_message])
+                
+                return f"""⚠️ **Job post created but there was an issue publishing it online.**
+
+**📋 Complete Job Details Ready:**
+- **Title**: {session.job_data.get('title', 'N/A')}
+- **Experience**: {experience_level}
+- **Location**: {session.job_data.get('location', 'N/A')}
+- **Salary**: {int(salary_min) if isinstance(salary_min, (int, float)) else 0}-{int(salary_max) if isinstance(salary_max, (int, float)) else 0} {session.job_data.get('currency', 'JOD')}
+
+**Error Details**: 
+{formatted_error}
+
+The job post data is complete and saved. Please fix the validation issues and try again, or contact your administrator to publish it manually.
+"""
+            el            if api_response.get("success"):
                 return f"""🎉 **Perfect! Your job post has been published successfully!**
 
 **"{session.job_data.get('title', 'Job Post')}"** is now live and ready to attract top talent!
 
 **📋 Final Job Details:**
 - **Title**: {session.job_data.get('title', 'N/A')}
-- **Department**: {session.job_data.get('department', 'N/A')}
 - **Experience**: {session.job_data.get('experienceLevel', 'N/A')}
 - **Location**: {session.job_data.get('location', 'N/A')}
-- **Salary**: {session.job_data.get('salaryMin', 'N/A')}-{session.job_data.get('salaryMax', 'N/A')} {session.job_data.get('currency', 'JOD')}
+- **Salary**: {int(float(session.job_data.get('salaryMin', 0)))} - {int(float(session.job_data.get('salaryMax', 0)))} {session.job_data.get('currency', 'JOD')}
 - **Skills**: {', '.join(session.job_data.get('skills', []))}
 
 **✨ What's Next:**
@@ -755,10 +789,9 @@ Thank you for using our AI HR assistant! Would you like to create another job po
 
 **📋 Complete Job Details Ready:**
 - **Title**: {session.job_data.get('title', 'N/A')}
-- **Department**: {session.job_data.get('department', 'N/A')}
-- **Experience**: {session.job_data.get('experienceLevel', 'N/A')}
+- **Experience**: {experience_level}
 - **Location**: {session.job_data.get('location', 'N/A')}
-- **Salary**: {session.job_data.get('salaryMin', 'N/A')}-{session.job_data.get('salaryMax', 'N/A')} {session.job_data.get('currency', 'JOD')}
+- **Salary**: {int(salary_min) if isinstance(salary_min, (int, float)) else 0}-{int(salary_max) if isinstance(salary_max, (int, float)) else 0} {session.job_data.get('currency', 'JOD')}
 
 **Error Details**: {api_response.get('error', 'Unknown error occurred')}
 
@@ -770,9 +803,9 @@ The job post data is complete and saved. Please contact your administrator to pu
 
 **📋 Complete Job Details:**
 - **Title**: {session.job_data.get('title', 'N/A')}
-- **Department**: {session.job_data.get('department', 'N/A')}
 - **Experience**: {session.job_data.get('experienceLevel', 'N/A')}
 - **Location**: {session.job_data.get('location', 'N/A')}
+- **Work Type**: {session.job_data.get('workType', 'N/A')}
 
 All the job information has been collected and is ready for posting. There was a technical issue with automatic posting, but your data is safely stored."""
 
