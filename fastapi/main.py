@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
 from pathlib import Path
@@ -6,6 +6,8 @@ import tempfile
 from agent import run_agent
 import textwrap # Import textwrap
 import os
+import json
+from whatsapp_handler import whatsapp_handler
 
 # Configuration for session management
 USE_SQL_SESSIONS = os.getenv("USE_SQL_SESSIONS", "true").lower() == "true"
@@ -399,6 +401,56 @@ async def cleanup_expired_sessions():
     except Exception as e:
         print(f"ERROR: cleanup_expired_sessions - Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error cleaning up sessions: {str(e)}")
+
+# WhatsApp webhook endpoints
+@app.get("/webhook")
+async def verify_whatsapp_webhook(
+    request: Request,
+    hub_mode: str = Query(None, alias="hub.mode"),
+    hub_challenge: str = Query(None, alias="hub.challenge"), 
+    hub_verify_token: str = Query(None, alias="hub.verify_token")
+):
+    """Verify WhatsApp webhook endpoint."""
+    
+    verify_token = os.getenv("WEBHOOK_VERIFY_TOKEN", "rolevate_webhook_verify_token_2025")
+    
+    print(f"🔍 Webhook verification attempt:")
+    print(f"  Mode: {hub_mode}")
+    print(f"  Challenge: {hub_challenge}")
+    print(f"  Verify Token: {hub_verify_token}")
+    
+    if hub_mode == "subscribe" and hub_verify_token == verify_token:
+        print("✅ WhatsApp webhook verified successfully")
+        return int(hub_challenge)
+    else:
+        print("❌ WhatsApp webhook verification failed")
+        raise HTTPException(status_code=403, detail="Verification failed")
+
+@app.post("/webhook")
+async def receive_whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
+    """
+    Receive WhatsApp messages and process them through the job post agent.
+    
+    - request: FastAPI request object containing WhatsApp webhook data
+    - background_tasks: Background tasks to process the message asynchronously
+    """
+    try:
+        # Parse the incoming JSON payload
+        payload = await request.json()
+        print(f"📥 Received WhatsApp webhook payload")
+        
+        # Process the webhook in the background to avoid blocking
+        background_tasks.add_task(whatsapp_handler.process_webhook, payload)
+        
+        # Return success immediately (WhatsApp requires quick response)
+        return {"status": "success"}
+        
+    except json.JSONDecodeError:
+        print(f"❌ Invalid JSON in WhatsApp webhook")
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+    except Exception as e:
+        print(f"❌ Error in WhatsApp webhook: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing webhook: {str(e)}")
 
 # Run the application with: uvicorn main:app --reload
 if __name__ == "__main__":
