@@ -14,6 +14,7 @@ import { CandidateModule } from './candidate/candidate.module';
 import { ApplyModule } from './apply/apply.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { WhatsAppModule } from './whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UploadsModule } from './uploads/uploads.module';
     ApplyModule,
     SubscriptionModule,
     UploadsModule,
+    WhatsAppModule,
   ],
   controllers: [AppController],
   providers: [AppService],

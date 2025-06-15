@@ -1,127 +1,114 @@
 """
-WhatsApp Notification Node for LangGraph Agent
+WhatsApp Notification Node for LangGraph
 
-This module contains the WhatsApp notification node for the CV analysis workflow.
-It sends WhatsApp notifications to candidates with their interview links after CV analysis.
+This module provides functionality to send WhatsApp notifications
+after CV analysis is complete.
 """
 
-import re
 from typing import Dict, Any
-from dotenv import load_dotenv
 from langchain_core.messages import AIMessage
-
-# Import the tools from the tools directory
+from langgraph.graph import END
 from ..tools.whatsapp_sender import send_whatsapp_message
 
+
 def send_whatsapp_notification_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Send a WhatsApp notification to the candidate with their interview link.
+    """Send WhatsApp notification after successful CV analysis.
     
     This node:
-    1. Takes the candidate phone number and WhatsApp link from the context
-    2. Gets the WhatsApp API token from environment variables
-    3. Sends a WhatsApp message using a template
-    4. Reports the result of the WhatsApp API call
+    1. Checks if candidate phone number is available
+    2. Sends a WhatsApp notification about the application status
+    3. Reports the result of the notification
     
     Args:
         state: The current state of the workflow with messages and context
         
     Returns:
-        Updated state with the WhatsApp API response
+        Updated state with the notification result
     """
-    # Load environment variables to access WhatsApp API token
-    load_dotenv()
-    
-    # Extract relevant data from context
     context = state.get("context", {})
-    candidate_phone = context.get("candidate_phone", None) # Phone is in context
-    application_id = context.get("candidate_id", None) # Using candidate_id as application_id for now
-    job_post_id = context.get("job_post_id", None) # Get job_post_id from context
-    cv_analysis = context.get("cv_analysis", "") # Get CV analysis to extract name
+    candidate_phone = context.get("candidate_phone", "")
+    candidate_id = context.get("candidate_id", "")
+    job_post_id = context.get("job_post_id", "")
+    api_response = context.get("api_response", {})
     
-    # Extract candidate name from CV analysis
-    candidate_name = None
-    if cv_analysis:
-        # Look for name in the CV analysis using regex
-        name_match = re.search(r"- \*\*Name:\*\* (.*?)(?:\n|$)", cv_analysis)
-        if not name_match:
-            # Try alternative format
-            name_match = re.search(r"Name:\*\* (.*?)(?:\n|$)", cv_analysis)
-        if name_match:
-            candidate_name = name_match.group(1).strip()
-
-    print(f"DEBUG: whatsapp_notification_node - Context received: {context}")
-    print(f"DEBUG: whatsapp_notification_node - Candidate Phone: {candidate_phone}, Name: {candidate_name}, App ID: {application_id}, Job ID: {job_post_id}")
-
-    # Validate required data
+    print(f"DEBUG: send_whatsapp_notification_node - Phone: {candidate_phone}, Candidate ID: {candidate_id}")
+    
+    # Check if we have a phone number
     if not candidate_phone:
+        response_message = "⚠ No phone number provided. Skipping WhatsApp notification."
+        print("DEBUG: send_whatsapp_notification_node - No phone number, skipping")
         return {
-            "messages": [AIMessage(content="Unable to send WhatsApp message: No phone number found.")],
-            "next": "END",
+            "messages": [AIMessage(content=response_message)],
+            "next": END,
             "context": context
         }
     
+    # Log API status but don't skip WhatsApp notification
+    api_success = api_response.get("success", False)
+    print(f"DEBUG: send_whatsapp_notification_node - API status: {api_success}, proceeding with WhatsApp notification anyway")
+    
     try:
-        # Clean the phone number - remove any non-digit characters except the + at the beginning
-        clean_phone = re.sub(r'[^\d+]', '', candidate_phone)
+        # Extract candidate name from CV analysis if available
+        cv_analysis = context.get("cv_analysis", "")
+        candidate_name = "Candidate"  # Default fallback
         
-        # If the number doesn't start with +, add it
-        if not clean_phone.startswith('+'):
-            clean_phone = f"+{clean_phone}"
-            
-        # Prepare template parameters for cv_received_notification
-        clean_phone_digits = re.sub(r'\D', '', clean_phone)
+        # Try to extract name from CV analysis
+        if cv_analysis and "name" in cv_analysis.lower():
+            lines = cv_analysis.split('\n')
+            for line in lines:
+                if 'name' in line.lower() and ':' in line:
+                    name_part = line.split(':')[-1].strip()
+                    if name_part and len(name_part) < 50:  # Reasonable name length
+                        candidate_name = name_part
+                        break
         
-        # Create template parameters as a dictionary
+        # Prepare template parameters for cv_received_notification template
         template_params = {
-            "name": candidate_name or "Candidate",
-            "phone": clean_phone_digits, # This is for the {{1}} in the body if needed, or other body params
-            "job_post_id": job_post_id or "" # Parameter for the button URL
+            "name": candidate_name,
+            "phone": candidate_phone,
+            "job_post_id": job_post_id  # Include job_post_id for the dynamic URL
         }
         
-        print(f"DEBUG: whatsapp_notification_node - Template Params: {template_params}")
-
-        # Send the WhatsApp message using the template
-        whatsapp_response = send_whatsapp_message(
-            phone_number=clean_phone,
+        print(f"DEBUG: send_whatsapp_notification_node - Template params: {template_params}")
+        
+        # Send the WhatsApp message using the cv_received_notification template
+        whatsapp_result = send_whatsapp_message(
+            phone_number=candidate_phone,
             template_name="cv_received_notification",
             template_params=template_params,
-            application_id=application_id
+            application_id=job_post_id  # Use job_post_id as application_id
         )
         
-        # Generate the response message
-        if whatsapp_response.get("success", False):
-            print(f"DEBUG: whatsapp_notification_node - WhatsApp call successful: {whatsapp_response}")
+        if whatsapp_result.get("success", False):
             response_message = (
-                f"✓ Successfully sent WhatsApp message to candidate\n"
+                f"✓ WhatsApp notification sent successfully!\n"
                 f"- Phone: {candidate_phone}\n"
-                f"- Name: {candidate_name or 'Not specified'}\n"
-                f"- Message ID: {whatsapp_response.get('data', {}).get('messageId', 'Unknown')}\n"
-                f"- Application ID: {application_id}"
+                f"- Template: cv_received_notification\n"
+                f"- Candidate: {candidate_name}\n"
+                f"- Status: {whatsapp_result.get('status_code', 'Sent')}"
             )
+            print(f"DEBUG: send_whatsapp_notification_node - WhatsApp template sent successfully to {candidate_phone}")
         else:
-            error_details = whatsapp_response.get("error", "Unknown error")
-            status_code = whatsapp_response.get("status_code", "N/A")
-            print(f"ERROR: whatsapp_notification_node - WhatsApp call failed. Status: {status_code}, Error: {error_details}")
+            error_detail = whatsapp_result.get('error', 'Unknown error')
             response_message = (
-                f"❌ Failed to send WhatsApp message to candidate\n"
+                f"⚠ Failed to send WhatsApp notification\n"
                 f"- Phone: {candidate_phone}\n"
-                f"- Error: {error_details}"
+                f"- Template: cv_received_notification\n"
+                f"- Error: {error_detail}"
             )
-        
-        # Add WhatsApp response to context
-        context["whatsapp_response"] = whatsapp_response
+            print(f"DEBUG: send_whatsapp_notification_node - WhatsApp failed: {error_detail}")
         
         return {
             "messages": [AIMessage(content=response_message)],
-            "next": "END",
+            "next": END,
             "context": context
         }
         
     except Exception as e:
-        # Catch any unexpected errors during the process
-        print(f"ERROR: whatsapp_notification_node - Unexpected error: {str(e)}")
+        error_message = f"Error sending WhatsApp notification: {str(e)}"
+        print(f"ERROR: send_whatsapp_notification_node - {error_message}")
         return {
-            "messages": [AIMessage(content=f"Error in WhatsApp notification node: {str(e)}")],
-            "next": "END",
+            "messages": [AIMessage(content=error_message)],
+            "next": END,
             "context": context
         }

@@ -259,17 +259,17 @@ def send_analysis_to_api_node(state: AgentState) -> AgentState:
     # Validate candidate ID and application ID
     import uuid
     
-    # For candidate ID, we can use a default if needed
-    default_candidate_id = "29c313d7-04dc-4a08-bc93-95efe273511e"  # Default candidate ID for testing
-    candidate_id = candidate_id if candidate_id else default_candidate_id
+    # Validate that both candidate_id and job_post_id are provided
+    if not candidate_id:
+        return {
+            "messages": [AIMessage(content="Candidate ID must be provided in the input.")],
+            "next": END,
+            "context": context
+        }
     
-    # For testing purposes, we have a known working application ID
-    known_application_id = "37b613ca-941b-4135-b081-f3523cf0ce8a"  # Known working application ID
-    
-    # For application ID, it must be provided by the user (job_post_id)
     if not job_post_id:
         return {
-            "messages": [AIMessage(content=f"Application ID (Job Post ID) must be provided. For testing, you can use: {known_application_id}")],
+            "messages": [AIMessage(content="Job Post ID (Application ID) must be provided in the input.")],
             "next": END,
             "context": context
         }
@@ -323,7 +323,8 @@ def send_analysis_to_api_node(state: AgentState) -> AgentState:
                 response_message = (
                     f"⚠ Failed to send CV analysis to API\n"
                     f"- Error: Application ID (Job Post ID) was not provided or is invalid.\n"
-                    f"- Details: {error_detail}"
+                    f"- Details: {error_detail}\n"
+                    f"- Proceeding with WhatsApp notification anyway..."
                 )
             elif "Invalid UUID format" in error_detail:
                 response_message = (
@@ -331,7 +332,8 @@ def send_analysis_to_api_node(state: AgentState) -> AgentState:
                     f"- Error: One or more IDs are in an invalid format.\n"
                     f"- Details: {error_detail}\n"
                     f"- Candidate ID: {candidate_id}\n"
-                    f"- Application ID: {application_id}"
+                    f"- Application ID: {application_id}\n"
+                    f"- Proceeding with WhatsApp notification anyway..."
                 )
             elif api_response.get('status_code') == 404:
                 known_working_id = "37b613ca-941b-4135-b081-f3523cf0ce8a"  # Known working application ID
@@ -343,16 +345,18 @@ def send_analysis_to_api_node(state: AgentState) -> AgentState:
                     f"- Candidate ID: {candidate_id}\n"
                     f"- Application ID: {application_id}\n"
                     f"- Note: This is expected in testing if the IDs don't exist in the database.\n"
-                    f"- For testing, try using this known working application ID: {known_working_id}"
+                    f"- For testing, try using this known working application ID: {known_working_id}\n"
+                    f"- Proceeding with WhatsApp notification anyway..."
                 )
             else:
                 response_message = (
                     f"⚠ Failed to send CV analysis to API\n"
                     f"- Error: {error_detail}\n"
-                    f"- Status Code: {api_response.get('status_code', 'Unknown')}"
+                    f"- Status Code: {api_response.get('status_code', 'Unknown')}\n"
+                    f"- Proceeding with WhatsApp notification anyway..."
                 )
-            # End the workflow if API call fails
-            next_node = END
+            # Continue to WhatsApp notification even if API call fails
+            next_node = "send_whatsapp_notification"
         # Add API response to context
         context["api_response"] = api_response
         context["application_id"] = application_id
@@ -373,7 +377,7 @@ def send_analysis_to_api_node(state: AgentState) -> AgentState:
 
 
 
-# Create the CV analysis graph
+# Create the CV analysis graphcd
 def create_graph() -> StateGraph:
     """Create a workflow graph for CV analysis.
     

@@ -23,6 +23,13 @@ export default function AIJobCreationPage() {
 
   const handleJobDataUpdate = (data: any) => {
     console.log("Received job data from AI:", data);
+    
+    // Check if data is null, undefined, or an empty object
+    if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+      console.log("Received empty or invalid job data, skipping update");
+      return;
+    }
+
     // Map AI-generated job data to JobFormData interface
     const mappedData: Partial<JobFormData> = {
       title: data.title || "",
@@ -60,13 +67,22 @@ export default function AIJobCreationPage() {
       benefits: Array.isArray(data.benefits)
         ? data.benefits.join("\n")
         : data.benefits || "",
-      skills: data.skills || [],
+      skills: Array.isArray(data.skills) ? data.skills : [],
       currency: data.salary_range?.currency || "USD",
       salaryMin: data.salary_range?.min || 0,
       salaryMax: data.salary_range?.max || 0,
       enableAiInterview: data.enable_ai_interview || false,
     };
-    setJobData(mappedData);
+    
+    // Only update job data if we have meaningful content
+    const hasContent = mappedData.title || mappedData.department || mappedData.description || 
+                      mappedData.requirements || mappedData.responsibilities;
+    
+    if (hasContent) {
+      setJobData(mappedData);
+    } else {
+      console.log("Job data contains no meaningful content, not updating state");
+    }
   };
 
   // Helper function to convert frontend experience level to backend enum

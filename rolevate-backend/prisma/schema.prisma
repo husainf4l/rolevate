@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,9 +8,9 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  email          String    @unique
-  username       String    @unique
+  id             String         @id @default(uuid())
+  email          String         @unique
+  username       String         @unique
   name           String?
   firstName      String?
   lastName       String?
@@ -25,319 +19,252 @@ model User {
   whatsappNumber String?
   profileImage   String?
   bio            String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   lastLoginAt    DateTime?
-  isActive       Boolean   @default(true)
-  role           UserRole  @default(RECRUITER)
+  isActive       Boolean        @default(true)
+  role           UserRole       @default(RECRUITER)
   companyId      String?
-
-  // Relations
-  company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  jobPosts      JobPost[]      @relation("JobPostCreator")
-  notifications Notification[]
+  jobPosts       JobPost[]      @relation("JobPostCreator")
+  notifications  Notification[]
+  company        Company?       @relation(fields: [companyId], references: [id])
 
   @@map("users")
 }
 
 model Company {
-  id          String       @id @default(uuid())
-  name        String       @unique
-  displayName String?
-  industry    String?
-  description String?
-  website     String?
-  logo        String?
-  location    String?
-  country     String?
-  city        String?
-  size        CompanySize?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  isActive    Boolean      @default(true)
-
-  // Relations
-  users        User[]
+  id           String        @id @default(uuid())
+  name         String        @unique
+  displayName  String?
+  industry     String?
+  description  String?
+  website      String?
+  logo         String?
+  location     String?
+  country      String?
+  city         String?
+  size         CompanySize?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  isActive     Boolean       @default(true)
   jobPosts     JobPost[]
   subscription Subscription?
+  users        User[]
 
   @@map("companies")
 }
 
 model JobPost {
-  id               String          @id @default(uuid())
-  title            String
-  description      String
-  requirements     String
-  responsibilities String?
-  benefits         String?
-  skills           String[] // Array of required skills
-  experienceLevel  ExperienceLevel
-  location         String?
-  workType         WorkType        @default(ONSITE)
-  salaryMin        Decimal?
-  salaryMax        Decimal?
-  currency         String?         @default("USD")
-  isActive         Boolean         @default(true)
-  isFeatured       Boolean         @default(false)
-  viewCount        Int             @default(0)
-  applicationCount Int             @default(0)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  expiresAt        DateTime?
-  publishedAt      DateTime?
-
-  // AI Interview Configuration
-  enableAiInterview   Boolean             @default(true)
-  interviewLanguages  InterviewLanguage[] @default([ENGLISH])
-  interviewDuration   Int                 @default(30) // minutes
-  aiPrompt            String? // Custom AI interviewer prompt/instructions
-  aiInstructions      String? // Additional instructions for AI interview
-  technicalQuestions  Json? // Store custom questions
-  behavioralQuestions Json?
-
-  // Foreign keys
-  companyId   String
-  createdById String
-
-  // Relations
-  company          Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdBy        User               @relation("JobPostCreator", fields: [createdById], references: [id])
-  applications     Application[]
-  InterviewHistory InterviewHistory[]
-  applies          Apply[]
+  id                    String                 @id @default(uuid())
+  title                 String
+  description           String
+  requirements          String
+  responsibilities      String?
+  benefits              String?
+  skills                String[]
+  experienceLevel       ExperienceLevel
+  location              String?
+  workType              WorkType               @default(ONSITE)
+  salaryMin             Decimal?
+  salaryMax             Decimal?
+  currency              String?                @default("USD")
+  isActive              Boolean                @default(true)
+  isFeatured            Boolean                @default(false)
+  viewCount             Int                    @default(0)
+  applicationCount      Int                    @default(0)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  expiresAt             DateTime?
+  publishedAt           DateTime?
+  enableAiInterview     Boolean                @default(true)
+  interviewLanguages    InterviewLanguage[]    @default([ENGLISH])
+  interviewDuration     Int                    @default(30)
+  aiPrompt              String?
+  aiInstructions        String?
+  technicalQuestions    Json?
+  behavioralQuestions   Json?
+  companyId             String
+  createdById           String
+  applies               Apply[]
+  applications          Application[]
+  InterviewHistory      InterviewHistory[]
+  company               Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy             User                   @relation("JobPostCreator", fields: [createdById], references: [id])
+  whatsappConversations WhatsAppConversation[]
 
   @@map("job_posts")
 }
 
 model Application {
-  id        String            @id @default(uuid())
-  status    ApplicationStatus @default(PENDING)
-  appliedAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-
-  // WhatsApp Integration
-  whatsappSent      Boolean         @default(false)
+  id                String            @id @default(uuid())
+  status            ApplicationStatus @default(PENDING)
+  appliedAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  whatsappSent      Boolean           @default(false)
   whatsappSentAt    DateTime?
   whatsappMessageId String?
   whatsappStatus    WhatsappStatus?
-
-  // CV Information
-  cvUrl       String?
-  cvFileName  String?
-  coverLetter String?
-
-  // Screening
+  cvUrl             String?
+  cvFileName        String?
+  coverLetter       String?
   isScreeningPassed Boolean?
   screeningNotes    String?
-
-  // Final Decision
-  rejectionReason String?
-  hiredAt         DateTime?
-  startDate       DateTime?
-
-  // Foreign keys
-  jobPostId   String
-  candidateId String
-
-  // Relations
-  jobPost       JobPost        @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
-  candidate     Candidate      @relation(fields: [candidateId], references: [id])
-  cvAnalysis    CvAnalysis?
-  interviews    Interview[]
-  fitScore      FitScore?
-  notifications Notification[]
+  rejectionReason   String?
+  hiredAt           DateTime?
+  startDate         DateTime?
+  jobPostId         String
+  candidateId       String
+  candidate         Candidate         @relation(fields: [candidateId], references: [id])
+  jobPost           JobPost           @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+  cvAnalysis        CvAnalysis?
+  fitScore          FitScore?
+  interviews        Interview[]
+  notifications     Notification[]
 
   @@unique([jobPostId, candidateId])
   @@map("applications")
 }
 
 model CvAnalysis {
-  id                 String  @id @default(uuid())
-  cvUrl              String
-  extractedText      String?
-  candidateName      String? // Extracted from CV by LLM
-  candidateEmail     String? // Extracted from CV by LLM  
-  candidatePhone     String? // Required input (phone number)
-  jobId              String? // Required input (job ID)
-  status             String? @default("pending") // pending, analyzing, completed, failed
-  whatsappLink       String?
-  // Overall Scoring (0-100)
-  overallScore       Float
-  skillsScore        Float
-  experienceScore    Float
-  educationScore     Float
-  languageScore      Float?
-  certificationScore Float?
-
-  // Detailed Analysis
+  id                    String      @id @default(uuid())
+  cvUrl                 String
+  extractedText         String?
+  candidateName         String?
+  candidateEmail        String?
+  candidatePhone        String?
+  jobId                 String?
+  status                String?     @default("pending")
+  whatsappLink          String?
+  overallScore          Float
+  skillsScore           Float
+  experienceScore       Float
+  educationScore        Float
+  languageScore         Float?
+  certificationScore    Float?
   summary               String
   strengths             String[]
   weaknesses            String[]
   suggestedImprovements String[]
-
-  // Extracted Information
-  skills         String[]
-  experience     Json? // Structured work experience
-  education      Json? // Structured education
-  certifications String[]
-  languages      Json? // Language proficiency
-
-  // AI Analysis Metadata
-  aiModel        String? // Which AI model was used
-  processingTime Int? // Processing time in milliseconds
-  analyzedAt     DateTime @default(now())
-
-  // Foreign keys
-  applicationId String @unique
-  candidateId   String
-
-  // Relations
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  candidate   Candidate   @relation(fields: [candidateId], references: [id])
+  skills                String[]
+  experience            Json?
+  education             Json?
+  certifications        String[]
+  languages             Json?
+  aiModel               String?
+  processingTime        Int?
+  analyzedAt            DateTime    @default(now())
+  applicationId         String      @unique
+  candidateId           String
+  application           Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate             Candidate   @relation(fields: [candidateId], references: [id])
 
   @@map("cv_analyses")
 }
 
 model Interview {
-  id       String            @id @default(uuid())
-  type     InterviewType     @default(AI_SCREENING)
-  language InterviewLanguage @default(ENGLISH)
-  status   InterviewStatus   @default(SCHEDULED)
-
-  // Scheduling
-  scheduledAt      DateTime
-  startedAt        DateTime?
-  completedAt      DateTime?
-  duration         Int? // Actual duration in minutes
-  expectedDuration Int       @default(30)
-
-  // LiveKit Integration
-  roomName         String  @unique
-  roomCode         String? @unique // Public access code for candidates
-  roomId           String?
-  accessToken      String?
-  participantToken String?
-  recordingEnabled Boolean @default(true)
-  recordingUrl     String?
-
-  // Candidate Information (for public access)
-  candidatePhone String?
-  candidateName  String?
-  instructions   String?
-  maxDuration    Int?      @default(1800) // Max interview duration in seconds
-  endedAt        DateTime?
-
-  // AI Analysis Scores (0-100)
-  overallScore       Float?
-  communicationScore Float?
-  technicalScore     Float?
-  behavioralScore    Float?
-  confidenceScore    Float?
-  clarityScore       Float?
-  responseTimeScore  Float?
-
-  // Detailed Analysis
+  id                  String            @id @default(uuid())
+  type                InterviewType     @default(AI_SCREENING)
+  language            InterviewLanguage @default(ENGLISH)
+  status              InterviewStatus   @default(SCHEDULED)
+  scheduledAt         DateTime
+  startedAt           DateTime?
+  completedAt         DateTime?
+  duration            Int?
+  expectedDuration    Int               @default(30)
+  roomName            String            @unique
+  roomCode            String?           @unique
+  roomId              String?
+  accessToken         String?
+  participantToken    String?
+  recordingEnabled    Boolean           @default(true)
+  recordingUrl        String?
+  candidatePhone      String?
+  candidateName       String?
+  instructions        String?
+  maxDuration         Int?              @default(1800)
+  endedAt             DateTime?
+  overallScore        Float?
+  communicationScore  Float?
+  technicalScore      Float?
+  behavioralScore     Float?
+  confidenceScore     Float?
+  clarityScore        Float?
+  responseTimeScore   Float?
   summary             String?
-  keyHighlights       String[] @default([])
-  areasForImprovement String[] @default([])
+  keyHighlights       String[]          @default([])
+  areasForImprovement String[]          @default([])
   recommendations     String?
-
-  // Interview Content
-  questionsAsked    Json? // Questions and answers
-  transcription     String?
-  sentimentAnalysis Json?
-
-  // AI Metadata
-  aiModel        String?
-  processingTime Int?
-
-  // Foreign keys
-  applicationId String
-  candidateId   String
-
-  // Relations
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  candidate   Candidate   @relation(fields: [candidateId], references: [id])
+  questionsAsked      Json?
+  transcription       String?
+  sentimentAnalysis   Json?
+  aiModel             String?
+  processingTime      Int?
+  applicationId       String
+  candidateId         String
+  application         Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate           Candidate         @relation(fields: [candidateId], references: [id])
 
   @@map("interviews")
 }
 
 model FitScore {
-  id String @id @default(uuid())
-
-  // Combined Scoring
-  overallScore    Float // Final weighted score (0-100)
-  cvWeight        Float @default(0.4)
-  interviewWeight Float @default(0.6)
-
-  // Component Scores
-  cvScore        Float?
-  interviewScore Float?
-
-  // Recommendation
-  recommendation FitRecommendation
-  confidence     Float // Confidence in recommendation (0-1)
-  reasoning      String
-
-  // Ranking
-  rankInPool Int? // Rank among all candidates for this job
-  percentile Float? // Percentile score
-
-  // Metadata
-  calculatedAt  DateTime @default(now())
-  lastUpdatedAt DateTime @updatedAt
-  version       String   @default("1.0") // Algorithm version
-
-  // Foreign keys
-  applicationId String @unique
-
-  // Relations
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  id              String            @id @default(uuid())
+  overallScore    Float
+  cvWeight        Float             @default(0.4)
+  interviewWeight Float             @default(0.6)
+  cvScore         Float?
+  interviewScore  Float?
+  recommendation  FitRecommendation
+  confidence      Float
+  reasoning       String
+  rankInPool      Int?
+  percentile      Float?
+  calculatedAt    DateTime          @default(now())
+  lastUpdatedAt   DateTime          @updatedAt
+  version         String            @default("1.0")
+  applicationId   String            @unique
+  application     Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@map("fit_scores")
 }
 
 model Notification {
-  id        String           @id @default(uuid())
-  type      NotificationType
-  title     String
-  message   String
-  isRead    Boolean          @default(false)
-  readAt    DateTime?
-  createdAt DateTime         @default(now())
-  data      Json? // Additional data for the notification
-
-  // Foreign keys
+  id            String           @id @default(uuid())
+  type          NotificationType
+  title         String
+  message       String
+  isRead        Boolean          @default(false)
+  readAt        DateTime?
+  createdAt     DateTime         @default(now())
+  data          Json?
   userId        String
   applicationId String?
-
-  // Relations
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application   Application?     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }
 
 model Candidate {
-  id                 String             @id @default(uuid())
-  phoneNumber        String             @unique
-  email              String?
-  name               String?
-  firstName          String?
-  lastName           String?
-  whatsappNumber     String?
-  profileImage       String?
-  bio                String?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  isActive           Boolean            @default(true)
-  cvUrl              String?
-  applications       Application[]
-  interviews         Interview[]
-  cvAnalyses         CvAnalysis[]
-  interviewHistories InterviewHistory[]
-  applies            Apply[]
+  id                    String                 @id @default(uuid())
+  phoneNumber           String                 @unique
+  email                 String?
+  name                  String?
+  firstName             String?
+  lastName              String?
+  whatsappNumber        String?
+  profileImage          String?
+  bio                   String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  isActive              Boolean                @default(true)
+  cvUrl                 String?
+  applies               Apply[]
+  applications          Application[]
+  cvAnalyses            CvAnalysis[]
+  interviewHistories    InterviewHistory[]
+  interviews            Interview[]
+  whatsappConversations WhatsAppConversation[]
 
   @@map("candidates")
 }
@@ -345,68 +272,117 @@ model Candidate {
 model InterviewHistory {
   id           Int        @id @default(autoincrement())
   candidate_id String?    @db.VarChar(64)
-  ai           String?    @db.Text
-  user         String?    @db.Text
+  ai           String?
+  user         String?
   language     String?    @db.VarChar(8)
-  created_at   DateTime   @default(now()) @db.Timestamp
-  job          JobPost?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  created_at   DateTime   @default(now()) @db.Timestamp(6)
   jobId        String?    @db.VarChar(64)
-  candidate    Candidate? @relation(fields: [candidate_id], references: [id], onDelete: SetNull)
+  candidate    Candidate? @relation(fields: [candidate_id], references: [id])
+  job          JobPost?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   @@map("interview_history")
 }
 
 model Subscription {
-  id     String             @id @default(uuid())
-  plan   SubscriptionPlan   @default(FREE)
-  status SubscriptionStatus @default(ACTIVE)
-
-  // Billing cycle
-  startDate   DateTime
-  endDate     DateTime
-  renewsAt    DateTime?
-  cancelledAt DateTime?
-
-  // Features & Limits
-  jobPostLimit   Int @default(5) // Number of job posts allowed
-  candidateLimit Int @default(100) // Number of candidates allowed
-  interviewLimit Int @default(50) // Number of interviews per month
-
-  // Payment information
-  priceAmount  Decimal? // Amount paid
-  currency     String       @default("USD")
-  billingCycle BillingCycle @default(MONTHLY)
-
-  // Stripe integration (optional)
+  id                   String             @id @default(uuid())
+  plan                 SubscriptionPlan   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  startDate            DateTime
+  endDate              DateTime
+  renewsAt             DateTime?
+  cancelledAt          DateTime?
+  jobPostLimit         Int                @default(5)
+  candidateLimit       Int                @default(100)
+  interviewLimit       Int                @default(50)
+  priceAmount          Decimal?
+  currency             String             @default("USD")
+  billingCycle         BillingCycle       @default(MONTHLY)
   stripeCustomerId     String?
   stripeSubscriptionId String?
   stripePriceId        String?
-
-  // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign keys
-  companyId String @unique
-
-  // Relations
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  companyId            String             @unique
+  company              Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
 }
 
 model Apply {
   id          String    @id @default(uuid())
-  candidate   Candidate @relation(fields: [candidateId], references: [id])
   candidateId String
-  jobPost     JobPost   @relation(fields: [jobPostId], references: [id])
   jobPostId   String
   cvUrl       String
   coverLetter String?
   createdAt   DateTime  @default(now())
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  jobPost     JobPost   @relation(fields: [jobPostId], references: [id])
 }
 
-// Enums
+model WhatsAppMessage {
+  id             String                @id @default(uuid())
+  messageId      String                @unique
+  from           String
+  to             String?
+  direction      MessageDirection
+  type           MessageType
+  content        String?
+  mediaUrl       String?
+  mediaType      String?
+  templateName   String?
+  status         MessageStatus         @default(SENT)
+  timestamp      DateTime
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  contactName    String?
+  metadata       Json?
+  conversationId String?
+  conversation   WhatsAppConversation? @relation(fields: [conversationId], references: [id])
+
+  @@index([from])
+  @@index([to])
+  @@index([timestamp])
+  @@index([conversationId])
+  @@map("whatsapp_messages")
+}
+
+model WhatsAppConversation {
+  id               String            @id @default(uuid())
+  phoneNumber      String            @unique
+  contactName      String?
+  lastMessageAt    DateTime
+  isActive         Boolean           @default(true)
+  templateRequired Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  candidateId      String?
+  jobPostId        String?
+  candidate        Candidate?        @relation(fields: [candidateId], references: [id])
+  jobPost          JobPost?          @relation(fields: [jobPostId], references: [id])
+  messages         WhatsAppMessage[]
+
+  @@index([phoneNumber])
+  @@index([lastMessageAt])
+  @@index([candidateId])
+  @@index([jobPostId])
+  @@map("whatsapp_conversations")
+}
+
+model WhatsAppTemplate {
+  id         String         @id @default(uuid())
+  name       String         @unique
+  status     TemplateStatus
+  language   String         @default("en")
+  category   String?
+  components Json?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([name])
+  @@index([status])
+  @@map("whatsapp_templates")
+}
+
 enum UserRole {
   SUPER_ADMIN
   COMPANY_ADMIN
@@ -415,11 +391,11 @@ enum UserRole {
 }
 
 enum CompanySize {
-  STARTUP // 1-10
-  SMALL // 11-50
-  MEDIUM // 51-200
-  LARGE // 201-1000
-  ENTERPRISE // 1000+
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
 }
 
 enum ExperienceLevel {
@@ -531,4 +507,37 @@ enum BillingCycle {
   MONTHLY
   QUARTERLY
   YEARLY
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  DOCUMENT
+  AUDIO
+  VIDEO
+  INTERACTIVE
+  BUTTON
+  TEMPLATE
+  LOCATION
+  CONTACT
+  STICKER
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum TemplateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DISABLED
 }

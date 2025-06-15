@@ -19,6 +19,9 @@ const Footer = () => {
             <Link href="/terms-of-service" className="text-[#94A3B8] hover:text-[#00C6AD] transition duration-300">
               Terms of Service
             </Link>
+            <Link href="/data-deletion" className="text-[#94A3B8] hover:text-[#00C6AD] transition duration-300">
+              Data Deletion
+            </Link>
             <Link href="/contact" className="text-[#94A3B8] hover:text-[#00C6AD] transition duration-300">
               Contact Us
             </Link>

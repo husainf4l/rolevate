@@ -19,6 +19,16 @@ export default function Navbar() {
             />
           </div>
 
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link
+              href="/release-summary"
+              className="text-gray-300 hover:text-white font-medium transition-colors duration-200"
+            >
+              Release Notes
+            </Link>
+          </div>
+
           {/* Auth Section */}
           <div className="flex items-center space-x-4">
             {/* Login and Signup buttons */}
@@ -72,6 +82,17 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-gray-800">
             <div className="flex flex-col space-y-3 pt-4">
+              {/* Mobile Navigation Links */}
+              <div className="flex flex-col space-y-2 px-4">
+                <Link
+                  href="/release-summary"
+                  className="text-gray-300 hover:text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-800"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Release Notes
+                </Link>
+              </div>
+              
               {/* Mobile Auth buttons */}
               <div className="flex flex-col space-y-2 px-4 pt-4 border-t border-gray-800">
                 <Link

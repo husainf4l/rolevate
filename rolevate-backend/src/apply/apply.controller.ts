@@ -11,7 +11,7 @@ const FormData = require('form-data');
 
 @Controller('apply')
 export class ApplyController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   @Post()
   @UseInterceptors(FileInterceptor('cv', {
@@ -46,13 +46,13 @@ export class ApplyController {
         where: { id: candidate.id },
         data: { cvUrl },
       });
-      
+
       // Also update cvUrl in any existing CV analyses for this candidate
       await this.prisma.cvAnalysis.updateMany({
         where: { candidateId: candidate.id },
         data: { cvUrl }
       });
-      
+
       // Update cvUrl in all applications for this candidate
       await this.prisma.application.updateMany({
         where: { candidateId: candidate.id },
@@ -99,32 +99,32 @@ export class ApplyController {
     try {
       // Create a new FormData instance with proper options
       const formData = new FormData();
-      
+
       // Add the required fields for the FastAPI endpoint
       // Keep only snake_case versions as that's FastAPI's common convention
       formData.append('candidate_id', candidate.id);
       formData.append('job_post_id', jobPostId);
       formData.append('candidate_phone', phoneNumber); // Changed to match FastAPI expectation
-      
+
       // Read the file from disk and append it to the form data
       const filePath = join(process.cwd(), 'uploads', 'cvs', file.filename);
-      
+
       // Create a new stream for the file - don't reuse streams as they can only be consumed once
       const fileStream = fs.createReadStream(filePath);
-      
+
       // Properly format the file attachment with the appropriate metadata
       // Use cv_file to match exactly what FastAPI is expecting
       formData.append('cv_file', fileStream, {
         filename: file.originalname,
         contentType: file.mimetype
       });
-      
+
       // Optional: Add application ID and other metadata if needed
       formData.append('application_id', application.id);
       if (coverLetter) {
         formData.append('cover_letter', coverLetter);
       }
-      
+
       // Debug what fields we're sending
       console.log('Sending fields to FastAPI:', {
         candidate_id: candidate.id,
@@ -134,27 +134,27 @@ export class ApplyController {
         cover_letter: coverLetter || 'none',
         cv_file: 'File stream attached' // Updated to match FastAPI expectation
       });
-      
+
       // Get the headers that will be sent
       const headers = formData.getHeaders();
       console.log('Headers being sent:', headers);
-      
+
       // Ensure we're using the right URL for the FastAPI server
       const fastApiUrl = process.env.FASTABI_URL || 'http://localhost:8000';
       console.log(`Sending request to: ${fastApiUrl}/apply`);
-      
+
       // Send the multipart/form-data request to FastAPI
       await axios.post(
-        `${fastApiUrl}/apply`, 
-        formData, 
+        `${fastApiUrl}/apply`,
+        formData,
         { headers }
       );
-      
+
       console.log('Successfully sent application to FastAPI server');
     } catch (err) {
       // Log the error but don't block the response
       console.error('Failed to notify fastabi server:', err.message);
-      
+
       // Log more detailed error information if available
       if (err.response) {
         // The request was made and the server responded with a status code

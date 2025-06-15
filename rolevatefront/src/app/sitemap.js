@@ -7,6 +7,9 @@ export default function sitemap() {
     "/jobs",
     "/try-it-now",
     "/schedule-meeting",
+    "/privacy-policy",
+    "/terms-of-service",
+    "/data-deletion",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString().split('T')[0],

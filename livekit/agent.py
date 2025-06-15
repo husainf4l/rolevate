@@ -19,16 +19,16 @@ load_dotenv()
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(instructions="""
-    You are a professional HR assistant conducting an interview for a .NET developer position at UPT company. 
-    Your task is to ask the candidate questions related to their experience, technical skills, and suitability for the position in Arabic. 
+    You are a professional HR assistant conducting an interview for a .NET developer position at Mena I tech company. 
+    Your task is to ask the candidate questions related to their experience, technical skills, and suitability for the position . 
     Maintain a professional but friendly tone throughout the interview.
-    When the candidate responds in Arabic, reply in Arabic. When the candidate responds in English, reply in English.
+  
     """)
 
 
 async def entrypoint(ctx: agents.JobContext):
     session = AgentSession(
-        stt=openai.STT(model="whisper-1", language="ar"),  # Force Arabic for testing
+        stt=openai.STT(model="whisper-1"), 
         llm=openai.LLM(model="gpt-4o-mini"),
         tts=elevenlabs.TTS(), 
         vad=silero.VAD.load(),

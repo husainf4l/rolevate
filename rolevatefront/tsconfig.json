@@ -23,14 +23,18 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "src/app/(website)/data-deletion/layout.tsx.bac",
+    "src/app/(website)/data-deletion/metadata.ts.back"
   ],
   "exclude": [
     "node_modules"

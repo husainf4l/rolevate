@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request, Query, BackgroundTasks
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
 from pathlib import Path
@@ -7,9 +7,7 @@ from agent import run_agent
 import textwrap # Import textwrap
 import os
 import json
-from whatsapp_handler import whatsapp_handler
 
-# Configuration for session management
 USE_SQL_SESSIONS = os.getenv("USE_SQL_SESSIONS", "true").lower() == "true"
 
 # Initialize FastAPI application
@@ -19,34 +17,26 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Root endpoint
 @app.get("/")
 async def root():
     return {"message": "Welcome to Rolevate API"}
 
-# Application endpoint
+
 @app.post("/apply")
 async def apply(
     candidate_id: str = Form(...),
     job_post_id: str = Form(...),
-    candidate_phone: str = Form(...), # Added candidate_phone
+    candidate_phone: str = Form(...),
     cv_file: UploadFile = File(...)
 ):
     """
     Process a job application with a CV file, candidate ID, job post ID, and candidate phone.
-    This endpoint accepts a candidate's CV file and relevant identifiers, processes the application,                                                                
+    This endpoint accepts a candidate's CV file and relevant identifiers, processes the application.
+    
     - candidate_id: Unique identifier for the candidate (must be a valid UUID)
     - job_post_id: Unique identifier for the job post (must be a valid UUID)
-    - candidate_phone: Phone number of the candidate (for WhatsApp notifications)
+    - candidate_phone: Phone number of the candidate
     - cv_file: Uploaded CV file in PDF or DOCX format
     """
     # Validate UUIDs before processing
@@ -105,7 +95,7 @@ async def apply(
         print(f"ERROR: main.py - Error processing application: {str(e)}") # Add logging for the exception
         raise HTTPException(status_code=500, detail=f"Error processing application: {str(e)}")
 
-# Job Post Creation endpoint with frontend-provided session management
+# Job Post Creation endpoint using direct job post agent
 @app.post("/create-job-post")
 async def create_job_post(
     message: str = Form(...),
@@ -114,7 +104,7 @@ async def create_job_post(
     company_name: str = Form(None)
 ):
     """
-    Create a job post through conversational AI agent with frontend-provided session ID.
+    Create a job post through conversational AI agent.
     
     - message: User's message or input for the job post creation
     - company_id: Unique identifier for the company creating the job post
@@ -122,7 +112,7 @@ async def create_job_post(
     - company_name: Name of the company (optional)
     """
     try:
-        from agent.session_job_post_agent import get_session_job_post_agent
+        from agent.job_post_agent import run_job_post_agent
         import uuid
         
         # Validate session ID format
@@ -136,51 +126,23 @@ async def create_job_post(
         
         print(f"DEBUG: create_job_post - Message: {message[:100]}..., Company ID: {company_id}, Company Name: {company_name}, Session ID: {session_id}")
         
-        # Choose session manager based on configuration
-        if USE_SQL_SESSIONS:
-            from agent.sql_session_job_post_agent import get_sql_session_job_post_agent
-            agent = get_sql_session_job_post_agent()
-            print("🗄️  Using SQL session management")
-        else:
-            from agent.session_job_post_agent import get_session_job_post_agent
-            agent = get_session_job_post_agent()
-            print("📁 Using JSON file session management")
-        
-        # Check if session already exists
-        existing_session = agent.get_session_info(session_id)
-        
-        if existing_session.get("error"):
-            # Session doesn't exist, create new one with provided ID
-            result = agent.start_conversation_with_id(session_id, company_id, company_name)
-            # Then process the first message
-            if not result.get("error"):
-                result = agent.continue_conversation(session_id, message)
-        else:
-            # Session exists, continue conversation
-            result = agent.continue_conversation(session_id, message)
+        # Call the job post agent directly with the message and company info
+        result = run_job_post_agent(message, company_id, company_name)
         
         print(f"DEBUG: create_job_post - Agent result: {result}")
         
-        if result.get("error"):
-            return {
-                "status": "error",
-                "error": result["error"],
-                "session_id": session_id,
-                "agent_response": result.get("response", "An error occurred"),
-                "is_complete": False,
-                "job_data": result.get("job_data", {}),
-                "current_step": result.get("current_step", "getting_basic_info")
-            }
+        # Extract response from agent messages
+        agent_response = result[-1].content if result else "No response from agent"
         
         return {
             "status": "success",
             "session_id": session_id,
             "company_id": company_id,
             "company_name": company_name,
-            "agent_response": result["response"],
-            "is_complete": result["is_complete"],
-            "job_data": result["job_data"],
-            "current_step": result["current_step"]
+            "agent_response": agent_response,
+            "is_complete": False,  # For now, assume not complete in single call
+            "job_data": {},
+            "current_step": "processing"
         }
         
     except HTTPException:
@@ -198,7 +160,7 @@ async def job_post_chat(
     company_name: str = Form(None)
 ):
     """
-    Continue a job post creation conversation using session ID.
+    Continue a job post creation conversation using direct job post agent.
     
     - message: User's message continuation
     - session_id: Session ID for conversation continuity
@@ -206,89 +168,61 @@ async def job_post_chat(
     - company_name: Company name (optional)
     """
     try:
-        from agent.session_job_post_agent import get_session_job_post_agent
+        from agent.job_post_agent import run_job_post_agent
         
         print(f"DEBUG: job_post_chat - Message: {message[:100]}..., Session ID: {session_id}")
         
-        # Choose session manager based on configuration
-        if USE_SQL_SESSIONS:
-            from agent.sql_session_job_post_agent import get_sql_session_job_post_agent
-            agent = get_sql_session_job_post_agent()
-            
-            # For SQL sessions, check if session exists first
-            session_info = agent.get_session_info(session_id)
-            if session_info.get("error"):
-                # Session doesn't exist, create it first
-                print(f"DEBUG: Creating new SQL session {session_id}")
-                create_result = agent.start_conversation_with_id(session_id, company_id or "default-company", company_name or "Default Company")
-                if create_result.get("error"):
-                    return {
-                        "status": "error",
-                        "error": create_result["error"],
-                        "session_id": session_id,
-                        "agent_response": "Failed to create session",
-                        "is_complete": False,
-                        "job_data": {},
-                        "current_step": "getting_basic_info"
-                    }
-            
-            # Now continue the conversation
-            result = agent.continue_conversation(session_id, message)
-        else:
-            from agent.session_job_post_agent import get_session_job_post_agent
-            agent = get_session_job_post_agent()
-            result = agent.continue_conversation(session_id, message)
+        # Call the job post agent directly
+        result = run_job_post_agent(message, company_id, company_name)
         
         print(f"DEBUG: job_post_chat - Agent result: {result}")
         
-        if result.get("error"):
-            return {
-                "status": "error",
-                "error": result["error"],
-                "session_id": result.get("session_id"),
-                "agent_response": result.get("response", "Session not found or expired"),
-                "is_complete": False,
-                "job_data": result.get("job_data", {}),
-                "current_step": result.get("current_step", "getting_basic_info")
-            }
+        # Extract response from agent messages
+        agent_response = result[-1].content if result else "No response from agent"
         
         return {
             "status": "success",
-            "session_id": result["session_id"],
-            "agent_response": result["response"],
-            "is_complete": result["is_complete"],
-            "job_data": result["job_data"],
-            "current_step": result["current_step"]
+            "session_id": session_id,
+            "agent_response": agent_response,
+            "is_complete": False,  # For now, assume not complete in single call
+            "job_data": {},
+            "current_step": "processing"
         }
         
     except Exception as e:
         print(f"ERROR: job_post_chat - Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in job post chat: {str(e)}")
 
-# Get session information endpoint
+# Get session information endpoint (simplified version)
 @app.get("/job-post-session/{session_id}")
 async def get_job_post_session(session_id: str):
     """
-    Get information about a job post session.
+    Get information about a job post session (simplified version).
     
     - session_id: Session ID to query
     """
     try:
-        # Choose session manager based on configuration
-        if USE_SQL_SESSIONS:
-            from agent.sql_session_job_post_agent import get_sql_session_job_post_agent
-            agent = get_sql_session_job_post_agent()
-        else:
-            from agent.session_job_post_agent import get_session_job_post_agent
-            agent = get_session_job_post_agent()
-        result = agent.get_session_info(session_id)
+        import uuid
         
-        if result.get("error"):
-            raise HTTPException(status_code=404, detail=result["error"])
+        # Validate session ID format
+        try:
+            uuid.UUID(session_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail="session_id must be a valid UUID format"
+            )
         
+        # Since we don't have session persistence, return a basic response
+        # indicating the session exists but with minimal data
         return {
             "status": "success",
-            **result
+            "session_id": session_id,
+            "exists": True,
+            "current_step": "processing",
+            "job_data": {},
+            "is_complete": False,
+            "message": "Session found (simplified mode - no persistent state)"
         }
         
     except HTTPException:
@@ -296,161 +230,6 @@ async def get_job_post_session(session_id: str):
     except Exception as e:
         print(f"ERROR: get_job_post_session - Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error getting session info: {str(e)}")
-
-# Delete session endpoint
-@app.delete("/job-post-session/{session_id}")
-async def delete_job_post_session(session_id: str):
-    """
-    Delete a job post session.
-    
-    - session_id: Session ID to delete
-    """
-    try:
-        # Choose session manager based on configuration
-        if USE_SQL_SESSIONS:
-            from agent.sql_session_job_post_agent import get_sql_session_job_post_agent
-            agent = get_sql_session_job_post_agent()
-        else:
-            from agent.session_job_post_agent import get_session_job_post_agent
-            agent = get_session_job_post_agent()
-        success = agent.delete_session(session_id)
-        
-        if not success:
-            raise HTTPException(status_code=404, detail="Session not found")
-        
-        return {
-            "status": "success",
-            "message": "Session deleted successfully"
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"ERROR: delete_job_post_session - Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error deleting session: {str(e)}")
-
-# Additional SQL session management endpoints
-@app.get("/session-stats")
-async def get_session_stats():
-    """
-    Get session statistics (only available with SQL session management).
-    """
-    if not USE_SQL_SESSIONS:
-        raise HTTPException(status_code=501, detail="Statistics only available with SQL session management")
-    
-    try:
-        from agent.sql_session_job_post_agent import get_sql_session_job_post_agent
-        agent = get_sql_session_job_post_agent()
-        stats = agent.get_session_stats()
-        
-        return {
-            "status": "success",
-            **stats
-        }
-        
-    except Exception as e:
-        print(f"ERROR: get_session_stats - Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting session stats: {str(e)}")
-
-@app.get("/company-sessions/{company_id}")
-async def get_company_sessions(company_id: str, limit: int = 50):
-    """
-    Get all sessions for a specific company (only available with SQL session management).
-    
-    - company_id: Company identifier
-    - limit: Maximum number of sessions to return
-    """
-    if not USE_SQL_SESSIONS:
-        raise HTTPException(status_code=501, detail="Company sessions only available with SQL session management")
-    
-    try:
-        from agent.sql_session_job_post_agent import get_sql_session_job_post_agent
-        agent = get_sql_session_job_post_agent()
-        sessions = agent.get_company_sessions(company_id, limit)
-        
-        return {
-            "status": "success",
-            "company_id": company_id,
-            "sessions": sessions,
-            "total_count": len(sessions)
-        }
-        
-    except Exception as e:
-        print(f"ERROR: get_company_sessions - Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting company sessions: {str(e)}")
-
-@app.post("/cleanup-expired-sessions")
-async def cleanup_expired_sessions():
-    """
-    Clean up expired sessions (only available with SQL session management).
-    """
-    if not USE_SQL_SESSIONS:
-        raise HTTPException(status_code=501, detail="Cleanup only available with SQL session management")
-    
-    try:
-        from agent.sql_session_job_post_agent import get_sql_session_job_post_agent
-        agent = get_sql_session_job_post_agent()
-        deleted_count = agent.cleanup_expired_sessions()
-        
-        return {
-            "status": "success",
-            "message": f"Cleaned up {deleted_count} expired sessions",
-            "deleted_count": deleted_count
-        }
-        
-    except Exception as e:
-        print(f"ERROR: cleanup_expired_sessions - Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error cleaning up sessions: {str(e)}")
-
-# WhatsApp webhook endpoints
-@app.get("/webhook")
-async def verify_whatsapp_webhook(
-    request: Request,
-    hub_mode: str = Query(None, alias="hub.mode"),
-    hub_challenge: str = Query(None, alias="hub.challenge"), 
-    hub_verify_token: str = Query(None, alias="hub.verify_token")
-):
-    """Verify WhatsApp webhook endpoint."""
-    
-    verify_token = os.getenv("WEBHOOK_VERIFY_TOKEN", "rolevate_webhook_verify_token_2025")
-    
-    print(f"🔍 Webhook verification attempt:")
-    print(f"  Mode: {hub_mode}")
-    print(f"  Challenge: {hub_challenge}")
-    print(f"  Verify Token: {hub_verify_token}")
-    
-    if hub_mode == "subscribe" and hub_verify_token == verify_token:
-        print("✅ WhatsApp webhook verified successfully")
-        return int(hub_challenge)
-    else:
-        print("❌ WhatsApp webhook verification failed")
-        raise HTTPException(status_code=403, detail="Verification failed")
-
-@app.post("/webhook")
-async def receive_whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
-    """
-    Receive WhatsApp messages and process them through the job post agent.
-    
-    - request: FastAPI request object containing WhatsApp webhook data
-    - background_tasks: Background tasks to process the message asynchronously
-    """
-    try:
-        # Parse the incoming JSON payload
-        payload = await request.json()
-        print(f"📥 Received WhatsApp webhook payload")
-        
-        # Process the webhook in the background to avoid blocking
-        background_tasks.add_task(whatsapp_handler.process_webhook, payload)
-        
-        # Return success immediately (WhatsApp requires quick response)
-        return {"status": "success"}
-        
-    except json.JSONDecodeError:
-        print(f"❌ Invalid JSON in WhatsApp webhook")
-        raise HTTPException(status_code=400, detail="Invalid JSON payload")
-    except Exception as e:
-        print(f"❌ Error in WhatsApp webhook: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing webhook: {str(e)}")
 
 # Run the application with: uvicorn main:app --reload
 if __name__ == "__main__":

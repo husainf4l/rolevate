@@ -6,6 +6,8 @@ import Head from "next/head";
 export default function TermsOfService() {
   return (
     <>
+            <div className="bg-[#0F172A] min-h-screen">
+
       <Head>
         <title>Terms of Service - Rolevate</title>
         <meta name="description" content="Rolevate's Terms of Service" />
@@ -15,7 +17,7 @@ export default function TermsOfService() {
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
-        <p className="text-gray-600 mb-8">Last Updated: June 14, 2025</p>
+        <p className=" mb-8">Last Updated: June 14, 2025</p>
 
         <div className="prose max-w-none">
           <h2 className="text-2xl font-semibold mt-8 mb-4">1. Agreement to Terms</h2>
@@ -195,7 +197,7 @@ export default function TermsOfService() {
         </div>
       </main>
 
-      <Footer />
-    </>
+</div>   
+ </>
   );
 }
