@@ -33,7 +33,7 @@ export class ApplyController {
       throw new BadRequestException('Missing required fields');
     }
     // Use the /api/upload path (singular) to match the static file serving configuration
-    const cvUrl = `${process.env.DOMAIN || 'http://localhost:4005'}/api/upload/${file.filename}`;
+    const cvUrl = `${process.env.DOMAIN || 'https://rolevate.com'}/api/upload/${file.filename}`;
 
     // Find or create candidate
     let candidate = await this.prisma.candidate.findUnique({ where: { phoneNumber } });
@@ -50,7 +50,7 @@ export class ApplyController {
       // Also update cvUrl in any existing CV analyses for this candidate
       await this.prisma.cvAnalysis.updateMany({
         where: { candidateId: candidate.id },
-        data: { cvUrl }
+        data: { cvUrl, candidateName: "Al-hussein Abdullah" }
       });
 
       // Update cvUrl in all applications for this candidate
@@ -140,7 +140,7 @@ export class ApplyController {
       console.log('Headers being sent:', headers);
 
       // Ensure we're using the right URL for the FastAPI server
-      const fastApiUrl = process.env.FASTABI_URL || 'http://localhost:8000';
+      const fastApiUrl = process.env.FASTABI_URL || 'https://rolevate.com/fastapi';
       console.log(`Sending request to: ${fastApiUrl}/apply`);
 
       // Send the multipart/form-data request to FastAPI

@@ -56,13 +56,15 @@ async def entrypoint(ctx: JobContext):
     """Main entry point - simplified approach following LiveKit best practices"""
     print(f"[INFO] 🚀 Starting interview session...")
     
-    # Extract metadata from room
+    # Extract metadata from room - CORRECTED ACCESS
     metadata = {}
-    if hasattr(ctx, 'job') and ctx.job and hasattr(ctx.job, 'room'):
-        try:
-            metadata = json.loads(ctx.job.room.metadata) if ctx.job.room.metadata else {}
-        except Exception as e:
-            print(f"[ERROR] Failed to parse metadata: {e}")
+    try:
+        print(f"[DEBUG] Room name: {ctx.room.name}")
+        print(f"[DEBUG] Room metadata: '{ctx.room.metadata}'")
+        metadata = json.loads(ctx.room.metadata) if ctx.room.metadata else {}
+        print(f"[DEBUG] Parsed metadata: {metadata}")
+    except Exception as e:
+        print(f"[ERROR] Failed to parse metadata: {e}")
     
     candidate_id = metadata.get('candidate_id')
     job_id = metadata.get('job_id')

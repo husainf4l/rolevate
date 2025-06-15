@@ -7,6 +7,8 @@ import {
   BadRequestException,
   UseGuards,
   Get,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { InterviewService } from './interview.service';
 import { CreateInterviewDto } from './dto/interview.dto';
@@ -18,7 +20,7 @@ import { UserRole } from '@prisma/client';
 
 @Controller('interview')
 export class InterviewController {
-  constructor(private readonly interviewService: InterviewService) {}
+  constructor(private readonly interviewService: InterviewService) { }
 
   @Post('create')
   async createInterview(
@@ -27,14 +29,14 @@ export class InterviewController {
   ) {
     try {
       const { jobPostId, phoneNumber, firstName, lastName } = createInterviewDto;
-      
+
       const result = await this.interviewService.createInterviewSession(
         jobPostId,
         phoneNumber,
         firstName,
         lastName
       );
-      
+
       return result;
     } catch (error) {
       console.error('Failed to create interview:', error.message);
@@ -48,14 +50,14 @@ export class InterviewController {
   async joinInterview(@Body() createInterviewDto: CreateInterviewDto) {
     try {
       const { jobPostId, phoneNumber, firstName, lastName } = createInterviewDto;
-      
+
       const result = await this.interviewService.createInterviewSession(
         jobPostId,
         phoneNumber,
         firstName,
         lastName
       );
-      
+
       return result;
     } catch (error) {
       console.error('Failed to join interview:', error.message);
@@ -70,4 +72,7 @@ export class InterviewController {
     // This would be implemented to return interviews for the authenticated user
     return { message: 'This would return interviews for the authenticated user', userId: user.id };
   }
+
+
+
 }

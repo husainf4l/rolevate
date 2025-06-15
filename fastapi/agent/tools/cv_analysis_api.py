@@ -109,7 +109,7 @@ def send_cv_analysis_to_api(
         
         # Send the request to the NestJS API
         response = requests.post(
-            "http://localhost:4005/api/cv-analysis",
+            "https://rolevate.com/api/cv-analysis",
             json=payload,
             headers={"Content-Type": "application/json"}
         )

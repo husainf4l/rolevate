@@ -250,7 +250,7 @@ def send_job_post_to_api(
         load_dotenv(override=True)
         
         # Get API configuration from environment
-        api_base_url = os.getenv("NESTJS_API_BASE_URL", "http://localhost:3000/api")
+        api_base_url = os.getenv("NESTJS_API_BASE_URL", "https://rolevate.com/api")
         
         # Construct API URL for AI job post creation (bypasses auth)
         # The base URL should already include /api if needed

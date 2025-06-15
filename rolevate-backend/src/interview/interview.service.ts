@@ -59,9 +59,9 @@ export class InterviewService {
 
     // Find or create application
     let application = await this.prisma.application.findFirst({
-      where: { 
+      where: {
         jobPostId: jobPostId,
-        candidateId: candidate.id 
+        candidateId: candidate.id
       }
     });
 
@@ -77,26 +77,19 @@ export class InterviewService {
 
     // Create complete metadata for AI agent
     const roomMetadata = JSON.stringify({
-      candidate_id: candidate.id,
       job_id: jobPostId,
       candidate_name: candidate.name,
-      candidate_phone: phoneNumber,
       job_title: jobPost.title,
       job_description: jobPost.description,
       job_requirements: jobPost.requirements,
       company: jobPost.company.name,
-      ai_prompt: jobPost.aiPrompt,
-      ai_instructions: jobPost.aiInstructions,
-      room_type: 'interview',
-      created_at: new Date().toISOString(),
-      application_id: application.id
     });
 
     // Create room in LiveKit
     await this.roomService.createRoom({
       name: roomName,
       metadata: roomMetadata,
-      maxParticipants: 2,
+      maxParticipants: 20,
       emptyTimeout: 1800,
     });
 
@@ -121,7 +114,7 @@ export class InterviewService {
     // Generate LiveKit access token
     const participantName = candidate.name || 'Candidate';
     const identity = `candidate_${phoneNumber.replace(/\D/g, '')}_${Date.now()}`;
-    
+
     const token = new AccessToken(this.apiKey, this.apiSecret, {
       identity: identity,
       name: participantName,
@@ -143,22 +136,27 @@ export class InterviewService {
       participantName,
       identity,
       wsUrl: this.livekitHost,
-      
+
       // Interview details
       roomCode,
       jobTitle: jobPost.title,
       companyName: jobPost.company.name,
       maxDuration: 1800,
-      
+
       // Database IDs
       interviewId: interviewSession.id,
       candidateId: candidate.id,
       applicationId: application.id,
       jobPostId: jobPostId,
-      
+
       status: 'READY_TO_JOIN'
     };
   }
+
+
+
+
+
 
   async scheduleInterview(scheduleInterviewDto: ScheduleInterviewDto): Promise<Interview> {
     // Verify application exists
@@ -643,4 +641,13 @@ export class InterviewService {
       },
     });
   }
+
+
+
+
+
+
+
+
+
 }
