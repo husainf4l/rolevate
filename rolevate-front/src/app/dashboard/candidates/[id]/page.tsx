@@ -37,7 +37,14 @@ interface Candidate {
   experience: string;
   education: string;
   skills: string[];
-  status: "ai_analysis" | "ai_interview_1" | "ai_interview_2" | "hr_interview" | "offer" | "hired" | "rejected";
+  status:
+    | "ai_analysis"
+    | "ai_interview_1"
+    | "ai_interview_2"
+    | "hr_interview"
+    | "offer"
+    | "hired"
+    | "rejected";
   appliedDate: string;
   lastActivity: string;
   salary: string;
@@ -62,13 +69,23 @@ const candidates: Candidate[] = [
     location: "Dubai, UAE",
     experience: "5 years",
     education: "Bachelor's in Computer Science - American University of Beirut",
-    skills: ["React", "TypeScript", "Node.js", "AWS", "GraphQL", "Redux", "Tailwind CSS", "Jest"],
+    skills: [
+      "React",
+      "TypeScript",
+      "Node.js",
+      "AWS",
+      "GraphQL",
+      "Redux",
+      "Tailwind CSS",
+      "Jest",
+    ],
     status: "ai_interview_2",
     appliedDate: "2024-12-01",
     lastActivity: "2 hours ago",
     salary: "AED 18,000",
     aiScore: 89,
-    notes: "AI Analysis: Strong technical skills match. Passed AI Interview 1 with excellent problem-solving. Currently in AI Interview 2.",
+    notes:
+      "AI Analysis: Strong technical skills match. Passed AI Interview 1 with excellent problem-solving. Currently in AI Interview 2.",
     resume: "sarah_ahmad_resume.pdf",
     jobId: "1",
     jobTitle: "Senior Frontend Developer",
@@ -85,13 +102,22 @@ const candidates: Candidate[] = [
     location: "Riyadh, Saudi Arabia",
     experience: "3 years",
     education: "Bachelor's in Software Engineering - King Saud University",
-    skills: ["React", "JavaScript", "CSS", "MongoDB", "Express", "HTML5", "Git"],
+    skills: [
+      "React",
+      "JavaScript",
+      "CSS",
+      "MongoDB",
+      "Express",
+      "HTML5",
+      "Git",
+    ],
     status: "ai_interview_1",
     appliedDate: "2024-11-28",
     lastActivity: "1 day ago",
     salary: "SAR 14,000",
     aiScore: 76,
-    notes: "AI Analysis: Good skills match. Solid fundamentals. Currently in first AI interview stage.",
+    notes:
+      "AI Analysis: Good skills match. Solid fundamentals. Currently in first AI interview stage.",
     resume: "mohammed_hassan_resume.pdf",
     jobId: "2",
     jobTitle: "React Developer",
@@ -171,10 +197,26 @@ const getStatusIcon = (status: Candidate["status"]) => {
 };
 
 const aiPipelineStages = [
-  { id: "ai_analysis", name: "AI Analysis", description: "Initial AI screening" },
-  { id: "ai_interview_1", name: "AI Interview 1", description: "First AI interview" },
-  { id: "ai_interview_2", name: "AI Interview 2", description: "Second AI interview" },
-  { id: "hr_interview", name: "HR Interview", description: "Human recruiter interview" },
+  {
+    id: "ai_analysis",
+    name: "AI Analysis",
+    description: "Initial AI screening",
+  },
+  {
+    id: "ai_interview_1",
+    name: "AI Interview 1",
+    description: "First AI interview",
+  },
+  {
+    id: "ai_interview_2",
+    name: "AI Interview 2",
+    description: "Second AI interview",
+  },
+  {
+    id: "hr_interview",
+    name: "HR Interview",
+    description: "Human recruiter interview",
+  },
   { id: "offer", name: "Offer", description: "Job offer extended" },
   { id: "hired", name: "Hired", description: "Successfully hired" },
 ];
@@ -191,7 +233,9 @@ export default function CandidateProfile() {
       <div className="p-8 pt-24">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Candidate Not Found</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              Candidate Not Found
+            </h1>
             <Link
               href="/dashboard/candidates"
               className="text-[#0891b2] hover:text-[#0fc4b5] font-medium"
@@ -203,7 +247,6 @@ export default function CandidateProfile() {
       </div>
     );
   }
-
 
   const getCurrentStageIndex = () => {
     return aiPipelineStages.findIndex((stage) => stage.id === candidate.status);
@@ -243,10 +286,16 @@ export default function CandidateProfile() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-2xl font-bold text-gray-900">{candidate.name}</h1>
-                    <span className="text-xl">{getSourceIcon(candidate.source)}</span>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {candidate.name}
+                    </h1>
+                    <span className="text-xl">
+                      {getSourceIcon(candidate.source)}
+                    </span>
                   </div>
-                  <p className="text-lg text-gray-600 mb-3">{candidate.position}</p>
+                  <p className="text-lg text-gray-600 mb-3">
+                    {candidate.position}
+                  </p>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
                     <div className="flex items-center gap-1">
                       <MapPinIcon className="w-4 h-4" />
@@ -278,32 +327,47 @@ export default function CandidateProfile() {
 
             {/* AI Pipeline Progress */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Recruitment Pipeline</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                AI Recruitment Pipeline
+              </h3>
               <div className="space-y-4">
                 {aiPipelineStages.map((stage, index) => {
                   const isCompleted = index < getCurrentStageIndex();
                   const isCurrent = stage.id === candidate.status;
                   const isRejected = candidate.status === "rejected";
-                  
+
                   return (
                     <div key={stage.id} className="flex items-center gap-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        isCompleted ? "bg-[#0891b2] text-white shadow-md" :
-                        isCurrent ? "bg-[#0fc4b5] text-white shadow-md ring-2 ring-[#0fc4b5]/30" :
-                        isRejected ? "bg-red-100 text-red-600" :
-                        "bg-gray-200 text-gray-600"
-                      }`}>
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          isCompleted
+                            ? "bg-[#0891b2] text-white shadow-md"
+                            : isCurrent
+                            ? "bg-[#0fc4b5] text-white shadow-md ring-2 ring-[#0fc4b5]/30"
+                            : isRejected
+                            ? "bg-red-100 text-red-600"
+                            : "bg-gray-200 text-gray-600"
+                        }`}
+                      >
                         {isCompleted || isCurrent ? (
                           <CheckCircleIcon className="w-5 h-5" />
                         ) : (
-                          <span className="text-sm font-medium">{index + 1}</span>
+                          <span className="text-sm font-medium">
+                            {index + 1}
+                          </span>
                         )}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className={`font-semibold ${
-                            isCompleted ? "text-[#0891b2]" : isCurrent ? "text-[#0fc4b5]" : "text-gray-600"
-                          }`}>
+                          <h4
+                            className={`font-semibold ${
+                              isCompleted
+                                ? "text-[#0891b2]"
+                                : isCurrent
+                                ? "text-[#0fc4b5]"
+                                : "text-gray-600"
+                            }`}
+                          >
                             {stage.name}
                           </h4>
                           {isCurrent && (
@@ -312,7 +376,9 @@ export default function CandidateProfile() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600">{stage.description}</p>
+                        <p className="text-sm text-gray-600">
+                          {stage.description}
+                        </p>
                       </div>
                     </div>
                   );
@@ -324,7 +390,9 @@ export default function CandidateProfile() {
                     </div>
                     <div>
                       <h4 className="font-medium text-red-600">Rejected</h4>
-                      <p className="text-sm text-gray-600">Application was not successful</p>
+                      <p className="text-sm text-gray-600">
+                        Application was not successful
+                      </p>
                     </div>
                   </div>
                 )}
@@ -333,8 +401,10 @@ export default function CandidateProfile() {
 
             {/* Skills & Education */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Skills & Education</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Skills & Education
+              </h3>
+
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <AcademicCapIcon className="w-5 h-5 text-gray-600" />
@@ -344,7 +414,9 @@ export default function CandidateProfile() {
               </div>
 
               <div>
-                <h4 className="font-medium text-gray-900 mb-3">Technical Skills</h4>
+                <h4 className="font-medium text-gray-900 mb-3">
+                  Technical Skills
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {candidate.skills.map((skill, index) => (
                     <span
@@ -360,8 +432,12 @@ export default function CandidateProfile() {
 
             {/* Notes */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Analysis & Notes</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{candidate.notes}</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                AI Analysis & Notes
+              </h3>
+              <p className="text-gray-700 whitespace-pre-wrap">
+                {candidate.notes}
+              </p>
             </div>
           </div>
 
@@ -369,13 +445,21 @@ export default function CandidateProfile() {
           <div className="space-y-6">
             {/* Status Card */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Status</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Current Status
+              </h3>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <StatusIcon className="w-6 h-6 text-[#0891b2]" />
                   <div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(candidate.status)}`}>
-                      {candidate.status.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                        candidate.status
+                      )}`}
+                    >
+                      {candidate.status
+                        .replace("_", " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
                     </span>
                   </div>
                 </div>
@@ -388,7 +472,9 @@ export default function CandidateProfile() {
 
             {/* Action Buttons */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Actions
+              </h3>
               <div className="space-y-3">
                 <button className="w-full flex items-center gap-2 px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors shadow-md font-medium">
                   <CheckCircleIcon className="w-4 h-4" />
@@ -411,19 +497,31 @@ export default function CandidateProfile() {
 
             {/* Job Details */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Applied For</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Applied For
+              </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="font-medium text-gray-900">{candidate.jobTitle}</p>
-                  <p className="text-sm text-gray-600">Job ID: {candidate.jobId}</p>
+                  <p className="font-medium text-gray-900">
+                    {candidate.jobTitle}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Job ID: {candidate.jobId}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Expected Salary</p>
-                  <p className="font-medium text-gray-900">{candidate.salary}</p>
+                  <p className="font-medium text-gray-900">
+                    {candidate.salary}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Priority</p>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(candidate.priority)}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                      candidate.priority
+                    )}`}
+                  >
                     {candidate.priority}
                   </span>
                 </div>
@@ -447,7 +545,9 @@ export default function CandidateProfile() {
 
             {/* Resume */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Resume</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Resume
+              </h3>
               <button className="w-full flex items-center gap-2 px-4 py-2 border-2 border-[#0fc4b5] text-[#0891b2] rounded-lg hover:bg-[#0fc4b5]/10 transition-colors font-medium">
                 <DocumentTextIcon className="w-4 h-4" />
                 View Resume ({candidate.resume})

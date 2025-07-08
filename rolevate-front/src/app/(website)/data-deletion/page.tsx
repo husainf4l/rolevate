@@ -125,12 +125,8 @@ export default function DataDeletionPage() {
             </li>
           </ul>
         </section>
-        <p>
-          Please type &quot;DELETE&quot; to confirm data deletion.
-        </p>
-        <p>
-          Enter &quot;CONFIRM&quot; to proceed.
-        </p>
+        <p>Please type &quot;DELETE&quot; to confirm data deletion.</p>
+        <p>Enter &quot;CONFIRM&quot; to proceed.</p>
         <div className="mt-8">
           <div className="mb-2 font-text text-gray-700">
             Have questions about data deletion? Need help with your request?

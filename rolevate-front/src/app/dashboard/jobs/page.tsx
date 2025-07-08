@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import Header from "@/components/dashboard/Header";
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
   FunnelIcon,
   BriefcaseIcon,
   MapPinIcon,
@@ -13,7 +13,7 @@ import {
   UsersIcon,
   PencilIcon,
   TrashIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 
 interface JobPost {
@@ -44,7 +44,8 @@ const jobPosts: JobPost[] = [
     views: 156,
     postedAt: "2 hours ago",
     deadline: "Dec 30, 2024",
-    description: "We are looking for a Senior Frontend Developer to join our fintech team in Dubai's financial district..."
+    description:
+      "We are looking for a Senior Frontend Developer to join our fintech team in Dubai's financial district...",
   },
   {
     id: "2",
@@ -58,7 +59,8 @@ const jobPosts: JobPost[] = [
     views: 89,
     postedAt: "5 hours ago",
     deadline: "Jan 15, 2025",
-    description: "Join our growing tech team in Riyadh to develop cutting-edge e-commerce solutions..."
+    description:
+      "Join our growing tech team in Riyadh to develop cutting-edge e-commerce solutions...",
   },
   {
     id: "3",
@@ -72,7 +74,8 @@ const jobPosts: JobPost[] = [
     views: 203,
     postedAt: "1 day ago",
     deadline: "Jan 10, 2025",
-    description: "We need a creative UI/UX Designer to enhance our digital banking platform user experience..."
+    description:
+      "We need a creative UI/UX Designer to enhance our digital banking platform user experience...",
   },
   {
     id: "4",
@@ -86,7 +89,8 @@ const jobPosts: JobPost[] = [
     views: 278,
     postedAt: "2 days ago",
     deadline: "Dec 15, 2024",
-    description: "Join our team as a Full Stack Developer to work on government digital transformation projects..."
+    description:
+      "Join our team as a Full Stack Developer to work on government digital transformation projects...",
   },
   {
     id: "5",
@@ -100,7 +104,8 @@ const jobPosts: JobPost[] = [
     views: 67,
     postedAt: "3 days ago",
     deadline: "Jan 20, 2025",
-    description: "We're seeking a Product Manager to drive our healthcare technology product strategy..."
+    description:
+      "We're seeking a Product Manager to drive our healthcare technology product strategy...",
   },
   {
     id: "6",
@@ -114,7 +119,8 @@ const jobPosts: JobPost[] = [
     views: 43,
     postedAt: "1 week ago",
     deadline: "Feb 1, 2025",
-    description: "Looking for a DevOps Engineer to manage our cloud infrastructure for regional operations..."
+    description:
+      "Looking for a DevOps Engineer to manage our cloud infrastructure for regional operations...",
   },
   {
     id: "7",
@@ -128,7 +134,8 @@ const jobPosts: JobPost[] = [
     views: 92,
     postedAt: "4 days ago",
     deadline: "Jan 25, 2025",
-    description: "Develop innovative mobile applications for our growing fintech startup in Jordan..."
+    description:
+      "Develop innovative mobile applications for our growing fintech startup in Jordan...",
   },
   {
     id: "8",
@@ -142,8 +149,9 @@ const jobPosts: JobPost[] = [
     views: 134,
     postedAt: "6 days ago",
     deadline: "Feb 10, 2025",
-    description: "Join our data science team to analyze market trends and customer behavior in the MENA region..."
-  }
+    description:
+      "Join our data science team to analyze market trends and customer behavior in the MENA region...",
+  },
 ];
 
 const getTypeColor = (type: JobPost["type"]) => {
@@ -179,22 +187,26 @@ export default function JobsPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
 
-  const filteredJobs = jobPosts.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
+  const filteredJobs = jobPosts.filter((job) => {
+    const matchesSearch =
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.location.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus = filterStatus === "all" || job.status === filterStatus;
     const matchesType = filterType === "all" || job.type === filterType;
-    
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
   return (
     <div className="p-8 pt-24">
       <div className="max-w-7xl mx-auto">
-        <Header title="Job Postings" subtitle="Manage your job listings and track applications" />
-        
+        <Header
+          title="Job Postings"
+          subtitle="Manage your job listings and track applications"
+        />
+
         {/* Action Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="flex-1">
@@ -209,7 +221,7 @@ export default function JobsPage() {
               />
             </div>
           </div>
-          
+
           <div className="flex gap-3">
             <select
               value={filterStatus}
@@ -221,7 +233,7 @@ export default function JobsPage() {
               <option value="paused">Paused</option>
               <option value="closed">Closed</option>
             </select>
-            
+
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
@@ -233,7 +245,7 @@ export default function JobsPage() {
               <option value="contract">Contract</option>
               <option value="remote">Remote</option>
             </select>
-            
+
             <button className="flex items-center gap-2 px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0891b2] transition-colors">
               <PlusIcon className="w-5 h-5" />
               New Job
@@ -251,11 +263,13 @@ export default function JobsPage() {
               <div className="text-sm font-medium text-green-600">+15%</div>
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-gray-900">{jobPosts.filter(job => job.status === 'active').length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {jobPosts.filter((job) => job.status === "active").length}
+              </p>
               <p className="text-sm text-gray-600 font-medium">Active Jobs</p>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-[#0fc4b5]/15 rounded-lg">
@@ -264,11 +278,15 @@ export default function JobsPage() {
               <div className="text-sm font-medium text-green-600">+32%</div>
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-gray-900">{jobPosts.reduce((sum, job) => sum + job.applicants, 0)}</p>
-              <p className="text-sm text-gray-600 font-medium">Total Applicants</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {jobPosts.reduce((sum, job) => sum + job.applicants, 0)}
+              </p>
+              <p className="text-sm text-gray-600 font-medium">
+                Total Applicants
+              </p>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-[#0fc4b5]/15 rounded-lg">
@@ -277,11 +295,13 @@ export default function JobsPage() {
               <div className="text-sm font-medium text-green-600">+18%</div>
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-gray-900">{jobPosts.reduce((sum, job) => sum + job.views, 0)}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {jobPosts.reduce((sum, job) => sum + job.views, 0)}
+              </p>
               <p className="text-sm text-gray-600 font-medium">Total Views</p>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-[#0fc4b5]/15 rounded-lg">
@@ -290,8 +310,17 @@ export default function JobsPage() {
               <div className="text-sm font-medium text-red-600">-5%</div>
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-gray-900">{Math.round((jobPosts.reduce((sum, job) => sum + job.applicants, 0) / jobPosts.reduce((sum, job) => sum + job.views, 0)) * 100)}%</p>
-              <p className="text-sm text-gray-600 font-medium">Application Rate</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {Math.round(
+                  (jobPosts.reduce((sum, job) => sum + job.applicants, 0) /
+                    jobPosts.reduce((sum, job) => sum + job.views, 0)) *
+                    100
+                )}
+                %
+              </p>
+              <p className="text-sm text-gray-600 font-medium">
+                Application Rate
+              </p>
             </div>
           </div>
         </div>
@@ -303,24 +332,37 @@ export default function JobsPage() {
               All Job Postings ({filteredJobs.length})
             </h2>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {filteredJobs.map((job) => (
-              <div key={job.id} className="p-6 hover:bg-gray-50 transition-colors">
+              <div
+                key={job.id}
+                className="p-6 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{job.title}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(job.type)}`}>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {job.title}
+                      </h3>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(
+                          job.type
+                        )}`}
+                      >
                         {job.type}
                       </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(job.status)}`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                          job.status
+                        )}`}
+                      >
                         {job.status}
                       </span>
                     </div>
                     <p className="text-gray-600 mb-3">{job.department}</p>
                     <p className="text-gray-700 mb-4">{job.description}</p>
-                    
+
                     <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <MapPinIcon className="w-4 h-4" />
@@ -340,7 +382,7 @@ export default function JobsPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 ml-4">
                     <button className="p-2 text-gray-400 hover:text-[#0fc4b5] transition-colors">
                       <EyeIcon className="w-5 h-5" />
@@ -353,7 +395,7 @@ export default function JobsPage() {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-sm text-gray-500">
                   <div className="flex items-center gap-4">
                     <span>Posted {job.postedAt}</span>
@@ -364,7 +406,11 @@ export default function JobsPage() {
                       View Applications
                     </button>
                     <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                      {job.status === 'active' ? 'Pause' : job.status === 'paused' ? 'Activate' : 'Reopen'}
+                      {job.status === "active"
+                        ? "Pause"
+                        : job.status === "paused"
+                        ? "Activate"
+                        : "Reopen"}
                     </button>
                   </div>
                 </div>
