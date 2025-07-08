@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fafbfc;
+  --foreground: #1d1d1f;
+  --primary-teal: #13ead9;
+  --secondary-teal: #0891b2;
+  --accent-light: #f0fdfa;
+  --glass-white: rgba(255, 255, 255, 0.85);
+  --glass-white-strong: rgba(255, 255, 255, 0.95);
+  --border-subtle: rgba(255, 255, 255, 0.2);
+  --border-corporate: rgba(8, 145, 178, 0.1);
+  --text-secondary: #6e6e73;
+  --text-tertiary: #86868b;
+  --surface-elevated: rgba(255, 255, 255, 0.8);
+  --shadow-soft: 0 2px 24px rgba(0, 0, 0, 0.04);
+  --shadow-medium: 0 4px 32px rgba(0, 0, 0, 0.08);
+  --shadow-strong: 0 8px 48px rgba(0, 0, 0, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #000000;
+    --foreground: #f5f5f7;
+    --text-secondary: #a1a1a6;
+    --text-tertiary: #86868b;
+    --surface-elevated: rgba(255, 255, 255, 0.05);
+    --glass-white: rgba(0, 0, 0, 0.8);
+    --glass-white-strong: rgba(0, 0, 0, 0.9);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #ffffff;
+  color: var(--foreground);
+  font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  line-height: 1.47059;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+}
+
+/* Apple-style scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+  background-clip: content-box;
+}
+
+/* Glass morphism utility classes */
+.glass {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass-white);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-strong {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: var(--glass-white-strong);
+  border: 1px solid var(--border-corporate);
+}
+
+/* Apple-style button reset */
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, [role="button"] {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Focus states */
+button:focus-visible, 
+a:focus-visible, 
+[role="button"]:focus-visible {
+  outline: 2px solid var(--secondary-teal);
+  outline-offset: 2px;
+}
+
+/* Section spacing utilities */
+.section-spacing {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+@media (min-width: 768px) {
+  .section-spacing {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+}
+
+/* Corporate container */
+.container-corporate {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container-corporate {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+/* Text gradient utility */
+.text-gradient-teal {
+  background: linear-gradient(90deg, #13ead9, #0891b2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
