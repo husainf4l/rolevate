@@ -5,7 +5,7 @@ import { Button } from "@/components/common/Button";
 export default function Hero() {
   return (
     <section className="w-full min-h-screen bg-white flex items-center">
-      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between py-24 px-6 lg:px-12">
+      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between py-16 pb-8 px-6 lg:px-12">
         {/* Image Section - First on Mobile */}
         <div className="flex-1 flex items-center justify-center order-1 lg:order-2 mb-16 lg:mb-0 lg:ml-16">
           <div className="relative w-96 h-80 lg:w-[36rem] lg:h-[28rem]">
@@ -47,17 +47,17 @@ export default function Hero() {
             Connect with top employers across the Middle East faster than ever before.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto px-2 sm:px-0">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-2 sm:px-0">
             <Button 
               variant="hero-primary" 
-              size="hero"
+              size="md"
               href="/interview"
             >
               Start Your Interview
             </Button>
             <Button 
               variant="hero-secondary" 
-              size="hero"
+              size="md"
               href="/jobs"
             >
               Explore Opportunities

@@ -129,13 +129,15 @@ export default function JobCard({
               href={`/jobs/${job.id}`}
               variant="ghost"
               size="sm"
+              className="rounded-xl border border-[#13ead9]/30 text-[#0891b2] hover:bg-[#13ead9]/10 hover:text-[#0891b2] transition-all duration-200 font-display px-4 py-2"
             >
               View Details
             </Button>
             <Button
               onClick={handleApply}
               variant="primary"
-              size="md"
+              size="sm"
+              className="rounded-xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white font-display px-4 py-2 shadow-corporate hover:shadow-xl hover:scale-[1.04] transition-all duration-200"
             >
               Apply Now
             </Button>

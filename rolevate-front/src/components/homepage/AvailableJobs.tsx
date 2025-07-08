@@ -96,7 +96,7 @@ export default function AvailableJobs() {
   };
 
   return (
-    <section className="w-full py-24 md:py-32 bg-white">
+    <section className="w-full pt-8 pb-24 md:pt-12 md:pb-32 bg-white">
       <div className="container mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="text-center mb-16 md:mb-20">

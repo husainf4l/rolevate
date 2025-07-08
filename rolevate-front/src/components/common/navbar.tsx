@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Logo from "./logo";
 import Link from "next/link";
+import { Button } from "@/components/common/Button";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,9 +56,14 @@ export default function Navbar() {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <button className="hidden rounded-2xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] px-6 py-3 text-sm font-display font-semibold text-white shadow-corporate hover:shadow-xl hover:scale-[1.02] transition-all duration-300 md:inline-flex">
+            <Button 
+              variant="primary" 
+              size="sm" 
+              href="/login"
+              className="hidden md:inline-flex"
+            >
               Sign In
-            </button>
+            </Button>
             <button 
               onClick={toggleMenu}
               className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gray-100/80 text-gray-700 hover:bg-gray-200/80 hover:text-[#0891b2] transition-all duration-200 md:hidden"
@@ -147,12 +153,15 @@ export default function Navbar() {
                   Contact
                 </Link>
                 <div className="pt-6 border-t border-gray-200/50">
-                  <button 
-                    className="w-full rounded-2xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white px-6 py-4 text-lg font-display font-semibold shadow-corporate hover:shadow-xl transition-all duration-300"
+                  <Button 
+                    variant="primary" 
+                    size="lg" 
+                    href="/login"
+                    fullWidth
                     onClick={closeMenu}
                   >
                     Sign In
-                  </button>
+                  </Button>
                 </div>
               </div>
             </nav>
