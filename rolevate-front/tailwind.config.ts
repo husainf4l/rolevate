@@ -14,11 +14,9 @@ const config: Config = {
           teal: {
             light: '#13ead9',
             DEFAULT: '#0891b2',
-            dark: '#0c7594',
           },
           slate: {
             DEFAULT: '#334155',
-            dark: '#1e293b',
           }
         },
         // Primary color shortcuts
@@ -59,7 +57,6 @@ const config: Config = {
         'brand-gradient-subtle': 'linear-gradient(90deg, #0891b2 0%, #13ead9 100%)',
         'teal-gradient': 'linear-gradient(90deg, #13ead9 0%, #0891b2 100%)',
         'teal-gradient-light': 'linear-gradient(90deg, #13ead9 0%, #14b8a6 100%)',
-        'teal-gradient-deep': 'linear-gradient(90deg, #0891b2 0%, #0c7594 100%)',
         'teal-gradient-radial': 'radial-gradient(circle, #13ead9 0%, #0891b2 100%)',
       },
       spacing: {

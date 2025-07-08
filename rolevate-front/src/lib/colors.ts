@@ -4,7 +4,6 @@ export const BRAND_COLORS = {
   teal: {
     light: '#13ead9',
     DEFAULT: '#0891b2',
-    dark: '#0c7594',
   },
   
   // Professional grays
@@ -50,7 +49,6 @@ export const BRAND_GRADIENTS = {
   reverse: 'linear-gradient(90deg, #13ead9 0%, #0891b2 100%)',
   teal: 'linear-gradient(90deg, #13ead9 0%, #0891b2 100%)',
   tealLight: 'linear-gradient(90deg, #13ead9 0%, #14b8a6 100%)',
-  tealDeep: 'linear-gradient(90deg, #0891b2 0%, #0c7594 100%)',
   tealRadial: 'radial-gradient(circle, #13ead9 0%, #0891b2 100%)',
 } as const;
 
@@ -58,7 +56,5 @@ export const BRAND_GRADIENTS = {
 export const CSS_VARIABLES = {
   '--color-brand-teal': '#0891b2',
   '--color-brand-teal-light': '#13ead9',
-  '--color-brand-teal-dark': '#0c7594',
   '--color-brand-slate': '#334155',
-  '--color-brand-slate-dark': '#1e293b',
 } as const;

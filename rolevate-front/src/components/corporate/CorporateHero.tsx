@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function CorporateHero() {
   return (
-    <section className="w-full container mx-auto flex flex-col lg:flex-row items-center justify-between min-h-[75vh] py-8 md:py-16 px-4 md:px-6 mt-8 md:mt-12">
+    <section className="w-full min-h-[70vh] container mx-auto flex flex-col lg:flex-row items-center justify-between  py-6 md:py-12 px-4 md:px-6 mt-8 md:mt-12">
       {/* Image Section - First on Mobile */}
       <div className="flex-1 flex items-center justify-center order-1 lg:order-2 mb-8 lg:mb-0 lg:ml-12">
         <div className="relative w-80 h-64 sm:w-96 sm:h-72 lg:w-[32rem] lg:h-96">

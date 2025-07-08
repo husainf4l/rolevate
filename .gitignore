@@ -81,6 +81,9 @@ build/
 # Specific files
 widd-*.json
 
+# Ignore old2 directory
+old2/
+
 # vercel
 .vercel
 

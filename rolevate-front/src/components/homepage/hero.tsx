@@ -4,8 +4,8 @@ import { Button } from "@/components/common/Button";
 
 export default function Hero() {
   return (
-    <section className="w-full min-h-screen bg-white flex items-center">
-      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between py-8 px-6 lg:px-12">
+    <section className="w-full min-h-[70vh] bg-white flex items-center">
+      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between py-6 px-6 lg:px-12">
         {/* Image Section - First on Mobile */}
         <div className="flex-1 flex items-center justify-center order-1 lg:order-2 mb-8 lg:mb-0 lg:ml-12">
           <div className="relative w-96 h-80 lg:w-[36rem] lg:h-[28rem]">
@@ -51,16 +51,16 @@ export default function Hero() {
             <Button 
               variant="hero-primary" 
               size="md"
-              href="/interview"
+              href="/jobs"
             >
-              Start Your Interview
+              Explore Opportunities
             </Button>
             <Button 
               variant="hero-secondary" 
               size="md"
-              href="/jobs"
+              href="/corporate"
             >
-              Explore Opportunities
+              See Top Companies
             </Button>
           </div>
         </div>

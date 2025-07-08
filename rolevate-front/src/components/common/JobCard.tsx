@@ -21,6 +21,8 @@ export interface JobData {
 interface JobCardProps {
   job: JobData;
   onApply?: (jobId: number) => void;
+  onSave?: (jobId: number) => void;
+  isSaved?: boolean;
   showDescription?: boolean;
   compact?: boolean;
 }
@@ -28,12 +30,20 @@ interface JobCardProps {
 export default function JobCard({ 
   job, 
   onApply, 
+  onSave,
+  isSaved = false,
   showDescription = false, 
   compact = false 
 }: JobCardProps) {
   const handleApply = () => {
     if (onApply) {
       onApply(job.id);
+    }
+  };
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave(job.id);
     }
   };
 
@@ -45,28 +55,50 @@ export default function JobCard({
     >
       {/* Urgent Badge */}
       {job.urgent && (
-        <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+        <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold z-10">
           Urgent
         </div>
+      )}
+      
+      {/* Save Button */}
+      {onSave && (
+        <button
+          onClick={handleSave}
+          className={`absolute top-4 ${job.urgent ? 'right-20' : 'right-4'} z-10 w-8 h-8 rounded-full bg-white shadow-md border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex items-center justify-center group/save`}
+          aria-label={isSaved ? 'Unsave job' : 'Save job'}
+        >
+          <svg 
+            className={`w-4 h-4 transition-all duration-200 ${
+              isSaved 
+                ? 'text-red-500 fill-current' 
+                : 'text-gray-400 group-hover/save:text-red-500 group-hover/save:fill-current'
+            }`} 
+            fill={isSaved ? "currentColor" : "none"} 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
       )}
 
       {/* Content */}
       <div className="relative">
         {/* Company Info */}
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-xl border border-gray-200">
+          <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-xl border border-gray-200 flex-shrink-0">
             {job.logo}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 text-base leading-tight group-hover:text-gray-700 transition-colors duration-300">
+            <h3 className="font-semibold text-gray-900 text-base leading-tight group-hover:text-gray-700 transition-colors duration-300 truncate">
               {job.company}
             </h3>
             <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span>{job.location}</span>
+              <span className="truncate">{job.location}</span>
             </div>
           </div>
         </div>
@@ -86,7 +118,7 @@ export default function JobCard({
         )}
 
         {/* Job Details */}
-        <div className="flex items-center gap-2 mb-4 text-sm">
+        <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
           <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg font-medium">
             {job.type}
           </span>
@@ -115,18 +147,18 @@ export default function JobCard({
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex items-center gap-1.5 text-xs text-gray-400">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span>{job.posted}</span>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button 
               variant="outline" 
               size="sm" 
               href={`/jobs/${job.id}`}
-              className="hidden md:inline-flex"
+              className="hidden sm:inline-flex text-xs px-3 py-1.5"
             >
               View Details
             </Button>
@@ -134,7 +166,7 @@ export default function JobCard({
               variant="primary" 
               size="sm" 
               onClick={handleApply}
-              className="hidden md:inline-flex"
+              className="text-xs px-3 py-1.5 sm:px-4 sm:py-2"
             >
               Apply Now
             </Button>
