@@ -4,9 +4,9 @@ import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'glass' | 'hero-primary' | 'hero-secondary' | 'danger' | 'success';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'glass' | 'hero-primary' | 'hero-secondary' | 'danger' | 'success' | 'warning' | 'info';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'hero';
-  loading?: boolean;
+  loading?: boolean | undefined;
   href?: string;
   external?: boolean;
   icon?: React.ReactNode;
@@ -14,33 +14,39 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   fullWidth?: boolean;
   ripple?: boolean;
   ariaLabel?: string;
+  tooltip?: string;
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  gradient?: boolean;
+  pulse?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ 
-    className = '', 
-    variant = 'primary', 
-    size = 'md', 
-    loading = false,
-    href,
-    external = false,
-    icon,
-    iconPosition = 'left',
-    fullWidth = false,
-    ripple = true,
-    ariaLabel,
-    children, 
-    disabled, 
-    onClick,
-    ...props 
-  }, ref) => {
+  (props, ref) => {
+    const {
+      className = '',
+      variant = 'primary',
+      size = 'md',
+      loading = false,
+      href,
+      external = false,
+      icon,
+      iconPosition = 'left',
+      fullWidth = false,
+      ariaLabel,
+      children,
+      disabled,
+      onClick,
+      ...rest
+    } = props;
+
     const [ripples, setRipples] = useState<Array<{ x: number; y: number; id: number }>>([]);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const rippleTimeouts = useRef<number[]>([]);
     
     // Ripple effect handler
     const handleRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (!ripple || disabled || loading) return;
+      if (!props.ripple || disabled || loading) return;
       
       const button = buttonRef.current;
       if (!button) return;
@@ -85,7 +91,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'hero-primary': 'bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-[1.02] focus:ring-[#0891b2]/40 focus:ring-offset-white',
       'hero-secondary': 'bg-white/90 backdrop-blur-lg text-gray-800 font-semibold border border-gray-200/50 shadow-lg hover:shadow-xl hover:bg-white hover:border-[#0891b2]/30 hover:scale-[1.02] hover:text-[#0891b2] focus:ring-gray-400/40',
       danger: 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-red-500/40',
-      success: 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-green-500/40'
+      success: 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-green-500/40',
+      warning: 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-orange-500 hover:to-yellow-500 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-yellow-500/40',
+      info: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-blue-500/40'
     };
     
     // Enhanced size classes with better proportions
@@ -165,7 +173,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
       return (
         <>
-          {ripple && <RippleEffect />}
+          {props.ripple && <RippleEffect />}
           {(variant === 'primary' || variant === 'hero-primary') && <GradientOverlay />}
           <span className="relative z-10 flex items-center gap-inherit">
             {loading && <LoadingSpinner />}
@@ -210,16 +218,26 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       );
     }
 
+    // Use the ref if provided, otherwise use the internal buttonRef
+    const mergedRef = (node: HTMLButtonElement) => {
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node;
+      }
+      buttonRef.current = node;
+    };
+
     // Regular button with enhanced accessibility
     return (
       <button
-        ref={buttonRef}
+        ref={mergedRef}
         className={buttonClasses}
         disabled={disabled || loading}
         aria-label={ariaLabel || (loading ? 'Loading...' : undefined)}
         aria-disabled={disabled || loading}
         onClick={handleClick}
-        {...props}
+        {...rest}
       >
         <ButtonContent />
       </button>

@@ -19,7 +19,7 @@ export default function Navbar() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/20 shadow-sm">
-        <div className="container mx-auto flex h-18 items-center justify-between px-6 md:px-12">
+        <div className="container mx-auto flex h-14 items-center justify-between px-4 md:px-10">
           <Link href="/" className="flex items-center gap-2">
             <Logo size={40} />
           </Link>
@@ -55,18 +55,18 @@ export default function Navbar() {
               Contact
             </Link>
           </nav>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Button 
               variant="primary" 
               size="sm" 
               href="/login"
-              className="hidden md:inline-flex"
+              className="hidden md:inline-flex rounded-lg shadow-none px-4 py-1.5 text-sm font-semibold"
             >
               Sign In
             </Button>
             <button 
               onClick={toggleMenu}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gray-100/80 text-gray-700 hover:bg-gray-200/80 hover:text-[#0891b2] transition-all duration-200 md:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100/80 text-gray-700 hover:bg-gray-200/80 hover:text-[#0891b2] transition-all duration-200 md:hidden border border-gray-200"
             >
               {isMenuOpen ? (
                 <svg
@@ -114,48 +114,48 @@ export default function Navbar() {
           />
           
           {/* Mobile Menu Panel */}
-          <div className="fixed top-18 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/20 shadow-corporate md:hidden">
-            <nav className="container mx-auto px-6 py-8">
-              <div className="flex flex-col gap-6">
+          <div className="fixed top-14 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/20 shadow-corporate md:hidden">
+            <nav className="container mx-auto px-4 py-5">
+              <div className="flex flex-col gap-2">
                 <Link
                   href="/features"
-                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-3 text-lg font-medium"
+                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-2 text-base font-medium"
                   onClick={closeMenu}
                 >
                   Features
                 </Link>
                 <Link
                   href="/pricing"
-                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-3 text-lg font-medium"
+                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-2 text-base font-medium"
                   onClick={closeMenu}
                 >
                   Pricing
                 </Link>
                 <Link
                   href="/corporate"
-                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-3 text-lg font-medium"
+                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-2 text-base font-medium"
                   onClick={closeMenu}
                 >
                   Corporate
                 </Link>
                 <Link
                   href="/about"
-                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-3 text-lg font-medium"
+                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-2 text-base font-medium"
                   onClick={closeMenu}
                 >
                   About
                 </Link>
                 <Link
                   href="/contact"
-                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-3 text-lg font-medium"
+                  className="font-text text-gray-700 hover:text-[#0891b2] transition-colors duration-200 py-2 text-base font-medium"
                   onClick={closeMenu}
                 >
                   Contact
                 </Link>
-                <div className="pt-6 border-t border-gray-200/50">
+                <div className="pt-4 border-t border-gray-200/50 mt-2">
                   <Button 
                     variant="primary" 
-                    size="lg" 
+                    size="md" 
                     href="/login"
                     fullWidth
                     onClick={closeMenu}

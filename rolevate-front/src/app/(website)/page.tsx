@@ -1,8 +1,7 @@
-import Logo from "@/components/common/logo";
-import Image from "next/image";
 import Hero from "@/components/homepage/hero";
 import AvailableJobs from "@/components/homepage/AvailableJobs";
 import CVUploadSection from "@/components/homepage/CVUploadSection";
+import SuccessStories from "@/components/homepage/SuccessStories";
 
 export default function Home() {
   return (
@@ -10,6 +9,7 @@ export default function Home() {
       <Hero />
       <AvailableJobs />
       <CVUploadSection />
+      <SuccessStories />
     </main>
   );
 }

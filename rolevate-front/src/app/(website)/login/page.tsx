@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -83,9 +84,9 @@ export default function LoginPage() {
           </form>
           <p className="mt-8 text-sm text-gray-500">
             Don&apos;t have an account?{' '}
-            <a href="#" className="text-[#0891b2] hover:underline font-medium">
+            <Link href="/signup" className="text-[#0891b2] hover:underline font-medium">
               Sign up
-            </a>
+            </Link>
           </p>
         </div>
       </div>
