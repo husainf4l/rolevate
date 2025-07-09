@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import UserSidebar from "@/components/dashboard/UserSidebar";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,10 +29,12 @@ export default function UserDashboardLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-[#23272a] bg-gray-50`}
       >
-        <div className="flex h-screen overflow-hidden">
-          <UserSidebar />
-          <main className="flex-1 overflow-y-auto lg:ml-64">{children}</main>
-        </div>
+        <ProtectedRoute allowedUserTypes={['CANDIDATE']}>
+          <div className="flex h-screen">
+            <UserSidebar />
+            <main className="flex-1 lg:ml-64 overflow-auto">{children}</main>
+          </div>
+        </ProtectedRoute>
       </body>
     </html>
   );

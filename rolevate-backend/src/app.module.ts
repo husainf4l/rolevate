@@ -5,10 +5,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CompanyModule } from './company/company.module';
+import { AiautocompleteModule } from './aiautocomplete/aiautocomplete.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, CompanyModule, ],
+  imports: [PrismaModule, AuthModule, UserModule, CompanyModule, AiautocompleteModule],
   controllers: [AppController],
-  providers: [AppService, ],
+  providers: [AppService],
 })
 export class AppModule {}

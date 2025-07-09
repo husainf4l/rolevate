@@ -1,3 +1,5 @@
+// Logout: calls Next.js API route to clear cookies
+
 // src/services/auth.ts
 
 const BASE_API = "http://localhost:4005/api";
@@ -13,6 +15,7 @@ export interface CreateUserDto {
   invitationCode?: string;
 }
 
+
 export async function signup(data: CreateUserDto) {
   const res = await fetch(`${BASE_API}/auth/signup`, {
     method: 'POST',
@@ -21,6 +24,117 @@ export async function signup(data: CreateUserDto) {
   });
   if (!res.ok) {
     throw new Error(await res.text());
+  }
+  return res.json();
+}
+
+// Helper function to handle user redirection
+function redirectUserByType(user: any, router: any) {
+  switch (user.userType) {
+    case "CANDIDATE":
+      router.replace("/userdashboard");
+      break;
+    case "COMPANY":
+      // Check if company user has a company or companyId
+      if (!user.company && !user.companyId) {
+        router.replace("/dashboard/setup-company");
+      } else {
+        router.replace("/dashboard");
+      }
+      break;
+    default:
+      router.replace("/");
+  }
+}
+
+// Login function - returns user object and sets tokens
+export async function login({ email, password }: { email: string; password: string }) {
+  const res = await fetch(`${BASE_API}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+    credentials: "include", // This ensures cookies are sent and received
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error?.message || error?.error || "Login failed");
+  }
+
+  const data = await res.json();
+  return data.user;
+}
+
+// Professional signin function - handles login and redirect
+export async function signin({ email, password, router }: { email: string; password: string; router: any }) {
+  const user = await login({ email, password });
+  redirectUserByType(user, router);
+  return user;
+}
+
+// Check authentication by making a protected API call
+export async function isAuthenticated(): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE_API}/auth/me`, {
+      method: "GET",
+      credentials: "include", // Send HTTP-only cookies
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// Get current authenticated user
+export async function getCurrentUser() {
+  try {
+    const res = await fetch(`${BASE_API}/auth/me`, {
+      method: "GET",
+      credentials: "include", // Send HTTP-only cookies
+    });
+    
+    if (!res.ok) {
+      console.log('Auth check failed with status:', res.status);
+      return null;
+    }
+    
+    const data = await res.json();
+    console.log('User data from /auth/me:', data);
+    return data;
+  } catch (error) {
+    console.log('Auth check failed:', error);
+    return null;
+  }
+}
+
+// Get user profile
+export async function getProfile() {
+  try {
+    const res = await fetch(`${BASE_API}/auth/profile`, {
+      method: "GET",
+      credentials: "include", // Send HTTP-only cookies
+    });
+    
+    if (!res.ok) {
+      throw new Error('Failed to get profile');
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.log('Profile fetch failed:', error);
+    throw error;
+  }
+}
+
+export async function logout() {
+  const res = await fetch(`${BASE_API}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw new Error("Logout failed");
   }
   return res.json();
 }

@@ -1,28 +1,30 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import {  useRouter } from "next/navigation";
+import { signin } from "@/services/auth";
 
 export default function LoginPage() {
-  const [corporateMode, setCorporateMode] = useState(false);
-  const searchParams = useSearchParams();
   const router = useRouter();
 
-  useEffect(() => {
-    if (searchParams.get("corporate") !== null) {
-      setCorporateMode(true);
-    } else {
-      setCorporateMode(false);
-    }
-  }, [searchParams]);
+  // Form state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleToggle = () => {
-    if (!corporateMode) {
-      router.replace("/login?corporate");
-    } else {
-      router.replace("/login");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      await signin({ email, password, router });
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,13 +36,13 @@ export default function LoginPage() {
           <div className="mb-8 w-full flex flex-col items-center lg:items-start">
             <span className="inline-flex items-center px-4 py-2 bg-[#13ead9]/10 text-[#0891b2] text-sm font-semibold rounded-full border border-[#13ead9]/20">
               <span className="w-2 h-2 bg-[#13ead9] rounded-full mr-2 animate-pulse"></span>
-              {corporateMode ? "Corporate Access" : "Welcome Back"}
+              Welcome Back
             </span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1] px-2 sm:px-0 w-full text-left">
-            {corporateMode ? "Corporate Sign In" : "Sign in to your account"}
+            Sign in to your account
           </h1>
-          <form className="w-full max-w-sm space-y-6 mt-4">
+          <form className="w-full max-w-sm space-y-6 mt-4" onSubmit={handleSubmit}>
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Email address
@@ -50,7 +52,10 @@ export default function LoginPage() {
                 id="email"
                 autoComplete="email"
                 required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
+                disabled={loading}
               />
             </div>
             <div className="mb-4">
@@ -60,9 +65,12 @@ export default function LoginPage() {
               <input
                 type="password"
                 id="password"
-                autoComplete={corporateMode ? "current-password" : "current-password"}
+                autoComplete="current-password"
                 required
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
+                disabled={loading}
               />
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 mb-2">
@@ -72,6 +80,7 @@ export default function LoginPage() {
                   name="remember"
                   type="checkbox"
                   className="h-4 w-4 rounded border-gray-300 text-[#13ead9] focus:ring-[#13ead9]"
+                  disabled={loading}
                 />
                 <label htmlFor="remember" className="ml-2 block text-sm text-gray-600">
                   Remember me
@@ -81,29 +90,22 @@ export default function LoginPage() {
                 Forgot password?
               </a>
             </div>
+            {error && (
+              <div className="text-red-500 text-sm text-left">{error}</div>
+            )}
             <button
               type="submit"
-              className="w-full rounded-2xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] py-3 px-6 text-white font-semibold shadow-corporate hover:shadow-xl transition-all duration-200 text-base font-display"
+              className="w-full rounded-2xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] py-3 px-6 text-white font-semibold shadow-corporate hover:shadow-xl transition-all duration-200 text-base font-display disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              {corporateMode ? "Corporate Sign In" : "Sign In"}
+              {loading ? "Signing In..." : "Sign In"}
             </button>
           </form>
-          {!corporateMode && (
-            <p className="mt-8 text-sm text-gray-500 text-left">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-[#0891b2] hover:underline font-medium">
-                Sign up
-              </Link>
-            </p>
-          )}
-          <p className="mt-4 text-sm text-gray-500 text-left">
-            <button
-              type="button"
-              className="text-[#0891b2] hover:underline font-semibold focus:outline-none bg-transparent"
-              onClick={handleToggle}
-            >
-              {corporateMode ? "Standard User Sign In" : "Corporate Sign In"}
-            </button>
+          <p className="mt-8 text-sm text-gray-500 text-left">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="text-[#0891b2] hover:underline font-medium">
+              Sign up
+            </Link>
           </p>
         </div>
         {/* Illustration (hidden on mobile) */}

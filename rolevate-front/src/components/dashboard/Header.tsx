@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { logout } from "@/services/auth";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   title?: string;
@@ -125,6 +127,7 @@ export default function Header({
   const [notificationOpen, setNotificationOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const unreadNotifications = recentNotifications.filter((n) => !n.read);
   const unreadCount = unreadNotifications.length;
@@ -156,6 +159,16 @@ export default function Header({
     );
     if (notification) {
       notification.read = true;
+    }
+  };
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace("/");
+    } catch (err) {
+      // Optionally show error
     }
   };
 
@@ -289,7 +302,7 @@ export default function Header({
                         className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 text-sm"
                         onClick={() => {
                           setMenuOpen(false);
-                          // Add sign out logic here
+                          handleLogout();
                         }}
                       >
                         Sign Out
@@ -427,7 +440,7 @@ export default function Header({
                       className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 text-sm"
                       onClick={() => {
                         setMenuOpen(false);
-                        // Add sign out logic here
+                        handleLogout();
                       }}
                     >
                       Sign Out

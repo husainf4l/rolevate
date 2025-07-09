@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Logo from "@/components/common/logo";
 import {
   HomeIcon,
@@ -19,6 +19,7 @@ import {
   CalendarDaysIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import { logout } from "@/services/auth";
 
 const navigationItems = [
   {
@@ -81,9 +82,20 @@ const navigationItems = [
 export default function UserSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace("/");
+    } catch (err) {
+      // Optionally show error
+    }
   };
 
   return (
@@ -173,7 +185,10 @@ export default function UserSidebar() {
             </div>
 
             {/* Logout Button */}
-            <button className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors">
+            <button
+              className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+              onClick={handleLogout}
+            >
               <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
               Logout
             </button>
