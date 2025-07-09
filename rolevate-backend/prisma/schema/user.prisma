@@ -1,0 +1,20 @@
+// ===================================
+// USER MANAGEMENT
+// ===================================
+
+model User {
+  id        String   @id @default(cuid())
+  userType  UserType
+  password  String?
+  email     String?  @unique
+  name      String?
+  isActive  Boolean  @default(true)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userType])
+  @@index([email])
+}

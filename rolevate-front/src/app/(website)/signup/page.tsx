@@ -1,9 +1,21 @@
 "use client";
 import React, { useState } from "react";
+import { signup, UserType } from "@/services/auth";
 import Image from "next/image";
 
 export default function SignupPage() {
   const [accountType, setAccountType] = useState<'individual' | 'corporate'>('individual');
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    invitationCode: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   return (
     <section className="w-full min-h-screen bg-white flex items-center">
@@ -53,127 +65,135 @@ export default function SignupPage() {
               Corporate
             </button>
           </div>
-          <form className="w-full max-w-sm space-y-6 mt-4">
-            {accountType === 'corporate' ? (
-              <>
-                <div>
-                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    id="companyName"
-                    autoComplete="organization"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="companyEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                    Company Email
-                  </label>
-                  <input
-                    type="email"
-                    id="companyEmail"
-                    autoComplete="email"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Person
-                  </label>
-                  <input
-                    type="text"
-                    id="contactPerson"
-                    autoComplete="name"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    id="confirm-password"
-                    autoComplete="new-password"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    autoComplete="name"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    autoComplete="email"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    id="confirm-password"
-                    autoComplete="new-password"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                  />
-                </div>
-              </>
+          <form
+            className="w-full max-w-sm space-y-6 mt-4"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setError(null);
+              setSuccess(false);
+              if (form.password !== form.confirmPassword) {
+                setError('Passwords do not match');
+                return;
+              }
+              setLoading(true);
+              try {
+                const userType: UserType = accountType === 'corporate' ? 'COMPANY' : 'CANDIDATE';
+                const payload = {
+                  email: form.email,
+                  password: form.password,
+                  name: form.name,
+                  userType,
+                  phone: form.phone,
+                  ...(accountType === 'corporate' && form.invitationCode ? { invitationCode: form.invitationCode } : {}),
+                };
+                await signup(payload);
+                setSuccess(true);
+                setForm({ name: '', email: '', password: '', confirmPassword: '', phone: '', invitationCode: '' });
+              } catch (err: any) {
+                setError(err.message || 'Signup failed');
+              } finally {
+                setLoading(false);
+              }
+            }}
+          >
+            {/* Name field */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                autoComplete="name"
+                required
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                className="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-md focus:border-[#13ead9] focus:ring-2 focus:ring-[#13ead9]/20 focus:outline-none transition-all"
+              />
+            </div>
+            {/* Email field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email address
+              </label>
+              <input
+                type="email"
+                id="email"
+                autoComplete="email"
+                required
+                value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                className="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-md focus:border-[#13ead9] focus:ring-2 focus:ring-[#13ead9]/20 focus:outline-none transition-all"
+              />
+            </div>
+            {/* Password field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                autoComplete="new-password"
+                required
+                value={form.password}
+                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                className="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-md focus:border-[#13ead9] focus:ring-2 focus:ring-[#13ead9]/20 focus:outline-none transition-all"
+              />
+            </div>
+            {/* Confirm Password field */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                autoComplete="new-password"
+                required
+                value={form.confirmPassword}
+                onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                className="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-md focus:border-[#13ead9] focus:ring-2 focus:ring-[#13ead9]/20 focus:outline-none transition-all"
+              />
+            </div>
+            {/* Phone field for all */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Phone
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                autoComplete="tel"
+                required
+                value={form.phone}
+                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                className="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-md focus:border-[#13ead9] focus:ring-2 focus:ring-[#13ead9]/20 focus:outline-none transition-all"
+              />
+            </div>
+            {/* Invitation Code field for corporate users */}
+            {accountType === 'corporate' && (
+              <div>
+                <label htmlFor="invitationCode" className="block text-sm font-medium text-gray-700 mb-1">
+                  Invitation Code
+                </label>
+                <input
+                  type="text"
+                  id="invitationCode"
+                  value={form.invitationCode}
+                  onChange={e => setForm(f => ({ ...f, invitationCode: e.target.value }))}
+                  className="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-md focus:border-[#13ead9] focus:ring-2 focus:ring-[#13ead9]/20 focus:outline-none transition-all"
+                />
+              </div>
             )}
+            {error && <div className="text-red-600 text-sm">{error}</div>}
+            {success && <div className="text-green-600 text-sm">Account created successfully!</div>}
             <button
               type="submit"
-              className="w-full rounded-2xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] py-3 px-6 text-white font-semibold shadow-corporate hover:shadow-xl transition-all duration-200 text-base font-display"
+              className="w-full rounded-2xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] py-3 px-6 text-white font-semibold shadow-corporate hover:shadow-xl transition-all duration-200 text-base font-display disabled:opacity-60"
+              disabled={loading}
             >
-              Create Account
+              {loading ? 'Creating...' : 'Create Account'}
             </button>
           </form>
           <p className="mt-8 text-sm text-gray-500">

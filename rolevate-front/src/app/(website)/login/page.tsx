@@ -41,33 +41,18 @@ export default function LoginPage() {
             {corporateMode ? "Corporate Sign In" : "Sign in to your account"}
           </h1>
           <form className="w-full max-w-sm space-y-6 mt-4">
-            {corporateMode ? (
-              <div className="mb-4">
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  id="username"
-                  autoComplete="username"
-                  required
-                  className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                />
-              </div>
-            ) : (
-              <div className="mb-4">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                  Email address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
-                />
-              </div>
-            )}
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Email address
+              </label>
+              <input
+                type="email"
+                id="email"
+                autoComplete="email"
+                required
+                className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
+              />
+            </div>
             <div className="mb-4">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Password
