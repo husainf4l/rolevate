@@ -25,21 +25,33 @@ export default function JobsPage() {
   const [jobPosts, setJobPosts] = useState<JobPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [filterType, setFilterType] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || "");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(() => searchParams.get('search') || "");
+  const [filterStatus, setFilterStatus] = useState<string>(() => searchParams.get('status') || "all");
+  const [filterType, setFilterType] = useState<string>(() => searchParams.get('type') || "all");
 
-  // Debounce search term to avoid too many API calls
+  // Update URL when search term changes
+  const updateSearchParams = (search: string, status: string, type: string) => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (status && status !== 'all') params.set('status', status);
+    if (type && type !== 'all') params.set('type', type);
+    
+    const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
+    window.history.replaceState({}, '', newUrl);
+  };
+
+  // Debounce search term and update URL
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
+      updateSearchParams(searchTerm, filterStatus, filterType);
     }, 500); // 500ms delay
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, filterStatus, filterType]);
 
-  // Fetch jobs from backend
+  // Fetch jobs - single effect that handles both initial load and search
   useEffect(() => {
     let isMounted = true;
     let abortController = new AbortController();
@@ -51,15 +63,13 @@ export default function JobsPage() {
           setError(null);
         }
         
-        // Add signal to abort request if component unmounts
-        const response = await JobService.getCompanyJobs(1, 100, debouncedSearchTerm); // Get first 100 jobs with search
+        const response = await JobService.getCompanyJobs(1, 100, debouncedSearchTerm);
         
         if (isMounted && !abortController.signal.aborted) {
           setJobPosts(response.jobs);
           console.log('Jobs fetched:', response.jobs.length, 'jobs');
-          console.log('Total jobs:', response.total);
           console.log('Search term:', debouncedSearchTerm);
-          console.log('Pagination:', response.pagination);
+          console.log('Total jobs:', response.total);
           console.log('Jobs by status:', {
             ACTIVE: response.jobs.filter(job => job.status === 'ACTIVE').length,
             DRAFT: response.jobs.filter(job => job.status === 'DRAFT').length,
@@ -206,6 +216,17 @@ export default function JobsPage() {
     }
   };
 
+  // Handle filter changes
+  const handleStatusFilterChange = (status: string) => {
+    setFilterStatus(status);
+    updateSearchParams(searchTerm, status, filterType);
+  };
+
+  const handleTypeFilterChange = (type: string) => {
+    setFilterType(type);
+    updateSearchParams(searchTerm, filterStatus, type);
+  };
+
   // Filter jobs based on status and type filters (search is handled server-side)
   const filteredJobs = jobPosts.filter((job) => {
     // Exclude deleted jobs by default unless specifically filtering for them
@@ -226,6 +247,7 @@ export default function JobsPage() {
     try {
       const response = await JobService.getCompanyJobs(1, 100, debouncedSearchTerm); // Get first 100 jobs with current search
       setJobPosts(response.jobs);
+      console.log('Jobs refreshed:', response.jobs.length, 'jobs');
     } catch (err) {
       console.error('Failed to refresh jobs:', err);
       setError(err instanceof Error ? err.message : 'Failed to refresh jobs');
@@ -488,7 +510,7 @@ export default function JobsPage() {
                 <label className="text-sm font-medium text-gray-700">Status:</label>
                 <select
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
+                  onChange={(e) => handleStatusFilterChange(e.target.value)}
                   className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5] focus:border-[#0fc4b5] bg-white text-sm font-medium"
                 >
                   <option value="all">All Status</option>
@@ -505,7 +527,7 @@ export default function JobsPage() {
                 <label className="text-sm font-medium text-gray-700">Type:</label>
                 <select
                   value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
+                  onChange={(e) => handleTypeFilterChange(e.target.value)}
                   className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5] focus:border-[#0fc4b5] bg-white text-sm font-medium"
                 >
                   <option value="all">All Types</option>
