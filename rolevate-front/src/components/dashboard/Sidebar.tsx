@@ -17,7 +17,13 @@ import {
   BellIcon,
 } from "@heroicons/react/24/outline";
 
-const navigationItems = [
+interface NavigationItem {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  label: string;
+  href: string;
+}
+
+const navigationItems: NavigationItem[] = [
   {
     icon: HomeIcon,
     label: "Dashboard",
@@ -25,8 +31,8 @@ const navigationItems = [
   },
   {
     icon: BriefcaseIcon,
-    label: "Job Postings",
-    href: "/dashboard/jobs",
+    label: "Job Management",
+    href: "/dashboard/jobs?search=&status=all&type=all",
   },
   {
     icon: UsersIcon,
@@ -107,10 +113,13 @@ export default function Sidebar() {
           <nav className="flex-1 px-3 py-4">
             <div className="space-y-1">
               {navigationItems.map((item) => {
+                // Extract just the pathname part for comparison
+                const itemPath = item.href.split('?')[0] || item.href;
                 const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/dashboard" &&
-                    pathname.startsWith(item.href));
+                  pathname === itemPath ||
+                  (itemPath !== "/dashboard" &&
+                    pathname.startsWith(itemPath));
+                
                 return (
                   <Link
                     key={item.label}
