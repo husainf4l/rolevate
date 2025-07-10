@@ -67,6 +67,28 @@ export class CompanyService {
       throw new BadRequestException('User already belongs to a company');
     }
 
+    // Convert size string to number of employees
+    let numberOfEmployees = createCompanyDto.numberOfEmployees;
+    if (createCompanyDto.size && !numberOfEmployees) {
+      const sizeRanges: { [key: string]: number } = {
+        '1-10': 5,
+        '11-50': 30,
+        '51-200': 125,
+        '201-500': 350,
+        '501-1000': 750,
+        '1000+': 1500
+      };
+      numberOfEmployees = sizeRanges[createCompanyDto.size] || 1;
+    }
+
+    // Prepare address data from flat fields or nested address object
+    const addressData = createCompanyDto.address || 
+      (createCompanyDto.street || createCompanyDto.city || createCompanyDto.country) ? {
+        street: createCompanyDto.street,
+        city: createCompanyDto.city,
+        country: createCompanyDto.country as any
+      } : null;
+
     // Create company
     const company = await this.prisma.company.create({
       data: {
@@ -76,14 +98,14 @@ export class CompanyService {
         phone: createCompanyDto.phone,
         website: createCompanyDto.website,
         industry: createCompanyDto.industry as any, // Cast to Industry enum
-        numberOfEmployees: createCompanyDto.numberOfEmployees,
+        numberOfEmployees: numberOfEmployees,
         subscription: 'FREE', // Default subscription
-        ...(createCompanyDto.address && {
+        ...(addressData && {
           address: {
             create: {
-              street: createCompanyDto.address.street,
-              city: createCompanyDto.address.city,
-              country: createCompanyDto.address.country,
+              street: addressData.street,
+              city: addressData.city,
+              country: addressData.country,
             }
           }
         })

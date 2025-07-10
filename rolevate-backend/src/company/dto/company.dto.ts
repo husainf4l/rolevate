@@ -35,6 +35,24 @@ export class CreateCompanyDto {
   @Min(1)
   @IsOptional()
   numberOfEmployees?: number;
+
+  // Flat address fields for convenience
+  @IsString()
+  @IsOptional()
+  street?: string;
+
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  country?: string;
+
+  // Company size as string for convenience
+  @IsString()
+  @IsOptional()
+  size?: string;
 }
 
 export class JoinCompanyDto {
