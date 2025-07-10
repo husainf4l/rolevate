@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
+import DashboardContentLayout from "@/components/dashboard/DashboardContentLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,9 @@ export default function DashboardLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-[#23272a] bg-gray-50`}
       >
         <ProtectedRoute allowedUserTypes={['COMPANY']}>
-          {children}
+          <DashboardContentLayout>
+            {children}
+          </DashboardContentLayout>
         </ProtectedRoute>
       </body>
     </html>

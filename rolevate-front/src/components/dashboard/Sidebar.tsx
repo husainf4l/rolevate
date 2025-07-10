@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import Logo from "@/components/common/logo";
 import {
   HomeIcon,
   BriefcaseIcon,
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
-  DocumentTextIcon,
   ChartBarIcon,
   Bars3Icon,
   XMarkIcon,
@@ -112,7 +112,7 @@ export default function Sidebar() {
                   (item.href !== "/dashboard" &&
                     pathname.startsWith(item.href));
                 return (
-                  <a
+                  <Link
                     key={item.label}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -130,7 +130,7 @@ export default function Sidebar() {
                       }`}
                     />
                     {item.label}
-                  </a>
+                  </Link>
                 );
               })}
             </div>

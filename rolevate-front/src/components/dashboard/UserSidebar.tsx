@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import Logo from "@/components/common/logo";
 import {
   HomeIcon,
@@ -142,7 +143,7 @@ export default function UserSidebar() {
                   (item.href !== "/userdashboard" &&
                     pathname.startsWith(item.href));
                 return (
-                  <a
+                  <Link
                     key={item.label}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -160,7 +161,7 @@ export default function UserSidebar() {
                       }`}
                     />
                     {item.label}
-                  </a>
+                  </Link>
                 );
               })}
             </div>

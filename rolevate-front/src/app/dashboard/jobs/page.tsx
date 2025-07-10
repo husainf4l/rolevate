@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/dashboard/Header";
 import {
   PlusIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   BriefcaseIcon,
   MapPinIcon,
   CurrencyDollarIcon,
@@ -183,6 +183,7 @@ const getStatusColor = (status: JobPost["status"]) => {
 };
 
 export default function JobsPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
@@ -246,7 +247,10 @@ export default function JobsPage() {
               <option value="remote">Remote</option>
             </select>
 
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0891b2] transition-colors">
+            <button 
+              onClick={() => router.push('/dashboard/jobs/create')}
+              className="flex items-center gap-2 px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0891b2] transition-colors"
+            >
               <PlusIcon className="w-5 h-5" />
               New Job
             </button>
