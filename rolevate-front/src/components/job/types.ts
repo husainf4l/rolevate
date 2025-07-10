@@ -6,6 +6,7 @@ export interface JobFormData {
   type: "full-time" | "part-time" | "contract" | "remote";
   deadline: string;
   description: string;
+  responsibilities: string;
   requirements: string;
   benefits: string;
   skills: string[];
@@ -15,6 +16,7 @@ export interface JobFormData {
   jobLevel: "entry" | "mid" | "senior" | "executive";
   workType: "onsite" | "remote" | "hybrid";
   industry: string;
+  companyDescription: string;
 }
 
 export interface ScreeningQuestion {

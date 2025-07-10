@@ -13,11 +13,15 @@ interface JobDetailsStepProps {
   errors: FormErrors;
   aiGenerating?: boolean;
   regeneratingRequirements?: boolean;
+  regeneratingBenefits?: boolean;
+  regeneratingResponsibilities?: boolean;
   onInputChange: (field: keyof JobFormData, value: string | string[]) => void;
   onAddSkill: (skill: string) => void;
   onRemoveSkill: (skill: string) => void;
   onRegenerateDescription?: () => void;
   onRegenerateRequirements?: () => void;
+  onRegenerateBenefits?: () => void;
+  onRegenerateResponsibilities?: () => void;
   skillSuggestions: string[];
 }
 
@@ -26,11 +30,15 @@ export default function JobDetailsStep({
   errors, 
   aiGenerating,
   regeneratingRequirements,
+  regeneratingBenefits,
+  regeneratingResponsibilities,
   onInputChange, 
   onAddSkill, 
   onRemoveSkill,
   onRegenerateDescription,
   onRegenerateRequirements,
+  onRegenerateBenefits,
+  onRegenerateResponsibilities,
   skillSuggestions 
 }: JobDetailsStepProps) {
   return (
@@ -91,6 +99,53 @@ export default function JobDetailsStep({
             </div>
           </div>
           {errors.description && <p className="mt-2 text-sm text-red-500">{errors.description}</p>}
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label htmlFor="responsibilities" className="block text-sm font-semibold text-[#1d1d1f]">
+              Key Responsibilities *
+            </label>
+            {onRegenerateResponsibilities && jobData.responsibilities.trim() && (
+              <button
+                type="button"
+                onClick={onRegenerateResponsibilities}
+                disabled={regeneratingResponsibilities}
+                className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-lg disabled:opacity-50 hover:from-[#0891b2] hover:to-[#0e7490] transition-all duration-200"
+              >
+                {regeneratingResponsibilities ? (
+                  <>
+                    <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                    Rewriting...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Regenerate with AI
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+          <div className="relative">
+            <textarea
+              id="responsibilities"
+              rows={6}
+              value={jobData.responsibilities}
+              onChange={(e) => onInputChange("responsibilities", e.target.value)}
+              className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent resize-none transition-all duration-200 placeholder-[#86868b] text-[#1d1d1f] backdrop-blur-sm ${
+                errors.responsibilities ? 'border-red-400' : 'border-[#d2d2d7]'
+              }`}
+              placeholder="List the main duties and responsibilities for this role, including day-to-day tasks, key deliverables, and expected outcomes..."
+              maxLength={1500}
+            />
+            <div className="absolute bottom-3 right-3 text-xs text-[#86868b]">
+              {jobData.responsibilities.length}/1500
+            </div>
+          </div>
+          {errors.responsibilities && <p className="mt-2 text-sm text-red-500">{errors.responsibilities}</p>}
         </div>
 
         <div>
@@ -198,7 +253,6 @@ export default function JobDetailsStep({
             placeholder="e.g. AED 15,000 - 20,000 (AI will suggest based on job details)"
           />
           {errors.salary && <p className="mt-2 text-sm text-red-500">{errors.salary}</p>}
-          <p className="mt-1 text-xs text-[#6e6e73]">💡 AI will suggest competitive salary ranges based on your job requirements</p>
         </div>
 
         <SkillsManager
@@ -210,10 +264,34 @@ export default function JobDetailsStep({
         />
 
         <div>
-          <label htmlFor="benefits" className="block text-sm font-semibold text-[#1d1d1f] mb-3">
-            Benefits & Perks
-            <span className="text-[#6e6e73] font-normal ml-1">(Optional)</span>
-          </label>
+          <div className="flex items-center justify-between mb-3">
+            <label htmlFor="benefits" className="block text-sm font-semibold text-[#1d1d1f]">
+              Benefits & Perks
+              <span className="text-[#6e6e73] font-normal ml-1">(Optional)</span>
+            </label>
+            {onRegenerateBenefits && jobData.benefits.trim() && (
+              <button
+                type="button"
+                onClick={onRegenerateBenefits}
+                disabled={regeneratingBenefits}
+                className="px-3 py-1.5 bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white rounded-lg hover:from-[#11d4c4] hover:to-[#0784a6] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+              >
+                {regeneratingBenefits ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Regenerating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Regenerate with AI
+                  </>
+                )}
+              </button>
+            )}
+          </div>
           <div className="relative">
             <textarea
               id="benefits"

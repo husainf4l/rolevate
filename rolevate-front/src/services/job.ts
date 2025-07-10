@@ -11,6 +11,7 @@ export interface JobAnalysisRequest {
 
 export interface JobAnalysisResponse {
   description: string;
+  responsibilities: string;
   requirements: string;
   skills: string[];
   benefits: string;
@@ -71,6 +72,7 @@ export class JobService {
     // Map the backend response to the expected frontend format
     return {
       description: data.jobRequirements?.description || '',
+      responsibilities: data.jobRequirements?.keyResponsibilities || '',
       requirements: data.jobRequirements?.qualifications?.length > 0 ? 
         '• ' + data.jobRequirements.qualifications.join('\n• ') : '',
       skills: data.jobRequirements?.requiredSkills || [],
@@ -134,7 +136,21 @@ export class JobService {
   /**
    * Rewrite job title using AI
    */
-  static async rewriteJobTitle(currentTitle: string): Promise<string> {
+  static async rewriteJobTitle(
+    currentTitle: string, 
+    industry?: string, 
+    company?: string, 
+    jobLevel?: string
+  ): Promise<{ jobTitle: string; department?: string }> {
+    const payload: any = {
+      jobTitle: currentTitle,
+    };
+
+    // Add optional fields if provided
+    if (industry) payload.industry = industry;
+    if (company) payload.company = company;
+    if (jobLevel) payload.jobLevel = jobLevel;
+
     const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-job-title`, {
       method: 'POST',
       headers: {
@@ -142,7 +158,7 @@ export class JobService {
       },
       credentials: 'include',
       mode: 'cors',
-      body: JSON.stringify({ title: currentTitle }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -151,6 +167,122 @@ export class JobService {
     }
 
     const data = await response.json();
-    return data.rewrittenTitle || data.title || currentTitle;
+    return {
+      jobTitle: data.jobTitle || currentTitle,
+      department: data.department
+    };
+  }
+
+  /**
+   * Rewrite job benefits using AI
+   */
+  static async rewriteBenefits(
+    currentBenefits: string,
+    industry?: string,
+    jobLevel?: string,
+    company?: string
+  ): Promise<string> {
+    const payload: any = {
+      benefits: currentBenefits,
+    };
+
+    // Add optional fields if provided
+    if (industry) payload.industry = industry;
+    if (jobLevel) payload.jobLevel = jobLevel;
+    if (company) payload.company = company;
+
+    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-benefits`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      mode: 'cors',
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to rewrite benefits' }));
+      throw new Error(error.message || 'Failed to rewrite benefits');
+    }
+
+    const data = await response.json();
+    return data.polishedBenefits || currentBenefits;
+  }
+
+  /**
+   * Rewrite job responsibilities using AI
+   */
+  static async rewriteResponsibilities(
+    currentResponsibilities: string,
+    industry?: string,
+    jobLevel?: string,
+    company?: string
+  ): Promise<string> {
+    const payload: any = {
+      responsibilities: currentResponsibilities,
+    };
+
+    // Add optional fields if provided
+    if (industry) payload.industry = industry;
+    if (jobLevel) payload.jobLevel = jobLevel;
+    if (company) payload.company = company;
+
+    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-responsibilities`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      mode: 'cors',
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to rewrite responsibilities' }));
+      throw new Error(error.message || 'Failed to rewrite responsibilities');
+    }
+
+    const data = await response.json();
+    return data.polishedResponsibilities || data.rewrittenResponsibilities || data.responsibilities || currentResponsibilities;
+  }
+
+  /**
+   * Rewrite company description using AI
+   */
+  static async rewriteCompanyDescription(
+    currentDescription: string,
+    industry?: string,
+    companyName?: string,
+    companySize?: string,
+    location?: string
+  ): Promise<string> {
+    const payload: any = {
+      aboutCompany: currentDescription,
+    };
+
+    // Add optional fields if provided
+    if (industry) payload.industry = industry;
+    if (companyName) payload.companyName = companyName;
+    if (companySize) payload.companySize = companySize;
+    if (location) payload.location = location;
+
+    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-company-description`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      mode: 'cors',
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to rewrite company description' }));
+      throw new Error(error.message || 'Failed to rewrite company description');
+    }
+
+    const data = await response.json();
+    return data.polishedAboutCompany || currentDescription;
   }
 }

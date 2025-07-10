@@ -34,6 +34,9 @@ export default function CreateJobPage() {
   const [regeneratingDescription, setRegeneratingDescription] = useState(false);
   const [regeneratingRequirements, setRegeneratingRequirements] = useState(false);
   const [regeneratingTitle, setRegeneratingTitle] = useState(false);
+  const [regeneratingBenefits, setRegeneratingBenefits] = useState(false);
+  const [regeneratingResponsibilities, setRegeneratingResponsibilities] = useState(false);
+  const [regeneratingCompanyDescription, setRegeneratingCompanyDescription] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [currentStep, setCurrentStep] = useState<FormStep>("basic");
   const [jobData, setJobData] = useState<JobFormData>({
@@ -44,6 +47,7 @@ export default function CreateJobPage() {
     type: "full-time",
     deadline: getDefaultDeadline() || "",
     description: "",
+    responsibilities: "",
     requirements: "",
     benefits: "",
     skills: [],
@@ -53,6 +57,7 @@ export default function CreateJobPage() {
     jobLevel: "mid",
     workType: "onsite",
     industry: "",
+    companyDescription: "",
   });
 
   // Helper function to map industry from API to form values
@@ -137,6 +142,7 @@ export default function CreateJobPage() {
             ...prev,
             industry: mapIndustryToFormValue(userData.company.industry),
             location: mapLocationToFormValue(userData.company.address),
+            companyDescription: userData.company.description || "",
           }));
         }
       } catch (error) {
@@ -183,6 +189,7 @@ export default function CreateJobPage() {
         
       case "details":
         if (!jobData.description.trim()) newErrors.description = "Job description is required";
+        if (!jobData.responsibilities.trim()) newErrors.responsibilities = "Key responsibilities are required";
         if (!jobData.requirements.trim()) newErrors.requirements = "Requirements are required";
         if (!jobData.experience.trim()) newErrors.experience = "Experience level is required";
         if (!jobData.salary.trim()) newErrors.salary = "Salary range is required";
@@ -219,6 +226,7 @@ export default function CreateJobPage() {
       console.log("Current errors:", errors);
       console.log("Current form data:", {
         description: jobData.description.length,
+        responsibilities: jobData.responsibilities.length,
         requirements: jobData.requirements.length,
         experience: jobData.experience,
         salary: jobData.salary,
@@ -262,6 +270,7 @@ export default function CreateJobPage() {
       setJobData(prev => ({
         ...prev,
         description: prev.description || analysis.description,
+        responsibilities: prev.responsibilities || analysis.responsibilities,
         requirements: prev.requirements || analysis.requirements,
         benefits: prev.benefits || analysis.benefits,
         skills: prev.skills.length === 0 ? analysis.skills : prev.skills,
@@ -310,6 +319,99 @@ export default function CreateJobPage() {
       // Could show a toast notification here
     } finally {
       setRegeneratingRequirements(false);
+    }
+  };
+
+  const regenerateTitle = async () => {
+    if (!jobData.title.trim()) return;
+    
+    setRegeneratingTitle(true);
+    try {
+      const result = await JobService.rewriteJobTitle(
+        jobData.title,
+        jobData.industry,
+        undefined, // company - we don't have this in the form
+        jobData.jobLevel
+      );
+      
+      setJobData(prev => ({ 
+        ...prev, 
+        title: result.jobTitle,
+        // Update department if provided by AI
+        ...(result.department && { department: result.department })
+      }));
+    } catch (error) {
+      console.error('Failed to regenerate job title:', error);
+      // Could show a toast notification here
+    } finally {
+      setRegeneratingTitle(false);
+    }
+  };
+
+  const regenerateBenefits = async () => {
+    if (!jobData.benefits.trim()) return;
+    
+    setRegeneratingBenefits(true);
+    try {
+      const rewrittenBenefits = await JobService.rewriteBenefits(
+        jobData.benefits,
+        jobData.industry,
+        jobData.jobLevel,
+        undefined // company - we don't have this in the form
+      );
+      setJobData(prev => ({ ...prev, benefits: rewrittenBenefits }));
+    } catch (error) {
+      console.error('Failed to regenerate benefits:', error);
+      // Could show a toast notification here
+    } finally {
+      setRegeneratingBenefits(false);
+    }
+  };
+
+  const regenerateResponsibilities = async () => {
+    if (!jobData.responsibilities.trim()) return;
+    
+    setRegeneratingResponsibilities(true);
+    try {
+      const rewrittenResponsibilities = await JobService.rewriteResponsibilities(
+        jobData.responsibilities,
+        jobData.industry,
+        jobData.jobLevel,
+        undefined // company - we don't have this in the form
+      );
+      setJobData(prev => ({ ...prev, responsibilities: rewrittenResponsibilities }));
+    } catch (error) {
+      console.error('Failed to regenerate responsibilities:', error);
+      // Could show a toast notification here
+    } finally {
+      setRegeneratingResponsibilities(false);
+    }
+  };
+
+  const regenerateCompanyDescription = async () => {
+    if (!jobData.companyDescription.trim()) return;
+    
+    setRegeneratingCompanyDescription(true);
+    try {
+      // Get company info from user data if available
+      const userData = await getCurrentUser();
+      const companyName = userData?.company?.name;
+      const companySize = userData?.company?.numberOfEmployees ? 
+        `${userData.company.numberOfEmployees} employees` : undefined;
+      
+      const rewrittenCompanyDescription = await JobService.rewriteCompanyDescription(
+        jobData.companyDescription,
+        jobData.industry,
+        companyName,
+        companySize,
+        jobData.location
+      );
+      setJobData(prev => ({ ...prev, companyDescription: rewrittenCompanyDescription }));
+    } catch (error) {
+      console.error('Failed to regenerate company description:', error);
+      // Could show a toast notification here
+    } finally {
+      setRegeneratingCompanyDescription(false);
     }
   };
 
@@ -441,6 +543,10 @@ export default function CreateJobPage() {
                 jobData={jobData}
                 errors={errors}
                 onInputChange={handleInputChange}
+                onRegenerateTitle={regenerateTitle}
+                regeneratingTitle={regeneratingTitle}
+                onRegenerateCompanyDescription={regenerateCompanyDescription}
+                regeneratingCompanyDescription={regeneratingCompanyDescription}
               />
             )}
 
@@ -450,11 +556,15 @@ export default function CreateJobPage() {
                 errors={errors}
                 aiGenerating={regeneratingDescription}
                 regeneratingRequirements={regeneratingRequirements}
+                regeneratingBenefits={regeneratingBenefits}
+                regeneratingResponsibilities={regeneratingResponsibilities}
                 onInputChange={handleInputChange}
                 onAddSkill={addSkill}
                 onRemoveSkill={removeSkill}
                 onRegenerateDescription={regenerateDescription}
                 onRegenerateRequirements={regenerateRequirements}
+                onRegenerateBenefits={regenerateBenefits}
+                onRegenerateResponsibilities={regenerateResponsibilities}
                 skillSuggestions={skillSuggestions}
               />
             )}
@@ -479,7 +589,7 @@ export default function CreateJobPage() {
               isFirstStep={isFirstStep()}
               isLastStep={isLastStep()}
               loading={loading}
-              aiGenerating={aiGenerating || regeneratingDescription || regeneratingRequirements}
+              aiGenerating={aiGenerating || regeneratingDescription || regeneratingRequirements || regeneratingTitle || regeneratingBenefits || regeneratingResponsibilities || regeneratingCompanyDescription}
               currentStep={currentStep}
               onPrevious={handlePrevious}
               onNext={handleNext}

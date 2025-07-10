@@ -38,6 +38,13 @@ export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
           <p className="text-[#6e6e73] whitespace-pre-line">{jobData.description}</p>
         </div>
 
+        {jobData.responsibilities && (
+          <div>
+            <h4 className="font-semibold text-[#1d1d1f] mb-2">Key Responsibilities</h4>
+            <p className="text-[#6e6e73] whitespace-pre-line">{jobData.responsibilities}</p>
+          </div>
+        )}
+
         <div>
           <h4 className="font-semibold text-[#1d1d1f] mb-2">Requirements</h4>
           <p className="text-[#6e6e73] whitespace-pre-line">{jobData.requirements}</p>
@@ -58,6 +65,13 @@ export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
           <div>
             <h4 className="font-semibold text-[#1d1d1f] mb-2">Benefits & Perks</h4>
             <p className="text-[#6e6e73] whitespace-pre-line">{jobData.benefits}</p>
+          </div>
+        )}
+
+        {jobData.companyDescription && (
+          <div>
+            <h4 className="font-semibold text-[#1d1d1f] mb-2">About the Company</h4>
+            <p className="text-[#6e6e73] whitespace-pre-line">{jobData.companyDescription}</p>
           </div>
         )}
 
