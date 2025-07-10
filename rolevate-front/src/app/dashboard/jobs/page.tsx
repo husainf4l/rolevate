@@ -26,8 +26,18 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
+
+  // Debounce search term to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Fetch jobs from backend
   useEffect(() => {
@@ -42,11 +52,14 @@ export default function JobsPage() {
         }
         
         // Add signal to abort request if component unmounts
-        const response = await JobService.getCompanyJobs();
+        const response = await JobService.getCompanyJobs(1, 100, debouncedSearchTerm); // Get first 100 jobs with search
         
         if (isMounted && !abortController.signal.aborted) {
           setJobPosts(response.jobs);
           console.log('Jobs fetched:', response.jobs.length, 'jobs');
+          console.log('Total jobs:', response.total);
+          console.log('Search term:', debouncedSearchTerm);
+          console.log('Pagination:', response.pagination);
           console.log('Jobs by status:', {
             ACTIVE: response.jobs.filter(job => job.status === 'ACTIVE').length,
             DRAFT: response.jobs.filter(job => job.status === 'DRAFT').length,
@@ -76,7 +89,7 @@ export default function JobsPage() {
       isMounted = false;
       abortController.abort();
     };
-  }, []);
+  }, [debouncedSearchTerm]); // Re-fetch when search term changes
 
   // Check for success message from job creation
   useEffect(() => {
@@ -193,22 +206,17 @@ export default function JobsPage() {
     }
   };
 
-  // Filter jobs based on search and filters
+  // Filter jobs based on status and type filters (search is handled server-side)
   const filteredJobs = jobPosts.filter((job) => {
     // Exclude deleted jobs by default unless specifically filtering for them
     if (filterStatus !== "DELETED" && job.status === "DELETED") {
       return false;
     }
 
-    const matchesSearch =
-      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchTerm.toLowerCase());
-
     const matchesStatus = filterStatus === "all" || job.status === filterStatus;
     const matchesType = filterType === "all" || job.type === filterType;
 
-    return matchesSearch && matchesStatus && matchesType;
+    return matchesStatus && matchesType;
   });
 
   // Refresh jobs function
@@ -216,7 +224,7 @@ export default function JobsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await JobService.getCompanyJobs();
+      const response = await JobService.getCompanyJobs(1, 100, debouncedSearchTerm); // Get first 100 jobs with current search
       setJobPosts(response.jobs);
     } catch (err) {
       console.error('Failed to refresh jobs:', err);
@@ -460,6 +468,11 @@ export default function JobsPage() {
             <div className="flex-1 min-w-0">
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                {loading && debouncedSearchTerm && (
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-[#0fc4b5] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <input
                   type="text"
                   placeholder="Search by job title, department, or location..."
@@ -753,6 +766,7 @@ export default function JobsPage() {
                     </button>
                     <button 
                       title="Edit Job"
+                      onClick={() => router.push(`/dashboard/jobs/${job.id}`)}
                       className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                     >
                       <PencilIcon className="w-5 h-5" />

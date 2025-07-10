@@ -39,6 +39,8 @@ export interface AIConfigResponse {
   aiSecondInterviewPrompt: string;
 }
 
+export interface UpdateJobRequest extends Partial<CreateJobRequest> {}
+
 export interface CreateJobRequest {
   title: string;
   department: string;
@@ -96,13 +98,23 @@ export interface JobPost {
   aiCvAnalysisPrompt?: string;
   aiFirstInterviewPrompt?: string;
   aiSecondInterviewPrompt?: string;
+  cvAnalysisPrompt?: string;
+  interviewPrompt?: string;
 }
 
 export interface GetJobsResponse {
   jobs: JobPost[];
   total: number;
-  page?: number;
-  limit?: number;
+  pagination?: {
+    page: number;
+    limit: number;
+    offset: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    nextPage: number | null;
+    prevPage: number | null;
+  };
 }
 
 export class JobService {
@@ -187,6 +199,51 @@ export class JobService {
       experienceLevel: mapExperienceLevel(data.experienceLevel || ''),
       educationLevel: mapEducationLevel(data.educationRequirements || []),
     };
+  }
+
+  /**
+   * Get a single job by its ID
+   */
+  static async getJobById(jobId: string): Promise<JobPost> {
+    const response = await fetch(`${this.baseUrl}/api/jobs/${jobId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      mode: 'cors',
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: `Failed to fetch job with ID ${jobId}` }));
+      throw new Error(error.message || `Failed to fetch job with ID ${jobId}`);
+    }
+
+    const data = await response.json();
+    return data as JobPost;
+  }
+
+  /**
+   * Update an existing job
+   */
+  static async updateJob(jobId: string, jobData: UpdateJobRequest): Promise<JobPost> {
+    const response = await fetch(`${this.baseUrl}/api/jobs/${jobId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      mode: 'cors',
+      body: JSON.stringify(jobData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to update job' }));
+      throw new Error(error.message || 'Failed to update job');
+    }
+
+    const data = await response.json();
+    return data.job as JobPost;
   }
 
   /**
@@ -454,10 +511,19 @@ export class JobService {
   /**
    * Fetch all jobs for the company
    */
-  static async getCompanyJobs(): Promise<GetJobsResponse> {
-    console.log('JobService.getCompanyJobs - Fetching from:', `${this.baseUrl}/jobs/company/all`);
+  static async getCompanyJobs(page: number = 1, limit: number = 100, search?: string): Promise<GetJobsResponse> {
+    console.log('JobService.getCompanyJobs - Fetching from:', `${this.baseUrl}/api/jobs/company/all`);
     
-    const response = await fetch(`${this.baseUrl}/api/jobs/company/all`, {
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (search && search.trim()) {
+      queryParams.append('search', search.trim());
+    }
+    
+    const response = await fetch(`${this.baseUrl}/api/jobs/company/all?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -478,7 +544,7 @@ export class JobService {
     console.log('JobService.getCompanyJobs - Success response:', data);
     
     // Transform the backend response to match our frontend interface
-    const jobs: JobPost[] = (data.jobs || data || []).map((job: any) => ({
+    const jobs: JobPost[] = (data.jobs || []).map((job: any) => ({
       id: job.id || job._id || '',
       title: job.title || '',
       department: job.department || '',
@@ -509,9 +575,8 @@ export class JobService {
 
     return {
       jobs,
-      total: data.total || jobs.length,
-      page: data.page || 1,
-      limit: data.limit || jobs.length,
+      total: data.total || 0,
+      pagination: data.pagination || undefined,
     };
   }
 
