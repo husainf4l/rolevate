@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/dashboard/Header";
 import { JobService, JobPost } from "@/services/job";
@@ -28,28 +28,37 @@ export default function JobsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
-  const fetchedRef = useRef(false);
 
   // Fetch jobs from backend
   useEffect(() => {
-    if (fetchedRef.current) return;
-    
     let isMounted = true;
+    let abortController = new AbortController();
     
     const fetchJobs = async () => {
       try {
-        if (!isMounted) return;
+        if (isMounted) {
+          setLoading(true);
+          setError(null);
+        }
         
-        setLoading(true);
-        setError(null);
-        
+        // Add signal to abort request if component unmounts
         const response = await JobService.getCompanyJobs();
         
-        if (isMounted) {
+        if (isMounted && !abortController.signal.aborted) {
           setJobPosts(response.jobs);
-          fetchedRef.current = true;
+          console.log('Jobs fetched:', response.jobs.length, 'jobs');
+          console.log('Jobs by status:', {
+            ACTIVE: response.jobs.filter(job => job.status === 'ACTIVE').length,
+            DRAFT: response.jobs.filter(job => job.status === 'DRAFT').length,
+            PAUSED: response.jobs.filter(job => job.status === 'PAUSED').length,
+            DELETED: response.jobs.filter(job => job.status === 'DELETED').length,
+          });
         }
       } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          console.log('Fetch aborted');
+          return;
+        }
         console.error('Failed to fetch jobs:', err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Failed to fetch jobs');
@@ -65,6 +74,7 @@ export default function JobsPage() {
     
     return () => {
       isMounted = false;
+      abortController.abort();
     };
   }, []);
 
@@ -205,11 +215,9 @@ export default function JobsPage() {
   const refreshJobs = async () => {
     setLoading(true);
     setError(null);
-    fetchedRef.current = false; // Reset the ref to allow fresh fetch
     try {
       const response = await JobService.getCompanyJobs();
       setJobPosts(response.jobs);
-      fetchedRef.current = true;
     } catch (err) {
       console.error('Failed to refresh jobs:', err);
       setError(err instanceof Error ? err.message : 'Failed to refresh jobs');
@@ -226,10 +234,12 @@ export default function JobsPage() {
     
     if (!confirmed) return;
 
+    // Store original job for rollback on error
+    const originalJob = jobPosts.find(job => job.id === jobId);
+    if (!originalJob) return;
+
     try {
-      await JobService.activateJob(jobId);
-      
-      // Update the job status in the local state
+      // Optimistically update UI first
       setJobPosts(prev => 
         prev.map(job => 
           job.id === jobId 
@@ -237,10 +247,23 @@ export default function JobsPage() {
             : job
         )
       );
+
+      // Then call backend API
+      console.log('Activating job:', jobId);
+      await JobService.activateJob(jobId);
       
-      // Show success message (you might want to use a proper toast notification)
+      // Show success message
       alert('Job published successfully!');
     } catch (err) {
+      // Rollback on error
+      setJobPosts(prev => 
+        prev.map(job => 
+          job.id === jobId 
+            ? originalJob
+            : job
+        )
+      );
+      
       console.error('Failed to activate job:', err);
       alert('Failed to publish job. Please try again.');
     }
@@ -254,11 +277,12 @@ export default function JobsPage() {
     
     if (!confirmed) return;
 
+    // Store original job for rollback on error
+    const originalJob = jobPosts.find(job => job.id === jobId);
+    if (!originalJob) return;
+
     try {
-      // Try to pause via backend API
-      // await JobService.pauseJob(jobId);
-      
-      // Update the local state to PAUSED
+      // Optimistically update UI first
       setJobPosts(prev => 
         prev.map(job => 
           job.id === jobId 
@@ -266,10 +290,23 @@ export default function JobsPage() {
             : job
         )
       );
+
+      // Then call backend API
+      console.log('Pausing job:', jobId);
+      await JobService.pauseJob(jobId);
       
       // Show success message
       alert('Job paused successfully!');
     } catch (err) {
+      // Rollback on error
+      setJobPosts(prev => 
+        prev.map(job => 
+          job.id === jobId 
+            ? originalJob
+            : job
+        )
+      );
+      
       console.error('Failed to pause job:', err);
       alert('Failed to pause job. Please try again.');
     }
@@ -283,11 +320,12 @@ export default function JobsPage() {
     
     if (!confirmed) return;
 
+    // Store original job for rollback on error
+    const originalJob = jobPosts.find(job => job.id === jobId);
+    if (!originalJob) return;
+
     try {
-      // Try to delete via backend API
-      // await JobService.deleteJob(jobId);
-      
-      // Update the local state to DELETED
+      // Optimistically update UI first
       setJobPosts(prev => 
         prev.map(job => 
           job.id === jobId 
@@ -295,10 +333,23 @@ export default function JobsPage() {
             : job
         )
       );
+
+      // Then call backend API
+      console.log('Deleting job:', jobId);
+      await JobService.deleteJob(jobId);
       
       // Show success message
       alert('Job deleted successfully!');
     } catch (err) {
+      // Rollback on error
+      setJobPosts(prev => 
+        prev.map(job => 
+          job.id === jobId 
+            ? originalJob
+            : job
+        )
+      );
+      
       console.error('Failed to delete job:', err);
       alert('Failed to delete job. Please try again.');
     }
