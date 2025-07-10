@@ -5,18 +5,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeftIcon, BriefcaseIcon, UserGroupIcon, DocumentTextIcon, EyeIcon } from "@heroicons/react/24/outline";
 import {
   JobFormData,
-  ScreeningQuestion,
   FormErrors,
   FormStep,
   StepConfig,
   BasicInformationStep,
   JobDetailsStep,
-  ScreeningQuestionsStep,
+  AIConfigurationStep,
   JobPreviewStep,
   ProgressIndicator,
   NavigationButtons,
 } from "@/components/job";
-import { JobService, JobAnalysisRequest } from "@/services/job";
+import { JobService, JobAnalysisRequest, AIConfigRequest, CreateJobRequest } from "@/services/job";
 import { getCurrentUser } from "@/services/auth";
 
 // Helper function to get default deadline (30 days from today)
@@ -44,9 +43,10 @@ export default function CreateJobPage() {
     department: "",
     location: "",
     salary: "",
-    type: "full-time",
+    type: "FULL_TIME",
     deadline: getDefaultDeadline() || "",
     description: "",
+    shortDescription: "",
     responsibilities: "",
     requirements: "",
     benefits: "",
@@ -54,10 +54,13 @@ export default function CreateJobPage() {
     experience: "",
     education: "",
     screeningQuestions: [],
-    jobLevel: "mid",
-    workType: "onsite",
+    jobLevel: "MID",
+    workType: "ONSITE",
     industry: "",
     companyDescription: "",
+    aiCvAnalysisPrompt: "",
+    aiFirstInterviewPrompt: "",
+    aiSecondInterviewPrompt: "",
   });
 
   // Helper function to map industry from API to form values
@@ -122,7 +125,7 @@ export default function CreateJobPage() {
   // Initialize step from URL on component mount
   useEffect(() => {
     const stepFromUrl = searchParams.get('step') as FormStep;
-    const validSteps: FormStep[] = ['basic', 'details', 'screening', 'preview'];
+    const validSteps: FormStep[] = ['basic', 'details', 'ai-config', 'preview'];
     
     if (stepFromUrl && validSteps.includes(stepFromUrl)) {
       setCurrentStep(stepFromUrl);
@@ -157,7 +160,7 @@ export default function CreateJobPage() {
   const steps: StepConfig[] = [
     { key: "basic", title: "Basic Information", description: "Job title, department, and basic details", icon: BriefcaseIcon },
     { key: "details", title: "Job Details", description: "Description, requirements, and skills", icon: DocumentTextIcon },
-    { key: "screening", title: "Screening Questions", description: "Add questions to filter candidates", icon: UserGroupIcon },
+    { key: "ai-config", title: "AI Configuration", description: "Configure AI prompts for recruitment", icon: UserGroupIcon },
     { key: "preview", title: "Preview & Publish", description: "Review and publish your job posting", icon: EyeIcon },
   ];
 
@@ -189,6 +192,7 @@ export default function CreateJobPage() {
         
       case "details":
         if (!jobData.description.trim()) newErrors.description = "Job description is required";
+        if (!jobData.shortDescription.trim()) newErrors.shortDescription = "Short description is required";
         if (!jobData.responsibilities.trim()) newErrors.responsibilities = "Key responsibilities are required";
         if (!jobData.requirements.trim()) newErrors.requirements = "Requirements are required";
         if (!jobData.experience.trim()) newErrors.experience = "Experience level is required";
@@ -196,16 +200,13 @@ export default function CreateJobPage() {
         if (jobData.skills.length === 0) newErrors.skills = "At least one skill is required";
         break;
         
-      case "screening":
-        // Screening questions are optional, but if added, they should be valid
-        jobData.screeningQuestions.forEach((q, index) => {
-          if (!q.question.trim()) {
-            newErrors[`screening_${index}`] = "Question text is required";
-          }
-          if (q.type === "multiple_choice" && (!q.options || q.options.length < 2)) {
-            newErrors[`screening_options_${index}`] = "Multiple choice questions need at least 2 options";
-          }
-        });
+      case "ai-config":
+        // AI configuration is optional, so no required validation
+        // Users can leave prompts empty to use defaults
+        break;
+        
+      case "preview":
+        // No validation needed for preview step
         break;
     }
     
@@ -214,7 +215,7 @@ export default function CreateJobPage() {
   };
 
   const validateForm = (): boolean => {
-    return validateStep("basic") && validateStep("details") && validateStep("screening");
+    return validateStep("basic") && validateStep("details") && validateStep("ai-config");
   };
 
   const handleNext = async () => {
@@ -243,6 +244,10 @@ export default function CreateJobPage() {
           if (currentStep === "basic" && nextStep.key === "details") {
             await generateJobAnalysis();
           }
+          // If moving from details to ai-config, generate AI configuration prompts
+          else if (currentStep === "details" && nextStep.key === "ai-config") {
+            await generateAIConfiguration();
+          }
           setCurrentStep(nextStep.key);
           updateUrlStep(nextStep.key);
         }
@@ -270,6 +275,7 @@ export default function CreateJobPage() {
       setJobData(prev => ({
         ...prev,
         description: prev.description || analysis.description,
+        shortDescription: prev.shortDescription || analysis.shortDescription,
         responsibilities: prev.responsibilities || analysis.responsibilities,
         requirements: prev.requirements || analysis.requirements,
         benefits: prev.benefits || analysis.benefits,
@@ -415,6 +421,50 @@ export default function CreateJobPage() {
     }
   };
 
+  const generateAIConfiguration = async () => {
+    setAiGenerating(true);
+    try {
+      const configRequest: AIConfigRequest = {
+        jobTitle: jobData.title,
+        department: jobData.department,
+        industry: jobData.industry,
+        jobLevel: jobData.jobLevel,
+        description: jobData.description,
+        responsibilities: jobData.responsibilities,
+        requirements: jobData.requirements,
+        skills: jobData.skills,
+      };
+
+      const aiConfig = await JobService.generateAIConfiguration(configRequest);
+      
+      // Update job data with AI configuration prompts (only if fields are empty)
+      setJobData(prev => ({
+        ...prev,
+        aiCvAnalysisPrompt: prev.aiCvAnalysisPrompt || aiConfig.aiCvAnalysisPrompt,
+        aiFirstInterviewPrompt: prev.aiFirstInterviewPrompt || aiConfig.aiFirstInterviewPrompt,
+        aiSecondInterviewPrompt: prev.aiSecondInterviewPrompt || aiConfig.aiSecondInterviewPrompt,
+      }));
+    } catch (error) {
+      console.error('Failed to generate AI configuration:', error);
+      // Continue to next step even if AI fails
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const regenerateAIConfiguration = async () => {
+    // Clear existing prompts first to ensure regeneration
+    setJobData(prev => ({
+      ...prev,
+      aiCvAnalysisPrompt: "",
+      aiFirstInterviewPrompt: "",
+      aiSecondInterviewPrompt: "",
+    }));
+    
+    // Generate new prompts
+    await generateAIConfiguration();
+  };
+
   const handlePrevious = () => {
     const currentIndex = getCurrentStepIndex();
     if (currentIndex > 0) {
@@ -427,21 +477,59 @@ export default function CreateJobPage() {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      console.log("Form validation failed");
+      return;
+    }
     
     setLoading(true);
     
     try {
-      // TODO: Implement API call to create job
-      console.log("Creating job:", jobData);
+      // Transform job data for backend API
+      const createJobRequest: CreateJobRequest = {
+        title: jobData.title.trim(),
+        shortDescription:jobData.shortDescription.trim(),
+        department: jobData.department.trim(),
+        location: jobData.location.trim(),
+        salary: jobData.salary.trim(),
+        type: jobData.type,
+        deadline: jobData.deadline,
+        description: jobData.description.trim(),
+        responsibilities: jobData.responsibilities.trim(),
+        requirements: jobData.requirements.trim(),
+        benefits: jobData.benefits.trim(),
+        skills: jobData.skills.filter(skill => skill.trim() !== ''), // Remove empty skills
+        experience: jobData.experience,
+        education: jobData.education,
+        jobLevel: jobData.jobLevel,
+        workType: jobData.workType,
+        industry: jobData.industry,
+        companyDescription: jobData.companyDescription.trim(),
+        aiCvAnalysisPrompt: jobData.aiCvAnalysisPrompt.trim(),
+        aiFirstInterviewPrompt: jobData.aiFirstInterviewPrompt.trim(),
+        aiSecondInterviewPrompt: jobData.aiSecondInterviewPrompt.trim(),
+      };
+
+      console.log("Creating job with data:", createJobRequest);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the backend API
+      const response = await JobService.createJob(createJobRequest);
       
-      // Navigate back to jobs page
-      router.push("/dashboard/jobs");
+      console.log("Job created successfully:", response);
+      
+      // Navigate back to jobs page with success message
+      router.push("/dashboard/jobs?created=true");
     } catch (error) {
       console.error("Failed to create job:", error);
+      
+      // Better error message handling
+      let errorMessage = "Unknown error occurred";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      // Show user-friendly error message
+      alert(`Failed to create job: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -465,50 +553,11 @@ export default function CreateJobPage() {
     setJobData(prev => ({ ...prev, skills: prev.skills.filter(skill => skill !== skillToRemove) }));
   };
 
-  const addScreeningQuestion = () => {
-    const newQuestion: ScreeningQuestion = {
-      id: Date.now().toString(),
-      question: "",
-      type: "yes_no",
-      required: false,
-    };
-    setJobData(prev => ({ ...prev, screeningQuestions: [...prev.screeningQuestions, newQuestion] }));
-  };
-
-  const updateScreeningQuestion = (id: string, updates: Partial<ScreeningQuestion>) => {
-    setJobData(prev => ({
-      ...prev,
-      screeningQuestions: prev.screeningQuestions.map(q => 
-        q.id === id ? { ...q, ...updates } : q
-      )
-    }));
-  };
-
-  const removeScreeningQuestion = (id: string) => {
-    setJobData(prev => ({
-      ...prev,
-      screeningQuestions: prev.screeningQuestions.filter(q => q.id !== id)
-    }));
-  };
-
   // Popular skills suggestions (would typically come from API)
   const skillSuggestions = [
     "JavaScript", "React", "Node.js", "Python", "Java", "AWS", "SQL", "Git", "Docker", "Kubernetes",
     "Project Management", "Agile", "Scrum", "Communication", "Leadership", "Problem Solving"
   ];
-
-  const addPrebuiltQuestion = (question: { question: string; type: ScreeningQuestion['type'] }) => {
-    const newQuestion: ScreeningQuestion = {
-      id: Date.now().toString(),
-      question: question.question,
-      type: question.type,
-      required: true,
-    };
-    setJobData(prev => ({ 
-      ...prev, 
-      screeningQuestions: [...prev.screeningQuestions, newQuestion] 
-    }));
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fafbfc] to-[#f5f7fa] p-4 sm:p-6 lg:p-8 pt-20 sm:pt-24">
@@ -569,14 +618,13 @@ export default function CreateJobPage() {
               />
             )}
 
-            {currentStep === "screening" && (
-              <ScreeningQuestionsStep
-                screeningQuestions={jobData.screeningQuestions}
+            {currentStep === "ai-config" && (
+              <AIConfigurationStep
+                jobData={jobData}
                 errors={errors}
-                onAddQuestion={addScreeningQuestion}
-                onUpdateQuestion={updateScreeningQuestion}
-                onRemoveQuestion={removeScreeningQuestion}
-                onAddPrebuiltQuestion={addPrebuiltQuestion}
+                onInputChange={handleInputChange}
+                isGenerating={aiGenerating}
+                onRegeneratePrompts={regenerateAIConfiguration}
               />
             )}
 

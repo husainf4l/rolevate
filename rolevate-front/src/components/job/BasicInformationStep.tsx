@@ -134,10 +134,10 @@ export default function BasicInformationStep({
             onChange={(e) => onInputChange("type", e.target.value as JobFormData["type"])}
             className="w-full px-4 py-4 bg-white/80 border border-[#d2d2d7] rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none"
           >
-            <option value="full-time">Full-time</option>
-            <option value="part-time">Part-time</option>
-            <option value="contract">Contract</option>
-            <option value="remote">Remote</option>
+            <option value="FULL_TIME">Full-time</option>
+            <option value="PART_TIME">Part-time</option>
+            <option value="CONTRACT">Contract</option>
+            <option value="REMOTE">Remote</option>
           </select>
         </div>
 
@@ -151,10 +151,10 @@ export default function BasicInformationStep({
             onChange={(e) => onInputChange("jobLevel", e.target.value as JobFormData["jobLevel"])}
             className="w-full px-4 py-4 bg-white/80 border border-[#d2d2d7] rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none"
           >
-            <option value="entry">Entry Level</option>
-            <option value="mid">Mid Level</option>
-            <option value="senior">Senior Level</option>
-            <option value="executive">Executive</option>
+            <option value="ENTRY">Entry Level</option>
+            <option value="MID">Mid Level</option>
+            <option value="SENIOR">Senior Level</option>
+            <option value="EXECUTIVE">Executive</option>
           </select>
         </div>
 
@@ -168,9 +168,9 @@ export default function BasicInformationStep({
             onChange={(e) => onInputChange("workType", e.target.value as JobFormData["workType"])}
             className="w-full px-4 py-4 bg-white/80 border border-[#d2d2d7] rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none"
           >
-            <option value="onsite">On-site</option>
-            <option value="remote">Remote</option>
-            <option value="hybrid">Hybrid</option>
+            <option value="ONSITE">On-site</option>
+            <option value="REMOTE">Remote</option>
+            <option value="HYBRID">Hybrid</option>
           </select>
         </div>
 

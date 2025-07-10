@@ -102,6 +102,29 @@ export default function JobDetailsStep({
         </div>
 
         <div>
+          <label htmlFor="shortDescription" className="block text-sm font-semibold text-[#1d1d1f] mb-3">
+            Short Description *
+          </label>
+          <div className="relative">
+            <textarea
+              id="shortDescription"
+              rows={3}
+              value={jobData.shortDescription}
+              onChange={(e) => onInputChange("shortDescription", e.target.value)}
+              className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent resize-none transition-all duration-200 placeholder-[#86868b] text-[#1d1d1f] backdrop-blur-sm ${
+                errors.shortDescription ? 'border-red-400' : 'border-[#d2d2d7]'
+              }`}
+              placeholder="A brief summary of the role that will appear in job listings and search results..."
+              maxLength={200}
+            />
+            <div className="absolute bottom-3 right-3 text-xs text-[#86868b]">
+              {jobData.shortDescription.length}/200
+            </div>
+          </div>
+          {errors.shortDescription && <p className="mt-2 text-sm text-red-500">{errors.shortDescription}</p>}
+        </div>
+
+        <div>
           <div className="flex items-center justify-between mb-3">
             <label htmlFor="responsibilities" className="block text-sm font-semibold text-[#1d1d1f]">
               Key Responsibilities *

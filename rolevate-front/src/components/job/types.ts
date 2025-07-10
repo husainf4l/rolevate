@@ -3,9 +3,10 @@ export interface JobFormData {
   department: string;
   location: string;
   salary: string;
-  type: "full-time" | "part-time" | "contract" | "remote";
+  type: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "REMOTE";
   deadline: string;
   description: string;
+  shortDescription: string;
   responsibilities: string;
   requirements: string;
   benefits: string;
@@ -13,10 +14,13 @@ export interface JobFormData {
   experience: string;
   education: string;
   screeningQuestions: ScreeningQuestion[];
-  jobLevel: "entry" | "mid" | "senior" | "executive";
-  workType: "onsite" | "remote" | "hybrid";
+  jobLevel: "ENTRY" | "MID" | "SENIOR" | "EXECUTIVE";
+  workType: "ONSITE" | "REMOTE" | "HYBRID";
   industry: string;
   companyDescription: string;
+  aiCvAnalysisPrompt: string;
+  aiFirstInterviewPrompt: string;
+  aiSecondInterviewPrompt: string;
 }
 
 export interface ScreeningQuestion {
@@ -31,7 +35,7 @@ export interface FormErrors {
   [key: string]: string;
 }
 
-export type FormStep = "basic" | "details" | "screening" | "preview";
+export type FormStep = "basic" | "details" | "ai-config" | "preview";
 
 export interface StepConfig {
   key: FormStep;

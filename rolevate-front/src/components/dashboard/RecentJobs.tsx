@@ -7,9 +7,9 @@ interface JobPost {
   department: string;
   location: string;
   salary: string;
-  type: "full-time" | "part-time" | "contract" | "remote";
+  type: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "REMOTE";
   postedAt: string;
-  status: "active" | "paused" | "closed";
+  status: "DRAFT" | "ACTIVE" | "PAUSED" | "CLOSED" | "EXPIRED";
   applicants: number;
   views: number;
 }
@@ -21,9 +21,9 @@ const recentJobs: JobPost[] = [
     department: "Engineering",
     location: "San Francisco, CA",
     salary: "$120k - $150k",
-    type: "full-time",
+    type: "FULL_TIME",
     postedAt: "2 hours ago",
-    status: "active",
+    status: "ACTIVE",
     applicants: 24,
     views: 156
   },
@@ -33,9 +33,9 @@ const recentJobs: JobPost[] = [
     department: "Engineering",
     location: "Remote",
     salary: "$90k - $110k",
-    type: "remote",
+    type: "REMOTE",
     postedAt: "5 hours ago",
-    status: "active",
+    status: "ACTIVE",
     applicants: 18,
     views: 89
   },
@@ -45,9 +45,9 @@ const recentJobs: JobPost[] = [
     department: "Design",
     location: "New York, NY",
     salary: "$80k - $100k",
-    type: "full-time",
+    type: "FULL_TIME",
     postedAt: "1 day ago",
-    status: "paused",
+    status: "PAUSED",
     applicants: 31,
     views: 203
   },
@@ -57,9 +57,9 @@ const recentJobs: JobPost[] = [
     department: "Engineering",
     location: "Austin, TX",
     salary: "$100k - $130k",
-    type: "full-time",
+    type: "FULL_TIME",
     postedAt: "2 days ago",
-    status: "closed",
+    status: "CLOSED",
     applicants: 45,
     views: 278
   }
@@ -67,13 +67,13 @@ const recentJobs: JobPost[] = [
 
 const getTypeColor = (type: JobPost["type"]) => {
   switch (type) {
-    case "full-time":
+    case "FULL_TIME":
       return "bg-green-100 text-green-800";
-    case "part-time":
+    case "PART_TIME":
       return "bg-blue-100 text-blue-800";
-    case "contract":
+    case "CONTRACT":
       return "bg-purple-100 text-purple-800";
-    case "remote":
+    case "REMOTE":
       return "bg-orange-100 text-orange-800";
     default:
       return "bg-gray-100 text-gray-800";
@@ -82,14 +82,50 @@ const getTypeColor = (type: JobPost["type"]) => {
 
 const getStatusColor = (status: JobPost["status"]) => {
   switch (status) {
-    case "active":
+    case "ACTIVE":
       return "bg-green-100 text-green-800";
-    case "paused":
+    case "PAUSED":
       return "bg-yellow-100 text-yellow-800";
-    case "closed":
+    case "CLOSED":
+      return "bg-red-100 text-red-800";
+    case "DRAFT":
+      return "bg-gray-100 text-gray-800";
+    case "EXPIRED":
       return "bg-red-100 text-red-800";
     default:
       return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getTypeDisplayText = (type: JobPost["type"]) => {
+  switch (type) {
+    case "FULL_TIME":
+      return "Full-time";
+    case "PART_TIME":
+      return "Part-time";
+    case "CONTRACT":
+      return "Contract";
+    case "REMOTE":
+      return "Remote";
+    default:
+      return type;
+  }
+};
+
+const getStatusDisplayText = (status: JobPost["status"]) => {
+  switch (status) {
+    case "ACTIVE":
+      return "Active";
+    case "PAUSED":
+      return "Paused";
+    case "CLOSED":
+      return "Closed";
+    case "DRAFT":
+      return "Draft";
+    case "EXPIRED":
+      return "Expired";
+    default:
+      return status;
   }
 };
 
@@ -119,10 +155,10 @@ export default function RecentJobs() {
               </div>
               <div className="flex items-center gap-2">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(job.type)}`}>
-                  {job.type}
+                  {getTypeDisplayText(job.type)}
                 </span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(job.status)}`}>
-                  {job.status}
+                  {getStatusDisplayText(job.status)}
                 </span>
               </div>
             </div>
