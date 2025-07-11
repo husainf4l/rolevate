@@ -21,29 +21,7 @@ export enum WorkType {
   HYBRID = 'HYBRID'
 }
 
-export enum ScreeningQuestionType {
-  YES_NO = 'YES_NO',
-  MULTIPLE_CHOICE = 'MULTIPLE_CHOICE', 
-  TEXT = 'TEXT',
-  NUMBER = 'NUMBER'
-}
 
-export class CreateScreeningQuestionDto {
-  @IsString()
-  question: string;
-
-  @IsEnum(ScreeningQuestionType)
-  type: ScreeningQuestionType;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  options?: string[];
-
-  @IsOptional()
-  @IsBoolean()
-  required?: boolean = false;
-}
 
 export class CreateJobDto {
   @IsString()
@@ -131,11 +109,7 @@ export class CreateJobDto {
   @IsString()
   companyDescription: string;
 
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateScreeningQuestionDto)
-  screeningQuestions?: CreateScreeningQuestionDto[];
+
 
   @IsOptional()
   @IsString()
@@ -192,7 +166,7 @@ export class JobResponseDto {
       zipCode: string;
     };
   };
-  screeningQuestions: ScreeningQuestionResponseDto[];
+
   cvAnalysisPrompt?: string;
   interviewPrompt?: string;
   aiSecondInterviewPrompt?: string;
@@ -203,12 +177,4 @@ export class JobResponseDto {
   updatedAt: Date;
 }
 
-export class ScreeningQuestionResponseDto {
-  id: string;
-  question: string;
-  type: ScreeningQuestionType;
-  options: string[];
-  required: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+

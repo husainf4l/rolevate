@@ -223,13 +223,6 @@ enum JobStatus {
   DELETED
 }
 
-enum ScreeningQuestionType {
-  YES_NO
-  MULTIPLE_CHOICE
-  TEXT
-  NUMBER
-}
-
 model Job {
   id                 String    @id @default(cuid())
   title              String
@@ -256,9 +249,6 @@ model Job {
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  // Screening questions
-  screeningQuestions ScreeningQuestion[]
-
   // Applications
   applications Application[]
 
@@ -280,28 +270,10 @@ model Job {
   @@index([jobLevel])
   @@index([industry])
   @@index([featured])
+  @@index([status, deadline]) // Composite index for public job queries
+  @@index([featured, status, deadline]) // Composite index for featured jobs
+  @@index([createdAt]) // Index for ordering
   @@map("jobs")
-}
-
-model ScreeningQuestion {
-  id       String                @id @default(cuid())
-  question String
-  type     ScreeningQuestionType
-  options  String[] // For multiple choice questions
-  required Boolean               @default(false)
-
-  // Job relationship
-  jobId String
-  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
-
-  // Screening answers
-  screeningAnswers ScreeningAnswer[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([jobId])
-  @@map("screening_questions")
 }
 
 // =======================================
@@ -357,6 +329,9 @@ model CandidateProfile {
   preferredWorkType   WorkType? // Preferred work arrangement
   preferredIndustries Industry[] // Preferred industries
   preferredLocations  String[] // Preferred work locations
+
+  // Saved Jobs
+  savedJobs String[] // Array of saved job IDs
 
   // Documents
   resumeUrl    String? // URL to uploaded resume
@@ -481,8 +456,10 @@ model Application {
   expectedSalary String?
   noticePeriod   String?
 
-  // Screening Answers
-  screeningAnswers ScreeningAnswer[]
+  // AI CV Analysis Results
+  cvAnalysisScore   Float?    @db.DoublePrecision // AI-generated score (0-100)
+  cvAnalysisResults Json? // Detailed analysis results
+  analyzedAt        DateTime? // When the CV was analyzed
 
   // Company Notes (internal)
   companyNotes String? @db.Text
@@ -503,20 +480,4 @@ model Application {
   @@index([candidateId])
   @@index([status])
   @@map("applications")
-}
-
-model ScreeningAnswer {
-  id            String            @id @default(cuid())
-  questionId    String
-  question      ScreeningQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  applicationId String
-  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  answer        String            @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([applicationId])
-  @@index([questionId])
-  @@map("screening_answers")
 }

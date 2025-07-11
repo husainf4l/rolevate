@@ -6,7 +6,9 @@ import {
   CandidateProfileResponseDto,
   CVResponseDto,
   CVStatus,
-  UpdateCVStatusDto
+  UpdateCVStatusDto,
+  SaveJobDto,
+  UnsaveJobDto
 } from './dto/candidate.dto';
 
 @Injectable()
@@ -377,6 +379,143 @@ export class CandidateService {
     };
   }
 
+  async saveJob(userId: string, jobId: string): Promise<CandidateProfileResponseDto> {
+    const profile = await this.prisma.candidateProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Candidate profile not found');
+    }
+
+    // Check if job is already saved
+    const currentSavedJobs = profile.savedJobs || [];
+    if (currentSavedJobs.includes(jobId)) {
+      throw new ConflictException('Job is already saved');
+    }
+
+    // Add job to saved jobs
+    const updatedProfile = await this.prisma.candidateProfile.update({
+      where: { userId },
+      data: {
+        savedJobs: [...currentSavedJobs, jobId],
+      },
+      include: {
+        cvs: {
+          where: { isActive: true },
+          orderBy: { uploadedAt: 'desc' }
+        }
+      }
+    });
+
+    // Clear cache for this user's profile
+    await this.cacheService.invalidateUserProfile(userId);
+
+    return this.mapToBasicProfileResponse(updatedProfile);
+  }
+
+  async unsaveJob(userId: string, jobId: string): Promise<CandidateProfileResponseDto> {
+    const profile = await this.prisma.candidateProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Candidate profile not found');
+    }
+
+    // Check if job is saved
+    const currentSavedJobs = profile.savedJobs || [];
+    if (!currentSavedJobs.includes(jobId)) {
+      throw new NotFoundException('Job is not in saved jobs');
+    }
+
+    // Remove job from saved jobs
+    const updatedProfile = await this.prisma.candidateProfile.update({
+      where: { userId },
+      data: {
+        savedJobs: currentSavedJobs.filter(id => id !== jobId),
+      },
+      include: {
+        cvs: {
+          where: { isActive: true },
+          orderBy: { uploadedAt: 'desc' }
+        }
+      }
+    });
+
+    // Clear cache for this user's profile
+    await this.cacheService.invalidateUserProfile(userId);
+
+    return this.mapToBasicProfileResponse(updatedProfile);
+  }
+
+  async getSavedJobs(userId: string): Promise<string[]> {
+    const profile = await this.prisma.candidateProfile.findUnique({
+      where: { userId },
+      select: { savedJobs: true }
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Candidate profile not found');
+    }
+
+    return profile.savedJobs || [];
+  }
+
+  async getSavedJobsDetails(userId: string): Promise<any[]> {
+    const profile = await this.prisma.candidateProfile.findUnique({
+      where: { userId },
+      select: { savedJobs: true }
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Candidate profile not found');
+    }
+
+    const savedJobIds = profile.savedJobs || [];
+    
+    if (savedJobIds.length === 0) {
+      return [];
+    }
+
+    // Get full job details for all saved jobs
+    const savedJobs = await this.prisma.job.findMany({
+      where: {
+        id: { in: savedJobIds },
+        status: { not: 'DELETED' } // Exclude deleted jobs
+      },
+      include: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+            industry: true,
+            numberOfEmployees: true,
+            address: {
+              select: {
+                city: true,
+                country: true
+              }
+            }
+          }
+        },
+        _count: {
+          select: {
+            applications: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Return jobs in the same order as they were saved
+    const orderedJobs = savedJobIds
+      .map(jobId => savedJobs.find(job => job.id === jobId))
+      .filter(job => job !== undefined); // Filter out any jobs that weren't found (deleted, etc.)
+
+    return orderedJobs;
+  }
+
   private mapToBasicProfileResponse(profile: any): CandidateProfileResponseDto {
     return {
       id: profile.id,
@@ -402,6 +541,7 @@ export class CandidateService {
       preferredWorkType: profile.preferredWorkType,
       preferredIndustries: profile.preferredIndustries || [],
       preferredLocations: profile.preferredLocations || [],
+      savedJobs: profile.savedJobs || [],
       resumeUrl: profile.resumeUrl,
       portfolioUrl: profile.portfolioUrl,
       linkedInUrl: profile.linkedInUrl,

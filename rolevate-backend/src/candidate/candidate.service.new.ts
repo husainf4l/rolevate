@@ -264,6 +264,7 @@ export class CandidateService {
       totalExperience: profile.totalExperience,
       expectedSalary: profile.expectedSalary,
       noticePeriod: profile.noticePeriod,
+      savedJobs: profile.savedJobs || [],
       highestEducation: profile.highestEducation,
       fieldOfStudy: profile.fieldOfStudy,
       university: profile.university,

@@ -57,6 +57,7 @@ export class CandidateProfileResponseDto {
   preferredWorkType?: string;
   preferredIndustries: string[];
   preferredLocations: string[];
+  savedJobs: string[]; // Array of saved job IDs
   resumeUrl?: string;
   portfolioUrl?: string;
   linkedInUrl?: string;
@@ -121,4 +122,14 @@ export class EducationResponseDto {
 export class UpdateCVStatusDto {
   @IsEnum(CVStatus)
   status: CVStatus;
+}
+
+export class SaveJobDto {
+  @IsString()
+  jobId: string;
+}
+
+export class UnsaveJobDto {
+  @IsString()
+  jobId: string;
 }

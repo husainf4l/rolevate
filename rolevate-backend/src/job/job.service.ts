@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateJobDto, JobResponseDto } from './dto/create-job.dto';
-import { JobType, JobLevel, WorkType, JobStatus, ScreeningQuestionType } from '@prisma/client';
+import { JobType, JobLevel, WorkType, JobStatus } from '@prisma/client';
 import { CacheService } from '../cache/cache.service';
 import { ViewTrackingService } from './view-tracking.service';
 
@@ -44,17 +44,8 @@ export class JobService {
       const job = await this.prisma.job.create({
         data: {
         ...jobData,
-        screeningQuestions: createJobDto.screeningQuestions?.length ? {
-          create: createJobDto.screeningQuestions.map(q => ({
-            question: q.question,
-            type: q.type as ScreeningQuestionType,
-            options: q.options || [],
-            required: q.required || false,
-          }))
-        } : undefined,
       },
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -78,7 +69,6 @@ export class JobService {
         status: { not: JobStatus.DELETED }, // Exclude deleted jobs
       },
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -111,7 +101,6 @@ export class JobService {
         status: { not: JobStatus.DELETED }, // Exclude deleted jobs
       },
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -167,28 +156,10 @@ export class JobService {
       updateData.deadline = new Date(updateJobDto.deadline);
     }
 
-    // Handle screening questions update
-    if (updateJobDto.screeningQuestions) {
-      // Delete existing questions and create new ones
-      await this.prisma.screeningQuestion.deleteMany({
-        where: { jobId: id },
-      });
-
-      updateData.screeningQuestions = {
-        create: updateJobDto.screeningQuestions.map(q => ({
-          question: q.question,
-          type: q.type as ScreeningQuestionType,
-          options: q.options || [],
-          required: q.required || false,
-        }))
-      };
-    }
-
     const job = await this.prisma.job.update({
       where: { id },
       data: updateData,
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -242,7 +213,6 @@ export class JobService {
       where: { id },
       data: { status },
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -270,7 +240,6 @@ export class JobService {
         },
       },
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -321,7 +290,6 @@ export class JobService {
         },
       },
       include: {
-        screeningQuestions: true,
         company: {
           include: {
             address: true,
@@ -366,7 +334,6 @@ export class JobService {
       where: { id },
       data: { status: JobStatus.DRAFT }, // Restore as draft
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -411,7 +378,6 @@ export class JobService {
         status: JobStatus.DELETED,
       },
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -454,7 +420,6 @@ export class JobService {
         ...searchCondition,
       },
       include: {
-        screeningQuestions: true,
         company: {
           select: {
             id: true,
@@ -531,7 +496,7 @@ export class JobService {
       ]
     } : {};
 
-    // Get all active jobs for public viewing (no company restriction)
+    // Get all active jobs for public viewing (optimized query)
     const jobs = await this.prisma.job.findMany({
       where: {
         status: JobStatus.ACTIVE,
@@ -540,27 +505,108 @@ export class JobService {
         },
         ...searchCondition,
       },
-      include: {
-        screeningQuestions: true,
+      select: {
+        id: true,
+        title: true,
+        department: true,
+        location: true,
+        salary: true,
+        type: true,
+        deadline: true,
+        shortDescription: true, // Use short description for listing
+        skills: true,
+        experience: true,
+        education: true,
+        jobLevel: true,
+        workType: true,
+        industry: true,
+        featured: true,
+        applicants: true,
+        views: true,
+        createdAt: true,
+        updatedAt: true,
         company: {
-          include: {
-            address: true,
+          select: {
+            id: true,
+            name: true,
+            industry: true,
+            numberOfEmployees: true,
+            address: {
+              select: {
+                city: true,
+                country: true,
+              },
+            },
           },
-        }
+        },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [
+        { featured: 'desc' }, // Featured jobs first
+        { createdAt: 'desc' },
+      ],
       take: limit,
       skip: offset,
     });
 
     const jobResponses = jobs.map(job => this.mapToJobResponse(job));
     
-    // Cache for 5 minutes
-    await this.cacheService.set(cacheKey, jobResponses, 300);
+    // Cache for 10 minutes (increased from 5 for better performance)
+    await this.cacheService.set(cacheKey, jobResponses, 600);
 
     return jobResponses;
+  }
+
+  async findAllPublicSimple(limit: number, offset: number): Promise<any[]> {
+    // Try to get from cache first
+    const cacheKey = `public_jobs_simple:${limit}:${offset}`;
+    const cachedJobs = await this.cacheService.get<any[]>(cacheKey);
+    
+    if (cachedJobs) {
+      return cachedJobs;
+    }
+
+    // Ultra-lightweight query - only essential fields
+    const jobs = await this.prisma.job.findMany({
+      where: {
+        status: JobStatus.ACTIVE,
+        deadline: {
+          gt: new Date(),
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        location: true,
+        salary: true,
+        type: true,
+        jobLevel: true,
+        workType: true,
+        featured: true,
+        createdAt: true,
+        company: {
+          select: {
+            name: true,
+            address: {
+              select: {
+                city: true,
+                country: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: [
+        { featured: 'desc' },
+        { createdAt: 'desc' },
+      ],
+      take: limit,
+      skip: offset,
+    });
+
+    // Cache for 15 minutes (longer since it's simpler data)
+    await this.cacheService.set(cacheKey, jobs, 900);
+
+    return jobs;
   }
 
   async countPublicJobs(search?: string): Promise<number> {
@@ -593,8 +639,8 @@ export class JobService {
       },
     });
 
-    // Cache for 5 minutes
-    await this.cacheService.set(cacheKey, count, 300);
+    // Cache for 10 minutes (increased from 5 for better performance)
+    await this.cacheService.set(cacheKey, count, 600);
 
     return count;
   }
@@ -623,7 +669,6 @@ export class JobService {
             address: true,
           },
         },
-        screeningQuestions: true,
       },
       orderBy: [
         { createdAt: 'desc' }, // Most recently created featured jobs first
@@ -662,7 +707,6 @@ export class JobService {
             address: true,
           },
         },
-        screeningQuestions: true,
       },
     });
 
@@ -714,15 +758,6 @@ export class JobService {
           zipCode: job.company.address.zipCode,
         } : undefined,
       } : undefined,
-      screeningQuestions: job.screeningQuestions.map((q: any) => ({
-        id: q.id,
-        question: q.question,
-        type: q.type,
-        options: q.options,
-        required: q.required,
-        createdAt: q.createdAt,
-        updatedAt: q.updatedAt,
-      })),
       cvAnalysisPrompt: job.cvAnalysisPrompt,
       interviewPrompt: job.interviewPrompt,
       aiSecondInterviewPrompt: job.aiSecondInterviewPrompt,

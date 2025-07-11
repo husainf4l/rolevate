@@ -21,6 +21,8 @@ import {
   CandidateProfileResponseDto,
   CVResponseDto,
   UpdateCVStatusDto,
+  SaveJobDto,
+  UnsaveJobDto,
 } from './dto/candidate.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
@@ -130,6 +132,50 @@ export class CandidateController {
     const userId = user.userId;
 
     return this.candidateService.activateCV(userId, cvId);
+  }
+
+  @Post('saved-jobs')
+  @UseGuards(JwtAuthGuard)
+  async saveJob(
+    @Body() saveJobDto: SaveJobDto,
+    @Req() req: Request,
+  ): Promise<CandidateProfileResponseDto> {
+    const user = req.user as any;
+    const userId = user.userId;
+
+    return this.candidateService.saveJob(userId, saveJobDto.jobId);
+  }
+
+  @Delete('saved-jobs/:jobId')
+  @UseGuards(JwtAuthGuard)
+  async unsaveJob(
+    @Param('jobId') jobId: string,
+    @Req() req: Request,
+  ): Promise<CandidateProfileResponseDto> {
+    const user = req.user as any;
+    const userId = user.userId;
+
+    return this.candidateService.unsaveJob(userId, jobId);
+  }
+
+  @Get('saved-jobs')
+  @UseGuards(JwtAuthGuard)
+  async getSavedJobs(@Req() req: Request): Promise<{ savedJobs: string[] }> {
+    const user = req.user as any;
+    const userId = user.userId;
+
+    const savedJobs = await this.candidateService.getSavedJobs(userId);
+    return { savedJobs };
+  }
+
+  @Get('saved-jobs/details')
+  @UseGuards(JwtAuthGuard)
+  async getSavedJobsDetails(@Req() req: Request): Promise<{ savedJobs: any[] }> {
+    const user = req.user as any;
+    const userId = user.userId;
+
+    const savedJobs = await this.candidateService.getSavedJobsDetails(userId);
+    return { savedJobs };
   }
 
   // Test endpoint to check candidate profile without auth

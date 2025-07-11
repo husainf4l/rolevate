@@ -314,6 +314,52 @@ export class JobController {
     };
   }
 
+  @Get('public/simple')
+  @SetMetadata('skipAuth', true)
+  async findAllPublicJobsSimple(
+    @Query('limit') limit?: string,
+    @Query('page') page?: string,
+  ): Promise<{ jobs: any[]; total: number; pagination: any }> {
+    // Parse pagination parameters
+    const limitNum = limit ? parseInt(limit, 10) : 20; // Higher default for simple endpoint
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const offsetNum = (pageNum - 1) * limitNum;
+
+    // Validate pagination parameters
+    if (limitNum < 1 || limitNum > 50) {
+      throw new BadRequestException('Limit must be between 1 and 50');
+    }
+    if (pageNum < 1) {
+      throw new BadRequestException('Page must be greater than 0');
+    }
+
+    // Get lightweight job data
+    const [jobs, total] = await Promise.all([
+      this.jobService.findAllPublicSimple(limitNum, offsetNum),
+      this.jobService.countPublicJobs()
+    ]);
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(total / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPrevPage = pageNum > 1;
+
+    return {
+      jobs,
+      total,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        offset: offsetNum,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+        nextPage: hasNextPage ? pageNum + 1 : null,
+        prevPage: hasPrevPage ? pageNum - 1 : null,
+      }
+    };
+  }
+
   @Get('public/:id')
   @SetMetadata('skipAuth', true)
   async findOnePublicJob(
