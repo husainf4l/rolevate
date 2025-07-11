@@ -1,0 +1,287 @@
+enum SubscriptionType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum Industry {
+  TECHNOLOGY
+  HEALTHCARE
+  FINANCE
+  EDUCATION
+  MANUFACTURING
+  RETAIL
+  CONSTRUCTION
+  TRANSPORTATION
+  HOSPITALITY
+  CONSULTING
+  MARKETING
+  REAL_ESTATE
+  MEDIA
+  AGRICULTURE
+  ENERGY
+  GOVERNMENT
+  NON_PROFIT
+  OTHER
+}
+
+enum Country {
+  AE // United Arab Emirates
+  SA // Saudi Arabia
+  QA // Qatar
+  KW // Kuwait
+  BH // Bahrain
+  OM // Oman
+  EG // Egypt
+  JO // Jordan
+  LB // Lebanon
+  SY // Syria
+  IQ // Iraq
+  YE // Yemen
+  MA // Morocco
+  TN // Tunisia
+  DZ // Algeria
+  LY // Libya
+  SD // Sudan
+  SO // Somalia
+  DJ // Djibouti
+  KM // Comoros
+}
+
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =======================================
+// ENUMS
+// =======================================
+
+enum UserType {
+  SYSTEM
+  COMPANY
+  CANDIDATE
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+enum TokenType {
+  REFRESH
+}
+
+// =======================================
+// USER MANAGEMENT
+// =======================================
+
+model User {
+  id           String         @id @default(cuid())
+  userType     UserType
+  password     String?
+  email        String?        @unique
+  name         String?
+  isActive     Boolean        @default(true)
+  companyId    String?
+  company      Company?       @relation(fields: [companyId], references: [id])
+  phone        String?
+  refreshTokens RefreshToken[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  
+  @@index([userType])
+  @@index([email])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  isRevoked Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  @@index([token])
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// =======================================
+// COMPANY MANAGEMENT
+// =======================================
+
+model Address {
+  id       String  @id @default(cuid())
+  street   String?
+  city     String?
+  country  Country
+  company  Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("addresses")
+}
+
+model Company {
+  id               String           @id @default(cuid())
+  name             String
+  description      String?          @db.Text
+  email            String?
+  phone            String?
+  website          String?
+  industry         Industry?
+  numberOfEmployees Int?
+  address          Address?
+  users            User[]
+  jobs             Job[]            // Add jobs relationship
+  invitations      Invitation[]
+  subscription     SubscriptionType @default(FREE)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  
+  @@map("companies")
+}
+
+model Invitation {
+  id        String           @id @default(cuid())
+  code      String           @unique
+  email     String?
+  status    InvitationStatus @default(PENDING)
+  companyId String
+  company   Company          @relation(fields: [companyId], references: [id])
+  usedAt    DateTime?
+  expiresAt DateTime
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  
+  @@index([code])
+  @@index([companyId])
+  @@map("invitations")
+}
+
+// =======================================
+// JOB MANAGEMENT
+// =======================================
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  REMOTE
+}
+
+enum JobLevel {
+  ENTRY
+  MID
+  SENIOR
+  EXECUTIVE
+}
+
+enum WorkType {
+  ONSITE
+  REMOTE
+  HYBRID
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  CLOSED
+  EXPIRED
+  DELETED
+}
+
+enum ScreeningQuestionType {
+  YES_NO
+  MULTIPLE_CHOICE
+  TEXT
+  NUMBER
+}
+
+model Job {
+  id               String   @id @default(cuid())
+  title            String
+  department       String
+  location         String
+  salary           String
+  type             JobType
+  deadline         DateTime
+  description      String   @db.Text
+  shortDescription String  @db.Text
+  responsibilities String   @db.Text
+  requirements     String   @db.Text
+  benefits         String   @db.Text
+  skills           String[] // Array of skill strings
+  experience       String
+  education        String
+  jobLevel         JobLevel
+  workType         WorkType
+  industry         String
+  companyDescription String @db.Text
+  status           JobStatus @default(DRAFT)
+  
+  // Company relationship
+  companyId        String
+  company          Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Screening questions
+  screeningQuestions ScreeningQuestion[]
+  
+  // AI prompts for analysis (optional)
+  cvAnalysisPrompt    String? @db.Text
+  interviewPrompt     String? @db.Text
+  aiSecondInterviewPrompt String? @db.Text
+  
+  // Metadata
+  applicants       Int      @default(0)
+  views            Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([companyId])
+  @@index([status])
+  @@index([type])
+  @@index([jobLevel])
+  @@index([industry])
+  @@map("jobs")
+}
+
+model ScreeningQuestion {
+  id       String                 @id @default(cuid())
+  question String
+  type     ScreeningQuestionType
+  options  String[]               // For multiple choice questions
+  required Boolean                @default(false)
+  
+  // Job relationship
+  jobId    String
+  job      Job                    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  
+  @@index([jobId])
+  @@map("screening_questions")
+}
+
+// =======================================
+// APPLICATION MANAGEMENT
+// =======================================
+
+// Future application models will be added here

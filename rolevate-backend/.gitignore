@@ -42,9 +42,9 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
-# Prisma auto-generated files
-/prisma/schema.prisma
-/generated/
+# # Prisma auto-generated files
+# /prisma/schema.prisma
+# /generated/
 
 # temp directory
 .temp
