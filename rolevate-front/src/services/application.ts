@@ -41,3 +41,32 @@ export async function applyToJob(data: ApplicationData): Promise<{ message: stri
     applicationId: resJson.id || resJson.applicationId,
   };
 }
+
+export type AnonymousApplicationData = {
+  jobId: string;
+  name: string;
+  email: string;
+  phone: string;
+  coverLetter?: string;
+  resumeUrl?: string;
+  portfolio?: string;
+};
+
+export async function applyToJobAnonymously(data: AnonymousApplicationData): Promise<{ message: string; applicationId?: string }> {
+  const response = await fetch("http://localhost:4005/api/applications/apply-with-cv", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Failed to apply to job" }));
+    throw new Error(error.message || "Failed to apply to job");
+  }
+  const resJson = await response.json();
+  return {
+    message: resJson.message || "Application submitted successfully",
+    applicationId: resJson.id || resJson.applicationId,
+  };
+}

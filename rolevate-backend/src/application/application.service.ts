@@ -1,14 +1,19 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
+import { OpenaiCvAnalysisService } from '../services/openai-cv-analysis.service';
+import { CvParsingService } from '../services/cv-parsing.service';
 import { CreateApplicationDto, ApplicationResponseDto, CVAnalysisResultDto, UpdateApplicationStatusDto } from './dto/application.dto';
-import { ApplicationStatus } from '@prisma/client';
+import { ApplicationStatus, UserType } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ApplicationService {
   constructor(
     private prisma: PrismaService,
     private cacheService: CacheService,
+    private openaiCvAnalysisService: OpenaiCvAnalysisService,
+    private cvParsingService: CvParsingService,
   ) {}
 
   async createApplication(createApplicationDto: CreateApplicationDto, candidateId: string): Promise<ApplicationResponseDto> {
@@ -105,6 +110,197 @@ export class ApplicationService {
     return this.mapToApplicationResponse(application);
   }
 
+  async createAnonymousApplication(
+    createApplicationDto: CreateApplicationDto
+  ): Promise<ApplicationResponseDto & { candidateCredentials?: { email: string; password: string } }> {
+    console.log('🔄 Processing anonymous application...');
+    
+    // Validate that resumeUrl is provided for anonymous applications
+    if (!createApplicationDto.resumeUrl) {
+      throw new BadRequestException('Resume URL is required for anonymous applications');
+    }
+
+    // Get job details to verify it exists and is active
+    const job = await this.prisma.job.findUnique({
+      where: { id: createApplicationDto.jobId },
+      include: { company: true },
+    });
+
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    if (job.status !== 'ACTIVE') {
+      throw new BadRequestException('Job is not accepting applications');
+    }
+
+    if (new Date() > job.deadline) {
+      throw new BadRequestException('Job application deadline has passed');
+    }
+
+    // Extract candidate information from CV
+    console.log('📄 Extracting candidate information from CV...');
+    const candidateInfo = await this.cvParsingService.extractCandidateInfoFromCV(createApplicationDto.resumeUrl);
+
+    // Check if user already exists with this email
+    let existingUser = await this.prisma.user.findUnique({
+      where: { email: candidateInfo.email },
+      include: { candidateProfile: true }
+    });
+
+    let candidateId: string;
+    let candidateCredentials: { email: string; password: string } | undefined;
+
+    if (existingUser) {
+      console.log('👤 Found existing user with email:', candidateInfo.email);
+      
+      if (!existingUser.candidateProfile) {
+        throw new BadRequestException('User exists but is not a candidate');
+      }
+
+      candidateId = existingUser.candidateProfile.id;
+      
+      // Check if already applied
+      const existingApplication = await this.prisma.application.findUnique({
+        where: {
+          jobId_candidateId: {
+            jobId: createApplicationDto.jobId,
+            candidateId: candidateId,
+          },
+        },
+      });
+
+      if (existingApplication) {
+        throw new ConflictException('This candidate has already applied for this job');
+      }
+    } else {
+      console.log('🆕 Creating new candidate account...');
+      
+      // Generate random password
+      const randomPassword = this.generateRandomPassword();
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      // Create user and candidate profile
+      const result = await this.createCandidateFromCV(candidateInfo, hashedPassword, createApplicationDto.resumeUrl);
+      candidateId = result.candidateProfile.id;
+      
+      candidateCredentials = {
+        email: candidateInfo.email,
+        password: randomPassword
+      };
+
+      console.log('✅ Created new candidate account for:', candidateInfo.email);
+    }
+
+    // Create the application
+    const application = await this.prisma.application.create({
+      data: {
+        jobId: createApplicationDto.jobId,
+        candidateId: candidateId,
+        coverLetter: createApplicationDto.coverLetter,
+        resumeUrl: createApplicationDto.resumeUrl,
+        expectedSalary: createApplicationDto.expectedSalary,
+        noticePeriod: createApplicationDto.noticePeriod,
+        status: ApplicationStatus.SUBMITTED,
+      },
+      include: {
+        job: {
+          include: {
+            company: true,
+          },
+        },
+        candidate: true,
+      },
+    });
+
+    // Increment job applicants count
+    await this.prisma.job.update({
+      where: { id: createApplicationDto.jobId },
+      data: {
+        applicants: {
+          increment: 1,
+        },
+      },
+    });
+
+    // Trigger AI CV analysis in the background
+    if (createApplicationDto.resumeUrl && job.cvAnalysisPrompt) {
+      this.analyzeCVInBackground(application.id, createApplicationDto.resumeUrl, job.cvAnalysisPrompt, job);
+    }
+
+    // Clear cache
+    await this.cacheService.clear();
+
+    const result = this.mapToApplicationResponse(application);
+    
+    // Include credentials for new accounts
+    if (candidateCredentials) {
+      return {
+        ...result,
+        candidateCredentials
+      };
+    }
+
+    return result;
+  }
+
+  private async createCandidateFromCV(
+    candidateInfo: any, 
+    hashedPassword: string, 
+    resumeUrl: string
+  ) {
+    console.log('🏗️ Creating user and candidate profile from CV data...');
+    
+    return await this.prisma.$transaction(async (tx) => {
+      // Create user
+      const user = await tx.user.create({
+        data: {
+          email: candidateInfo.email,
+          name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+          password: hashedPassword,
+          userType: UserType.CANDIDATE,
+          isActive: true,
+        },
+      });
+
+      // Create candidate profile
+      const candidateProfile = await tx.candidateProfile.create({
+        data: {
+          userId: user.id,
+          firstName: candidateInfo.firstName,
+          lastName: candidateInfo.lastName,
+          email: candidateInfo.email,
+          phone: candidateInfo.phone,
+          currentJobTitle: candidateInfo.currentJobTitle,
+          currentCompany: candidateInfo.currentCompany,
+          totalExperience: candidateInfo.totalExperience,
+          skills: candidateInfo.skills || [],
+          resumeUrl: resumeUrl,
+          profileSummary: candidateInfo.summary,
+          isOpenToWork: true,
+          isProfilePublic: true,
+        },
+      });
+
+      return {
+        user,
+        candidateProfile
+      };
+    });
+  }
+
+  private generateRandomPassword(): string {
+    const length = 12;
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    
+    return password;
+  }
+
   async analyzeCVInBackground(applicationId: string, resumeUrl: string, analysisPrompt: string, job: any): Promise<void> {
     try {
       // This would run in the background - you might want to use a queue system like Bull
@@ -133,47 +329,8 @@ export class ApplicationService {
   }
 
   async performAICVAnalysis(resumeUrl: string, analysisPrompt: string, job: any): Promise<CVAnalysisResultDto> {
-    // This is a mock implementation - replace with actual AI service
-    // In a real implementation, you would:
-    // 1. Extract text from the CV PDF
-    // 2. Send to OpenAI/Claude with the analysis prompt
-    // 3. Parse the AI response
-    
-    const mockAnalysis: CVAnalysisResultDto = {
-      score: Math.floor(Math.random() * 40) + 60, // Random score between 60-100
-      summary: `Candidate shows strong potential for the ${job.title} position with relevant experience and skills.`,
-      strengths: [
-        'Strong technical background',
-        'Relevant industry experience',
-        'Good educational qualifications',
-      ],
-      weaknesses: [
-        'Could benefit from more leadership experience',
-        'Some gaps in required technologies',
-      ],
-      recommendations: [
-        'Consider for technical interview',
-        'Assess communication skills',
-        'Verify specific technology experience',
-      ],
-      skillsMatch: {
-        matched: job.skills?.slice(0, 3) || ['JavaScript', 'React'],
-        missing: job.skills?.slice(3, 5) || ['Node.js'],
-        percentage: 75,
-      },
-      experienceMatch: {
-        relevant: true,
-        years: Math.floor(Math.random() * 8) + 2,
-        details: 'Solid experience in relevant technologies and industry',
-      },
-      educationMatch: {
-        relevant: true,
-        details: 'Educational background aligns with job requirements',
-      },
-      overallFit: Math.random() > 0.3 ? 'Good' : 'Excellent',
-    };
-
-    return mockAnalysis;
+    // Use OpenAI GPT-4o for real CV analysis with text extraction
+    return await this.openaiCvAnalysisService.analyzeCVWithOpenAI(resumeUrl, analysisPrompt, job);
   }
 
   async getApplicationsByCandidate(candidateId: string): Promise<ApplicationResponseDto[]> {

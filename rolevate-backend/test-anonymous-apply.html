@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Job Application Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 4px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Anonymous Job Application Test</h1>
+    <p>Test the anonymous application flow where users can apply for jobs without being registered.</p>
+
+    <div class="info">
+        <h3>📋 Available Endpoints:</h3>
+        <ul>
+            <li><strong>Method 1 (Recommended):</strong> <code>POST /api/applications/apply-with-cv</code> - Upload CV + Apply in one step</li>
+            <li><strong>Method 2:</strong> <code>POST /api/uploads/cvs</code> + <code>POST /api/applications/anonymous</code> - Two-step process</li>
+        </ul>
+    </div>
+
+    <form id="applicationForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="jobId">Job ID (required):</label>
+            <input type="text" id="jobId" name="jobId" value="cm5g78jxm0003lz5o2n0v1234" placeholder="Enter job ID">
+            <small>Replace with actual job ID from your database</small>
+        </div>
+
+        <div class="form-group">
+            <label for="cv">CV File (required):</label>
+            <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" required>
+            <small>Upload PDF, DOC, or DOCX file (max 5MB)</small>
+        </div>
+
+        <div class="form-group">
+            <label for="coverLetter">Cover Letter (optional):</label>
+            <textarea id="coverLetter" name="coverLetter" rows="4" placeholder="Tell us why you're interested in this position..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="expectedSalary">Expected Salary (optional):</label>
+            <input type="text" id="expectedSalary" name="expectedSalary" placeholder="e.g., 5000 JOD">
+        </div>
+
+        <div class="form-group">
+            <label for="noticePeriod">Notice Period (optional):</label>
+            <input type="text" id="noticePeriod" name="noticePeriod" placeholder="e.g., 1 month">
+        </div>
+
+        <button type="submit">🎯 Apply for Job</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            const formData = new FormData();
+            
+            // Add form fields to FormData
+            formData.append('jobId', document.getElementById('jobId').value);
+            formData.append('cv', document.getElementById('cv').files[0]);
+            
+            const coverLetter = document.getElementById('coverLetter').value;
+            const expectedSalary = document.getElementById('expectedSalary').value;
+            const noticePeriod = document.getElementById('noticePeriod').value;
+            
+            if (coverLetter) formData.append('coverLetter', coverLetter);
+            if (expectedSalary) formData.append('expectedSalary', expectedSalary);
+            if (noticePeriod) formData.append('noticePeriod', noticePeriod);
+            
+            try {
+                resultDiv.innerHTML = '<div class="info">⏳ Uploading CV and processing application...</div>';
+                
+                const response = await fetch('http://localhost:4005/api/applications/apply-with-cv', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    let resultHTML = '<div class="success"><h3>✅ Application Submitted Successfully!</h3>';
+                    resultHTML += `<p><strong>Application ID:</strong> ${data.id}</p>`;
+                    resultHTML += `<p><strong>Status:</strong> ${data.status}</p>`;
+                    
+                    if (data.candidateCredentials) {
+                        resultHTML += '<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 4px;">';
+                        resultHTML += '<h4>🔑 Your Account Credentials:</h4>';
+                        resultHTML += `<p><strong>Email:</strong> ${data.candidateCredentials.email}</p>`;
+                        resultHTML += `<p><strong>Password:</strong> ${data.candidateCredentials.password}</p>`;
+                        resultHTML += '<p><small>⚠️ Please save these credentials to login later!</small></p>';
+                        resultHTML += '</div>';
+                    }
+                    
+                    resultHTML += '<p>🤖 CV analysis will be completed in the background.</p>';
+                    resultHTML += '</div>';
+                    
+                    resultDiv.innerHTML = resultHTML;
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><h3>❌ Application Failed</h3><p>${data.message || 'Unknown error'}</p></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h3>❌ Network Error</h3><p>${error.message}</p><p>Make sure the server is running on http://localhost:4005</p></div>`;
+            }
+        });
+    </script>
+</body>
+</html>

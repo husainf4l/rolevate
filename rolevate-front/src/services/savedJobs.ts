@@ -152,11 +152,20 @@ export async function getSavedJobsDetails(): Promise<SavedJobsDetailsResponse> {
     });
 
     if (!res.ok) {
+      // If 404, treat as no saved jobs
+      if (res.status === 404) {
+        return { savedJobs: [] };
+      }
       const error = await res.json().catch(() => ({}));
       throw new Error(error?.message || error?.error || "Failed to get saved jobs details");
     }
 
-    return await res.json();
+    // If response is empty or not an object, treat as no saved jobs
+    const data = await res.json().catch(() => null);
+    if (!data || typeof data !== "object" || !Array.isArray(data.savedJobs)) {
+      return { savedJobs: [] };
+    }
+    return data;
   } catch (error) {
     console.error("Get saved jobs details failed:", error);
     throw error;

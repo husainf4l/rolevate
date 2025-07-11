@@ -230,6 +230,22 @@ export class AuthService {
 
     const user = await this.userService.create(userData);
 
+    // If userType is CANDIDATE, create a candidate profile automatically (if not present)
+    if (createUserDto.userType === 'CANDIDATE') {
+      try {
+        await this.candidateService.createBasicProfile({
+          firstName: createUserDto.name || '',
+          lastName: '',
+          email: createUserDto.email,
+          phone: createUserDto.phone,
+          // cvUrl, currentLocation, isOpenToWork are left undefined
+        }, user.id);
+      } catch (e) {
+        // Ignore if already exists, throw otherwise
+        if (!String(e.message).includes('already exists')) throw e;
+      }
+    }
+
     // Mark invitation as used if provided
     if (createUserDto.invitationCode) {
       await this.invitationService.useInvitation(createUserDto.invitationCode);

@@ -21,8 +21,9 @@ export class CreateBasicCandidateProfileDto {
   @IsString()
   phone?: string;
 
+  @IsOptional()
   @IsUrl()
-  cvUrl: string;
+  cvUrl?: string;
 
   @IsOptional()
   @IsString()

@@ -7,7 +7,11 @@ import { Button } from "@/components/common/Button";
 import { JobData } from "@/components/common/JobCard";
 
 import { JobService, JobPost } from "@/services/job";
-import { applyToJob, uploadCV } from "@/services/application";
+import {
+  applyToJob,
+  applyToJobAnonymously,
+  uploadCV,
+} from "@/services/application";
 
 export default function JobApplyPage() {
   const router = useRouter();
@@ -198,19 +202,46 @@ export default function JobApplyPage() {
       if (
         formData.cv &&
         typeof formData.cv === "object" &&
-        "fileUrl" in formData.cv
+        "fileUrl" in formData.cv &&
+        formData.cv.fileUrl
       ) {
         resumeUrl = formData.cv.fileUrl;
       } else if (formData.cv && formData.cv instanceof File) {
         resumeUrl = await uploadCV(formData.cv);
       }
-      await applyToJob({
-        jobId,
-        coverLetter: formData.coverLetter,
-        resumeUrl: typeof resumeUrl === "string" ? resumeUrl : "",
-        expectedSalary: formData.experience || "",
-        noticePeriod: "",
-      });
+
+      // Prevent submission if no valid resumeUrl
+      if (
+        !resumeUrl ||
+        typeof resumeUrl !== "string" ||
+        !/^https?:\/\//.test(resumeUrl)
+      ) {
+        setError(
+          "Please select or upload a valid CV before submitting your application."
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      if (isAuthenticated) {
+        await applyToJob({
+          jobId,
+          coverLetter: formData.coverLetter,
+          resumeUrl,
+          expectedSalary: formData.experience || "",
+          noticePeriod: "",
+        });
+      } else {
+        await applyToJobAnonymously({
+          jobId,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          coverLetter: formData.coverLetter,
+          resumeUrl,
+          portfolio: formData.portfolio,
+        });
+      }
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || "Failed to submit application");
@@ -322,7 +353,8 @@ export default function JobApplyPage() {
             {typeof job.company === "string" ? job.company : job.company}
           </p>
           <p className="text-gray-700 mb-8">
-            Thank you for your application. You will be invited to an AI interview in the next 5 minutes. Please be ready!
+            Thank you for your application. You will be invited to an AI
+            interview in the next 5 minutes. Please be ready!
           </p>
           <div className="space-y-3">
             <Button
