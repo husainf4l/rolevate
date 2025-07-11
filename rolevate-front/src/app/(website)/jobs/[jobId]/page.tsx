@@ -97,7 +97,8 @@ export default function JobDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Use the saved jobs hook - get all needed values in one call
-  const { isJobSaved, toggleSaveJob, canSaveJobs, savedJobIds } = useSavedJobs();
+  const { isJobSaved, toggleSaveJob, canSaveJobs, savedJobIds } =
+    useSavedJobs();
 
   useEffect(() => {
     const fetchJobDetail = async () => {
@@ -138,10 +139,20 @@ export default function JobDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0fc4b5] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading job details...</p>
+          <div className="relative mb-8">
+            <div className="w-16 h-16 border-4 border-gray-200 rounded-full animate-spin mx-auto"></div>
+            <div className="w-16 h-16 border-4 border-[#0891b2] border-t-transparent rounded-full animate-spin absolute top-0 left-1/2 transform -translate-x-1/2"></div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 font-display">
+              Loading Job Details...
+            </h3>
+            <p className="text-gray-600">
+              Please wait while we fetch the job information
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -149,17 +160,28 @@ export default function JobDetailPage() {
 
   if (error || !job) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Job Not Found
-          </h2>
-          <p className="text-gray-600 mb-6">
-            {error || "The job you're looking for doesn't exist."}
-          </p>
-          <Button href="/jobs" variant="primary">
-            Back to Jobs
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="w-20 h-20 bg-gradient-to-r from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">😞</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-display">
+              Job Not Found
+            </h2>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              {error ||
+                "The job you're looking for doesn't exist or has been removed."}
+            </p>
+            <Button
+              href="/jobs"
+              variant="primary"
+              size="lg"
+              className="shadow-lg"
+            >
+              ← Back to Jobs
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -167,142 +189,193 @@ export default function JobDetailPage() {
 
   const isSaved = isJobSaved(jobId);
   const showSaveButton = canSaveJobs();
-  
+
   // Debug logging with more detail
-  console.log('Job Detail Page - Debug Info:', {
+  console.log("Job Detail Page - Debug Info:", {
     jobId,
     jobIdType: typeof jobId,
     isSaved,
     showSaveButton,
-    canSaveJobs: canSaveJobs()
+    canSaveJobs: canSaveJobs(),
   });
-  
+
   // Check the hook state directly
-  console.log('Direct hook state check:', {
+  console.log("Direct hook state check:", {
     savedJobIds: Array.from(savedJobIds),
     savedJobIdsSize: savedJobIds.size,
     hasJobId: savedJobIds.has(jobId),
-    jobIdStringified: JSON.stringify(jobId)
+    jobIdStringified: JSON.stringify(jobId),
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <nav className="mb-6 text-sm text-gray-600">
+          <span>Jobs</span>
+          <span className="mx-2">•</span>
+          <span>{job.department}</span>
+          <span className="mx-2">•</span>
+          <span className="text-[#0891b2] font-medium">{job.title}</span>
+        </nav>
+
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex-1">
+        <div className="bg-white rounded-3xl shadow-lg border border-gray-200/50 p-8 mb-8 relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#13ead9]/5 to-[#0891b2]/5 rounded-full -translate-y-32 translate-x-32"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#0891b2]/5 to-[#13ead9]/5 rounded-full translate-y-24 -translate-x-24"></div>
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex-1 mb-8 lg:mb-0">
               <div className="flex items-center space-x-3 mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 font-display">
                   {job.title}
                 </h1>
                 {job.featured && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 border border-orange-200/50">
                     <StarIcon className="w-3 h-3 mr-1" />
                     Featured
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center space-x-2 mb-4">
-                <BuildingOfficeIcon className="w-5 h-5 text-[#0fc4b5]" />
-                <span className="text-xl font-semibold text-[#0fc4b5]">
-                  {job.company?.name || "Company"}
-                </span>
-                <span className="text-gray-400">•</span>
-                <span className="text-gray-600">
-                  {job.company?.industry || job.industry || "Industry"}
-                </span>
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center shadow-lg">
+                  <BuildingOfficeIcon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <span className="text-xl font-semibold text-[#0891b2] font-display">
+                    {job.company?.name || "Company"}
+                  </span>
+                  <p className="text-gray-600 text-sm">
+                    {job.company?.industry || job.industry || "Industry"}
+                  </p>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <MapPinIcon className="w-4 h-4" />
-                  <span className="text-sm">{job.location}</span>
+                <div className="flex items-center space-x-2 text-gray-600 bg-gray-50 rounded-xl p-3">
+                  <MapPinIcon className="w-4 h-4 text-[#0891b2]" />
+                  <span className="text-sm font-medium">{job.location}</span>
                 </div>
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <CurrencyDollarIcon className="w-4 h-4" />
-                  <span className="text-sm">{job.salary}</span>
+                <div className="flex items-center space-x-2 text-gray-600 bg-gray-50 rounded-xl p-3">
+                  <CurrencyDollarIcon className="w-4 h-4 text-[#0891b2]" />
+                  <span className="text-sm font-medium">{job.salary}</span>
                 </div>
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <BriefcaseIcon className="w-4 h-4" />
-                  <span className="text-sm">{formatJobType(job.type)}</span>
+                <div className="flex items-center space-x-2 text-gray-600 bg-gray-50 rounded-xl p-3">
+                  <BriefcaseIcon className="w-4 h-4 text-[#0891b2]" />
+                  <span className="text-sm font-medium">
+                    {formatJobType(job.type)}
+                  </span>
                 </div>
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <ClockIcon className="w-4 h-4" />
-                  <span className="text-sm">
+                <div className="flex items-center space-x-2 text-gray-600 bg-gray-50 rounded-xl p-3">
+                  <ClockIcon className="w-4 h-4 text-[#0891b2]" />
+                  <span className="text-sm font-medium">
                     {formatWorkType(job.workType || "On-site")}
                   </span>
                 </div>
               </div>
 
-              <p className="text-gray-600 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed text-lg">
                 {job.shortDescription}
               </p>
             </div>
 
-            <div className="lg:ml-8 mt-6 lg:mt-0">
-              <div className="flex flex-col space-y-3">
-                <Button size="lg" className="w-full lg:w-auto">
-                  Apply Now
-                </Button>
-
-                {showSaveButton && (
-                  <button
-                    onClick={handleSaveJob}
-                    className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg border transition-all duration-200 w-full lg:w-auto font-medium ${
-                      isSaved
-                        ? "bg-[#0fc4b5] text-white border-[#0fc4b5] hover:bg-[#0ba399] shadow-md"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400"
-                    }`}
-                    title={isSaved ? "Remove from saved jobs" : "Save this job"}
+            <div className="lg:ml-12 flex-shrink-0">
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 shadow-lg border border-gray-200/50 min-w-[280px]">
+                <div className="flex flex-col space-y-4">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="w-full shadow-lg"
+                    ripple={true}
                   >
-                    {isSaved ? (
-                      <BookmarkIconSolid className="w-5 h-5 text-white" />
-                    ) : (
-                      <BookmarkIcon className="w-5 h-5 text-gray-500" />
-                    )}
-                    <span className={isSaved ? "text-white" : "text-gray-700"}>
-                      {isSaved ? "Saved ✓" : "Save Job"}
-                    </span>
-                  </button>
-                )}
-              </div>
+                    Apply Now
+                  </Button>
 
-              <div className="mt-6 text-sm text-gray-500 space-y-2">
-                <div className="flex items-center space-x-2">
-                  <UserGroupIcon className="w-4 h-4" />
-                  <span>{job.applicants} applicants</span>
+                  {showSaveButton && (
+                    <button
+                      onClick={handleSaveJob}
+                      className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-2xl border-2 transition-all duration-300 w-full font-semibold text-base ${
+                        isSaved
+                          ? "bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white border-transparent shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:border-[#0891b2] hover:text-[#0891b2] hover:shadow-md transform hover:scale-[1.02]"
+                      }`}
+                      title={
+                        isSaved ? "Remove from saved jobs" : "Save this job"
+                      }
+                    >
+                      {isSaved ? (
+                        <BookmarkIconSolid className="w-5 h-5" />
+                      ) : (
+                        <BookmarkIcon className="w-5 h-5" />
+                      )}
+                      <span>{isSaved ? "Saved ✓" : "Save Job"}</span>
+                    </button>
+                  )}
                 </div>
-                {job.deadline && (
-                  <div className="flex items-center space-x-2">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span>
-                      Apply by {new Date(job.deadline).toLocaleDateString()}
-                    </span>
+
+                <div className="mt-6 pt-6 border-t border-gray-200 space-y-4">
+                  <div className="flex items-center space-x-3 text-gray-600">
+                    <div className="w-8 h-8 bg-[#0891b2]/10 rounded-lg flex items-center justify-center">
+                      <UserGroupIcon className="w-4 h-4 text-[#0891b2]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {job.applicants} applicants
+                      </p>
+                      <p className="text-xs text-gray-500">applied so far</p>
+                    </div>
                   </div>
-                )}
-                <div className="flex items-center space-x-2">
-                  <ClockIcon className="w-4 h-4" />
-                  <span>
-                    Posted {new Date(job.postedAt).toLocaleDateString()}
-                  </span>
+
+                  {job.deadline && (
+                    <div className="flex items-center space-x-3 text-gray-600">
+                      <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <CalendarIcon className="w-4 h-4 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {new Date(job.deadline).toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          application deadline
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center space-x-3 text-gray-600">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <ClockIcon className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {new Date(job.postedAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-gray-500">posted date</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             {/* Job Description */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Job Description
-              </h2>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-8">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">📋</span>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 font-display">
+                  Job Description
+                </h2>
+              </div>
               <div className="prose prose-gray max-w-none">
-                <p className="whitespace-pre-line text-gray-600 leading-relaxed">
+                <p className="whitespace-pre-line text-gray-600 leading-relaxed text-lg">
                   {job.description}
                 </p>
               </div>
@@ -310,12 +383,17 @@ export default function JobDetailPage() {
 
             {/* Responsibilities */}
             {job.responsibilities && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Key Responsibilities
-                </h2>
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">🎯</span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 font-display">
+                    Key Responsibilities
+                  </h2>
+                </div>
                 <div className="prose prose-gray max-w-none">
-                  <p className="whitespace-pre-line text-gray-600 leading-relaxed">
+                  <p className="whitespace-pre-line text-gray-600 leading-relaxed text-lg">
                     {job.responsibilities}
                   </p>
                 </div>
@@ -324,12 +402,17 @@ export default function JobDetailPage() {
 
             {/* Requirements */}
             {job.requirements && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Requirements
-                </h2>
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">✅</span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 font-display">
+                    Requirements
+                  </h2>
+                </div>
                 <div className="prose prose-gray max-w-none">
-                  <p className="whitespace-pre-line text-gray-600 leading-relaxed">
+                  <p className="whitespace-pre-line text-gray-600 leading-relaxed text-lg">
                     {job.requirements}
                   </p>
                 </div>
@@ -338,12 +421,17 @@ export default function JobDetailPage() {
 
             {/* Benefits */}
             {job.benefits && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Benefits
-                </h2>
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">🎁</span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 font-display">
+                    Benefits & Perks
+                  </h2>
+                </div>
                 <div className="prose prose-gray max-w-none">
-                  <p className="whitespace-pre-line text-gray-600 leading-relaxed">
+                  <p className="whitespace-pre-line text-gray-600 leading-relaxed text-lg">
                     {job.benefits}
                   </p>
                 </div>
@@ -352,51 +440,97 @@ export default function JobDetailPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Job Details */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Job Details
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Experience Level
-                  </label>
-                  <p className="text-gray-900">{job.experience}</p>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-xl flex items-center justify-center">
+                  <BriefcaseIcon className="w-5 h-5 text-white" />
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Education
-                  </label>
-                  <p className="text-gray-900">{job.education}</p>
+                <h3 className="text-xl font-bold text-gray-900 font-display">
+                  Job Details
+                </h3>
+              </div>
+              <div className="space-y-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-blue-600 text-sm font-medium">
+                      💼
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <label className="text-sm font-medium text-gray-500 block">
+                      Experience Level
+                    </label>
+                    <p className="text-gray-900 font-medium truncate">
+                      {job.experience || "Not specified"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Job Level
-                  </label>
-                  <p className="text-gray-900">{job.jobLevel}</p>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 text-sm font-medium">
+                      🎓
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <label className="text-sm font-medium text-gray-500 block">
+                      Education
+                    </label>
+                    <p className="text-gray-900 font-medium truncate">
+                      {job.education || "Not specified"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Industry
-                  </label>
-                  <p className="text-gray-900">{job.industry}</p>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-purple-600 text-sm font-medium">
+                      📊
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <label className="text-sm font-medium text-gray-500 block">
+                      Job Level
+                    </label>
+                    <p className="text-gray-900 font-medium truncate">
+                      {job.jobLevel || "Not specified"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-orange-600 text-sm font-medium">
+                      🏭
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <label className="text-sm font-medium text-gray-500 block">
+                      Industry
+                    </label>
+                    <p className="text-gray-900 font-medium truncate">
+                      {job.industry || "Not specified"}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Skills */}
             {job.skills && job.skills.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Required Skills
-                </h3>
-                <div className="flex flex-wrap gap-2">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-6">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">🛠️</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 font-display">
+                    Required Skills
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-3">
                   {job.skills.map((skill, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#0fc4b5]/10 text-[#0fc4b5]"
+                      className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 text-[#0891b2] border border-[#0891b2]/20 hover:from-[#13ead9]/20 hover:to-[#0891b2]/20 transition-colors duration-200"
                     >
                       {skill}
                     </span>
@@ -407,32 +541,61 @@ export default function JobDetailPage() {
 
             {/* Company Info */}
             {job.company && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  About {job.company.name}
-                </h3>
-                <div className="space-y-3">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-6">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-10 h-10 bg-gradient-to-r from-gray-600 to-gray-700 rounded-xl flex items-center justify-center">
+                    <BuildingOfficeIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 font-display">
+                    About {job.company.name}
+                  </h3>
+                </div>
+                <div className="space-y-4">
                   {job.company.industry && (
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <BuildingOfficeIcon className="w-4 h-4" />
-                      <span className="text-sm">{job.company.industry}</span>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <BuildingOfficeIcon className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          Industry
+                        </p>
+                        <p className="text-gray-900 font-medium">
+                          {job.company.industry}
+                        </p>
+                      </div>
                     </div>
                   )}
                   {job.company.numberOfEmployees && (
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <UserGroupIcon className="w-4 h-4" />
-                      <span className="text-sm">
-                        {job.company.numberOfEmployees} employees
-                      </span>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <UserGroupIcon className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          Company Size
+                        </p>
+                        <p className="text-gray-900 font-medium">
+                          {job.company.numberOfEmployees.toLocaleString()}{" "}
+                          employees
+                        </p>
+                      </div>
                     </div>
                   )}
                   {job.company.address && (
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <MapPinIcon className="w-4 h-4" />
-                      <span className="text-sm">
-                        {job.company.address.city},{" "}
-                        {job.company.address.country}
-                      </span>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <MapPinIcon className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          Location
+                        </p>
+                        <p className="text-gray-900 font-medium">
+                          {job.company.address.city},{" "}
+                          {job.company.address.country}
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>

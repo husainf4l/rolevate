@@ -25,17 +25,11 @@ export default function UserDashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="light">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased text-[#23272a] bg-gray-50`}
-      >
-        <ProtectedRoute allowedUserTypes={['CANDIDATE']}>
-          <div className="flex h-screen">
-            <UserSidebar />
-            <main className="flex-1 lg:ml-64 overflow-auto">{children}</main>
-          </div>
-        </ProtectedRoute>
-      </body>
-    </html>
+    <ProtectedRoute allowedUserTypes={['CANDIDATE']}>
+      <div className="flex h-screen">
+        <UserSidebar />
+        <main className="flex-1 lg:ml-64 overflow-auto">{children}</main>
+      </div>
+    </ProtectedRoute>
   );
 }

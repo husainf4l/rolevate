@@ -6,59 +6,6 @@ import { Button } from "@/components/common/Button";
 import { JobService, JobPost } from "@/services/job";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 
-// Fallback data in case API fails
-const fallbackJobsData: JobData[] = [
-  {
-    id: "fallback-1",
-    title: "Senior Software Engineer",
-    company: "Aramco Digital",
-    location: "Riyadh, Saudi Arabia",
-    type: "Full-time",
-    salary: "25,000 - 35,000 SAR",
-    skills: ["React", "Node.js", "TypeScript", "AWS", "GraphQL"],
-    posted: "2 days ago",
-    applicants: 23,
-    logo: "🏢",
-    description:
-      "Join Saudi Arabia's leading tech transformation initiative building next-generation digital solutions.",
-    urgent: true,
-  },
-  {
-    id: "fallback-2",
-    title: "Product Manager",
-    company: "Qatar Airways Group",
-    location: "Doha, Qatar",
-    type: "Full-time",
-    salary: "18,000 - 25,000 QAR",
-    skills: [
-      "Product Strategy",
-      "Analytics",
-      "Leadership",
-      "Agile",
-      "Aviation Tech",
-    ],
-    posted: "1 day ago",
-    applicants: 41,
-    logo: "✈️",
-    description:
-      "Drive digital product innovation for Qatar's world-class airline and travel ecosystem.",
-  },
-  {
-    id: "fallback-3",
-    title: "UX Designer",
-    company: "Zain Jordan",
-    location: "Amman, Jordan",
-    type: "Full-time",
-    salary: "1,200 - 1,800 JOD",
-    skills: ["Figma", "User Research", "Arabic UX", "Mobile Design"],
-    posted: "3 days ago",
-    applicants: 18,
-    logo: "📱",
-    description:
-      "Design innovative digital experiences for Jordan's leading telecommunications company.",
-  },
-];
-
 const jobTypes = [
   "All",
   "Full-time",
@@ -93,17 +40,7 @@ const salaryRanges = [
   "35K - 50K",
   "50K+",
 ];
-const companies = [
-  "All",
-  "Aramco Digital",
-  "Qatar Airways",
-  "Zain",
-  "NEOM Tech",
-  "Careem",
-  "Ooredoo",
-  "Dubai Police",
-  "KAUST",
-];
+const companies = ["All"];
 const industries = [
   "All",
   "Technology",
@@ -229,10 +166,11 @@ export default function JobsPage() {
       setCurrentPage(page);
     } catch (error) {
       console.error("Error fetching jobs:", error);
-      setApiError("Failed to load jobs");
-      // Fallback to hardcoded data
-      setJobs(fallbackJobsData);
-      setTotalJobs(fallbackJobsData.length);
+      setApiError("Failed to load jobs from server");
+      // Set empty state instead of fallback data
+      setJobs([]);
+      setTotalJobs(0);
+      setPagination(undefined);
     } finally {
       setLoading(false);
     }

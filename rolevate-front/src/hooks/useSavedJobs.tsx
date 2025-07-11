@@ -39,25 +39,33 @@ export function useSavedJobs() {
       setIsLoading(true);
       setError(null);
 
-      console.log('loadSavedJobs: Starting to load saved jobs', { user: user?.userType, hasProfile: !!user?.candidateProfile });
+      console.log("loadSavedJobs: Starting to load saved jobs", {
+        user: user?.userType,
+        hasProfile: !!user?.candidateProfile,
+      });
 
       // If no user, don't load saved jobs
       if (!user) {
-        console.log('loadSavedJobs: No user, setting empty saved jobs');
+        console.log("loadSavedJobs: No user, setting empty saved jobs");
         setSavedJobIds(new Set());
         return;
       }
 
       // Only candidates can have saved jobs
       if (user.userType !== "CANDIDATE") {
-        console.log('loadSavedJobs: User is not candidate, setting empty saved jobs');
+        console.log(
+          "loadSavedJobs: User is not candidate, setting empty saved jobs"
+        );
         setSavedJobIds(new Set());
         return;
       }
 
       // Load saved jobs from user profile if available, otherwise from API
       if (user.candidateProfile?.savedJobs) {
-        console.log('loadSavedJobs: Found saved jobs in profile', user.candidateProfile.savedJobs);
+        console.log(
+          "loadSavedJobs: Found saved jobs in profile",
+          user.candidateProfile.savedJobs
+        );
         // Check if savedJobs is array of strings (job IDs) or objects
         const savedJobsData = user.candidateProfile.savedJobs;
 
@@ -66,23 +74,25 @@ export function useSavedJobs() {
           // If first item is a string, treat as array of job IDs
           if (typeof savedJobsData[0] === "string") {
             jobIds = new Set(savedJobsData as string[]);
-            console.log('loadSavedJobs: Treating as string array', jobIds);
+            console.log("loadSavedJobs: Treating as string array", jobIds);
           } else {
             // If objects, extract jobId property
             jobIds = new Set(
               savedJobsData.map((savedJob: any) => savedJob.jobId)
             );
-            console.log('loadSavedJobs: Treating as object array', jobIds);
+            console.log("loadSavedJobs: Treating as object array", jobIds);
           }
         } else {
           jobIds = new Set();
-          console.log('loadSavedJobs: Empty saved jobs array');
+          console.log("loadSavedJobs: Empty saved jobs array");
         }
 
         setSavedJobIds(jobIds);
         console.log("Loaded saved jobs from profile:", Array.from(jobIds));
       } else {
-        console.log('loadSavedJobs: No saved jobs in profile, fetching from API');
+        console.log(
+          "loadSavedJobs: No saved jobs in profile, fetching from API"
+        );
         // Fallback to API call
         const savedJobs = await getSavedJobs();
         const jobIds = new Set(savedJobs.map((job) => job.jobId));
@@ -102,25 +112,28 @@ export function useSavedJobs() {
   const isJobSaved = (jobId: string): boolean => {
     // If user is not a candidate, they can't save jobs
     if (!user || user.userType !== "CANDIDATE") {
-      console.log('isJobSaved: User not candidate or not logged in', { user: user?.userType, jobId });
+      console.log("isJobSaved: User not candidate or not logged in", {
+        user: user?.userType,
+        jobId,
+      });
       return false;
     }
     const isSaved = savedJobIds.has(jobId);
-    console.log('isJobSaved check:', { 
-      jobId, 
-      isSaved, 
+    console.log("isJobSaved check:", {
+      jobId,
+      isSaved,
       savedJobIds: Array.from(savedJobIds),
-      savedJobIdsSize: savedJobIds.size 
+      savedJobIdsSize: savedJobIds.size,
     });
     return isSaved;
   };
 
   const canSaveJobs = (): boolean => {
     const canSave = user !== null && user.userType === "CANDIDATE";
-    console.log('canSaveJobs check:', { 
-      user: user?.userType, 
-      canSave, 
-      hasUser: !!user 
+    console.log("canSaveJobs check:", {
+      user: user?.userType,
+      canSave,
+      hasUser: !!user,
     });
     return canSave;
   };
