@@ -11,12 +11,15 @@ import {
   ClockIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
+  StarIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   CVData,
   uploadCV,
   getCVs,
   deleteCV,
+  activateCV,
   transformCVData,
 } from "@/services/cv";
 
@@ -55,6 +58,12 @@ export default function CVPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showActivationModal, setShowActivationModal] = useState(false);
+  const [pendingActivationCV, setPendingActivationCV] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load CVs on component mount
@@ -83,11 +92,48 @@ export default function CVPage() {
       const response = await uploadCV(file);
       const transformedCV = transformCVData(response);
       setCvs((prev) => [transformedCV, ...prev]);
+
+      // Show activation modal for the newly uploaded CV
+      setPendingActivationCV({ id: response.id, name: file.name });
+      setShowActivationModal(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload CV");
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleConfirmActivation = async () => {
+    if (!pendingActivationCV) return;
+
+    try {
+      await handleActivateCV(pendingActivationCV.id);
+      setSuccessMessage(
+        `CV "${pendingActivationCV.name}" has been uploaded and activated successfully!`
+      );
+    } catch (activateErr) {
+      setError(
+        activateErr instanceof Error
+          ? activateErr.message
+          : "Failed to activate CV"
+      );
+    }
+
+    setShowActivationModal(false);
+    setPendingActivationCV(null);
+    setTimeout(() => setSuccessMessage(null), 5000);
+  };
+
+  const handleDeclineActivation = () => {
+    if (pendingActivationCV) {
+      setSuccessMessage(
+        `CV "${pendingActivationCV.name}" uploaded successfully! You can activate it later from the CV list.`
+      );
+      setTimeout(() => setSuccessMessage(null), 5000);
+    }
+
+    setShowActivationModal(false);
+    setPendingActivationCV(null);
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,6 +153,28 @@ export default function CVPage() {
       setCvs((prev) => prev.filter((cv) => cv.id !== cvId));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete CV");
+    }
+  };
+
+  const handleActivateCV = async (cvId: string) => {
+    try {
+      setError(null);
+      setSuccessMessage(null);
+      await activateCV(cvId);
+
+      // Update the CVs list - deactivate all others and activate the selected one
+      setCvs((prev) =>
+        prev.map((cv) => ({
+          ...cv,
+          isActive: cv.id === cvId,
+        }))
+      );
+
+      setSuccessMessage("CV activated successfully!");
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to activate CV");
     }
   };
 
@@ -135,6 +203,19 @@ export default function CVPage() {
             <button
               onClick={() => setError(null)}
               className="mt-2 text-sm text-red-600 hover:text-red-800"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-800">{successMessage}</p>
+            <button
+              onClick={() => setSuccessMessage(null)}
+              className="mt-2 text-sm text-green-600 hover:text-green-800"
             >
               Dismiss
             </button>
@@ -240,8 +321,9 @@ export default function CVPage() {
                             {cv.originalFileName}
                           </h3>
                           {cv.isActive && (
-                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                              Active
+                            <span className="inline-flex items-center space-x-1 px-2 py-1 text-xs font-medium rounded-full bg-[#0fc4b5] text-white">
+                              <StarIcon className="w-3 h-3" />
+                              <span>Active</span>
                             </span>
                           )}
                         </div>
@@ -290,6 +372,15 @@ export default function CVPage() {
                         >
                           Download
                         </button>
+                        {!cv.isActive && (
+                          <button
+                            onClick={() => handleActivateCV(cv.id)}
+                            className="inline-flex items-center space-x-1 px-3 py-1 text-sm bg-[#0fc4b5] text-white rounded-md hover:bg-[#0ba399] transition-colors"
+                          >
+                            <StarIcon className="w-3 h-3" />
+                            <span>Set as Active</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -328,6 +419,84 @@ export default function CVPage() {
             </div>
           </div>
         </div>
+
+        {/* Activation Modal */}
+        {showActivationModal && pendingActivationCV && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              {/* Background overlay */}
+              <div
+                className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                onClick={handleDeclineActivation}
+                aria-hidden="true"
+              ></div>
+
+              {/* This element is to trick the browser into centering the modal contents. */}
+              <span
+                className="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+              >
+                &#8203;
+              </span>
+
+              {/* Modal panel */}
+              <div className="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-[#0fc4b5] bg-opacity-10 sm:mx-0 sm:h-10 sm:w-10">
+                    <DocumentArrowUpIcon
+                      className="h-6 w-6 text-[#0fc4b5]"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3
+                      className="text-lg leading-6 font-medium text-gray-900"
+                      id="modal-title"
+                    >
+                      CV Uploaded Successfully!
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Would you like to set "{pendingActivationCV.name}" as
+                        your active CV?
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <div className="flex">
+                    <InformationCircleIcon className="h-5 w-5 text-yellow-400" />
+                    <div className="ml-3">
+                      <p className="text-sm text-yellow-700">
+                        Setting this as active will deactivate your current CV
+                        and make this one visible to employers.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                  <button
+                    type="button"
+                    onClick={handleConfirmActivation}
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#0fc4b5] text-base font-medium text-white hover:bg-[#0ba399] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0fc4b5] sm:ml-3 sm:w-auto sm:text-sm transition-colors"
+                  >
+                    <StarIcon className="w-4 h-4 mr-2" />
+                    Set as Active
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeclineActivation}
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:w-auto sm:text-sm transition-colors"
+                  >
+                    Keep Inactive
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

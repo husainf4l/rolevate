@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import JobCard, { JobData } from "@/components/common/JobCard";
 import { Button } from "@/components/common/Button";
 import { JobService, JobPost } from "@/services/job";
+import { useSavedJobs } from "@/hooks/useSavedJobs";
 
 // Fallback data in case API fails
 const fallbackJobsData: JobData[] = [
@@ -127,7 +128,9 @@ export default function JobsPage() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [savedJobs, setSavedJobs] = useState<string[]>([]);
+
+  // Use the useSavedJobs hook for canonical saved jobs state
+  const { isJobSaved, toggleSaveJob } = useSavedJobs();
 
   // API state
   const [jobs, setJobs] = useState<JobData[]>([]);
@@ -256,12 +259,13 @@ export default function JobsPage() {
     console.log(`Applying for job ID: ${jobId}`);
   };
 
-  const handleSaveJob = (jobId: string) => {
-    setSavedJobs((prev) =>
-      prev.includes(jobId)
-        ? prev.filter((id) => id !== jobId)
-        : [...prev, jobId]
-    );
+  const handleSaveJob = async (jobId: string) => {
+    try {
+      await toggleSaveJob(jobId);
+    } catch (error) {
+      console.error("Failed to toggle save job:", error);
+      // Error handling is already done in the hook
+    }
   };
 
   // Handle page change
@@ -727,7 +731,7 @@ export default function JobsPage() {
                                 job={job}
                                 onApply={handleApply}
                                 onSave={handleSaveJob}
-                                isSaved={savedJobs.includes(job.id)}
+                                isSaved={isJobSaved(job.id)}
                                 showDescription={true}
                                 compact={false}
                               />

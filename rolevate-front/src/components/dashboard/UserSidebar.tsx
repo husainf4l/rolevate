@@ -31,7 +31,7 @@ const navigationItems = [
   {
     icon: BriefcaseIcon,
     label: "Browse Jobs",
-    href: "/userdashboard/jobs",
+    href: "/jobs",
   },
   {
     icon: ClipboardDocumentListIcon,

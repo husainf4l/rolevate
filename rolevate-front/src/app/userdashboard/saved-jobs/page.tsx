@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import {
   BookmarkIcon,
   MapPinIcon,
@@ -7,90 +9,56 @@ import {
   BriefcaseIcon,
   TrashIcon,
   EyeIcon,
+  HeartIcon,
 } from "@heroicons/react/24/outline";
+import { useSavedJobs } from "@/hooks/useSavedJobs";
+import { getSavedJobsDetails } from "@/services/savedJobs";
 
 interface SavedJob {
   id: string;
   title: string;
-  company: string;
+  department: string;
   location: string;
   salary: string;
-  type: string;
-  savedDate: string;
+  type: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP";
+  deadline: string;
   description: string;
-  isRemote: boolean;
-  experienceLevel: string;
-  matchScore: number;
-  applicationDeadline?: string;
+  shortDescription: string;
+  responsibilities: string;
+  requirements: string;
+  benefits: string;
+  skills: string[];
+  experience: string;
+  education: string;
+  jobLevel: "ENTRY" | "MID" | "SENIOR" | "EXECUTIVE";
+  workType: "ON_SITE" | "REMOTE" | "HYBRID";
+  industry: string;
+  status: "ACTIVE" | "INACTIVE" | "CLOSED";
+  featured: boolean;
+  applicants: number;
+  views: number;
+  createdAt: string;
+  updatedAt: string;
+  company: {
+    id: string;
+    name: string;
+    industry: string;
+    numberOfEmployees: number;
+    address: {
+      city: string;
+      country: string;
+    };
+  };
+  screeningQuestions: Array<{
+    id: string;
+    question: string;
+    type: "YES_NO" | "MULTIPLE_CHOICE" | "TEXT";
+    required: boolean;
+  }>;
+  _count: {
+    applications: number;
+  };
 }
-
-const mockSavedJobs: SavedJob[] = [
-  {
-    id: "1",
-    title: "Senior React Developer",
-    company: "TechFlow Solutions",
-    location: "San Francisco, CA",
-    salary: "$120k - $150k",
-    type: "Full-time",
-    savedDate: "2025-01-07",
-    description:
-      "We're looking for a senior React developer to join our growing team and help build next-generation web applications.",
-    isRemote: false,
-    experienceLevel: "Senior",
-    matchScore: 95,
-    applicationDeadline: "2025-01-15",
-  },
-  {
-    id: "2",
-    title: "Frontend Engineer",
-    company: "Innovation Labs",
-    location: "Remote",
-    salary: "$100k - $130k",
-    type: "Full-time",
-    savedDate: "2025-01-06",
-    description:
-      "Join our remote team to create amazing user experiences using cutting-edge technologies.",
-    isRemote: true,
-    experienceLevel: "Mid-level",
-    matchScore: 88,
-    applicationDeadline: "2025-01-20",
-  },
-  {
-    id: "3",
-    title: "UI/UX Developer",
-    company: "CreativeDesign Co.",
-    location: "New York, NY",
-    salary: "$90k - $120k",
-    type: "Contract",
-    savedDate: "2025-01-05",
-    description:
-      "Design and develop beautiful, intuitive interfaces for our client projects.",
-    isRemote: false,
-    experienceLevel: "Mid-level",
-    matchScore: 82,
-  },
-  {
-    id: "4",
-    title: "Full Stack Developer",
-    company: "StartupXYZ",
-    location: "Austin, TX",
-    salary: "$110k - $140k",
-    type: "Full-time",
-    savedDate: "2025-01-04",
-    description:
-      "Build end-to-end solutions in a fast-paced startup environment.",
-    isRemote: false,
-    experienceLevel: "Mid-level",
-    matchScore: 76,
-    applicationDeadline: "2025-01-18",
-  },
-];
-
-const getMatchScoreColor = (score: number) => {
-  if (score >= 90) return "bg-green-100 text-green-800";
-  if (score >= 80) return "bg-yellow-100 text-yellow-800";
-  return "bg-red-100 text-red-800";
-};
 
 const isDeadlineApproaching = (deadline: string) => {
   const deadlineDate = new Date(deadline);
@@ -100,7 +68,86 @@ const isDeadlineApproaching = (deadline: string) => {
   return diffDays <= 3;
 };
 
+const formatJobType = (type: string) => {
+  switch (type) {
+    case "FULL_TIME":
+      return "Full-time";
+    case "PART_TIME":
+      return "Part-time";
+    case "CONTRACT":
+      return "Contract";
+    case "INTERNSHIP":
+      return "Internship";
+    default:
+      return type;
+  }
+};
+
 export default function SavedJobsPage() {
+  const { toggleSaveJob } = useSavedJobs();
+  const [savedJobsDetails, setSavedJobsDetails] = useState<SavedJob[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch saved jobs details from API
+  useEffect(() => {
+    const fetchSavedJobsDetails = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await getSavedJobsDetails();
+        setSavedJobsDetails(response.savedJobs);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load saved jobs"
+        );
+        console.error("Failed to fetch saved jobs details:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSavedJobsDetails();
+  }, []);
+
+  const handleUnsaveJob = async (jobId: string) => {
+    try {
+      await toggleSaveJob(jobId);
+      // Remove from local state
+      setSavedJobsDetails((prev) => prev.filter((job) => job.id !== jobId));
+    } catch (error) {
+      console.error("Failed to unsave job:", error);
+      // You could show a toast notification here
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0fc4b5] mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your saved jobs...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-red-800 mb-2">
+              Error Loading Saved Jobs
+            </h3>
+            <p className="text-red-700">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex-1 p-8">
       <div className="max-w-7xl mx-auto">
@@ -119,7 +166,7 @@ export default function SavedJobsPage() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Saved</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {mockSavedJobs.length}
+                  {savedJobsDetails.length}
                 </p>
               </div>
               <div className="p-3 bg-[#0fc4b5] bg-opacity-10 rounded-lg">
@@ -148,10 +195,9 @@ export default function SavedJobsPage() {
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {
-                    mockSavedJobs.filter(
+                    savedJobsDetails.filter(
                       (job) =>
-                        job.applicationDeadline &&
-                        isDeadlineApproaching(job.applicationDeadline)
+                        job.deadline && isDeadlineApproaching(job.deadline)
                     ).length
                   }
                 </p>
@@ -182,15 +228,15 @@ export default function SavedJobsPage() {
               </select>
             </div>
             <div className="text-sm text-gray-500">
-              {mockSavedJobs.length} saved jobs
+              {savedJobsDetails.length} saved jobs
             </div>
           </div>
         </div>
 
         {/* Saved Jobs List */}
-        {mockSavedJobs.length === 0 ? (
+        {savedJobsDetails.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <BookmarkIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <HeartIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No saved jobs yet
             </h3>
@@ -206,7 +252,7 @@ export default function SavedJobsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {mockSavedJobs.map((job) => (
+            {savedJobsDetails.map((job) => (
               <div
                 key={job.id}
                 className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
@@ -217,27 +263,24 @@ export default function SavedJobsPage() {
                       <h3 className="text-xl font-semibold text-gray-900">
                         {job.title}
                       </h3>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getMatchScoreColor(
-                          job.matchScore
-                        )}`}
-                      >
-                        {job.matchScore}% match
-                      </span>
-                      {job.isRemote && (
+                      {job.workType === "REMOTE" && (
                         <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
                           Remote
                         </span>
                       )}
-                      {job.applicationDeadline &&
-                        isDeadlineApproaching(job.applicationDeadline) && (
-                          <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                            Deadline Soon
-                          </span>
-                        )}
+                      {job.workType === "HYBRID" && (
+                        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                          Hybrid
+                        </span>
+                      )}
+                      {job.deadline && isDeadlineApproaching(job.deadline) && (
+                        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                          Deadline Soon
+                        </span>
+                      )}
                     </div>
                     <p className="text-lg text-[#0fc4b5] font-medium mb-2">
-                      {job.company}
+                      {job.company.name}
                     </p>
                     <p className="text-gray-600 mb-4 line-clamp-2">
                       {job.description}
@@ -253,11 +296,11 @@ export default function SavedJobsPage() {
                       </div>
                       <div className="flex items-center space-x-1">
                         <BriefcaseIcon className="w-4 h-4" />
-                        <span>{job.type}</span>
+                        <span>{formatJobType(job.type)}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <ClockIcon className="w-4 h-4" />
-                        <span>{job.experienceLevel}</span>
+                        <span>{job.experience}</span>
                       </div>
                     </div>
                   </div>
@@ -265,7 +308,11 @@ export default function SavedJobsPage() {
                     <button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
                       <EyeIcon className="w-5 h-5" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                    <button
+                      onClick={() => handleUnsaveJob(job.id)}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Remove from saved jobs"
+                    >
                       <TrashIcon className="w-5 h-5" />
                     </button>
                   </div>
@@ -274,19 +321,21 @@ export default function SavedJobsPage() {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <span>
-                      Saved on {new Date(job.savedDate).toLocaleDateString()}
+                      Saved on {new Date(job.createdAt).toLocaleDateString()}
                     </span>
-                    {job.applicationDeadline && (
+                    {job.deadline && (
                       <span>
-                        Apply by{" "}
-                        {new Date(job.applicationDeadline).toLocaleDateString()}
+                        Apply by {new Date(job.deadline).toLocaleDateString()}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a
+                      href={`/jobs/${job.id}`}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
                       View Details
-                    </button>
+                    </a>
                     <button className="px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0ba399] transition-colors">
                       Apply Now
                     </button>

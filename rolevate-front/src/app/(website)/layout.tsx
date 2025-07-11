@@ -4,6 +4,7 @@ import "../globals.css";
 import Navbar from "@/components/common/navbar";
 import Footer from "@/components/common/Footer";
 import GDPRPopup from "@/components/common/GDPRPopup";
+import AuthProvider from "@/components/common/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,10 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-[#23272a] bg-white`}
       >
-        <Navbar />
-        <main className="pt-16">{children}</main>
-        <Footer />
-        <GDPRPopup />
+        <AuthProvider>
+          <Navbar />
+          <main className="pt-16">{children}</main>
+          <Footer />
+          <GDPRPopup />
+        </AuthProvider>
       </body>
     </html>
   );

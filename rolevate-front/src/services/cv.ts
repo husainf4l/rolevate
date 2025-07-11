@@ -96,6 +96,24 @@ export async function deleteCV(cvId: string): Promise<{ success: boolean; messag
   return res.json();
 }
 
+// Activate CV
+export async function activateCV(cvId: string): Promise<CVResponseDto> {
+  const res = await fetch(`${BASE_API}/candidate/cvs/${cvId}/activate`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error?.message || 'Failed to activate CV');
+  }
+
+  return res.json();
+}
+
 // Helper function to transform backend CV data to frontend format
 export function transformCVData(cv: CVResponseDto): CVData {
   return {
