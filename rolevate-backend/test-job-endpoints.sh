@@ -1,6 +1,12 @@
 #!/bin/bash
 
-echo "Testing Job Creation Endpoint"
+echo "Testi    "experience": "5+ years",
+    "education": "Bachelor'\''s degree in Computer Science or related field",
+    "jobLevel": "SENIOR",
+    "workType": "HYBRID",
+    "industry": "Technology",
+    "companyDescription": "We are a leading technology company focused on innovation and excellence. Our team is passionate about building cutting-edge solutions.",
+    "cvAnalysisPrompt": "Analyze this CV for a senior software engineer position. Look for TypeScript, React, Node.js experience and assess technical skills."dpoint"
 echo "=============================="
 
 # First, let's test the job creation endpoint
@@ -28,24 +34,6 @@ curl -X POST "http://localhost:3000/api/jobs" \
     "workType": "HYBRID",
     "industry": "Technology",
     "companyDescription": "We are a leading technology company focused on innovation and excellence. Our team is passionate about building cutting-edge solutions.",
-    "screeningQuestions": [
-      {
-        "question": "Do you have experience with TypeScript?",
-        "type": "YES_NO",
-        "required": true
-      },
-      {
-        "question": "How many years of React experience do you have?",
-        "type": "NUMBER",
-        "required": true
-      },
-      {
-        "question": "Which databases have you worked with?",
-        "type": "MULTIPLE_CHOICE",
-        "options": ["PostgreSQL", "MySQL", "MongoDB", "Redis"],
-        "required": false
-      }
-    ],
     "cvAnalysisPrompt": "Analyze the candidate'\''s CV focusing on their technical skills, experience with our tech stack, and leadership potential.",
     "interviewPrompt": "Conduct a technical interview focusing on system design, problem-solving, and cultural fit."
   }'

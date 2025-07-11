@@ -10,9 +10,24 @@ import { JobModule } from './job/job.module';
 import { CandidateModule } from './candidate/candidate.module';
 import { AppCacheModule } from './cache/cache.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { LiveKitModule } from './livekit/livekit.module';
+import { ApplicationModule } from './application/application.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, CompanyModule, AiautocompleteModule, JobModule, CandidateModule, AppCacheModule, UploadsModule],
+  // Removed duplicate imports property
+  imports: [
+    PrismaModule,
+    AuthModule,
+    UserModule,
+    CompanyModule,
+    AiautocompleteModule,
+    JobModule,
+    CandidateModule,
+    AppCacheModule,
+    UploadsModule,
+    LiveKitModule,
+    ApplicationModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -116,13 +116,13 @@ export class ApplicationService {
             where: { id: applicationId },
             data: {
               cvAnalysisScore: analysisResult.score,
-              cvAnalysisResults: analysisResult,
+              cvAnalysisResults: analysisResult as any, // Cast to any for JSON field
               analyzedAt: new Date(),
             },
           });
 
           // Clear cache after analysis
-          await this.cacheService.invalidatePattern(`applications:*`);
+          await this.cacheService.clear();
         } catch (error) {
           console.error('Background CV analysis failed:', error);
         }
@@ -266,7 +266,7 @@ export class ApplicationService {
     });
 
     // Clear cache
-    await this.cacheService.invalidatePattern(`applications:*`);
+    await this.cacheService.clear();
 
     return this.mapToApplicationResponse(updatedApplication);
   }

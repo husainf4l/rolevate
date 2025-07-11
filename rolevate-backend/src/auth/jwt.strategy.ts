@@ -1,11 +1,17 @@
+
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
+import { UserService } from '../user/user.service';
+import { CandidateService } from '../candidate/candidate.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(
+    private readonly userService: UserService,
+    private readonly candidateService: CandidateService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
@@ -49,10 +55,27 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     console.log('=== JWT Strategy validate called ===');
     console.log('JWT payload:', payload);
-    
-    const result = { userId: payload.sub, email: payload.email, userType: payload.userType };
+
+    // Fetch user and candidate profile if userType is CANDIDATE
+    let candidateProfileId: string | undefined = undefined;
+    if (payload.userType === 'CANDIDATE') {
+      try {
+        const profile = await this.candidateService.findProfileByUserId(payload.sub);
+        if (profile) {
+          candidateProfileId = profile.id;
+        }
+      } catch (e) {
+        console.log('Error fetching candidate profile in JWT strategy:', e);
+      }
+    }
+
+    const result = {
+      userId: payload.sub,
+      email: payload.email,
+      userType: payload.userType,
+      candidateProfileId,
+    };
     console.log('JWT validation result:', result);
-    
     return result;
   }
 }
