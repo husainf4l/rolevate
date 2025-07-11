@@ -100,6 +100,18 @@ export interface JobPost {
   aiSecondInterviewPrompt?: string;
   cvAnalysisPrompt?: string;
   interviewPrompt?: string;
+  // Add company information
+  company?: {
+    id: string;
+    name: string;
+    address?: {
+      id: string;
+      street: string;
+      city: string;
+      country: string;
+    } | null;
+  } | null;
+  companyId?: string;
 }
 
 export interface GetJobsResponse {
@@ -571,6 +583,13 @@ export class JobService {
       aiCvAnalysisPrompt: job.aiCvAnalysisPrompt || '',
       aiFirstInterviewPrompt: job.aiFirstInterviewPrompt || '',
       aiSecondInterviewPrompt: job.aiSecondInterviewPrompt || '',
+      // Add company information
+      company: job.company ? {
+        id: job.company.id || '',
+        name: job.company.name || '',
+        address: job.company.address || null
+      } : null,
+      companyId: job.companyId || '',
     }));
 
     return {
@@ -678,4 +697,165 @@ export class JobService {
       message: data.message || 'Job deleted successfully',
     };
   }
+
+  /**
+   * Fetch featured jobs (public endpoint - no auth required)
+   */
+  static async getFeaturedJobs(): Promise<JobPost[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/public/featured`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Failed to fetch featured jobs' }));
+        throw new Error(error.message || 'Failed to fetch featured jobs');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching featured jobs:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch all public jobs with pagination (public endpoint - no auth required)
+   */
+  static async getAllPublicJobs(
+    page: number = 1, 
+    limit: number = 10, 
+    search?: string
+  ): Promise<GetJobsResponse> {
+    try {
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      
+      if (search && search.trim()) {
+        queryParams.append('search', search.trim());
+      }
+
+      const response = await fetch(`${this.baseUrl}/api/jobs/public/all?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Failed to fetch public jobs' }));
+        throw new Error(error.message || 'Failed to fetch public jobs');
+      }
+
+      const data = await response.json();
+      
+      // Transform the backend response to match our frontend interface
+      const jobs: JobPost[] = (data.jobs || []).map((job: any) => ({
+        id: job.id || job._id || '',
+        title: job.title || '',
+        department: job.department || '',
+        location: job.location || '',
+        salary: job.salary || '',
+        type: job.type || 'FULL_TIME',
+        status: job.status || 'ACTIVE',
+        applicants: job.applicants || job.applicantCount || 0,
+        views: job.views || job.viewCount || 0,
+        postedAt: job.postedAt || job.createdAt || '',
+        deadline: job.deadline || '',
+        description: job.description || '',
+        shortDescription: job.shortDescription || '',
+        responsibilities: job.responsibilities || '',
+        requirements: job.requirements || '',
+        benefits: job.benefits || '',
+        skills: job.skills || [],
+        experience: job.experience || '',
+        education: job.education || '',
+        jobLevel: job.jobLevel || '',
+        workType: job.workType || '',
+        industry: job.industry || '',
+        companyDescription: job.companyDescription || '',
+        // Add company information
+        company: job.company ? {
+          id: job.company.id || '',
+          name: job.company.name || '',
+          address: job.company.address || null
+        } : null,
+        companyId: job.companyId || '',
+      }));
+
+      return {
+        jobs,
+        total: data.total || 0,
+        pagination: data.pagination || undefined,
+      };
+    } catch (error) {
+      console.error('Error fetching public jobs:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a single public job by ID (public endpoint - no auth required)
+   */
+  static async getPublicJobById(jobId: string): Promise<JobPost> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/jobs/public/${jobId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: `Failed to fetch job with ID ${jobId}` }));
+        throw new Error(error.message || `Failed to fetch job with ID ${jobId}`);
+      }
+
+      const data = await response.json();
+      
+      // Transform the backend response to match our frontend interface
+      return {
+        id: data.id || data._id || '',
+        title: data.title || '',
+        department: data.department || '',
+        location: data.location || '',
+        salary: data.salary || '',
+        type: data.type || 'FULL_TIME',
+        status: data.status || 'ACTIVE',
+        applicants: data.applicants || data.applicantCount || 0,
+        views: data.views || data.viewCount || 0,
+        postedAt: data.postedAt || data.createdAt || '',
+        deadline: data.deadline || '',
+        description: data.description || '',
+        shortDescription: data.shortDescription || '',
+        responsibilities: data.responsibilities || '',
+        requirements: data.requirements || '',
+        benefits: data.benefits || '',
+        skills: data.skills || [],
+        experience: data.experience || '',
+        education: data.education || '',
+        jobLevel: data.jobLevel || '',
+        workType: data.workType || '',
+        industry: data.industry || '',
+        companyDescription: data.companyDescription || '',
+        // Add company information
+        company: data.company ? {
+          id: data.company.id || '',
+          name: data.company.name || '',
+          address: data.company.address || null
+        } : null,
+        companyId: data.companyId || '',
+      };
+    } catch (error) {
+      console.error('Error fetching public job:', error);
+      throw error;
+    }
+  }
+
 }

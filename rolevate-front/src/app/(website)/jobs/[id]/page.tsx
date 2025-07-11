@@ -1,13 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/common/Button";
 import { JobData } from "@/components/common/JobCard";
+import { JobService, JobPost } from "@/services/job";
 
 const jobsData: JobData[] = [
   {
-    id: 1,
+    id: "fallback-1",
     title: "Senior Software Engineer",
     company: "Aramco Digital",
     location: "Riyadh, Saudi Arabia",
@@ -22,7 +23,7 @@ const jobsData: JobData[] = [
     urgent: true,
   },
   {
-    id: 2,
+    id: "fallback-2",
     title: "Product Manager",
     company: "Qatar Airways Group",
     location: "Doha, Qatar",
@@ -42,7 +43,7 @@ const jobsData: JobData[] = [
       "Drive digital product innovation for Qatar's world-class airline and travel ecosystem. Lead cross-functional teams to deliver exceptional customer experiences across all touchpoints.",
   },
   {
-    id: 3,
+    id: "fallback-3",
     title: "UX Designer",
     company: "Zain Jordan",
     location: "Amman, Jordan",
@@ -56,7 +57,7 @@ const jobsData: JobData[] = [
       "Design innovative digital experiences for Jordan's leading telecommunications company. Focus on creating intuitive, accessible interfaces that serve diverse user needs across the region.",
   },
   {
-    id: 4,
+    id: "fallback-4",
     title: "Data Scientist",
     company: "NEOM Tech",
     location: "NEOM, Saudi Arabia",
@@ -71,7 +72,7 @@ const jobsData: JobData[] = [
     urgent: true,
   },
   {
-    id: 5,
+    id: "fallback-5",
     title: "Digital Marketing Manager",
     company: "Careem",
     location: "Dubai, UAE / Remote",
@@ -90,7 +91,7 @@ const jobsData: JobData[] = [
       "Lead regional marketing campaigns for the Middle East's super app serving millions. Drive user acquisition and engagement across multiple markets and platforms.",
   },
   {
-    id: 6,
+    id: "fallback-6",
     title: "Cloud Solutions Architect",
     company: "Ooredoo Qatar",
     location: "Doha, Qatar",
@@ -104,7 +105,7 @@ const jobsData: JobData[] = [
       "Architect next-generation cloud and 5G solutions for Qatar's digital transformation. Design scalable, secure infrastructure that supports the country's vision for digital innovation.",
   },
   {
-    id: 7,
+    id: "fallback-7",
     title: "Cybersecurity Specialist",
     company: "Dubai Police",
     location: "Dubai, UAE",
@@ -118,7 +119,7 @@ const jobsData: JobData[] = [
       "Protect Dubai's digital infrastructure with cutting-edge cybersecurity solutions. Join a team dedicated to maintaining the highest security standards for one of the world's smartest cities.",
   },
   {
-    id: 8,
+    id: "fallback-8",
     title: "AI Research Engineer",
     company: "KAUST",
     location: "Thuwal, Saudi Arabia",
@@ -139,9 +140,9 @@ const jobsData: JobData[] = [
   },
 ];
 
-// Change jobRequirements keys to numbers for proper TypeScript indexing
-const jobRequirements: { [key: number]: string[] } = {
-  1: [
+// Change jobRequirements keys to strings to match JobData id type
+const jobRequirements: { [key: string]: string[] } = {
+  "fallback-1": [
     "5+ years of experience in software development",
     "Expert knowledge of React, Node.js, and TypeScript",
     "Experience with AWS cloud services",
@@ -149,7 +150,7 @@ const jobRequirements: { [key: number]: string[] } = {
     "Experience with microservices architecture",
     "Fluency in English and Arabic preferred",
   ],
-  2: [
+  "fallback-2": [
     "3+ years of product management experience",
     "Experience in aviation or travel industry preferred",
     "Strong analytical and data-driven decision making skills",
@@ -157,7 +158,7 @@ const jobRequirements: { [key: number]: string[] } = {
     "Experience with Agile development methodologies",
     "Excellent communication skills in English and Arabic",
   ],
-  3: [
+  "fallback-3": [
     "3+ years of UX/UI design experience",
     "Proficiency in Figma and design systems",
     "Experience with user research and testing",
@@ -165,7 +166,7 @@ const jobRequirements: { [key: number]: string[] } = {
     "Mobile-first design approach",
     "Portfolio showcasing relevant work",
   ],
-  4: [
+  "fallback-4": [
     "PhD or Master's in Computer Science, Statistics, or related field",
     "5+ years of experience in machine learning and AI",
     "Expertise in Python, TensorFlow, and PyTorch",
@@ -173,7 +174,7 @@ const jobRequirements: { [key: number]: string[] } = {
     "Knowledge of smart city technologies and IoT",
     "Research publication experience preferred",
   ],
-  5: [
+  "fallback-5": [
     "4+ years of digital marketing experience",
     "Experience in Middle East markets",
     "Proficiency in Arabic content creation",
@@ -181,7 +182,7 @@ const jobRequirements: { [key: number]: string[] } = {
     "Experience with marketing automation tools",
     "Data-driven approach to campaign optimization",
   ],
-  6: [
+  "fallback-6": [
     "5+ years of cloud architecture experience",
     "AWS and Azure certifications",
     "Experience with 5G infrastructure",
@@ -189,7 +190,7 @@ const jobRequirements: { [key: number]: string[] } = {
     "Strong problem-solving and communication skills",
     "Experience in telecommunications industry preferred",
   ],
-  7: [
+  "fallback-7": [
     "Bachelor's degree in Cybersecurity or related field",
     "3+ years of cybersecurity experience",
     "Experience with threat analysis and incident response",
@@ -197,7 +198,7 @@ const jobRequirements: { [key: number]: string[] } = {
     "Fluency in Arabic and English",
     "Security certifications (CISSP, CEH, etc.) preferred",
   ],
-  8: [
+  "fallback-8": [
     "PhD in Machine Learning, AI, or related field",
     "2+ years of research experience",
     "Expertise in deep learning and neural networks",
@@ -221,25 +222,185 @@ const benefits = [
 export default function JobDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  // const [isApplying, setIsApplying] = useState(false);
+  const [job, setJob] = useState<JobData | null>(null);
+  const [jobPost, setJobPost] = useState<JobPost | null>(null); // Store original job post data
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const jobId = parseInt(params.id as string);
-  const job = jobsData.find((j) => j.id === jobId);
+  const jobId = params.id as string;
 
-  if (!job) {
+  // Helper function to convert JobPost to JobData format
+  const convertJobPostToJobData = (jobPost: JobPost): JobData => {
+    // Get a dynamic logo based on company name or industry
+    const getCompanyLogo = (companyName?: string, industry?: string) => {
+      if (!companyName && !industry) return "🏢";
+
+      const searchText = `${companyName || ""} ${industry || ""}`.toLowerCase();
+
+      if (
+        searchText.includes("healthcare") ||
+        searchText.includes("health") ||
+        searchText.includes("medical")
+      )
+        return "🏥";
+      if (searchText.includes("tech") || searchText.includes("software"))
+        return "💻";
+      if (searchText.includes("bank") || searchText.includes("finance"))
+        return "�";
+      if (searchText.includes("education") || searchText.includes("school"))
+        return "🎓";
+      if (searchText.includes("retail") || searchText.includes("shop"))
+        return "🛍️";
+      if (searchText.includes("food") || searchText.includes("restaurant"))
+        return "🍽️";
+      if (searchText.includes("travel") || searchText.includes("airline"))
+        return "✈️";
+      if (
+        searchText.includes("energy") ||
+        searchText.includes("oil") ||
+        searchText.includes("gas")
+      )
+        return "⚡";
+      if (
+        searchText.includes("construction") ||
+        searchText.includes("building")
+      )
+        return "🏗️";
+      if (
+        searchText.includes("telecom") ||
+        searchText.includes("communication")
+      )
+        return "📱";
+      if (searchText.includes("automotive") || searchText.includes("car"))
+        return "🚗";
+      if (searchText.includes("media") || searchText.includes("entertainment"))
+        return "🎬";
+      if (searchText.includes("sales") || searchText.includes("trading"))
+        return "💼";
+      return "🏢";
+    };
+
+    // Calculate time since posting
+    const getTimeAgo = (dateString: string) => {
+      const now = new Date();
+      const posted = new Date(dateString);
+      const diffTime = Math.abs(now.getTime() - posted.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) return "1 day ago";
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+      return `${Math.ceil(diffDays / 30)} months ago`;
+    };
+
+    return {
+      id: jobPost.id,
+      title: jobPost.title,
+      company: jobPost.company?.name || "Company",
+      location: jobPost.location,
+      type:
+        jobPost.type === "FULL_TIME"
+          ? "Full-time"
+          : jobPost.type === "PART_TIME"
+          ? "Part-time"
+          : jobPost.type === "CONTRACT"
+          ? "Contract"
+          : "Remote",
+      salary: jobPost.salary || "Competitive salary",
+      skills: jobPost.skills || [],
+      posted: getTimeAgo(jobPost.postedAt || new Date().toISOString()),
+      applicants: jobPost.applicants || 0,
+      logo: getCompanyLogo(jobPost.company?.name, jobPost.industry),
+      description: jobPost.description || jobPost.shortDescription || "",
+      urgent: false, // Can be enhanced later if needed
+    };
+  };
+
+  // Fetch job data from API
+  useEffect(() => {
+    const fetchJob = async () => {
+      if (!jobId) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        const jobPostData = await JobService.getPublicJobById(jobId);
+        const convertedJob = convertJobPostToJobData(jobPostData);
+        setJob(convertedJob);
+        setJobPost(jobPostData); // Store original job post data
+      } catch (err) {
+        console.error("Error fetching job:", err);
+        setError("Failed to load job details");
+        // Try to find in fallback data
+        const fallbackJob = jobsData.find((j) => j.id === jobId);
+        if (fallbackJob) {
+          setJob(fallbackJob);
+          setError(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [jobId]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <svg
+            className="animate-spin h-12 w-12 text-blue-500 mx-auto mb-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"
+            ></path>
+          </svg>
+          <div className="text-lg text-gray-500">Loading job details...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state or job not found
+  if (error || !job) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-gray-400 text-6xl mb-4">❌</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Job Not Found
+            {error ? "Failed to Load Job" : "Job Not Found"}
           </h1>
           <p className="text-gray-600 mb-6">
-            The job you're looking for doesn't exist or has been removed.
+            {error
+              ? "There was an error loading the job details. Please try again."
+              : "The job you're looking for doesn't exist or has been removed."}
           </p>
-          <Button variant="primary" onClick={() => router.push("/jobs")}>
-            Back to Jobs
-          </Button>
+          <div className="flex gap-4 justify-center">
+            <Button
+              variant="secondary"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </Button>
+            <Button variant="primary" onClick={() => router.push("/jobs")}>
+              Back to Jobs
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -248,8 +409,6 @@ export default function JobDetailsPage() {
   const handleApply = () => {
     router.push(`/jobs/${jobId}/apply`);
   };
-
-  const requirements = jobRequirements[jobId] || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -311,6 +470,24 @@ export default function JobDetailsPage() {
                       </svg>
                       <span className="font-semibold">{job.company}</span>
                     </div>
+                    {jobPost?.department && (
+                      <div className="flex items-center gap-1">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                          />
+                        </svg>
+                        <span>{jobPost.department}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <svg
                         className="w-4 h-4"
@@ -334,13 +511,68 @@ export default function JobDetailsPage() {
                       <span>{job.location}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3 mb-4 flex-wrap">
                     <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg font-medium">
                       {job.type}
                     </span>
-                    <span className="font-semibold text-gray-900 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                    {jobPost?.workType && (
+                      <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-medium border border-blue-200">
+                        {jobPost.workType === "ONSITE"
+                          ? "On-site"
+                          : jobPost.workType === "REMOTE"
+                          ? "Remote"
+                          : "Hybrid"}
+                      </span>
+                    )}
+                    {jobPost?.jobLevel && (
+                      <span className="bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg font-medium border border-purple-200">
+                        {jobPost.jobLevel === "ENTRY"
+                          ? "Entry Level"
+                          : jobPost.jobLevel === "MID"
+                          ? "Mid Level"
+                          : jobPost.jobLevel === "SENIOR"
+                          ? "Senior Level"
+                          : "Executive"}
+                      </span>
+                    )}
+                    <span className="font-semibold text-gray-900 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
                       {job.salary}
                     </span>
+                    {jobPost?.deadline && (
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-1.5">
+                        <div className="flex items-center gap-2">
+                          <svg
+                            className="w-4 h-4 text-orange-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <div>
+                            <div className="text-xs font-medium text-orange-800">
+                              Application Deadline
+                            </div>
+                            <div className="text-xs text-orange-600">
+                              {new Date(jobPost.deadline).toLocaleDateString(
+                                "en-US",
+                                {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
@@ -359,6 +591,42 @@ export default function JobDetailsPage() {
                       </svg>
                       <span>Posted {job.posted}</span>
                     </div>
+                    {jobPost?.experience && (
+                      <div className="flex items-center gap-1">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0H8m8 0v2a2 2 0 002 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2v-8a2 2 0 012-2V6"
+                          />
+                        </svg>
+                        <span>{jobPost.experience} experience</span>
+                      </div>
+                    )}
+                    {jobPost?.education && (
+                      <div className="flex items-center gap-1">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                          />
+                        </svg>
+                        <span>{jobPost.education}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -403,56 +671,88 @@ export default function JobDetailsPage() {
               <p className="text-gray-600 leading-relaxed">{job.description}</p>
             </div>
 
+            {/* Responsibilities */}
+            {jobPost?.responsibilities && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  Key Responsibilities
+                </h2>
+                <div className="prose max-w-none">
+                  <div className="whitespace-pre-line text-gray-600 leading-relaxed">
+                    {jobPost.responsibilities}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Requirements */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Requirements
               </h2>
-              <ul className="space-y-3">
-                {requirements.map((req: string, index: number) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <svg
-                      className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="text-gray-600">{req}</span>
-                  </li>
-                ))}
-              </ul>
+              {jobPost?.requirements ? (
+                <div className="prose max-w-none">
+                  <div className="whitespace-pre-line text-gray-600 leading-relaxed">
+                    {jobPost.requirements}
+                  </div>
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {(jobRequirements[jobId] || []).map(
+                    (req: string, index: number) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <svg
+                          className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className="text-gray-600">{req}</span>
+                      </li>
+                    )
+                  )}
+                </ul>
+              )}
             </div>
 
             {/* Benefits */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Benefits</h2>
-              <ul className="space-y-3">
-                {benefits.map((benefit: string, index: number) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <svg
-                      className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="text-gray-600">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
+              {jobPost?.benefits ? (
+                <div className="prose max-w-none">
+                  <div className="whitespace-pre-line text-gray-600 leading-relaxed">
+                    {jobPost.benefits}
+                  </div>
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {benefits.map((benefit: string, index: number) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <svg
+                        className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-600">{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
@@ -489,12 +789,22 @@ export default function JobDetailsPage() {
                     <div className="font-medium text-gray-900">
                       {job.company}
                     </div>
-                    <div className="text-sm text-gray-500">{job.location}</div>
+                    <div className="text-sm text-gray-500">
+                      {jobPost?.company?.address
+                        ? `${jobPost.company.address.street}, ${jobPost.company.address.city}, ${jobPost.company.address.country}`
+                        : job.location}
+                    </div>
+                    {jobPost?.industry && (
+                      <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded mt-1 inline-block">
+                        {jobPost.industry.charAt(0).toUpperCase() +
+                          jobPost.industry.slice(1)}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  A leading company in the Middle East region, committed to
-                  innovation and excellence in their industry.
+                  {jobPost?.companyDescription ||
+                    "A leading company in the Middle East region, committed to innovation and excellence in their industry."}
                 </p>
               </div>
             </div>

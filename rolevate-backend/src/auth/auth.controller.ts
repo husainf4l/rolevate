@@ -75,29 +75,57 @@ export class AuthController {
 
   @Post('refresh')
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    console.log('=== /refresh endpoint called ===');
+    console.log('Cookies:', req.cookies);
+    
     const refreshToken = req.cookies?.refresh_token;
+    console.log('Refresh token found:', !!refreshToken);
+    console.log('Refresh token (truncated):', refreshToken ? refreshToken.substring(0, 20) + '...' : 'null');
+    
     if (!refreshToken) {
+      console.log('No refresh token found in cookies');
       throw new UnauthorizedException('Refresh token not found');
     }
 
-    const result = await this.authService.refreshAccessToken(refreshToken);
-    
-    // Set new access token
-    res.cookie('access_token', result.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
+    try {
+      console.log('Calling authService.refreshAccessToken...');
+      const result = await this.authService.refreshAccessToken(refreshToken);
+      console.log('Refresh successful, new access token generated');
+      
+      // Set new access token
+      res.cookie('access_token', result.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
 
-    return { message: 'Token refreshed successfully' };
+      console.log('New access token cookie set');
+      return { message: 'Token refreshed successfully' };
+    } catch (error) {
+      console.error('Error in /refresh endpoint:', error);
+      throw error;
+    }
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getMe(@Req() req: Request) {
+    console.log('=== /me endpoint called ===');
+    console.log('req.user:', req.user);
+    
     const user = req.user as any;
-    return this.authService.getUserById(user.userId);
+    console.log('user object:', user);
+    console.log('user.userId:', user?.userId);
+    
+    try {
+      const result = await this.authService.getUserById(user.userId);
+      console.log('getUserById result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in /me endpoint:', error);
+      throw error;
+    }
   }
 
   @Get('subscription')

@@ -114,12 +114,11 @@ export default function Sidebar() {
             <div className="space-y-1">
               {navigationItems.map((item) => {
                 // Extract just the pathname part for comparison
-                const itemPath = item.href.split('?')[0] || item.href;
+                const itemPath = item.href.split("?")[0] || item.href;
                 const isActive =
                   pathname === itemPath ||
-                  (itemPath !== "/dashboard" &&
-                    pathname.startsWith(itemPath));
-                
+                  (itemPath !== "/dashboard" && pathname.startsWith(itemPath));
+
                 return (
                   <Link
                     key={item.label}
@@ -144,25 +143,6 @@ export default function Sidebar() {
               })}
             </div>
           </nav>
-
-          {/* User Profile (no logout) */}
-          <div className="border-t border-gray-200 p-3">
-            <div className="flex items-center px-3 py-2 text-sm">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">TC</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    Tech Corp Ltd
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    hr@techcorp.com
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </aside>
     </>

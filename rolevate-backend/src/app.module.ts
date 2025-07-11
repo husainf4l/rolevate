@@ -7,10 +7,12 @@ import { UserModule } from './user/user.module';
 import { CompanyModule } from './company/company.module';
 import { AiautocompleteModule } from './aiautocomplete/aiautocomplete.module';
 import { JobModule } from './job/job.module';
+import { CandidateModule } from './candidate/candidate.module';
 import { AppCacheModule } from './cache/cache.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, CompanyModule, AiautocompleteModule, JobModule, AppCacheModule],
+  imports: [PrismaModule, AuthModule, UserModule, CompanyModule, AiautocompleteModule, JobModule, CandidateModule, AppCacheModule, UploadsModule],
   controllers: [AppController],
   providers: [AppService],
 })

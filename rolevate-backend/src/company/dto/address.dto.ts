@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsEnum } from 'class-validator';
-import { Country } from '../../../generated/prisma';
+import { Country } from '@prisma/client';
 
 export class AddressDto {
   @IsString()

@@ -5,6 +5,7 @@ import { BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { logout } from "@/services/auth";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HeaderProps {
   title?: string;
@@ -128,6 +129,28 @@ export default function Header({
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { user } = useAuth();
+
+  // Helper function to get user initials
+  const getUserInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Helper function to get company display name
+  const getCompanyDisplayName = () => {
+    if (user?.company?.name) {
+      return user.company.name;
+    }
+    if (user?.name) {
+      return user.name;
+    }
+    return "Company User";
+  };
 
   const unreadNotifications = recentNotifications.filter((n) => !n.read);
   const unreadCount = unreadNotifications.length;
@@ -418,13 +441,17 @@ export default function Header({
                   onClick={() => setMenuOpen((v) => !v)}
                 >
                   <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">TC</span>
+                    <span className="text-white text-sm font-medium">
+                      {user?.name ? getUserInitials(user.name) : "U"}
+                    </span>
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-900">
-                      Tech Corp Ltd
+                      {getCompanyDisplayName()}
                     </p>
-                    <p className="text-xs text-gray-500">hr@techcorp.com</p>
+                    <p className="text-xs text-gray-500">
+                      {user?.email || "user@company.com"}
+                    </p>
                   </div>
                 </button>
                 {menuOpen && (

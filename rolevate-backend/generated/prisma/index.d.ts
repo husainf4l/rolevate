@@ -48,6 +48,36 @@ export type Job = $Result.DefaultSelection<Prisma.$JobPayload>
  * 
  */
 export type ScreeningQuestion = $Result.DefaultSelection<Prisma.$ScreeningQuestionPayload>
+/**
+ * Model CandidateProfile
+ * 
+ */
+export type CandidateProfile = $Result.DefaultSelection<Prisma.$CandidateProfilePayload>
+/**
+ * Model WorkExperience
+ * 
+ */
+export type WorkExperience = $Result.DefaultSelection<Prisma.$WorkExperiencePayload>
+/**
+ * Model Education
+ * 
+ */
+export type Education = $Result.DefaultSelection<Prisma.$EducationPayload>
+/**
+ * Model CV
+ * 
+ */
+export type CV = $Result.DefaultSelection<Prisma.$CVPayload>
+/**
+ * Model Application
+ * 
+ */
+export type Application = $Result.DefaultSelection<Prisma.$ApplicationPayload>
+/**
+ * Model ScreeningAnswer
+ * 
+ */
+export type ScreeningAnswer = $Result.DefaultSelection<Prisma.$ScreeningAnswerPayload>
 
 /**
  * Enums
@@ -137,6 +167,29 @@ export const TokenType: {
 export type TokenType = (typeof TokenType)[keyof typeof TokenType]
 
 
+export const CVStatus: {
+  UPLOADED: 'UPLOADED',
+  PROCESSING: 'PROCESSING',
+  PROCESSED: 'PROCESSED',
+  ERROR: 'ERROR'
+};
+
+export type CVStatus = (typeof CVStatus)[keyof typeof CVStatus]
+
+
+export const ApplicationStatus: {
+  SUBMITTED: 'SUBMITTED',
+  REVIEWING: 'REVIEWING',
+  INTERVIEW_SCHEDULED: 'INTERVIEW_SCHEDULED',
+  INTERVIEWED: 'INTERVIEWED',
+  OFFERED: 'OFFERED',
+  REJECTED: 'REJECTED',
+  WITHDRAWN: 'WITHDRAWN'
+};
+
+export type ApplicationStatus = (typeof ApplicationStatus)[keyof typeof ApplicationStatus]
+
+
 export const JobType: {
   FULL_TIME: 'FULL_TIME',
   PART_TIME: 'PART_TIME',
@@ -187,6 +240,29 @@ export const ScreeningQuestionType: {
 
 export type ScreeningQuestionType = (typeof ScreeningQuestionType)[keyof typeof ScreeningQuestionType]
 
+
+export const ExperienceLevel: {
+  FRESH_GRADUATE: 'FRESH_GRADUATE',
+  ENTRY_LEVEL: 'ENTRY_LEVEL',
+  MID_LEVEL: 'MID_LEVEL',
+  SENIOR_LEVEL: 'SENIOR_LEVEL',
+  EXECUTIVE: 'EXECUTIVE'
+};
+
+export type ExperienceLevel = (typeof ExperienceLevel)[keyof typeof ExperienceLevel]
+
+
+export const EducationLevel: {
+  HIGH_SCHOOL: 'HIGH_SCHOOL',
+  DIPLOMA: 'DIPLOMA',
+  BACHELOR: 'BACHELOR',
+  MASTER: 'MASTER',
+  PHD: 'PHD',
+  PROFESSIONAL_CERTIFICATION: 'PROFESSIONAL_CERTIFICATION'
+};
+
+export type EducationLevel = (typeof EducationLevel)[keyof typeof EducationLevel]
+
 }
 
 export type SubscriptionType = $Enums.SubscriptionType
@@ -213,6 +289,14 @@ export type TokenType = $Enums.TokenType
 
 export const TokenType: typeof $Enums.TokenType
 
+export type CVStatus = $Enums.CVStatus
+
+export const CVStatus: typeof $Enums.CVStatus
+
+export type ApplicationStatus = $Enums.ApplicationStatus
+
+export const ApplicationStatus: typeof $Enums.ApplicationStatus
+
 export type JobType = $Enums.JobType
 
 export const JobType: typeof $Enums.JobType
@@ -232,6 +316,14 @@ export const JobStatus: typeof $Enums.JobStatus
 export type ScreeningQuestionType = $Enums.ScreeningQuestionType
 
 export const ScreeningQuestionType: typeof $Enums.ScreeningQuestionType
+
+export type ExperienceLevel = $Enums.ExperienceLevel
+
+export const ExperienceLevel: typeof $Enums.ExperienceLevel
+
+export type EducationLevel = $Enums.EducationLevel
+
+export const EducationLevel: typeof $Enums.EducationLevel
 
 /**
  * ##  Prisma Client ʲˢ
@@ -427,6 +519,66 @@ export class PrismaClient<
     * ```
     */
   get screeningQuestion(): Prisma.ScreeningQuestionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.candidateProfile`: Exposes CRUD operations for the **CandidateProfile** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CandidateProfiles
+    * const candidateProfiles = await prisma.candidateProfile.findMany()
+    * ```
+    */
+  get candidateProfile(): Prisma.CandidateProfileDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.workExperience`: Exposes CRUD operations for the **WorkExperience** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more WorkExperiences
+    * const workExperiences = await prisma.workExperience.findMany()
+    * ```
+    */
+  get workExperience(): Prisma.WorkExperienceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.education`: Exposes CRUD operations for the **Education** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Educations
+    * const educations = await prisma.education.findMany()
+    * ```
+    */
+  get education(): Prisma.EducationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.cV`: Exposes CRUD operations for the **CV** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CVS
+    * const cVS = await prisma.cV.findMany()
+    * ```
+    */
+  get cV(): Prisma.CVDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.application`: Exposes CRUD operations for the **Application** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Applications
+    * const applications = await prisma.application.findMany()
+    * ```
+    */
+  get application(): Prisma.ApplicationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.screeningAnswer`: Exposes CRUD operations for the **ScreeningAnswer** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ScreeningAnswers
+    * const screeningAnswers = await prisma.screeningAnswer.findMany()
+    * ```
+    */
+  get screeningAnswer(): Prisma.ScreeningAnswerDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -873,7 +1025,13 @@ export namespace Prisma {
     Company: 'Company',
     Invitation: 'Invitation',
     Job: 'Job',
-    ScreeningQuestion: 'ScreeningQuestion'
+    ScreeningQuestion: 'ScreeningQuestion',
+    CandidateProfile: 'CandidateProfile',
+    WorkExperience: 'WorkExperience',
+    Education: 'Education',
+    CV: 'CV',
+    Application: 'Application',
+    ScreeningAnswer: 'ScreeningAnswer'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -892,7 +1050,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "refreshToken" | "address" | "company" | "invitation" | "job" | "screeningQuestion"
+      modelProps: "user" | "refreshToken" | "address" | "company" | "invitation" | "job" | "screeningQuestion" | "candidateProfile" | "workExperience" | "education" | "cV" | "application" | "screeningAnswer"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1414,6 +1572,450 @@ export namespace Prisma {
           }
         }
       }
+      CandidateProfile: {
+        payload: Prisma.$CandidateProfilePayload<ExtArgs>
+        fields: Prisma.CandidateProfileFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CandidateProfileFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CandidateProfileFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>
+          }
+          findFirst: {
+            args: Prisma.CandidateProfileFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CandidateProfileFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>
+          }
+          findMany: {
+            args: Prisma.CandidateProfileFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>[]
+          }
+          create: {
+            args: Prisma.CandidateProfileCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>
+          }
+          createMany: {
+            args: Prisma.CandidateProfileCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CandidateProfileCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>[]
+          }
+          delete: {
+            args: Prisma.CandidateProfileDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>
+          }
+          update: {
+            args: Prisma.CandidateProfileUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>
+          }
+          deleteMany: {
+            args: Prisma.CandidateProfileDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CandidateProfileUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CandidateProfileUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>[]
+          }
+          upsert: {
+            args: Prisma.CandidateProfileUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateProfilePayload>
+          }
+          aggregate: {
+            args: Prisma.CandidateProfileAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCandidateProfile>
+          }
+          groupBy: {
+            args: Prisma.CandidateProfileGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CandidateProfileGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CandidateProfileCountArgs<ExtArgs>
+            result: $Utils.Optional<CandidateProfileCountAggregateOutputType> | number
+          }
+        }
+      }
+      WorkExperience: {
+        payload: Prisma.$WorkExperiencePayload<ExtArgs>
+        fields: Prisma.WorkExperienceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.WorkExperienceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.WorkExperienceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>
+          }
+          findFirst: {
+            args: Prisma.WorkExperienceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.WorkExperienceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>
+          }
+          findMany: {
+            args: Prisma.WorkExperienceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>[]
+          }
+          create: {
+            args: Prisma.WorkExperienceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>
+          }
+          createMany: {
+            args: Prisma.WorkExperienceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.WorkExperienceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>[]
+          }
+          delete: {
+            args: Prisma.WorkExperienceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>
+          }
+          update: {
+            args: Prisma.WorkExperienceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>
+          }
+          deleteMany: {
+            args: Prisma.WorkExperienceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.WorkExperienceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WorkExperienceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>[]
+          }
+          upsert: {
+            args: Prisma.WorkExperienceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkExperiencePayload>
+          }
+          aggregate: {
+            args: Prisma.WorkExperienceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateWorkExperience>
+          }
+          groupBy: {
+            args: Prisma.WorkExperienceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<WorkExperienceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.WorkExperienceCountArgs<ExtArgs>
+            result: $Utils.Optional<WorkExperienceCountAggregateOutputType> | number
+          }
+        }
+      }
+      Education: {
+        payload: Prisma.$EducationPayload<ExtArgs>
+        fields: Prisma.EducationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EducationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EducationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>
+          }
+          findFirst: {
+            args: Prisma.EducationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EducationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>
+          }
+          findMany: {
+            args: Prisma.EducationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>[]
+          }
+          create: {
+            args: Prisma.EducationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>
+          }
+          createMany: {
+            args: Prisma.EducationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EducationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>[]
+          }
+          delete: {
+            args: Prisma.EducationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>
+          }
+          update: {
+            args: Prisma.EducationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>
+          }
+          deleteMany: {
+            args: Prisma.EducationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EducationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EducationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>[]
+          }
+          upsert: {
+            args: Prisma.EducationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EducationPayload>
+          }
+          aggregate: {
+            args: Prisma.EducationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEducation>
+          }
+          groupBy: {
+            args: Prisma.EducationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EducationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EducationCountArgs<ExtArgs>
+            result: $Utils.Optional<EducationCountAggregateOutputType> | number
+          }
+        }
+      }
+      CV: {
+        payload: Prisma.$CVPayload<ExtArgs>
+        fields: Prisma.CVFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CVFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CVFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>
+          }
+          findFirst: {
+            args: Prisma.CVFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CVFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>
+          }
+          findMany: {
+            args: Prisma.CVFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>[]
+          }
+          create: {
+            args: Prisma.CVCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>
+          }
+          createMany: {
+            args: Prisma.CVCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CVCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>[]
+          }
+          delete: {
+            args: Prisma.CVDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>
+          }
+          update: {
+            args: Prisma.CVUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>
+          }
+          deleteMany: {
+            args: Prisma.CVDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CVUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CVUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>[]
+          }
+          upsert: {
+            args: Prisma.CVUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CVPayload>
+          }
+          aggregate: {
+            args: Prisma.CVAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCV>
+          }
+          groupBy: {
+            args: Prisma.CVGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CVGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CVCountArgs<ExtArgs>
+            result: $Utils.Optional<CVCountAggregateOutputType> | number
+          }
+        }
+      }
+      Application: {
+        payload: Prisma.$ApplicationPayload<ExtArgs>
+        fields: Prisma.ApplicationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ApplicationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ApplicationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>
+          }
+          findFirst: {
+            args: Prisma.ApplicationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ApplicationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>
+          }
+          findMany: {
+            args: Prisma.ApplicationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>[]
+          }
+          create: {
+            args: Prisma.ApplicationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>
+          }
+          createMany: {
+            args: Prisma.ApplicationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ApplicationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>[]
+          }
+          delete: {
+            args: Prisma.ApplicationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>
+          }
+          update: {
+            args: Prisma.ApplicationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>
+          }
+          deleteMany: {
+            args: Prisma.ApplicationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ApplicationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ApplicationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>[]
+          }
+          upsert: {
+            args: Prisma.ApplicationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationPayload>
+          }
+          aggregate: {
+            args: Prisma.ApplicationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateApplication>
+          }
+          groupBy: {
+            args: Prisma.ApplicationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ApplicationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ApplicationCountArgs<ExtArgs>
+            result: $Utils.Optional<ApplicationCountAggregateOutputType> | number
+          }
+        }
+      }
+      ScreeningAnswer: {
+        payload: Prisma.$ScreeningAnswerPayload<ExtArgs>
+        fields: Prisma.ScreeningAnswerFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ScreeningAnswerFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ScreeningAnswerFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>
+          }
+          findFirst: {
+            args: Prisma.ScreeningAnswerFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ScreeningAnswerFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>
+          }
+          findMany: {
+            args: Prisma.ScreeningAnswerFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>[]
+          }
+          create: {
+            args: Prisma.ScreeningAnswerCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>
+          }
+          createMany: {
+            args: Prisma.ScreeningAnswerCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ScreeningAnswerCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>[]
+          }
+          delete: {
+            args: Prisma.ScreeningAnswerDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>
+          }
+          update: {
+            args: Prisma.ScreeningAnswerUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>
+          }
+          deleteMany: {
+            args: Prisma.ScreeningAnswerDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ScreeningAnswerUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ScreeningAnswerUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>[]
+          }
+          upsert: {
+            args: Prisma.ScreeningAnswerUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreeningAnswerPayload>
+          }
+          aggregate: {
+            args: Prisma.ScreeningAnswerAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateScreeningAnswer>
+          }
+          groupBy: {
+            args: Prisma.ScreeningAnswerGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ScreeningAnswerGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ScreeningAnswerCountArgs<ExtArgs>
+            result: $Utils.Optional<ScreeningAnswerCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1505,6 +2107,12 @@ export namespace Prisma {
     invitation?: InvitationOmit
     job?: JobOmit
     screeningQuestion?: ScreeningQuestionOmit
+    candidateProfile?: CandidateProfileOmit
+    workExperience?: WorkExperienceOmit
+    education?: EducationOmit
+    cV?: CVOmit
+    application?: ApplicationOmit
+    screeningAnswer?: ScreeningAnswerOmit
   }
 
   /* Types for Logging */
@@ -1680,10 +2288,12 @@ export namespace Prisma {
 
   export type JobCountOutputType = {
     screeningQuestions: number
+    applications: number
   }
 
   export type JobCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     screeningQuestions?: boolean | JobCountOutputTypeCountScreeningQuestionsArgs
+    applications?: boolean | JobCountOutputTypeCountApplicationsArgs
   }
 
   // Custom InputTypes
@@ -1702,6 +2312,133 @@ export namespace Prisma {
    */
   export type JobCountOutputTypeCountScreeningQuestionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ScreeningQuestionWhereInput
+  }
+
+  /**
+   * JobCountOutputType without action
+   */
+  export type JobCountOutputTypeCountApplicationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ApplicationWhereInput
+  }
+
+
+  /**
+   * Count Type ScreeningQuestionCountOutputType
+   */
+
+  export type ScreeningQuestionCountOutputType = {
+    screeningAnswers: number
+  }
+
+  export type ScreeningQuestionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    screeningAnswers?: boolean | ScreeningQuestionCountOutputTypeCountScreeningAnswersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ScreeningQuestionCountOutputType without action
+   */
+  export type ScreeningQuestionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningQuestionCountOutputType
+     */
+    select?: ScreeningQuestionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ScreeningQuestionCountOutputType without action
+   */
+  export type ScreeningQuestionCountOutputTypeCountScreeningAnswersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ScreeningAnswerWhereInput
+  }
+
+
+  /**
+   * Count Type CandidateProfileCountOutputType
+   */
+
+  export type CandidateProfileCountOutputType = {
+    applications: number
+    cvs: number
+    workExperiences: number
+    educationHistory: number
+  }
+
+  export type CandidateProfileCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    applications?: boolean | CandidateProfileCountOutputTypeCountApplicationsArgs
+    cvs?: boolean | CandidateProfileCountOutputTypeCountCvsArgs
+    workExperiences?: boolean | CandidateProfileCountOutputTypeCountWorkExperiencesArgs
+    educationHistory?: boolean | CandidateProfileCountOutputTypeCountEducationHistoryArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CandidateProfileCountOutputType without action
+   */
+  export type CandidateProfileCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfileCountOutputType
+     */
+    select?: CandidateProfileCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CandidateProfileCountOutputType without action
+   */
+  export type CandidateProfileCountOutputTypeCountApplicationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ApplicationWhereInput
+  }
+
+  /**
+   * CandidateProfileCountOutputType without action
+   */
+  export type CandidateProfileCountOutputTypeCountCvsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CVWhereInput
+  }
+
+  /**
+   * CandidateProfileCountOutputType without action
+   */
+  export type CandidateProfileCountOutputTypeCountWorkExperiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WorkExperienceWhereInput
+  }
+
+  /**
+   * CandidateProfileCountOutputType without action
+   */
+  export type CandidateProfileCountOutputTypeCountEducationHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EducationWhereInput
+  }
+
+
+  /**
+   * Count Type ApplicationCountOutputType
+   */
+
+  export type ApplicationCountOutputType = {
+    screeningAnswers: number
+  }
+
+  export type ApplicationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    screeningAnswers?: boolean | ApplicationCountOutputTypeCountScreeningAnswersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ApplicationCountOutputType without action
+   */
+  export type ApplicationCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationCountOutputType
+     */
+    select?: ApplicationCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ApplicationCountOutputType without action
+   */
+  export type ApplicationCountOutputTypeCountScreeningAnswersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ScreeningAnswerWhereInput
   }
 
 
@@ -1915,6 +2652,7 @@ export namespace Prisma {
     updatedAt?: boolean
     company?: boolean | User$companyArgs<ExtArgs>
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
+    candidateProfile?: boolean | User$candidateProfileArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1963,6 +2701,7 @@ export namespace Prisma {
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     company?: boolean | User$companyArgs<ExtArgs>
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
+    candidateProfile?: boolean | User$candidateProfileArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1977,6 +2716,7 @@ export namespace Prisma {
     objects: {
       company: Prisma.$CompanyPayload<ExtArgs> | null
       refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
+      candidateProfile: Prisma.$CandidateProfilePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2385,6 +3125,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     company<T extends User$companyArgs<ExtArgs> = {}>(args?: Subset<T, User$companyArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     refreshTokens<T extends User$refreshTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    candidateProfile<T extends User$candidateProfileArgs<ExtArgs> = {}>(args?: Subset<T, User$candidateProfileArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2860,6 +3601,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RefreshTokenScalarFieldEnum | RefreshTokenScalarFieldEnum[]
+  }
+
+  /**
+   * User.candidateProfile
+   */
+  export type User$candidateProfileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    where?: CandidateProfileWhereInput
   }
 
   /**
@@ -7466,6 +8226,7 @@ export namespace Prisma {
     cvAnalysisPrompt: string | null
     interviewPrompt: string | null
     aiSecondInterviewPrompt: string | null
+    featured: boolean | null
     applicants: number | null
     views: number | null
     createdAt: Date | null
@@ -7496,6 +8257,7 @@ export namespace Prisma {
     cvAnalysisPrompt: string | null
     interviewPrompt: string | null
     aiSecondInterviewPrompt: string | null
+    featured: boolean | null
     applicants: number | null
     views: number | null
     createdAt: Date | null
@@ -7527,6 +8289,7 @@ export namespace Prisma {
     cvAnalysisPrompt: number
     interviewPrompt: number
     aiSecondInterviewPrompt: number
+    featured: number
     applicants: number
     views: number
     createdAt: number
@@ -7569,6 +8332,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: true
     interviewPrompt?: true
     aiSecondInterviewPrompt?: true
+    featured?: true
     applicants?: true
     views?: true
     createdAt?: true
@@ -7599,6 +8363,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: true
     interviewPrompt?: true
     aiSecondInterviewPrompt?: true
+    featured?: true
     applicants?: true
     views?: true
     createdAt?: true
@@ -7630,6 +8395,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: true
     interviewPrompt?: true
     aiSecondInterviewPrompt?: true
+    featured?: true
     applicants?: true
     views?: true
     createdAt?: true
@@ -7748,6 +8514,7 @@ export namespace Prisma {
     cvAnalysisPrompt: string | null
     interviewPrompt: string | null
     aiSecondInterviewPrompt: string | null
+    featured: boolean
     applicants: number
     views: number
     createdAt: Date
@@ -7798,12 +8565,14 @@ export namespace Prisma {
     cvAnalysisPrompt?: boolean
     interviewPrompt?: boolean
     aiSecondInterviewPrompt?: boolean
+    featured?: boolean
     applicants?: boolean
     views?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     company?: boolean | CompanyDefaultArgs<ExtArgs>
     screeningQuestions?: boolean | Job$screeningQuestionsArgs<ExtArgs>
+    applications?: boolean | Job$applicationsArgs<ExtArgs>
     _count?: boolean | JobCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["job"]>
 
@@ -7832,6 +8601,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: boolean
     interviewPrompt?: boolean
     aiSecondInterviewPrompt?: boolean
+    featured?: boolean
     applicants?: boolean
     views?: boolean
     createdAt?: boolean
@@ -7864,6 +8634,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: boolean
     interviewPrompt?: boolean
     aiSecondInterviewPrompt?: boolean
+    featured?: boolean
     applicants?: boolean
     views?: boolean
     createdAt?: boolean
@@ -7896,16 +8667,18 @@ export namespace Prisma {
     cvAnalysisPrompt?: boolean
     interviewPrompt?: boolean
     aiSecondInterviewPrompt?: boolean
+    featured?: boolean
     applicants?: boolean
     views?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type JobOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "department" | "location" | "salary" | "type" | "deadline" | "description" | "shortDescription" | "responsibilities" | "requirements" | "benefits" | "skills" | "experience" | "education" | "jobLevel" | "workType" | "industry" | "companyDescription" | "status" | "companyId" | "cvAnalysisPrompt" | "interviewPrompt" | "aiSecondInterviewPrompt" | "applicants" | "views" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
+  export type JobOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "department" | "location" | "salary" | "type" | "deadline" | "description" | "shortDescription" | "responsibilities" | "requirements" | "benefits" | "skills" | "experience" | "education" | "jobLevel" | "workType" | "industry" | "companyDescription" | "status" | "companyId" | "cvAnalysisPrompt" | "interviewPrompt" | "aiSecondInterviewPrompt" | "featured" | "applicants" | "views" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
   export type JobInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     company?: boolean | CompanyDefaultArgs<ExtArgs>
     screeningQuestions?: boolean | Job$screeningQuestionsArgs<ExtArgs>
+    applications?: boolean | Job$applicationsArgs<ExtArgs>
     _count?: boolean | JobCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type JobIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7920,6 +8693,7 @@ export namespace Prisma {
     objects: {
       company: Prisma.$CompanyPayload<ExtArgs>
       screeningQuestions: Prisma.$ScreeningQuestionPayload<ExtArgs>[]
+      applications: Prisma.$ApplicationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -7946,6 +8720,7 @@ export namespace Prisma {
       cvAnalysisPrompt: string | null
       interviewPrompt: string | null
       aiSecondInterviewPrompt: string | null
+      featured: boolean
       applicants: number
       views: number
       createdAt: Date
@@ -8346,6 +9121,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     company<T extends CompanyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CompanyDefaultArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     screeningQuestions<T extends Job$screeningQuestionsArgs<ExtArgs> = {}>(args?: Subset<T, Job$screeningQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreeningQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    applications<T extends Job$applicationsArgs<ExtArgs> = {}>(args?: Subset<T, Job$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8399,6 +9175,7 @@ export namespace Prisma {
     readonly cvAnalysisPrompt: FieldRef<"Job", 'String'>
     readonly interviewPrompt: FieldRef<"Job", 'String'>
     readonly aiSecondInterviewPrompt: FieldRef<"Job", 'String'>
+    readonly featured: FieldRef<"Job", 'Boolean'>
     readonly applicants: FieldRef<"Job", 'Int'>
     readonly views: FieldRef<"Job", 'Int'>
     readonly createdAt: FieldRef<"Job", 'DateTime'>
@@ -8823,6 +9600,30 @@ export namespace Prisma {
   }
 
   /**
+   * Job.applications
+   */
+  export type Job$applicationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    where?: ApplicationWhereInput
+    orderBy?: ApplicationOrderByWithRelationInput | ApplicationOrderByWithRelationInput[]
+    cursor?: ApplicationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ApplicationScalarFieldEnum | ApplicationScalarFieldEnum[]
+  }
+
+  /**
    * Job without action
    */
   export type JobDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9026,6 +9827,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     job?: boolean | JobDefaultArgs<ExtArgs>
+    screeningAnswers?: boolean | ScreeningQuestion$screeningAnswersArgs<ExtArgs>
+    _count?: boolean | ScreeningQuestionCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["screeningQuestion"]>
 
   export type ScreeningQuestionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -9066,6 +9869,8 @@ export namespace Prisma {
   export type ScreeningQuestionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question" | "type" | "options" | "required" | "jobId" | "createdAt" | "updatedAt", ExtArgs["result"]["screeningQuestion"]>
   export type ScreeningQuestionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     job?: boolean | JobDefaultArgs<ExtArgs>
+    screeningAnswers?: boolean | ScreeningQuestion$screeningAnswersArgs<ExtArgs>
+    _count?: boolean | ScreeningQuestionCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ScreeningQuestionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     job?: boolean | JobDefaultArgs<ExtArgs>
@@ -9078,6 +9883,7 @@ export namespace Prisma {
     name: "ScreeningQuestion"
     objects: {
       job: Prisma.$JobPayload<ExtArgs>
+      screeningAnswers: Prisma.$ScreeningAnswerPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9483,6 +10289,7 @@ export namespace Prisma {
   export interface Prisma__ScreeningQuestionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     job<T extends JobDefaultArgs<ExtArgs> = {}>(args?: Subset<T, JobDefaultArgs<ExtArgs>>): Prisma__JobClient<$Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    screeningAnswers<T extends ScreeningQuestion$screeningAnswersArgs<ExtArgs> = {}>(args?: Subset<T, ScreeningQuestion$screeningAnswersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9916,6 +10723,30 @@ export namespace Prisma {
   }
 
   /**
+   * ScreeningQuestion.screeningAnswers
+   */
+  export type ScreeningQuestion$screeningAnswersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    where?: ScreeningAnswerWhereInput
+    orderBy?: ScreeningAnswerOrderByWithRelationInput | ScreeningAnswerOrderByWithRelationInput[]
+    cursor?: ScreeningAnswerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ScreeningAnswerScalarFieldEnum | ScreeningAnswerScalarFieldEnum[]
+  }
+
+  /**
    * ScreeningQuestion without action
    */
   export type ScreeningQuestionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9931,6 +10762,7404 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ScreeningQuestionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CandidateProfile
+   */
+
+  export type AggregateCandidateProfile = {
+    _count: CandidateProfileCountAggregateOutputType | null
+    _avg: CandidateProfileAvgAggregateOutputType | null
+    _sum: CandidateProfileSumAggregateOutputType | null
+    _min: CandidateProfileMinAggregateOutputType | null
+    _max: CandidateProfileMaxAggregateOutputType | null
+  }
+
+  export type CandidateProfileAvgAggregateOutputType = {
+    totalExperience: number | null
+    graduationYear: number | null
+  }
+
+  export type CandidateProfileSumAggregateOutputType = {
+    totalExperience: number | null
+    graduationYear: number | null
+  }
+
+  export type CandidateProfileMinAggregateOutputType = {
+    id: string | null
+    firstName: string | null
+    lastName: string | null
+    email: string | null
+    phone: string | null
+    dateOfBirth: Date | null
+    nationality: $Enums.Country | null
+    currentLocation: string | null
+    currentJobTitle: string | null
+    currentCompany: string | null
+    experienceLevel: $Enums.ExperienceLevel | null
+    totalExperience: number | null
+    expectedSalary: string | null
+    noticePeriod: string | null
+    highestEducation: $Enums.EducationLevel | null
+    fieldOfStudy: string | null
+    university: string | null
+    graduationYear: number | null
+    preferredWorkType: $Enums.WorkType | null
+    resumeUrl: string | null
+    portfolioUrl: string | null
+    linkedInUrl: string | null
+    githubUrl: string | null
+    isProfilePublic: boolean | null
+    isOpenToWork: boolean | null
+    profileSummary: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CandidateProfileMaxAggregateOutputType = {
+    id: string | null
+    firstName: string | null
+    lastName: string | null
+    email: string | null
+    phone: string | null
+    dateOfBirth: Date | null
+    nationality: $Enums.Country | null
+    currentLocation: string | null
+    currentJobTitle: string | null
+    currentCompany: string | null
+    experienceLevel: $Enums.ExperienceLevel | null
+    totalExperience: number | null
+    expectedSalary: string | null
+    noticePeriod: string | null
+    highestEducation: $Enums.EducationLevel | null
+    fieldOfStudy: string | null
+    university: string | null
+    graduationYear: number | null
+    preferredWorkType: $Enums.WorkType | null
+    resumeUrl: string | null
+    portfolioUrl: string | null
+    linkedInUrl: string | null
+    githubUrl: string | null
+    isProfilePublic: boolean | null
+    isOpenToWork: boolean | null
+    profileSummary: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CandidateProfileCountAggregateOutputType = {
+    id: number
+    firstName: number
+    lastName: number
+    email: number
+    phone: number
+    dateOfBirth: number
+    nationality: number
+    currentLocation: number
+    currentJobTitle: number
+    currentCompany: number
+    experienceLevel: number
+    totalExperience: number
+    expectedSalary: number
+    noticePeriod: number
+    highestEducation: number
+    fieldOfStudy: number
+    university: number
+    graduationYear: number
+    skills: number
+    preferredJobTypes: number
+    preferredWorkType: number
+    preferredIndustries: number
+    preferredLocations: number
+    resumeUrl: number
+    portfolioUrl: number
+    linkedInUrl: number
+    githubUrl: number
+    isProfilePublic: number
+    isOpenToWork: number
+    profileSummary: number
+    userId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CandidateProfileAvgAggregateInputType = {
+    totalExperience?: true
+    graduationYear?: true
+  }
+
+  export type CandidateProfileSumAggregateInputType = {
+    totalExperience?: true
+    graduationYear?: true
+  }
+
+  export type CandidateProfileMinAggregateInputType = {
+    id?: true
+    firstName?: true
+    lastName?: true
+    email?: true
+    phone?: true
+    dateOfBirth?: true
+    nationality?: true
+    currentLocation?: true
+    currentJobTitle?: true
+    currentCompany?: true
+    experienceLevel?: true
+    totalExperience?: true
+    expectedSalary?: true
+    noticePeriod?: true
+    highestEducation?: true
+    fieldOfStudy?: true
+    university?: true
+    graduationYear?: true
+    preferredWorkType?: true
+    resumeUrl?: true
+    portfolioUrl?: true
+    linkedInUrl?: true
+    githubUrl?: true
+    isProfilePublic?: true
+    isOpenToWork?: true
+    profileSummary?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CandidateProfileMaxAggregateInputType = {
+    id?: true
+    firstName?: true
+    lastName?: true
+    email?: true
+    phone?: true
+    dateOfBirth?: true
+    nationality?: true
+    currentLocation?: true
+    currentJobTitle?: true
+    currentCompany?: true
+    experienceLevel?: true
+    totalExperience?: true
+    expectedSalary?: true
+    noticePeriod?: true
+    highestEducation?: true
+    fieldOfStudy?: true
+    university?: true
+    graduationYear?: true
+    preferredWorkType?: true
+    resumeUrl?: true
+    portfolioUrl?: true
+    linkedInUrl?: true
+    githubUrl?: true
+    isProfilePublic?: true
+    isOpenToWork?: true
+    profileSummary?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CandidateProfileCountAggregateInputType = {
+    id?: true
+    firstName?: true
+    lastName?: true
+    email?: true
+    phone?: true
+    dateOfBirth?: true
+    nationality?: true
+    currentLocation?: true
+    currentJobTitle?: true
+    currentCompany?: true
+    experienceLevel?: true
+    totalExperience?: true
+    expectedSalary?: true
+    noticePeriod?: true
+    highestEducation?: true
+    fieldOfStudy?: true
+    university?: true
+    graduationYear?: true
+    skills?: true
+    preferredJobTypes?: true
+    preferredWorkType?: true
+    preferredIndustries?: true
+    preferredLocations?: true
+    resumeUrl?: true
+    portfolioUrl?: true
+    linkedInUrl?: true
+    githubUrl?: true
+    isProfilePublic?: true
+    isOpenToWork?: true
+    profileSummary?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CandidateProfileAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CandidateProfile to aggregate.
+     */
+    where?: CandidateProfileWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateProfiles to fetch.
+     */
+    orderBy?: CandidateProfileOrderByWithRelationInput | CandidateProfileOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CandidateProfileWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateProfiles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateProfiles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CandidateProfiles
+    **/
+    _count?: true | CandidateProfileCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CandidateProfileAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CandidateProfileSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CandidateProfileMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CandidateProfileMaxAggregateInputType
+  }
+
+  export type GetCandidateProfileAggregateType<T extends CandidateProfileAggregateArgs> = {
+        [P in keyof T & keyof AggregateCandidateProfile]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCandidateProfile[P]>
+      : GetScalarType<T[P], AggregateCandidateProfile[P]>
+  }
+
+
+
+
+  export type CandidateProfileGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CandidateProfileWhereInput
+    orderBy?: CandidateProfileOrderByWithAggregationInput | CandidateProfileOrderByWithAggregationInput[]
+    by: CandidateProfileScalarFieldEnum[] | CandidateProfileScalarFieldEnum
+    having?: CandidateProfileScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CandidateProfileCountAggregateInputType | true
+    _avg?: CandidateProfileAvgAggregateInputType
+    _sum?: CandidateProfileSumAggregateInputType
+    _min?: CandidateProfileMinAggregateInputType
+    _max?: CandidateProfileMaxAggregateInputType
+  }
+
+  export type CandidateProfileGroupByOutputType = {
+    id: string
+    firstName: string
+    lastName: string
+    email: string
+    phone: string | null
+    dateOfBirth: Date | null
+    nationality: $Enums.Country | null
+    currentLocation: string | null
+    currentJobTitle: string | null
+    currentCompany: string | null
+    experienceLevel: $Enums.ExperienceLevel | null
+    totalExperience: number | null
+    expectedSalary: string | null
+    noticePeriod: string | null
+    highestEducation: $Enums.EducationLevel | null
+    fieldOfStudy: string | null
+    university: string | null
+    graduationYear: number | null
+    skills: string[]
+    preferredJobTypes: $Enums.JobType[]
+    preferredWorkType: $Enums.WorkType | null
+    preferredIndustries: $Enums.Industry[]
+    preferredLocations: string[]
+    resumeUrl: string | null
+    portfolioUrl: string | null
+    linkedInUrl: string | null
+    githubUrl: string | null
+    isProfilePublic: boolean
+    isOpenToWork: boolean
+    profileSummary: string | null
+    userId: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: CandidateProfileCountAggregateOutputType | null
+    _avg: CandidateProfileAvgAggregateOutputType | null
+    _sum: CandidateProfileSumAggregateOutputType | null
+    _min: CandidateProfileMinAggregateOutputType | null
+    _max: CandidateProfileMaxAggregateOutputType | null
+  }
+
+  type GetCandidateProfileGroupByPayload<T extends CandidateProfileGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CandidateProfileGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CandidateProfileGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CandidateProfileGroupByOutputType[P]>
+            : GetScalarType<T[P], CandidateProfileGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CandidateProfileSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    email?: boolean
+    phone?: boolean
+    dateOfBirth?: boolean
+    nationality?: boolean
+    currentLocation?: boolean
+    currentJobTitle?: boolean
+    currentCompany?: boolean
+    experienceLevel?: boolean
+    totalExperience?: boolean
+    expectedSalary?: boolean
+    noticePeriod?: boolean
+    highestEducation?: boolean
+    fieldOfStudy?: boolean
+    university?: boolean
+    graduationYear?: boolean
+    skills?: boolean
+    preferredJobTypes?: boolean
+    preferredWorkType?: boolean
+    preferredIndustries?: boolean
+    preferredLocations?: boolean
+    resumeUrl?: boolean
+    portfolioUrl?: boolean
+    linkedInUrl?: boolean
+    githubUrl?: boolean
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | CandidateProfile$userArgs<ExtArgs>
+    applications?: boolean | CandidateProfile$applicationsArgs<ExtArgs>
+    cvs?: boolean | CandidateProfile$cvsArgs<ExtArgs>
+    workExperiences?: boolean | CandidateProfile$workExperiencesArgs<ExtArgs>
+    educationHistory?: boolean | CandidateProfile$educationHistoryArgs<ExtArgs>
+    _count?: boolean | CandidateProfileCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateProfile"]>
+
+  export type CandidateProfileSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    email?: boolean
+    phone?: boolean
+    dateOfBirth?: boolean
+    nationality?: boolean
+    currentLocation?: boolean
+    currentJobTitle?: boolean
+    currentCompany?: boolean
+    experienceLevel?: boolean
+    totalExperience?: boolean
+    expectedSalary?: boolean
+    noticePeriod?: boolean
+    highestEducation?: boolean
+    fieldOfStudy?: boolean
+    university?: boolean
+    graduationYear?: boolean
+    skills?: boolean
+    preferredJobTypes?: boolean
+    preferredWorkType?: boolean
+    preferredIndustries?: boolean
+    preferredLocations?: boolean
+    resumeUrl?: boolean
+    portfolioUrl?: boolean
+    linkedInUrl?: boolean
+    githubUrl?: boolean
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | CandidateProfile$userArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateProfile"]>
+
+  export type CandidateProfileSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    email?: boolean
+    phone?: boolean
+    dateOfBirth?: boolean
+    nationality?: boolean
+    currentLocation?: boolean
+    currentJobTitle?: boolean
+    currentCompany?: boolean
+    experienceLevel?: boolean
+    totalExperience?: boolean
+    expectedSalary?: boolean
+    noticePeriod?: boolean
+    highestEducation?: boolean
+    fieldOfStudy?: boolean
+    university?: boolean
+    graduationYear?: boolean
+    skills?: boolean
+    preferredJobTypes?: boolean
+    preferredWorkType?: boolean
+    preferredIndustries?: boolean
+    preferredLocations?: boolean
+    resumeUrl?: boolean
+    portfolioUrl?: boolean
+    linkedInUrl?: boolean
+    githubUrl?: boolean
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | CandidateProfile$userArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateProfile"]>
+
+  export type CandidateProfileSelectScalar = {
+    id?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    email?: boolean
+    phone?: boolean
+    dateOfBirth?: boolean
+    nationality?: boolean
+    currentLocation?: boolean
+    currentJobTitle?: boolean
+    currentCompany?: boolean
+    experienceLevel?: boolean
+    totalExperience?: boolean
+    expectedSalary?: boolean
+    noticePeriod?: boolean
+    highestEducation?: boolean
+    fieldOfStudy?: boolean
+    university?: boolean
+    graduationYear?: boolean
+    skills?: boolean
+    preferredJobTypes?: boolean
+    preferredWorkType?: boolean
+    preferredIndustries?: boolean
+    preferredLocations?: boolean
+    resumeUrl?: boolean
+    portfolioUrl?: boolean
+    linkedInUrl?: boolean
+    githubUrl?: boolean
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CandidateProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "phone" | "dateOfBirth" | "nationality" | "currentLocation" | "currentJobTitle" | "currentCompany" | "experienceLevel" | "totalExperience" | "expectedSalary" | "noticePeriod" | "highestEducation" | "fieldOfStudy" | "university" | "graduationYear" | "skills" | "preferredJobTypes" | "preferredWorkType" | "preferredIndustries" | "preferredLocations" | "resumeUrl" | "portfolioUrl" | "linkedInUrl" | "githubUrl" | "isProfilePublic" | "isOpenToWork" | "profileSummary" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["candidateProfile"]>
+  export type CandidateProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CandidateProfile$userArgs<ExtArgs>
+    applications?: boolean | CandidateProfile$applicationsArgs<ExtArgs>
+    cvs?: boolean | CandidateProfile$cvsArgs<ExtArgs>
+    workExperiences?: boolean | CandidateProfile$workExperiencesArgs<ExtArgs>
+    educationHistory?: boolean | CandidateProfile$educationHistoryArgs<ExtArgs>
+    _count?: boolean | CandidateProfileCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CandidateProfileIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CandidateProfile$userArgs<ExtArgs>
+  }
+  export type CandidateProfileIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CandidateProfile$userArgs<ExtArgs>
+  }
+
+  export type $CandidateProfilePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CandidateProfile"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs> | null
+      applications: Prisma.$ApplicationPayload<ExtArgs>[]
+      cvs: Prisma.$CVPayload<ExtArgs>[]
+      workExperiences: Prisma.$WorkExperiencePayload<ExtArgs>[]
+      educationHistory: Prisma.$EducationPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      firstName: string
+      lastName: string
+      email: string
+      phone: string | null
+      dateOfBirth: Date | null
+      nationality: $Enums.Country | null
+      currentLocation: string | null
+      currentJobTitle: string | null
+      currentCompany: string | null
+      experienceLevel: $Enums.ExperienceLevel | null
+      totalExperience: number | null
+      expectedSalary: string | null
+      noticePeriod: string | null
+      highestEducation: $Enums.EducationLevel | null
+      fieldOfStudy: string | null
+      university: string | null
+      graduationYear: number | null
+      skills: string[]
+      preferredJobTypes: $Enums.JobType[]
+      preferredWorkType: $Enums.WorkType | null
+      preferredIndustries: $Enums.Industry[]
+      preferredLocations: string[]
+      resumeUrl: string | null
+      portfolioUrl: string | null
+      linkedInUrl: string | null
+      githubUrl: string | null
+      isProfilePublic: boolean
+      isOpenToWork: boolean
+      profileSummary: string | null
+      userId: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["candidateProfile"]>
+    composites: {}
+  }
+
+  type CandidateProfileGetPayload<S extends boolean | null | undefined | CandidateProfileDefaultArgs> = $Result.GetResult<Prisma.$CandidateProfilePayload, S>
+
+  type CandidateProfileCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CandidateProfileFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CandidateProfileCountAggregateInputType | true
+    }
+
+  export interface CandidateProfileDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CandidateProfile'], meta: { name: 'CandidateProfile' } }
+    /**
+     * Find zero or one CandidateProfile that matches the filter.
+     * @param {CandidateProfileFindUniqueArgs} args - Arguments to find a CandidateProfile
+     * @example
+     * // Get one CandidateProfile
+     * const candidateProfile = await prisma.candidateProfile.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CandidateProfileFindUniqueArgs>(args: SelectSubset<T, CandidateProfileFindUniqueArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CandidateProfile that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CandidateProfileFindUniqueOrThrowArgs} args - Arguments to find a CandidateProfile
+     * @example
+     * // Get one CandidateProfile
+     * const candidateProfile = await prisma.candidateProfile.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CandidateProfileFindUniqueOrThrowArgs>(args: SelectSubset<T, CandidateProfileFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CandidateProfile that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateProfileFindFirstArgs} args - Arguments to find a CandidateProfile
+     * @example
+     * // Get one CandidateProfile
+     * const candidateProfile = await prisma.candidateProfile.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CandidateProfileFindFirstArgs>(args?: SelectSubset<T, CandidateProfileFindFirstArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CandidateProfile that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateProfileFindFirstOrThrowArgs} args - Arguments to find a CandidateProfile
+     * @example
+     * // Get one CandidateProfile
+     * const candidateProfile = await prisma.candidateProfile.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CandidateProfileFindFirstOrThrowArgs>(args?: SelectSubset<T, CandidateProfileFindFirstOrThrowArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CandidateProfiles that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateProfileFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CandidateProfiles
+     * const candidateProfiles = await prisma.candidateProfile.findMany()
+     * 
+     * // Get first 10 CandidateProfiles
+     * const candidateProfiles = await prisma.candidateProfile.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const candidateProfileWithIdOnly = await prisma.candidateProfile.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CandidateProfileFindManyArgs>(args?: SelectSubset<T, CandidateProfileFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CandidateProfile.
+     * @param {CandidateProfileCreateArgs} args - Arguments to create a CandidateProfile.
+     * @example
+     * // Create one CandidateProfile
+     * const CandidateProfile = await prisma.candidateProfile.create({
+     *   data: {
+     *     // ... data to create a CandidateProfile
+     *   }
+     * })
+     * 
+     */
+    create<T extends CandidateProfileCreateArgs>(args: SelectSubset<T, CandidateProfileCreateArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CandidateProfiles.
+     * @param {CandidateProfileCreateManyArgs} args - Arguments to create many CandidateProfiles.
+     * @example
+     * // Create many CandidateProfiles
+     * const candidateProfile = await prisma.candidateProfile.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CandidateProfileCreateManyArgs>(args?: SelectSubset<T, CandidateProfileCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CandidateProfiles and returns the data saved in the database.
+     * @param {CandidateProfileCreateManyAndReturnArgs} args - Arguments to create many CandidateProfiles.
+     * @example
+     * // Create many CandidateProfiles
+     * const candidateProfile = await prisma.candidateProfile.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CandidateProfiles and only return the `id`
+     * const candidateProfileWithIdOnly = await prisma.candidateProfile.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CandidateProfileCreateManyAndReturnArgs>(args?: SelectSubset<T, CandidateProfileCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CandidateProfile.
+     * @param {CandidateProfileDeleteArgs} args - Arguments to delete one CandidateProfile.
+     * @example
+     * // Delete one CandidateProfile
+     * const CandidateProfile = await prisma.candidateProfile.delete({
+     *   where: {
+     *     // ... filter to delete one CandidateProfile
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CandidateProfileDeleteArgs>(args: SelectSubset<T, CandidateProfileDeleteArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CandidateProfile.
+     * @param {CandidateProfileUpdateArgs} args - Arguments to update one CandidateProfile.
+     * @example
+     * // Update one CandidateProfile
+     * const candidateProfile = await prisma.candidateProfile.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CandidateProfileUpdateArgs>(args: SelectSubset<T, CandidateProfileUpdateArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CandidateProfiles.
+     * @param {CandidateProfileDeleteManyArgs} args - Arguments to filter CandidateProfiles to delete.
+     * @example
+     * // Delete a few CandidateProfiles
+     * const { count } = await prisma.candidateProfile.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CandidateProfileDeleteManyArgs>(args?: SelectSubset<T, CandidateProfileDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CandidateProfiles.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateProfileUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CandidateProfiles
+     * const candidateProfile = await prisma.candidateProfile.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CandidateProfileUpdateManyArgs>(args: SelectSubset<T, CandidateProfileUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CandidateProfiles and returns the data updated in the database.
+     * @param {CandidateProfileUpdateManyAndReturnArgs} args - Arguments to update many CandidateProfiles.
+     * @example
+     * // Update many CandidateProfiles
+     * const candidateProfile = await prisma.candidateProfile.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CandidateProfiles and only return the `id`
+     * const candidateProfileWithIdOnly = await prisma.candidateProfile.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CandidateProfileUpdateManyAndReturnArgs>(args: SelectSubset<T, CandidateProfileUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CandidateProfile.
+     * @param {CandidateProfileUpsertArgs} args - Arguments to update or create a CandidateProfile.
+     * @example
+     * // Update or create a CandidateProfile
+     * const candidateProfile = await prisma.candidateProfile.upsert({
+     *   create: {
+     *     // ... data to create a CandidateProfile
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CandidateProfile we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CandidateProfileUpsertArgs>(args: SelectSubset<T, CandidateProfileUpsertArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CandidateProfiles.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateProfileCountArgs} args - Arguments to filter CandidateProfiles to count.
+     * @example
+     * // Count the number of CandidateProfiles
+     * const count = await prisma.candidateProfile.count({
+     *   where: {
+     *     // ... the filter for the CandidateProfiles we want to count
+     *   }
+     * })
+    **/
+    count<T extends CandidateProfileCountArgs>(
+      args?: Subset<T, CandidateProfileCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CandidateProfileCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CandidateProfile.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateProfileAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CandidateProfileAggregateArgs>(args: Subset<T, CandidateProfileAggregateArgs>): Prisma.PrismaPromise<GetCandidateProfileAggregateType<T>>
+
+    /**
+     * Group by CandidateProfile.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateProfileGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CandidateProfileGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CandidateProfileGroupByArgs['orderBy'] }
+        : { orderBy?: CandidateProfileGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CandidateProfileGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCandidateProfileGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CandidateProfile model
+   */
+  readonly fields: CandidateProfileFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CandidateProfile.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CandidateProfileClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends CandidateProfile$userArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfile$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    applications<T extends CandidateProfile$applicationsArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfile$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    cvs<T extends CandidateProfile$cvsArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfile$cvsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    workExperiences<T extends CandidateProfile$workExperiencesArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfile$workExperiencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    educationHistory<T extends CandidateProfile$educationHistoryArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfile$educationHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CandidateProfile model
+   */
+  interface CandidateProfileFieldRefs {
+    readonly id: FieldRef<"CandidateProfile", 'String'>
+    readonly firstName: FieldRef<"CandidateProfile", 'String'>
+    readonly lastName: FieldRef<"CandidateProfile", 'String'>
+    readonly email: FieldRef<"CandidateProfile", 'String'>
+    readonly phone: FieldRef<"CandidateProfile", 'String'>
+    readonly dateOfBirth: FieldRef<"CandidateProfile", 'DateTime'>
+    readonly nationality: FieldRef<"CandidateProfile", 'Country'>
+    readonly currentLocation: FieldRef<"CandidateProfile", 'String'>
+    readonly currentJobTitle: FieldRef<"CandidateProfile", 'String'>
+    readonly currentCompany: FieldRef<"CandidateProfile", 'String'>
+    readonly experienceLevel: FieldRef<"CandidateProfile", 'ExperienceLevel'>
+    readonly totalExperience: FieldRef<"CandidateProfile", 'Int'>
+    readonly expectedSalary: FieldRef<"CandidateProfile", 'String'>
+    readonly noticePeriod: FieldRef<"CandidateProfile", 'String'>
+    readonly highestEducation: FieldRef<"CandidateProfile", 'EducationLevel'>
+    readonly fieldOfStudy: FieldRef<"CandidateProfile", 'String'>
+    readonly university: FieldRef<"CandidateProfile", 'String'>
+    readonly graduationYear: FieldRef<"CandidateProfile", 'Int'>
+    readonly skills: FieldRef<"CandidateProfile", 'String[]'>
+    readonly preferredJobTypes: FieldRef<"CandidateProfile", 'JobType[]'>
+    readonly preferredWorkType: FieldRef<"CandidateProfile", 'WorkType'>
+    readonly preferredIndustries: FieldRef<"CandidateProfile", 'Industry[]'>
+    readonly preferredLocations: FieldRef<"CandidateProfile", 'String[]'>
+    readonly resumeUrl: FieldRef<"CandidateProfile", 'String'>
+    readonly portfolioUrl: FieldRef<"CandidateProfile", 'String'>
+    readonly linkedInUrl: FieldRef<"CandidateProfile", 'String'>
+    readonly githubUrl: FieldRef<"CandidateProfile", 'String'>
+    readonly isProfilePublic: FieldRef<"CandidateProfile", 'Boolean'>
+    readonly isOpenToWork: FieldRef<"CandidateProfile", 'Boolean'>
+    readonly profileSummary: FieldRef<"CandidateProfile", 'String'>
+    readonly userId: FieldRef<"CandidateProfile", 'String'>
+    readonly createdAt: FieldRef<"CandidateProfile", 'DateTime'>
+    readonly updatedAt: FieldRef<"CandidateProfile", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CandidateProfile findUnique
+   */
+  export type CandidateProfileFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateProfile to fetch.
+     */
+    where: CandidateProfileWhereUniqueInput
+  }
+
+  /**
+   * CandidateProfile findUniqueOrThrow
+   */
+  export type CandidateProfileFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateProfile to fetch.
+     */
+    where: CandidateProfileWhereUniqueInput
+  }
+
+  /**
+   * CandidateProfile findFirst
+   */
+  export type CandidateProfileFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateProfile to fetch.
+     */
+    where?: CandidateProfileWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateProfiles to fetch.
+     */
+    orderBy?: CandidateProfileOrderByWithRelationInput | CandidateProfileOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CandidateProfiles.
+     */
+    cursor?: CandidateProfileWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateProfiles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateProfiles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CandidateProfiles.
+     */
+    distinct?: CandidateProfileScalarFieldEnum | CandidateProfileScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateProfile findFirstOrThrow
+   */
+  export type CandidateProfileFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateProfile to fetch.
+     */
+    where?: CandidateProfileWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateProfiles to fetch.
+     */
+    orderBy?: CandidateProfileOrderByWithRelationInput | CandidateProfileOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CandidateProfiles.
+     */
+    cursor?: CandidateProfileWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateProfiles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateProfiles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CandidateProfiles.
+     */
+    distinct?: CandidateProfileScalarFieldEnum | CandidateProfileScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateProfile findMany
+   */
+  export type CandidateProfileFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateProfiles to fetch.
+     */
+    where?: CandidateProfileWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateProfiles to fetch.
+     */
+    orderBy?: CandidateProfileOrderByWithRelationInput | CandidateProfileOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CandidateProfiles.
+     */
+    cursor?: CandidateProfileWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateProfiles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateProfiles.
+     */
+    skip?: number
+    distinct?: CandidateProfileScalarFieldEnum | CandidateProfileScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateProfile create
+   */
+  export type CandidateProfileCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CandidateProfile.
+     */
+    data: XOR<CandidateProfileCreateInput, CandidateProfileUncheckedCreateInput>
+  }
+
+  /**
+   * CandidateProfile createMany
+   */
+  export type CandidateProfileCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CandidateProfiles.
+     */
+    data: CandidateProfileCreateManyInput | CandidateProfileCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CandidateProfile createManyAndReturn
+   */
+  export type CandidateProfileCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * The data used to create many CandidateProfiles.
+     */
+    data: CandidateProfileCreateManyInput | CandidateProfileCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CandidateProfile update
+   */
+  export type CandidateProfileUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CandidateProfile.
+     */
+    data: XOR<CandidateProfileUpdateInput, CandidateProfileUncheckedUpdateInput>
+    /**
+     * Choose, which CandidateProfile to update.
+     */
+    where: CandidateProfileWhereUniqueInput
+  }
+
+  /**
+   * CandidateProfile updateMany
+   */
+  export type CandidateProfileUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CandidateProfiles.
+     */
+    data: XOR<CandidateProfileUpdateManyMutationInput, CandidateProfileUncheckedUpdateManyInput>
+    /**
+     * Filter which CandidateProfiles to update
+     */
+    where?: CandidateProfileWhereInput
+    /**
+     * Limit how many CandidateProfiles to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CandidateProfile updateManyAndReturn
+   */
+  export type CandidateProfileUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * The data used to update CandidateProfiles.
+     */
+    data: XOR<CandidateProfileUpdateManyMutationInput, CandidateProfileUncheckedUpdateManyInput>
+    /**
+     * Filter which CandidateProfiles to update
+     */
+    where?: CandidateProfileWhereInput
+    /**
+     * Limit how many CandidateProfiles to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CandidateProfile upsert
+   */
+  export type CandidateProfileUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CandidateProfile to update in case it exists.
+     */
+    where: CandidateProfileWhereUniqueInput
+    /**
+     * In case the CandidateProfile found by the `where` argument doesn't exist, create a new CandidateProfile with this data.
+     */
+    create: XOR<CandidateProfileCreateInput, CandidateProfileUncheckedCreateInput>
+    /**
+     * In case the CandidateProfile was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CandidateProfileUpdateInput, CandidateProfileUncheckedUpdateInput>
+  }
+
+  /**
+   * CandidateProfile delete
+   */
+  export type CandidateProfileDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+    /**
+     * Filter which CandidateProfile to delete.
+     */
+    where: CandidateProfileWhereUniqueInput
+  }
+
+  /**
+   * CandidateProfile deleteMany
+   */
+  export type CandidateProfileDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CandidateProfiles to delete
+     */
+    where?: CandidateProfileWhereInput
+    /**
+     * Limit how many CandidateProfiles to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CandidateProfile.user
+   */
+  export type CandidateProfile$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * CandidateProfile.applications
+   */
+  export type CandidateProfile$applicationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    where?: ApplicationWhereInput
+    orderBy?: ApplicationOrderByWithRelationInput | ApplicationOrderByWithRelationInput[]
+    cursor?: ApplicationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ApplicationScalarFieldEnum | ApplicationScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateProfile.cvs
+   */
+  export type CandidateProfile$cvsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    where?: CVWhereInput
+    orderBy?: CVOrderByWithRelationInput | CVOrderByWithRelationInput[]
+    cursor?: CVWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CVScalarFieldEnum | CVScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateProfile.workExperiences
+   */
+  export type CandidateProfile$workExperiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    where?: WorkExperienceWhereInput
+    orderBy?: WorkExperienceOrderByWithRelationInput | WorkExperienceOrderByWithRelationInput[]
+    cursor?: WorkExperienceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WorkExperienceScalarFieldEnum | WorkExperienceScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateProfile.educationHistory
+   */
+  export type CandidateProfile$educationHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    where?: EducationWhereInput
+    orderBy?: EducationOrderByWithRelationInput | EducationOrderByWithRelationInput[]
+    cursor?: EducationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: EducationScalarFieldEnum | EducationScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateProfile without action
+   */
+  export type CandidateProfileDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateProfile
+     */
+    select?: CandidateProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateProfile
+     */
+    omit?: CandidateProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateProfileInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model WorkExperience
+   */
+
+  export type AggregateWorkExperience = {
+    _count: WorkExperienceCountAggregateOutputType | null
+    _min: WorkExperienceMinAggregateOutputType | null
+    _max: WorkExperienceMaxAggregateOutputType | null
+  }
+
+  export type WorkExperienceMinAggregateOutputType = {
+    id: string | null
+    jobTitle: string | null
+    company: string | null
+    location: string | null
+    startDate: Date | null
+    endDate: Date | null
+    isCurrent: boolean | null
+    description: string | null
+    candidateId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type WorkExperienceMaxAggregateOutputType = {
+    id: string | null
+    jobTitle: string | null
+    company: string | null
+    location: string | null
+    startDate: Date | null
+    endDate: Date | null
+    isCurrent: boolean | null
+    description: string | null
+    candidateId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type WorkExperienceCountAggregateOutputType = {
+    id: number
+    jobTitle: number
+    company: number
+    location: number
+    startDate: number
+    endDate: number
+    isCurrent: number
+    description: number
+    candidateId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type WorkExperienceMinAggregateInputType = {
+    id?: true
+    jobTitle?: true
+    company?: true
+    location?: true
+    startDate?: true
+    endDate?: true
+    isCurrent?: true
+    description?: true
+    candidateId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type WorkExperienceMaxAggregateInputType = {
+    id?: true
+    jobTitle?: true
+    company?: true
+    location?: true
+    startDate?: true
+    endDate?: true
+    isCurrent?: true
+    description?: true
+    candidateId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type WorkExperienceCountAggregateInputType = {
+    id?: true
+    jobTitle?: true
+    company?: true
+    location?: true
+    startDate?: true
+    endDate?: true
+    isCurrent?: true
+    description?: true
+    candidateId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type WorkExperienceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WorkExperience to aggregate.
+     */
+    where?: WorkExperienceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WorkExperiences to fetch.
+     */
+    orderBy?: WorkExperienceOrderByWithRelationInput | WorkExperienceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: WorkExperienceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WorkExperiences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WorkExperiences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned WorkExperiences
+    **/
+    _count?: true | WorkExperienceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: WorkExperienceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: WorkExperienceMaxAggregateInputType
+  }
+
+  export type GetWorkExperienceAggregateType<T extends WorkExperienceAggregateArgs> = {
+        [P in keyof T & keyof AggregateWorkExperience]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateWorkExperience[P]>
+      : GetScalarType<T[P], AggregateWorkExperience[P]>
+  }
+
+
+
+
+  export type WorkExperienceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WorkExperienceWhereInput
+    orderBy?: WorkExperienceOrderByWithAggregationInput | WorkExperienceOrderByWithAggregationInput[]
+    by: WorkExperienceScalarFieldEnum[] | WorkExperienceScalarFieldEnum
+    having?: WorkExperienceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: WorkExperienceCountAggregateInputType | true
+    _min?: WorkExperienceMinAggregateInputType
+    _max?: WorkExperienceMaxAggregateInputType
+  }
+
+  export type WorkExperienceGroupByOutputType = {
+    id: string
+    jobTitle: string
+    company: string
+    location: string | null
+    startDate: Date
+    endDate: Date | null
+    isCurrent: boolean
+    description: string | null
+    candidateId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: WorkExperienceCountAggregateOutputType | null
+    _min: WorkExperienceMinAggregateOutputType | null
+    _max: WorkExperienceMaxAggregateOutputType | null
+  }
+
+  type GetWorkExperienceGroupByPayload<T extends WorkExperienceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<WorkExperienceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof WorkExperienceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], WorkExperienceGroupByOutputType[P]>
+            : GetScalarType<T[P], WorkExperienceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type WorkExperienceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobTitle?: boolean
+    company?: boolean
+    location?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    isCurrent?: boolean
+    description?: boolean
+    candidateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["workExperience"]>
+
+  export type WorkExperienceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobTitle?: boolean
+    company?: boolean
+    location?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    isCurrent?: boolean
+    description?: boolean
+    candidateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["workExperience"]>
+
+  export type WorkExperienceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobTitle?: boolean
+    company?: boolean
+    location?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    isCurrent?: boolean
+    description?: boolean
+    candidateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["workExperience"]>
+
+  export type WorkExperienceSelectScalar = {
+    id?: boolean
+    jobTitle?: boolean
+    company?: boolean
+    location?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    isCurrent?: boolean
+    description?: boolean
+    candidateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type WorkExperienceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobTitle" | "company" | "location" | "startDate" | "endDate" | "isCurrent" | "description" | "candidateId" | "createdAt" | "updatedAt", ExtArgs["result"]["workExperience"]>
+  export type WorkExperienceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+  export type WorkExperienceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+  export type WorkExperienceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+
+  export type $WorkExperiencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "WorkExperience"
+    objects: {
+      candidate: Prisma.$CandidateProfilePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      jobTitle: string
+      company: string
+      location: string | null
+      startDate: Date
+      endDate: Date | null
+      isCurrent: boolean
+      description: string | null
+      candidateId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["workExperience"]>
+    composites: {}
+  }
+
+  type WorkExperienceGetPayload<S extends boolean | null | undefined | WorkExperienceDefaultArgs> = $Result.GetResult<Prisma.$WorkExperiencePayload, S>
+
+  type WorkExperienceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<WorkExperienceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: WorkExperienceCountAggregateInputType | true
+    }
+
+  export interface WorkExperienceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['WorkExperience'], meta: { name: 'WorkExperience' } }
+    /**
+     * Find zero or one WorkExperience that matches the filter.
+     * @param {WorkExperienceFindUniqueArgs} args - Arguments to find a WorkExperience
+     * @example
+     * // Get one WorkExperience
+     * const workExperience = await prisma.workExperience.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends WorkExperienceFindUniqueArgs>(args: SelectSubset<T, WorkExperienceFindUniqueArgs<ExtArgs>>): Prisma__WorkExperienceClient<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one WorkExperience that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {WorkExperienceFindUniqueOrThrowArgs} args - Arguments to find a WorkExperience
+     * @example
+     * // Get one WorkExperience
+     * const workExperience = await prisma.workExperience.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends WorkExperienceFindUniqueOrThrowArgs>(args: SelectSubset<T, WorkExperienceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__WorkExperienceClient<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WorkExperience that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WorkExperienceFindFirstArgs} args - Arguments to find a WorkExperience
+     * @example
+     * // Get one WorkExperience
+     * const workExperience = await prisma.workExperience.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends WorkExperienceFindFirstArgs>(args?: SelectSubset<T, WorkExperienceFindFirstArgs<ExtArgs>>): Prisma__WorkExperienceClient<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WorkExperience that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WorkExperienceFindFirstOrThrowArgs} args - Arguments to find a WorkExperience
+     * @example
+     * // Get one WorkExperience
+     * const workExperience = await prisma.workExperience.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends WorkExperienceFindFirstOrThrowArgs>(args?: SelectSubset<T, WorkExperienceFindFirstOrThrowArgs<ExtArgs>>): Prisma__WorkExperienceClient<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more WorkExperiences that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WorkExperienceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all WorkExperiences
+     * const workExperiences = await prisma.workExperience.findMany()
+     * 
+     * // Get first 10 WorkExperiences
+     * const workExperiences = await prisma.workExperience.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const workExperienceWithIdOnly = await prisma.workExperience.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends WorkExperienceFindManyArgs>(args?: SelectSubset<T, WorkExperienceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a WorkExperience.
+     * @param {WorkExperienceCreateArgs} args - Arguments to create a WorkExperience.
+     * @example
+     * // Create one WorkExperience
+     * const WorkExperience = await prisma.workExperience.create({
+     *   data: {
+     *     // ... data to create a WorkExperience
+     *   }
+     * })
+     * 
+     */
+    create<T extends WorkExperienceCreateArgs>(args: SelectSubset<T, WorkExperienceCreateArgs<ExtArgs>>): Prisma__WorkExperienceClient<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many WorkExperiences.
+     * @param {WorkExperienceCreateManyArgs} args - Arguments to create many WorkExperiences.
+     * @example
+     * // Create many WorkExperiences
+     * const workExperience = await prisma.workExperience.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends WorkExperienceCreateManyArgs>(args?: SelectSubset<T, WorkExperienceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many WorkExperiences and returns the data saved in the database.
+     * @param {WorkExperienceCreateManyAndReturnArgs} args - Arguments to create many WorkExperiences.
+     * @example
+     * // Create many WorkExperiences
+     * const workExperience = await prisma.workExperience.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many WorkExperiences and only return the `id`
+     * const workExperienceWithIdOnly = await prisma.workExperience.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends WorkExperienceCreateManyAndReturnArgs>(args?: SelectSubset<T, WorkExperienceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a WorkExperience.
+     * @param {WorkExperienceDeleteArgs} args - Arguments to delete one WorkExperience.
+     * @example
+     * // Delete one WorkExperience
+     * const WorkExperience = await prisma.workExperience.delete({
+     *   where: {
+     *     // ... filter to delete one WorkExperience
+     *   }
+     * })
+     * 
+     */
+    delete<T extends WorkExperienceDeleteArgs>(args: SelectSubset<T, WorkExperienceDeleteArgs<ExtArgs>>): Prisma__WorkExperienceClient<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one WorkExperience.
+     * @param {WorkExperienceUpdateArgs} args - Arguments to update one WorkExperience.
+     * @example
+     * // Update one WorkExperience
+     * const workExperience = await prisma.workExperience.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends WorkExperienceUpdateArgs>(args: SelectSubset<T, WorkExperienceUpdateArgs<ExtArgs>>): Prisma__WorkExperienceClient<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more WorkExperiences.
+     * @param {WorkExperienceDeleteManyArgs} args - Arguments to filter WorkExperiences to delete.
+     * @example
+     * // Delete a few WorkExperiences
+     * const { count } = await prisma.workExperience.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends WorkExperienceDeleteManyArgs>(args?: SelectSubset<T, WorkExperienceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WorkExperiences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WorkExperienceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many WorkExperiences
+     * const workExperience = await prisma.workExperience.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends WorkExperienceUpdateManyArgs>(args: SelectSubset<T, WorkExperienceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WorkExperiences and returns the data updated in the database.
+     * @param {WorkExperienceUpdateManyAndReturnArgs} args - Arguments to update many WorkExperiences.
+     * @example
+     * // Update many WorkExperiences
+     * const workExperience = await prisma.workExperience.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WorkExperiences and only return the `id`
+     * const workExperienceWithIdOnly = await prisma.workExperience.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WorkExperienceUpdateManyAndReturnArgs>(args: SelectSubset<T, WorkExperienceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one WorkExperience.
+     * @param {WorkExperienceUpsertArgs} args - Arguments to update or create a WorkExperience.
+     * @example
+     * // Update or create a WorkExperience
+     * const workExperience = await prisma.workExperience.upsert({
+     *   create: {
+     *     // ... data to create a WorkExperience
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the WorkExperience we want to update
+     *   }
+     * })
+     */
+    upsert<T extends WorkExperienceUpsertArgs>(args: SelectSubset<T, WorkExperienceUpsertArgs<ExtArgs>>): Prisma__WorkExperienceClient<$Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of WorkExperiences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WorkExperienceCountArgs} args - Arguments to filter WorkExperiences to count.
+     * @example
+     * // Count the number of WorkExperiences
+     * const count = await prisma.workExperience.count({
+     *   where: {
+     *     // ... the filter for the WorkExperiences we want to count
+     *   }
+     * })
+    **/
+    count<T extends WorkExperienceCountArgs>(
+      args?: Subset<T, WorkExperienceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], WorkExperienceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a WorkExperience.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WorkExperienceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends WorkExperienceAggregateArgs>(args: Subset<T, WorkExperienceAggregateArgs>): Prisma.PrismaPromise<GetWorkExperienceAggregateType<T>>
+
+    /**
+     * Group by WorkExperience.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WorkExperienceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends WorkExperienceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: WorkExperienceGroupByArgs['orderBy'] }
+        : { orderBy?: WorkExperienceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, WorkExperienceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetWorkExperienceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the WorkExperience model
+   */
+  readonly fields: WorkExperienceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for WorkExperience.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__WorkExperienceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    candidate<T extends CandidateProfileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfileDefaultArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the WorkExperience model
+   */
+  interface WorkExperienceFieldRefs {
+    readonly id: FieldRef<"WorkExperience", 'String'>
+    readonly jobTitle: FieldRef<"WorkExperience", 'String'>
+    readonly company: FieldRef<"WorkExperience", 'String'>
+    readonly location: FieldRef<"WorkExperience", 'String'>
+    readonly startDate: FieldRef<"WorkExperience", 'DateTime'>
+    readonly endDate: FieldRef<"WorkExperience", 'DateTime'>
+    readonly isCurrent: FieldRef<"WorkExperience", 'Boolean'>
+    readonly description: FieldRef<"WorkExperience", 'String'>
+    readonly candidateId: FieldRef<"WorkExperience", 'String'>
+    readonly createdAt: FieldRef<"WorkExperience", 'DateTime'>
+    readonly updatedAt: FieldRef<"WorkExperience", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * WorkExperience findUnique
+   */
+  export type WorkExperienceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which WorkExperience to fetch.
+     */
+    where: WorkExperienceWhereUniqueInput
+  }
+
+  /**
+   * WorkExperience findUniqueOrThrow
+   */
+  export type WorkExperienceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which WorkExperience to fetch.
+     */
+    where: WorkExperienceWhereUniqueInput
+  }
+
+  /**
+   * WorkExperience findFirst
+   */
+  export type WorkExperienceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which WorkExperience to fetch.
+     */
+    where?: WorkExperienceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WorkExperiences to fetch.
+     */
+    orderBy?: WorkExperienceOrderByWithRelationInput | WorkExperienceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WorkExperiences.
+     */
+    cursor?: WorkExperienceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WorkExperiences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WorkExperiences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WorkExperiences.
+     */
+    distinct?: WorkExperienceScalarFieldEnum | WorkExperienceScalarFieldEnum[]
+  }
+
+  /**
+   * WorkExperience findFirstOrThrow
+   */
+  export type WorkExperienceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which WorkExperience to fetch.
+     */
+    where?: WorkExperienceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WorkExperiences to fetch.
+     */
+    orderBy?: WorkExperienceOrderByWithRelationInput | WorkExperienceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WorkExperiences.
+     */
+    cursor?: WorkExperienceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WorkExperiences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WorkExperiences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WorkExperiences.
+     */
+    distinct?: WorkExperienceScalarFieldEnum | WorkExperienceScalarFieldEnum[]
+  }
+
+  /**
+   * WorkExperience findMany
+   */
+  export type WorkExperienceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which WorkExperiences to fetch.
+     */
+    where?: WorkExperienceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WorkExperiences to fetch.
+     */
+    orderBy?: WorkExperienceOrderByWithRelationInput | WorkExperienceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing WorkExperiences.
+     */
+    cursor?: WorkExperienceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WorkExperiences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WorkExperiences.
+     */
+    skip?: number
+    distinct?: WorkExperienceScalarFieldEnum | WorkExperienceScalarFieldEnum[]
+  }
+
+  /**
+   * WorkExperience create
+   */
+  export type WorkExperienceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a WorkExperience.
+     */
+    data: XOR<WorkExperienceCreateInput, WorkExperienceUncheckedCreateInput>
+  }
+
+  /**
+   * WorkExperience createMany
+   */
+  export type WorkExperienceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many WorkExperiences.
+     */
+    data: WorkExperienceCreateManyInput | WorkExperienceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * WorkExperience createManyAndReturn
+   */
+  export type WorkExperienceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * The data used to create many WorkExperiences.
+     */
+    data: WorkExperienceCreateManyInput | WorkExperienceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * WorkExperience update
+   */
+  export type WorkExperienceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a WorkExperience.
+     */
+    data: XOR<WorkExperienceUpdateInput, WorkExperienceUncheckedUpdateInput>
+    /**
+     * Choose, which WorkExperience to update.
+     */
+    where: WorkExperienceWhereUniqueInput
+  }
+
+  /**
+   * WorkExperience updateMany
+   */
+  export type WorkExperienceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update WorkExperiences.
+     */
+    data: XOR<WorkExperienceUpdateManyMutationInput, WorkExperienceUncheckedUpdateManyInput>
+    /**
+     * Filter which WorkExperiences to update
+     */
+    where?: WorkExperienceWhereInput
+    /**
+     * Limit how many WorkExperiences to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WorkExperience updateManyAndReturn
+   */
+  export type WorkExperienceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * The data used to update WorkExperiences.
+     */
+    data: XOR<WorkExperienceUpdateManyMutationInput, WorkExperienceUncheckedUpdateManyInput>
+    /**
+     * Filter which WorkExperiences to update
+     */
+    where?: WorkExperienceWhereInput
+    /**
+     * Limit how many WorkExperiences to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * WorkExperience upsert
+   */
+  export type WorkExperienceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the WorkExperience to update in case it exists.
+     */
+    where: WorkExperienceWhereUniqueInput
+    /**
+     * In case the WorkExperience found by the `where` argument doesn't exist, create a new WorkExperience with this data.
+     */
+    create: XOR<WorkExperienceCreateInput, WorkExperienceUncheckedCreateInput>
+    /**
+     * In case the WorkExperience was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<WorkExperienceUpdateInput, WorkExperienceUncheckedUpdateInput>
+  }
+
+  /**
+   * WorkExperience delete
+   */
+  export type WorkExperienceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+    /**
+     * Filter which WorkExperience to delete.
+     */
+    where: WorkExperienceWhereUniqueInput
+  }
+
+  /**
+   * WorkExperience deleteMany
+   */
+  export type WorkExperienceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WorkExperiences to delete
+     */
+    where?: WorkExperienceWhereInput
+    /**
+     * Limit how many WorkExperiences to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * WorkExperience without action
+   */
+  export type WorkExperienceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkExperience
+     */
+    select?: WorkExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkExperience
+     */
+    omit?: WorkExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WorkExperienceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Education
+   */
+
+  export type AggregateEducation = {
+    _count: EducationCountAggregateOutputType | null
+    _min: EducationMinAggregateOutputType | null
+    _max: EducationMaxAggregateOutputType | null
+  }
+
+  export type EducationMinAggregateOutputType = {
+    id: string | null
+    degree: string | null
+    institution: string | null
+    fieldOfStudy: string | null
+    startDate: Date | null
+    endDate: Date | null
+    isCurrent: boolean | null
+    grade: string | null
+    description: string | null
+    candidateId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EducationMaxAggregateOutputType = {
+    id: string | null
+    degree: string | null
+    institution: string | null
+    fieldOfStudy: string | null
+    startDate: Date | null
+    endDate: Date | null
+    isCurrent: boolean | null
+    grade: string | null
+    description: string | null
+    candidateId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EducationCountAggregateOutputType = {
+    id: number
+    degree: number
+    institution: number
+    fieldOfStudy: number
+    startDate: number
+    endDate: number
+    isCurrent: number
+    grade: number
+    description: number
+    candidateId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type EducationMinAggregateInputType = {
+    id?: true
+    degree?: true
+    institution?: true
+    fieldOfStudy?: true
+    startDate?: true
+    endDate?: true
+    isCurrent?: true
+    grade?: true
+    description?: true
+    candidateId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EducationMaxAggregateInputType = {
+    id?: true
+    degree?: true
+    institution?: true
+    fieldOfStudy?: true
+    startDate?: true
+    endDate?: true
+    isCurrent?: true
+    grade?: true
+    description?: true
+    candidateId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EducationCountAggregateInputType = {
+    id?: true
+    degree?: true
+    institution?: true
+    fieldOfStudy?: true
+    startDate?: true
+    endDate?: true
+    isCurrent?: true
+    grade?: true
+    description?: true
+    candidateId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type EducationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Education to aggregate.
+     */
+    where?: EducationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Educations to fetch.
+     */
+    orderBy?: EducationOrderByWithRelationInput | EducationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EducationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Educations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Educations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Educations
+    **/
+    _count?: true | EducationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EducationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EducationMaxAggregateInputType
+  }
+
+  export type GetEducationAggregateType<T extends EducationAggregateArgs> = {
+        [P in keyof T & keyof AggregateEducation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEducation[P]>
+      : GetScalarType<T[P], AggregateEducation[P]>
+  }
+
+
+
+
+  export type EducationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EducationWhereInput
+    orderBy?: EducationOrderByWithAggregationInput | EducationOrderByWithAggregationInput[]
+    by: EducationScalarFieldEnum[] | EducationScalarFieldEnum
+    having?: EducationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EducationCountAggregateInputType | true
+    _min?: EducationMinAggregateInputType
+    _max?: EducationMaxAggregateInputType
+  }
+
+  export type EducationGroupByOutputType = {
+    id: string
+    degree: string
+    institution: string
+    fieldOfStudy: string | null
+    startDate: Date
+    endDate: Date | null
+    isCurrent: boolean
+    grade: string | null
+    description: string | null
+    candidateId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: EducationCountAggregateOutputType | null
+    _min: EducationMinAggregateOutputType | null
+    _max: EducationMaxAggregateOutputType | null
+  }
+
+  type GetEducationGroupByPayload<T extends EducationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EducationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EducationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EducationGroupByOutputType[P]>
+            : GetScalarType<T[P], EducationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EducationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    degree?: boolean
+    institution?: boolean
+    fieldOfStudy?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    isCurrent?: boolean
+    grade?: boolean
+    description?: boolean
+    candidateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["education"]>
+
+  export type EducationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    degree?: boolean
+    institution?: boolean
+    fieldOfStudy?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    isCurrent?: boolean
+    grade?: boolean
+    description?: boolean
+    candidateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["education"]>
+
+  export type EducationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    degree?: boolean
+    institution?: boolean
+    fieldOfStudy?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    isCurrent?: boolean
+    grade?: boolean
+    description?: boolean
+    candidateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["education"]>
+
+  export type EducationSelectScalar = {
+    id?: boolean
+    degree?: boolean
+    institution?: boolean
+    fieldOfStudy?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    isCurrent?: boolean
+    grade?: boolean
+    description?: boolean
+    candidateId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type EducationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "degree" | "institution" | "fieldOfStudy" | "startDate" | "endDate" | "isCurrent" | "grade" | "description" | "candidateId" | "createdAt" | "updatedAt", ExtArgs["result"]["education"]>
+  export type EducationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+  export type EducationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+  export type EducationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+
+  export type $EducationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Education"
+    objects: {
+      candidate: Prisma.$CandidateProfilePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      degree: string
+      institution: string
+      fieldOfStudy: string | null
+      startDate: Date
+      endDate: Date | null
+      isCurrent: boolean
+      grade: string | null
+      description: string | null
+      candidateId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["education"]>
+    composites: {}
+  }
+
+  type EducationGetPayload<S extends boolean | null | undefined | EducationDefaultArgs> = $Result.GetResult<Prisma.$EducationPayload, S>
+
+  type EducationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EducationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EducationCountAggregateInputType | true
+    }
+
+  export interface EducationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Education'], meta: { name: 'Education' } }
+    /**
+     * Find zero or one Education that matches the filter.
+     * @param {EducationFindUniqueArgs} args - Arguments to find a Education
+     * @example
+     * // Get one Education
+     * const education = await prisma.education.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EducationFindUniqueArgs>(args: SelectSubset<T, EducationFindUniqueArgs<ExtArgs>>): Prisma__EducationClient<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Education that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EducationFindUniqueOrThrowArgs} args - Arguments to find a Education
+     * @example
+     * // Get one Education
+     * const education = await prisma.education.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EducationFindUniqueOrThrowArgs>(args: SelectSubset<T, EducationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EducationClient<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Education that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EducationFindFirstArgs} args - Arguments to find a Education
+     * @example
+     * // Get one Education
+     * const education = await prisma.education.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EducationFindFirstArgs>(args?: SelectSubset<T, EducationFindFirstArgs<ExtArgs>>): Prisma__EducationClient<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Education that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EducationFindFirstOrThrowArgs} args - Arguments to find a Education
+     * @example
+     * // Get one Education
+     * const education = await prisma.education.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EducationFindFirstOrThrowArgs>(args?: SelectSubset<T, EducationFindFirstOrThrowArgs<ExtArgs>>): Prisma__EducationClient<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Educations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EducationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Educations
+     * const educations = await prisma.education.findMany()
+     * 
+     * // Get first 10 Educations
+     * const educations = await prisma.education.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const educationWithIdOnly = await prisma.education.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EducationFindManyArgs>(args?: SelectSubset<T, EducationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Education.
+     * @param {EducationCreateArgs} args - Arguments to create a Education.
+     * @example
+     * // Create one Education
+     * const Education = await prisma.education.create({
+     *   data: {
+     *     // ... data to create a Education
+     *   }
+     * })
+     * 
+     */
+    create<T extends EducationCreateArgs>(args: SelectSubset<T, EducationCreateArgs<ExtArgs>>): Prisma__EducationClient<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Educations.
+     * @param {EducationCreateManyArgs} args - Arguments to create many Educations.
+     * @example
+     * // Create many Educations
+     * const education = await prisma.education.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EducationCreateManyArgs>(args?: SelectSubset<T, EducationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Educations and returns the data saved in the database.
+     * @param {EducationCreateManyAndReturnArgs} args - Arguments to create many Educations.
+     * @example
+     * // Create many Educations
+     * const education = await prisma.education.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Educations and only return the `id`
+     * const educationWithIdOnly = await prisma.education.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EducationCreateManyAndReturnArgs>(args?: SelectSubset<T, EducationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Education.
+     * @param {EducationDeleteArgs} args - Arguments to delete one Education.
+     * @example
+     * // Delete one Education
+     * const Education = await prisma.education.delete({
+     *   where: {
+     *     // ... filter to delete one Education
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EducationDeleteArgs>(args: SelectSubset<T, EducationDeleteArgs<ExtArgs>>): Prisma__EducationClient<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Education.
+     * @param {EducationUpdateArgs} args - Arguments to update one Education.
+     * @example
+     * // Update one Education
+     * const education = await prisma.education.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EducationUpdateArgs>(args: SelectSubset<T, EducationUpdateArgs<ExtArgs>>): Prisma__EducationClient<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Educations.
+     * @param {EducationDeleteManyArgs} args - Arguments to filter Educations to delete.
+     * @example
+     * // Delete a few Educations
+     * const { count } = await prisma.education.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EducationDeleteManyArgs>(args?: SelectSubset<T, EducationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Educations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EducationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Educations
+     * const education = await prisma.education.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EducationUpdateManyArgs>(args: SelectSubset<T, EducationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Educations and returns the data updated in the database.
+     * @param {EducationUpdateManyAndReturnArgs} args - Arguments to update many Educations.
+     * @example
+     * // Update many Educations
+     * const education = await prisma.education.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Educations and only return the `id`
+     * const educationWithIdOnly = await prisma.education.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EducationUpdateManyAndReturnArgs>(args: SelectSubset<T, EducationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Education.
+     * @param {EducationUpsertArgs} args - Arguments to update or create a Education.
+     * @example
+     * // Update or create a Education
+     * const education = await prisma.education.upsert({
+     *   create: {
+     *     // ... data to create a Education
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Education we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EducationUpsertArgs>(args: SelectSubset<T, EducationUpsertArgs<ExtArgs>>): Prisma__EducationClient<$Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Educations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EducationCountArgs} args - Arguments to filter Educations to count.
+     * @example
+     * // Count the number of Educations
+     * const count = await prisma.education.count({
+     *   where: {
+     *     // ... the filter for the Educations we want to count
+     *   }
+     * })
+    **/
+    count<T extends EducationCountArgs>(
+      args?: Subset<T, EducationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EducationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Education.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EducationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EducationAggregateArgs>(args: Subset<T, EducationAggregateArgs>): Prisma.PrismaPromise<GetEducationAggregateType<T>>
+
+    /**
+     * Group by Education.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EducationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EducationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EducationGroupByArgs['orderBy'] }
+        : { orderBy?: EducationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EducationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEducationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Education model
+   */
+  readonly fields: EducationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Education.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EducationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    candidate<T extends CandidateProfileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfileDefaultArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Education model
+   */
+  interface EducationFieldRefs {
+    readonly id: FieldRef<"Education", 'String'>
+    readonly degree: FieldRef<"Education", 'String'>
+    readonly institution: FieldRef<"Education", 'String'>
+    readonly fieldOfStudy: FieldRef<"Education", 'String'>
+    readonly startDate: FieldRef<"Education", 'DateTime'>
+    readonly endDate: FieldRef<"Education", 'DateTime'>
+    readonly isCurrent: FieldRef<"Education", 'Boolean'>
+    readonly grade: FieldRef<"Education", 'String'>
+    readonly description: FieldRef<"Education", 'String'>
+    readonly candidateId: FieldRef<"Education", 'String'>
+    readonly createdAt: FieldRef<"Education", 'DateTime'>
+    readonly updatedAt: FieldRef<"Education", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Education findUnique
+   */
+  export type EducationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * Filter, which Education to fetch.
+     */
+    where: EducationWhereUniqueInput
+  }
+
+  /**
+   * Education findUniqueOrThrow
+   */
+  export type EducationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * Filter, which Education to fetch.
+     */
+    where: EducationWhereUniqueInput
+  }
+
+  /**
+   * Education findFirst
+   */
+  export type EducationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * Filter, which Education to fetch.
+     */
+    where?: EducationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Educations to fetch.
+     */
+    orderBy?: EducationOrderByWithRelationInput | EducationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Educations.
+     */
+    cursor?: EducationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Educations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Educations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Educations.
+     */
+    distinct?: EducationScalarFieldEnum | EducationScalarFieldEnum[]
+  }
+
+  /**
+   * Education findFirstOrThrow
+   */
+  export type EducationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * Filter, which Education to fetch.
+     */
+    where?: EducationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Educations to fetch.
+     */
+    orderBy?: EducationOrderByWithRelationInput | EducationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Educations.
+     */
+    cursor?: EducationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Educations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Educations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Educations.
+     */
+    distinct?: EducationScalarFieldEnum | EducationScalarFieldEnum[]
+  }
+
+  /**
+   * Education findMany
+   */
+  export type EducationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * Filter, which Educations to fetch.
+     */
+    where?: EducationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Educations to fetch.
+     */
+    orderBy?: EducationOrderByWithRelationInput | EducationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Educations.
+     */
+    cursor?: EducationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Educations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Educations.
+     */
+    skip?: number
+    distinct?: EducationScalarFieldEnum | EducationScalarFieldEnum[]
+  }
+
+  /**
+   * Education create
+   */
+  export type EducationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Education.
+     */
+    data: XOR<EducationCreateInput, EducationUncheckedCreateInput>
+  }
+
+  /**
+   * Education createMany
+   */
+  export type EducationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Educations.
+     */
+    data: EducationCreateManyInput | EducationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Education createManyAndReturn
+   */
+  export type EducationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * The data used to create many Educations.
+     */
+    data: EducationCreateManyInput | EducationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Education update
+   */
+  export type EducationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Education.
+     */
+    data: XOR<EducationUpdateInput, EducationUncheckedUpdateInput>
+    /**
+     * Choose, which Education to update.
+     */
+    where: EducationWhereUniqueInput
+  }
+
+  /**
+   * Education updateMany
+   */
+  export type EducationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Educations.
+     */
+    data: XOR<EducationUpdateManyMutationInput, EducationUncheckedUpdateManyInput>
+    /**
+     * Filter which Educations to update
+     */
+    where?: EducationWhereInput
+    /**
+     * Limit how many Educations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Education updateManyAndReturn
+   */
+  export type EducationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * The data used to update Educations.
+     */
+    data: XOR<EducationUpdateManyMutationInput, EducationUncheckedUpdateManyInput>
+    /**
+     * Filter which Educations to update
+     */
+    where?: EducationWhereInput
+    /**
+     * Limit how many Educations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Education upsert
+   */
+  export type EducationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Education to update in case it exists.
+     */
+    where: EducationWhereUniqueInput
+    /**
+     * In case the Education found by the `where` argument doesn't exist, create a new Education with this data.
+     */
+    create: XOR<EducationCreateInput, EducationUncheckedCreateInput>
+    /**
+     * In case the Education was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EducationUpdateInput, EducationUncheckedUpdateInput>
+  }
+
+  /**
+   * Education delete
+   */
+  export type EducationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+    /**
+     * Filter which Education to delete.
+     */
+    where: EducationWhereUniqueInput
+  }
+
+  /**
+   * Education deleteMany
+   */
+  export type EducationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Educations to delete
+     */
+    where?: EducationWhereInput
+    /**
+     * Limit how many Educations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Education without action
+   */
+  export type EducationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Education
+     */
+    select?: EducationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Education
+     */
+    omit?: EducationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EducationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CV
+   */
+
+  export type AggregateCV = {
+    _count: CVCountAggregateOutputType | null
+    _avg: CVAvgAggregateOutputType | null
+    _sum: CVSumAggregateOutputType | null
+    _min: CVMinAggregateOutputType | null
+    _max: CVMaxAggregateOutputType | null
+  }
+
+  export type CVAvgAggregateOutputType = {
+    fileSize: number | null
+  }
+
+  export type CVSumAggregateOutputType = {
+    fileSize: number | null
+  }
+
+  export type CVMinAggregateOutputType = {
+    id: string | null
+    fileName: string | null
+    originalFileName: string | null
+    fileUrl: string | null
+    fileSize: number | null
+    mimeType: string | null
+    status: $Enums.CVStatus | null
+    isActive: boolean | null
+    candidateId: string | null
+    uploadedAt: Date | null
+    processedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CVMaxAggregateOutputType = {
+    id: string | null
+    fileName: string | null
+    originalFileName: string | null
+    fileUrl: string | null
+    fileSize: number | null
+    mimeType: string | null
+    status: $Enums.CVStatus | null
+    isActive: boolean | null
+    candidateId: string | null
+    uploadedAt: Date | null
+    processedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CVCountAggregateOutputType = {
+    id: number
+    fileName: number
+    originalFileName: number
+    fileUrl: number
+    fileSize: number
+    mimeType: number
+    status: number
+    isActive: number
+    extractedData: number
+    candidateId: number
+    uploadedAt: number
+    processedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CVAvgAggregateInputType = {
+    fileSize?: true
+  }
+
+  export type CVSumAggregateInputType = {
+    fileSize?: true
+  }
+
+  export type CVMinAggregateInputType = {
+    id?: true
+    fileName?: true
+    originalFileName?: true
+    fileUrl?: true
+    fileSize?: true
+    mimeType?: true
+    status?: true
+    isActive?: true
+    candidateId?: true
+    uploadedAt?: true
+    processedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CVMaxAggregateInputType = {
+    id?: true
+    fileName?: true
+    originalFileName?: true
+    fileUrl?: true
+    fileSize?: true
+    mimeType?: true
+    status?: true
+    isActive?: true
+    candidateId?: true
+    uploadedAt?: true
+    processedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CVCountAggregateInputType = {
+    id?: true
+    fileName?: true
+    originalFileName?: true
+    fileUrl?: true
+    fileSize?: true
+    mimeType?: true
+    status?: true
+    isActive?: true
+    extractedData?: true
+    candidateId?: true
+    uploadedAt?: true
+    processedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CVAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CV to aggregate.
+     */
+    where?: CVWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CVS to fetch.
+     */
+    orderBy?: CVOrderByWithRelationInput | CVOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CVWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CVS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CVS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CVS
+    **/
+    _count?: true | CVCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CVAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CVSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CVMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CVMaxAggregateInputType
+  }
+
+  export type GetCVAggregateType<T extends CVAggregateArgs> = {
+        [P in keyof T & keyof AggregateCV]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCV[P]>
+      : GetScalarType<T[P], AggregateCV[P]>
+  }
+
+
+
+
+  export type CVGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CVWhereInput
+    orderBy?: CVOrderByWithAggregationInput | CVOrderByWithAggregationInput[]
+    by: CVScalarFieldEnum[] | CVScalarFieldEnum
+    having?: CVScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CVCountAggregateInputType | true
+    _avg?: CVAvgAggregateInputType
+    _sum?: CVSumAggregateInputType
+    _min?: CVMinAggregateInputType
+    _max?: CVMaxAggregateInputType
+  }
+
+  export type CVGroupByOutputType = {
+    id: string
+    fileName: string
+    originalFileName: string | null
+    fileUrl: string
+    fileSize: number | null
+    mimeType: string | null
+    status: $Enums.CVStatus
+    isActive: boolean
+    extractedData: JsonValue | null
+    candidateId: string
+    uploadedAt: Date
+    processedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: CVCountAggregateOutputType | null
+    _avg: CVAvgAggregateOutputType | null
+    _sum: CVSumAggregateOutputType | null
+    _min: CVMinAggregateOutputType | null
+    _max: CVMaxAggregateOutputType | null
+  }
+
+  type GetCVGroupByPayload<T extends CVGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CVGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CVGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CVGroupByOutputType[P]>
+            : GetScalarType<T[P], CVGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CVSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileName?: boolean
+    originalFileName?: boolean
+    fileUrl?: boolean
+    fileSize?: boolean
+    mimeType?: boolean
+    status?: boolean
+    isActive?: boolean
+    extractedData?: boolean
+    candidateId?: boolean
+    uploadedAt?: boolean
+    processedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cV"]>
+
+  export type CVSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileName?: boolean
+    originalFileName?: boolean
+    fileUrl?: boolean
+    fileSize?: boolean
+    mimeType?: boolean
+    status?: boolean
+    isActive?: boolean
+    extractedData?: boolean
+    candidateId?: boolean
+    uploadedAt?: boolean
+    processedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cV"]>
+
+  export type CVSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileName?: boolean
+    originalFileName?: boolean
+    fileUrl?: boolean
+    fileSize?: boolean
+    mimeType?: boolean
+    status?: boolean
+    isActive?: boolean
+    extractedData?: boolean
+    candidateId?: boolean
+    uploadedAt?: boolean
+    processedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cV"]>
+
+  export type CVSelectScalar = {
+    id?: boolean
+    fileName?: boolean
+    originalFileName?: boolean
+    fileUrl?: boolean
+    fileSize?: boolean
+    mimeType?: boolean
+    status?: boolean
+    isActive?: boolean
+    extractedData?: boolean
+    candidateId?: boolean
+    uploadedAt?: boolean
+    processedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CVOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileName" | "originalFileName" | "fileUrl" | "fileSize" | "mimeType" | "status" | "isActive" | "extractedData" | "candidateId" | "uploadedAt" | "processedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["cV"]>
+  export type CVInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+  export type CVIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+  export type CVIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+
+  export type $CVPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CV"
+    objects: {
+      candidate: Prisma.$CandidateProfilePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      fileName: string
+      originalFileName: string | null
+      fileUrl: string
+      fileSize: number | null
+      mimeType: string | null
+      status: $Enums.CVStatus
+      isActive: boolean
+      extractedData: Prisma.JsonValue | null
+      candidateId: string
+      uploadedAt: Date
+      processedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["cV"]>
+    composites: {}
+  }
+
+  type CVGetPayload<S extends boolean | null | undefined | CVDefaultArgs> = $Result.GetResult<Prisma.$CVPayload, S>
+
+  type CVCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CVFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CVCountAggregateInputType | true
+    }
+
+  export interface CVDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CV'], meta: { name: 'CV' } }
+    /**
+     * Find zero or one CV that matches the filter.
+     * @param {CVFindUniqueArgs} args - Arguments to find a CV
+     * @example
+     * // Get one CV
+     * const cV = await prisma.cV.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CVFindUniqueArgs>(args: SelectSubset<T, CVFindUniqueArgs<ExtArgs>>): Prisma__CVClient<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CV that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CVFindUniqueOrThrowArgs} args - Arguments to find a CV
+     * @example
+     * // Get one CV
+     * const cV = await prisma.cV.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CVFindUniqueOrThrowArgs>(args: SelectSubset<T, CVFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CVClient<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CV that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CVFindFirstArgs} args - Arguments to find a CV
+     * @example
+     * // Get one CV
+     * const cV = await prisma.cV.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CVFindFirstArgs>(args?: SelectSubset<T, CVFindFirstArgs<ExtArgs>>): Prisma__CVClient<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CV that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CVFindFirstOrThrowArgs} args - Arguments to find a CV
+     * @example
+     * // Get one CV
+     * const cV = await prisma.cV.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CVFindFirstOrThrowArgs>(args?: SelectSubset<T, CVFindFirstOrThrowArgs<ExtArgs>>): Prisma__CVClient<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CVS that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CVFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CVS
+     * const cVS = await prisma.cV.findMany()
+     * 
+     * // Get first 10 CVS
+     * const cVS = await prisma.cV.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const cVWithIdOnly = await prisma.cV.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CVFindManyArgs>(args?: SelectSubset<T, CVFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CV.
+     * @param {CVCreateArgs} args - Arguments to create a CV.
+     * @example
+     * // Create one CV
+     * const CV = await prisma.cV.create({
+     *   data: {
+     *     // ... data to create a CV
+     *   }
+     * })
+     * 
+     */
+    create<T extends CVCreateArgs>(args: SelectSubset<T, CVCreateArgs<ExtArgs>>): Prisma__CVClient<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CVS.
+     * @param {CVCreateManyArgs} args - Arguments to create many CVS.
+     * @example
+     * // Create many CVS
+     * const cV = await prisma.cV.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CVCreateManyArgs>(args?: SelectSubset<T, CVCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CVS and returns the data saved in the database.
+     * @param {CVCreateManyAndReturnArgs} args - Arguments to create many CVS.
+     * @example
+     * // Create many CVS
+     * const cV = await prisma.cV.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CVS and only return the `id`
+     * const cVWithIdOnly = await prisma.cV.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CVCreateManyAndReturnArgs>(args?: SelectSubset<T, CVCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CV.
+     * @param {CVDeleteArgs} args - Arguments to delete one CV.
+     * @example
+     * // Delete one CV
+     * const CV = await prisma.cV.delete({
+     *   where: {
+     *     // ... filter to delete one CV
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CVDeleteArgs>(args: SelectSubset<T, CVDeleteArgs<ExtArgs>>): Prisma__CVClient<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CV.
+     * @param {CVUpdateArgs} args - Arguments to update one CV.
+     * @example
+     * // Update one CV
+     * const cV = await prisma.cV.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CVUpdateArgs>(args: SelectSubset<T, CVUpdateArgs<ExtArgs>>): Prisma__CVClient<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CVS.
+     * @param {CVDeleteManyArgs} args - Arguments to filter CVS to delete.
+     * @example
+     * // Delete a few CVS
+     * const { count } = await prisma.cV.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CVDeleteManyArgs>(args?: SelectSubset<T, CVDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CVS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CVUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CVS
+     * const cV = await prisma.cV.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CVUpdateManyArgs>(args: SelectSubset<T, CVUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CVS and returns the data updated in the database.
+     * @param {CVUpdateManyAndReturnArgs} args - Arguments to update many CVS.
+     * @example
+     * // Update many CVS
+     * const cV = await prisma.cV.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CVS and only return the `id`
+     * const cVWithIdOnly = await prisma.cV.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CVUpdateManyAndReturnArgs>(args: SelectSubset<T, CVUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CV.
+     * @param {CVUpsertArgs} args - Arguments to update or create a CV.
+     * @example
+     * // Update or create a CV
+     * const cV = await prisma.cV.upsert({
+     *   create: {
+     *     // ... data to create a CV
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CV we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CVUpsertArgs>(args: SelectSubset<T, CVUpsertArgs<ExtArgs>>): Prisma__CVClient<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CVS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CVCountArgs} args - Arguments to filter CVS to count.
+     * @example
+     * // Count the number of CVS
+     * const count = await prisma.cV.count({
+     *   where: {
+     *     // ... the filter for the CVS we want to count
+     *   }
+     * })
+    **/
+    count<T extends CVCountArgs>(
+      args?: Subset<T, CVCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CVCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CV.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CVAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CVAggregateArgs>(args: Subset<T, CVAggregateArgs>): Prisma.PrismaPromise<GetCVAggregateType<T>>
+
+    /**
+     * Group by CV.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CVGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CVGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CVGroupByArgs['orderBy'] }
+        : { orderBy?: CVGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CVGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCVGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CV model
+   */
+  readonly fields: CVFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CV.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CVClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    candidate<T extends CandidateProfileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfileDefaultArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CV model
+   */
+  interface CVFieldRefs {
+    readonly id: FieldRef<"CV", 'String'>
+    readonly fileName: FieldRef<"CV", 'String'>
+    readonly originalFileName: FieldRef<"CV", 'String'>
+    readonly fileUrl: FieldRef<"CV", 'String'>
+    readonly fileSize: FieldRef<"CV", 'Int'>
+    readonly mimeType: FieldRef<"CV", 'String'>
+    readonly status: FieldRef<"CV", 'CVStatus'>
+    readonly isActive: FieldRef<"CV", 'Boolean'>
+    readonly extractedData: FieldRef<"CV", 'Json'>
+    readonly candidateId: FieldRef<"CV", 'String'>
+    readonly uploadedAt: FieldRef<"CV", 'DateTime'>
+    readonly processedAt: FieldRef<"CV", 'DateTime'>
+    readonly createdAt: FieldRef<"CV", 'DateTime'>
+    readonly updatedAt: FieldRef<"CV", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CV findUnique
+   */
+  export type CVFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * Filter, which CV to fetch.
+     */
+    where: CVWhereUniqueInput
+  }
+
+  /**
+   * CV findUniqueOrThrow
+   */
+  export type CVFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * Filter, which CV to fetch.
+     */
+    where: CVWhereUniqueInput
+  }
+
+  /**
+   * CV findFirst
+   */
+  export type CVFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * Filter, which CV to fetch.
+     */
+    where?: CVWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CVS to fetch.
+     */
+    orderBy?: CVOrderByWithRelationInput | CVOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CVS.
+     */
+    cursor?: CVWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CVS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CVS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CVS.
+     */
+    distinct?: CVScalarFieldEnum | CVScalarFieldEnum[]
+  }
+
+  /**
+   * CV findFirstOrThrow
+   */
+  export type CVFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * Filter, which CV to fetch.
+     */
+    where?: CVWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CVS to fetch.
+     */
+    orderBy?: CVOrderByWithRelationInput | CVOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CVS.
+     */
+    cursor?: CVWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CVS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CVS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CVS.
+     */
+    distinct?: CVScalarFieldEnum | CVScalarFieldEnum[]
+  }
+
+  /**
+   * CV findMany
+   */
+  export type CVFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * Filter, which CVS to fetch.
+     */
+    where?: CVWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CVS to fetch.
+     */
+    orderBy?: CVOrderByWithRelationInput | CVOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CVS.
+     */
+    cursor?: CVWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CVS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CVS.
+     */
+    skip?: number
+    distinct?: CVScalarFieldEnum | CVScalarFieldEnum[]
+  }
+
+  /**
+   * CV create
+   */
+  export type CVCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CV.
+     */
+    data: XOR<CVCreateInput, CVUncheckedCreateInput>
+  }
+
+  /**
+   * CV createMany
+   */
+  export type CVCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CVS.
+     */
+    data: CVCreateManyInput | CVCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CV createManyAndReturn
+   */
+  export type CVCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * The data used to create many CVS.
+     */
+    data: CVCreateManyInput | CVCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CV update
+   */
+  export type CVUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CV.
+     */
+    data: XOR<CVUpdateInput, CVUncheckedUpdateInput>
+    /**
+     * Choose, which CV to update.
+     */
+    where: CVWhereUniqueInput
+  }
+
+  /**
+   * CV updateMany
+   */
+  export type CVUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CVS.
+     */
+    data: XOR<CVUpdateManyMutationInput, CVUncheckedUpdateManyInput>
+    /**
+     * Filter which CVS to update
+     */
+    where?: CVWhereInput
+    /**
+     * Limit how many CVS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CV updateManyAndReturn
+   */
+  export type CVUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * The data used to update CVS.
+     */
+    data: XOR<CVUpdateManyMutationInput, CVUncheckedUpdateManyInput>
+    /**
+     * Filter which CVS to update
+     */
+    where?: CVWhereInput
+    /**
+     * Limit how many CVS to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CV upsert
+   */
+  export type CVUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CV to update in case it exists.
+     */
+    where: CVWhereUniqueInput
+    /**
+     * In case the CV found by the `where` argument doesn't exist, create a new CV with this data.
+     */
+    create: XOR<CVCreateInput, CVUncheckedCreateInput>
+    /**
+     * In case the CV was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CVUpdateInput, CVUncheckedUpdateInput>
+  }
+
+  /**
+   * CV delete
+   */
+  export type CVDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+    /**
+     * Filter which CV to delete.
+     */
+    where: CVWhereUniqueInput
+  }
+
+  /**
+   * CV deleteMany
+   */
+  export type CVDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CVS to delete
+     */
+    where?: CVWhereInput
+    /**
+     * Limit how many CVS to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CV without action
+   */
+  export type CVDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CV
+     */
+    select?: CVSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CV
+     */
+    omit?: CVOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CVInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Application
+   */
+
+  export type AggregateApplication = {
+    _count: ApplicationCountAggregateOutputType | null
+    _min: ApplicationMinAggregateOutputType | null
+    _max: ApplicationMaxAggregateOutputType | null
+  }
+
+  export type ApplicationMinAggregateOutputType = {
+    id: string | null
+    status: $Enums.ApplicationStatus | null
+    jobId: string | null
+    candidateId: string | null
+    coverLetter: string | null
+    resumeUrl: string | null
+    expectedSalary: string | null
+    noticePeriod: string | null
+    companyNotes: string | null
+    appliedAt: Date | null
+    reviewedAt: Date | null
+    interviewScheduledAt: Date | null
+    interviewedAt: Date | null
+    rejectedAt: Date | null
+    acceptedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ApplicationMaxAggregateOutputType = {
+    id: string | null
+    status: $Enums.ApplicationStatus | null
+    jobId: string | null
+    candidateId: string | null
+    coverLetter: string | null
+    resumeUrl: string | null
+    expectedSalary: string | null
+    noticePeriod: string | null
+    companyNotes: string | null
+    appliedAt: Date | null
+    reviewedAt: Date | null
+    interviewScheduledAt: Date | null
+    interviewedAt: Date | null
+    rejectedAt: Date | null
+    acceptedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ApplicationCountAggregateOutputType = {
+    id: number
+    status: number
+    jobId: number
+    candidateId: number
+    coverLetter: number
+    resumeUrl: number
+    expectedSalary: number
+    noticePeriod: number
+    companyNotes: number
+    appliedAt: number
+    reviewedAt: number
+    interviewScheduledAt: number
+    interviewedAt: number
+    rejectedAt: number
+    acceptedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ApplicationMinAggregateInputType = {
+    id?: true
+    status?: true
+    jobId?: true
+    candidateId?: true
+    coverLetter?: true
+    resumeUrl?: true
+    expectedSalary?: true
+    noticePeriod?: true
+    companyNotes?: true
+    appliedAt?: true
+    reviewedAt?: true
+    interviewScheduledAt?: true
+    interviewedAt?: true
+    rejectedAt?: true
+    acceptedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ApplicationMaxAggregateInputType = {
+    id?: true
+    status?: true
+    jobId?: true
+    candidateId?: true
+    coverLetter?: true
+    resumeUrl?: true
+    expectedSalary?: true
+    noticePeriod?: true
+    companyNotes?: true
+    appliedAt?: true
+    reviewedAt?: true
+    interviewScheduledAt?: true
+    interviewedAt?: true
+    rejectedAt?: true
+    acceptedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ApplicationCountAggregateInputType = {
+    id?: true
+    status?: true
+    jobId?: true
+    candidateId?: true
+    coverLetter?: true
+    resumeUrl?: true
+    expectedSalary?: true
+    noticePeriod?: true
+    companyNotes?: true
+    appliedAt?: true
+    reviewedAt?: true
+    interviewScheduledAt?: true
+    interviewedAt?: true
+    rejectedAt?: true
+    acceptedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ApplicationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Application to aggregate.
+     */
+    where?: ApplicationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Applications to fetch.
+     */
+    orderBy?: ApplicationOrderByWithRelationInput | ApplicationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ApplicationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Applications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Applications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Applications
+    **/
+    _count?: true | ApplicationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ApplicationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ApplicationMaxAggregateInputType
+  }
+
+  export type GetApplicationAggregateType<T extends ApplicationAggregateArgs> = {
+        [P in keyof T & keyof AggregateApplication]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateApplication[P]>
+      : GetScalarType<T[P], AggregateApplication[P]>
+  }
+
+
+
+
+  export type ApplicationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ApplicationWhereInput
+    orderBy?: ApplicationOrderByWithAggregationInput | ApplicationOrderByWithAggregationInput[]
+    by: ApplicationScalarFieldEnum[] | ApplicationScalarFieldEnum
+    having?: ApplicationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ApplicationCountAggregateInputType | true
+    _min?: ApplicationMinAggregateInputType
+    _max?: ApplicationMaxAggregateInputType
+  }
+
+  export type ApplicationGroupByOutputType = {
+    id: string
+    status: $Enums.ApplicationStatus
+    jobId: string
+    candidateId: string
+    coverLetter: string | null
+    resumeUrl: string | null
+    expectedSalary: string | null
+    noticePeriod: string | null
+    companyNotes: string | null
+    appliedAt: Date
+    reviewedAt: Date | null
+    interviewScheduledAt: Date | null
+    interviewedAt: Date | null
+    rejectedAt: Date | null
+    acceptedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ApplicationCountAggregateOutputType | null
+    _min: ApplicationMinAggregateOutputType | null
+    _max: ApplicationMaxAggregateOutputType | null
+  }
+
+  type GetApplicationGroupByPayload<T extends ApplicationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ApplicationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ApplicationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ApplicationGroupByOutputType[P]>
+            : GetScalarType<T[P], ApplicationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ApplicationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    status?: boolean
+    jobId?: boolean
+    candidateId?: boolean
+    coverLetter?: boolean
+    resumeUrl?: boolean
+    expectedSalary?: boolean
+    noticePeriod?: boolean
+    companyNotes?: boolean
+    appliedAt?: boolean
+    reviewedAt?: boolean
+    interviewScheduledAt?: boolean
+    interviewedAt?: boolean
+    rejectedAt?: boolean
+    acceptedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    job?: boolean | JobDefaultArgs<ExtArgs>
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+    screeningAnswers?: boolean | Application$screeningAnswersArgs<ExtArgs>
+    _count?: boolean | ApplicationCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["application"]>
+
+  export type ApplicationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    status?: boolean
+    jobId?: boolean
+    candidateId?: boolean
+    coverLetter?: boolean
+    resumeUrl?: boolean
+    expectedSalary?: boolean
+    noticePeriod?: boolean
+    companyNotes?: boolean
+    appliedAt?: boolean
+    reviewedAt?: boolean
+    interviewScheduledAt?: boolean
+    interviewedAt?: boolean
+    rejectedAt?: boolean
+    acceptedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    job?: boolean | JobDefaultArgs<ExtArgs>
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["application"]>
+
+  export type ApplicationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    status?: boolean
+    jobId?: boolean
+    candidateId?: boolean
+    coverLetter?: boolean
+    resumeUrl?: boolean
+    expectedSalary?: boolean
+    noticePeriod?: boolean
+    companyNotes?: boolean
+    appliedAt?: boolean
+    reviewedAt?: boolean
+    interviewScheduledAt?: boolean
+    interviewedAt?: boolean
+    rejectedAt?: boolean
+    acceptedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    job?: boolean | JobDefaultArgs<ExtArgs>
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["application"]>
+
+  export type ApplicationSelectScalar = {
+    id?: boolean
+    status?: boolean
+    jobId?: boolean
+    candidateId?: boolean
+    coverLetter?: boolean
+    resumeUrl?: boolean
+    expectedSalary?: boolean
+    noticePeriod?: boolean
+    companyNotes?: boolean
+    appliedAt?: boolean
+    reviewedAt?: boolean
+    interviewScheduledAt?: boolean
+    interviewedAt?: boolean
+    rejectedAt?: boolean
+    acceptedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ApplicationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "jobId" | "candidateId" | "coverLetter" | "resumeUrl" | "expectedSalary" | "noticePeriod" | "companyNotes" | "appliedAt" | "reviewedAt" | "interviewScheduledAt" | "interviewedAt" | "rejectedAt" | "acceptedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["application"]>
+  export type ApplicationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    job?: boolean | JobDefaultArgs<ExtArgs>
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+    screeningAnswers?: boolean | Application$screeningAnswersArgs<ExtArgs>
+    _count?: boolean | ApplicationCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type ApplicationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    job?: boolean | JobDefaultArgs<ExtArgs>
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+  export type ApplicationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    job?: boolean | JobDefaultArgs<ExtArgs>
+    candidate?: boolean | CandidateProfileDefaultArgs<ExtArgs>
+  }
+
+  export type $ApplicationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Application"
+    objects: {
+      job: Prisma.$JobPayload<ExtArgs>
+      candidate: Prisma.$CandidateProfilePayload<ExtArgs>
+      screeningAnswers: Prisma.$ScreeningAnswerPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      status: $Enums.ApplicationStatus
+      jobId: string
+      candidateId: string
+      coverLetter: string | null
+      resumeUrl: string | null
+      expectedSalary: string | null
+      noticePeriod: string | null
+      companyNotes: string | null
+      appliedAt: Date
+      reviewedAt: Date | null
+      interviewScheduledAt: Date | null
+      interviewedAt: Date | null
+      rejectedAt: Date | null
+      acceptedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["application"]>
+    composites: {}
+  }
+
+  type ApplicationGetPayload<S extends boolean | null | undefined | ApplicationDefaultArgs> = $Result.GetResult<Prisma.$ApplicationPayload, S>
+
+  type ApplicationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ApplicationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ApplicationCountAggregateInputType | true
+    }
+
+  export interface ApplicationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Application'], meta: { name: 'Application' } }
+    /**
+     * Find zero or one Application that matches the filter.
+     * @param {ApplicationFindUniqueArgs} args - Arguments to find a Application
+     * @example
+     * // Get one Application
+     * const application = await prisma.application.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ApplicationFindUniqueArgs>(args: SelectSubset<T, ApplicationFindUniqueArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Application that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ApplicationFindUniqueOrThrowArgs} args - Arguments to find a Application
+     * @example
+     * // Get one Application
+     * const application = await prisma.application.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ApplicationFindUniqueOrThrowArgs>(args: SelectSubset<T, ApplicationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Application that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationFindFirstArgs} args - Arguments to find a Application
+     * @example
+     * // Get one Application
+     * const application = await prisma.application.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ApplicationFindFirstArgs>(args?: SelectSubset<T, ApplicationFindFirstArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Application that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationFindFirstOrThrowArgs} args - Arguments to find a Application
+     * @example
+     * // Get one Application
+     * const application = await prisma.application.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ApplicationFindFirstOrThrowArgs>(args?: SelectSubset<T, ApplicationFindFirstOrThrowArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Applications that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Applications
+     * const applications = await prisma.application.findMany()
+     * 
+     * // Get first 10 Applications
+     * const applications = await prisma.application.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const applicationWithIdOnly = await prisma.application.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ApplicationFindManyArgs>(args?: SelectSubset<T, ApplicationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Application.
+     * @param {ApplicationCreateArgs} args - Arguments to create a Application.
+     * @example
+     * // Create one Application
+     * const Application = await prisma.application.create({
+     *   data: {
+     *     // ... data to create a Application
+     *   }
+     * })
+     * 
+     */
+    create<T extends ApplicationCreateArgs>(args: SelectSubset<T, ApplicationCreateArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Applications.
+     * @param {ApplicationCreateManyArgs} args - Arguments to create many Applications.
+     * @example
+     * // Create many Applications
+     * const application = await prisma.application.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ApplicationCreateManyArgs>(args?: SelectSubset<T, ApplicationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Applications and returns the data saved in the database.
+     * @param {ApplicationCreateManyAndReturnArgs} args - Arguments to create many Applications.
+     * @example
+     * // Create many Applications
+     * const application = await prisma.application.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Applications and only return the `id`
+     * const applicationWithIdOnly = await prisma.application.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ApplicationCreateManyAndReturnArgs>(args?: SelectSubset<T, ApplicationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Application.
+     * @param {ApplicationDeleteArgs} args - Arguments to delete one Application.
+     * @example
+     * // Delete one Application
+     * const Application = await prisma.application.delete({
+     *   where: {
+     *     // ... filter to delete one Application
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ApplicationDeleteArgs>(args: SelectSubset<T, ApplicationDeleteArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Application.
+     * @param {ApplicationUpdateArgs} args - Arguments to update one Application.
+     * @example
+     * // Update one Application
+     * const application = await prisma.application.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ApplicationUpdateArgs>(args: SelectSubset<T, ApplicationUpdateArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Applications.
+     * @param {ApplicationDeleteManyArgs} args - Arguments to filter Applications to delete.
+     * @example
+     * // Delete a few Applications
+     * const { count } = await prisma.application.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ApplicationDeleteManyArgs>(args?: SelectSubset<T, ApplicationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Applications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Applications
+     * const application = await prisma.application.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ApplicationUpdateManyArgs>(args: SelectSubset<T, ApplicationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Applications and returns the data updated in the database.
+     * @param {ApplicationUpdateManyAndReturnArgs} args - Arguments to update many Applications.
+     * @example
+     * // Update many Applications
+     * const application = await prisma.application.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Applications and only return the `id`
+     * const applicationWithIdOnly = await prisma.application.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ApplicationUpdateManyAndReturnArgs>(args: SelectSubset<T, ApplicationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Application.
+     * @param {ApplicationUpsertArgs} args - Arguments to update or create a Application.
+     * @example
+     * // Update or create a Application
+     * const application = await prisma.application.upsert({
+     *   create: {
+     *     // ... data to create a Application
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Application we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ApplicationUpsertArgs>(args: SelectSubset<T, ApplicationUpsertArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Applications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationCountArgs} args - Arguments to filter Applications to count.
+     * @example
+     * // Count the number of Applications
+     * const count = await prisma.application.count({
+     *   where: {
+     *     // ... the filter for the Applications we want to count
+     *   }
+     * })
+    **/
+    count<T extends ApplicationCountArgs>(
+      args?: Subset<T, ApplicationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ApplicationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Application.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ApplicationAggregateArgs>(args: Subset<T, ApplicationAggregateArgs>): Prisma.PrismaPromise<GetApplicationAggregateType<T>>
+
+    /**
+     * Group by Application.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ApplicationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ApplicationGroupByArgs['orderBy'] }
+        : { orderBy?: ApplicationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ApplicationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetApplicationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Application model
+   */
+  readonly fields: ApplicationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Application.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ApplicationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    job<T extends JobDefaultArgs<ExtArgs> = {}>(args?: Subset<T, JobDefaultArgs<ExtArgs>>): Prisma__JobClient<$Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    candidate<T extends CandidateProfileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CandidateProfileDefaultArgs<ExtArgs>>): Prisma__CandidateProfileClient<$Result.GetResult<Prisma.$CandidateProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    screeningAnswers<T extends Application$screeningAnswersArgs<ExtArgs> = {}>(args?: Subset<T, Application$screeningAnswersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Application model
+   */
+  interface ApplicationFieldRefs {
+    readonly id: FieldRef<"Application", 'String'>
+    readonly status: FieldRef<"Application", 'ApplicationStatus'>
+    readonly jobId: FieldRef<"Application", 'String'>
+    readonly candidateId: FieldRef<"Application", 'String'>
+    readonly coverLetter: FieldRef<"Application", 'String'>
+    readonly resumeUrl: FieldRef<"Application", 'String'>
+    readonly expectedSalary: FieldRef<"Application", 'String'>
+    readonly noticePeriod: FieldRef<"Application", 'String'>
+    readonly companyNotes: FieldRef<"Application", 'String'>
+    readonly appliedAt: FieldRef<"Application", 'DateTime'>
+    readonly reviewedAt: FieldRef<"Application", 'DateTime'>
+    readonly interviewScheduledAt: FieldRef<"Application", 'DateTime'>
+    readonly interviewedAt: FieldRef<"Application", 'DateTime'>
+    readonly rejectedAt: FieldRef<"Application", 'DateTime'>
+    readonly acceptedAt: FieldRef<"Application", 'DateTime'>
+    readonly createdAt: FieldRef<"Application", 'DateTime'>
+    readonly updatedAt: FieldRef<"Application", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Application findUnique
+   */
+  export type ApplicationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * Filter, which Application to fetch.
+     */
+    where: ApplicationWhereUniqueInput
+  }
+
+  /**
+   * Application findUniqueOrThrow
+   */
+  export type ApplicationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * Filter, which Application to fetch.
+     */
+    where: ApplicationWhereUniqueInput
+  }
+
+  /**
+   * Application findFirst
+   */
+  export type ApplicationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * Filter, which Application to fetch.
+     */
+    where?: ApplicationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Applications to fetch.
+     */
+    orderBy?: ApplicationOrderByWithRelationInput | ApplicationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Applications.
+     */
+    cursor?: ApplicationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Applications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Applications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Applications.
+     */
+    distinct?: ApplicationScalarFieldEnum | ApplicationScalarFieldEnum[]
+  }
+
+  /**
+   * Application findFirstOrThrow
+   */
+  export type ApplicationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * Filter, which Application to fetch.
+     */
+    where?: ApplicationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Applications to fetch.
+     */
+    orderBy?: ApplicationOrderByWithRelationInput | ApplicationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Applications.
+     */
+    cursor?: ApplicationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Applications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Applications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Applications.
+     */
+    distinct?: ApplicationScalarFieldEnum | ApplicationScalarFieldEnum[]
+  }
+
+  /**
+   * Application findMany
+   */
+  export type ApplicationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * Filter, which Applications to fetch.
+     */
+    where?: ApplicationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Applications to fetch.
+     */
+    orderBy?: ApplicationOrderByWithRelationInput | ApplicationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Applications.
+     */
+    cursor?: ApplicationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Applications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Applications.
+     */
+    skip?: number
+    distinct?: ApplicationScalarFieldEnum | ApplicationScalarFieldEnum[]
+  }
+
+  /**
+   * Application create
+   */
+  export type ApplicationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Application.
+     */
+    data: XOR<ApplicationCreateInput, ApplicationUncheckedCreateInput>
+  }
+
+  /**
+   * Application createMany
+   */
+  export type ApplicationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Applications.
+     */
+    data: ApplicationCreateManyInput | ApplicationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Application createManyAndReturn
+   */
+  export type ApplicationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * The data used to create many Applications.
+     */
+    data: ApplicationCreateManyInput | ApplicationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Application update
+   */
+  export type ApplicationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Application.
+     */
+    data: XOR<ApplicationUpdateInput, ApplicationUncheckedUpdateInput>
+    /**
+     * Choose, which Application to update.
+     */
+    where: ApplicationWhereUniqueInput
+  }
+
+  /**
+   * Application updateMany
+   */
+  export type ApplicationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Applications.
+     */
+    data: XOR<ApplicationUpdateManyMutationInput, ApplicationUncheckedUpdateManyInput>
+    /**
+     * Filter which Applications to update
+     */
+    where?: ApplicationWhereInput
+    /**
+     * Limit how many Applications to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Application updateManyAndReturn
+   */
+  export type ApplicationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * The data used to update Applications.
+     */
+    data: XOR<ApplicationUpdateManyMutationInput, ApplicationUncheckedUpdateManyInput>
+    /**
+     * Filter which Applications to update
+     */
+    where?: ApplicationWhereInput
+    /**
+     * Limit how many Applications to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Application upsert
+   */
+  export type ApplicationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Application to update in case it exists.
+     */
+    where: ApplicationWhereUniqueInput
+    /**
+     * In case the Application found by the `where` argument doesn't exist, create a new Application with this data.
+     */
+    create: XOR<ApplicationCreateInput, ApplicationUncheckedCreateInput>
+    /**
+     * In case the Application was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ApplicationUpdateInput, ApplicationUncheckedUpdateInput>
+  }
+
+  /**
+   * Application delete
+   */
+  export type ApplicationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    /**
+     * Filter which Application to delete.
+     */
+    where: ApplicationWhereUniqueInput
+  }
+
+  /**
+   * Application deleteMany
+   */
+  export type ApplicationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Applications to delete
+     */
+    where?: ApplicationWhereInput
+    /**
+     * Limit how many Applications to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Application.screeningAnswers
+   */
+  export type Application$screeningAnswersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    where?: ScreeningAnswerWhereInput
+    orderBy?: ScreeningAnswerOrderByWithRelationInput | ScreeningAnswerOrderByWithRelationInput[]
+    cursor?: ScreeningAnswerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ScreeningAnswerScalarFieldEnum | ScreeningAnswerScalarFieldEnum[]
+  }
+
+  /**
+   * Application without action
+   */
+  export type ApplicationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ScreeningAnswer
+   */
+
+  export type AggregateScreeningAnswer = {
+    _count: ScreeningAnswerCountAggregateOutputType | null
+    _min: ScreeningAnswerMinAggregateOutputType | null
+    _max: ScreeningAnswerMaxAggregateOutputType | null
+  }
+
+  export type ScreeningAnswerMinAggregateOutputType = {
+    id: string | null
+    questionId: string | null
+    applicationId: string | null
+    answer: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ScreeningAnswerMaxAggregateOutputType = {
+    id: string | null
+    questionId: string | null
+    applicationId: string | null
+    answer: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ScreeningAnswerCountAggregateOutputType = {
+    id: number
+    questionId: number
+    applicationId: number
+    answer: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ScreeningAnswerMinAggregateInputType = {
+    id?: true
+    questionId?: true
+    applicationId?: true
+    answer?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ScreeningAnswerMaxAggregateInputType = {
+    id?: true
+    questionId?: true
+    applicationId?: true
+    answer?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ScreeningAnswerCountAggregateInputType = {
+    id?: true
+    questionId?: true
+    applicationId?: true
+    answer?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ScreeningAnswerAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ScreeningAnswer to aggregate.
+     */
+    where?: ScreeningAnswerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ScreeningAnswers to fetch.
+     */
+    orderBy?: ScreeningAnswerOrderByWithRelationInput | ScreeningAnswerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ScreeningAnswerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ScreeningAnswers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ScreeningAnswers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ScreeningAnswers
+    **/
+    _count?: true | ScreeningAnswerCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ScreeningAnswerMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ScreeningAnswerMaxAggregateInputType
+  }
+
+  export type GetScreeningAnswerAggregateType<T extends ScreeningAnswerAggregateArgs> = {
+        [P in keyof T & keyof AggregateScreeningAnswer]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateScreeningAnswer[P]>
+      : GetScalarType<T[P], AggregateScreeningAnswer[P]>
+  }
+
+
+
+
+  export type ScreeningAnswerGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ScreeningAnswerWhereInput
+    orderBy?: ScreeningAnswerOrderByWithAggregationInput | ScreeningAnswerOrderByWithAggregationInput[]
+    by: ScreeningAnswerScalarFieldEnum[] | ScreeningAnswerScalarFieldEnum
+    having?: ScreeningAnswerScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ScreeningAnswerCountAggregateInputType | true
+    _min?: ScreeningAnswerMinAggregateInputType
+    _max?: ScreeningAnswerMaxAggregateInputType
+  }
+
+  export type ScreeningAnswerGroupByOutputType = {
+    id: string
+    questionId: string
+    applicationId: string
+    answer: string
+    createdAt: Date
+    updatedAt: Date
+    _count: ScreeningAnswerCountAggregateOutputType | null
+    _min: ScreeningAnswerMinAggregateOutputType | null
+    _max: ScreeningAnswerMaxAggregateOutputType | null
+  }
+
+  type GetScreeningAnswerGroupByPayload<T extends ScreeningAnswerGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ScreeningAnswerGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ScreeningAnswerGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ScreeningAnswerGroupByOutputType[P]>
+            : GetScalarType<T[P], ScreeningAnswerGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ScreeningAnswerSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    questionId?: boolean
+    applicationId?: boolean
+    answer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    question?: boolean | ScreeningQuestionDefaultArgs<ExtArgs>
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["screeningAnswer"]>
+
+  export type ScreeningAnswerSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    questionId?: boolean
+    applicationId?: boolean
+    answer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    question?: boolean | ScreeningQuestionDefaultArgs<ExtArgs>
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["screeningAnswer"]>
+
+  export type ScreeningAnswerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    questionId?: boolean
+    applicationId?: boolean
+    answer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    question?: boolean | ScreeningQuestionDefaultArgs<ExtArgs>
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["screeningAnswer"]>
+
+  export type ScreeningAnswerSelectScalar = {
+    id?: boolean
+    questionId?: boolean
+    applicationId?: boolean
+    answer?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ScreeningAnswerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "questionId" | "applicationId" | "answer" | "createdAt" | "updatedAt", ExtArgs["result"]["screeningAnswer"]>
+  export type ScreeningAnswerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question?: boolean | ScreeningQuestionDefaultArgs<ExtArgs>
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }
+  export type ScreeningAnswerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question?: boolean | ScreeningQuestionDefaultArgs<ExtArgs>
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }
+  export type ScreeningAnswerIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    question?: boolean | ScreeningQuestionDefaultArgs<ExtArgs>
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }
+
+  export type $ScreeningAnswerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ScreeningAnswer"
+    objects: {
+      question: Prisma.$ScreeningQuestionPayload<ExtArgs>
+      application: Prisma.$ApplicationPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      questionId: string
+      applicationId: string
+      answer: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["screeningAnswer"]>
+    composites: {}
+  }
+
+  type ScreeningAnswerGetPayload<S extends boolean | null | undefined | ScreeningAnswerDefaultArgs> = $Result.GetResult<Prisma.$ScreeningAnswerPayload, S>
+
+  type ScreeningAnswerCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ScreeningAnswerFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ScreeningAnswerCountAggregateInputType | true
+    }
+
+  export interface ScreeningAnswerDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ScreeningAnswer'], meta: { name: 'ScreeningAnswer' } }
+    /**
+     * Find zero or one ScreeningAnswer that matches the filter.
+     * @param {ScreeningAnswerFindUniqueArgs} args - Arguments to find a ScreeningAnswer
+     * @example
+     * // Get one ScreeningAnswer
+     * const screeningAnswer = await prisma.screeningAnswer.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ScreeningAnswerFindUniqueArgs>(args: SelectSubset<T, ScreeningAnswerFindUniqueArgs<ExtArgs>>): Prisma__ScreeningAnswerClient<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ScreeningAnswer that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ScreeningAnswerFindUniqueOrThrowArgs} args - Arguments to find a ScreeningAnswer
+     * @example
+     * // Get one ScreeningAnswer
+     * const screeningAnswer = await prisma.screeningAnswer.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ScreeningAnswerFindUniqueOrThrowArgs>(args: SelectSubset<T, ScreeningAnswerFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScreeningAnswerClient<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ScreeningAnswer that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScreeningAnswerFindFirstArgs} args - Arguments to find a ScreeningAnswer
+     * @example
+     * // Get one ScreeningAnswer
+     * const screeningAnswer = await prisma.screeningAnswer.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ScreeningAnswerFindFirstArgs>(args?: SelectSubset<T, ScreeningAnswerFindFirstArgs<ExtArgs>>): Prisma__ScreeningAnswerClient<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ScreeningAnswer that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScreeningAnswerFindFirstOrThrowArgs} args - Arguments to find a ScreeningAnswer
+     * @example
+     * // Get one ScreeningAnswer
+     * const screeningAnswer = await prisma.screeningAnswer.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ScreeningAnswerFindFirstOrThrowArgs>(args?: SelectSubset<T, ScreeningAnswerFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScreeningAnswerClient<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ScreeningAnswers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScreeningAnswerFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ScreeningAnswers
+     * const screeningAnswers = await prisma.screeningAnswer.findMany()
+     * 
+     * // Get first 10 ScreeningAnswers
+     * const screeningAnswers = await prisma.screeningAnswer.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const screeningAnswerWithIdOnly = await prisma.screeningAnswer.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ScreeningAnswerFindManyArgs>(args?: SelectSubset<T, ScreeningAnswerFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ScreeningAnswer.
+     * @param {ScreeningAnswerCreateArgs} args - Arguments to create a ScreeningAnswer.
+     * @example
+     * // Create one ScreeningAnswer
+     * const ScreeningAnswer = await prisma.screeningAnswer.create({
+     *   data: {
+     *     // ... data to create a ScreeningAnswer
+     *   }
+     * })
+     * 
+     */
+    create<T extends ScreeningAnswerCreateArgs>(args: SelectSubset<T, ScreeningAnswerCreateArgs<ExtArgs>>): Prisma__ScreeningAnswerClient<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ScreeningAnswers.
+     * @param {ScreeningAnswerCreateManyArgs} args - Arguments to create many ScreeningAnswers.
+     * @example
+     * // Create many ScreeningAnswers
+     * const screeningAnswer = await prisma.screeningAnswer.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ScreeningAnswerCreateManyArgs>(args?: SelectSubset<T, ScreeningAnswerCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ScreeningAnswers and returns the data saved in the database.
+     * @param {ScreeningAnswerCreateManyAndReturnArgs} args - Arguments to create many ScreeningAnswers.
+     * @example
+     * // Create many ScreeningAnswers
+     * const screeningAnswer = await prisma.screeningAnswer.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ScreeningAnswers and only return the `id`
+     * const screeningAnswerWithIdOnly = await prisma.screeningAnswer.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ScreeningAnswerCreateManyAndReturnArgs>(args?: SelectSubset<T, ScreeningAnswerCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ScreeningAnswer.
+     * @param {ScreeningAnswerDeleteArgs} args - Arguments to delete one ScreeningAnswer.
+     * @example
+     * // Delete one ScreeningAnswer
+     * const ScreeningAnswer = await prisma.screeningAnswer.delete({
+     *   where: {
+     *     // ... filter to delete one ScreeningAnswer
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ScreeningAnswerDeleteArgs>(args: SelectSubset<T, ScreeningAnswerDeleteArgs<ExtArgs>>): Prisma__ScreeningAnswerClient<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ScreeningAnswer.
+     * @param {ScreeningAnswerUpdateArgs} args - Arguments to update one ScreeningAnswer.
+     * @example
+     * // Update one ScreeningAnswer
+     * const screeningAnswer = await prisma.screeningAnswer.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ScreeningAnswerUpdateArgs>(args: SelectSubset<T, ScreeningAnswerUpdateArgs<ExtArgs>>): Prisma__ScreeningAnswerClient<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ScreeningAnswers.
+     * @param {ScreeningAnswerDeleteManyArgs} args - Arguments to filter ScreeningAnswers to delete.
+     * @example
+     * // Delete a few ScreeningAnswers
+     * const { count } = await prisma.screeningAnswer.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ScreeningAnswerDeleteManyArgs>(args?: SelectSubset<T, ScreeningAnswerDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScreeningAnswers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScreeningAnswerUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ScreeningAnswers
+     * const screeningAnswer = await prisma.screeningAnswer.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ScreeningAnswerUpdateManyArgs>(args: SelectSubset<T, ScreeningAnswerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScreeningAnswers and returns the data updated in the database.
+     * @param {ScreeningAnswerUpdateManyAndReturnArgs} args - Arguments to update many ScreeningAnswers.
+     * @example
+     * // Update many ScreeningAnswers
+     * const screeningAnswer = await prisma.screeningAnswer.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ScreeningAnswers and only return the `id`
+     * const screeningAnswerWithIdOnly = await prisma.screeningAnswer.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ScreeningAnswerUpdateManyAndReturnArgs>(args: SelectSubset<T, ScreeningAnswerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ScreeningAnswer.
+     * @param {ScreeningAnswerUpsertArgs} args - Arguments to update or create a ScreeningAnswer.
+     * @example
+     * // Update or create a ScreeningAnswer
+     * const screeningAnswer = await prisma.screeningAnswer.upsert({
+     *   create: {
+     *     // ... data to create a ScreeningAnswer
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ScreeningAnswer we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ScreeningAnswerUpsertArgs>(args: SelectSubset<T, ScreeningAnswerUpsertArgs<ExtArgs>>): Prisma__ScreeningAnswerClient<$Result.GetResult<Prisma.$ScreeningAnswerPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ScreeningAnswers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScreeningAnswerCountArgs} args - Arguments to filter ScreeningAnswers to count.
+     * @example
+     * // Count the number of ScreeningAnswers
+     * const count = await prisma.screeningAnswer.count({
+     *   where: {
+     *     // ... the filter for the ScreeningAnswers we want to count
+     *   }
+     * })
+    **/
+    count<T extends ScreeningAnswerCountArgs>(
+      args?: Subset<T, ScreeningAnswerCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ScreeningAnswerCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ScreeningAnswer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScreeningAnswerAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ScreeningAnswerAggregateArgs>(args: Subset<T, ScreeningAnswerAggregateArgs>): Prisma.PrismaPromise<GetScreeningAnswerAggregateType<T>>
+
+    /**
+     * Group by ScreeningAnswer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScreeningAnswerGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ScreeningAnswerGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ScreeningAnswerGroupByArgs['orderBy'] }
+        : { orderBy?: ScreeningAnswerGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ScreeningAnswerGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetScreeningAnswerGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ScreeningAnswer model
+   */
+  readonly fields: ScreeningAnswerFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ScreeningAnswer.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ScreeningAnswerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    question<T extends ScreeningQuestionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ScreeningQuestionDefaultArgs<ExtArgs>>): Prisma__ScreeningQuestionClient<$Result.GetResult<Prisma.$ScreeningQuestionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    application<T extends ApplicationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ApplicationDefaultArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ScreeningAnswer model
+   */
+  interface ScreeningAnswerFieldRefs {
+    readonly id: FieldRef<"ScreeningAnswer", 'String'>
+    readonly questionId: FieldRef<"ScreeningAnswer", 'String'>
+    readonly applicationId: FieldRef<"ScreeningAnswer", 'String'>
+    readonly answer: FieldRef<"ScreeningAnswer", 'String'>
+    readonly createdAt: FieldRef<"ScreeningAnswer", 'DateTime'>
+    readonly updatedAt: FieldRef<"ScreeningAnswer", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ScreeningAnswer findUnique
+   */
+  export type ScreeningAnswerFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * Filter, which ScreeningAnswer to fetch.
+     */
+    where: ScreeningAnswerWhereUniqueInput
+  }
+
+  /**
+   * ScreeningAnswer findUniqueOrThrow
+   */
+  export type ScreeningAnswerFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * Filter, which ScreeningAnswer to fetch.
+     */
+    where: ScreeningAnswerWhereUniqueInput
+  }
+
+  /**
+   * ScreeningAnswer findFirst
+   */
+  export type ScreeningAnswerFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * Filter, which ScreeningAnswer to fetch.
+     */
+    where?: ScreeningAnswerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ScreeningAnswers to fetch.
+     */
+    orderBy?: ScreeningAnswerOrderByWithRelationInput | ScreeningAnswerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ScreeningAnswers.
+     */
+    cursor?: ScreeningAnswerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ScreeningAnswers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ScreeningAnswers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ScreeningAnswers.
+     */
+    distinct?: ScreeningAnswerScalarFieldEnum | ScreeningAnswerScalarFieldEnum[]
+  }
+
+  /**
+   * ScreeningAnswer findFirstOrThrow
+   */
+  export type ScreeningAnswerFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * Filter, which ScreeningAnswer to fetch.
+     */
+    where?: ScreeningAnswerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ScreeningAnswers to fetch.
+     */
+    orderBy?: ScreeningAnswerOrderByWithRelationInput | ScreeningAnswerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ScreeningAnswers.
+     */
+    cursor?: ScreeningAnswerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ScreeningAnswers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ScreeningAnswers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ScreeningAnswers.
+     */
+    distinct?: ScreeningAnswerScalarFieldEnum | ScreeningAnswerScalarFieldEnum[]
+  }
+
+  /**
+   * ScreeningAnswer findMany
+   */
+  export type ScreeningAnswerFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * Filter, which ScreeningAnswers to fetch.
+     */
+    where?: ScreeningAnswerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ScreeningAnswers to fetch.
+     */
+    orderBy?: ScreeningAnswerOrderByWithRelationInput | ScreeningAnswerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ScreeningAnswers.
+     */
+    cursor?: ScreeningAnswerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ScreeningAnswers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ScreeningAnswers.
+     */
+    skip?: number
+    distinct?: ScreeningAnswerScalarFieldEnum | ScreeningAnswerScalarFieldEnum[]
+  }
+
+  /**
+   * ScreeningAnswer create
+   */
+  export type ScreeningAnswerCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ScreeningAnswer.
+     */
+    data: XOR<ScreeningAnswerCreateInput, ScreeningAnswerUncheckedCreateInput>
+  }
+
+  /**
+   * ScreeningAnswer createMany
+   */
+  export type ScreeningAnswerCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ScreeningAnswers.
+     */
+    data: ScreeningAnswerCreateManyInput | ScreeningAnswerCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ScreeningAnswer createManyAndReturn
+   */
+  export type ScreeningAnswerCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * The data used to create many ScreeningAnswers.
+     */
+    data: ScreeningAnswerCreateManyInput | ScreeningAnswerCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ScreeningAnswer update
+   */
+  export type ScreeningAnswerUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ScreeningAnswer.
+     */
+    data: XOR<ScreeningAnswerUpdateInput, ScreeningAnswerUncheckedUpdateInput>
+    /**
+     * Choose, which ScreeningAnswer to update.
+     */
+    where: ScreeningAnswerWhereUniqueInput
+  }
+
+  /**
+   * ScreeningAnswer updateMany
+   */
+  export type ScreeningAnswerUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ScreeningAnswers.
+     */
+    data: XOR<ScreeningAnswerUpdateManyMutationInput, ScreeningAnswerUncheckedUpdateManyInput>
+    /**
+     * Filter which ScreeningAnswers to update
+     */
+    where?: ScreeningAnswerWhereInput
+    /**
+     * Limit how many ScreeningAnswers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ScreeningAnswer updateManyAndReturn
+   */
+  export type ScreeningAnswerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * The data used to update ScreeningAnswers.
+     */
+    data: XOR<ScreeningAnswerUpdateManyMutationInput, ScreeningAnswerUncheckedUpdateManyInput>
+    /**
+     * Filter which ScreeningAnswers to update
+     */
+    where?: ScreeningAnswerWhereInput
+    /**
+     * Limit how many ScreeningAnswers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ScreeningAnswer upsert
+   */
+  export type ScreeningAnswerUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ScreeningAnswer to update in case it exists.
+     */
+    where: ScreeningAnswerWhereUniqueInput
+    /**
+     * In case the ScreeningAnswer found by the `where` argument doesn't exist, create a new ScreeningAnswer with this data.
+     */
+    create: XOR<ScreeningAnswerCreateInput, ScreeningAnswerUncheckedCreateInput>
+    /**
+     * In case the ScreeningAnswer was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ScreeningAnswerUpdateInput, ScreeningAnswerUncheckedUpdateInput>
+  }
+
+  /**
+   * ScreeningAnswer delete
+   */
+  export type ScreeningAnswerDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
+    /**
+     * Filter which ScreeningAnswer to delete.
+     */
+    where: ScreeningAnswerWhereUniqueInput
+  }
+
+  /**
+   * ScreeningAnswer deleteMany
+   */
+  export type ScreeningAnswerDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ScreeningAnswers to delete
+     */
+    where?: ScreeningAnswerWhereInput
+    /**
+     * Limit how many ScreeningAnswers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ScreeningAnswer without action
+   */
+  export type ScreeningAnswerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreeningAnswer
+     */
+    select?: ScreeningAnswerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreeningAnswer
+     */
+    omit?: ScreeningAnswerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreeningAnswerInclude<ExtArgs> | null
   }
 
 
@@ -10047,6 +18276,7 @@ export namespace Prisma {
     cvAnalysisPrompt: 'cvAnalysisPrompt',
     interviewPrompt: 'interviewPrompt',
     aiSecondInterviewPrompt: 'aiSecondInterviewPrompt',
+    featured: 'featured',
     applicants: 'applicants',
     views: 'views',
     createdAt: 'createdAt',
@@ -10070,12 +18300,149 @@ export namespace Prisma {
   export type ScreeningQuestionScalarFieldEnum = (typeof ScreeningQuestionScalarFieldEnum)[keyof typeof ScreeningQuestionScalarFieldEnum]
 
 
+  export const CandidateProfileScalarFieldEnum: {
+    id: 'id',
+    firstName: 'firstName',
+    lastName: 'lastName',
+    email: 'email',
+    phone: 'phone',
+    dateOfBirth: 'dateOfBirth',
+    nationality: 'nationality',
+    currentLocation: 'currentLocation',
+    currentJobTitle: 'currentJobTitle',
+    currentCompany: 'currentCompany',
+    experienceLevel: 'experienceLevel',
+    totalExperience: 'totalExperience',
+    expectedSalary: 'expectedSalary',
+    noticePeriod: 'noticePeriod',
+    highestEducation: 'highestEducation',
+    fieldOfStudy: 'fieldOfStudy',
+    university: 'university',
+    graduationYear: 'graduationYear',
+    skills: 'skills',
+    preferredJobTypes: 'preferredJobTypes',
+    preferredWorkType: 'preferredWorkType',
+    preferredIndustries: 'preferredIndustries',
+    preferredLocations: 'preferredLocations',
+    resumeUrl: 'resumeUrl',
+    portfolioUrl: 'portfolioUrl',
+    linkedInUrl: 'linkedInUrl',
+    githubUrl: 'githubUrl',
+    isProfilePublic: 'isProfilePublic',
+    isOpenToWork: 'isOpenToWork',
+    profileSummary: 'profileSummary',
+    userId: 'userId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CandidateProfileScalarFieldEnum = (typeof CandidateProfileScalarFieldEnum)[keyof typeof CandidateProfileScalarFieldEnum]
+
+
+  export const WorkExperienceScalarFieldEnum: {
+    id: 'id',
+    jobTitle: 'jobTitle',
+    company: 'company',
+    location: 'location',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    isCurrent: 'isCurrent',
+    description: 'description',
+    candidateId: 'candidateId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type WorkExperienceScalarFieldEnum = (typeof WorkExperienceScalarFieldEnum)[keyof typeof WorkExperienceScalarFieldEnum]
+
+
+  export const EducationScalarFieldEnum: {
+    id: 'id',
+    degree: 'degree',
+    institution: 'institution',
+    fieldOfStudy: 'fieldOfStudy',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    isCurrent: 'isCurrent',
+    grade: 'grade',
+    description: 'description',
+    candidateId: 'candidateId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type EducationScalarFieldEnum = (typeof EducationScalarFieldEnum)[keyof typeof EducationScalarFieldEnum]
+
+
+  export const CVScalarFieldEnum: {
+    id: 'id',
+    fileName: 'fileName',
+    originalFileName: 'originalFileName',
+    fileUrl: 'fileUrl',
+    fileSize: 'fileSize',
+    mimeType: 'mimeType',
+    status: 'status',
+    isActive: 'isActive',
+    extractedData: 'extractedData',
+    candidateId: 'candidateId',
+    uploadedAt: 'uploadedAt',
+    processedAt: 'processedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CVScalarFieldEnum = (typeof CVScalarFieldEnum)[keyof typeof CVScalarFieldEnum]
+
+
+  export const ApplicationScalarFieldEnum: {
+    id: 'id',
+    status: 'status',
+    jobId: 'jobId',
+    candidateId: 'candidateId',
+    coverLetter: 'coverLetter',
+    resumeUrl: 'resumeUrl',
+    expectedSalary: 'expectedSalary',
+    noticePeriod: 'noticePeriod',
+    companyNotes: 'companyNotes',
+    appliedAt: 'appliedAt',
+    reviewedAt: 'reviewedAt',
+    interviewScheduledAt: 'interviewScheduledAt',
+    interviewedAt: 'interviewedAt',
+    rejectedAt: 'rejectedAt',
+    acceptedAt: 'acceptedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ApplicationScalarFieldEnum = (typeof ApplicationScalarFieldEnum)[keyof typeof ApplicationScalarFieldEnum]
+
+
+  export const ScreeningAnswerScalarFieldEnum: {
+    id: 'id',
+    questionId: 'questionId',
+    applicationId: 'applicationId',
+    answer: 'answer',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ScreeningAnswerScalarFieldEnum = (typeof ScreeningAnswerScalarFieldEnum)[keyof typeof ScreeningAnswerScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
   export const QueryMode: {
@@ -10092,6 +18459,15 @@ export namespace Prisma {
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -10289,6 +18665,76 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'ExperienceLevel'
+   */
+  export type EnumExperienceLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExperienceLevel'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExperienceLevel[]'
+   */
+  export type ListEnumExperienceLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExperienceLevel[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'EducationLevel'
+   */
+  export type EnumEducationLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EducationLevel'>
+    
+
+
+  /**
+   * Reference to a field of type 'EducationLevel[]'
+   */
+  export type ListEnumEducationLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EducationLevel[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'CVStatus'
+   */
+  export type EnumCVStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CVStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'CVStatus[]'
+   */
+  export type ListEnumCVStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CVStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'ApplicationStatus'
+   */
+  export type EnumApplicationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ApplicationStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ApplicationStatus[]'
+   */
+  export type ListEnumApplicationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ApplicationStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -10321,6 +18767,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     company?: XOR<CompanyNullableScalarRelationFilter, CompanyWhereInput> | null
     refreshTokens?: RefreshTokenListRelationFilter
+    candidateProfile?: XOR<CandidateProfileNullableScalarRelationFilter, CandidateProfileWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -10336,6 +18783,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     company?: CompanyOrderByWithRelationInput
     refreshTokens?: RefreshTokenOrderByRelationAggregateInput
+    candidateProfile?: CandidateProfileOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -10354,6 +18802,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     company?: XOR<CompanyNullableScalarRelationFilter, CompanyWhereInput> | null
     refreshTokens?: RefreshTokenListRelationFilter
+    candidateProfile?: XOR<CandidateProfileNullableScalarRelationFilter, CandidateProfileWhereInput> | null
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -10717,12 +19166,14 @@ export namespace Prisma {
     cvAnalysisPrompt?: StringNullableFilter<"Job"> | string | null
     interviewPrompt?: StringNullableFilter<"Job"> | string | null
     aiSecondInterviewPrompt?: StringNullableFilter<"Job"> | string | null
+    featured?: BoolFilter<"Job"> | boolean
     applicants?: IntFilter<"Job"> | number
     views?: IntFilter<"Job"> | number
     createdAt?: DateTimeFilter<"Job"> | Date | string
     updatedAt?: DateTimeFilter<"Job"> | Date | string
     company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
     screeningQuestions?: ScreeningQuestionListRelationFilter
+    applications?: ApplicationListRelationFilter
   }
 
   export type JobOrderByWithRelationInput = {
@@ -10750,12 +19201,14 @@ export namespace Prisma {
     cvAnalysisPrompt?: SortOrderInput | SortOrder
     interviewPrompt?: SortOrderInput | SortOrder
     aiSecondInterviewPrompt?: SortOrderInput | SortOrder
+    featured?: SortOrder
     applicants?: SortOrder
     views?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     company?: CompanyOrderByWithRelationInput
     screeningQuestions?: ScreeningQuestionOrderByRelationAggregateInput
+    applications?: ApplicationOrderByRelationAggregateInput
   }
 
   export type JobWhereUniqueInput = Prisma.AtLeast<{
@@ -10786,12 +19239,14 @@ export namespace Prisma {
     cvAnalysisPrompt?: StringNullableFilter<"Job"> | string | null
     interviewPrompt?: StringNullableFilter<"Job"> | string | null
     aiSecondInterviewPrompt?: StringNullableFilter<"Job"> | string | null
+    featured?: BoolFilter<"Job"> | boolean
     applicants?: IntFilter<"Job"> | number
     views?: IntFilter<"Job"> | number
     createdAt?: DateTimeFilter<"Job"> | Date | string
     updatedAt?: DateTimeFilter<"Job"> | Date | string
     company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
     screeningQuestions?: ScreeningQuestionListRelationFilter
+    applications?: ApplicationListRelationFilter
   }, "id">
 
   export type JobOrderByWithAggregationInput = {
@@ -10819,6 +19274,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: SortOrderInput | SortOrder
     interviewPrompt?: SortOrderInput | SortOrder
     aiSecondInterviewPrompt?: SortOrderInput | SortOrder
+    featured?: SortOrder
     applicants?: SortOrder
     views?: SortOrder
     createdAt?: SortOrder
@@ -10858,6 +19314,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: StringNullableWithAggregatesFilter<"Job"> | string | null
     interviewPrompt?: StringNullableWithAggregatesFilter<"Job"> | string | null
     aiSecondInterviewPrompt?: StringNullableWithAggregatesFilter<"Job"> | string | null
+    featured?: BoolWithAggregatesFilter<"Job"> | boolean
     applicants?: IntWithAggregatesFilter<"Job"> | number
     views?: IntWithAggregatesFilter<"Job"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Job"> | Date | string
@@ -10877,6 +19334,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ScreeningQuestion"> | Date | string
     updatedAt?: DateTimeFilter<"ScreeningQuestion"> | Date | string
     job?: XOR<JobScalarRelationFilter, JobWhereInput>
+    screeningAnswers?: ScreeningAnswerListRelationFilter
   }
 
   export type ScreeningQuestionOrderByWithRelationInput = {
@@ -10889,6 +19347,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     job?: JobOrderByWithRelationInput
+    screeningAnswers?: ScreeningAnswerOrderByRelationAggregateInput
   }
 
   export type ScreeningQuestionWhereUniqueInput = Prisma.AtLeast<{
@@ -10904,6 +19363,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ScreeningQuestion"> | Date | string
     updatedAt?: DateTimeFilter<"ScreeningQuestion"> | Date | string
     job?: XOR<JobScalarRelationFilter, JobWhereInput>
+    screeningAnswers?: ScreeningAnswerListRelationFilter
   }, "id">
 
   export type ScreeningQuestionOrderByWithAggregationInput = {
@@ -10934,6 +19394,677 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"ScreeningQuestion"> | Date | string
   }
 
+  export type CandidateProfileWhereInput = {
+    AND?: CandidateProfileWhereInput | CandidateProfileWhereInput[]
+    OR?: CandidateProfileWhereInput[]
+    NOT?: CandidateProfileWhereInput | CandidateProfileWhereInput[]
+    id?: StringFilter<"CandidateProfile"> | string
+    firstName?: StringFilter<"CandidateProfile"> | string
+    lastName?: StringFilter<"CandidateProfile"> | string
+    email?: StringFilter<"CandidateProfile"> | string
+    phone?: StringNullableFilter<"CandidateProfile"> | string | null
+    dateOfBirth?: DateTimeNullableFilter<"CandidateProfile"> | Date | string | null
+    nationality?: EnumCountryNullableFilter<"CandidateProfile"> | $Enums.Country | null
+    currentLocation?: StringNullableFilter<"CandidateProfile"> | string | null
+    currentJobTitle?: StringNullableFilter<"CandidateProfile"> | string | null
+    currentCompany?: StringNullableFilter<"CandidateProfile"> | string | null
+    experienceLevel?: EnumExperienceLevelNullableFilter<"CandidateProfile"> | $Enums.ExperienceLevel | null
+    totalExperience?: IntNullableFilter<"CandidateProfile"> | number | null
+    expectedSalary?: StringNullableFilter<"CandidateProfile"> | string | null
+    noticePeriod?: StringNullableFilter<"CandidateProfile"> | string | null
+    highestEducation?: EnumEducationLevelNullableFilter<"CandidateProfile"> | $Enums.EducationLevel | null
+    fieldOfStudy?: StringNullableFilter<"CandidateProfile"> | string | null
+    university?: StringNullableFilter<"CandidateProfile"> | string | null
+    graduationYear?: IntNullableFilter<"CandidateProfile"> | number | null
+    skills?: StringNullableListFilter<"CandidateProfile">
+    preferredJobTypes?: EnumJobTypeNullableListFilter<"CandidateProfile">
+    preferredWorkType?: EnumWorkTypeNullableFilter<"CandidateProfile"> | $Enums.WorkType | null
+    preferredIndustries?: EnumIndustryNullableListFilter<"CandidateProfile">
+    preferredLocations?: StringNullableListFilter<"CandidateProfile">
+    resumeUrl?: StringNullableFilter<"CandidateProfile"> | string | null
+    portfolioUrl?: StringNullableFilter<"CandidateProfile"> | string | null
+    linkedInUrl?: StringNullableFilter<"CandidateProfile"> | string | null
+    githubUrl?: StringNullableFilter<"CandidateProfile"> | string | null
+    isProfilePublic?: BoolFilter<"CandidateProfile"> | boolean
+    isOpenToWork?: BoolFilter<"CandidateProfile"> | boolean
+    profileSummary?: StringNullableFilter<"CandidateProfile"> | string | null
+    userId?: StringNullableFilter<"CandidateProfile"> | string | null
+    createdAt?: DateTimeFilter<"CandidateProfile"> | Date | string
+    updatedAt?: DateTimeFilter<"CandidateProfile"> | Date | string
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    applications?: ApplicationListRelationFilter
+    cvs?: CVListRelationFilter
+    workExperiences?: WorkExperienceListRelationFilter
+    educationHistory?: EducationListRelationFilter
+  }
+
+  export type CandidateProfileOrderByWithRelationInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    dateOfBirth?: SortOrderInput | SortOrder
+    nationality?: SortOrderInput | SortOrder
+    currentLocation?: SortOrderInput | SortOrder
+    currentJobTitle?: SortOrderInput | SortOrder
+    currentCompany?: SortOrderInput | SortOrder
+    experienceLevel?: SortOrderInput | SortOrder
+    totalExperience?: SortOrderInput | SortOrder
+    expectedSalary?: SortOrderInput | SortOrder
+    noticePeriod?: SortOrderInput | SortOrder
+    highestEducation?: SortOrderInput | SortOrder
+    fieldOfStudy?: SortOrderInput | SortOrder
+    university?: SortOrderInput | SortOrder
+    graduationYear?: SortOrderInput | SortOrder
+    skills?: SortOrder
+    preferredJobTypes?: SortOrder
+    preferredWorkType?: SortOrderInput | SortOrder
+    preferredIndustries?: SortOrder
+    preferredLocations?: SortOrder
+    resumeUrl?: SortOrderInput | SortOrder
+    portfolioUrl?: SortOrderInput | SortOrder
+    linkedInUrl?: SortOrderInput | SortOrder
+    githubUrl?: SortOrderInput | SortOrder
+    isProfilePublic?: SortOrder
+    isOpenToWork?: SortOrder
+    profileSummary?: SortOrderInput | SortOrder
+    userId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    applications?: ApplicationOrderByRelationAggregateInput
+    cvs?: CVOrderByRelationAggregateInput
+    workExperiences?: WorkExperienceOrderByRelationAggregateInput
+    educationHistory?: EducationOrderByRelationAggregateInput
+  }
+
+  export type CandidateProfileWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    email?: string
+    userId?: string
+    AND?: CandidateProfileWhereInput | CandidateProfileWhereInput[]
+    OR?: CandidateProfileWhereInput[]
+    NOT?: CandidateProfileWhereInput | CandidateProfileWhereInput[]
+    firstName?: StringFilter<"CandidateProfile"> | string
+    lastName?: StringFilter<"CandidateProfile"> | string
+    phone?: StringNullableFilter<"CandidateProfile"> | string | null
+    dateOfBirth?: DateTimeNullableFilter<"CandidateProfile"> | Date | string | null
+    nationality?: EnumCountryNullableFilter<"CandidateProfile"> | $Enums.Country | null
+    currentLocation?: StringNullableFilter<"CandidateProfile"> | string | null
+    currentJobTitle?: StringNullableFilter<"CandidateProfile"> | string | null
+    currentCompany?: StringNullableFilter<"CandidateProfile"> | string | null
+    experienceLevel?: EnumExperienceLevelNullableFilter<"CandidateProfile"> | $Enums.ExperienceLevel | null
+    totalExperience?: IntNullableFilter<"CandidateProfile"> | number | null
+    expectedSalary?: StringNullableFilter<"CandidateProfile"> | string | null
+    noticePeriod?: StringNullableFilter<"CandidateProfile"> | string | null
+    highestEducation?: EnumEducationLevelNullableFilter<"CandidateProfile"> | $Enums.EducationLevel | null
+    fieldOfStudy?: StringNullableFilter<"CandidateProfile"> | string | null
+    university?: StringNullableFilter<"CandidateProfile"> | string | null
+    graduationYear?: IntNullableFilter<"CandidateProfile"> | number | null
+    skills?: StringNullableListFilter<"CandidateProfile">
+    preferredJobTypes?: EnumJobTypeNullableListFilter<"CandidateProfile">
+    preferredWorkType?: EnumWorkTypeNullableFilter<"CandidateProfile"> | $Enums.WorkType | null
+    preferredIndustries?: EnumIndustryNullableListFilter<"CandidateProfile">
+    preferredLocations?: StringNullableListFilter<"CandidateProfile">
+    resumeUrl?: StringNullableFilter<"CandidateProfile"> | string | null
+    portfolioUrl?: StringNullableFilter<"CandidateProfile"> | string | null
+    linkedInUrl?: StringNullableFilter<"CandidateProfile"> | string | null
+    githubUrl?: StringNullableFilter<"CandidateProfile"> | string | null
+    isProfilePublic?: BoolFilter<"CandidateProfile"> | boolean
+    isOpenToWork?: BoolFilter<"CandidateProfile"> | boolean
+    profileSummary?: StringNullableFilter<"CandidateProfile"> | string | null
+    createdAt?: DateTimeFilter<"CandidateProfile"> | Date | string
+    updatedAt?: DateTimeFilter<"CandidateProfile"> | Date | string
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    applications?: ApplicationListRelationFilter
+    cvs?: CVListRelationFilter
+    workExperiences?: WorkExperienceListRelationFilter
+    educationHistory?: EducationListRelationFilter
+  }, "id" | "email" | "userId">
+
+  export type CandidateProfileOrderByWithAggregationInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    dateOfBirth?: SortOrderInput | SortOrder
+    nationality?: SortOrderInput | SortOrder
+    currentLocation?: SortOrderInput | SortOrder
+    currentJobTitle?: SortOrderInput | SortOrder
+    currentCompany?: SortOrderInput | SortOrder
+    experienceLevel?: SortOrderInput | SortOrder
+    totalExperience?: SortOrderInput | SortOrder
+    expectedSalary?: SortOrderInput | SortOrder
+    noticePeriod?: SortOrderInput | SortOrder
+    highestEducation?: SortOrderInput | SortOrder
+    fieldOfStudy?: SortOrderInput | SortOrder
+    university?: SortOrderInput | SortOrder
+    graduationYear?: SortOrderInput | SortOrder
+    skills?: SortOrder
+    preferredJobTypes?: SortOrder
+    preferredWorkType?: SortOrderInput | SortOrder
+    preferredIndustries?: SortOrder
+    preferredLocations?: SortOrder
+    resumeUrl?: SortOrderInput | SortOrder
+    portfolioUrl?: SortOrderInput | SortOrder
+    linkedInUrl?: SortOrderInput | SortOrder
+    githubUrl?: SortOrderInput | SortOrder
+    isProfilePublic?: SortOrder
+    isOpenToWork?: SortOrder
+    profileSummary?: SortOrderInput | SortOrder
+    userId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CandidateProfileCountOrderByAggregateInput
+    _avg?: CandidateProfileAvgOrderByAggregateInput
+    _max?: CandidateProfileMaxOrderByAggregateInput
+    _min?: CandidateProfileMinOrderByAggregateInput
+    _sum?: CandidateProfileSumOrderByAggregateInput
+  }
+
+  export type CandidateProfileScalarWhereWithAggregatesInput = {
+    AND?: CandidateProfileScalarWhereWithAggregatesInput | CandidateProfileScalarWhereWithAggregatesInput[]
+    OR?: CandidateProfileScalarWhereWithAggregatesInput[]
+    NOT?: CandidateProfileScalarWhereWithAggregatesInput | CandidateProfileScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CandidateProfile"> | string
+    firstName?: StringWithAggregatesFilter<"CandidateProfile"> | string
+    lastName?: StringWithAggregatesFilter<"CandidateProfile"> | string
+    email?: StringWithAggregatesFilter<"CandidateProfile"> | string
+    phone?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    dateOfBirth?: DateTimeNullableWithAggregatesFilter<"CandidateProfile"> | Date | string | null
+    nationality?: EnumCountryNullableWithAggregatesFilter<"CandidateProfile"> | $Enums.Country | null
+    currentLocation?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    currentJobTitle?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    currentCompany?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    experienceLevel?: EnumExperienceLevelNullableWithAggregatesFilter<"CandidateProfile"> | $Enums.ExperienceLevel | null
+    totalExperience?: IntNullableWithAggregatesFilter<"CandidateProfile"> | number | null
+    expectedSalary?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    noticePeriod?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    highestEducation?: EnumEducationLevelNullableWithAggregatesFilter<"CandidateProfile"> | $Enums.EducationLevel | null
+    fieldOfStudy?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    university?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    graduationYear?: IntNullableWithAggregatesFilter<"CandidateProfile"> | number | null
+    skills?: StringNullableListFilter<"CandidateProfile">
+    preferredJobTypes?: EnumJobTypeNullableListFilter<"CandidateProfile">
+    preferredWorkType?: EnumWorkTypeNullableWithAggregatesFilter<"CandidateProfile"> | $Enums.WorkType | null
+    preferredIndustries?: EnumIndustryNullableListFilter<"CandidateProfile">
+    preferredLocations?: StringNullableListFilter<"CandidateProfile">
+    resumeUrl?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    portfolioUrl?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    linkedInUrl?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    githubUrl?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    isProfilePublic?: BoolWithAggregatesFilter<"CandidateProfile"> | boolean
+    isOpenToWork?: BoolWithAggregatesFilter<"CandidateProfile"> | boolean
+    profileSummary?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    userId?: StringNullableWithAggregatesFilter<"CandidateProfile"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"CandidateProfile"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CandidateProfile"> | Date | string
+  }
+
+  export type WorkExperienceWhereInput = {
+    AND?: WorkExperienceWhereInput | WorkExperienceWhereInput[]
+    OR?: WorkExperienceWhereInput[]
+    NOT?: WorkExperienceWhereInput | WorkExperienceWhereInput[]
+    id?: StringFilter<"WorkExperience"> | string
+    jobTitle?: StringFilter<"WorkExperience"> | string
+    company?: StringFilter<"WorkExperience"> | string
+    location?: StringNullableFilter<"WorkExperience"> | string | null
+    startDate?: DateTimeFilter<"WorkExperience"> | Date | string
+    endDate?: DateTimeNullableFilter<"WorkExperience"> | Date | string | null
+    isCurrent?: BoolFilter<"WorkExperience"> | boolean
+    description?: StringNullableFilter<"WorkExperience"> | string | null
+    candidateId?: StringFilter<"WorkExperience"> | string
+    createdAt?: DateTimeFilter<"WorkExperience"> | Date | string
+    updatedAt?: DateTimeFilter<"WorkExperience"> | Date | string
+    candidate?: XOR<CandidateProfileScalarRelationFilter, CandidateProfileWhereInput>
+  }
+
+  export type WorkExperienceOrderByWithRelationInput = {
+    id?: SortOrder
+    jobTitle?: SortOrder
+    company?: SortOrder
+    location?: SortOrderInput | SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrderInput | SortOrder
+    isCurrent?: SortOrder
+    description?: SortOrderInput | SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    candidate?: CandidateProfileOrderByWithRelationInput
+  }
+
+  export type WorkExperienceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: WorkExperienceWhereInput | WorkExperienceWhereInput[]
+    OR?: WorkExperienceWhereInput[]
+    NOT?: WorkExperienceWhereInput | WorkExperienceWhereInput[]
+    jobTitle?: StringFilter<"WorkExperience"> | string
+    company?: StringFilter<"WorkExperience"> | string
+    location?: StringNullableFilter<"WorkExperience"> | string | null
+    startDate?: DateTimeFilter<"WorkExperience"> | Date | string
+    endDate?: DateTimeNullableFilter<"WorkExperience"> | Date | string | null
+    isCurrent?: BoolFilter<"WorkExperience"> | boolean
+    description?: StringNullableFilter<"WorkExperience"> | string | null
+    candidateId?: StringFilter<"WorkExperience"> | string
+    createdAt?: DateTimeFilter<"WorkExperience"> | Date | string
+    updatedAt?: DateTimeFilter<"WorkExperience"> | Date | string
+    candidate?: XOR<CandidateProfileScalarRelationFilter, CandidateProfileWhereInput>
+  }, "id">
+
+  export type WorkExperienceOrderByWithAggregationInput = {
+    id?: SortOrder
+    jobTitle?: SortOrder
+    company?: SortOrder
+    location?: SortOrderInput | SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrderInput | SortOrder
+    isCurrent?: SortOrder
+    description?: SortOrderInput | SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: WorkExperienceCountOrderByAggregateInput
+    _max?: WorkExperienceMaxOrderByAggregateInput
+    _min?: WorkExperienceMinOrderByAggregateInput
+  }
+
+  export type WorkExperienceScalarWhereWithAggregatesInput = {
+    AND?: WorkExperienceScalarWhereWithAggregatesInput | WorkExperienceScalarWhereWithAggregatesInput[]
+    OR?: WorkExperienceScalarWhereWithAggregatesInput[]
+    NOT?: WorkExperienceScalarWhereWithAggregatesInput | WorkExperienceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"WorkExperience"> | string
+    jobTitle?: StringWithAggregatesFilter<"WorkExperience"> | string
+    company?: StringWithAggregatesFilter<"WorkExperience"> | string
+    location?: StringNullableWithAggregatesFilter<"WorkExperience"> | string | null
+    startDate?: DateTimeWithAggregatesFilter<"WorkExperience"> | Date | string
+    endDate?: DateTimeNullableWithAggregatesFilter<"WorkExperience"> | Date | string | null
+    isCurrent?: BoolWithAggregatesFilter<"WorkExperience"> | boolean
+    description?: StringNullableWithAggregatesFilter<"WorkExperience"> | string | null
+    candidateId?: StringWithAggregatesFilter<"WorkExperience"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"WorkExperience"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"WorkExperience"> | Date | string
+  }
+
+  export type EducationWhereInput = {
+    AND?: EducationWhereInput | EducationWhereInput[]
+    OR?: EducationWhereInput[]
+    NOT?: EducationWhereInput | EducationWhereInput[]
+    id?: StringFilter<"Education"> | string
+    degree?: StringFilter<"Education"> | string
+    institution?: StringFilter<"Education"> | string
+    fieldOfStudy?: StringNullableFilter<"Education"> | string | null
+    startDate?: DateTimeFilter<"Education"> | Date | string
+    endDate?: DateTimeNullableFilter<"Education"> | Date | string | null
+    isCurrent?: BoolFilter<"Education"> | boolean
+    grade?: StringNullableFilter<"Education"> | string | null
+    description?: StringNullableFilter<"Education"> | string | null
+    candidateId?: StringFilter<"Education"> | string
+    createdAt?: DateTimeFilter<"Education"> | Date | string
+    updatedAt?: DateTimeFilter<"Education"> | Date | string
+    candidate?: XOR<CandidateProfileScalarRelationFilter, CandidateProfileWhereInput>
+  }
+
+  export type EducationOrderByWithRelationInput = {
+    id?: SortOrder
+    degree?: SortOrder
+    institution?: SortOrder
+    fieldOfStudy?: SortOrderInput | SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrderInput | SortOrder
+    isCurrent?: SortOrder
+    grade?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    candidate?: CandidateProfileOrderByWithRelationInput
+  }
+
+  export type EducationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: EducationWhereInput | EducationWhereInput[]
+    OR?: EducationWhereInput[]
+    NOT?: EducationWhereInput | EducationWhereInput[]
+    degree?: StringFilter<"Education"> | string
+    institution?: StringFilter<"Education"> | string
+    fieldOfStudy?: StringNullableFilter<"Education"> | string | null
+    startDate?: DateTimeFilter<"Education"> | Date | string
+    endDate?: DateTimeNullableFilter<"Education"> | Date | string | null
+    isCurrent?: BoolFilter<"Education"> | boolean
+    grade?: StringNullableFilter<"Education"> | string | null
+    description?: StringNullableFilter<"Education"> | string | null
+    candidateId?: StringFilter<"Education"> | string
+    createdAt?: DateTimeFilter<"Education"> | Date | string
+    updatedAt?: DateTimeFilter<"Education"> | Date | string
+    candidate?: XOR<CandidateProfileScalarRelationFilter, CandidateProfileWhereInput>
+  }, "id">
+
+  export type EducationOrderByWithAggregationInput = {
+    id?: SortOrder
+    degree?: SortOrder
+    institution?: SortOrder
+    fieldOfStudy?: SortOrderInput | SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrderInput | SortOrder
+    isCurrent?: SortOrder
+    grade?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: EducationCountOrderByAggregateInput
+    _max?: EducationMaxOrderByAggregateInput
+    _min?: EducationMinOrderByAggregateInput
+  }
+
+  export type EducationScalarWhereWithAggregatesInput = {
+    AND?: EducationScalarWhereWithAggregatesInput | EducationScalarWhereWithAggregatesInput[]
+    OR?: EducationScalarWhereWithAggregatesInput[]
+    NOT?: EducationScalarWhereWithAggregatesInput | EducationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Education"> | string
+    degree?: StringWithAggregatesFilter<"Education"> | string
+    institution?: StringWithAggregatesFilter<"Education"> | string
+    fieldOfStudy?: StringNullableWithAggregatesFilter<"Education"> | string | null
+    startDate?: DateTimeWithAggregatesFilter<"Education"> | Date | string
+    endDate?: DateTimeNullableWithAggregatesFilter<"Education"> | Date | string | null
+    isCurrent?: BoolWithAggregatesFilter<"Education"> | boolean
+    grade?: StringNullableWithAggregatesFilter<"Education"> | string | null
+    description?: StringNullableWithAggregatesFilter<"Education"> | string | null
+    candidateId?: StringWithAggregatesFilter<"Education"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Education"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Education"> | Date | string
+  }
+
+  export type CVWhereInput = {
+    AND?: CVWhereInput | CVWhereInput[]
+    OR?: CVWhereInput[]
+    NOT?: CVWhereInput | CVWhereInput[]
+    id?: StringFilter<"CV"> | string
+    fileName?: StringFilter<"CV"> | string
+    originalFileName?: StringNullableFilter<"CV"> | string | null
+    fileUrl?: StringFilter<"CV"> | string
+    fileSize?: IntNullableFilter<"CV"> | number | null
+    mimeType?: StringNullableFilter<"CV"> | string | null
+    status?: EnumCVStatusFilter<"CV"> | $Enums.CVStatus
+    isActive?: BoolFilter<"CV"> | boolean
+    extractedData?: JsonNullableFilter<"CV">
+    candidateId?: StringFilter<"CV"> | string
+    uploadedAt?: DateTimeFilter<"CV"> | Date | string
+    processedAt?: DateTimeNullableFilter<"CV"> | Date | string | null
+    createdAt?: DateTimeFilter<"CV"> | Date | string
+    updatedAt?: DateTimeFilter<"CV"> | Date | string
+    candidate?: XOR<CandidateProfileScalarRelationFilter, CandidateProfileWhereInput>
+  }
+
+  export type CVOrderByWithRelationInput = {
+    id?: SortOrder
+    fileName?: SortOrder
+    originalFileName?: SortOrderInput | SortOrder
+    fileUrl?: SortOrder
+    fileSize?: SortOrderInput | SortOrder
+    mimeType?: SortOrderInput | SortOrder
+    status?: SortOrder
+    isActive?: SortOrder
+    extractedData?: SortOrderInput | SortOrder
+    candidateId?: SortOrder
+    uploadedAt?: SortOrder
+    processedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    candidate?: CandidateProfileOrderByWithRelationInput
+  }
+
+  export type CVWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: CVWhereInput | CVWhereInput[]
+    OR?: CVWhereInput[]
+    NOT?: CVWhereInput | CVWhereInput[]
+    fileName?: StringFilter<"CV"> | string
+    originalFileName?: StringNullableFilter<"CV"> | string | null
+    fileUrl?: StringFilter<"CV"> | string
+    fileSize?: IntNullableFilter<"CV"> | number | null
+    mimeType?: StringNullableFilter<"CV"> | string | null
+    status?: EnumCVStatusFilter<"CV"> | $Enums.CVStatus
+    isActive?: BoolFilter<"CV"> | boolean
+    extractedData?: JsonNullableFilter<"CV">
+    candidateId?: StringFilter<"CV"> | string
+    uploadedAt?: DateTimeFilter<"CV"> | Date | string
+    processedAt?: DateTimeNullableFilter<"CV"> | Date | string | null
+    createdAt?: DateTimeFilter<"CV"> | Date | string
+    updatedAt?: DateTimeFilter<"CV"> | Date | string
+    candidate?: XOR<CandidateProfileScalarRelationFilter, CandidateProfileWhereInput>
+  }, "id">
+
+  export type CVOrderByWithAggregationInput = {
+    id?: SortOrder
+    fileName?: SortOrder
+    originalFileName?: SortOrderInput | SortOrder
+    fileUrl?: SortOrder
+    fileSize?: SortOrderInput | SortOrder
+    mimeType?: SortOrderInput | SortOrder
+    status?: SortOrder
+    isActive?: SortOrder
+    extractedData?: SortOrderInput | SortOrder
+    candidateId?: SortOrder
+    uploadedAt?: SortOrder
+    processedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CVCountOrderByAggregateInput
+    _avg?: CVAvgOrderByAggregateInput
+    _max?: CVMaxOrderByAggregateInput
+    _min?: CVMinOrderByAggregateInput
+    _sum?: CVSumOrderByAggregateInput
+  }
+
+  export type CVScalarWhereWithAggregatesInput = {
+    AND?: CVScalarWhereWithAggregatesInput | CVScalarWhereWithAggregatesInput[]
+    OR?: CVScalarWhereWithAggregatesInput[]
+    NOT?: CVScalarWhereWithAggregatesInput | CVScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CV"> | string
+    fileName?: StringWithAggregatesFilter<"CV"> | string
+    originalFileName?: StringNullableWithAggregatesFilter<"CV"> | string | null
+    fileUrl?: StringWithAggregatesFilter<"CV"> | string
+    fileSize?: IntNullableWithAggregatesFilter<"CV"> | number | null
+    mimeType?: StringNullableWithAggregatesFilter<"CV"> | string | null
+    status?: EnumCVStatusWithAggregatesFilter<"CV"> | $Enums.CVStatus
+    isActive?: BoolWithAggregatesFilter<"CV"> | boolean
+    extractedData?: JsonNullableWithAggregatesFilter<"CV">
+    candidateId?: StringWithAggregatesFilter<"CV"> | string
+    uploadedAt?: DateTimeWithAggregatesFilter<"CV"> | Date | string
+    processedAt?: DateTimeNullableWithAggregatesFilter<"CV"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"CV"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CV"> | Date | string
+  }
+
+  export type ApplicationWhereInput = {
+    AND?: ApplicationWhereInput | ApplicationWhereInput[]
+    OR?: ApplicationWhereInput[]
+    NOT?: ApplicationWhereInput | ApplicationWhereInput[]
+    id?: StringFilter<"Application"> | string
+    status?: EnumApplicationStatusFilter<"Application"> | $Enums.ApplicationStatus
+    jobId?: StringFilter<"Application"> | string
+    candidateId?: StringFilter<"Application"> | string
+    coverLetter?: StringNullableFilter<"Application"> | string | null
+    resumeUrl?: StringNullableFilter<"Application"> | string | null
+    expectedSalary?: StringNullableFilter<"Application"> | string | null
+    noticePeriod?: StringNullableFilter<"Application"> | string | null
+    companyNotes?: StringNullableFilter<"Application"> | string | null
+    appliedAt?: DateTimeFilter<"Application"> | Date | string
+    reviewedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    interviewScheduledAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    interviewedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    rejectedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    acceptedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    createdAt?: DateTimeFilter<"Application"> | Date | string
+    updatedAt?: DateTimeFilter<"Application"> | Date | string
+    job?: XOR<JobScalarRelationFilter, JobWhereInput>
+    candidate?: XOR<CandidateProfileScalarRelationFilter, CandidateProfileWhereInput>
+    screeningAnswers?: ScreeningAnswerListRelationFilter
+  }
+
+  export type ApplicationOrderByWithRelationInput = {
+    id?: SortOrder
+    status?: SortOrder
+    jobId?: SortOrder
+    candidateId?: SortOrder
+    coverLetter?: SortOrderInput | SortOrder
+    resumeUrl?: SortOrderInput | SortOrder
+    expectedSalary?: SortOrderInput | SortOrder
+    noticePeriod?: SortOrderInput | SortOrder
+    companyNotes?: SortOrderInput | SortOrder
+    appliedAt?: SortOrder
+    reviewedAt?: SortOrderInput | SortOrder
+    interviewScheduledAt?: SortOrderInput | SortOrder
+    interviewedAt?: SortOrderInput | SortOrder
+    rejectedAt?: SortOrderInput | SortOrder
+    acceptedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    job?: JobOrderByWithRelationInput
+    candidate?: CandidateProfileOrderByWithRelationInput
+    screeningAnswers?: ScreeningAnswerOrderByRelationAggregateInput
+  }
+
+  export type ApplicationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    jobId_candidateId?: ApplicationJobIdCandidateIdCompoundUniqueInput
+    AND?: ApplicationWhereInput | ApplicationWhereInput[]
+    OR?: ApplicationWhereInput[]
+    NOT?: ApplicationWhereInput | ApplicationWhereInput[]
+    status?: EnumApplicationStatusFilter<"Application"> | $Enums.ApplicationStatus
+    jobId?: StringFilter<"Application"> | string
+    candidateId?: StringFilter<"Application"> | string
+    coverLetter?: StringNullableFilter<"Application"> | string | null
+    resumeUrl?: StringNullableFilter<"Application"> | string | null
+    expectedSalary?: StringNullableFilter<"Application"> | string | null
+    noticePeriod?: StringNullableFilter<"Application"> | string | null
+    companyNotes?: StringNullableFilter<"Application"> | string | null
+    appliedAt?: DateTimeFilter<"Application"> | Date | string
+    reviewedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    interviewScheduledAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    interviewedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    rejectedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    acceptedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    createdAt?: DateTimeFilter<"Application"> | Date | string
+    updatedAt?: DateTimeFilter<"Application"> | Date | string
+    job?: XOR<JobScalarRelationFilter, JobWhereInput>
+    candidate?: XOR<CandidateProfileScalarRelationFilter, CandidateProfileWhereInput>
+    screeningAnswers?: ScreeningAnswerListRelationFilter
+  }, "id" | "jobId_candidateId">
+
+  export type ApplicationOrderByWithAggregationInput = {
+    id?: SortOrder
+    status?: SortOrder
+    jobId?: SortOrder
+    candidateId?: SortOrder
+    coverLetter?: SortOrderInput | SortOrder
+    resumeUrl?: SortOrderInput | SortOrder
+    expectedSalary?: SortOrderInput | SortOrder
+    noticePeriod?: SortOrderInput | SortOrder
+    companyNotes?: SortOrderInput | SortOrder
+    appliedAt?: SortOrder
+    reviewedAt?: SortOrderInput | SortOrder
+    interviewScheduledAt?: SortOrderInput | SortOrder
+    interviewedAt?: SortOrderInput | SortOrder
+    rejectedAt?: SortOrderInput | SortOrder
+    acceptedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ApplicationCountOrderByAggregateInput
+    _max?: ApplicationMaxOrderByAggregateInput
+    _min?: ApplicationMinOrderByAggregateInput
+  }
+
+  export type ApplicationScalarWhereWithAggregatesInput = {
+    AND?: ApplicationScalarWhereWithAggregatesInput | ApplicationScalarWhereWithAggregatesInput[]
+    OR?: ApplicationScalarWhereWithAggregatesInput[]
+    NOT?: ApplicationScalarWhereWithAggregatesInput | ApplicationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Application"> | string
+    status?: EnumApplicationStatusWithAggregatesFilter<"Application"> | $Enums.ApplicationStatus
+    jobId?: StringWithAggregatesFilter<"Application"> | string
+    candidateId?: StringWithAggregatesFilter<"Application"> | string
+    coverLetter?: StringNullableWithAggregatesFilter<"Application"> | string | null
+    resumeUrl?: StringNullableWithAggregatesFilter<"Application"> | string | null
+    expectedSalary?: StringNullableWithAggregatesFilter<"Application"> | string | null
+    noticePeriod?: StringNullableWithAggregatesFilter<"Application"> | string | null
+    companyNotes?: StringNullableWithAggregatesFilter<"Application"> | string | null
+    appliedAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
+    reviewedAt?: DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
+    interviewScheduledAt?: DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
+    interviewedAt?: DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
+    rejectedAt?: DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
+    acceptedAt?: DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
+  }
+
+  export type ScreeningAnswerWhereInput = {
+    AND?: ScreeningAnswerWhereInput | ScreeningAnswerWhereInput[]
+    OR?: ScreeningAnswerWhereInput[]
+    NOT?: ScreeningAnswerWhereInput | ScreeningAnswerWhereInput[]
+    id?: StringFilter<"ScreeningAnswer"> | string
+    questionId?: StringFilter<"ScreeningAnswer"> | string
+    applicationId?: StringFilter<"ScreeningAnswer"> | string
+    answer?: StringFilter<"ScreeningAnswer"> | string
+    createdAt?: DateTimeFilter<"ScreeningAnswer"> | Date | string
+    updatedAt?: DateTimeFilter<"ScreeningAnswer"> | Date | string
+    question?: XOR<ScreeningQuestionScalarRelationFilter, ScreeningQuestionWhereInput>
+    application?: XOR<ApplicationScalarRelationFilter, ApplicationWhereInput>
+  }
+
+  export type ScreeningAnswerOrderByWithRelationInput = {
+    id?: SortOrder
+    questionId?: SortOrder
+    applicationId?: SortOrder
+    answer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    question?: ScreeningQuestionOrderByWithRelationInput
+    application?: ApplicationOrderByWithRelationInput
+  }
+
+  export type ScreeningAnswerWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ScreeningAnswerWhereInput | ScreeningAnswerWhereInput[]
+    OR?: ScreeningAnswerWhereInput[]
+    NOT?: ScreeningAnswerWhereInput | ScreeningAnswerWhereInput[]
+    questionId?: StringFilter<"ScreeningAnswer"> | string
+    applicationId?: StringFilter<"ScreeningAnswer"> | string
+    answer?: StringFilter<"ScreeningAnswer"> | string
+    createdAt?: DateTimeFilter<"ScreeningAnswer"> | Date | string
+    updatedAt?: DateTimeFilter<"ScreeningAnswer"> | Date | string
+    question?: XOR<ScreeningQuestionScalarRelationFilter, ScreeningQuestionWhereInput>
+    application?: XOR<ApplicationScalarRelationFilter, ApplicationWhereInput>
+  }, "id">
+
+  export type ScreeningAnswerOrderByWithAggregationInput = {
+    id?: SortOrder
+    questionId?: SortOrder
+    applicationId?: SortOrder
+    answer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ScreeningAnswerCountOrderByAggregateInput
+    _max?: ScreeningAnswerMaxOrderByAggregateInput
+    _min?: ScreeningAnswerMinOrderByAggregateInput
+  }
+
+  export type ScreeningAnswerScalarWhereWithAggregatesInput = {
+    AND?: ScreeningAnswerScalarWhereWithAggregatesInput | ScreeningAnswerScalarWhereWithAggregatesInput[]
+    OR?: ScreeningAnswerScalarWhereWithAggregatesInput[]
+    NOT?: ScreeningAnswerScalarWhereWithAggregatesInput | ScreeningAnswerScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ScreeningAnswer"> | string
+    questionId?: StringWithAggregatesFilter<"ScreeningAnswer"> | string
+    applicationId?: StringWithAggregatesFilter<"ScreeningAnswer"> | string
+    answer?: StringWithAggregatesFilter<"ScreeningAnswer"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ScreeningAnswer"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ScreeningAnswer"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     userType: $Enums.UserType
@@ -10946,6 +20077,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    candidateProfile?: CandidateProfileCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -10960,6 +20092,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    candidateProfile?: CandidateProfileUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -10974,6 +20107,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    candidateProfile?: CandidateProfileUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -10988,6 +20122,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    candidateProfile?: CandidateProfileUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -11387,12 +20522,14 @@ export namespace Prisma {
     cvAnalysisPrompt?: string | null
     interviewPrompt?: string | null
     aiSecondInterviewPrompt?: string | null
+    featured?: boolean
     applicants?: number
     views?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     company: CompanyCreateNestedOneWithoutJobsInput
     screeningQuestions?: ScreeningQuestionCreateNestedManyWithoutJobInput
+    applications?: ApplicationCreateNestedManyWithoutJobInput
   }
 
   export type JobUncheckedCreateInput = {
@@ -11420,11 +20557,13 @@ export namespace Prisma {
     cvAnalysisPrompt?: string | null
     interviewPrompt?: string | null
     aiSecondInterviewPrompt?: string | null
+    featured?: boolean
     applicants?: number
     views?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     screeningQuestions?: ScreeningQuestionUncheckedCreateNestedManyWithoutJobInput
+    applications?: ApplicationUncheckedCreateNestedManyWithoutJobInput
   }
 
   export type JobUpdateInput = {
@@ -11451,12 +20590,14 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneRequiredWithoutJobsNestedInput
     screeningQuestions?: ScreeningQuestionUpdateManyWithoutJobNestedInput
+    applications?: ApplicationUpdateManyWithoutJobNestedInput
   }
 
   export type JobUncheckedUpdateInput = {
@@ -11484,11 +20625,13 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     screeningQuestions?: ScreeningQuestionUncheckedUpdateManyWithoutJobNestedInput
+    applications?: ApplicationUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type JobCreateManyInput = {
@@ -11516,6 +20659,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: string | null
     interviewPrompt?: string | null
     aiSecondInterviewPrompt?: string | null
+    featured?: boolean
     applicants?: number
     views?: number
     createdAt?: Date | string
@@ -11546,6 +20690,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11577,6 +20722,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11592,6 +20738,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     job: JobCreateNestedOneWithoutScreeningQuestionsInput
+    screeningAnswers?: ScreeningAnswerCreateNestedManyWithoutQuestionInput
   }
 
   export type ScreeningQuestionUncheckedCreateInput = {
@@ -11603,6 +20750,7 @@ export namespace Prisma {
     jobId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedCreateNestedManyWithoutQuestionInput
   }
 
   export type ScreeningQuestionUpdateInput = {
@@ -11614,6 +20762,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     job?: JobUpdateOneRequiredWithoutScreeningQuestionsNestedInput
+    screeningAnswers?: ScreeningAnswerUpdateManyWithoutQuestionNestedInput
   }
 
   export type ScreeningQuestionUncheckedUpdateInput = {
@@ -11625,6 +20774,7 @@ export namespace Prisma {
     jobId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedUpdateManyWithoutQuestionNestedInput
   }
 
   export type ScreeningQuestionCreateManyInput = {
@@ -11655,6 +20805,795 @@ export namespace Prisma {
     options?: ScreeningQuestionUpdateoptionsInput | string[]
     required?: BoolFieldUpdateOperationsInput | boolean
     jobId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CandidateProfileCreateInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutCandidateProfileInput
+    applications?: ApplicationCreateNestedManyWithoutCandidateInput
+    cvs?: CVCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileUncheckedCreateInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
+    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceUncheckedCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationUncheckedCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutCandidateProfileNestedInput
+    applications?: ApplicationUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUncheckedUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileCreateManyInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CandidateProfileUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CandidateProfileUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkExperienceCreateInput = {
+    id?: string
+    jobTitle: string
+    company: string
+    location?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    candidate: CandidateProfileCreateNestedOneWithoutWorkExperiencesInput
+  }
+
+  export type WorkExperienceUncheckedCreateInput = {
+    id?: string
+    jobTitle: string
+    company: string
+    location?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    description?: string | null
+    candidateId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WorkExperienceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobTitle?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidate?: CandidateProfileUpdateOneRequiredWithoutWorkExperiencesNestedInput
+  }
+
+  export type WorkExperienceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobTitle?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    candidateId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkExperienceCreateManyInput = {
+    id?: string
+    jobTitle: string
+    company: string
+    location?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    description?: string | null
+    candidateId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WorkExperienceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobTitle?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkExperienceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobTitle?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    candidateId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EducationCreateInput = {
+    id?: string
+    degree: string
+    institution: string
+    fieldOfStudy?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    grade?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    candidate: CandidateProfileCreateNestedOneWithoutEducationHistoryInput
+  }
+
+  export type EducationUncheckedCreateInput = {
+    id?: string
+    degree: string
+    institution: string
+    fieldOfStudy?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    grade?: string | null
+    description?: string | null
+    candidateId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EducationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    degree?: StringFieldUpdateOperationsInput | string
+    institution?: StringFieldUpdateOperationsInput | string
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidate?: CandidateProfileUpdateOneRequiredWithoutEducationHistoryNestedInput
+  }
+
+  export type EducationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    degree?: StringFieldUpdateOperationsInput | string
+    institution?: StringFieldUpdateOperationsInput | string
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    candidateId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EducationCreateManyInput = {
+    id?: string
+    degree: string
+    institution: string
+    fieldOfStudy?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    grade?: string | null
+    description?: string | null
+    candidateId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EducationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    degree?: StringFieldUpdateOperationsInput | string
+    institution?: StringFieldUpdateOperationsInput | string
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EducationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    degree?: StringFieldUpdateOperationsInput | string
+    institution?: StringFieldUpdateOperationsInput | string
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    candidateId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CVCreateInput = {
+    id?: string
+    fileName: string
+    originalFileName?: string | null
+    fileUrl: string
+    fileSize?: number | null
+    mimeType?: string | null
+    status?: $Enums.CVStatus
+    isActive?: boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: Date | string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    candidate: CandidateProfileCreateNestedOneWithoutCvsInput
+  }
+
+  export type CVUncheckedCreateInput = {
+    id?: string
+    fileName: string
+    originalFileName?: string | null
+    fileUrl: string
+    fileSize?: number | null
+    mimeType?: string | null
+    status?: $Enums.CVStatus
+    isActive?: boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    candidateId: string
+    uploadedAt?: Date | string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CVUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileName?: StringFieldUpdateOperationsInput | string
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumCVStatusFieldUpdateOperationsInput | $Enums.CVStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidate?: CandidateProfileUpdateOneRequiredWithoutCvsNestedInput
+  }
+
+  export type CVUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileName?: StringFieldUpdateOperationsInput | string
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumCVStatusFieldUpdateOperationsInput | $Enums.CVStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    candidateId?: StringFieldUpdateOperationsInput | string
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CVCreateManyInput = {
+    id?: string
+    fileName: string
+    originalFileName?: string | null
+    fileUrl: string
+    fileSize?: number | null
+    mimeType?: string | null
+    status?: $Enums.CVStatus
+    isActive?: boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    candidateId: string
+    uploadedAt?: Date | string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CVUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileName?: StringFieldUpdateOperationsInput | string
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumCVStatusFieldUpdateOperationsInput | $Enums.CVStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CVUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileName?: StringFieldUpdateOperationsInput | string
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumCVStatusFieldUpdateOperationsInput | $Enums.CVStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    candidateId?: StringFieldUpdateOperationsInput | string
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationCreateInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    job: JobCreateNestedOneWithoutApplicationsInput
+    candidate: CandidateProfileCreateNestedOneWithoutApplicationsInput
+    screeningAnswers?: ScreeningAnswerCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationUncheckedCreateInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    jobId: string
+    candidateId: string
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    job?: JobUpdateOneRequiredWithoutApplicationsNestedInput
+    candidate?: CandidateProfileUpdateOneRequiredWithoutApplicationsNestedInput
+    screeningAnswers?: ScreeningAnswerUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ApplicationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    jobId?: StringFieldUpdateOperationsInput | string
+    candidateId?: StringFieldUpdateOperationsInput | string
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ApplicationCreateManyInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    jobId: string
+    candidateId: string
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ApplicationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    jobId?: StringFieldUpdateOperationsInput | string
+    candidateId?: StringFieldUpdateOperationsInput | string
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScreeningAnswerCreateInput = {
+    id?: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    question: ScreeningQuestionCreateNestedOneWithoutScreeningAnswersInput
+    application: ApplicationCreateNestedOneWithoutScreeningAnswersInput
+  }
+
+  export type ScreeningAnswerUncheckedCreateInput = {
+    id?: string
+    questionId: string
+    applicationId: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScreeningAnswerUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: ScreeningQuestionUpdateOneRequiredWithoutScreeningAnswersNestedInput
+    application?: ApplicationUpdateOneRequiredWithoutScreeningAnswersNestedInput
+  }
+
+  export type ScreeningAnswerUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScreeningAnswerCreateManyInput = {
+    id?: string
+    questionId: string
+    applicationId: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScreeningAnswerUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScreeningAnswerUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11721,6 +21660,11 @@ export namespace Prisma {
     every?: RefreshTokenWhereInput
     some?: RefreshTokenWhereInput
     none?: RefreshTokenWhereInput
+  }
+
+  export type CandidateProfileNullableScalarRelationFilter = {
+    is?: CandidateProfileWhereInput | null
+    isNot?: CandidateProfileWhereInput | null
   }
 
   export type SortOrderInput = {
@@ -12203,7 +22147,17 @@ export namespace Prisma {
     none?: ScreeningQuestionWhereInput
   }
 
+  export type ApplicationListRelationFilter = {
+    every?: ApplicationWhereInput
+    some?: ApplicationWhereInput
+    none?: ApplicationWhereInput
+  }
+
   export type ScreeningQuestionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ApplicationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -12232,6 +22186,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: SortOrder
     interviewPrompt?: SortOrder
     aiSecondInterviewPrompt?: SortOrder
+    featured?: SortOrder
     applicants?: SortOrder
     views?: SortOrder
     createdAt?: SortOrder
@@ -12267,6 +22222,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: SortOrder
     interviewPrompt?: SortOrder
     aiSecondInterviewPrompt?: SortOrder
+    featured?: SortOrder
     applicants?: SortOrder
     views?: SortOrder
     createdAt?: SortOrder
@@ -12297,6 +22253,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: SortOrder
     interviewPrompt?: SortOrder
     aiSecondInterviewPrompt?: SortOrder
+    featured?: SortOrder
     applicants?: SortOrder
     views?: SortOrder
     createdAt?: SortOrder
@@ -12376,6 +22333,16 @@ export namespace Prisma {
     isNot?: JobWhereInput
   }
 
+  export type ScreeningAnswerListRelationFilter = {
+    every?: ScreeningAnswerWhereInput
+    some?: ScreeningAnswerWhereInput
+    none?: ScreeningAnswerWhereInput
+  }
+
+  export type ScreeningAnswerOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ScreeningQuestionCountOrderByAggregateInput = {
     id?: SortOrder
     question?: SortOrder
@@ -12417,6 +22384,569 @@ export namespace Prisma {
     _max?: NestedEnumScreeningQuestionTypeFilter<$PrismaModel>
   }
 
+  export type EnumCountryNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.Country | EnumCountryFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Country[] | ListEnumCountryFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Country[] | ListEnumCountryFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCountryNullableFilter<$PrismaModel> | $Enums.Country | null
+  }
+
+  export type EnumExperienceLevelNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExperienceLevel | EnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExperienceLevelNullableFilter<$PrismaModel> | $Enums.ExperienceLevel | null
+  }
+
+  export type EnumEducationLevelNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.EducationLevel | EnumEducationLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.EducationLevel[] | ListEnumEducationLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.EducationLevel[] | ListEnumEducationLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumEducationLevelNullableFilter<$PrismaModel> | $Enums.EducationLevel | null
+  }
+
+  export type EnumJobTypeNullableListFilter<$PrismaModel = never> = {
+    equals?: $Enums.JobType[] | ListEnumJobTypeFieldRefInput<$PrismaModel> | null
+    has?: $Enums.JobType | EnumJobTypeFieldRefInput<$PrismaModel> | null
+    hasEvery?: $Enums.JobType[] | ListEnumJobTypeFieldRefInput<$PrismaModel>
+    hasSome?: $Enums.JobType[] | ListEnumJobTypeFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type EnumWorkTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.WorkType | EnumWorkTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.WorkType[] | ListEnumWorkTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.WorkType[] | ListEnumWorkTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumWorkTypeNullableFilter<$PrismaModel> | $Enums.WorkType | null
+  }
+
+  export type EnumIndustryNullableListFilter<$PrismaModel = never> = {
+    equals?: $Enums.Industry[] | ListEnumIndustryFieldRefInput<$PrismaModel> | null
+    has?: $Enums.Industry | EnumIndustryFieldRefInput<$PrismaModel> | null
+    hasEvery?: $Enums.Industry[] | ListEnumIndustryFieldRefInput<$PrismaModel>
+    hasSome?: $Enums.Industry[] | ListEnumIndustryFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type CVListRelationFilter = {
+    every?: CVWhereInput
+    some?: CVWhereInput
+    none?: CVWhereInput
+  }
+
+  export type WorkExperienceListRelationFilter = {
+    every?: WorkExperienceWhereInput
+    some?: WorkExperienceWhereInput
+    none?: WorkExperienceWhereInput
+  }
+
+  export type EducationListRelationFilter = {
+    every?: EducationWhereInput
+    some?: EducationWhereInput
+    none?: EducationWhereInput
+  }
+
+  export type CVOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type WorkExperienceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type EducationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CandidateProfileCountOrderByAggregateInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    dateOfBirth?: SortOrder
+    nationality?: SortOrder
+    currentLocation?: SortOrder
+    currentJobTitle?: SortOrder
+    currentCompany?: SortOrder
+    experienceLevel?: SortOrder
+    totalExperience?: SortOrder
+    expectedSalary?: SortOrder
+    noticePeriod?: SortOrder
+    highestEducation?: SortOrder
+    fieldOfStudy?: SortOrder
+    university?: SortOrder
+    graduationYear?: SortOrder
+    skills?: SortOrder
+    preferredJobTypes?: SortOrder
+    preferredWorkType?: SortOrder
+    preferredIndustries?: SortOrder
+    preferredLocations?: SortOrder
+    resumeUrl?: SortOrder
+    portfolioUrl?: SortOrder
+    linkedInUrl?: SortOrder
+    githubUrl?: SortOrder
+    isProfilePublic?: SortOrder
+    isOpenToWork?: SortOrder
+    profileSummary?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CandidateProfileAvgOrderByAggregateInput = {
+    totalExperience?: SortOrder
+    graduationYear?: SortOrder
+  }
+
+  export type CandidateProfileMaxOrderByAggregateInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    dateOfBirth?: SortOrder
+    nationality?: SortOrder
+    currentLocation?: SortOrder
+    currentJobTitle?: SortOrder
+    currentCompany?: SortOrder
+    experienceLevel?: SortOrder
+    totalExperience?: SortOrder
+    expectedSalary?: SortOrder
+    noticePeriod?: SortOrder
+    highestEducation?: SortOrder
+    fieldOfStudy?: SortOrder
+    university?: SortOrder
+    graduationYear?: SortOrder
+    preferredWorkType?: SortOrder
+    resumeUrl?: SortOrder
+    portfolioUrl?: SortOrder
+    linkedInUrl?: SortOrder
+    githubUrl?: SortOrder
+    isProfilePublic?: SortOrder
+    isOpenToWork?: SortOrder
+    profileSummary?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CandidateProfileMinOrderByAggregateInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    dateOfBirth?: SortOrder
+    nationality?: SortOrder
+    currentLocation?: SortOrder
+    currentJobTitle?: SortOrder
+    currentCompany?: SortOrder
+    experienceLevel?: SortOrder
+    totalExperience?: SortOrder
+    expectedSalary?: SortOrder
+    noticePeriod?: SortOrder
+    highestEducation?: SortOrder
+    fieldOfStudy?: SortOrder
+    university?: SortOrder
+    graduationYear?: SortOrder
+    preferredWorkType?: SortOrder
+    resumeUrl?: SortOrder
+    portfolioUrl?: SortOrder
+    linkedInUrl?: SortOrder
+    githubUrl?: SortOrder
+    isProfilePublic?: SortOrder
+    isOpenToWork?: SortOrder
+    profileSummary?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CandidateProfileSumOrderByAggregateInput = {
+    totalExperience?: SortOrder
+    graduationYear?: SortOrder
+  }
+
+  export type EnumCountryNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Country | EnumCountryFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Country[] | ListEnumCountryFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Country[] | ListEnumCountryFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCountryNullableWithAggregatesFilter<$PrismaModel> | $Enums.Country | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumCountryNullableFilter<$PrismaModel>
+    _max?: NestedEnumCountryNullableFilter<$PrismaModel>
+  }
+
+  export type EnumExperienceLevelNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExperienceLevel | EnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExperienceLevelNullableWithAggregatesFilter<$PrismaModel> | $Enums.ExperienceLevel | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumExperienceLevelNullableFilter<$PrismaModel>
+    _max?: NestedEnumExperienceLevelNullableFilter<$PrismaModel>
+  }
+
+  export type EnumEducationLevelNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.EducationLevel | EnumEducationLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.EducationLevel[] | ListEnumEducationLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.EducationLevel[] | ListEnumEducationLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumEducationLevelNullableWithAggregatesFilter<$PrismaModel> | $Enums.EducationLevel | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumEducationLevelNullableFilter<$PrismaModel>
+    _max?: NestedEnumEducationLevelNullableFilter<$PrismaModel>
+  }
+
+  export type EnumWorkTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.WorkType | EnumWorkTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.WorkType[] | ListEnumWorkTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.WorkType[] | ListEnumWorkTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumWorkTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.WorkType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumWorkTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumWorkTypeNullableFilter<$PrismaModel>
+  }
+
+  export type CandidateProfileScalarRelationFilter = {
+    is?: CandidateProfileWhereInput
+    isNot?: CandidateProfileWhereInput
+  }
+
+  export type WorkExperienceCountOrderByAggregateInput = {
+    id?: SortOrder
+    jobTitle?: SortOrder
+    company?: SortOrder
+    location?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    isCurrent?: SortOrder
+    description?: SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WorkExperienceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    jobTitle?: SortOrder
+    company?: SortOrder
+    location?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    isCurrent?: SortOrder
+    description?: SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WorkExperienceMinOrderByAggregateInput = {
+    id?: SortOrder
+    jobTitle?: SortOrder
+    company?: SortOrder
+    location?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    isCurrent?: SortOrder
+    description?: SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EducationCountOrderByAggregateInput = {
+    id?: SortOrder
+    degree?: SortOrder
+    institution?: SortOrder
+    fieldOfStudy?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    isCurrent?: SortOrder
+    grade?: SortOrder
+    description?: SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EducationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    degree?: SortOrder
+    institution?: SortOrder
+    fieldOfStudy?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    isCurrent?: SortOrder
+    grade?: SortOrder
+    description?: SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EducationMinOrderByAggregateInput = {
+    id?: SortOrder
+    degree?: SortOrder
+    institution?: SortOrder
+    fieldOfStudy?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    isCurrent?: SortOrder
+    grade?: SortOrder
+    description?: SortOrder
+    candidateId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumCVStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.CVStatus | EnumCVStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.CVStatus[] | ListEnumCVStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CVStatus[] | ListEnumCVStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumCVStatusFilter<$PrismaModel> | $Enums.CVStatus
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type CVCountOrderByAggregateInput = {
+    id?: SortOrder
+    fileName?: SortOrder
+    originalFileName?: SortOrder
+    fileUrl?: SortOrder
+    fileSize?: SortOrder
+    mimeType?: SortOrder
+    status?: SortOrder
+    isActive?: SortOrder
+    extractedData?: SortOrder
+    candidateId?: SortOrder
+    uploadedAt?: SortOrder
+    processedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CVAvgOrderByAggregateInput = {
+    fileSize?: SortOrder
+  }
+
+  export type CVMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fileName?: SortOrder
+    originalFileName?: SortOrder
+    fileUrl?: SortOrder
+    fileSize?: SortOrder
+    mimeType?: SortOrder
+    status?: SortOrder
+    isActive?: SortOrder
+    candidateId?: SortOrder
+    uploadedAt?: SortOrder
+    processedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CVMinOrderByAggregateInput = {
+    id?: SortOrder
+    fileName?: SortOrder
+    originalFileName?: SortOrder
+    fileUrl?: SortOrder
+    fileSize?: SortOrder
+    mimeType?: SortOrder
+    status?: SortOrder
+    isActive?: SortOrder
+    candidateId?: SortOrder
+    uploadedAt?: SortOrder
+    processedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CVSumOrderByAggregateInput = {
+    fileSize?: SortOrder
+  }
+
+  export type EnumCVStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CVStatus | EnumCVStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.CVStatus[] | ListEnumCVStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CVStatus[] | ListEnumCVStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumCVStatusWithAggregatesFilter<$PrismaModel> | $Enums.CVStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCVStatusFilter<$PrismaModel>
+    _max?: NestedEnumCVStatusFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type EnumApplicationStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ApplicationStatus | EnumApplicationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumApplicationStatusFilter<$PrismaModel> | $Enums.ApplicationStatus
+  }
+
+  export type ApplicationJobIdCandidateIdCompoundUniqueInput = {
+    jobId: string
+    candidateId: string
+  }
+
+  export type ApplicationCountOrderByAggregateInput = {
+    id?: SortOrder
+    status?: SortOrder
+    jobId?: SortOrder
+    candidateId?: SortOrder
+    coverLetter?: SortOrder
+    resumeUrl?: SortOrder
+    expectedSalary?: SortOrder
+    noticePeriod?: SortOrder
+    companyNotes?: SortOrder
+    appliedAt?: SortOrder
+    reviewedAt?: SortOrder
+    interviewScheduledAt?: SortOrder
+    interviewedAt?: SortOrder
+    rejectedAt?: SortOrder
+    acceptedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ApplicationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    status?: SortOrder
+    jobId?: SortOrder
+    candidateId?: SortOrder
+    coverLetter?: SortOrder
+    resumeUrl?: SortOrder
+    expectedSalary?: SortOrder
+    noticePeriod?: SortOrder
+    companyNotes?: SortOrder
+    appliedAt?: SortOrder
+    reviewedAt?: SortOrder
+    interviewScheduledAt?: SortOrder
+    interviewedAt?: SortOrder
+    rejectedAt?: SortOrder
+    acceptedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ApplicationMinOrderByAggregateInput = {
+    id?: SortOrder
+    status?: SortOrder
+    jobId?: SortOrder
+    candidateId?: SortOrder
+    coverLetter?: SortOrder
+    resumeUrl?: SortOrder
+    expectedSalary?: SortOrder
+    noticePeriod?: SortOrder
+    companyNotes?: SortOrder
+    appliedAt?: SortOrder
+    reviewedAt?: SortOrder
+    interviewScheduledAt?: SortOrder
+    interviewedAt?: SortOrder
+    rejectedAt?: SortOrder
+    acceptedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumApplicationStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ApplicationStatus | EnumApplicationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumApplicationStatusWithAggregatesFilter<$PrismaModel> | $Enums.ApplicationStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumApplicationStatusFilter<$PrismaModel>
+    _max?: NestedEnumApplicationStatusFilter<$PrismaModel>
+  }
+
+  export type ScreeningQuestionScalarRelationFilter = {
+    is?: ScreeningQuestionWhereInput
+    isNot?: ScreeningQuestionWhereInput
+  }
+
+  export type ApplicationScalarRelationFilter = {
+    is?: ApplicationWhereInput
+    isNot?: ApplicationWhereInput
+  }
+
+  export type ScreeningAnswerCountOrderByAggregateInput = {
+    id?: SortOrder
+    questionId?: SortOrder
+    applicationId?: SortOrder
+    answer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ScreeningAnswerMaxOrderByAggregateInput = {
+    id?: SortOrder
+    questionId?: SortOrder
+    applicationId?: SortOrder
+    answer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ScreeningAnswerMinOrderByAggregateInput = {
+    id?: SortOrder
+    questionId?: SortOrder
+    applicationId?: SortOrder
+    answer?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type CompanyCreateNestedOneWithoutUsersInput = {
     create?: XOR<CompanyCreateWithoutUsersInput, CompanyUncheckedCreateWithoutUsersInput>
     connectOrCreate?: CompanyCreateOrConnectWithoutUsersInput
@@ -12430,11 +22960,23 @@ export namespace Prisma {
     connect?: RefreshTokenWhereUniqueInput | RefreshTokenWhereUniqueInput[]
   }
 
+  export type CandidateProfileCreateNestedOneWithoutUserInput = {
+    create?: XOR<CandidateProfileCreateWithoutUserInput, CandidateProfileUncheckedCreateWithoutUserInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutUserInput
+    connect?: CandidateProfileWhereUniqueInput
+  }
+
   export type RefreshTokenUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<RefreshTokenCreateWithoutUserInput, RefreshTokenUncheckedCreateWithoutUserInput> | RefreshTokenCreateWithoutUserInput[] | RefreshTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: RefreshTokenCreateOrConnectWithoutUserInput | RefreshTokenCreateOrConnectWithoutUserInput[]
     createMany?: RefreshTokenCreateManyUserInputEnvelope
     connect?: RefreshTokenWhereUniqueInput | RefreshTokenWhereUniqueInput[]
+  }
+
+  export type CandidateProfileUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<CandidateProfileCreateWithoutUserInput, CandidateProfileUncheckedCreateWithoutUserInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutUserInput
+    connect?: CandidateProfileWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -12481,6 +23023,16 @@ export namespace Prisma {
     deleteMany?: RefreshTokenScalarWhereInput | RefreshTokenScalarWhereInput[]
   }
 
+  export type CandidateProfileUpdateOneWithoutUserNestedInput = {
+    create?: XOR<CandidateProfileCreateWithoutUserInput, CandidateProfileUncheckedCreateWithoutUserInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutUserInput
+    upsert?: CandidateProfileUpsertWithoutUserInput
+    disconnect?: CandidateProfileWhereInput | boolean
+    delete?: CandidateProfileWhereInput | boolean
+    connect?: CandidateProfileWhereUniqueInput
+    update?: XOR<XOR<CandidateProfileUpdateToOneWithWhereWithoutUserInput, CandidateProfileUpdateWithoutUserInput>, CandidateProfileUncheckedUpdateWithoutUserInput>
+  }
+
   export type RefreshTokenUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<RefreshTokenCreateWithoutUserInput, RefreshTokenUncheckedCreateWithoutUserInput> | RefreshTokenCreateWithoutUserInput[] | RefreshTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: RefreshTokenCreateOrConnectWithoutUserInput | RefreshTokenCreateOrConnectWithoutUserInput[]
@@ -12493,6 +23045,16 @@ export namespace Prisma {
     update?: RefreshTokenUpdateWithWhereUniqueWithoutUserInput | RefreshTokenUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: RefreshTokenUpdateManyWithWhereWithoutUserInput | RefreshTokenUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: RefreshTokenScalarWhereInput | RefreshTokenScalarWhereInput[]
+  }
+
+  export type CandidateProfileUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<CandidateProfileCreateWithoutUserInput, CandidateProfileUncheckedCreateWithoutUserInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutUserInput
+    upsert?: CandidateProfileUpsertWithoutUserInput
+    disconnect?: CandidateProfileWhereInput | boolean
+    delete?: CandidateProfileWhereInput | boolean
+    connect?: CandidateProfileWhereUniqueInput
+    update?: XOR<XOR<CandidateProfileUpdateToOneWithWhereWithoutUserInput, CandidateProfileUpdateWithoutUserInput>, CandidateProfileUncheckedUpdateWithoutUserInput>
   }
 
   export type UserCreateNestedOneWithoutRefreshTokensInput = {
@@ -12740,11 +23302,25 @@ export namespace Prisma {
     connect?: ScreeningQuestionWhereUniqueInput | ScreeningQuestionWhereUniqueInput[]
   }
 
+  export type ApplicationCreateNestedManyWithoutJobInput = {
+    create?: XOR<ApplicationCreateWithoutJobInput, ApplicationUncheckedCreateWithoutJobInput> | ApplicationCreateWithoutJobInput[] | ApplicationUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: ApplicationCreateOrConnectWithoutJobInput | ApplicationCreateOrConnectWithoutJobInput[]
+    createMany?: ApplicationCreateManyJobInputEnvelope
+    connect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+  }
+
   export type ScreeningQuestionUncheckedCreateNestedManyWithoutJobInput = {
     create?: XOR<ScreeningQuestionCreateWithoutJobInput, ScreeningQuestionUncheckedCreateWithoutJobInput> | ScreeningQuestionCreateWithoutJobInput[] | ScreeningQuestionUncheckedCreateWithoutJobInput[]
     connectOrCreate?: ScreeningQuestionCreateOrConnectWithoutJobInput | ScreeningQuestionCreateOrConnectWithoutJobInput[]
     createMany?: ScreeningQuestionCreateManyJobInputEnvelope
     connect?: ScreeningQuestionWhereUniqueInput | ScreeningQuestionWhereUniqueInput[]
+  }
+
+  export type ApplicationUncheckedCreateNestedManyWithoutJobInput = {
+    create?: XOR<ApplicationCreateWithoutJobInput, ApplicationUncheckedCreateWithoutJobInput> | ApplicationCreateWithoutJobInput[] | ApplicationUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: ApplicationCreateOrConnectWithoutJobInput | ApplicationCreateOrConnectWithoutJobInput[]
+    createMany?: ApplicationCreateManyJobInputEnvelope
+    connect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
   }
 
   export type EnumJobTypeFieldUpdateOperationsInput = {
@@ -12798,6 +23374,20 @@ export namespace Prisma {
     deleteMany?: ScreeningQuestionScalarWhereInput | ScreeningQuestionScalarWhereInput[]
   }
 
+  export type ApplicationUpdateManyWithoutJobNestedInput = {
+    create?: XOR<ApplicationCreateWithoutJobInput, ApplicationUncheckedCreateWithoutJobInput> | ApplicationCreateWithoutJobInput[] | ApplicationUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: ApplicationCreateOrConnectWithoutJobInput | ApplicationCreateOrConnectWithoutJobInput[]
+    upsert?: ApplicationUpsertWithWhereUniqueWithoutJobInput | ApplicationUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: ApplicationCreateManyJobInputEnvelope
+    set?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    disconnect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    delete?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    connect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    update?: ApplicationUpdateWithWhereUniqueWithoutJobInput | ApplicationUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: ApplicationUpdateManyWithWhereWithoutJobInput | ApplicationUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: ApplicationScalarWhereInput | ApplicationScalarWhereInput[]
+  }
+
   export type ScreeningQuestionUncheckedUpdateManyWithoutJobNestedInput = {
     create?: XOR<ScreeningQuestionCreateWithoutJobInput, ScreeningQuestionUncheckedCreateWithoutJobInput> | ScreeningQuestionCreateWithoutJobInput[] | ScreeningQuestionUncheckedCreateWithoutJobInput[]
     connectOrCreate?: ScreeningQuestionCreateOrConnectWithoutJobInput | ScreeningQuestionCreateOrConnectWithoutJobInput[]
@@ -12812,6 +23402,20 @@ export namespace Prisma {
     deleteMany?: ScreeningQuestionScalarWhereInput | ScreeningQuestionScalarWhereInput[]
   }
 
+  export type ApplicationUncheckedUpdateManyWithoutJobNestedInput = {
+    create?: XOR<ApplicationCreateWithoutJobInput, ApplicationUncheckedCreateWithoutJobInput> | ApplicationCreateWithoutJobInput[] | ApplicationUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: ApplicationCreateOrConnectWithoutJobInput | ApplicationCreateOrConnectWithoutJobInput[]
+    upsert?: ApplicationUpsertWithWhereUniqueWithoutJobInput | ApplicationUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: ApplicationCreateManyJobInputEnvelope
+    set?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    disconnect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    delete?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    connect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    update?: ApplicationUpdateWithWhereUniqueWithoutJobInput | ApplicationUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: ApplicationUpdateManyWithWhereWithoutJobInput | ApplicationUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: ApplicationScalarWhereInput | ApplicationScalarWhereInput[]
+  }
+
   export type ScreeningQuestionCreateoptionsInput = {
     set: string[]
   }
@@ -12820,6 +23424,20 @@ export namespace Prisma {
     create?: XOR<JobCreateWithoutScreeningQuestionsInput, JobUncheckedCreateWithoutScreeningQuestionsInput>
     connectOrCreate?: JobCreateOrConnectWithoutScreeningQuestionsInput
     connect?: JobWhereUniqueInput
+  }
+
+  export type ScreeningAnswerCreateNestedManyWithoutQuestionInput = {
+    create?: XOR<ScreeningAnswerCreateWithoutQuestionInput, ScreeningAnswerUncheckedCreateWithoutQuestionInput> | ScreeningAnswerCreateWithoutQuestionInput[] | ScreeningAnswerUncheckedCreateWithoutQuestionInput[]
+    connectOrCreate?: ScreeningAnswerCreateOrConnectWithoutQuestionInput | ScreeningAnswerCreateOrConnectWithoutQuestionInput[]
+    createMany?: ScreeningAnswerCreateManyQuestionInputEnvelope
+    connect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+  }
+
+  export type ScreeningAnswerUncheckedCreateNestedManyWithoutQuestionInput = {
+    create?: XOR<ScreeningAnswerCreateWithoutQuestionInput, ScreeningAnswerUncheckedCreateWithoutQuestionInput> | ScreeningAnswerCreateWithoutQuestionInput[] | ScreeningAnswerUncheckedCreateWithoutQuestionInput[]
+    connectOrCreate?: ScreeningAnswerCreateOrConnectWithoutQuestionInput | ScreeningAnswerCreateOrConnectWithoutQuestionInput[]
+    createMany?: ScreeningAnswerCreateManyQuestionInputEnvelope
+    connect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
   }
 
   export type EnumScreeningQuestionTypeFieldUpdateOperationsInput = {
@@ -12837,6 +23455,418 @@ export namespace Prisma {
     upsert?: JobUpsertWithoutScreeningQuestionsInput
     connect?: JobWhereUniqueInput
     update?: XOR<XOR<JobUpdateToOneWithWhereWithoutScreeningQuestionsInput, JobUpdateWithoutScreeningQuestionsInput>, JobUncheckedUpdateWithoutScreeningQuestionsInput>
+  }
+
+  export type ScreeningAnswerUpdateManyWithoutQuestionNestedInput = {
+    create?: XOR<ScreeningAnswerCreateWithoutQuestionInput, ScreeningAnswerUncheckedCreateWithoutQuestionInput> | ScreeningAnswerCreateWithoutQuestionInput[] | ScreeningAnswerUncheckedCreateWithoutQuestionInput[]
+    connectOrCreate?: ScreeningAnswerCreateOrConnectWithoutQuestionInput | ScreeningAnswerCreateOrConnectWithoutQuestionInput[]
+    upsert?: ScreeningAnswerUpsertWithWhereUniqueWithoutQuestionInput | ScreeningAnswerUpsertWithWhereUniqueWithoutQuestionInput[]
+    createMany?: ScreeningAnswerCreateManyQuestionInputEnvelope
+    set?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    disconnect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    delete?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    connect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    update?: ScreeningAnswerUpdateWithWhereUniqueWithoutQuestionInput | ScreeningAnswerUpdateWithWhereUniqueWithoutQuestionInput[]
+    updateMany?: ScreeningAnswerUpdateManyWithWhereWithoutQuestionInput | ScreeningAnswerUpdateManyWithWhereWithoutQuestionInput[]
+    deleteMany?: ScreeningAnswerScalarWhereInput | ScreeningAnswerScalarWhereInput[]
+  }
+
+  export type ScreeningAnswerUncheckedUpdateManyWithoutQuestionNestedInput = {
+    create?: XOR<ScreeningAnswerCreateWithoutQuestionInput, ScreeningAnswerUncheckedCreateWithoutQuestionInput> | ScreeningAnswerCreateWithoutQuestionInput[] | ScreeningAnswerUncheckedCreateWithoutQuestionInput[]
+    connectOrCreate?: ScreeningAnswerCreateOrConnectWithoutQuestionInput | ScreeningAnswerCreateOrConnectWithoutQuestionInput[]
+    upsert?: ScreeningAnswerUpsertWithWhereUniqueWithoutQuestionInput | ScreeningAnswerUpsertWithWhereUniqueWithoutQuestionInput[]
+    createMany?: ScreeningAnswerCreateManyQuestionInputEnvelope
+    set?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    disconnect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    delete?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    connect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    update?: ScreeningAnswerUpdateWithWhereUniqueWithoutQuestionInput | ScreeningAnswerUpdateWithWhereUniqueWithoutQuestionInput[]
+    updateMany?: ScreeningAnswerUpdateManyWithWhereWithoutQuestionInput | ScreeningAnswerUpdateManyWithWhereWithoutQuestionInput[]
+    deleteMany?: ScreeningAnswerScalarWhereInput | ScreeningAnswerScalarWhereInput[]
+  }
+
+  export type CandidateProfileCreateskillsInput = {
+    set: string[]
+  }
+
+  export type CandidateProfileCreatepreferredJobTypesInput = {
+    set: $Enums.JobType[]
+  }
+
+  export type CandidateProfileCreatepreferredIndustriesInput = {
+    set: $Enums.Industry[]
+  }
+
+  export type CandidateProfileCreatepreferredLocationsInput = {
+    set: string[]
+  }
+
+  export type UserCreateNestedOneWithoutCandidateProfileInput = {
+    create?: XOR<UserCreateWithoutCandidateProfileInput, UserUncheckedCreateWithoutCandidateProfileInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCandidateProfileInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type ApplicationCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
+    createMany?: ApplicationCreateManyCandidateInputEnvelope
+    connect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+  }
+
+  export type CVCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<CVCreateWithoutCandidateInput, CVUncheckedCreateWithoutCandidateInput> | CVCreateWithoutCandidateInput[] | CVUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: CVCreateOrConnectWithoutCandidateInput | CVCreateOrConnectWithoutCandidateInput[]
+    createMany?: CVCreateManyCandidateInputEnvelope
+    connect?: CVWhereUniqueInput | CVWhereUniqueInput[]
+  }
+
+  export type WorkExperienceCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<WorkExperienceCreateWithoutCandidateInput, WorkExperienceUncheckedCreateWithoutCandidateInput> | WorkExperienceCreateWithoutCandidateInput[] | WorkExperienceUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: WorkExperienceCreateOrConnectWithoutCandidateInput | WorkExperienceCreateOrConnectWithoutCandidateInput[]
+    createMany?: WorkExperienceCreateManyCandidateInputEnvelope
+    connect?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+  }
+
+  export type EducationCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<EducationCreateWithoutCandidateInput, EducationUncheckedCreateWithoutCandidateInput> | EducationCreateWithoutCandidateInput[] | EducationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: EducationCreateOrConnectWithoutCandidateInput | EducationCreateOrConnectWithoutCandidateInput[]
+    createMany?: EducationCreateManyCandidateInputEnvelope
+    connect?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+  }
+
+  export type ApplicationUncheckedCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
+    createMany?: ApplicationCreateManyCandidateInputEnvelope
+    connect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+  }
+
+  export type CVUncheckedCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<CVCreateWithoutCandidateInput, CVUncheckedCreateWithoutCandidateInput> | CVCreateWithoutCandidateInput[] | CVUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: CVCreateOrConnectWithoutCandidateInput | CVCreateOrConnectWithoutCandidateInput[]
+    createMany?: CVCreateManyCandidateInputEnvelope
+    connect?: CVWhereUniqueInput | CVWhereUniqueInput[]
+  }
+
+  export type WorkExperienceUncheckedCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<WorkExperienceCreateWithoutCandidateInput, WorkExperienceUncheckedCreateWithoutCandidateInput> | WorkExperienceCreateWithoutCandidateInput[] | WorkExperienceUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: WorkExperienceCreateOrConnectWithoutCandidateInput | WorkExperienceCreateOrConnectWithoutCandidateInput[]
+    createMany?: WorkExperienceCreateManyCandidateInputEnvelope
+    connect?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+  }
+
+  export type EducationUncheckedCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<EducationCreateWithoutCandidateInput, EducationUncheckedCreateWithoutCandidateInput> | EducationCreateWithoutCandidateInput[] | EducationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: EducationCreateOrConnectWithoutCandidateInput | EducationCreateOrConnectWithoutCandidateInput[]
+    createMany?: EducationCreateManyCandidateInputEnvelope
+    connect?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+  }
+
+  export type NullableEnumCountryFieldUpdateOperationsInput = {
+    set?: $Enums.Country | null
+  }
+
+  export type NullableEnumExperienceLevelFieldUpdateOperationsInput = {
+    set?: $Enums.ExperienceLevel | null
+  }
+
+  export type NullableEnumEducationLevelFieldUpdateOperationsInput = {
+    set?: $Enums.EducationLevel | null
+  }
+
+  export type CandidateProfileUpdateskillsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type CandidateProfileUpdatepreferredJobTypesInput = {
+    set?: $Enums.JobType[]
+    push?: $Enums.JobType | $Enums.JobType[]
+  }
+
+  export type NullableEnumWorkTypeFieldUpdateOperationsInput = {
+    set?: $Enums.WorkType | null
+  }
+
+  export type CandidateProfileUpdatepreferredIndustriesInput = {
+    set?: $Enums.Industry[]
+    push?: $Enums.Industry | $Enums.Industry[]
+  }
+
+  export type CandidateProfileUpdatepreferredLocationsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type UserUpdateOneWithoutCandidateProfileNestedInput = {
+    create?: XOR<UserCreateWithoutCandidateProfileInput, UserUncheckedCreateWithoutCandidateProfileInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCandidateProfileInput
+    upsert?: UserUpsertWithoutCandidateProfileInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCandidateProfileInput, UserUpdateWithoutCandidateProfileInput>, UserUncheckedUpdateWithoutCandidateProfileInput>
+  }
+
+  export type ApplicationUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
+    upsert?: ApplicationUpsertWithWhereUniqueWithoutCandidateInput | ApplicationUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: ApplicationCreateManyCandidateInputEnvelope
+    set?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    disconnect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    delete?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    connect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    update?: ApplicationUpdateWithWhereUniqueWithoutCandidateInput | ApplicationUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: ApplicationUpdateManyWithWhereWithoutCandidateInput | ApplicationUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: ApplicationScalarWhereInput | ApplicationScalarWhereInput[]
+  }
+
+  export type CVUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<CVCreateWithoutCandidateInput, CVUncheckedCreateWithoutCandidateInput> | CVCreateWithoutCandidateInput[] | CVUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: CVCreateOrConnectWithoutCandidateInput | CVCreateOrConnectWithoutCandidateInput[]
+    upsert?: CVUpsertWithWhereUniqueWithoutCandidateInput | CVUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: CVCreateManyCandidateInputEnvelope
+    set?: CVWhereUniqueInput | CVWhereUniqueInput[]
+    disconnect?: CVWhereUniqueInput | CVWhereUniqueInput[]
+    delete?: CVWhereUniqueInput | CVWhereUniqueInput[]
+    connect?: CVWhereUniqueInput | CVWhereUniqueInput[]
+    update?: CVUpdateWithWhereUniqueWithoutCandidateInput | CVUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: CVUpdateManyWithWhereWithoutCandidateInput | CVUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: CVScalarWhereInput | CVScalarWhereInput[]
+  }
+
+  export type WorkExperienceUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<WorkExperienceCreateWithoutCandidateInput, WorkExperienceUncheckedCreateWithoutCandidateInput> | WorkExperienceCreateWithoutCandidateInput[] | WorkExperienceUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: WorkExperienceCreateOrConnectWithoutCandidateInput | WorkExperienceCreateOrConnectWithoutCandidateInput[]
+    upsert?: WorkExperienceUpsertWithWhereUniqueWithoutCandidateInput | WorkExperienceUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: WorkExperienceCreateManyCandidateInputEnvelope
+    set?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+    disconnect?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+    delete?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+    connect?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+    update?: WorkExperienceUpdateWithWhereUniqueWithoutCandidateInput | WorkExperienceUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: WorkExperienceUpdateManyWithWhereWithoutCandidateInput | WorkExperienceUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: WorkExperienceScalarWhereInput | WorkExperienceScalarWhereInput[]
+  }
+
+  export type EducationUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<EducationCreateWithoutCandidateInput, EducationUncheckedCreateWithoutCandidateInput> | EducationCreateWithoutCandidateInput[] | EducationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: EducationCreateOrConnectWithoutCandidateInput | EducationCreateOrConnectWithoutCandidateInput[]
+    upsert?: EducationUpsertWithWhereUniqueWithoutCandidateInput | EducationUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: EducationCreateManyCandidateInputEnvelope
+    set?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+    disconnect?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+    delete?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+    connect?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+    update?: EducationUpdateWithWhereUniqueWithoutCandidateInput | EducationUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: EducationUpdateManyWithWhereWithoutCandidateInput | EducationUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: EducationScalarWhereInput | EducationScalarWhereInput[]
+  }
+
+  export type ApplicationUncheckedUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
+    upsert?: ApplicationUpsertWithWhereUniqueWithoutCandidateInput | ApplicationUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: ApplicationCreateManyCandidateInputEnvelope
+    set?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    disconnect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    delete?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    connect?: ApplicationWhereUniqueInput | ApplicationWhereUniqueInput[]
+    update?: ApplicationUpdateWithWhereUniqueWithoutCandidateInput | ApplicationUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: ApplicationUpdateManyWithWhereWithoutCandidateInput | ApplicationUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: ApplicationScalarWhereInput | ApplicationScalarWhereInput[]
+  }
+
+  export type CVUncheckedUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<CVCreateWithoutCandidateInput, CVUncheckedCreateWithoutCandidateInput> | CVCreateWithoutCandidateInput[] | CVUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: CVCreateOrConnectWithoutCandidateInput | CVCreateOrConnectWithoutCandidateInput[]
+    upsert?: CVUpsertWithWhereUniqueWithoutCandidateInput | CVUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: CVCreateManyCandidateInputEnvelope
+    set?: CVWhereUniqueInput | CVWhereUniqueInput[]
+    disconnect?: CVWhereUniqueInput | CVWhereUniqueInput[]
+    delete?: CVWhereUniqueInput | CVWhereUniqueInput[]
+    connect?: CVWhereUniqueInput | CVWhereUniqueInput[]
+    update?: CVUpdateWithWhereUniqueWithoutCandidateInput | CVUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: CVUpdateManyWithWhereWithoutCandidateInput | CVUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: CVScalarWhereInput | CVScalarWhereInput[]
+  }
+
+  export type WorkExperienceUncheckedUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<WorkExperienceCreateWithoutCandidateInput, WorkExperienceUncheckedCreateWithoutCandidateInput> | WorkExperienceCreateWithoutCandidateInput[] | WorkExperienceUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: WorkExperienceCreateOrConnectWithoutCandidateInput | WorkExperienceCreateOrConnectWithoutCandidateInput[]
+    upsert?: WorkExperienceUpsertWithWhereUniqueWithoutCandidateInput | WorkExperienceUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: WorkExperienceCreateManyCandidateInputEnvelope
+    set?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+    disconnect?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+    delete?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+    connect?: WorkExperienceWhereUniqueInput | WorkExperienceWhereUniqueInput[]
+    update?: WorkExperienceUpdateWithWhereUniqueWithoutCandidateInput | WorkExperienceUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: WorkExperienceUpdateManyWithWhereWithoutCandidateInput | WorkExperienceUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: WorkExperienceScalarWhereInput | WorkExperienceScalarWhereInput[]
+  }
+
+  export type EducationUncheckedUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<EducationCreateWithoutCandidateInput, EducationUncheckedCreateWithoutCandidateInput> | EducationCreateWithoutCandidateInput[] | EducationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: EducationCreateOrConnectWithoutCandidateInput | EducationCreateOrConnectWithoutCandidateInput[]
+    upsert?: EducationUpsertWithWhereUniqueWithoutCandidateInput | EducationUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: EducationCreateManyCandidateInputEnvelope
+    set?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+    disconnect?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+    delete?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+    connect?: EducationWhereUniqueInput | EducationWhereUniqueInput[]
+    update?: EducationUpdateWithWhereUniqueWithoutCandidateInput | EducationUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: EducationUpdateManyWithWhereWithoutCandidateInput | EducationUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: EducationScalarWhereInput | EducationScalarWhereInput[]
+  }
+
+  export type CandidateProfileCreateNestedOneWithoutWorkExperiencesInput = {
+    create?: XOR<CandidateProfileCreateWithoutWorkExperiencesInput, CandidateProfileUncheckedCreateWithoutWorkExperiencesInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutWorkExperiencesInput
+    connect?: CandidateProfileWhereUniqueInput
+  }
+
+  export type CandidateProfileUpdateOneRequiredWithoutWorkExperiencesNestedInput = {
+    create?: XOR<CandidateProfileCreateWithoutWorkExperiencesInput, CandidateProfileUncheckedCreateWithoutWorkExperiencesInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutWorkExperiencesInput
+    upsert?: CandidateProfileUpsertWithoutWorkExperiencesInput
+    connect?: CandidateProfileWhereUniqueInput
+    update?: XOR<XOR<CandidateProfileUpdateToOneWithWhereWithoutWorkExperiencesInput, CandidateProfileUpdateWithoutWorkExperiencesInput>, CandidateProfileUncheckedUpdateWithoutWorkExperiencesInput>
+  }
+
+  export type CandidateProfileCreateNestedOneWithoutEducationHistoryInput = {
+    create?: XOR<CandidateProfileCreateWithoutEducationHistoryInput, CandidateProfileUncheckedCreateWithoutEducationHistoryInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutEducationHistoryInput
+    connect?: CandidateProfileWhereUniqueInput
+  }
+
+  export type CandidateProfileUpdateOneRequiredWithoutEducationHistoryNestedInput = {
+    create?: XOR<CandidateProfileCreateWithoutEducationHistoryInput, CandidateProfileUncheckedCreateWithoutEducationHistoryInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutEducationHistoryInput
+    upsert?: CandidateProfileUpsertWithoutEducationHistoryInput
+    connect?: CandidateProfileWhereUniqueInput
+    update?: XOR<XOR<CandidateProfileUpdateToOneWithWhereWithoutEducationHistoryInput, CandidateProfileUpdateWithoutEducationHistoryInput>, CandidateProfileUncheckedUpdateWithoutEducationHistoryInput>
+  }
+
+  export type CandidateProfileCreateNestedOneWithoutCvsInput = {
+    create?: XOR<CandidateProfileCreateWithoutCvsInput, CandidateProfileUncheckedCreateWithoutCvsInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutCvsInput
+    connect?: CandidateProfileWhereUniqueInput
+  }
+
+  export type EnumCVStatusFieldUpdateOperationsInput = {
+    set?: $Enums.CVStatus
+  }
+
+  export type CandidateProfileUpdateOneRequiredWithoutCvsNestedInput = {
+    create?: XOR<CandidateProfileCreateWithoutCvsInput, CandidateProfileUncheckedCreateWithoutCvsInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutCvsInput
+    upsert?: CandidateProfileUpsertWithoutCvsInput
+    connect?: CandidateProfileWhereUniqueInput
+    update?: XOR<XOR<CandidateProfileUpdateToOneWithWhereWithoutCvsInput, CandidateProfileUpdateWithoutCvsInput>, CandidateProfileUncheckedUpdateWithoutCvsInput>
+  }
+
+  export type JobCreateNestedOneWithoutApplicationsInput = {
+    create?: XOR<JobCreateWithoutApplicationsInput, JobUncheckedCreateWithoutApplicationsInput>
+    connectOrCreate?: JobCreateOrConnectWithoutApplicationsInput
+    connect?: JobWhereUniqueInput
+  }
+
+  export type CandidateProfileCreateNestedOneWithoutApplicationsInput = {
+    create?: XOR<CandidateProfileCreateWithoutApplicationsInput, CandidateProfileUncheckedCreateWithoutApplicationsInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutApplicationsInput
+    connect?: CandidateProfileWhereUniqueInput
+  }
+
+  export type ScreeningAnswerCreateNestedManyWithoutApplicationInput = {
+    create?: XOR<ScreeningAnswerCreateWithoutApplicationInput, ScreeningAnswerUncheckedCreateWithoutApplicationInput> | ScreeningAnswerCreateWithoutApplicationInput[] | ScreeningAnswerUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: ScreeningAnswerCreateOrConnectWithoutApplicationInput | ScreeningAnswerCreateOrConnectWithoutApplicationInput[]
+    createMany?: ScreeningAnswerCreateManyApplicationInputEnvelope
+    connect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+  }
+
+  export type ScreeningAnswerUncheckedCreateNestedManyWithoutApplicationInput = {
+    create?: XOR<ScreeningAnswerCreateWithoutApplicationInput, ScreeningAnswerUncheckedCreateWithoutApplicationInput> | ScreeningAnswerCreateWithoutApplicationInput[] | ScreeningAnswerUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: ScreeningAnswerCreateOrConnectWithoutApplicationInput | ScreeningAnswerCreateOrConnectWithoutApplicationInput[]
+    createMany?: ScreeningAnswerCreateManyApplicationInputEnvelope
+    connect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+  }
+
+  export type EnumApplicationStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ApplicationStatus
+  }
+
+  export type JobUpdateOneRequiredWithoutApplicationsNestedInput = {
+    create?: XOR<JobCreateWithoutApplicationsInput, JobUncheckedCreateWithoutApplicationsInput>
+    connectOrCreate?: JobCreateOrConnectWithoutApplicationsInput
+    upsert?: JobUpsertWithoutApplicationsInput
+    connect?: JobWhereUniqueInput
+    update?: XOR<XOR<JobUpdateToOneWithWhereWithoutApplicationsInput, JobUpdateWithoutApplicationsInput>, JobUncheckedUpdateWithoutApplicationsInput>
+  }
+
+  export type CandidateProfileUpdateOneRequiredWithoutApplicationsNestedInput = {
+    create?: XOR<CandidateProfileCreateWithoutApplicationsInput, CandidateProfileUncheckedCreateWithoutApplicationsInput>
+    connectOrCreate?: CandidateProfileCreateOrConnectWithoutApplicationsInput
+    upsert?: CandidateProfileUpsertWithoutApplicationsInput
+    connect?: CandidateProfileWhereUniqueInput
+    update?: XOR<XOR<CandidateProfileUpdateToOneWithWhereWithoutApplicationsInput, CandidateProfileUpdateWithoutApplicationsInput>, CandidateProfileUncheckedUpdateWithoutApplicationsInput>
+  }
+
+  export type ScreeningAnswerUpdateManyWithoutApplicationNestedInput = {
+    create?: XOR<ScreeningAnswerCreateWithoutApplicationInput, ScreeningAnswerUncheckedCreateWithoutApplicationInput> | ScreeningAnswerCreateWithoutApplicationInput[] | ScreeningAnswerUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: ScreeningAnswerCreateOrConnectWithoutApplicationInput | ScreeningAnswerCreateOrConnectWithoutApplicationInput[]
+    upsert?: ScreeningAnswerUpsertWithWhereUniqueWithoutApplicationInput | ScreeningAnswerUpsertWithWhereUniqueWithoutApplicationInput[]
+    createMany?: ScreeningAnswerCreateManyApplicationInputEnvelope
+    set?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    disconnect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    delete?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    connect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    update?: ScreeningAnswerUpdateWithWhereUniqueWithoutApplicationInput | ScreeningAnswerUpdateWithWhereUniqueWithoutApplicationInput[]
+    updateMany?: ScreeningAnswerUpdateManyWithWhereWithoutApplicationInput | ScreeningAnswerUpdateManyWithWhereWithoutApplicationInput[]
+    deleteMany?: ScreeningAnswerScalarWhereInput | ScreeningAnswerScalarWhereInput[]
+  }
+
+  export type ScreeningAnswerUncheckedUpdateManyWithoutApplicationNestedInput = {
+    create?: XOR<ScreeningAnswerCreateWithoutApplicationInput, ScreeningAnswerUncheckedCreateWithoutApplicationInput> | ScreeningAnswerCreateWithoutApplicationInput[] | ScreeningAnswerUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: ScreeningAnswerCreateOrConnectWithoutApplicationInput | ScreeningAnswerCreateOrConnectWithoutApplicationInput[]
+    upsert?: ScreeningAnswerUpsertWithWhereUniqueWithoutApplicationInput | ScreeningAnswerUpsertWithWhereUniqueWithoutApplicationInput[]
+    createMany?: ScreeningAnswerCreateManyApplicationInputEnvelope
+    set?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    disconnect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    delete?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    connect?: ScreeningAnswerWhereUniqueInput | ScreeningAnswerWhereUniqueInput[]
+    update?: ScreeningAnswerUpdateWithWhereUniqueWithoutApplicationInput | ScreeningAnswerUpdateWithWhereUniqueWithoutApplicationInput[]
+    updateMany?: ScreeningAnswerUpdateManyWithWhereWithoutApplicationInput | ScreeningAnswerUpdateManyWithWhereWithoutApplicationInput[]
+    deleteMany?: ScreeningAnswerScalarWhereInput | ScreeningAnswerScalarWhereInput[]
+  }
+
+  export type ScreeningQuestionCreateNestedOneWithoutScreeningAnswersInput = {
+    create?: XOR<ScreeningQuestionCreateWithoutScreeningAnswersInput, ScreeningQuestionUncheckedCreateWithoutScreeningAnswersInput>
+    connectOrCreate?: ScreeningQuestionCreateOrConnectWithoutScreeningAnswersInput
+    connect?: ScreeningQuestionWhereUniqueInput
+  }
+
+  export type ApplicationCreateNestedOneWithoutScreeningAnswersInput = {
+    create?: XOR<ApplicationCreateWithoutScreeningAnswersInput, ApplicationUncheckedCreateWithoutScreeningAnswersInput>
+    connectOrCreate?: ApplicationCreateOrConnectWithoutScreeningAnswersInput
+    connect?: ApplicationWhereUniqueInput
+  }
+
+  export type ScreeningQuestionUpdateOneRequiredWithoutScreeningAnswersNestedInput = {
+    create?: XOR<ScreeningQuestionCreateWithoutScreeningAnswersInput, ScreeningQuestionUncheckedCreateWithoutScreeningAnswersInput>
+    connectOrCreate?: ScreeningQuestionCreateOrConnectWithoutScreeningAnswersInput
+    upsert?: ScreeningQuestionUpsertWithoutScreeningAnswersInput
+    connect?: ScreeningQuestionWhereUniqueInput
+    update?: XOR<XOR<ScreeningQuestionUpdateToOneWithWhereWithoutScreeningAnswersInput, ScreeningQuestionUpdateWithoutScreeningAnswersInput>, ScreeningQuestionUncheckedUpdateWithoutScreeningAnswersInput>
+  }
+
+  export type ApplicationUpdateOneRequiredWithoutScreeningAnswersNestedInput = {
+    create?: XOR<ApplicationCreateWithoutScreeningAnswersInput, ApplicationUncheckedCreateWithoutScreeningAnswersInput>
+    connectOrCreate?: ApplicationCreateOrConnectWithoutScreeningAnswersInput
+    upsert?: ApplicationUpsertWithoutScreeningAnswersInput
+    connect?: ApplicationWhereUniqueInput
+    update?: XOR<XOR<ApplicationUpdateToOneWithWhereWithoutScreeningAnswersInput, ApplicationUpdateWithoutScreeningAnswersInput>, ApplicationUncheckedUpdateWithoutScreeningAnswersInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -13210,6 +24240,131 @@ export namespace Prisma {
     _max?: NestedEnumScreeningQuestionTypeFilter<$PrismaModel>
   }
 
+  export type NestedEnumCountryNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.Country | EnumCountryFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Country[] | ListEnumCountryFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Country[] | ListEnumCountryFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCountryNullableFilter<$PrismaModel> | $Enums.Country | null
+  }
+
+  export type NestedEnumExperienceLevelNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExperienceLevel | EnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExperienceLevelNullableFilter<$PrismaModel> | $Enums.ExperienceLevel | null
+  }
+
+  export type NestedEnumEducationLevelNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.EducationLevel | EnumEducationLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.EducationLevel[] | ListEnumEducationLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.EducationLevel[] | ListEnumEducationLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumEducationLevelNullableFilter<$PrismaModel> | $Enums.EducationLevel | null
+  }
+
+  export type NestedEnumWorkTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.WorkType | EnumWorkTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.WorkType[] | ListEnumWorkTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.WorkType[] | ListEnumWorkTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumWorkTypeNullableFilter<$PrismaModel> | $Enums.WorkType | null
+  }
+
+  export type NestedEnumCountryNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Country | EnumCountryFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Country[] | ListEnumCountryFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Country[] | ListEnumCountryFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCountryNullableWithAggregatesFilter<$PrismaModel> | $Enums.Country | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumCountryNullableFilter<$PrismaModel>
+    _max?: NestedEnumCountryNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumExperienceLevelNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExperienceLevel | EnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExperienceLevelNullableWithAggregatesFilter<$PrismaModel> | $Enums.ExperienceLevel | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumExperienceLevelNullableFilter<$PrismaModel>
+    _max?: NestedEnumExperienceLevelNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumEducationLevelNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.EducationLevel | EnumEducationLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.EducationLevel[] | ListEnumEducationLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.EducationLevel[] | ListEnumEducationLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumEducationLevelNullableWithAggregatesFilter<$PrismaModel> | $Enums.EducationLevel | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumEducationLevelNullableFilter<$PrismaModel>
+    _max?: NestedEnumEducationLevelNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumWorkTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.WorkType | EnumWorkTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.WorkType[] | ListEnumWorkTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.WorkType[] | ListEnumWorkTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumWorkTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.WorkType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumWorkTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumWorkTypeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumCVStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.CVStatus | EnumCVStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.CVStatus[] | ListEnumCVStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CVStatus[] | ListEnumCVStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumCVStatusFilter<$PrismaModel> | $Enums.CVStatus
+  }
+
+  export type NestedEnumCVStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CVStatus | EnumCVStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.CVStatus[] | ListEnumCVStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CVStatus[] | ListEnumCVStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumCVStatusWithAggregatesFilter<$PrismaModel> | $Enums.CVStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCVStatusFilter<$PrismaModel>
+    _max?: NestedEnumCVStatusFilter<$PrismaModel>
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedEnumApplicationStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ApplicationStatus | EnumApplicationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumApplicationStatusFilter<$PrismaModel> | $Enums.ApplicationStatus
+  }
+
+  export type NestedEnumApplicationStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ApplicationStatus | EnumApplicationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumApplicationStatusWithAggregatesFilter<$PrismaModel> | $Enums.ApplicationStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumApplicationStatusFilter<$PrismaModel>
+    _max?: NestedEnumApplicationStatusFilter<$PrismaModel>
+  }
+
   export type CompanyCreateWithoutUsersInput = {
     id?: string
     name: string
@@ -13275,6 +24430,89 @@ export namespace Prisma {
   export type RefreshTokenCreateManyUserInputEnvelope = {
     data: RefreshTokenCreateManyUserInput | RefreshTokenCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type CandidateProfileCreateWithoutUserInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    applications?: ApplicationCreateNestedManyWithoutCandidateInput
+    cvs?: CVCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileUncheckedCreateWithoutUserInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
+    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceUncheckedCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationUncheckedCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileCreateOrConnectWithoutUserInput = {
+    where: CandidateProfileWhereUniqueInput
+    create: XOR<CandidateProfileCreateWithoutUserInput, CandidateProfileUncheckedCreateWithoutUserInput>
   }
 
   export type CompanyUpsertWithoutUsersInput = {
@@ -13351,6 +24589,95 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"RefreshToken"> | Date | string
   }
 
+  export type CandidateProfileUpsertWithoutUserInput = {
+    update: XOR<CandidateProfileUpdateWithoutUserInput, CandidateProfileUncheckedUpdateWithoutUserInput>
+    create: XOR<CandidateProfileCreateWithoutUserInput, CandidateProfileUncheckedCreateWithoutUserInput>
+    where?: CandidateProfileWhereInput
+  }
+
+  export type CandidateProfileUpdateToOneWithWhereWithoutUserInput = {
+    where?: CandidateProfileWhereInput
+    data: XOR<CandidateProfileUpdateWithoutUserInput, CandidateProfileUncheckedUpdateWithoutUserInput>
+  }
+
+  export type CandidateProfileUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applications?: ApplicationUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUncheckedUpdateManyWithoutCandidateNestedInput
+  }
+
   export type UserCreateWithoutRefreshTokensInput = {
     id?: string
     userType: $Enums.UserType
@@ -13362,6 +24689,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
+    candidateProfile?: CandidateProfileCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -13375,6 +24703,7 @@ export namespace Prisma {
     phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    candidateProfile?: CandidateProfileUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -13404,6 +24733,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
+    candidateProfile?: CandidateProfileUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -13417,6 +24747,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidateProfile?: CandidateProfileUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type CompanyCreateWithoutAddressInput = {
@@ -13537,6 +24868,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    candidateProfile?: CandidateProfileCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCompanyInput = {
@@ -13550,6 +24882,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    candidateProfile?: CandidateProfileUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCompanyInput = {
@@ -13586,11 +24919,13 @@ export namespace Prisma {
     cvAnalysisPrompt?: string | null
     interviewPrompt?: string | null
     aiSecondInterviewPrompt?: string | null
+    featured?: boolean
     applicants?: number
     views?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     screeningQuestions?: ScreeningQuestionCreateNestedManyWithoutJobInput
+    applications?: ApplicationCreateNestedManyWithoutJobInput
   }
 
   export type JobUncheckedCreateWithoutCompanyInput = {
@@ -13617,11 +24952,13 @@ export namespace Prisma {
     cvAnalysisPrompt?: string | null
     interviewPrompt?: string | null
     aiSecondInterviewPrompt?: string | null
+    featured?: boolean
     applicants?: number
     views?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     screeningQuestions?: ScreeningQuestionUncheckedCreateNestedManyWithoutJobInput
+    applications?: ApplicationUncheckedCreateNestedManyWithoutJobInput
   }
 
   export type JobCreateOrConnectWithoutCompanyInput = {
@@ -13771,6 +25108,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: StringNullableFilter<"Job"> | string | null
     interviewPrompt?: StringNullableFilter<"Job"> | string | null
     aiSecondInterviewPrompt?: StringNullableFilter<"Job"> | string | null
+    featured?: BoolFilter<"Job"> | boolean
     applicants?: IntFilter<"Job"> | number
     views?: IntFilter<"Job"> | number
     createdAt?: DateTimeFilter<"Job"> | Date | string
@@ -13939,6 +25277,7 @@ export namespace Prisma {
     required?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    screeningAnswers?: ScreeningAnswerCreateNestedManyWithoutQuestionInput
   }
 
   export type ScreeningQuestionUncheckedCreateWithoutJobInput = {
@@ -13949,6 +25288,7 @@ export namespace Prisma {
     required?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedCreateNestedManyWithoutQuestionInput
   }
 
   export type ScreeningQuestionCreateOrConnectWithoutJobInput = {
@@ -13958,6 +25298,56 @@ export namespace Prisma {
 
   export type ScreeningQuestionCreateManyJobInputEnvelope = {
     data: ScreeningQuestionCreateManyJobInput | ScreeningQuestionCreateManyJobInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ApplicationCreateWithoutJobInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    candidate: CandidateProfileCreateNestedOneWithoutApplicationsInput
+    screeningAnswers?: ScreeningAnswerCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationUncheckedCreateWithoutJobInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    candidateId: string
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationCreateOrConnectWithoutJobInput = {
+    where: ApplicationWhereUniqueInput
+    create: XOR<ApplicationCreateWithoutJobInput, ApplicationUncheckedCreateWithoutJobInput>
+  }
+
+  export type ApplicationCreateManyJobInputEnvelope = {
+    data: ApplicationCreateManyJobInput | ApplicationCreateManyJobInput[]
     skipDuplicates?: boolean
   }
 
@@ -14036,6 +25426,45 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"ScreeningQuestion"> | Date | string
   }
 
+  export type ApplicationUpsertWithWhereUniqueWithoutJobInput = {
+    where: ApplicationWhereUniqueInput
+    update: XOR<ApplicationUpdateWithoutJobInput, ApplicationUncheckedUpdateWithoutJobInput>
+    create: XOR<ApplicationCreateWithoutJobInput, ApplicationUncheckedCreateWithoutJobInput>
+  }
+
+  export type ApplicationUpdateWithWhereUniqueWithoutJobInput = {
+    where: ApplicationWhereUniqueInput
+    data: XOR<ApplicationUpdateWithoutJobInput, ApplicationUncheckedUpdateWithoutJobInput>
+  }
+
+  export type ApplicationUpdateManyWithWhereWithoutJobInput = {
+    where: ApplicationScalarWhereInput
+    data: XOR<ApplicationUpdateManyMutationInput, ApplicationUncheckedUpdateManyWithoutJobInput>
+  }
+
+  export type ApplicationScalarWhereInput = {
+    AND?: ApplicationScalarWhereInput | ApplicationScalarWhereInput[]
+    OR?: ApplicationScalarWhereInput[]
+    NOT?: ApplicationScalarWhereInput | ApplicationScalarWhereInput[]
+    id?: StringFilter<"Application"> | string
+    status?: EnumApplicationStatusFilter<"Application"> | $Enums.ApplicationStatus
+    jobId?: StringFilter<"Application"> | string
+    candidateId?: StringFilter<"Application"> | string
+    coverLetter?: StringNullableFilter<"Application"> | string | null
+    resumeUrl?: StringNullableFilter<"Application"> | string | null
+    expectedSalary?: StringNullableFilter<"Application"> | string | null
+    noticePeriod?: StringNullableFilter<"Application"> | string | null
+    companyNotes?: StringNullableFilter<"Application"> | string | null
+    appliedAt?: DateTimeFilter<"Application"> | Date | string
+    reviewedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    interviewScheduledAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    interviewedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    rejectedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    acceptedAt?: DateTimeNullableFilter<"Application"> | Date | string | null
+    createdAt?: DateTimeFilter<"Application"> | Date | string
+    updatedAt?: DateTimeFilter<"Application"> | Date | string
+  }
+
   export type JobCreateWithoutScreeningQuestionsInput = {
     id?: string
     title: string
@@ -14060,11 +25489,13 @@ export namespace Prisma {
     cvAnalysisPrompt?: string | null
     interviewPrompt?: string | null
     aiSecondInterviewPrompt?: string | null
+    featured?: boolean
     applicants?: number
     views?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     company: CompanyCreateNestedOneWithoutJobsInput
+    applications?: ApplicationCreateNestedManyWithoutJobInput
   }
 
   export type JobUncheckedCreateWithoutScreeningQuestionsInput = {
@@ -14092,15 +25523,43 @@ export namespace Prisma {
     cvAnalysisPrompt?: string | null
     interviewPrompt?: string | null
     aiSecondInterviewPrompt?: string | null
+    featured?: boolean
     applicants?: number
     views?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    applications?: ApplicationUncheckedCreateNestedManyWithoutJobInput
   }
 
   export type JobCreateOrConnectWithoutScreeningQuestionsInput = {
     where: JobWhereUniqueInput
     create: XOR<JobCreateWithoutScreeningQuestionsInput, JobUncheckedCreateWithoutScreeningQuestionsInput>
+  }
+
+  export type ScreeningAnswerCreateWithoutQuestionInput = {
+    id?: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    application: ApplicationCreateNestedOneWithoutScreeningAnswersInput
+  }
+
+  export type ScreeningAnswerUncheckedCreateWithoutQuestionInput = {
+    id?: string
+    applicationId: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScreeningAnswerCreateOrConnectWithoutQuestionInput = {
+    where: ScreeningAnswerWhereUniqueInput
+    create: XOR<ScreeningAnswerCreateWithoutQuestionInput, ScreeningAnswerUncheckedCreateWithoutQuestionInput>
+  }
+
+  export type ScreeningAnswerCreateManyQuestionInputEnvelope = {
+    data: ScreeningAnswerCreateManyQuestionInput | ScreeningAnswerCreateManyQuestionInput[]
+    skipDuplicates?: boolean
   }
 
   export type JobUpsertWithoutScreeningQuestionsInput = {
@@ -14138,11 +25597,13 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneRequiredWithoutJobsNestedInput
+    applications?: ApplicationUpdateManyWithoutJobNestedInput
   }
 
   export type JobUncheckedUpdateWithoutScreeningQuestionsInput = {
@@ -14170,8 +25631,1429 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applications?: ApplicationUncheckedUpdateManyWithoutJobNestedInput
+  }
+
+  export type ScreeningAnswerUpsertWithWhereUniqueWithoutQuestionInput = {
+    where: ScreeningAnswerWhereUniqueInput
+    update: XOR<ScreeningAnswerUpdateWithoutQuestionInput, ScreeningAnswerUncheckedUpdateWithoutQuestionInput>
+    create: XOR<ScreeningAnswerCreateWithoutQuestionInput, ScreeningAnswerUncheckedCreateWithoutQuestionInput>
+  }
+
+  export type ScreeningAnswerUpdateWithWhereUniqueWithoutQuestionInput = {
+    where: ScreeningAnswerWhereUniqueInput
+    data: XOR<ScreeningAnswerUpdateWithoutQuestionInput, ScreeningAnswerUncheckedUpdateWithoutQuestionInput>
+  }
+
+  export type ScreeningAnswerUpdateManyWithWhereWithoutQuestionInput = {
+    where: ScreeningAnswerScalarWhereInput
+    data: XOR<ScreeningAnswerUpdateManyMutationInput, ScreeningAnswerUncheckedUpdateManyWithoutQuestionInput>
+  }
+
+  export type ScreeningAnswerScalarWhereInput = {
+    AND?: ScreeningAnswerScalarWhereInput | ScreeningAnswerScalarWhereInput[]
+    OR?: ScreeningAnswerScalarWhereInput[]
+    NOT?: ScreeningAnswerScalarWhereInput | ScreeningAnswerScalarWhereInput[]
+    id?: StringFilter<"ScreeningAnswer"> | string
+    questionId?: StringFilter<"ScreeningAnswer"> | string
+    applicationId?: StringFilter<"ScreeningAnswer"> | string
+    answer?: StringFilter<"ScreeningAnswer"> | string
+    createdAt?: DateTimeFilter<"ScreeningAnswer"> | Date | string
+    updatedAt?: DateTimeFilter<"ScreeningAnswer"> | Date | string
+  }
+
+  export type UserCreateWithoutCandidateProfileInput = {
+    id?: string
+    userType: $Enums.UserType
+    password?: string | null
+    email?: string | null
+    name?: string | null
+    isActive?: boolean
+    phone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
+    refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutCandidateProfileInput = {
+    id?: string
+    userType: $Enums.UserType
+    password?: string | null
+    email?: string | null
+    name?: string | null
+    isActive?: boolean
+    companyId?: string | null
+    phone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutCandidateProfileInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCandidateProfileInput, UserUncheckedCreateWithoutCandidateProfileInput>
+  }
+
+  export type ApplicationCreateWithoutCandidateInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    job: JobCreateNestedOneWithoutApplicationsInput
+    screeningAnswers?: ScreeningAnswerCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationUncheckedCreateWithoutCandidateInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    jobId: string
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationCreateOrConnectWithoutCandidateInput = {
+    where: ApplicationWhereUniqueInput
+    create: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type ApplicationCreateManyCandidateInputEnvelope = {
+    data: ApplicationCreateManyCandidateInput | ApplicationCreateManyCandidateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CVCreateWithoutCandidateInput = {
+    id?: string
+    fileName: string
+    originalFileName?: string | null
+    fileUrl: string
+    fileSize?: number | null
+    mimeType?: string | null
+    status?: $Enums.CVStatus
+    isActive?: boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: Date | string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CVUncheckedCreateWithoutCandidateInput = {
+    id?: string
+    fileName: string
+    originalFileName?: string | null
+    fileUrl: string
+    fileSize?: number | null
+    mimeType?: string | null
+    status?: $Enums.CVStatus
+    isActive?: boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: Date | string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CVCreateOrConnectWithoutCandidateInput = {
+    where: CVWhereUniqueInput
+    create: XOR<CVCreateWithoutCandidateInput, CVUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type CVCreateManyCandidateInputEnvelope = {
+    data: CVCreateManyCandidateInput | CVCreateManyCandidateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type WorkExperienceCreateWithoutCandidateInput = {
+    id?: string
+    jobTitle: string
+    company: string
+    location?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WorkExperienceUncheckedCreateWithoutCandidateInput = {
+    id?: string
+    jobTitle: string
+    company: string
+    location?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WorkExperienceCreateOrConnectWithoutCandidateInput = {
+    where: WorkExperienceWhereUniqueInput
+    create: XOR<WorkExperienceCreateWithoutCandidateInput, WorkExperienceUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type WorkExperienceCreateManyCandidateInputEnvelope = {
+    data: WorkExperienceCreateManyCandidateInput | WorkExperienceCreateManyCandidateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type EducationCreateWithoutCandidateInput = {
+    id?: string
+    degree: string
+    institution: string
+    fieldOfStudy?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    grade?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EducationUncheckedCreateWithoutCandidateInput = {
+    id?: string
+    degree: string
+    institution: string
+    fieldOfStudy?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    grade?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EducationCreateOrConnectWithoutCandidateInput = {
+    where: EducationWhereUniqueInput
+    create: XOR<EducationCreateWithoutCandidateInput, EducationUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type EducationCreateManyCandidateInputEnvelope = {
+    data: EducationCreateManyCandidateInput | EducationCreateManyCandidateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutCandidateProfileInput = {
+    update: XOR<UserUpdateWithoutCandidateProfileInput, UserUncheckedUpdateWithoutCandidateProfileInput>
+    create: XOR<UserCreateWithoutCandidateProfileInput, UserUncheckedCreateWithoutCandidateProfileInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutCandidateProfileInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutCandidateProfileInput, UserUncheckedUpdateWithoutCandidateProfileInput>
+  }
+
+  export type UserUpdateWithoutCandidateProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userType?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
+    refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCandidateProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userType?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type ApplicationUpsertWithWhereUniqueWithoutCandidateInput = {
+    where: ApplicationWhereUniqueInput
+    update: XOR<ApplicationUpdateWithoutCandidateInput, ApplicationUncheckedUpdateWithoutCandidateInput>
+    create: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type ApplicationUpdateWithWhereUniqueWithoutCandidateInput = {
+    where: ApplicationWhereUniqueInput
+    data: XOR<ApplicationUpdateWithoutCandidateInput, ApplicationUncheckedUpdateWithoutCandidateInput>
+  }
+
+  export type ApplicationUpdateManyWithWhereWithoutCandidateInput = {
+    where: ApplicationScalarWhereInput
+    data: XOR<ApplicationUpdateManyMutationInput, ApplicationUncheckedUpdateManyWithoutCandidateInput>
+  }
+
+  export type CVUpsertWithWhereUniqueWithoutCandidateInput = {
+    where: CVWhereUniqueInput
+    update: XOR<CVUpdateWithoutCandidateInput, CVUncheckedUpdateWithoutCandidateInput>
+    create: XOR<CVCreateWithoutCandidateInput, CVUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type CVUpdateWithWhereUniqueWithoutCandidateInput = {
+    where: CVWhereUniqueInput
+    data: XOR<CVUpdateWithoutCandidateInput, CVUncheckedUpdateWithoutCandidateInput>
+  }
+
+  export type CVUpdateManyWithWhereWithoutCandidateInput = {
+    where: CVScalarWhereInput
+    data: XOR<CVUpdateManyMutationInput, CVUncheckedUpdateManyWithoutCandidateInput>
+  }
+
+  export type CVScalarWhereInput = {
+    AND?: CVScalarWhereInput | CVScalarWhereInput[]
+    OR?: CVScalarWhereInput[]
+    NOT?: CVScalarWhereInput | CVScalarWhereInput[]
+    id?: StringFilter<"CV"> | string
+    fileName?: StringFilter<"CV"> | string
+    originalFileName?: StringNullableFilter<"CV"> | string | null
+    fileUrl?: StringFilter<"CV"> | string
+    fileSize?: IntNullableFilter<"CV"> | number | null
+    mimeType?: StringNullableFilter<"CV"> | string | null
+    status?: EnumCVStatusFilter<"CV"> | $Enums.CVStatus
+    isActive?: BoolFilter<"CV"> | boolean
+    extractedData?: JsonNullableFilter<"CV">
+    candidateId?: StringFilter<"CV"> | string
+    uploadedAt?: DateTimeFilter<"CV"> | Date | string
+    processedAt?: DateTimeNullableFilter<"CV"> | Date | string | null
+    createdAt?: DateTimeFilter<"CV"> | Date | string
+    updatedAt?: DateTimeFilter<"CV"> | Date | string
+  }
+
+  export type WorkExperienceUpsertWithWhereUniqueWithoutCandidateInput = {
+    where: WorkExperienceWhereUniqueInput
+    update: XOR<WorkExperienceUpdateWithoutCandidateInput, WorkExperienceUncheckedUpdateWithoutCandidateInput>
+    create: XOR<WorkExperienceCreateWithoutCandidateInput, WorkExperienceUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type WorkExperienceUpdateWithWhereUniqueWithoutCandidateInput = {
+    where: WorkExperienceWhereUniqueInput
+    data: XOR<WorkExperienceUpdateWithoutCandidateInput, WorkExperienceUncheckedUpdateWithoutCandidateInput>
+  }
+
+  export type WorkExperienceUpdateManyWithWhereWithoutCandidateInput = {
+    where: WorkExperienceScalarWhereInput
+    data: XOR<WorkExperienceUpdateManyMutationInput, WorkExperienceUncheckedUpdateManyWithoutCandidateInput>
+  }
+
+  export type WorkExperienceScalarWhereInput = {
+    AND?: WorkExperienceScalarWhereInput | WorkExperienceScalarWhereInput[]
+    OR?: WorkExperienceScalarWhereInput[]
+    NOT?: WorkExperienceScalarWhereInput | WorkExperienceScalarWhereInput[]
+    id?: StringFilter<"WorkExperience"> | string
+    jobTitle?: StringFilter<"WorkExperience"> | string
+    company?: StringFilter<"WorkExperience"> | string
+    location?: StringNullableFilter<"WorkExperience"> | string | null
+    startDate?: DateTimeFilter<"WorkExperience"> | Date | string
+    endDate?: DateTimeNullableFilter<"WorkExperience"> | Date | string | null
+    isCurrent?: BoolFilter<"WorkExperience"> | boolean
+    description?: StringNullableFilter<"WorkExperience"> | string | null
+    candidateId?: StringFilter<"WorkExperience"> | string
+    createdAt?: DateTimeFilter<"WorkExperience"> | Date | string
+    updatedAt?: DateTimeFilter<"WorkExperience"> | Date | string
+  }
+
+  export type EducationUpsertWithWhereUniqueWithoutCandidateInput = {
+    where: EducationWhereUniqueInput
+    update: XOR<EducationUpdateWithoutCandidateInput, EducationUncheckedUpdateWithoutCandidateInput>
+    create: XOR<EducationCreateWithoutCandidateInput, EducationUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type EducationUpdateWithWhereUniqueWithoutCandidateInput = {
+    where: EducationWhereUniqueInput
+    data: XOR<EducationUpdateWithoutCandidateInput, EducationUncheckedUpdateWithoutCandidateInput>
+  }
+
+  export type EducationUpdateManyWithWhereWithoutCandidateInput = {
+    where: EducationScalarWhereInput
+    data: XOR<EducationUpdateManyMutationInput, EducationUncheckedUpdateManyWithoutCandidateInput>
+  }
+
+  export type EducationScalarWhereInput = {
+    AND?: EducationScalarWhereInput | EducationScalarWhereInput[]
+    OR?: EducationScalarWhereInput[]
+    NOT?: EducationScalarWhereInput | EducationScalarWhereInput[]
+    id?: StringFilter<"Education"> | string
+    degree?: StringFilter<"Education"> | string
+    institution?: StringFilter<"Education"> | string
+    fieldOfStudy?: StringNullableFilter<"Education"> | string | null
+    startDate?: DateTimeFilter<"Education"> | Date | string
+    endDate?: DateTimeNullableFilter<"Education"> | Date | string | null
+    isCurrent?: BoolFilter<"Education"> | boolean
+    grade?: StringNullableFilter<"Education"> | string | null
+    description?: StringNullableFilter<"Education"> | string | null
+    candidateId?: StringFilter<"Education"> | string
+    createdAt?: DateTimeFilter<"Education"> | Date | string
+    updatedAt?: DateTimeFilter<"Education"> | Date | string
+  }
+
+  export type CandidateProfileCreateWithoutWorkExperiencesInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutCandidateProfileInput
+    applications?: ApplicationCreateNestedManyWithoutCandidateInput
+    cvs?: CVCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileUncheckedCreateWithoutWorkExperiencesInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
+    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationUncheckedCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileCreateOrConnectWithoutWorkExperiencesInput = {
+    where: CandidateProfileWhereUniqueInput
+    create: XOR<CandidateProfileCreateWithoutWorkExperiencesInput, CandidateProfileUncheckedCreateWithoutWorkExperiencesInput>
+  }
+
+  export type CandidateProfileUpsertWithoutWorkExperiencesInput = {
+    update: XOR<CandidateProfileUpdateWithoutWorkExperiencesInput, CandidateProfileUncheckedUpdateWithoutWorkExperiencesInput>
+    create: XOR<CandidateProfileCreateWithoutWorkExperiencesInput, CandidateProfileUncheckedCreateWithoutWorkExperiencesInput>
+    where?: CandidateProfileWhereInput
+  }
+
+  export type CandidateProfileUpdateToOneWithWhereWithoutWorkExperiencesInput = {
+    where?: CandidateProfileWhereInput
+    data: XOR<CandidateProfileUpdateWithoutWorkExperiencesInput, CandidateProfileUncheckedUpdateWithoutWorkExperiencesInput>
+  }
+
+  export type CandidateProfileUpdateWithoutWorkExperiencesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutCandidateProfileNestedInput
+    applications?: ApplicationUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileUncheckedUpdateWithoutWorkExperiencesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUncheckedUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileCreateWithoutEducationHistoryInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutCandidateProfileInput
+    applications?: ApplicationCreateNestedManyWithoutCandidateInput
+    cvs?: CVCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileUncheckedCreateWithoutEducationHistoryInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
+    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceUncheckedCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileCreateOrConnectWithoutEducationHistoryInput = {
+    where: CandidateProfileWhereUniqueInput
+    create: XOR<CandidateProfileCreateWithoutEducationHistoryInput, CandidateProfileUncheckedCreateWithoutEducationHistoryInput>
+  }
+
+  export type CandidateProfileUpsertWithoutEducationHistoryInput = {
+    update: XOR<CandidateProfileUpdateWithoutEducationHistoryInput, CandidateProfileUncheckedUpdateWithoutEducationHistoryInput>
+    create: XOR<CandidateProfileCreateWithoutEducationHistoryInput, CandidateProfileUncheckedCreateWithoutEducationHistoryInput>
+    where?: CandidateProfileWhereInput
+  }
+
+  export type CandidateProfileUpdateToOneWithWhereWithoutEducationHistoryInput = {
+    where?: CandidateProfileWhereInput
+    data: XOR<CandidateProfileUpdateWithoutEducationHistoryInput, CandidateProfileUncheckedUpdateWithoutEducationHistoryInput>
+  }
+
+  export type CandidateProfileUpdateWithoutEducationHistoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutCandidateProfileNestedInput
+    applications?: ApplicationUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileUncheckedUpdateWithoutEducationHistoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileCreateWithoutCvsInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutCandidateProfileInput
+    applications?: ApplicationCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileUncheckedCreateWithoutCvsInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceUncheckedCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationUncheckedCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileCreateOrConnectWithoutCvsInput = {
+    where: CandidateProfileWhereUniqueInput
+    create: XOR<CandidateProfileCreateWithoutCvsInput, CandidateProfileUncheckedCreateWithoutCvsInput>
+  }
+
+  export type CandidateProfileUpsertWithoutCvsInput = {
+    update: XOR<CandidateProfileUpdateWithoutCvsInput, CandidateProfileUncheckedUpdateWithoutCvsInput>
+    create: XOR<CandidateProfileCreateWithoutCvsInput, CandidateProfileUncheckedCreateWithoutCvsInput>
+    where?: CandidateProfileWhereInput
+  }
+
+  export type CandidateProfileUpdateToOneWithWhereWithoutCvsInput = {
+    where?: CandidateProfileWhereInput
+    data: XOR<CandidateProfileUpdateWithoutCvsInput, CandidateProfileUncheckedUpdateWithoutCvsInput>
+  }
+
+  export type CandidateProfileUpdateWithoutCvsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutCandidateProfileNestedInput
+    applications?: ApplicationUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileUncheckedUpdateWithoutCvsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUncheckedUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type JobCreateWithoutApplicationsInput = {
+    id?: string
+    title: string
+    department: string
+    location: string
+    salary: string
+    type: $Enums.JobType
+    deadline: Date | string
+    description: string
+    shortDescription: string
+    responsibilities: string
+    requirements: string
+    benefits: string
+    skills?: JobCreateskillsInput | string[]
+    experience: string
+    education: string
+    jobLevel: $Enums.JobLevel
+    workType: $Enums.WorkType
+    industry: string
+    companyDescription: string
+    status?: $Enums.JobStatus
+    cvAnalysisPrompt?: string | null
+    interviewPrompt?: string | null
+    aiSecondInterviewPrompt?: string | null
+    featured?: boolean
+    applicants?: number
+    views?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company: CompanyCreateNestedOneWithoutJobsInput
+    screeningQuestions?: ScreeningQuestionCreateNestedManyWithoutJobInput
+  }
+
+  export type JobUncheckedCreateWithoutApplicationsInput = {
+    id?: string
+    title: string
+    department: string
+    location: string
+    salary: string
+    type: $Enums.JobType
+    deadline: Date | string
+    description: string
+    shortDescription: string
+    responsibilities: string
+    requirements: string
+    benefits: string
+    skills?: JobCreateskillsInput | string[]
+    experience: string
+    education: string
+    jobLevel: $Enums.JobLevel
+    workType: $Enums.WorkType
+    industry: string
+    companyDescription: string
+    status?: $Enums.JobStatus
+    companyId: string
+    cvAnalysisPrompt?: string | null
+    interviewPrompt?: string | null
+    aiSecondInterviewPrompt?: string | null
+    featured?: boolean
+    applicants?: number
+    views?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    screeningQuestions?: ScreeningQuestionUncheckedCreateNestedManyWithoutJobInput
+  }
+
+  export type JobCreateOrConnectWithoutApplicationsInput = {
+    where: JobWhereUniqueInput
+    create: XOR<JobCreateWithoutApplicationsInput, JobUncheckedCreateWithoutApplicationsInput>
+  }
+
+  export type CandidateProfileCreateWithoutApplicationsInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutCandidateProfileInput
+    cvs?: CVCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileUncheckedCreateWithoutApplicationsInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string | null
+    dateOfBirth?: Date | string | null
+    nationality?: $Enums.Country | null
+    currentLocation?: string | null
+    currentJobTitle?: string | null
+    currentCompany?: string | null
+    experienceLevel?: $Enums.ExperienceLevel | null
+    totalExperience?: number | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    highestEducation?: $Enums.EducationLevel | null
+    fieldOfStudy?: string | null
+    university?: string | null
+    graduationYear?: number | null
+    skills?: CandidateProfileCreateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileCreatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileCreatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileCreatepreferredLocationsInput | string[]
+    resumeUrl?: string | null
+    portfolioUrl?: string | null
+    linkedInUrl?: string | null
+    githubUrl?: string | null
+    isProfilePublic?: boolean
+    isOpenToWork?: boolean
+    profileSummary?: string | null
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    workExperiences?: WorkExperienceUncheckedCreateNestedManyWithoutCandidateInput
+    educationHistory?: EducationUncheckedCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateProfileCreateOrConnectWithoutApplicationsInput = {
+    where: CandidateProfileWhereUniqueInput
+    create: XOR<CandidateProfileCreateWithoutApplicationsInput, CandidateProfileUncheckedCreateWithoutApplicationsInput>
+  }
+
+  export type ScreeningAnswerCreateWithoutApplicationInput = {
+    id?: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    question: ScreeningQuestionCreateNestedOneWithoutScreeningAnswersInput
+  }
+
+  export type ScreeningAnswerUncheckedCreateWithoutApplicationInput = {
+    id?: string
+    questionId: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScreeningAnswerCreateOrConnectWithoutApplicationInput = {
+    where: ScreeningAnswerWhereUniqueInput
+    create: XOR<ScreeningAnswerCreateWithoutApplicationInput, ScreeningAnswerUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type ScreeningAnswerCreateManyApplicationInputEnvelope = {
+    data: ScreeningAnswerCreateManyApplicationInput | ScreeningAnswerCreateManyApplicationInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type JobUpsertWithoutApplicationsInput = {
+    update: XOR<JobUpdateWithoutApplicationsInput, JobUncheckedUpdateWithoutApplicationsInput>
+    create: XOR<JobCreateWithoutApplicationsInput, JobUncheckedCreateWithoutApplicationsInput>
+    where?: JobWhereInput
+  }
+
+  export type JobUpdateToOneWithWhereWithoutApplicationsInput = {
+    where?: JobWhereInput
+    data: XOR<JobUpdateWithoutApplicationsInput, JobUncheckedUpdateWithoutApplicationsInput>
+  }
+
+  export type JobUpdateWithoutApplicationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    department?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    salary?: StringFieldUpdateOperationsInput | string
+    type?: EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+    deadline?: DateTimeFieldUpdateOperationsInput | Date | string
+    description?: StringFieldUpdateOperationsInput | string
+    shortDescription?: StringFieldUpdateOperationsInput | string
+    responsibilities?: StringFieldUpdateOperationsInput | string
+    requirements?: StringFieldUpdateOperationsInput | string
+    benefits?: StringFieldUpdateOperationsInput | string
+    skills?: JobUpdateskillsInput | string[]
+    experience?: StringFieldUpdateOperationsInput | string
+    education?: StringFieldUpdateOperationsInput | string
+    jobLevel?: EnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel
+    workType?: EnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType
+    industry?: StringFieldUpdateOperationsInput | string
+    companyDescription?: StringFieldUpdateOperationsInput | string
+    status?: EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+    cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    applicants?: IntFieldUpdateOperationsInput | number
+    views?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneRequiredWithoutJobsNestedInput
+    screeningQuestions?: ScreeningQuestionUpdateManyWithoutJobNestedInput
+  }
+
+  export type JobUncheckedUpdateWithoutApplicationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    department?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    salary?: StringFieldUpdateOperationsInput | string
+    type?: EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+    deadline?: DateTimeFieldUpdateOperationsInput | Date | string
+    description?: StringFieldUpdateOperationsInput | string
+    shortDescription?: StringFieldUpdateOperationsInput | string
+    responsibilities?: StringFieldUpdateOperationsInput | string
+    requirements?: StringFieldUpdateOperationsInput | string
+    benefits?: StringFieldUpdateOperationsInput | string
+    skills?: JobUpdateskillsInput | string[]
+    experience?: StringFieldUpdateOperationsInput | string
+    education?: StringFieldUpdateOperationsInput | string
+    jobLevel?: EnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel
+    workType?: EnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType
+    industry?: StringFieldUpdateOperationsInput | string
+    companyDescription?: StringFieldUpdateOperationsInput | string
+    status?: EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+    companyId?: StringFieldUpdateOperationsInput | string
+    cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    applicants?: IntFieldUpdateOperationsInput | number
+    views?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    screeningQuestions?: ScreeningQuestionUncheckedUpdateManyWithoutJobNestedInput
+  }
+
+  export type CandidateProfileUpsertWithoutApplicationsInput = {
+    update: XOR<CandidateProfileUpdateWithoutApplicationsInput, CandidateProfileUncheckedUpdateWithoutApplicationsInput>
+    create: XOR<CandidateProfileCreateWithoutApplicationsInput, CandidateProfileUncheckedCreateWithoutApplicationsInput>
+    where?: CandidateProfileWhereInput
+  }
+
+  export type CandidateProfileUpdateToOneWithWhereWithoutApplicationsInput = {
+    where?: CandidateProfileWhereInput
+    data: XOR<CandidateProfileUpdateWithoutApplicationsInput, CandidateProfileUncheckedUpdateWithoutApplicationsInput>
+  }
+
+  export type CandidateProfileUpdateWithoutApplicationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutCandidateProfileNestedInput
+    cvs?: CVUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateProfileUncheckedUpdateWithoutApplicationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nationality?: NullableEnumCountryFieldUpdateOperationsInput | $Enums.Country | null
+    currentLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    currentJobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceLevel?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    totalExperience?: NullableIntFieldUpdateOperationsInput | number | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    highestEducation?: NullableEnumEducationLevelFieldUpdateOperationsInput | $Enums.EducationLevel | null
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    graduationYear?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: CandidateProfileUpdateskillsInput | string[]
+    preferredJobTypes?: CandidateProfileUpdatepreferredJobTypesInput | $Enums.JobType[]
+    preferredWorkType?: NullableEnumWorkTypeFieldUpdateOperationsInput | $Enums.WorkType | null
+    preferredIndustries?: CandidateProfileUpdatepreferredIndustriesInput | $Enums.Industry[]
+    preferredLocations?: CandidateProfileUpdatepreferredLocationsInput | string[]
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    portfolioUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedInUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isProfilePublic?: BoolFieldUpdateOperationsInput | boolean
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    profileSummary?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    workExperiences?: WorkExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+    educationHistory?: EducationUncheckedUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type ScreeningAnswerUpsertWithWhereUniqueWithoutApplicationInput = {
+    where: ScreeningAnswerWhereUniqueInput
+    update: XOR<ScreeningAnswerUpdateWithoutApplicationInput, ScreeningAnswerUncheckedUpdateWithoutApplicationInput>
+    create: XOR<ScreeningAnswerCreateWithoutApplicationInput, ScreeningAnswerUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type ScreeningAnswerUpdateWithWhereUniqueWithoutApplicationInput = {
+    where: ScreeningAnswerWhereUniqueInput
+    data: XOR<ScreeningAnswerUpdateWithoutApplicationInput, ScreeningAnswerUncheckedUpdateWithoutApplicationInput>
+  }
+
+  export type ScreeningAnswerUpdateManyWithWhereWithoutApplicationInput = {
+    where: ScreeningAnswerScalarWhereInput
+    data: XOR<ScreeningAnswerUpdateManyMutationInput, ScreeningAnswerUncheckedUpdateManyWithoutApplicationInput>
+  }
+
+  export type ScreeningQuestionCreateWithoutScreeningAnswersInput = {
+    id?: string
+    question: string
+    type: $Enums.ScreeningQuestionType
+    options?: ScreeningQuestionCreateoptionsInput | string[]
+    required?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    job: JobCreateNestedOneWithoutScreeningQuestionsInput
+  }
+
+  export type ScreeningQuestionUncheckedCreateWithoutScreeningAnswersInput = {
+    id?: string
+    question: string
+    type: $Enums.ScreeningQuestionType
+    options?: ScreeningQuestionCreateoptionsInput | string[]
+    required?: boolean
+    jobId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScreeningQuestionCreateOrConnectWithoutScreeningAnswersInput = {
+    where: ScreeningQuestionWhereUniqueInput
+    create: XOR<ScreeningQuestionCreateWithoutScreeningAnswersInput, ScreeningQuestionUncheckedCreateWithoutScreeningAnswersInput>
+  }
+
+  export type ApplicationCreateWithoutScreeningAnswersInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    job: JobCreateNestedOneWithoutApplicationsInput
+    candidate: CandidateProfileCreateNestedOneWithoutApplicationsInput
+  }
+
+  export type ApplicationUncheckedCreateWithoutScreeningAnswersInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    jobId: string
+    candidateId: string
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ApplicationCreateOrConnectWithoutScreeningAnswersInput = {
+    where: ApplicationWhereUniqueInput
+    create: XOR<ApplicationCreateWithoutScreeningAnswersInput, ApplicationUncheckedCreateWithoutScreeningAnswersInput>
+  }
+
+  export type ScreeningQuestionUpsertWithoutScreeningAnswersInput = {
+    update: XOR<ScreeningQuestionUpdateWithoutScreeningAnswersInput, ScreeningQuestionUncheckedUpdateWithoutScreeningAnswersInput>
+    create: XOR<ScreeningQuestionCreateWithoutScreeningAnswersInput, ScreeningQuestionUncheckedCreateWithoutScreeningAnswersInput>
+    where?: ScreeningQuestionWhereInput
+  }
+
+  export type ScreeningQuestionUpdateToOneWithWhereWithoutScreeningAnswersInput = {
+    where?: ScreeningQuestionWhereInput
+    data: XOR<ScreeningQuestionUpdateWithoutScreeningAnswersInput, ScreeningQuestionUncheckedUpdateWithoutScreeningAnswersInput>
+  }
+
+  export type ScreeningQuestionUpdateWithoutScreeningAnswersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    type?: EnumScreeningQuestionTypeFieldUpdateOperationsInput | $Enums.ScreeningQuestionType
+    options?: ScreeningQuestionUpdateoptionsInput | string[]
+    required?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    job?: JobUpdateOneRequiredWithoutScreeningQuestionsNestedInput
+  }
+
+  export type ScreeningQuestionUncheckedUpdateWithoutScreeningAnswersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    type?: EnumScreeningQuestionTypeFieldUpdateOperationsInput | $Enums.ScreeningQuestionType
+    options?: ScreeningQuestionUpdateoptionsInput | string[]
+    required?: BoolFieldUpdateOperationsInput | boolean
+    jobId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationUpsertWithoutScreeningAnswersInput = {
+    update: XOR<ApplicationUpdateWithoutScreeningAnswersInput, ApplicationUncheckedUpdateWithoutScreeningAnswersInput>
+    create: XOR<ApplicationCreateWithoutScreeningAnswersInput, ApplicationUncheckedCreateWithoutScreeningAnswersInput>
+    where?: ApplicationWhereInput
+  }
+
+  export type ApplicationUpdateToOneWithWhereWithoutScreeningAnswersInput = {
+    where?: ApplicationWhereInput
+    data: XOR<ApplicationUpdateWithoutScreeningAnswersInput, ApplicationUncheckedUpdateWithoutScreeningAnswersInput>
+  }
+
+  export type ApplicationUpdateWithoutScreeningAnswersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    job?: JobUpdateOneRequiredWithoutApplicationsNestedInput
+    candidate?: CandidateProfileUpdateOneRequiredWithoutApplicationsNestedInput
+  }
+
+  export type ApplicationUncheckedUpdateWithoutScreeningAnswersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    jobId?: StringFieldUpdateOperationsInput | string
+    candidateId?: StringFieldUpdateOperationsInput | string
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14248,6 +27130,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: string | null
     interviewPrompt?: string | null
     aiSecondInterviewPrompt?: string | null
+    featured?: boolean
     applicants?: number
     views?: number
     createdAt?: Date | string
@@ -14276,6 +27159,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    candidateProfile?: CandidateProfileUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCompanyInput = {
@@ -14289,6 +27173,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    candidateProfile?: CandidateProfileUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutCompanyInput = {
@@ -14327,11 +27212,13 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     screeningQuestions?: ScreeningQuestionUpdateManyWithoutJobNestedInput
+    applications?: ApplicationUpdateManyWithoutJobNestedInput
   }
 
   export type JobUncheckedUpdateWithoutCompanyInput = {
@@ -14358,11 +27245,13 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     screeningQuestions?: ScreeningQuestionUncheckedUpdateManyWithoutJobNestedInput
+    applications?: ApplicationUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type JobUncheckedUpdateManyWithoutCompanyInput = {
@@ -14389,6 +27278,7 @@ export namespace Prisma {
     cvAnalysisPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     interviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
     aiSecondInterviewPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    featured?: BoolFieldUpdateOperationsInput | boolean
     applicants?: IntFieldUpdateOperationsInput | number
     views?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14438,6 +27328,25 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type ApplicationCreateManyJobInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    candidateId: string
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ScreeningQuestionUpdateWithoutJobInput = {
     id?: StringFieldUpdateOperationsInput | string
     question?: StringFieldUpdateOperationsInput | string
@@ -14446,6 +27355,7 @@ export namespace Prisma {
     required?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    screeningAnswers?: ScreeningAnswerUpdateManyWithoutQuestionNestedInput
   }
 
   export type ScreeningQuestionUncheckedUpdateWithoutJobInput = {
@@ -14456,6 +27366,7 @@ export namespace Prisma {
     required?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedUpdateManyWithoutQuestionNestedInput
   }
 
   export type ScreeningQuestionUncheckedUpdateManyWithoutJobInput = {
@@ -14464,6 +27375,379 @@ export namespace Prisma {
     type?: EnumScreeningQuestionTypeFieldUpdateOperationsInput | $Enums.ScreeningQuestionType
     options?: ScreeningQuestionUpdateoptionsInput | string[]
     required?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidate?: CandidateProfileUpdateOneRequiredWithoutApplicationsNestedInput
+    screeningAnswers?: ScreeningAnswerUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ApplicationUncheckedUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    candidateId?: StringFieldUpdateOperationsInput | string
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ApplicationUncheckedUpdateManyWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    candidateId?: StringFieldUpdateOperationsInput | string
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScreeningAnswerCreateManyQuestionInput = {
+    id?: string
+    applicationId: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScreeningAnswerUpdateWithoutQuestionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: ApplicationUpdateOneRequiredWithoutScreeningAnswersNestedInput
+  }
+
+  export type ScreeningAnswerUncheckedUpdateWithoutQuestionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScreeningAnswerUncheckedUpdateManyWithoutQuestionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationCreateManyCandidateInput = {
+    id?: string
+    status?: $Enums.ApplicationStatus
+    jobId: string
+    coverLetter?: string | null
+    resumeUrl?: string | null
+    expectedSalary?: string | null
+    noticePeriod?: string | null
+    companyNotes?: string | null
+    appliedAt?: Date | string
+    reviewedAt?: Date | string | null
+    interviewScheduledAt?: Date | string | null
+    interviewedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CVCreateManyCandidateInput = {
+    id?: string
+    fileName: string
+    originalFileName?: string | null
+    fileUrl: string
+    fileSize?: number | null
+    mimeType?: string | null
+    status?: $Enums.CVStatus
+    isActive?: boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: Date | string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WorkExperienceCreateManyCandidateInput = {
+    id?: string
+    jobTitle: string
+    company: string
+    location?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EducationCreateManyCandidateInput = {
+    id?: string
+    degree: string
+    institution: string
+    fieldOfStudy?: string | null
+    startDate: Date | string
+    endDate?: Date | string | null
+    isCurrent?: boolean
+    grade?: string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ApplicationUpdateWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    job?: JobUpdateOneRequiredWithoutApplicationsNestedInput
+    screeningAnswers?: ScreeningAnswerUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ApplicationUncheckedUpdateWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    jobId?: StringFieldUpdateOperationsInput | string
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    screeningAnswers?: ScreeningAnswerUncheckedUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ApplicationUncheckedUpdateManyWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumApplicationStatusFieldUpdateOperationsInput | $Enums.ApplicationStatus
+    jobId?: StringFieldUpdateOperationsInput | string
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    resumeUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expectedSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    noticePeriod?: NullableStringFieldUpdateOperationsInput | string | null
+    companyNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewScheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CVUpdateWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileName?: StringFieldUpdateOperationsInput | string
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumCVStatusFieldUpdateOperationsInput | $Enums.CVStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CVUncheckedUpdateWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileName?: StringFieldUpdateOperationsInput | string
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumCVStatusFieldUpdateOperationsInput | $Enums.CVStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CVUncheckedUpdateManyWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileName?: StringFieldUpdateOperationsInput | string
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: StringFieldUpdateOperationsInput | string
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumCVStatusFieldUpdateOperationsInput | $Enums.CVStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkExperienceUpdateWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobTitle?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkExperienceUncheckedUpdateWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobTitle?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WorkExperienceUncheckedUpdateManyWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobTitle?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EducationUpdateWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    degree?: StringFieldUpdateOperationsInput | string
+    institution?: StringFieldUpdateOperationsInput | string
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EducationUncheckedUpdateWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    degree?: StringFieldUpdateOperationsInput | string
+    institution?: StringFieldUpdateOperationsInput | string
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EducationUncheckedUpdateManyWithoutCandidateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    degree?: StringFieldUpdateOperationsInput | string
+    institution?: StringFieldUpdateOperationsInput | string
+    fieldOfStudy?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCurrent?: BoolFieldUpdateOperationsInput | boolean
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScreeningAnswerCreateManyApplicationInput = {
+    id?: string
+    questionId: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScreeningAnswerUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: ScreeningQuestionUpdateOneRequiredWithoutScreeningAnswersNestedInput
+  }
+
+  export type ScreeningAnswerUncheckedUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScreeningAnswerUncheckedUpdateManyWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

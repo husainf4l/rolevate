@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import JobCard, { JobData } from "@/components/common/JobCard";
 import { Button } from "@/components/common/Button";
+import { JobService, JobPost } from "@/services/job";
 
-const jobsData: JobData[] = [
+// Fallback data in case API fails
+const fallbackJobsData: JobData[] = [
   {
-    id: 1,
+    id: "fallback-1",
     title: "Senior Software Engineer",
     company: "Aramco Digital",
     location: "Riyadh, Saudi Arabia",
@@ -21,7 +23,7 @@ const jobsData: JobData[] = [
     urgent: true,
   },
   {
-    id: 2,
+    id: "fallback-2",
     title: "Product Manager",
     company: "Qatar Airways Group",
     location: "Doha, Qatar",
@@ -41,7 +43,7 @@ const jobsData: JobData[] = [
       "Drive digital product innovation for Qatar's world-class airline and travel ecosystem.",
   },
   {
-    id: 3,
+    id: "fallback-3",
     title: "UX Designer",
     company: "Zain Jordan",
     location: "Amman, Jordan",
@@ -53,88 +55,6 @@ const jobsData: JobData[] = [
     logo: "📱",
     description:
       "Design innovative digital experiences for Jordan's leading telecommunications company.",
-  },
-  {
-    id: 4,
-    title: "Data Scientist",
-    company: "NEOM Tech",
-    location: "NEOM, Saudi Arabia",
-    type: "Full-time",
-    salary: "30,000 - 45,000 SAR",
-    skills: ["Python", "Machine Learning", "Smart Cities", "IoT", "AI"],
-    posted: "1 day ago",
-    applicants: 35,
-    logo: "🌟",
-    description:
-      "Shape the future of smart cities with cutting-edge AI and data science at NEOM.",
-    urgent: true,
-  },
-  {
-    id: 5,
-    title: "Digital Marketing Manager",
-    company: "Careem",
-    location: "Dubai, UAE / Remote",
-    type: "Full-time",
-    salary: "15,000 - 22,000 AED",
-    skills: [
-      "Digital Marketing",
-      "Arabic Content",
-      "Social Media",
-      "Growth Hacking",
-    ],
-    posted: "4 days ago",
-    applicants: 29,
-    logo: "🚗",
-    description:
-      "Lead regional marketing campaigns for the Middle East's super app serving millions.",
-  },
-  {
-    id: 6,
-    title: "Cloud Solutions Architect",
-    company: "Ooredoo Qatar",
-    location: "Doha, Qatar",
-    type: "Full-time",
-    salary: "20,000 - 28,000 QAR",
-    skills: ["AWS", "Azure", "5G Infrastructure", "Enterprise Solutions"],
-    posted: "2 days ago",
-    applicants: 27,
-    logo: "☁️",
-    description:
-      "Architect next-generation cloud and 5G solutions for Qatar's digital transformation.",
-  },
-  {
-    id: 7,
-    title: "Cybersecurity Specialist",
-    company: "Dubai Police",
-    location: "Dubai, UAE",
-    type: "Full-time",
-    salary: "18,000 - 28,000 AED",
-    skills: ["Cybersecurity", "Threat Analysis", "Incident Response", "Arabic"],
-    posted: "5 days ago",
-    applicants: 15,
-    logo: "🛡️",
-    description:
-      "Protect Dubai's digital infrastructure with cutting-edge cybersecurity solutions.",
-  },
-  {
-    id: 8,
-    title: "AI Research Engineer",
-    company: "KAUST",
-    location: "Thuwal, Saudi Arabia",
-    type: "Full-time",
-    salary: "28,000 - 38,000 SAR",
-    skills: [
-      "Machine Learning",
-      "Deep Learning",
-      "Research",
-      "Python",
-      "TensorFlow",
-    ],
-    posted: "3 days ago",
-    applicants: 31,
-    logo: "🧠",
-    description:
-      "Advance AI research at one of the world's leading science and technology universities.",
   },
 ];
 
@@ -207,13 +127,136 @@ export default function JobsPage() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [savedJobs, setSavedJobs] = useState<number[]>([]);
+  const [savedJobs, setSavedJobs] = useState<string[]>([]);
 
-  const handleApply = (jobId: number) => {
+  // API state
+  const [jobs, setJobs] = useState<JobData[]>([]);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<any>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const jobsPerPage = 10;
+
+  // Helper function to convert JobPost to JobData format
+  const convertJobPostToJobData = (jobPost: JobPost): JobData => {
+    return {
+      id: jobPost.id, // Use string ID directly (UUID from backend)
+      title: jobPost.title,
+      company: jobPost.company?.name || "Company", // Use actual company name from API
+      location: jobPost.location,
+      type:
+        jobPost.type === "FULL_TIME"
+          ? "Full-time"
+          : jobPost.type === "PART_TIME"
+          ? "Part-time"
+          : jobPost.type === "CONTRACT"
+          ? "Contract"
+          : "Remote",
+      salary: jobPost.salary,
+      skills: jobPost.skills || [],
+      posted: new Date(jobPost.postedAt).toLocaleDateString(),
+      applicants: jobPost.applicants,
+      logo: getCompanyLogo(jobPost.company?.name), // Dynamic logo based on company
+      description: jobPost.shortDescription || jobPost.description,
+      urgent: false, // You might want to add this field to JobPost interface
+    };
+  };
+
+  // Helper function to get company logo/emoji based on company name
+  const getCompanyLogo = (companyName?: string): string => {
+    if (!companyName) return "🏢";
+
+    const name = companyName.toLowerCase();
+
+    // Map company names to appropriate emojis
+    if (name.includes("tech") || name.includes("software")) return "💻";
+    if (
+      name.includes("health") ||
+      name.includes("medical") ||
+      name.includes("pharma")
+    )
+      return "🏥";
+    if (name.includes("finance") || name.includes("bank")) return "🏦";
+    if (
+      name.includes("education") ||
+      name.includes("school") ||
+      name.includes("university")
+    )
+      return "🎓";
+    if (name.includes("food") || name.includes("restaurant")) return "🍽️";
+    if (
+      name.includes("travel") ||
+      name.includes("airline") ||
+      name.includes("tourism")
+    )
+      return "✈️";
+    if (
+      name.includes("retail") ||
+      name.includes("shop") ||
+      name.includes("store")
+    )
+      return "🛍️";
+    if (name.includes("energy") || name.includes("oil") || name.includes("gas"))
+      return "⚡";
+    if (name.includes("construction") || name.includes("building")) return "🏗️";
+    if (name.includes("telecom") || name.includes("communication")) return "📱";
+    if (name.includes("automotive") || name.includes("car")) return "🚗";
+    if (name.includes("media") || name.includes("entertainment")) return "🎬";
+
+    return "🏢"; // Default logo
+  };
+
+  // Fetch jobs from API
+  const fetchJobs = async (page: number = 1, search?: string) => {
+    try {
+      setLoading(true);
+      setApiError(null);
+
+      const response = await JobService.getAllPublicJobs(
+        page,
+        jobsPerPage,
+        search || searchTerm || undefined
+      );
+
+      const convertedJobs = response.jobs.map(convertJobPostToJobData);
+      setJobs(convertedJobs);
+      setTotalJobs(response.total);
+      setPagination(response.pagination);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      setApiError("Failed to load jobs");
+      // Fallback to hardcoded data
+      setJobs(fallbackJobsData);
+      setTotalJobs(fallbackJobsData.length);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial fetch and search effect
+  useEffect(() => {
+    fetchJobs(1, searchTerm);
+  }, [searchTerm]);
+
+  // Filter jobs locally (since API doesn't support all filter types yet)
+  const filteredJobs = jobs.filter((job) => {
+    const matchesType = selectedType === "All" || job.type === selectedType;
+    const matchesLocation =
+      selectedLocation === "All" || job.location.includes(selectedLocation);
+    const matchesCompany =
+      selectedCompany === "All" || job.company === selectedCompany;
+
+    // Add other filter logic here
+    return matchesType && matchesLocation && matchesCompany;
+  });
+
+  const handleApply = (jobId: string) => {
     console.log(`Applying for job ID: ${jobId}`);
   };
 
-  const handleSaveJob = (jobId: number) => {
+  const handleSaveJob = (jobId: string) => {
     setSavedJobs((prev) =>
       prev.includes(jobId)
         ? prev.filter((id) => id !== jobId)
@@ -221,100 +264,10 @@ export default function JobsPage() {
     );
   };
 
-  // Simulate loading when filters/search change
-  const [sortedJobs, setSortedJobs] = useState<JobData[]>(jobsData);
-
-  useEffect(() => {
-    setLoading(true);
-    const timeout = setTimeout(() => {
-      const result = jobsData.filter((job) => {
-        const matchesSearch =
-          job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          job.skills.some((skill) =>
-            skill.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-        const matchesType = selectedType === "All" || job.type === selectedType;
-        const matchesLocation =
-          selectedLocation === "All" || job.location.includes(selectedLocation);
-        const matchesCompany =
-          selectedCompany === "All" || job.company === selectedCompany;
-        // Salary range matching
-        const matchesSalary =
-          selectedSalary === "All" ||
-          (() => {
-            const salaryNum = parseInt(job.salary.replace(/[^\d]/g, ""));
-            switch (selectedSalary) {
-              case "Below 10K":
-                return salaryNum < 10000;
-              case "10K - 20K":
-                return salaryNum >= 10000 && salaryNum <= 20000;
-              case "20K - 35K":
-                return salaryNum >= 20000 && salaryNum <= 35000;
-              case "35K - 50K":
-                return salaryNum >= 35000 && salaryNum <= 50000;
-              case "50K+":
-                return salaryNum > 50000;
-              default:
-                return true;
-            }
-          })();
-        // Industry matching (simplified)
-        const matchesIndustry =
-          selectedIndustry === "All" ||
-          (() => {
-            const industryMap: { [key: string]: string } = {
-              "Aramco Digital": "Technology",
-              "Qatar Airways Group": "Aviation",
-              "Zain Jordan": "Telecommunications",
-              "NEOM Tech": "Technology",
-              Careem: "Transportation",
-              "Ooredoo Qatar": "Telecommunications",
-              "Dubai Police": "Government",
-              KAUST: "Research",
-            };
-            return industryMap[job.company] === selectedIndustry;
-          })();
-        // Experience level matching (simplified)
-        const matchesExperience =
-          selectedExperience === "All" ||
-          (() => {
-            const experienceMap: { [key: string]: string } = {
-              "Senior Software Engineer": "Senior Level",
-              "Product Manager": "Mid Level",
-              "UX Designer": "Mid Level",
-              "Data Scientist": "Senior Level",
-              "Digital Marketing Manager": "Mid Level",
-              "Cloud Solutions Architect": "Senior Level",
-              "Cybersecurity Specialist": "Senior Level",
-              "AI Research Engineer": "Senior Level",
-            };
-            return experienceMap[job.title] === selectedExperience;
-          })();
-        return (
-          matchesSearch &&
-          matchesType &&
-          matchesLocation &&
-          matchesCompany &&
-          matchesSalary &&
-          matchesIndustry &&
-          matchesExperience
-        );
-      });
-      setSortedJobs(result);
-      setLoading(false);
-    }, 500); // 0.5s loading
-    return () => clearTimeout(timeout);
-  }, [
-    searchTerm,
-    selectedType,
-    selectedLocation,
-    selectedExperience,
-    selectedSalary,
-    selectedCompany,
-    selectedIndustry,
-    sortBy,
-  ]);
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    fetchJobs(page);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -681,8 +634,13 @@ export default function JobsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <div className="text-lg sm:text-xl font-semibold text-gray-900">
-                      {sortedJobs.length}{" "}
-                      {sortedJobs.length === 1 ? "Job" : "Jobs"} Found
+                      {filteredJobs.length}{" "}
+                      {filteredJobs.length === 1 ? "Job" : "Jobs"} Found
+                      {totalJobs > 0 && totalJobs !== filteredJobs.length && (
+                        <span className="text-sm text-gray-500 ml-2">
+                          (filtered from {totalJobs} total)
+                        </span>
+                      )}
                     </div>
                     {(searchTerm ||
                       selectedType !== "All" ||
@@ -757,7 +715,7 @@ export default function JobsPage() {
                   ) : (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 xl:gap-10">
-                        {sortedJobs.map((job) => (
+                        {filteredJobs.map((job) => (
                           <div
                             key={job.id}
                             className="animate-fade-in group relative flex flex-col h-full"
@@ -778,7 +736,7 @@ export default function JobsPage() {
                         ))}
                       </div>
                       {/* No Results */}
-                      {sortedJobs.length === 0 && (
+                      {filteredJobs.length === 0 && !loading && (
                         <div className="text-center py-12 sm:py-16 lg:py-20">
                           <div
                             className="text-gray-400 text-5xl sm:text-6xl lg:text-7xl mb-4 sm:mb-6"
@@ -808,6 +766,74 @@ export default function JobsPage() {
                           >
                             Clear All Filters
                           </Button>
+                        </div>
+                      )}
+
+                      {/* Pagination */}
+                      {pagination && pagination.totalPages > 1 && (
+                        <div className="flex items-center justify-center mt-12 space-x-2">
+                          <Button
+                            variant="secondary"
+                            disabled={!pagination.hasPrevPage || loading}
+                            onClick={() =>
+                              handlePageChange(pagination.prevPage)
+                            }
+                            className="px-4 py-2"
+                          >
+                            Previous
+                          </Button>
+
+                          <div className="flex items-center space-x-2">
+                            {Array.from(
+                              { length: Math.min(5, pagination.totalPages) },
+                              (_, i) => {
+                                const page = i + 1;
+                                return (
+                                  <button
+                                    key={page}
+                                    onClick={() => handlePageChange(page)}
+                                    disabled={loading}
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                      currentPage === page
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                                    }`}
+                                  >
+                                    {page}
+                                  </button>
+                                );
+                              }
+                            )}
+                          </div>
+
+                          <Button
+                            variant="secondary"
+                            disabled={!pagination.hasNextPage || loading}
+                            onClick={() =>
+                              handlePageChange(pagination.nextPage)
+                            }
+                            className="px-4 py-2"
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* API Error */}
+                      {apiError && (
+                        <div className="text-center py-8">
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md mx-auto">
+                            <div className="text-red-600 font-medium mb-2">
+                              {apiError}
+                            </div>
+                            <Button
+                              variant="secondary"
+                              onClick={() => fetchJobs(currentPage)}
+                              className="text-sm"
+                            >
+                              Try Again
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </>

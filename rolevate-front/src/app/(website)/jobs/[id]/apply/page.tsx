@@ -1,142 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/common/Button";
-
-// Job data
-const jobsData = [
-  {
-    id: 1,
-    title: "Senior Software Engineer",
-    company: "Aramco Digital",
-    location: "Riyadh, Saudi Arabia",
-    type: "Full-time",
-    salary: "25,000 - 35,000 SAR",
-    skills: ["React", "Node.js", "TypeScript", "AWS", "GraphQL"],
-    posted: "2 days ago",
-    logo: "🏢",
-    description:
-      "Join Saudi Arabia's leading tech transformation initiative building next-generation digital solutions.",
-    urgent: true,
-  },
-  {
-    id: 2,
-    title: "Product Manager",
-    company: "Qatar Airways Group",
-    location: "Doha, Qatar",
-    type: "Full-time",
-    salary: "18,000 - 25,000 QAR",
-    skills: [
-      "Product Strategy",
-      "Analytics",
-      "Leadership",
-      "Agile",
-      "Aviation Tech",
-    ],
-    posted: "1 day ago",
-    logo: "✈️",
-    description:
-      "Drive digital product innovation for Qatar's world-class airline and travel ecosystem.",
-  },
-  {
-    id: 3,
-    title: "UX Designer",
-    company: "Zain Jordan",
-    location: "Amman, Jordan",
-    type: "Full-time",
-    salary: "1,200 - 1,800 JOD",
-    skills: ["Figma", "User Research", "Arabic UX", "Mobile Design"],
-    posted: "3 days ago",
-    logo: "📱",
-    description:
-      "Design innovative digital experiences for Jordan's leading telecommunications company.",
-  },
-  {
-    id: 4,
-    title: "Data Scientist",
-    company: "NEOM Tech",
-    location: "NEOM, Saudi Arabia",
-    type: "Full-time",
-    salary: "30,000 - 45,000 SAR",
-    skills: ["Python", "Machine Learning", "Smart Cities", "IoT", "AI"],
-    posted: "1 day ago",
-    logo: "🌟",
-    description:
-      "Shape the future of smart cities with cutting-edge AI and data science at NEOM.",
-    urgent: true,
-  },
-  {
-    id: 5,
-    title: "Digital Marketing Manager",
-    company: "Careem",
-    location: "Dubai, UAE / Remote",
-    type: "Full-time",
-    salary: "15,000 - 22,000 AED",
-    skills: [
-      "Digital Marketing",
-      "Arabic Content",
-      "Social Media",
-      "Growth Hacking",
-    ],
-    posted: "4 days ago",
-    logo: "🚗",
-    description:
-      "Lead regional marketing campaigns for the Middle East's super app.",
-  },
-  {
-    id: 6,
-    title: "Cloud Solutions Architect",
-    company: "Ooredoo Qatar",
-    location: "Doha, Qatar",
-    type: "Full-time",
-    salary: "20,000 - 28,000 QAR",
-    skills: ["AWS", "Azure", "5G Infrastructure", "Enterprise Solutions"],
-    posted: "2 days ago",
-    logo: "☁️",
-    description:
-      "Architect next-generation cloud and 5G solutions for Qatar's digital transformation.",
-  },
-  {
-    id: 7,
-    title: "Cybersecurity Specialist",
-    company: "Dubai Police",
-    location: "Dubai, UAE",
-    type: "Full-time",
-    salary: "18,000 - 28,000 AED",
-    skills: ["Cybersecurity", "Threat Analysis", "Incident Response", "Arabic"],
-    posted: "5 days ago",
-    logo: "🛡️",
-    description:
-      "Protect Dubai's digital infrastructure with cutting-edge cybersecurity solutions.",
-  },
-  {
-    id: 8,
-    title: "AI Research Engineer",
-    company: "KAUST",
-    location: "Thuwal, Saudi Arabia",
-    type: "Full-time",
-    salary: "28,000 - 38,000 SAR",
-    skills: [
-      "Machine Learning",
-      "Deep Learning",
-      "Research",
-      "Python",
-      "TensorFlow",
-    ],
-    posted: "3 days ago",
-    logo: "🧠",
-    description:
-      "Advance AI research at one of the world's leading science and technology universities.",
-  },
-];
+import { JobData } from "@/components/common/JobCard";
+import { JobService, JobPost } from "@/services/job";
 
 export default function JobApplyPage() {
   const router = useRouter();
   const params = useParams();
-  const [loading, setLoading] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
-  const [formData, setFormData] = React.useState({
+  const [job, setJob] = useState<JobData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
@@ -146,9 +24,116 @@ export default function JobApplyPage() {
     portfolio: "",
   });
 
-  // Get job details
-  const jobId = parseInt(params.id as string);
-  const job = jobsData.find((j) => j.id === jobId);
+  const jobId = params.id as string;
+
+  // Helper function to convert JobPost to JobData format (same as job details page)
+  const convertJobPostToJobData = (jobPost: JobPost): JobData => {
+    // Get a dynamic logo based on company name or industry
+    const getCompanyLogo = (companyName?: string, industry?: string) => {
+      if (!companyName && !industry) return "🏢";
+
+      const searchText = `${companyName || ""} ${industry || ""}`.toLowerCase();
+
+      if (
+        searchText.includes("healthcare") ||
+        searchText.includes("health") ||
+        searchText.includes("medical")
+      )
+        return "🏥";
+      if (searchText.includes("tech") || searchText.includes("software"))
+        return "💻";
+      if (searchText.includes("bank") || searchText.includes("finance"))
+        return "🏦";
+      if (searchText.includes("education") || searchText.includes("school"))
+        return "🎓";
+      if (searchText.includes("retail") || searchText.includes("shop"))
+        return "🛍️";
+      if (searchText.includes("food") || searchText.includes("restaurant"))
+        return "🍽️";
+      if (searchText.includes("travel") || searchText.includes("airline"))
+        return "✈️";
+      if (
+        searchText.includes("energy") ||
+        searchText.includes("oil") ||
+        searchText.includes("gas")
+      )
+        return "⚡";
+      if (
+        searchText.includes("construction") ||
+        searchText.includes("building")
+      )
+        return "🏗️";
+      if (
+        searchText.includes("telecom") ||
+        searchText.includes("communication")
+      )
+        return "📱";
+      if (searchText.includes("automotive") || searchText.includes("car"))
+        return "🚗";
+      if (searchText.includes("media") || searchText.includes("entertainment"))
+        return "🎬";
+      if (searchText.includes("sales") || searchText.includes("trading"))
+        return "💼";
+      return "🏢";
+    };
+
+    // Calculate time since posting
+    const getTimeAgo = (dateString: string) => {
+      const now = new Date();
+      const posted = new Date(dateString);
+      const diffTime = Math.abs(now.getTime() - posted.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) return "1 day ago";
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+      return `${Math.ceil(diffDays / 30)} months ago`;
+    };
+
+    return {
+      id: jobPost.id,
+      title: jobPost.title,
+      company: jobPost.company?.name || "Company",
+      location: jobPost.location,
+      type:
+        jobPost.type === "FULL_TIME"
+          ? "Full-time"
+          : jobPost.type === "PART_TIME"
+          ? "Part-time"
+          : jobPost.type === "CONTRACT"
+          ? "Contract"
+          : "Remote",
+      salary: jobPost.salary || "Competitive salary",
+      skills: jobPost.skills || [],
+      posted: getTimeAgo(jobPost.postedAt || new Date().toISOString()),
+      applicants: jobPost.applicants || 0,
+      logo: getCompanyLogo(jobPost.company?.name, jobPost.industry),
+      description: jobPost.description || jobPost.shortDescription || "",
+      urgent: false, // Can be enhanced later if needed
+    };
+  };
+
+  // Fetch job data from API
+  useEffect(() => {
+    const fetchJob = async () => {
+      if (!jobId) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        const jobPostData = await JobService.getPublicJobById(jobId);
+        const convertedJob = convertJobPostToJobData(jobPostData);
+        setJob(convertedJob);
+      } catch (err) {
+        console.error("Error fetching job:", err);
+        setError("Failed to load job details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [jobId]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -161,18 +146,49 @@ export default function JobApplyPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
 
     // Simulate API call
     setTimeout(() => {
-      setLoading(false);
+      setSubmitting(false);
       setSuccess(true);
     }, 2000);
   };
 
-  if (!job) {
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <svg
+            className="animate-spin h-12 w-12 text-blue-500 mx-auto mb-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"
+            ></path>
+          </svg>
+          <div className="text-lg text-gray-500">Loading job details...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!job || error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="w-24 h-24 mx-auto mb-6 bg-red-100 rounded-3xl flex items-center justify-center">
             <svg
@@ -190,14 +206,24 @@ export default function JobApplyPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-3">
-            Job Not Found
+            {error ? "Failed to Load Job" : "Job Not Found"}
           </h1>
           <p className="text-gray-600 mb-8">
-            The job you're looking for doesn't exist or has been removed.
+            {error
+              ? "There was an error loading the job details. Please try again."
+              : "The job you're looking for doesn't exist or has been removed."}
           </p>
-          <Button variant="primary" onClick={() => router.push("/jobs")}>
-            Browse All Jobs
-          </Button>
+          <div className="flex gap-4 justify-center">
+            <Button
+              variant="secondary"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </Button>
+            <Button variant="primary" onClick={() => router.push("/jobs")}>
+              Browse All Jobs
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -205,11 +231,11 @@ export default function JobApplyPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4">
-        <div className="max-w-lg w-full text-center bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
-          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full text-center bg-white rounded-3xl shadow-xl border border-gray-200 p-8">
+          <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
             <svg
-              className="w-10 h-10 text-white"
+              className="w-10 h-10 text-green-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -222,7 +248,7 @@ export default function JobApplyPage() {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-3">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">
             Application Submitted!
           </h1>
           <p className="text-lg font-semibold text-gray-900 mb-2">
@@ -255,17 +281,17 @@ export default function JobApplyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Navigation Header */}
-      <nav className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-40">
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.back()}
-                className="flex items-center space-x-2 text-gray-600 hover:text-[#0891b2] transition-colors group"
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors group"
               >
-                <div className="p-2 rounded-xl group-hover:bg-[#13ead9]/10 transition-colors">
+                <div className="p-2 rounded-xl group-hover:bg-gray-100 transition-colors">
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -287,7 +313,7 @@ export default function JobApplyPage() {
                 Job Application
               </h1>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-[#0891b2] bg-[#13ead9]/10 px-3 py-2 rounded-full">
+            <div className="flex items-center space-x-2 text-sm text-gray-700 bg-gray-100 px-3 py-2 rounded-full">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -311,7 +337,7 @@ export default function JobApplyPage() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Job Summary Card */}
           <div className="lg:col-span-2">
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 overflow-hidden sticky top-24">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden sticky top-24">
               {/* Job Header */}
               <div className="bg-gradient-to-r from-[#0891b2] to-[#13ead9] p-8 text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full transform translate-x-16 -translate-y-16"></div>
@@ -339,10 +365,10 @@ export default function JobApplyPage() {
               {/* Job Details */}
               <div className="p-8 space-y-6">
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 rounded-2xl">
-                    <div className="w-10 h-10 bg-[#0891b2]/10 rounded-xl flex items-center justify-center">
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-[#0891b2]"
+                        className="w-5 h-5 text-gray-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -369,10 +395,10 @@ export default function JobApplyPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 rounded-2xl">
-                    <div className="w-10 h-10 bg-[#0891b2]/10 rounded-xl flex items-center justify-center">
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-[#0891b2]"
+                        className="w-5 h-5 text-gray-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -386,7 +412,7 @@ export default function JobApplyPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="font-bold text-[#0891b2] text-lg">
+                      <p className="font-bold text-gray-900 text-lg">
                         {job.salary}
                       </p>
                       <p className="text-sm text-gray-600">
@@ -405,7 +431,7 @@ export default function JobApplyPage() {
                     {job.skills.map((skill, idx) => (
                       <span
                         key={idx}
-                        className="bg-gradient-to-r from-[#13ead9]/20 to-[#0891b2]/20 text-[#0891b2] px-3 py-2 rounded-xl text-sm font-semibold border border-[#0891b2]/20 hover:scale-105 transition-transform cursor-default"
+                        className=" px-3 py-2 rounded-xl text-sm font-semibold border border-[#0891b2]/20 hover:scale-105 transition-transform cursor-default"
                       >
                         {skill}
                       </span>
@@ -413,7 +439,7 @@ export default function JobApplyPage() {
                   </div>
                 </div>
 
-                <div className="p-6 bg-gradient-to-br from-gray-50 to-[#13ead9]/5 rounded-2xl border border-[#0891b2]/10">
+                <div className="p-6 bg-gray-50 rounded-2xl border border-gray-200">
                   <p className="text-gray-700 leading-relaxed">
                     {job.description}
                   </p>
@@ -424,8 +450,8 @@ export default function JobApplyPage() {
 
           {/* Application Form */}
           <div className="lg:col-span-3">
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-50 to-[#13ead9]/5 px-8 py-6 border-b border-gray-200/50">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
+              <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-900">
                   Submit Your Application
                 </h2>
@@ -436,11 +462,36 @@ export default function JobApplyPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                {/* Login Option - Prominently placed at top */}
+                <div className="p-6 bg-blue-50 border border-blue-200 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-blue-900 mb-1">
+                        Already have an account?
+                      </h3>
+                      <p className="text-sm text-blue-700">
+                        Login to use your saved CV and apply faster. No need to
+                        fill forms manually.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() =>
+                        window.open("http://localhost:3000/login", "_blank")
+                      }
+                      className="ml-4"
+                    >
+                      Login
+                    </Button>
+                  </div>
+                </div>
+
                 {/* Personal Information */}
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-[#0891b2]/10 rounded-lg flex items-center justify-center">
-                      <div className="w-2 h-2 bg-[#0891b2] rounded-full"></div>
+                    <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
                     </div>
                     <span>Personal Information</span>
                   </h3>
@@ -457,7 +508,7 @@ export default function JobApplyPage() {
                         onChange={(e) =>
                           handleInputChange("name", e.target.value)
                         }
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] transition-colors text-gray-900 placeholder-gray-500"
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500"
                         placeholder="Enter your full name"
                       />
                     </div>
@@ -473,7 +524,7 @@ export default function JobApplyPage() {
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
                         }
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] transition-colors text-gray-900 placeholder-gray-500"
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500"
                         placeholder="your.email@example.com"
                       />
                     </div>
@@ -490,7 +541,7 @@ export default function JobApplyPage() {
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
                       }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] transition-colors text-gray-900 placeholder-gray-500"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500"
                       placeholder="+966 5XXXXXXXX"
                     />
                   </div>
@@ -499,8 +550,8 @@ export default function JobApplyPage() {
                 {/* CV Upload */}
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-[#0891b2]/10 rounded-lg flex items-center justify-center">
-                      <div className="w-2 h-2 bg-[#0891b2] rounded-full"></div>
+                    <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
                     </div>
                     <span>Documents</span>
                   </h3>
@@ -509,17 +560,18 @@ export default function JobApplyPage() {
                     <label className="block text-sm font-medium text-gray-700">
                       Resume/CV <span className="text-red-500">*</span>
                     </label>
+
                     <div className="relative">
                       <input
                         type="file"
                         required
                         accept=".pdf,.doc,.docx"
                         onChange={handleFileChange}
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-[#13ead9]/10 file:text-[#0891b2] hover:file:bg-[#13ead9]/20"
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                       />
                     </div>
                     {formData.cv && (
-                      <p className="text-sm text-[#0891b2] flex items-center space-x-2">
+                      <p className="text-sm text-gray-700 flex items-center space-x-2">
                         <svg
                           className="w-4 h-4"
                           fill="none"
@@ -549,7 +601,7 @@ export default function JobApplyPage() {
                       onChange={(e) =>
                         handleInputChange("portfolio", e.target.value)
                       }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] transition-colors text-gray-900 placeholder-gray-500"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500"
                       placeholder="https://your-portfolio.com"
                     />
                   </div>
@@ -558,31 +610,11 @@ export default function JobApplyPage() {
                 {/* Additional Information */}
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-[#0891b2]/10 rounded-lg flex items-center justify-center">
-                      <div className="w-2 h-2 bg-[#0891b2] rounded-full"></div>
+                    <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
                     </div>
                     <span>Additional Information</span>
                   </h3>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Years of Experience
-                    </label>
-                    <select
-                      value={formData.experience}
-                      onChange={(e) =>
-                        handleInputChange("experience", e.target.value)
-                      }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] transition-colors text-gray-900"
-                    >
-                      <option value="">Select experience level</option>
-                      <option value="0-1">0-1 years</option>
-                      <option value="1-3">1-3 years</option>
-                      <option value="3-5">3-5 years</option>
-                      <option value="5-10">5-10 years</option>
-                      <option value="10+">10+ years</option>
-                    </select>
-                  </div>
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
@@ -595,7 +627,7 @@ export default function JobApplyPage() {
                       onChange={(e) =>
                         handleInputChange("coverLetter", e.target.value)
                       }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] transition-colors text-gray-900 placeholder-gray-500 resize-none"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 resize-none"
                       placeholder="Tell us why you're perfect for this role..."
                     />
                   </div>
@@ -606,10 +638,10 @@ export default function JobApplyPage() {
                   <Button
                     type="submit"
                     variant="primary"
-                    loading={loading}
+                    loading={submitting}
                     className="w-full py-4 text-lg font-semibold rounded-2xl"
                   >
-                    {loading
+                    {submitting
                       ? "Submitting Application..."
                       : "Submit Application"}
                   </Button>

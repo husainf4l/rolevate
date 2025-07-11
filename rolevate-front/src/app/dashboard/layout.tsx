@@ -29,10 +29,8 @@ export default function DashboardLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-[#23272a] bg-gray-50`}
       >
-        <ProtectedRoute allowedUserTypes={['COMPANY']}>
-          <DashboardContentLayout>
-            {children}
-          </DashboardContentLayout>
+        <ProtectedRoute allowedUserTypes={["COMPANY"]}>
+          <DashboardContentLayout>{children}</DashboardContentLayout>
         </ProtectedRoute>
       </body>
     </html>

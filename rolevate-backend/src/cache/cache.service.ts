@@ -40,11 +40,89 @@ export class CacheService {
 
   async clear(): Promise<void> {
     try {
-      // Note: cache-manager doesn't have a reset method in newer versions
-      // We'll implement pattern-based clearing if needed
-      console.log('Cache clear requested - implement pattern-based clearing if needed');
+      console.log('🧹 Starting cache clear operation...');
+      
+      // Try to cast to any to access reset method if it exists
+      const cacheStore = this.cacheManager as any;
+      
+      // If the cache manager supports reset, use it
+      if (typeof cacheStore.reset === 'function') {
+        await cacheStore.reset();
+        console.log('✅ Cache cleared using reset method');
+        return;
+      }
+      
+      // Otherwise, manually clear known cache patterns
+      const commonKeys = [
+        // Job cache patterns
+        'job:featured',
+        'public:jobs:20:0',
+        'public:jobs:10:0',
+        'public:count',
+        // Add more specific keys as needed
+      ];
+      
+      console.log('🗑️ Clearing known cache keys:', commonKeys);
+      
+      for (const key of commonKeys) {
+        try {
+          await this.cacheManager.del(key);
+          console.log(`✅ Cleared cache key: ${key}`);
+        } catch (error) {
+          console.error(`❌ Failed to clear cache key ${key}:`, error);
+        }
+      }
+      
+      console.log('✅ Cache clear operation completed');
     } catch (error) {
-      console.error('Cache clear error:', error);
+      console.error('❌ Cache clear error:', error);
+      throw error;
+    }
+  }
+
+  async clearAll(): Promise<{ cleared: boolean; method: string; message: string }> {
+    try {
+      console.log('🧹 Starting complete cache clear...');
+      
+      // Try to cast to any to access reset method if it exists
+      const cacheStore = this.cacheManager as any;
+      
+      // Try different methods to clear cache
+      if (typeof cacheStore.reset === 'function') {
+        await cacheStore.reset();
+        return {
+          cleared: true,
+          method: 'reset',
+          message: 'All cache cleared using reset method'
+        };
+      }
+      
+      // For stores that don't support reset, we'll clear manually
+      // This is a more aggressive approach
+      const patterns = [
+        'job:', 'company:', 'public:', 'candidate_profile:', 'user:', 'auth:'
+      ];
+      
+      let clearedCount = 0;
+      
+      // Since we can't easily iterate over all keys in most cache stores,
+      // we'll just clear the cache and let it rebuild naturally
+      await this.clear();
+      clearedCount++;
+      
+      return {
+        cleared: true,
+        method: 'manual',
+        message: `Cache cleared manually. ${clearedCount} operations completed.`
+      };
+      
+    } catch (error) {
+      console.error('❌ Cache clearAll error:', error);
+      return {
+        cleared: false,
+        method: 'error',
+        message: `Failed to clear cache: ${error.message}`
+      };
     }
   }
 
@@ -113,5 +191,16 @@ export class CacheService {
     ];
 
     await Promise.all(commonKeys.map(key => this.del(key)));
+  }
+
+  async invalidateUserProfile(userId: string): Promise<void> {
+    // Invalidate user profile related cache keys
+    const keysToDelete = [
+      `user:${userId}:profile`,
+      `candidate:${userId}:profile`,
+      `candidate:${userId}:cvs`,
+    ];
+
+    await Promise.all(keysToDelete.map(key => this.del(key)));
   }
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '@/services/auth';
+import { AuthContext, User } from '@/hooks/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,33 +13,37 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, allowedUserTypes }: ProtectedRouteProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         console.log('Checking authentication...');
-        const user = await getCurrentUser();
-        console.log('User from getCurrentUser:', user);
+        const userData = await getCurrentUser();
+        console.log('User from getCurrentUser:', userData);
         
-        if (!user) {
+        if (!userData) {
           console.log('No user found, redirecting to login');
           router.replace('/login');
           return;
         }
 
+        // Store user data
+        setUser(userData);
+
         // Get current pathname
         const currentPath = window.location.pathname;
 
         // Check if user type is allowed for this route
-        if (allowedUserTypes && !allowedUserTypes.includes(user.userType)) {
-          console.log('User type not allowed:', user.userType, 'Allowed:', allowedUserTypes);
+        if (allowedUserTypes && !allowedUserTypes.includes(userData.userType)) {
+          console.log('User type not allowed:', userData.userType, 'Allowed:', allowedUserTypes);
           // User type not allowed, redirect based on their type
-          if (user.userType === 'CANDIDATE') {
+          if (userData.userType === 'CANDIDATE') {
             router.replace('/userdashboard');
-          } else if (user.userType === 'COMPANY') {
+          } else if (userData.userType === 'COMPANY') {
             // Check if company user has a company or companyId
-            if (!user.company && !user.companyId) {
+            if (!userData.company && !userData.companyId) {
               router.replace('/dashboard/setup-company');
             } else {
               router.replace('/dashboard');
@@ -50,22 +55,22 @@ export default function ProtectedRoute({ children, allowedUserTypes }: Protected
         }
 
         // Special handling for COMPANY users
-        if (user.userType === 'COMPANY' && allowedUserTypes?.includes('COMPANY')) {
+        if (userData.userType === 'COMPANY' && allowedUserTypes?.includes('COMPANY')) {
           // If company user has no company and is NOT on setup-company page, redirect
-          if (!user.company && !user.companyId && !currentPath.includes('/dashboard/setup-company')) {
+          if (!userData.company && !userData.companyId && !currentPath.includes('/dashboard/setup-company')) {
             console.log('Company user has no company, redirecting to setup-company');
             router.replace('/dashboard/setup-company');
             return;
           }
           // If company user has a company and IS on setup-company page, redirect to dashboard
-          if ((user.company || user.companyId) && currentPath.includes('/dashboard/setup-company')) {
+          if ((userData.company || userData.companyId) && currentPath.includes('/dashboard/setup-company')) {
             console.log('Company user already has company, redirecting to dashboard');
             router.replace('/dashboard');
             return;
           }
         }
 
-        console.log('User authorized:', user);
+        console.log('User authorized:', userData);
         setIsAuthorized(true);
       } catch (error) {
         console.error('Authentication check failed:', error);
@@ -102,5 +107,9 @@ export default function ProtectedRoute({ children, allowedUserTypes }: Protected
     );
   }
 
-  return <>{children}</>;
+  return (
+    <AuthContext.Provider value={{ user, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }

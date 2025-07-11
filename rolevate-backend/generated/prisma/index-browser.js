@@ -204,6 +204,7 @@ exports.Prisma.JobScalarFieldEnum = {
   cvAnalysisPrompt: 'cvAnalysisPrompt',
   interviewPrompt: 'interviewPrompt',
   aiSecondInterviewPrompt: 'aiSecondInterviewPrompt',
+  featured: 'featured',
   applicants: 'applicants',
   views: 'views',
   createdAt: 'createdAt',
@@ -221,9 +222,125 @@ exports.Prisma.ScreeningQuestionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CandidateProfileScalarFieldEnum = {
+  id: 'id',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  email: 'email',
+  phone: 'phone',
+  dateOfBirth: 'dateOfBirth',
+  nationality: 'nationality',
+  currentLocation: 'currentLocation',
+  currentJobTitle: 'currentJobTitle',
+  currentCompany: 'currentCompany',
+  experienceLevel: 'experienceLevel',
+  totalExperience: 'totalExperience',
+  expectedSalary: 'expectedSalary',
+  noticePeriod: 'noticePeriod',
+  highestEducation: 'highestEducation',
+  fieldOfStudy: 'fieldOfStudy',
+  university: 'university',
+  graduationYear: 'graduationYear',
+  skills: 'skills',
+  preferredJobTypes: 'preferredJobTypes',
+  preferredWorkType: 'preferredWorkType',
+  preferredIndustries: 'preferredIndustries',
+  preferredLocations: 'preferredLocations',
+  resumeUrl: 'resumeUrl',
+  portfolioUrl: 'portfolioUrl',
+  linkedInUrl: 'linkedInUrl',
+  githubUrl: 'githubUrl',
+  isProfilePublic: 'isProfilePublic',
+  isOpenToWork: 'isOpenToWork',
+  profileSummary: 'profileSummary',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.WorkExperienceScalarFieldEnum = {
+  id: 'id',
+  jobTitle: 'jobTitle',
+  company: 'company',
+  location: 'location',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isCurrent: 'isCurrent',
+  description: 'description',
+  candidateId: 'candidateId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EducationScalarFieldEnum = {
+  id: 'id',
+  degree: 'degree',
+  institution: 'institution',
+  fieldOfStudy: 'fieldOfStudy',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isCurrent: 'isCurrent',
+  grade: 'grade',
+  description: 'description',
+  candidateId: 'candidateId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CVScalarFieldEnum = {
+  id: 'id',
+  fileName: 'fileName',
+  originalFileName: 'originalFileName',
+  fileUrl: 'fileUrl',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  status: 'status',
+  isActive: 'isActive',
+  extractedData: 'extractedData',
+  candidateId: 'candidateId',
+  uploadedAt: 'uploadedAt',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ApplicationScalarFieldEnum = {
+  id: 'id',
+  status: 'status',
+  jobId: 'jobId',
+  candidateId: 'candidateId',
+  coverLetter: 'coverLetter',
+  resumeUrl: 'resumeUrl',
+  expectedSalary: 'expectedSalary',
+  noticePeriod: 'noticePeriod',
+  companyNotes: 'companyNotes',
+  appliedAt: 'appliedAt',
+  reviewedAt: 'reviewedAt',
+  interviewScheduledAt: 'interviewScheduledAt',
+  interviewedAt: 'interviewedAt',
+  rejectedAt: 'rejectedAt',
+  acceptedAt: 'acceptedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ScreeningAnswerScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  applicationId: 'applicationId',
+  answer: 'answer',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -234,6 +351,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.UserType = exports.$Enums.UserType = {
   SYSTEM: 'SYSTEM',
@@ -333,6 +456,40 @@ exports.ScreeningQuestionType = exports.$Enums.ScreeningQuestionType = {
   NUMBER: 'NUMBER'
 };
 
+exports.ExperienceLevel = exports.$Enums.ExperienceLevel = {
+  FRESH_GRADUATE: 'FRESH_GRADUATE',
+  ENTRY_LEVEL: 'ENTRY_LEVEL',
+  MID_LEVEL: 'MID_LEVEL',
+  SENIOR_LEVEL: 'SENIOR_LEVEL',
+  EXECUTIVE: 'EXECUTIVE'
+};
+
+exports.EducationLevel = exports.$Enums.EducationLevel = {
+  HIGH_SCHOOL: 'HIGH_SCHOOL',
+  DIPLOMA: 'DIPLOMA',
+  BACHELOR: 'BACHELOR',
+  MASTER: 'MASTER',
+  PHD: 'PHD',
+  PROFESSIONAL_CERTIFICATION: 'PROFESSIONAL_CERTIFICATION'
+};
+
+exports.CVStatus = exports.$Enums.CVStatus = {
+  UPLOADED: 'UPLOADED',
+  PROCESSING: 'PROCESSING',
+  PROCESSED: 'PROCESSED',
+  ERROR: 'ERROR'
+};
+
+exports.ApplicationStatus = exports.$Enums.ApplicationStatus = {
+  SUBMITTED: 'SUBMITTED',
+  REVIEWING: 'REVIEWING',
+  INTERVIEW_SCHEDULED: 'INTERVIEW_SCHEDULED',
+  INTERVIEWED: 'INTERVIEWED',
+  OFFERED: 'OFFERED',
+  REJECTED: 'REJECTED',
+  WITHDRAWN: 'WITHDRAWN'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   RefreshToken: 'RefreshToken',
@@ -340,7 +497,13 @@ exports.Prisma.ModelName = {
   Company: 'Company',
   Invitation: 'Invitation',
   Job: 'Job',
-  ScreeningQuestion: 'ScreeningQuestion'
+  ScreeningQuestion: 'ScreeningQuestion',
+  CandidateProfile: 'CandidateProfile',
+  WorkExperience: 'WorkExperience',
+  Education: 'Education',
+  CV: 'CV',
+  Application: 'Application',
+  ScreeningAnswer: 'ScreeningAnswer'
 };
 
 /**

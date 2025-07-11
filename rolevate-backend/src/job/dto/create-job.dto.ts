@@ -180,10 +180,23 @@ export class JobResponseDto {
   companyDescription: string;
   status: string;
   companyId: string;
+  company?: {
+    id: string;
+    name: string;
+    address?: {
+      id: string;
+      street: string;
+      city: string;
+      state: string;
+      country: string;
+      zipCode: string;
+    };
+  };
   screeningQuestions: ScreeningQuestionResponseDto[];
   cvAnalysisPrompt?: string;
   interviewPrompt?: string;
   aiSecondInterviewPrompt?: string;
+  featured: boolean;
   applicants: number;
   views: number;
   createdAt: Date;

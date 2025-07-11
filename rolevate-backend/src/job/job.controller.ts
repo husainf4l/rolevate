@@ -6,18 +6,20 @@ import {
   Patch, 
   Param, 
   Delete, 
+  Put,
   UseGuards, 
   Request,
   Query,
   HttpStatus,
   HttpCode,
   BadRequestException,
-  SetMetadata
+  SetMetadata,
+  ParseIntPipe
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { CreateJobDto, JobResponseDto } from './dto/create-job.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { JobStatus } from '../../generated/prisma';
+import { JobStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('jobs')
@@ -225,6 +227,42 @@ export class JobController {
     return this.jobService.updateStatus(id, body.status, user.companyId);
   }
 
+  @Patch(':id/featured')
+  async toggleFeatured(
+    @Param('id') id: string,
+    @Body() body: { featured: boolean },
+    @Request() req: any,
+  ): Promise<JobResponseDto> {
+    const userId = req.user.userId;
+    
+    // Get user's company for access control
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { company: true }
+    });
+
+    if (!user || !user.companyId) {
+      throw new BadRequestException('User must be associated with a company to update featured status');
+    }
+
+    return this.jobService.toggleFeatured(id, body.featured, user.companyId);
+  }
+
+  @Get('public/featured')
+  @SetMetadata('skipAuth', true)
+  async findFeaturedJobs(
+    @Query('limit') limit?: string,
+  ): Promise<JobResponseDto[]> {
+    const limitNum = limit ? parseInt(limit, 10) : 10; // Default limit of 10
+    
+    // Validate limit parameter
+    if (limitNum < 1 || limitNum > 50) {
+      throw new BadRequestException('Limit must be between 1 and 50');
+    }
+
+    return this.jobService.findFeaturedJobs(limitNum);
+  }
+
   @Get('public/all')
   @SetMetadata('skipAuth', true)
   async findAllPublicJobs(
@@ -351,5 +389,38 @@ export class JobController {
     }
 
     return this.jobService.findAllDeleted(user.companyId);
+  }
+
+  @Put(':id/toggle-featured')
+  async toggleFeaturedStatus(
+    @Param('id') id: string,
+    @Request() req: any,
+  ): Promise<JobResponseDto> {
+    const userId = req.user.userId;
+    
+    // Get user's company for access control
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { company: true }
+    });
+
+    if (!user || !user.companyId) {
+      throw new BadRequestException('User must be associated with a company to toggle job featured status');
+    }
+
+    // Get current job to determine current featured status
+    const currentJob = await this.prisma.job.findFirst({
+      where: {
+        id,
+        companyId: user.companyId,
+      },
+    });
+
+    if (!currentJob) {
+      throw new BadRequestException('Job not found or you do not have permission to modify it');
+    }
+
+    // Toggle the featured status
+    return this.jobService.toggleFeatured(id, !currentJob.featured, user.companyId);
   }
 }

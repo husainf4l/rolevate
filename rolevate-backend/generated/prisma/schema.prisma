@@ -81,23 +81,41 @@ enum TokenType {
   REFRESH
 }
 
+enum CVStatus {
+  UPLOADED
+  PROCESSING
+  PROCESSED
+  ERROR
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  REVIEWING
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  OFFERED
+  REJECTED
+  WITHDRAWN
+}
+
 // =======================================
 // USER MANAGEMENT
 // =======================================
 
 model User {
-  id            String         @id @default(cuid())
-  userType      UserType
-  password      String?
-  email         String?        @unique
-  name          String?
-  isActive      Boolean        @default(true)
-  companyId     String?
-  company       Company?       @relation(fields: [companyId], references: [id])
-  phone         String?
-  refreshTokens RefreshToken[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id               String            @id @default(cuid())
+  userType         UserType
+  password         String?
+  email            String?           @unique
+  name             String?
+  isActive         Boolean           @default(true)
+  companyId        String?
+  company          Company?          @relation(fields: [companyId], references: [id])
+  phone            String?
+  refreshTokens    RefreshToken[]
+  candidateProfile CandidateProfile? // One-to-one relationship with candidate profile
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   @@index([userType])
   @@index([email])
@@ -242,12 +260,16 @@ model Job {
   // Screening questions
   screeningQuestions ScreeningQuestion[]
 
+  // Applications
+  applications Application[]
+
   // AI prompts for analysis (optional)
   cvAnalysisPrompt        String? @db.Text
   interviewPrompt         String? @db.Text
   aiSecondInterviewPrompt String? @db.Text
 
   // Metadata
+  featured   Boolean  @default(false)
   applicants Int      @default(0)
   views      Int      @default(0)
   createdAt  DateTime @default(now())
@@ -258,6 +280,7 @@ model Job {
   @@index([type])
   @@index([jobLevel])
   @@index([industry])
+  @@index([featured])
   @@map("jobs")
 }
 
@@ -272,6 +295,9 @@ model ScreeningQuestion {
   jobId String
   job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
+  // Screening answers
+  screeningAnswers ScreeningAnswer[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -280,7 +306,218 @@ model ScreeningQuestion {
 }
 
 // =======================================
+// CANDIDATE MANAGEMENT
+// =======================================
+
+enum ExperienceLevel {
+  FRESH_GRADUATE
+  ENTRY_LEVEL
+  MID_LEVEL
+  SENIOR_LEVEL
+  EXECUTIVE
+}
+
+enum EducationLevel {
+  HIGH_SCHOOL
+  DIPLOMA
+  BACHELOR
+  MASTER
+  PHD
+  PROFESSIONAL_CERTIFICATION
+}
+
+model CandidateProfile {
+  id String @id @default(cuid())
+
+  // Basic Information
+  firstName       String
+  lastName        String
+  email           String    @unique
+  phone           String?
+  dateOfBirth     DateTime?
+  nationality     Country?
+  currentLocation String?
+
+  // Professional Information
+  currentJobTitle String?
+  currentCompany  String?
+  experienceLevel ExperienceLevel?
+  totalExperience Int? // Years of experience
+  expectedSalary  String?
+  noticePeriod    String? // e.g., "30 days", "Immediate"
+
+  // Education
+  highestEducation EducationLevel?
+  fieldOfStudy     String?
+  university       String?
+  graduationYear   Int?
+
+  // Skills and Preferences
+  skills              String[] // Array of skills
+  preferredJobTypes   JobType[] // Preferred job types
+  preferredWorkType   WorkType? // Preferred work arrangement
+  preferredIndustries Industry[] // Preferred industries
+  preferredLocations  String[] // Preferred work locations
+
+  // Documents
+  resumeUrl    String? // URL to uploaded resume
+  portfolioUrl String? // Portfolio website
+  linkedInUrl  String?
+  githubUrl    String?
+
+  // Profile Settings
+  isProfilePublic Boolean @default(true)
+  isOpenToWork    Boolean @default(true)
+  profileSummary  String? @db.Text
+
+  // User relationship
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Applications
+  applications Application[]
+
+  // CVs
+  cvs CV[]
+
+  // Work Experience
+  workExperiences WorkExperience[]
+
+  // Education History
+  educationHistory Education[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([experienceLevel])
+  @@index([isOpenToWork])
+  @@index([currentLocation])
+  @@map("candidate_profiles")
+}
+
+model WorkExperience {
+  id          String    @id @default(cuid())
+  jobTitle    String
+  company     String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime? // Null if current job
+  isCurrent   Boolean   @default(false)
+  description String?   @db.Text
+
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([candidateId])
+  @@map("work_experiences")
+}
+
+model Education {
+  id           String    @id @default(cuid())
+  degree       String // e.g., "Bachelor of Computer Science"
+  institution  String
+  fieldOfStudy String?
+  startDate    DateTime
+  endDate      DateTime? // Null if ongoing
+  isCurrent    Boolean   @default(false)
+  grade        String? // GPA, percentage, etc.
+  description  String?   @db.Text
+
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([candidateId])
+  @@map("education_history")
+}
+
+model CV {
+  id               String   @id @default(cuid())
+  fileName         String
+  originalFileName String?
+  fileUrl          String
+  fileSize         Int? // File size in bytes
+  mimeType         String? // e.g., "application/pdf"
+  status           CVStatus @default(UPLOADED)
+  isActive         Boolean  @default(true) // Only one CV can be active at a time
+  extractedData    Json? // JSON object with extracted CV information
+
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  uploadedAt  DateTime  @default(now())
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([candidateId])
+  @@index([status])
+  @@index([isActive])
+  @@map("cvs")
+}
+
+// =======================================
 // APPLICATION MANAGEMENT
 // =======================================
 
-// Future application models will be added here
+model Application {
+  id     String            @id @default(cuid())
+  status ApplicationStatus @default(SUBMITTED)
+
+  // Job and Candidate
+  jobId       String
+  job         Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  // Application Details
+  coverLetter    String? @db.Text
+  resumeUrl      String? // Specific resume for this application
+  expectedSalary String?
+  noticePeriod   String?
+
+  // Screening Answers
+  screeningAnswers ScreeningAnswer[]
+
+  // Company Notes (internal)
+  companyNotes String? @db.Text
+
+  // Timeline
+  appliedAt            DateTime  @default(now())
+  reviewedAt           DateTime?
+  interviewScheduledAt DateTime?
+  interviewedAt        DateTime?
+  rejectedAt           DateTime?
+  acceptedAt           DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, candidateId]) // Prevent duplicate applications
+  @@index([jobId])
+  @@index([candidateId])
+  @@index([status])
+  @@map("applications")
+}
+
+model ScreeningAnswer {
+  id            String            @id @default(cuid())
+  questionId    String
+  question      ScreeningQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  applicationId String
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  answer        String            @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([applicationId])
+  @@index([questionId])
+  @@map("screening_answers")
+}

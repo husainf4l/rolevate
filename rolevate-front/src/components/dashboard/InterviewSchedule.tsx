@@ -1,11 +1,13 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   CalendarDaysIcon,
   ClockIcon,
   VideoCameraIcon,
   MapPinIcon,
+  PlayIcon,
 } from "@heroicons/react/24/outline";
 
 interface Interview {
@@ -91,12 +93,21 @@ export default function InterviewSchedule() {
         <h2 className="text-xl font-semibold text-gray-900">
           Upcoming Interviews
         </h2>
-        <a
-          href="/userdashboard/interviews"
-          className="text-[#0fc4b5] hover:text-[#0ba399] font-medium text-sm transition-colors"
-        >
-          View all
-        </a>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/interview/test-room-123"
+            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white text-sm rounded-lg hover:from-[#0891b2] hover:to-[#13ead9] transition-all duration-200 font-medium shadow-sm"
+          >
+            <PlayIcon className="w-4 h-4" />
+            Test Interview
+          </Link>
+          <a
+            href="/userdashboard/interviews"
+            className="text-[#0fc4b5] hover:text-[#0ba399] font-medium text-sm transition-colors"
+          >
+            View all
+          </a>
+        </div>
       </div>
 
       {upcomingInterviews.length === 0 ? (

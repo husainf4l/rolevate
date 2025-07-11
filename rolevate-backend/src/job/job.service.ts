@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateJobDto, JobResponseDto } from './dto/create-job.dto';
-import { JobType, JobLevel, WorkType, JobStatus, ScreeningQuestionType } from '../../generated/prisma';
+import { JobType, JobLevel, WorkType, JobStatus, ScreeningQuestionType } from '@prisma/client';
 import { CacheService } from '../cache/cache.service';
 import { ViewTrackingService } from './view-tracking.service';
 
@@ -323,10 +323,9 @@ export class JobService {
       include: {
         screeningQuestions: true,
         company: {
-          select: {
-            id: true,
-            name: true,
-          }
+          include: {
+            address: true,
+          },
         }
       },
     });
@@ -544,10 +543,9 @@ export class JobService {
       include: {
         screeningQuestions: true,
         company: {
-          select: {
-            id: true,
-            name: true,
-          }
+          include: {
+            address: true,
+          },
         }
       },
       orderBy: {
@@ -601,6 +599,86 @@ export class JobService {
     return count;
   }
 
+  async findFeaturedJobs(limit: number = 6): Promise<JobResponseDto[]> {
+    const cacheKey = `featured_jobs:limit:${limit}`;
+    
+    // Check cache first
+    const cached = await this.cacheService.get(cacheKey);
+    if (cached) {
+      return cached as JobResponseDto[];
+    }
+
+    // Get featured jobs that are active and have future deadlines
+    const jobs = await this.prisma.job.findMany({
+      where: {
+        featured: true,
+        status: JobStatus.ACTIVE,
+        deadline: {
+          gt: new Date(), // Only show jobs with future deadlines
+        },
+      },
+      include: {
+        company: {
+          include: {
+            address: true,
+          },
+        },
+        screeningQuestions: true,
+      },
+      orderBy: [
+        { createdAt: 'desc' }, // Most recently created featured jobs first
+      ],
+      take: limit,
+    });
+
+    const result = jobs.map(job => this.mapToJobResponse(job));
+    
+    // Cache for 10 minutes
+    await this.cacheService.set(cacheKey, result, 600);
+    
+    return result;
+  }
+
+  async toggleFeatured(id: string, featured: boolean, companyId: string): Promise<JobResponseDto> {
+    // First check if the job exists and belongs to the company
+    const existingJob = await this.prisma.job.findFirst({
+      where: {
+        id,
+        companyId,
+      },
+    });
+
+    if (!existingJob) {
+      throw new NotFoundException('Job not found or you do not have permission to modify it');
+    }
+
+    // Update the featured status
+    const job = await this.prisma.job.update({
+      where: { id },
+      data: { featured },
+      include: {
+        company: {
+          include: {
+            address: true,
+          },
+        },
+        screeningQuestions: true,
+      },
+    });
+
+    // Invalidate caches
+    await this.cacheService.invalidateJobCache(id, companyId);
+    await this.cacheService.invalidateCompanyJobsCache(companyId);
+    await this.cacheService.invalidatePublicJobsCache();
+    
+    // Invalidate featured jobs cache by deleting common cache keys
+    for (let i = 1; i <= 50; i++) {
+      await this.cacheService.del(`featured_jobs:limit:${i}`);
+    }
+
+    return this.mapToJobResponse(job);
+  }
+
   private mapToJobResponse(job: any): JobResponseDto {
     return {
       id: job.id,
@@ -624,6 +702,18 @@ export class JobService {
       companyDescription: job.companyDescription,
       status: job.status,
       companyId: job.companyId,
+      company: job.company ? {
+        id: job.company.id,
+        name: job.company.name,
+        address: job.company.address ? {
+          id: job.company.address.id,
+          street: job.company.address.street,
+          city: job.company.address.city,
+          state: job.company.address.state,
+          country: job.company.address.country,
+          zipCode: job.company.address.zipCode,
+        } : undefined,
+      } : undefined,
       screeningQuestions: job.screeningQuestions.map((q: any) => ({
         id: q.id,
         question: q.question,
@@ -636,6 +726,7 @@ export class JobService {
       cvAnalysisPrompt: job.cvAnalysisPrompt,
       interviewPrompt: job.interviewPrompt,
       aiSecondInterviewPrompt: job.aiSecondInterviewPrompt,
+      featured: job.featured,
       applicants: job.applicants,
       views: job.views,
       createdAt: job.createdAt,

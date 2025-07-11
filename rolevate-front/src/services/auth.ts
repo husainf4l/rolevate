@@ -49,6 +49,8 @@ function redirectUserByType(user: any, router: any) {
 
 // Login function - returns user object and sets tokens
 export async function login({ email, password }: { email: string; password: string }) {
+  console.log('Making login request to:', `${BASE_API}/auth/login`);
+  
   const res = await fetch(`${BASE_API}/auth/login`, {
     method: "POST",
     headers: {
@@ -58,12 +60,17 @@ export async function login({ email, password }: { email: string; password: stri
     credentials: "include", // This ensures cookies are sent and received
   });
 
+  console.log('Login response status:', res.status);
+  console.log('Login response headers:', Object.fromEntries(res.headers.entries()));
+
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
     throw new Error(error?.message || error?.error || "Login failed");
   }
 
   const data = await res.json();
+  console.log('Login successful, user data:', data.user);
+  console.log('Document cookies after login:', document.cookie);
   return data.user;
 }
 
@@ -93,15 +100,16 @@ export async function getCurrentUser() {
     const res = await fetch(`${BASE_API}/auth/me`, {
       method: "GET",
       credentials: "include", // Send HTTP-only cookies
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
     
     if (!res.ok) {
-      console.log('Auth check failed with status:', res.status);
       return null;
     }
     
     const data = await res.json();
-    console.log('User data from /auth/me:', data);
     return data;
   } catch (error) {
     console.log('Auth check failed:', error);
