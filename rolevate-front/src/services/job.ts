@@ -130,6 +130,38 @@ export interface GetJobsResponse {
 }
 
 export class JobService {
+  /**
+   * Apply to a job (POST /api/applications)
+   * @param applicationData { jobId, coverLetter, resumeUrl?, expectedSalary, noticePeriod }
+   */
+  static async applyToJob(applicationData: {
+    jobId: string;
+    coverLetter: string;
+    resumeUrl?: string;
+    expectedSalary: string;
+    noticePeriod: string;
+  }): Promise<{ message: string; applicationId?: string }> {
+    const response = await fetch(`${this.baseUrl}/api/applications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      mode: 'cors',
+      body: JSON.stringify(applicationData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to apply to job' }));
+      throw new Error(error.message || 'Failed to apply to job');
+    }
+
+    const data = await response.json();
+    return {
+      message: data.message || 'Application submitted successfully',
+      applicationId: data.id || data.applicationId,
+    };
+  }
   private static baseUrl = 'http://localhost:4005'; // Backend URL
 
   /**

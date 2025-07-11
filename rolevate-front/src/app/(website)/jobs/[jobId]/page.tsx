@@ -89,6 +89,8 @@ const formatWorkType = (type: string) => {
 };
 
 export default function JobDetailPage() {
+  // Application modal state
+  // Removed unused applying state
   const params = useParams();
   const jobId = params.jobId as string;
 
@@ -289,6 +291,13 @@ export default function JobDetailPage() {
                     size="lg"
                     className="w-full shadow-lg"
                     ripple={true}
+                    disabled={isLoading || !job}
+                    onClick={() => {
+                      // Only navigate if job is loaded and valid
+                      if (!isLoading && job && typeof window !== "undefined") {
+                        window.location.href = `/jobs/${job.id}/apply`;
+                      }
+                    }}
                   >
                     Apply Now
                   </Button>
