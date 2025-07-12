@@ -9,14 +9,18 @@ export class InputSanitizationMiddleware implements NestMiddleware {
       req.body = this.sanitizeObject(req.body);
     }
 
-    // Sanitize query parameters
-    if (req.query) {
-      req.query = this.sanitizeObject(req.query);
+    // Sanitize query parameters (mutate in place, do not reassign)
+    if (req.query && typeof req.query === 'object') {
+      for (const key of Object.keys(req.query)) {
+        req.query[key] = this.sanitizeObject(req.query[key]);
+      }
     }
 
-    // Sanitize URL parameters
-    if (req.params) {
-      req.params = this.sanitizeObject(req.params);
+    // Sanitize URL parameters (mutate in place, do not reassign)
+    if (req.params && typeof req.params === 'object') {
+      for (const key of Object.keys(req.params)) {
+        req.params[key] = this.sanitizeObject(req.params[key]);
+      }
     }
 
     next();

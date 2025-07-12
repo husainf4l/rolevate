@@ -146,6 +146,7 @@ model User {
   phone            String?
   refreshTokens    RefreshToken[]
   candidateProfile CandidateProfile? // One-to-one relationship with candidate profile
+  applicationNotes ApplicationNote[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -523,6 +524,9 @@ model Application {
   // Company Notes (internal)
   companyNotes String? @db.Text
 
+  // Notes (HR, AI, System, Activity Log)
+  notes ApplicationNote[]
+
   // Timeline
   appliedAt            DateTime  @default(now())
   reviewedAt           DateTime?
@@ -539,4 +543,21 @@ model Application {
   @@index([candidateId])
   @@index([status])
   @@map("applications")
+}
+
+model ApplicationNote {
+  id            String      @id @default(cuid())
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  applicationId String
+  text          String      @db.Text
+  createdAt     DateTime    @default(now())
+  source        NoteSource  @default(USER)
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+}
+
+enum NoteSource {
+  USER
+  AI
+  SYSTEM
 }

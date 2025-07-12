@@ -1,4 +1,3 @@
-
 import { Body, Controller, Post, Get, Patch, Param, Query, Req, UseGuards, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException, SetMetadata } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApplicationService } from './application.service';
@@ -118,14 +117,21 @@ export class ApplicationController {
   }
 
   @Get('company')
+  @UseGuards(JwtAuthGuard)
   async getCompanyApplications(
     @Req() req: Request & { user?: { id: string; companyId?: string; userType?: string } },
     @Query('status') status?: string,
-    @Query('jobId') jobId?: string
-  ): Promise<ApplicationResponseDto[]> {
+    @Query('jobId') jobId?: string,
+    @Query('applicationId') applicationId?: string
+  ): Promise<ApplicationResponseDto[] | ApplicationResponseDto> {
     const user = req.user;
     if (!user || user.userType !== 'COMPANY' || !user.companyId) {
       throw new UnauthorizedException('Company authentication required');
+    }
+    
+    // If applicationId is provided, return the specific application
+    if (applicationId) {
+      return this.applicationService.getApplicationByIdForCompany(applicationId, user.companyId);
     }
     
     // If jobId is provided, use the existing getApplicationsByJob method
@@ -136,6 +142,7 @@ export class ApplicationController {
     return this.applicationService.getAllApplicationsForCompany(user.companyId, status);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/status')
   async updateApplicationStatus(
     @Param('id') applicationId: string,
@@ -147,5 +154,38 @@ export class ApplicationController {
       throw new UnauthorizedException('Company authentication required');
     }
     return this.applicationService.updateApplicationStatus(applicationId, updateDto, user.companyId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':applicationId/notes')
+  async createApplicationNote(
+    @Param('applicationId') applicationId: string,
+    @Body() dto: any,
+    @Req() req: Request & { user?: { id?: string; userId?: string; [key: string]: any } }
+  ) {
+    // Accept sub as a possible user id property, even if not typed
+    const user = req.user as any;
+    const userId = user?.userId || user?.id || user?.sub;
+    return this.applicationService.createApplicationNote(applicationId, dto, userId);
+  }
+
+  @Get(':applicationId/notes')
+  async getApplicationNotes(
+    @Param('applicationId') applicationId: string
+  ) {
+    return this.applicationService.getApplicationNotes(applicationId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':applicationId/notes/:noteId')
+  async updateApplicationNote(
+    @Param('noteId') noteId: string,
+    @Body() dto: any,
+    @Req() req: Request & { user?: { id?: string; userId?: string; [key: string]: any } }
+  ) {
+    // Accept sub as a possible user id property, even if not typed
+    const user = req.user as any;
+    const userId = user?.userId || user?.id || user?.sub;
+    return this.applicationService.updateApplicationNote(noteId, dto, userId);
   }
 }

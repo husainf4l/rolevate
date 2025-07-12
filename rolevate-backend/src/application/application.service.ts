@@ -448,6 +448,31 @@ export class ApplicationService {
     return this.mapToApplicationResponse(application);
   }
 
+  async getApplicationByIdForCompany(applicationId: string, companyId: string): Promise<ApplicationResponseDto> {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: {
+        job: {
+          include: {
+            company: true,
+          },
+        },
+        candidate: true,
+      },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+
+    // Verify that the application belongs to a job from this company
+    if (application.job.companyId !== companyId) {
+      throw new NotFoundException('Application not found');
+    }
+
+    return this.mapToApplicationResponse(application);
+  }
+
   async getAllApplicationsForCompany(companyId: string, status?: string): Promise<ApplicationResponseDto[]> {
     // Find all jobs for this company
     const jobs = await this.prisma.job.findMany({
@@ -473,6 +498,84 @@ export class ApplicationService {
     });
     return applications.map(app => this.mapToApplicationResponse(app));
   }
+
+  // --- Application Notes CRUD ---
+  async createApplicationNote(applicationId: string, dto: any, userId?: string) {
+    let finalUserId: string | null = null;
+    if (dto.source === 'USER') {
+      // Always use the authenticated userId for USER notes, never from client
+      if (!userId) throw new Error('Authenticated user required for USER note');
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (!user) throw new Error('User not found');
+      finalUserId = user.id;
+    } else if (dto.userId) {
+      // For SYSTEM/AI notes, allow userId if provided (e.g., for system attribution)
+      finalUserId = dto.userId;
+    }
+    const note = await this.prisma.applicationNote.create({
+      data: {
+        applicationId,
+        text: dto.text,
+        source: dto.source,
+        userId: finalUserId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+    return note;
+  }
+
+  async getApplicationNotes(applicationId: string) {
+    return this.prisma.applicationNote.findMany({
+      where: { applicationId },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  async updateApplicationNote(noteId: string, dto: any, userId?: string) {
+    let finalUserId: string | null = null;
+    if (dto.source === 'USER') {
+      if (!userId) throw new Error('Authenticated user required for USER note');
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (!user) throw new Error('User not found');
+      finalUserId = user.id;
+    }
+    const note = await this.prisma.applicationNote.update({
+      where: { id: noteId },
+      data: {
+        text: dto.text,
+        source: dto.source,
+        userId: finalUserId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+    return note;
+  }
+  // ...existing code...
 
   private mapToApplicationResponse(application: any): ApplicationResponseDto {
     return {
