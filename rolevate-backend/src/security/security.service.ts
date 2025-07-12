@@ -38,12 +38,17 @@ export class SecurityService {
       });
 
       // Store in database for audit trail
-      await this.prisma.$executeRaw`
-        INSERT INTO security_logs (type, user_id, ip_hash, user_agent_hash, details, severity, created_at)
-        VALUES (${event.type}, ${event.userId}, ${this.hashData(event.ip)}, 
-                ${event.userAgent ? this.hashData(event.userAgent) : null}, 
-                ${JSON.stringify(event.details)}, ${event.severity}, ${event.timestamp})
-      `;
+      await this.prisma.securityLog.create({
+        data: {
+          type: event.type,
+          userId: event.userId,
+          ipHash: this.hashData(event.ip),
+          userAgentHash: event.userAgent ? this.hashData(event.userAgent) : null,
+          details: event.details,
+          severity: event.severity,
+          createdAt: event.timestamp,
+        },
+      });
 
       // Alert on critical events
       if (event.severity === 'CRITICAL') {
@@ -68,7 +73,7 @@ export class SecurityService {
       const metrics = await this.prisma.$queryRaw<Array<{ type: string; count: number }>>`
         SELECT type, COUNT(*) as count 
         FROM security_logs 
-        WHERE created_at >= ${since}
+        WHERE "createdAt" >= ${since}
         GROUP BY type
       `;
 
@@ -77,10 +82,10 @@ export class SecurityService {
       const dataAccess = metrics.find(m => m.type === 'DATA_BREACH_ATTEMPT')?.count || 0;
 
       const lastIncident = await this.prisma.$queryRaw<Array<{ created_at: Date }>>`
-        SELECT created_at 
+        SELECT "createdAt" as created_at
         FROM security_logs 
         WHERE severity IN ('HIGH', 'CRITICAL')
-        ORDER BY created_at DESC 
+        ORDER BY "createdAt" DESC 
         LIMIT 1
       `;
 

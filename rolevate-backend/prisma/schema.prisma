@@ -130,6 +130,21 @@ enum ApplicationStatus {
   WITHDRAWN
 }
 
+enum NotificationType {
+  SUCCESS
+  WARNING
+  INFO
+  ERROR
+}
+
+enum NotificationCategory {
+  APPLICATION
+  INTERVIEW
+  SYSTEM
+  CANDIDATE
+  OFFER
+}
+
 // =======================================
 // USER MANAGEMENT
 // =======================================
@@ -147,6 +162,7 @@ model User {
   refreshTokens    RefreshToken[]
   candidateProfile CandidateProfile? // One-to-one relationship with candidate profile
   applicationNotes ApplicationNote[]
+  notifications    Notification[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -168,6 +184,34 @@ model RefreshToken {
   @@index([token])
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+// =======================================
+// NOTIFICATION MANAGEMENT
+// =======================================
+
+model Notification {
+  id         String               @id @default(cuid())
+  type       NotificationType
+  category   NotificationCategory
+  title      String
+  message    String               @db.Text
+  timestamp  DateTime             @default(now())
+  read       Boolean              @default(false)
+  actionUrl  String?
+  metadata   Json?
+  userId     String?
+  user       User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId  String?
+  company    Company?             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+
+  @@index([userId, read])
+  @@index([companyId, read])
+  @@index([category, timestamp])
+  @@index([type, timestamp])
+  @@map("notifications")
 }
 
 // =======================================
@@ -200,6 +244,7 @@ model Company {
   users             User[]
   jobs              Job[] // Add jobs relationship
   invitations       Invitation[]
+  notifications     Notification[]
   subscription      SubscriptionType @default(FREE)
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt

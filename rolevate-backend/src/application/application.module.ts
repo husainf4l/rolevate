@@ -5,9 +5,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AppCacheModule } from '../cache/cache.module';
 import { OpenaiCvAnalysisService } from '../services/openai-cv-analysis.service';
 import { CvParsingService } from '../services/cv-parsing.service';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [AppCacheModule],
+  imports: [AppCacheModule, NotificationModule],
   controllers: [ApplicationController],
   providers: [ApplicationService, PrismaService, OpenaiCvAnalysisService, CvParsingService],
   exports: [ApplicationService],

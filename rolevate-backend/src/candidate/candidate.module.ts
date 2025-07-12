@@ -4,11 +4,13 @@ import { CandidateController } from './candidate.controller';
 import { CandidateService } from './candidate.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AppCacheModule } from '../cache/cache.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
     PrismaModule, 
     AppCacheModule,
+    NotificationModule,
     MulterModule.register({
       dest: './uploads',
     }),

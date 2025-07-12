@@ -13,6 +13,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { LiveKitModule } from './livekit/livekit.module';
 import { ApplicationModule } from './application/application.module';
 import { SecurityModule } from './security/security.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   // Removed duplicate imports property
@@ -29,6 +30,7 @@ import { SecurityModule } from './security/security.module';
     LiveKitModule,
     ApplicationModule,
     SecurityModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -5,6 +5,8 @@ import { InvitationService } from '../company/invitation.service';
 import { CandidateService } from '../candidate/candidate.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SecurityService } from '../security/security.service';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
@@ -18,6 +20,7 @@ export class AuthService {
     private readonly candidateService: CandidateService,
     private readonly prisma: PrismaService,
     private readonly securityService: SecurityService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async validateUser(email: string, pass: string, ip?: string): Promise<any> {
@@ -273,6 +276,33 @@ export class AuthService {
 
     // Get user with company information
     const userWithCompany = await this.getUserById(user.id);
+    
+    // Create welcome notification
+    try {
+      let welcomeMessage = '';
+      if (createUserDto.userType === 'CANDIDATE') {
+        welcomeMessage = 'Welcome to Rolevate! Start browsing jobs and upload your CV to get started.';
+      } else if (createUserDto.userType === 'COMPANY') {
+        welcomeMessage = 'Welcome to Rolevate! You can now start posting jobs and managing applications.';
+      } else {
+        welcomeMessage = 'Welcome to Rolevate! Your account has been created successfully.';
+      }
+
+      await this.notificationService.create({
+        type: NotificationType.SUCCESS,
+        category: NotificationCategory.SYSTEM,
+        title: 'Welcome to Rolevate!',
+        message: welcomeMessage,
+        userId: user.id,
+        companyId: companyId || undefined,
+        metadata: {
+          userType: createUserDto.userType,
+          registrationDate: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create welcome notification:', error);
+    }
     
     // Generate tokens
     const payload = { email: userWithCompany.email, sub: userWithCompany.id, userType: userWithCompany.userType };

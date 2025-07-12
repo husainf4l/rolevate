@@ -3,8 +3,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
 import { OpenaiCvAnalysisService } from '../services/openai-cv-analysis.service';
 import { CvParsingService } from '../services/cv-parsing.service';
+import { NotificationService } from '../notification/notification.service';
 import { CreateApplicationDto, ApplicationResponseDto, CVAnalysisResultDto, UpdateApplicationStatusDto } from './dto/application.dto';
 import { ApplicationStatus, UserType } from '@prisma/client';
+import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -14,6 +16,7 @@ export class ApplicationService {
     private cacheService: CacheService,
     private openaiCvAnalysisService: OpenaiCvAnalysisService,
     private cvParsingService: CvParsingService,
+    private notificationService: NotificationService,
   ) {}
 
   async createApplication(createApplicationDto: CreateApplicationDto, candidateId: string): Promise<ApplicationResponseDto> {
@@ -98,6 +101,24 @@ export class ApplicationService {
         },
       },
     });
+
+    // Create notification for company about new application
+    try {
+      await this.notificationService.create({
+        type: NotificationType.INFO,
+        category: NotificationCategory.APPLICATION,
+        title: 'New Application Received',
+        message: `New application received for ${job.title} from ${application.candidate.firstName} ${application.candidate.lastName}`,
+        companyId: job.companyId,
+        metadata: {
+          candidateName: `${application.candidate.firstName} ${application.candidate.lastName}`,
+          jobTitle: job.title,
+          applicationId: application.id,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create application notification:', error);
+    }
 
     // Trigger AI CV analysis in the background
     if (resumeUrl && job.cvAnalysisPrompt) {
@@ -222,6 +243,24 @@ export class ApplicationService {
         },
       },
     });
+
+    // Create notification for company about new application
+    try {
+      await this.notificationService.create({
+        type: NotificationType.INFO,
+        category: NotificationCategory.APPLICATION,
+        title: 'New Application Received',
+        message: `New application received for ${job.title} from ${application.candidate.firstName} ${application.candidate.lastName}`,
+        companyId: job.companyId,
+        metadata: {
+          candidateName: `${application.candidate.firstName} ${application.candidate.lastName}`,
+          jobTitle: job.title,
+          applicationId: application.id,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create application notification:', error);
+    }
 
     // Trigger AI CV analysis in the background
     if (createApplicationDto.resumeUrl && job.cvAnalysisPrompt) {
@@ -421,6 +460,63 @@ export class ApplicationService {
         candidate: true,
       },
     });
+
+    // Create notification for candidate about status update
+    try {
+      let notificationTitle = '';
+      let notificationMessage = '';
+      let notificationType = NotificationType.INFO;
+
+      switch (updateDto.status) {
+        case ApplicationStatus.REVIEWING:
+          notificationTitle = 'Application Under Review';
+          notificationMessage = `Your application for ${application.job.title} is now under review.`;
+          notificationType = NotificationType.INFO;
+          break;
+        case ApplicationStatus.INTERVIEW_SCHEDULED:
+          notificationTitle = 'Interview Scheduled';
+          notificationMessage = `An interview has been scheduled for your application to ${application.job.title}.`;
+          notificationType = NotificationType.SUCCESS;
+          break;
+        case ApplicationStatus.INTERVIEWED:
+          notificationTitle = 'Interview Completed';
+          notificationMessage = `Your interview for ${application.job.title} has been completed.`;
+          notificationType = NotificationType.INFO;
+          break;
+        case ApplicationStatus.OFFERED:
+          notificationTitle = 'Job Offer Received';
+          notificationMessage = `Congratulations! You have received an offer for ${application.job.title}.`;
+          notificationType = NotificationType.SUCCESS;
+          break;
+        case ApplicationStatus.REJECTED:
+          notificationTitle = 'Application Update';
+          notificationMessage = `Thank you for your interest in ${application.job.title}. We have decided to move forward with other candidates.`;
+          notificationType = NotificationType.INFO;
+          break;
+        case ApplicationStatus.WITHDRAWN:
+          notificationTitle = 'Application Withdrawn';
+          notificationMessage = `Your application for ${application.job.title} has been withdrawn.`;
+          notificationType = NotificationType.INFO;
+          break;
+      }
+
+      if (notificationTitle && application.candidate.userId) {
+        await this.notificationService.create({
+          type: notificationType,
+          category: NotificationCategory.APPLICATION,
+          title: notificationTitle,
+          message: notificationMessage,
+          userId: application.candidate.userId,
+          metadata: {
+            applicationId: application.id,
+            jobTitle: application.job.title,
+            candidateName: `${application.candidate.firstName} ${application.candidate.lastName}`,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to create status update notification:', error);
+    }
 
     // Clear cache
     await this.cacheService.clear();

@@ -9,6 +9,7 @@ import { CompanyModule } from '../company/company.module';
 import { CandidateModule } from '../candidate/candidate.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SecurityModule } from '../security/security.module';
+import { NotificationModule } from '../notification/notification.module';
 import { JwtStrategy } from './jwt.strategy';
 import { TokenCleanupService } from './token-cleanup.service';
 
@@ -25,6 +26,7 @@ import { TokenCleanupService } from './token-cleanup.service';
     CandidateModule,
     PrismaModule,
     SecurityModule,
+    NotificationModule,
   ],
   providers: [AuthService, JwtStrategy, TokenCleanupService],
   controllers: [AuthController],

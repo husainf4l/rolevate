@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
 import {
   CreateBasicCandidateProfileDto,
   CandidateProfileResponseDto,
@@ -16,6 +18,7 @@ export class CandidateService {
   constructor(
     private prisma: PrismaService,
     private cacheService: CacheService,
+    private notificationService: NotificationService,
   ) {}
 
   async createBasicProfile(createBasicDto: CreateBasicCandidateProfileDto, userId?: string): Promise<CandidateProfileResponseDto> {
@@ -155,6 +158,23 @@ export class CandidateService {
 
       return newCV;
     });
+
+    // Create notification for successful CV upload
+    try {
+      await this.notificationService.create({
+        type: NotificationType.SUCCESS,
+        category: NotificationCategory.CANDIDATE,
+        title: 'CV Uploaded Successfully',
+        message: `Your CV "${originalFileName}" has been uploaded successfully and is now active.`,
+        userId: userId,
+        metadata: {
+          fileName: originalFileName,
+          cvId: cv.id,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create CV upload notification:', error);
+    }
 
     // Clear cache for this user's profile
     await this.cacheService.invalidateUserProfile(userId);

@@ -4,6 +4,8 @@ import { CreateJobDto, JobResponseDto } from './dto/create-job.dto';
 import { JobType, JobLevel, WorkType, JobStatus } from '@prisma/client';
 import { CacheService } from '../cache/cache.service';
 import { ViewTrackingService } from './view-tracking.service';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
 
 @Injectable()
 export class JobService {
@@ -11,6 +13,7 @@ export class JobService {
     private prisma: PrismaService,
     private cacheService: CacheService,
     private viewTrackingService: ViewTrackingService,
+    private notificationService: NotificationService,
   ) {}
 
   async create(createJobDto: CreateJobDto, companyId: string): Promise<JobResponseDto> {
@@ -221,6 +224,25 @@ export class JobService {
         }
       },
     });
+
+    // Create notification when job is published
+    if (status === JobStatus.ACTIVE && existingJob.status !== JobStatus.ACTIVE) {
+      try {
+        await this.notificationService.create({
+          type: NotificationType.SUCCESS,
+          category: NotificationCategory.SYSTEM,
+          title: 'Job Published Successfully',
+          message: `Your job "${job.title}" has been published and is now live for candidates to apply.`,
+          companyId: job.companyId,
+          metadata: {
+            jobTitle: job.title,
+            jobId: job.id,
+          },
+        });
+      } catch (error) {
+        console.error('Failed to create job published notification:', error);
+      }
+    }
 
     // Invalidate caches
     await this.cacheService.invalidateJobCache(id, companyId);
