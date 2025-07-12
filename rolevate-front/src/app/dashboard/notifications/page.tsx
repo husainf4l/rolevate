@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/dashboard/Header";
 import {
   BellIcon,
@@ -14,10 +14,11 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
+
 interface Notification {
   id: string;
-  type: "success" | "warning" | "info" | "error";
-  category: "application" | "interview" | "system" | "candidate" | "offer";
+  type: "SUCCESS" | "WARNING" | "INFO" | "ERROR";
+  category: "APPLICATION" | "INTERVIEW" | "SYSTEM" | "CANDIDATE" | "OFFER";
   title: string;
   message: string;
   timestamp: string;
@@ -28,168 +29,34 @@ interface Notification {
     jobTitle?: string;
     interviewDate?: string;
     applicationId?: string;
+    [key: string]: any;
   };
+  userId?: string;
+  companyId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-const notifications: Notification[] = [
-  {
-    id: "1",
-    type: "success",
-    category: "application",
-    title: "New Application Received",
-    message:
-      "Sarah Al-Ahmad has applied for Senior Frontend Developer position",
-    timestamp: "2024-12-08T10:30:00Z",
-    read: false,
-    actionUrl: "/dashboard/candidates/1",
-    metadata: {
-      candidateName: "Sarah Al-Ahmad",
-      jobTitle: "Senior Frontend Developer",
-      applicationId: "APP-001",
-    },
-  },
-  {
-    id: "2",
-    type: "info",
-    category: "interview",
-    title: "AI Interview Completed",
-    message: "Mohammed Hassan has completed AI Interview 1 with a score of 76%",
-    timestamp: "2024-12-08T09:15:00Z",
-    read: false,
-    actionUrl: "/dashboard/candidates/2",
-    metadata: {
-      candidateName: "Mohammed Hassan",
-      jobTitle: "React Developer",
-    },
-  },
-  {
-    id: "3",
-    type: "warning",
-    category: "interview",
-    title: "HR Interview Scheduled",
-    message: "Nour El-Din is scheduled for HR interview tomorrow at 2:00 PM",
-    timestamp: "2024-12-08T08:45:00Z",
-    read: false,
-    actionUrl: "/dashboard/candidates/7",
-    metadata: {
-      candidateName: "Nour El-Din",
-      jobTitle: "Data Scientist",
-      interviewDate: "2024-12-09T14:00:00Z",
-    },
-  },
-  {
-    id: "4",
-    type: "success",
-    category: "offer",
-    title: "Offer Accepted",
-    message:
-      "Omar Khalil has accepted the offer for Full Stack Developer position",
-    timestamp: "2024-12-08T07:20:00Z",
-    read: true,
-    actionUrl: "/dashboard/candidates/4",
-    metadata: {
-      candidateName: "Omar Khalil",
-      jobTitle: "Full Stack Developer",
-    },
-  },
-  {
-    id: "5",
-    type: "error",
-    category: "system",
-    title: "System Alert",
-    message:
-      "AI Interview system experienced a brief downtime. All scheduled interviews have been rescheduled.",
-    timestamp: "2024-12-08T06:30:00Z",
-    read: true,
-    actionUrl: "/dashboard/system-status",
-  },
-  {
-    id: "6",
-    type: "info",
-    category: "candidate",
-    title: "Candidate Profile Updated",
-    message:
-      "Fatima Al-Zahra has updated her portfolio with new design projects",
-    timestamp: "2024-12-07T16:45:00Z",
-    read: true,
-    actionUrl: "/dashboard/candidates/3",
-    metadata: {
-      candidateName: "Fatima Al-Zahra",
-      jobTitle: "UI/UX Designer",
-    },
-  },
-  {
-    id: "7",
-    type: "warning",
-    category: "application",
-    title: "Application Deadline Reminder",
-    message: "DevOps Engineer position applications close in 3 days",
-    timestamp: "2024-12-07T15:30:00Z",
-    read: true,
-    actionUrl: "/dashboard/jobs/6",
-    metadata: {
-      jobTitle: "DevOps Engineer",
-    },
-  },
-  {
-    id: "8",
-    type: "success",
-    category: "interview",
-    title: "Interview Feedback Submitted",
-    message: "HR feedback has been submitted for Yusuf Al-Rashid's interview",
-    timestamp: "2024-12-07T14:15:00Z",
-    read: true,
-    actionUrl: "/dashboard/candidates/8",
-    metadata: {
-      candidateName: "Yusuf Al-Rashid",
-      jobTitle: "Product Manager",
-    },
-  },
-  {
-    id: "9",
-    type: "info",
-    category: "system",
-    title: "Weekly Report Generated",
-    message: "Your weekly recruitment report is ready for download",
-    timestamp: "2024-12-07T09:00:00Z",
-    read: true,
-    actionUrl: "/dashboard/reports",
-  },
-  {
-    id: "10",
-    type: "error",
-    category: "candidate",
-    title: "Candidate Rejected",
-    message:
-      "Ahmed Mansour did not meet the requirements for Mobile App Developer position",
-    timestamp: "2024-12-07T08:30:00Z",
-    read: true,
-    actionUrl: "/dashboard/candidates/6",
-    metadata: {
-      candidateName: "Ahmed Mansour",
-      jobTitle: "Mobile App Developer",
-    },
-  },
-];
+// Notifications state will be loaded from backend
 
 const getNotificationIcon = (
   type: Notification["type"],
   category: Notification["category"]
 ) => {
   const categoryIcon = {
-    application: BriefcaseIcon,
-    interview: ChatBubbleLeftRightIcon,
-    system: InformationCircleIcon,
-    candidate: UserIcon,
-    offer: DocumentTextIcon,
+    APPLICATION: BriefcaseIcon,
+    INTERVIEW: ChatBubbleLeftRightIcon,
+    SYSTEM: InformationCircleIcon,
+    CANDIDATE: UserIcon,
+    OFFER: DocumentTextIcon,
   }[category];
 
   const Icon = categoryIcon;
   const colorClass = {
-    success: "text-green-600 bg-green-100",
-    warning: "text-yellow-600 bg-yellow-100",
-    info: "text-blue-600 bg-blue-100",
-    error: "text-red-600 bg-red-100",
+    SUCCESS: "text-green-600 bg-green-100",
+    WARNING: "text-yellow-600 bg-yellow-100",
+    INFO: "text-blue-600 bg-blue-100",
+    ERROR: "text-red-600 bg-red-100",
   }[type];
 
   return (
@@ -219,13 +86,36 @@ const formatTimestamp = (timestamp: string) => {
 };
 
 export default function NotificationsPage() {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedNotification, setSelectedNotification] =
     useState<Notification | null>(null);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredNotifications = notifications.filter((notification) => {
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("http://localhost:4005/api/notifications", {
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("Failed to fetch notifications");
+        const data = await res.json();
+        setNotifications(Array.isArray(data) ? data : data.notifications || []);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch notifications");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  const filteredNotifications = notifications.filter((notification: Notification) => {
     const matchesReadFilter =
       filter === "all" ||
       (filter === "read" && notification.read) ||
@@ -243,26 +133,52 @@ export default function NotificationsPage() {
   });
 
   const markAsRead = (notificationId: string) => {
-    const notification = notifications.find((n) => n.id === notificationId);
-    if (notification) {
-      notification.read = true;
-    }
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === notificationId ? { ...n, read: true } : n
+      )
+    );
   };
 
   const markAllAsRead = () => {
-    notifications.forEach((notification) => {
-      notification.read = true;
-    });
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const deleteNotification = (notificationId: string) => {
-    const index = notifications.findIndex((n) => n.id === notificationId);
-    if (index > -1) {
-      notifications.splice(index, 1);
+    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+    if (selectedNotification?.id === notificationId) {
+      setSelectedNotification(null);
     }
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0891b2] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading notifications...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
