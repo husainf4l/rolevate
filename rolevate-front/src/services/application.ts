@@ -9,27 +9,58 @@ export type ApplicationData = {
 
 export interface Application {
   id: string;
-  status: "PENDING" | "REVIEWING" | "REJECTED" | "OFFERED" | "HIRED";
+  status: "SUBMITTED" | "REVIEWING" | "INTERVIEW_SCHEDULED" | "INTERVIEWED" | "OFFERED" | "REJECTED" | "WITHDRAWN";
   appliedAt: string;
   cvAnalysisScore: number;
-  user: {
+  jobId: string;
+  candidateId: string;
+  coverLetter: string;
+  resumeUrl: string;
+  expectedSalary: string;
+  noticePeriod: string;
+  cvAnalysisResults?: {
+    score: number;
+    summary: string;
+    strengths: string[];
+    overallFit: string;
+    weaknesses: string[];
+    skillsMatch: {
+      matched: string[];
+      missing: string[];
+      percentage: number;
+    };
+    educationMatch: {
+      details: string;
+      relevant: boolean;
+    };
+    experienceMatch: {
+      years: number;
+      details: string;
+      relevant: boolean;
+    };
+    recommendations: string[];
+  };
+  analyzedAt: string;
+  companyNotes?: string;
+  reviewedAt?: string;
+  interviewScheduledAt?: string;
+  interviewedAt?: string;
+  rejectedAt?: string;
+  acceptedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  candidate: {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
-    phone?: string;
   };
   job: {
     id: string;
     title: string;
-    location?: string;
-    salary?: string;
-  };
-  cv?: {
-    id: string;
-    fileName: string;
-    skills?: string[];
-    experience?: string;
-    education?: string;
+    company: {
+      name: string;
+    };
   };
 }
 
@@ -84,6 +115,7 @@ export async function applyToJobAnonymously(data: AnonymousApplicationData): Pro
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(data),
   });
   if (!response.ok) {
@@ -139,6 +171,45 @@ export async function getCompanyApplications(jobId?: string): Promise<Applicatio
   return response.json();
 }
 
+// Get a single application by ID using the company endpoint with applicationId query
+export async function getApplicationById(applicationId: string): Promise<Application> {
+  const response = await fetch(`http://localhost:4005/api/applications/company?applicationId=${applicationId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Failed to fetch application" }));
+    throw new Error(error.message || "Failed to fetch application");
+  }
+  
+  const data = await response.json();
+  console.log('Raw response data:', data);
+  
+  // Handle both array and single object responses
+  let application: Application;
+  
+  if (Array.isArray(data)) {
+    // If using applicationId query, backend should return array with single application or empty array
+    if (data.length === 0) {
+      throw new Error("Application not found or you don't have permission to view it");
+    }
+    application = data[0];
+  } else {
+    // If backend returns a single object directly
+    application = data;
+  }
+  
+  if (!application || !application.id) {
+    throw new Error("Application data is invalid or missing required fields");
+  }
+
+  return application;
+}
+
 // Update application status
 export async function updateApplicationStatus(
   applicationId: string, 
@@ -169,4 +240,92 @@ export async function bulkUpdateApplicationStatus(
   const promises = applicationIds.map(id => updateApplicationStatus(id, status));
   await Promise.all(promises);
   return { message: `Successfully updated ${applicationIds.length} applications` };
+}
+
+// Application notes interfaces
+export interface ApplicationNote {
+  id: string;
+  applicationId: string;
+  text: string;
+  createdAt: string;
+  source: "USER" | "AI" | "SYSTEM";
+  userId?: string;
+  user?: {
+    id: string;
+    name?: string;
+    email?: string;
+  };
+}
+
+export interface CreateNoteData {
+  text: string;
+  source: ApplicationNote["source"];
+}
+
+export interface UpdateNoteData {
+  text?: string;
+  source?: ApplicationNote["source"];
+}
+
+// Get application notes
+export async function getApplicationNotes(applicationId: string): Promise<ApplicationNote[]> {
+  const response = await fetch(`http://localhost:4005/api/applications/${applicationId}/notes`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Failed to fetch application notes" }));
+    throw new Error(error.message || "Failed to fetch application notes");
+  }
+  
+  return response.json();
+}
+
+// Create application note
+export async function createApplicationNote(
+  applicationId: string, 
+  noteData: CreateNoteData
+): Promise<ApplicationNote> {
+  const response = await fetch(`http://localhost:4005/api/applications/${applicationId}/notes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(noteData),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Failed to create application note" }));
+    throw new Error(error.message || "Failed to create application note");
+  }
+  
+  return response.json();
+}
+
+// Update application note
+export async function updateApplicationNote(
+  applicationId: string,
+  noteId: string,
+  noteData: UpdateNoteData
+): Promise<ApplicationNote> {
+  const response = await fetch(`http://localhost:4005/api/applications/${applicationId}/notes/${noteId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(noteData),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Failed to update application note" }));
+    throw new Error(error.message || "Failed to update application note");
+  }
+  
+  return response.json();
 }

@@ -41,16 +41,20 @@ interface CandidateDisplay extends Application {
 
 const getStatusColor = (status: Application["status"]) => {
   switch (status) {
-    case "PENDING":
+    case "SUBMITTED":
       return "bg-gray-100 text-gray-800";
     case "REVIEWING":
       return "bg-blue-100 text-blue-800";
+    case "INTERVIEW_SCHEDULED":
+      return "bg-purple-100 text-purple-800";
+    case "INTERVIEWED":
+      return "bg-indigo-100 text-indigo-800";
     case "OFFERED":
-      return "bg-green-100 text-green-800";
-    case "HIRED":
       return "bg-green-100 text-green-800";
     case "REJECTED":
       return "bg-red-100 text-red-800";
+    case "WITHDRAWN":
+      return "bg-gray-100 text-gray-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
@@ -89,8 +93,8 @@ const transformApplicationToCandidate = (application: Application): CandidateDis
   return {
     ...application,
     position: application.job.title,
-    skills: application.cv?.skills || [],
-    location: application.job.location || "Not specified",
+    skills: application.cvAnalysisResults?.skillsMatch?.matched || [],
+    location: "Not specified", // No location in current API response
     source: "direct" as const, // Default source, could be enhanced
     priority: "medium" as const, // Default priority, could be calculated
     cvRating: application.cvAnalysisScore,
@@ -100,9 +104,11 @@ const transformApplicationToCandidate = (application: Application): CandidateDis
     overallRating: application.cvAnalysisScore,
     appliedDate: new Date(application.appliedAt).toLocaleDateString(),
     lastActivity: new Date(application.appliedAt).toLocaleDateString(),
-    experience: application.cv?.experience || "Not specified",
-    name: application.user.name,
-    email: application.user.email,
+    experience: application.cvAnalysisResults?.experienceMatch?.years 
+      ? `${application.cvAnalysisResults.experienceMatch.years} years` 
+      : "Not specified",
+    name: `${application.candidate.firstName} ${application.candidate.lastName}`,
+    email: application.candidate.email,
   };
 };
 
@@ -121,12 +127,21 @@ export default function CandidatesPage() {
     const fetchApplications = async () => {
       try {
         setLoading(true);
+        setError(null);
+        console.log('Fetching company applications...');
         const applications = await getCompanyApplications();
+        console.log('Applications fetched successfully:', applications);
         const transformedCandidates = applications.map(transformApplicationToCandidate);
         setCandidates(transformedCandidates);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch applications');
         console.error('Error fetching applications:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch applications';
+        setError(errorMessage);
+        
+        // Check if it's a 401 authentication error
+        if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
+          console.error('Authentication error - user may not be logged in as company');
+        }
       } finally {
         setLoading(false);
       }
@@ -199,12 +214,12 @@ export default function CandidatesPage() {
 
   // Map API statuses to display statuses
   const statusCounts = {
-    ai_analysis: candidates.filter((c) => c.status === "PENDING").length,
+    ai_analysis: candidates.filter((c) => c.status === "SUBMITTED").length,
     ai_interview_1: candidates.filter((c) => c.status === "REVIEWING").length,
-    ai_interview_2: 0, // Not directly mapped from API
-    hr_interview: 0, // Not directly mapped from API  
+    ai_interview_2: candidates.filter((c) => c.status === "INTERVIEW_SCHEDULED").length,
+    hr_interview: candidates.filter((c) => c.status === "INTERVIEWED").length,
     offer: candidates.filter((c) => c.status === "OFFERED").length,
-    hired: candidates.filter((c) => c.status === "HIRED").length,
+    hired: 0, // No equivalent in new enum - could be tracked separately
     rejected: candidates.filter((c) => c.status === "REJECTED").length,
   };
 
@@ -240,13 +255,45 @@ export default function CandidatesPage() {
           {/* Error State */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
-              <p className="text-red-600">Error: {error}</p>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Retry
-              </button>
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <XCircleIcon className="h-5 w-5 text-red-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    {error.includes('Unauthorized') || error.includes('401') 
+                      ? 'Authentication Error' 
+                      : 'Error Loading Candidates'
+                    }
+                  </h3>
+                  <div className="mt-2 text-sm text-red-700">
+                    <p>{error}</p>
+                    {(error.includes('Unauthorized') || error.includes('401')) && (
+                      <p className="mt-1">
+                        Please make sure you are logged in as a company. You may need to log out and log back in.
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-4">
+                    <div className="-mx-2 -my-1.5 flex">
+                      <button 
+                        onClick={() => window.location.reload()} 
+                        className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                      >
+                        Retry
+                      </button>
+                      {(error.includes('Unauthorized') || error.includes('401')) && (
+                        <button 
+                          onClick={() => window.location.href = '/login'} 
+                          className="ml-3 px-3 py-2 bg-white text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
+                        >
+                          Go to Login
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -259,7 +306,7 @@ export default function CandidatesPage() {
                     <div className="text-2xl font-bold text-gray-900 mb-1">
                       {statusCounts.ai_analysis}
                     </div>
-                    <div className="text-sm text-gray-600 mb-2">Pending</div>
+                    <div className="text-sm text-gray-600 mb-2">Submitted</div>
                     <div className="w-8 h-8 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
                       <ChartBarIcon className="w-5 h-5 text-gray-600" />
                     </div>
@@ -283,7 +330,7 @@ export default function CandidatesPage() {
                     <div className="text-2xl font-bold text-gray-900 mb-1">
                       {statusCounts.ai_interview_2}
                     </div>
-                    <div className="text-sm text-gray-600 mb-2">Interview 2</div>
+                    <div className="text-sm text-gray-600 mb-2">Interview Scheduled</div>
                     <div className="w-8 h-8 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
                       <ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-600" />
                     </div>
@@ -295,7 +342,7 @@ export default function CandidatesPage() {
                     <div className="text-2xl font-bold text-[#0891b2] mb-1">
                       {statusCounts.hr_interview}
                     </div>
-                    <div className="text-sm text-gray-600 mb-2">HR Interview</div>
+                    <div className="text-sm text-gray-600 mb-2">Interviewed</div>
                     <div className="w-8 h-8 mx-auto bg-blue-100 rounded-lg flex items-center justify-center">
                       <UserIcon className="w-5 h-5 text-[#0891b2]" />
                     </div>
@@ -368,11 +415,13 @@ export default function CandidatesPage() {
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
                       >
                         <option value="all">All Status</option>
-                        <option value="PENDING">Pending</option>
+                        <option value="SUBMITTED">Submitted</option>
                         <option value="REVIEWING">Reviewing</option>
+                        <option value="INTERVIEW_SCHEDULED">Interview Scheduled</option>
+                        <option value="INTERVIEWED">Interviewed</option>
                         <option value="OFFERED">Offered</option>
-                        <option value="HIRED">Hired</option>
                         <option value="REJECTED">Rejected</option>
+                        <option value="WITHDRAWN">Withdrawn</option>
                       </select>
                     </div>
 
@@ -440,11 +489,17 @@ export default function CandidatesPage() {
                             onClick={() => handleBulkStatusUpdate("REVIEWING")}
                             className="px-3 py-1.5 text-sm bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium"
                           >
-                            Advance Stage
+                            Move to Review
+                          </button>
+                          <button 
+                            onClick={() => handleBulkStatusUpdate("INTERVIEW_SCHEDULED")}
+                            className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                          >
+                            Schedule Interview
                           </button>
                           <button 
                             onClick={() => handleBulkStatusUpdate("OFFERED")}
-                            className="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                            className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                           >
                             Send Offer
                           </button>
@@ -610,7 +665,10 @@ export default function CandidatesPage() {
                             candidate.status
                           )}`}
                         >
-                          {candidate.status.replace("_", " ")}
+                          {candidate.status === "SUBMITTED" ? "Submitted" : 
+                           candidate.status === "INTERVIEW_SCHEDULED" ? "Interview Scheduled" :
+                           candidate.status === "INTERVIEWED" ? "Interviewed" :
+                           candidate.status.replace("_", " ")}
                         </span>
                       </td>
 
@@ -681,10 +739,10 @@ export default function CandidatesPage() {
                             View
                           </Link>
                           <button 
-                            onClick={() => handleSingleStatusUpdate(candidate.id, "REVIEWING")}
+                            onClick={() => handleSingleStatusUpdate(candidate.id, "INTERVIEW_SCHEDULED")}
                             className="text-green-600 hover:text-green-700 font-medium text-sm"
                           >
-                            Advance
+                            Schedule
                           </button>
                           <button 
                             onClick={() => handleSingleStatusUpdate(candidate.id, "REJECTED")}
