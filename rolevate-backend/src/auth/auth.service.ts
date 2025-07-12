@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import { InvitationService } from '../company/invitation.service';
 import { CandidateService } from '../candidate/candidate.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { SecurityService } from '../security/security.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
@@ -16,14 +17,36 @@ export class AuthService {
     private readonly invitationService: InvitationService,
     private readonly candidateService: CandidateService,
     private readonly prisma: PrismaService,
+    private readonly securityService: SecurityService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string, ip?: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
+    
     if (user && user.password && await bcrypt.compare(pass, user.password)) {
+      // Log successful authentication
+      await this.securityService.logSecurityEvent({
+        type: 'AUTH_SUCCESS',
+        userId: user.id,
+        ip: ip || 'unknown',
+        details: { email: user.email, userType: user.userType },
+        timestamp: new Date(),
+        severity: 'LOW',
+      });
+      
       const { password, ...result } = user;
       return result;
     }
+    
+    // Log failed authentication
+    await this.securityService.logSecurityEvent({
+      type: 'AUTH_FAILURE',
+      ip: ip || 'unknown',
+      details: { attemptedEmail: email, reason: user ? 'invalid_password' : 'user_not_found' },
+      timestamp: new Date(),
+      severity: 'MEDIUM',
+    });
+    
     return null;
   }
 
@@ -58,39 +81,34 @@ export class AuthService {
   }
 
   async refreshAccessToken(refreshToken: string) {
-    console.log('=== refreshAccessToken called ===');
-    console.log('Refresh token (truncated):', refreshToken.substring(0, 20) + '...');
+    // Removed detailed logging for security
     
     const tokenRecord = await this.prisma.refreshToken.findUnique({
       where: { token: refreshToken },
       include: { user: true },
     });
 
-    console.log('Token record found:', !!tokenRecord);
+    // Security: Reduced logging
     
     if (!tokenRecord) {
-      console.log('No token record found in database');
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
     
     if (tokenRecord.isRevoked) {
-      console.log('Token is revoked');
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
     
     if (tokenRecord.expiresAt < new Date()) {
-      console.log('Token is expired. Expires at:', tokenRecord.expiresAt, 'Current time:', new Date());
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    console.log('Token is valid. User ID:', tokenRecord.user.id, 'Email:', tokenRecord.user.email);
+    // Token is valid, proceeding
     
     const user = tokenRecord.user;
     const payload = { email: user.email, sub: user.id, userType: user.userType };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
 
-    console.log('New access token generated successfully');
-    console.log('Payload:', payload);
+    // Access token generated successfully
     
     return {
       access_token: accessToken,
@@ -112,8 +130,7 @@ export class AuthService {
   }
 
   async getUserById(id: string) {
-    console.log('=== getUserById called ===');
-    console.log('id parameter:', id);
+    // Getting user by ID
     
     try {
       const user = await this.prisma.user.findUnique({
@@ -127,10 +144,9 @@ export class AuthService {
         },
       });
       
-      console.log('Database query result:', user);
+      // User found in database
       
       if (!user) {
-        console.log('User not found in database');
         throw new UnauthorizedException('User not found');
       }
       
@@ -148,20 +164,18 @@ export class AuthService {
           const candidateProfile = await this.candidateService.findProfileByUserId(user.id);
           if (candidateProfile) {
             response.candidateProfile = candidateProfile;
-            console.log('Candidate profile found and added to response:', candidateProfile);
+            // Candidate profile added to response
           } else {
-            console.log('No candidate profile found for user:', user.id);
+            // No candidate profile found
           }
         } catch (error) {
-          console.log('Error fetching candidate profile for user:', user.id, error);
-          // Don't throw error, just continue without candidate profile
+          // Error fetching candidate profile - continuing without it
         }
       }
       
-      console.log('Final response (password excluded):', response);
+      // Returning user data (password excluded)
       return response;
     } catch (error) {
-      console.error('Error in getUserById:', error);
       throw error;
     }
   }
@@ -206,8 +220,14 @@ export class AuthService {
       throw new BadRequestException('User with this email already exists');
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    // Validate password strength
+    const passwordValidation = this.securityService.validatePassword(createUserDto.password);
+    if (!passwordValidation.valid) {
+      throw new BadRequestException(`Password requirements not met: ${passwordValidation.issues.join(', ')}`);
+    }
+
+    // Hash password with higher salt rounds for security
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 12);
 
     // Handle invitation code if provided
     let companyId: string | null = null;

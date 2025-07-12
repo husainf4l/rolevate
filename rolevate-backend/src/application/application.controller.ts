@@ -1,8 +1,8 @@
 
-import { Body, Controller, Post, Req, UseGuards, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, Get, Patch, Param, Query, Req, UseGuards, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException, SetMetadata } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApplicationService } from './application.service';
-import { CreateApplicationDto, ApplicationResponseDto } from './dto/application.dto';
+import { CreateApplicationDto, ApplicationResponseDto, UpdateApplicationStatusDto } from './dto/application.dto';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { diskStorage } from 'multer';
@@ -14,7 +14,6 @@ import { v4 as uuidv4 } from 'uuid';
 export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   async createApplication(
     @Body() createApplicationDto: CreateApplicationDto,
@@ -28,6 +27,7 @@ export class ApplicationController {
     return this.applicationService.createApplication(createApplicationDto, user.candidateProfileId);
   }
 
+  @SetMetadata('skipAuth', true)
   @Post('anonymous')
   async createAnonymousApplication(
     @Body() createApplicationDto: CreateApplicationDto
@@ -36,6 +36,7 @@ export class ApplicationController {
     return this.applicationService.createAnonymousApplication(createApplicationDto);
   }
 
+  @SetMetadata('skipAuth', true)
   @Post('apply-with-cv')
   @UseInterceptors(FileInterceptor('cv', {
     storage: diskStorage({
@@ -102,5 +103,49 @@ export class ApplicationController {
 
     // Process the anonymous application
     return this.applicationService.createAnonymousApplication(createApplicationDto);
+  }
+
+  @Get('job/:jobId')
+  async getApplicationsByJob(
+    @Param('jobId') jobId: string,
+    @Req() req: Request & { user?: { id: string; companyId?: string; userType?: string } }
+  ): Promise<ApplicationResponseDto[]> {
+    const user = req.user;
+    if (!user || user.userType !== 'COMPANY' || !user.companyId) {
+      throw new UnauthorizedException('Company authentication required');
+    }
+    return this.applicationService.getApplicationsByJob(jobId, user.companyId);
+  }
+
+  @Get('company')
+  async getCompanyApplications(
+    @Req() req: Request & { user?: { id: string; companyId?: string; userType?: string } },
+    @Query('status') status?: string,
+    @Query('jobId') jobId?: string
+  ): Promise<ApplicationResponseDto[]> {
+    const user = req.user;
+    if (!user || user.userType !== 'COMPANY' || !user.companyId) {
+      throw new UnauthorizedException('Company authentication required');
+    }
+    
+    // If jobId is provided, use the existing getApplicationsByJob method
+    if (jobId) {
+      return this.applicationService.getApplicationsByJob(jobId, user.companyId);
+    }
+    // Otherwise, return all applications for the company, optionally filtered by status
+    return this.applicationService.getAllApplicationsForCompany(user.companyId, status);
+  }
+
+  @Patch(':id/status')
+  async updateApplicationStatus(
+    @Param('id') applicationId: string,
+    @Body() updateDto: UpdateApplicationStatusDto,
+    @Req() req: Request & { user?: { id: string; companyId?: string; userType?: string } }
+  ): Promise<ApplicationResponseDto> {
+    const user = req.user;
+    if (!user || user.userType !== 'COMPANY' || !user.companyId) {
+      throw new UnauthorizedException('Company authentication required');
+    }
+    return this.applicationService.updateApplicationStatus(applicationId, updateDto, user.companyId);
   }
 }

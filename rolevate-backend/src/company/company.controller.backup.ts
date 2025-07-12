@@ -17,12 +17,80 @@ export class CompanyController {
     return this.companyService.findAll();
   }
 
-  // Specific routes must come BEFORE parameterized routes
-  @Get('profile')
+  @Get(':id')
+  async findById(@Param('id') id: string) {
+    return this.companyService.findById(id);
+  }
+
+  @Post('register')
   @UseGuards(JwtAuthGuard)
-  async getMyCompanyProfile(@Req() req: Request) {
+  async registerCompany(
+    @Body() createCompanyDto: CreateCompanyDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    return this.companyService.create(createCompanyDto, user.userId);
+  }
+
+  @Post('join')
+  @UseGuards(JwtAuthGuard)
+  async joinCompany(
+    @Body() joinCompanyDto: JoinCompanyDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    return this.companyService.joinCompany(user.userId, joinCompanyDto.invitationCode);
+  }
+
+  @Get('me/company')
+  @UseGuards(JwtAuthGuard)
+  async getMyCompany(@Req() req: Request) {
     const user = req.user as any;
     return this.companyService.getUserCompany(user.userId);
+  }
+
+  @Post(':id/invitation')
+  @UseGuards(JwtAuthGuard)
+  async generateInvitation(
+    @Param('id') companyId: string,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    
+    // Check if user belongs to this company
+    const userCompany = await this.companyService.getUserCompany(user.userId);
+    if (!userCompany || userCompany.id !== companyId) {
+      throw new UnauthorizedException('You can only generate invitations for your own company');
+    }
+    
+    return this.invitationService.generateInvitation(companyId);
+  }
+
+  @Get(':id/invitations')
+  @UseGuards(JwtAuthGuard)
+  async getCompanyInvitations(
+    @Param('id') companyId: string,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    
+    // Check if user belongs to this company
+    const userCompany = await this.companyService.getUserCompany(user.userId);
+    if (!userCompany || userCompany.id !== companyId) {
+      throw new UnauthorizedException('You can only view invitations for your own company');
+    }
+    
+    const company = await this.companyService.findById(companyId);
+    return company?.invitations || [];
+  }
+
+  @Get('invitation/:code')
+  async getInvitationDetails(@Param('code') code: string) {
+    const invitation = await this.invitationService.getInvitationDetails(code);
+    if (!invitation) {
+      throw new UnauthorizedException('Invalid invitation code');
+    }
+    return invitation;
   }
 
   @Get('stats')
@@ -80,80 +148,10 @@ export class CompanyController {
     ];
   }
 
-  @Get('me/company')
+  @Get('profile')
   @UseGuards(JwtAuthGuard)
-  async getMyCompany(@Req() req: Request) {
+  async getMyCompanyProfile(@Req() req: Request) {
     const user = req.user as any;
     return this.companyService.getUserCompany(user.userId);
-  }
-
-  @Get('invitation/:code')
-  async getInvitationDetails(@Param('code') code: string) {
-    const invitation = await this.invitationService.getInvitationDetails(code);
-    if (!invitation) {
-      throw new UnauthorizedException('Invalid invitation code');
-    }
-    return invitation;
-  }
-
-  // Parameterized routes come LAST
-  @Get(':id')
-  async findById(@Param('id') id: string) {
-    return this.companyService.findById(id);
-  }
-
-  @Get(':id/invitations')
-  @UseGuards(JwtAuthGuard)
-  async getCompanyInvitations(
-    @Param('id') companyId: string,
-    @Req() req: Request,
-  ) {
-    const user = req.user as any;
-    
-    // Check if user belongs to this company
-    const userCompany = await this.companyService.getUserCompany(user.userId);
-    if (!userCompany || userCompany.id !== companyId) {
-      throw new UnauthorizedException('You can only view invitations for your own company');
-    }
-    
-    const company = await this.companyService.findById(companyId);
-    return company?.invitations || [];
-  }
-
-  @Post('register')
-  @UseGuards(JwtAuthGuard)
-  async registerCompany(
-    @Body() createCompanyDto: CreateCompanyDto,
-    @Req() req: Request,
-  ) {
-    const user = req.user as any;
-    return this.companyService.create(createCompanyDto, user.userId);
-  }
-
-  @Post('join')
-  @UseGuards(JwtAuthGuard)
-  async joinCompany(
-    @Body() joinCompanyDto: JoinCompanyDto,
-    @Req() req: Request,
-  ) {
-    const user = req.user as any;
-    return this.companyService.joinCompany(user.userId, joinCompanyDto.invitationCode);
-  }
-
-  @Post(':id/invitation')
-  @UseGuards(JwtAuthGuard)
-  async generateInvitation(
-    @Param('id') companyId: string,
-    @Req() req: Request,
-  ) {
-    const user = req.user as any;
-    
-    // Check if user belongs to this company
-    const userCompany = await this.companyService.getUserCompany(user.userId);
-    if (!userCompany || userCompany.id !== companyId) {
-      throw new UnauthorizedException('You can only generate invitations for your own company');
-    }
-    
-    return this.invitationService.generateInvitation(companyId);
   }
 }

@@ -15,33 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          console.log('=== JWT Extractor called ===');
-          console.log('Request cookies:', request?.cookies);
-          console.log('access_token from cookies:', request?.cookies?.access_token);
           const token = request?.cookies?.access_token;
-          console.log('Extracted token from cookies:', token ? 'Token found' : 'No token');
-          
-          if (token) {
-            try {
-              // Decode JWT payload without verification to check expiration
-              const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-              const now = Math.floor(Date.now() / 1000);
-              console.log('JWT payload:', payload);
-              console.log('Current time (epoch):', now);
-              console.log('Token expires at (epoch):', payload.exp);
-              console.log('Token expired?', now > payload.exp);
-              console.log('Time until expiration (seconds):', payload.exp - now);
-              
-              if (now > payload.exp) {
-                console.log('❌ Token is EXPIRED - this will cause 401');
-              } else {
-                console.log('✅ Token is still valid');
-              }
-            } catch (error) {
-              console.log('Error decoding JWT payload:', error);
-            }
-          }
-          
           return token;
         },
         ExtractJwt.fromAuthHeaderAsBearerToken(), // Fallback to Bearer token
@@ -49,15 +23,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'defaultSecret',
     });
-    console.log('JWT Strategy initialized with secret:', process.env.JWT_SECRET ? 'Secret found' : 'Using default secret');
+    // JWT Strategy initialized
   }
 
   async validate(payload: any) {
-    console.log('=== JWT Strategy validate called ===');
-    console.log('JWT payload:', payload);
+    // Validating JWT payload
 
     // Fetch user and candidate profile if userType is CANDIDATE
     let candidateProfileId: string | undefined = undefined;
+    let companyId: string | undefined = undefined;
+    
     if (payload.userType === 'CANDIDATE') {
       try {
         const profile = await this.candidateService.findProfileByUserId(payload.sub);
@@ -65,17 +40,28 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           candidateProfileId = profile.id;
         }
       } catch (e) {
-        console.log('Error fetching candidate profile in JWT strategy:', e);
+        // Error fetching candidate profile
+      }
+    } else if (payload.userType === 'COMPANY') {
+      try {
+        const user = await this.userService.findById(payload.sub);
+        if (user && user.companyId) {
+          companyId = user.companyId;
+        }
+      } catch (e) {
+        // Error fetching company info
       }
     }
 
     const result = {
+      id: payload.sub,
       userId: payload.sub,
       email: payload.email,
       userType: payload.userType,
       candidateProfileId,
+      companyId,
     };
-    console.log('JWT validation result:', result);
+    // JWT validation completed
     return result;
   }
 }

@@ -209,7 +209,7 @@ export default function JobCard({
             </span>
           ))}
           {job.skills.length > (compact ? 2 : 3) && (
-            <span className="text-gray-400 text-xs px-2.5 py-1 font-medium">
+            <span className="text-gray-600 text-xs px-2.5 py-1 font-medium">
               +{job.skills.length - (compact ? 2 : 3)} more
             </span>
           )}
@@ -217,7 +217,7 @@ export default function JobCard({
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <div className="flex items-center gap-1.5 text-xs text-gray-600">
             <svg
               className="w-3.5 h-3.5 flex-shrink-0"
               fill="none"

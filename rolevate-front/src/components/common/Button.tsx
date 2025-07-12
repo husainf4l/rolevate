@@ -119,7 +119,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       success:
         "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-green-500/40",
       warning:
-        "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-orange-500 hover:to-yellow-500 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-yellow-500/40",
+        "bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-yellow-500/40",
       info: "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hover:scale-[1.01] focus:ring-blue-500/40",
     };
 

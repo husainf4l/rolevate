@@ -448,6 +448,32 @@ export class ApplicationService {
     return this.mapToApplicationResponse(application);
   }
 
+  async getAllApplicationsForCompany(companyId: string, status?: string): Promise<ApplicationResponseDto[]> {
+    // Find all jobs for this company
+    const jobs = await this.prisma.job.findMany({
+      where: { companyId },
+      select: { id: true },
+    });
+    const jobIds = jobs.map(j => j.id);
+    if (jobIds.length === 0) return [];
+
+    // Find all applications for these jobs, optionally filter by status
+    const where: any = { jobId: { in: jobIds } };
+    if (status) where.status = status;
+
+    const applications = await this.prisma.application.findMany({
+      where,
+      include: {
+        candidate: true,
+        job: { include: { company: true } },
+      },
+      orderBy: [
+        { createdAt: 'desc' },
+      ],
+    });
+    return applications.map(app => this.mapToApplicationResponse(app));
+  }
+
   private mapToApplicationResponse(application: any): ApplicationResponseDto {
     return {
       id: application.id,

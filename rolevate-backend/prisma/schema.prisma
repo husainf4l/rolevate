@@ -1,4 +1,24 @@
 // =======================================
+// SECURITY AUDIT LOGS
+// =======================================
+
+model SecurityLog {
+  id            String   @id @default(cuid())
+  type          String   // AUTH_FAILURE, UNAUTHORIZED_ACCESS, etc.
+  userId        String?
+  ipHash        String   // Hashed IP for privacy
+  userAgentHash String?  // Hashed user agent
+  details       Json     // Additional event details
+  severity      String   // LOW, MEDIUM, HIGH, CRITICAL
+  createdAt     DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([severity, createdAt])
+  @@index([userId, createdAt])
+  @@map("security_logs")
+}
+
+// =======================================
 // LIVEKIT ROOM
 // =======================================
 
