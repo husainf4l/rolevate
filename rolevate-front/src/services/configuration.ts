@@ -1,3 +1,5 @@
+import { API_CONFIG } from '@/lib/config';
+
 export interface CompanyData {
   name: string;
   industry: string;
@@ -29,7 +31,7 @@ export interface GenerateDescriptionResponse {
 }
 
 export class ConfigurationService {
-  private static baseUrl = 'http://localhost:4005/api';
+  private static baseUrl = API_CONFIG.API_BASE_URL;
 
   /**
    * Create a new company

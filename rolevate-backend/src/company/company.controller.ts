@@ -1,9 +1,14 @@
-import { Controller, Get, Param, Post, Body, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, UseGuards, Req, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { CompanyService } from './company.service';
 import { InvitationService } from './invitation.service';
 import { CreateCompanyDto, JoinCompanyDto } from './dto/company.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 @Controller('company')
 export class CompanyController {
@@ -155,5 +160,68 @@ export class CompanyController {
     }
     
     return this.invitationService.generateInvitation(companyId);
+  }
+
+  @Post('upload-logo')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('logo', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        const uploadDir = join(process.cwd(), 'uploads', 'logos');
+        if (!existsSync(uploadDir)) {
+          mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+      },
+      filename: (req, file, cb) => {
+        const fileExtension = extname(file.originalname);
+        const fileName = `logo_${uuidv4()}${fileExtension}`;
+        cb(null, fileName);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      // Accept only image files
+      const allowedMimes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp'
+      ];
+      
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only image files (JPEG, PNG, GIF, WebP) are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+  }))
+  async uploadLogo(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const user = req.user as any;
+    const userCompany = await this.companyService.getUserCompany(user.userId);
+    
+    if (!userCompany) {
+      throw new UnauthorizedException('User must belong to a company to upload logo');
+    }
+
+    // Update company with logo path
+    const logoPath = `logos/${file.filename}`;
+    const updatedCompany = await this.companyService.updateLogo(userCompany.id, logoPath);
+
+    return {
+      message: 'Logo uploaded successfully',
+      logoPath,
+      company: updatedCompany
+    };
   }
 }

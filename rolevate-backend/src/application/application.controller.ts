@@ -105,6 +105,7 @@ export class ApplicationController {
   }
 
   @Get('job/:jobId')
+  @UseGuards(JwtAuthGuard)
   async getApplicationsByJob(
     @Param('jobId') jobId: string,
     @Req() req: Request & { user?: { id: string; companyId?: string; userType?: string } }

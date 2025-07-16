@@ -1,8 +1,13 @@
-import { Controller, Post, Body, UnauthorizedException, Res, Req, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, Res, Req, Get, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 @Controller('auth')
 export class AuthController {
@@ -138,7 +143,8 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req: Request) {
-    return req.user;
+    const user = req.user as any;
+    return this.authService.getUserById(user.userId);
   }
 
   @Post('revoke-all')
@@ -149,5 +155,63 @@ export class AuthController {
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
     return { message: 'All tokens revoked successfully' };
+  }
+
+  @Post('upload-avatar')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('avatar', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        const uploadDir = join(process.cwd(), 'uploads', 'avatars');
+        if (!existsSync(uploadDir)) {
+          mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+      },
+      filename: (req, file, cb) => {
+        const fileExtension = extname(file.originalname);
+        const fileName = `avatar_${uuidv4()}${fileExtension}`;
+        cb(null, fileName);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      // Accept only image files
+      const allowedMimes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp'
+      ];
+      
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only image files (JPEG, PNG, GIF, WebP) are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+  }))
+  async uploadAvatar(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const user = req.user as any;
+    
+    // Update user with avatar path
+    const avatarPath = `avatars/${file.filename}`;
+    const updatedUser = await this.authService.updateAvatar(user.userId, avatarPath);
+
+    return {
+      message: 'Avatar uploaded successfully',
+      avatarPath,
+      user: updatedUser
+    };
   }
 }

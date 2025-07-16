@@ -17,6 +17,7 @@ interface User {
   companyId?: string;
 }
 
+
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -49,11 +50,13 @@ export default function Navbar() {
     try {
       const userData = await getCurrentUser();
       setUser(userData);
+      
     } catch (error) {
       console.log("Auth check failed:", error);
       setUser(null);
     }
   };
+
 
   const handleLogout = async () => {
     try {

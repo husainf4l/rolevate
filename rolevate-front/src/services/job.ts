@@ -1,3 +1,5 @@
+import { API_CONFIG } from '@/lib/config';
+
 export interface JobAnalysisRequest {
   jobTitle: string;
   department: string;
@@ -141,7 +143,7 @@ export class JobService {
     expectedSalary: string;
     noticePeriod: string;
   }): Promise<{ message: string; applicationId?: string }> {
-    const response = await fetch(`${this.baseUrl}/api/applications`, {
+    const response = await fetch(`${this.baseUrl}/applications`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -162,13 +164,13 @@ export class JobService {
       applicationId: data.id || data.applicationId,
     };
   }
-  private static baseUrl = 'http://localhost:4005'; // Backend URL
+  private static baseUrl = API_CONFIG.API_BASE_URL; // Backend URL
 
   /**
    * Generate job analysis using AI
    */
   static async generateJobAnalysis(request: JobAnalysisRequest): Promise<JobAnalysisResponse> {
-    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/job-analysis`, {
+    const response = await fetch(`${this.baseUrl}/aiautocomplete/job-analysis`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -249,7 +251,7 @@ export class JobService {
    * Get a single job by its ID
    */
   static async getJobById(jobId: string): Promise<JobPost> {
-    const response = await fetch(`${this.baseUrl}/api/jobs/${jobId}`, {
+    const response = await fetch(`${this.baseUrl}/jobs/${jobId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -271,7 +273,7 @@ export class JobService {
    * Update an existing job
    */
   static async updateJob(jobId: string, jobData: UpdateJobRequest): Promise<JobPost> {
-    const response = await fetch(`${this.baseUrl}/api/jobs/${jobId}`, {
+    const response = await fetch(`${this.baseUrl}/jobs/${jobId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -294,7 +296,7 @@ export class JobService {
    * Rewrite job description using AI
    */
   static async rewriteJobDescription(currentDescription: string): Promise<string> {
-    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-job-description`, {
+    const response = await fetch(`${this.baseUrl}/aiautocomplete/rewrite-job-description`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -317,7 +319,7 @@ export class JobService {
    * Rewrite job requirements using AI
    */
   static async rewriteJobRequirements(currentRequirements: string): Promise<string> {
-    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-requirements`, {
+    const response = await fetch(`${this.baseUrl}/aiautocomplete/rewrite-requirements`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -354,7 +356,7 @@ export class JobService {
     if (company) payload.company = company;
     if (jobLevel) payload.jobLevel = jobLevel;
 
-    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-job-title`, {
+    const response = await fetch(`${this.baseUrl}/aiautocomplete/rewrite-job-title`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -394,7 +396,7 @@ export class JobService {
     if (jobLevel) payload.jobLevel = jobLevel;
     if (company) payload.company = company;
 
-    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-benefits`, {
+    const response = await fetch(`${this.baseUrl}/aiautocomplete/rewrite-benefits`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -431,7 +433,7 @@ export class JobService {
     if (jobLevel) payload.jobLevel = jobLevel;
     if (company) payload.company = company;
 
-    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-responsibilities`, {
+    const response = await fetch(`${this.baseUrl}/aiautocomplete/rewrite-responsibilities`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -470,7 +472,7 @@ export class JobService {
     if (companySize) payload.companySize = companySize;
     if (location) payload.location = location;
 
-    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/rewrite-company-description`, {
+    const response = await fetch(`${this.baseUrl}/aiautocomplete/rewrite-company-description`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -493,7 +495,7 @@ export class JobService {
    * Generate AI configuration prompts based on job details
    */
   static async generateAIConfiguration(request: AIConfigRequest): Promise<AIConfigResponse> {
-    const response = await fetch(`${this.baseUrl}/api/aiautocomplete/generate-ai-config`, {
+    const response = await fetch(`${this.baseUrl}/aiautocomplete/generate-ai-config`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -520,10 +522,10 @@ export class JobService {
    * Create a new job posting
    */
   static async createJob(request: CreateJobRequest): Promise<CreateJobResponse> {
-    console.log('JobService.createJob - Sending request to:', `${this.baseUrl}/api/jobs/create`);
+    console.log('JobService.createJob - Sending request to:', `${this.baseUrl}/jobs/create`);
     console.log('JobService.createJob - Request payload:', request);
     
-    const response = await fetch(`${this.baseUrl}/api/jobs/create`, {
+    const response = await fetch(`${this.baseUrl}/jobs/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -556,7 +558,7 @@ export class JobService {
    * Fetch all jobs for the company
    */
   static async getCompanyJobs(page: number = 1, limit: number = 100, search?: string): Promise<GetJobsResponse> {
-    console.log('JobService.getCompanyJobs - Fetching from:', `${this.baseUrl}/api/jobs/company/all`);
+    console.log('JobService.getCompanyJobs - Fetching from:', `${this.baseUrl}/jobs/company/all`);
     
     const queryParams = new URLSearchParams({
       page: page.toString(),
@@ -567,7 +569,7 @@ export class JobService {
       queryParams.append('search', search.trim());
     }
     
-    const response = await fetch(`${this.baseUrl}/api/jobs/company/all?${queryParams}`, {
+    const response = await fetch(`${this.baseUrl}/jobs/company/all?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -637,7 +639,7 @@ export class JobService {
   static async activateJob(jobId: string): Promise<{id: string, message: string}> {
     console.log('JobService.activateJob - Activating job:', jobId);
     
-    const response = await fetch(`${this.baseUrl}/api/jobs/${jobId}`, {
+    const response = await fetch(`${this.baseUrl}/jobs/${jobId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -670,7 +672,7 @@ export class JobService {
   static async pauseJob(jobId: string): Promise<{id: string, message: string}> {
     console.log('JobService.pauseJob - Pausing job:', jobId);
     
-    const response = await fetch(`${this.baseUrl}/api/jobs/${jobId}`, {
+    const response = await fetch(`${this.baseUrl}/jobs/${jobId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -703,7 +705,7 @@ export class JobService {
   static async deleteJob(jobId: string): Promise<{id: string, message: string}> {
     console.log('JobService.deleteJob - Deleting job:', jobId);
     
-    const response = await fetch(`${this.baseUrl}/api/jobs/${jobId}`, {
+    const response = await fetch(`${this.baseUrl}/jobs/${jobId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -735,7 +737,7 @@ export class JobService {
    */
   static async getFeaturedJobs(): Promise<JobPost[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/jobs/public/featured`, {
+      const response = await fetch(`${this.baseUrl}/jobs/public/featured`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -773,7 +775,7 @@ export class JobService {
         queryParams.append('search', search.trim());
       }
 
-      const response = await fetch(`${this.baseUrl}/api/jobs/public/all?${queryParams}`, {
+      const response = await fetch(`${this.baseUrl}/jobs/public/all?${queryParams}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -837,7 +839,7 @@ export class JobService {
    */
   static async getPublicJobById(jobId: string): Promise<JobPost> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/jobs/public/${jobId}`, {
+      const response = await fetch(`${this.baseUrl}/jobs/public/${jobId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

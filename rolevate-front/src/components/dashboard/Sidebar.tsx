@@ -4,11 +4,12 @@ import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/common/logo";
+import { useAuth } from "@/hooks/useAuth";
+import { API_CONFIG } from "@/lib/config";
 import {
   HomeIcon,
   BriefcaseIcon,
   ChatBubbleLeftRightIcon,
-  Cog6ToothIcon,
   ChartBarIcon,
   Bars3Icon,
   XMarkIcon,
@@ -59,16 +60,12 @@ const navigationItems: NavigationItem[] = [
     label: "Communication",
     href: "/dashboard/messages",
   },
-  {
-    icon: Cog6ToothIcon,
-    label: "Settings",
-    href: "/dashboard/settings",
-  },
 ];
 
 export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

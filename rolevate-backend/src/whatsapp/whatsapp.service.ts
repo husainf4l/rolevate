@@ -33,7 +33,16 @@ export class WhatsAppService {
         return await res.json();
     }
 
-    async sendTemplateMessage(to: string, templateName: string, lang: string = 'en_US', params?: string[]) {
+    async sendTemplateMessage(to: string, templateName: string, lang?: string, params?: string[]) {
+        // Set default language based on template name
+        if (!lang) {
+            // Map template names to their correct language codes
+            const templateLanguageMap = {
+                'hello_world': 'en_US',
+                'cv_received_notification': 'en'
+            };
+            lang = templateLanguageMap[templateName] || 'en_US';
+        }
         const phoneNumberId = this.configService.get<string>('WHATSAPP_PHONE_NUMBER_ID');
         const apiVersion = this.configService.get<string>('WHATSAPP_API_VERSION') || 'v18.0';
         const accessToken = await this.tokenManager.getAccessToken();

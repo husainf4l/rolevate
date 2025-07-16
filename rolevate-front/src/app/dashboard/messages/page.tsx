@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/dashboard/Header";
 import Link from "next/link";
@@ -25,272 +25,79 @@ import {
 interface CommunicationRecord {
   id: string;
   candidateId: string;
-  candidateName: string;
-  candidateEmail: string;
-  position: string;
-  type: "email" | "whatsapp" | "call" | "video" | "sms" | "linkedin";
-  direction: "inbound" | "outbound";
-  subject?: string;
+  companyId: string;
+  jobId?: string;
+  type: "WHATSAPP" | "EMAIL" | "PHONE" | "SMS";
+  direction: "INBOUND" | "OUTBOUND";
+  status: "SENT" | "DELIVERED" | "READ" | "FAILED";
   content: string;
-  timestamp: string;
-  status: "sent" | "delivered" | "read" | "replied" | "failed";
-  hrUser: string;
-  attachments?: string[];
-  duration?: number; // for calls in minutes
-  tags?: string[];
-  priority: "high" | "medium" | "low";
-  relatedJobId: string;
-  followUp?: string;
+  subject?: string;
+  whatsappId?: string;
+  phoneNumber?: string;
+  sentAt?: string;
+  deliveredAt?: string;
+  readAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  candidate: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  job?: {
+    title: string;
+  };
 }
 
-const communicationHistory: CommunicationRecord[] = [
-  {
-    id: "1",
-    candidateId: "1",
-    candidateName: "Sarah Al-Ahmad",
-    candidateEmail: "sarah.ahmad@email.com",
-    position: "Senior Frontend Developer",
-    type: "email",
-    direction: "outbound",
-    subject: "Interview Invitation - Senior Frontend Developer Position",
-    content:
-      "Dear Sarah, We are pleased to invite you for an interview for the Senior Frontend Developer position. Your profile shows excellent qualifications...",
-    timestamp: "2024-12-08 10:30",
-    status: "read",
-    hrUser: "Emma Johnson",
-    attachments: ["interview_details.pdf"],
-    tags: ["interview", "invitation"],
-    priority: "high",
-    relatedJobId: "1",
-    followUp: "2024-12-10 14:00",
-  },
-  {
-    id: "2",
-    candidateId: "1",
-    candidateName: "Sarah Al-Ahmad",
-    candidateEmail: "sarah.ahmad@email.com",
-    position: "Senior Frontend Developer",
-    type: "whatsapp",
-    direction: "inbound",
-    content:
-      "Hi Emma, thank you for the interview invitation. I'm available for the scheduled time. Looking forward to it!",
-    timestamp: "2024-12-08 14:15",
-    status: "delivered",
-    hrUser: "Emma Johnson",
-    tags: ["response", "confirmation"],
-    priority: "medium",
-    relatedJobId: "1",
-  },
-  {
-    id: "3",
-    candidateId: "2",
-    candidateName: "Mohammed Hassan",
-    candidateEmail: "m.hassan@email.com",
-    position: "React Developer",
-    type: "call",
-    direction: "outbound",
-    content:
-      "Initial screening call to discuss React Developer position and candidate's experience",
-    timestamp: "2024-12-08 16:00",
-    status: "sent",
-    hrUser: "David Chen",
-    duration: 25,
-    tags: ["screening", "initial"],
-    priority: "medium",
-    relatedJobId: "2",
-  },
-  {
-    id: "4",
-    candidateId: "3",
-    candidateName: "Fatima Al-Zahra",
-    candidateEmail: "fatima.zahra@email.com",
-    position: "UI/UX Designer",
-    type: "email",
-    direction: "outbound",
-    subject: "Job Offer - UI/UX Designer Position",
-    content:
-      "Congratulations! We are delighted to offer you the UI/UX Designer position at our company. Please find the offer letter attached...",
-    timestamp: "2024-12-08 09:45",
-    status: "read",
-    hrUser: "Sarah Wilson",
-    attachments: ["offer_letter.pdf", "benefits_package.pdf"],
-    tags: ["offer", "congratulations"],
-    priority: "high",
-    relatedJobId: "3",
-  },
-  {
-    id: "5",
-    candidateId: "3",
-    candidateName: "Fatima Al-Zahra",
-    candidateEmail: "fatima.zahra@email.com",
-    position: "UI/UX Designer",
-    type: "video",
-    direction: "outbound",
-    content: "Final interview and offer discussion via video call",
-    timestamp: "2024-12-07 15:30",
-    status: "sent",
-    hrUser: "Sarah Wilson",
-    duration: 45,
-    tags: ["final", "interview"],
-    priority: "high",
-    relatedJobId: "3",
-  },
-  {
-    id: "6",
-    candidateId: "4",
-    candidateName: "Omar Khalil",
-    candidateEmail: "omar.khalil@email.com",
-    position: "Full Stack Developer",
-    type: "email",
-    direction: "outbound",
-    subject: "Welcome to the Team!",
-    content:
-      "Welcome aboard! We're excited to have you join our development team. Your first day is scheduled for...",
-    timestamp: "2024-12-06 11:20",
-    status: "read",
-    hrUser: "Michael Torres",
-    attachments: ["welcome_package.pdf", "first_day_schedule.pdf"],
-    tags: ["welcome", "onboarding"],
-    priority: "high",
-    relatedJobId: "4",
-  },
-  {
-    id: "7",
-    candidateId: "5",
-    candidateName: "Layla Ibrahim",
-    candidateEmail: "layla.ibrahim@email.com",
-    position: "DevOps Engineer",
-    type: "whatsapp",
-    direction: "outbound",
-    content:
-      "Hi Layla, just wanted to check if you received our email about the technical assessment. Let me know if you have any questions!",
-    timestamp: "2024-12-08 13:00",
-    status: "delivered",
-    hrUser: "Emma Johnson",
-    tags: ["follow-up", "assessment"],
-    priority: "medium",
-    relatedJobId: "6",
-  },
-  {
-    id: "8",
-    candidateId: "6",
-    candidateName: "Ahmed Mansour",
-    candidateEmail: "ahmed.mansour@email.com",
-    position: "Mobile App Developer",
-    type: "email",
-    direction: "outbound",
-    subject: "Application Status Update",
-    content:
-      "Thank you for your interest in the Mobile App Developer position. After careful consideration, we have decided to move forward with other candidates...",
-    timestamp: "2024-12-05 14:30",
-    status: "read",
-    hrUser: "David Chen",
-    tags: ["rejection", "closure"],
-    priority: "low",
-    relatedJobId: "7",
-  },
-  {
-    id: "9",
-    candidateId: "7",
-    candidateName: "Nour El-Din",
-    candidateEmail: "nour.eldin@email.com",
-    position: "Data Scientist",
-    type: "call",
-    direction: "inbound",
-    content:
-      "Candidate called to discuss salary negotiation and start date flexibility",
-    timestamp: "2024-12-08 11:45",
-    status: "sent",
-    hrUser: "Sarah Wilson",
-    duration: 18,
-    tags: ["negotiation", "salary"],
-    priority: "high",
-    relatedJobId: "8",
-  },
-  {
-    id: "10",
-    candidateId: "8",
-    candidateName: "Yusuf Al-Rashid",
-    candidateEmail: "yusuf.rashid@email.com",
-    position: "Product Manager",
-    type: "linkedin",
-    direction: "outbound",
-    content:
-      "Connected with candidate on LinkedIn and sent initial message about Product Manager opportunity",
-    timestamp: "2024-12-08 08:30",
-    status: "sent",
-    hrUser: "Michael Torres",
-    tags: ["outreach", "linkedin"],
-    priority: "medium",
-    relatedJobId: "5",
-  },
-];
+interface CommunicationStats {
+  total: number;
+  byType: { [key: string]: number };
+  byStatus: { [key: string]: number };
+}
+
 
 const getTypeIcon = (type: string) => {
-  switch (type) {
+  switch (type?.toLowerCase()) {
     case "email":
       return <EnvelopeIcon className="w-5 h-5" />;
     case "whatsapp":
       return <ChatBubbleLeftRightIcon className="w-5 h-5" />;
-    case "call":
+    case "phone":
       return <PhoneIcon className="w-5 h-5" />;
-    case "video":
-      return <VideoCameraIcon className="w-5 h-5" />;
     case "sms":
       return <ChatBubbleLeftRightIcon className="w-5 h-5" />;
-    case "linkedin":
-      return <UserIcon className="w-5 h-5" />;
     default:
       return <ChatBubbleLeftRightIcon className="w-5 h-5" />;
   }
 };
 
 const getTypeColor = (type: string) => {
-  switch (type) {
+  switch (type?.toLowerCase()) {
     case "email":
       return "bg-blue-100 text-blue-800";
     case "whatsapp":
       return "bg-green-100 text-green-800";
-    case "call":
+    case "phone":
       return "bg-purple-100 text-purple-800";
-    case "video":
-      return "bg-red-100 text-red-800";
     case "sms":
       return "bg-yellow-100 text-yellow-800";
-    case "linkedin":
-      return "bg-indigo-100 text-indigo-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
 };
 
 const getStatusIcon = (status: string) => {
-  switch (status) {
+  switch (status?.toLowerCase()) {
     case "sent":
       return <PaperAirplaneIcon className="w-4 h-4 text-gray-500" />;
     case "delivered":
       return <CheckIcon className="w-4 h-4 text-blue-500" />;
     case "read":
       return <CheckCircleIcon className="w-4 h-4 text-green-500" />;
-    case "replied":
-      return <ChatBubbleLeftRightIcon className="w-4 h-4 text-[#0891b2]" />;
     case "failed":
       return <XMarkIcon className="w-4 h-4 text-red-500" />;
     default:
       return <ClockIcon className="w-4 h-4 text-gray-400" />;
-  }
-};
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "high":
-      return "bg-red-100 text-red-800";
-    case "medium":
-      return "bg-yellow-100 text-yellow-800";
-    case "low":
-      return "bg-green-100 text-green-800";
-    default:
-      return "bg-gray-100 text-gray-800";
   }
 };
 
@@ -299,25 +106,103 @@ export default function CommunicationPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [communications, setCommunications] = useState<CommunicationRecord[]>([]);
+  const [stats, setStats] = useState<CommunicationStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const filteredCommunications = communicationHistory.filter((comm) => {
-    const matchesSearch =
-      comm.candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  // Fetch communications from API
+  const fetchCommunications = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "20",
+      });
+      
+      if (filterType !== "all") params.append("type", filterType.toUpperCase());
+      if (filterStatus !== "all") params.append("status", filterStatus.toUpperCase());
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:4005/api/communications?${params}`, {
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch communications');
+      
+      const data = await response.json();
+      setCommunications(data.communications || []);
+      setTotalPages(data.totalPages || 1);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch communications');
+      setCommunications([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch communication stats
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:4005/api/communications/stats', {
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
+  };
+
+  // Filter communications locally by search term
+  const filteredCommunications = communications.filter((comm) => {
+    if (!searchTerm) return true;
+    
+    const candidateName = `${comm.candidate.firstName} ${comm.candidate.lastName}`;
+    const jobTitle = comm.job?.title || '';
+    
+    return (
+      candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comm.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comm.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comm.position.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesType = filterType === "all" || comm.type === filterType;
-    const matchesStatus =
-      filterStatus === "all" || comm.status === filterStatus;
-
-    return matchesSearch && matchesType && matchesStatus;
+      jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      comm.candidate.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleString();
   };
+
+  // Fetch data on component mount and when filters change
+  useEffect(() => {
+    fetchCommunications();
+    fetchStats();
+  }, [page, filterType, filterStatus]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    if (page !== 1) {
+      setPage(1);
+    }
+  }, [filterType, filterStatus]);
 
   return (
     <div className="min-h-screen">
@@ -350,7 +235,7 @@ export default function CommunicationPage() {
                     Total Communications
                   </p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {communicationHistory.length}
+                    {stats?.total || 0}
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-[#0891b2]/10">
@@ -366,10 +251,7 @@ export default function CommunicationPage() {
                     Emails Sent
                   </p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {
-                      communicationHistory.filter((c) => c.type === "email")
-                        .length
-                    }
+                    {stats?.byType?.EMAIL || 0}
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-blue-100">
@@ -382,14 +264,10 @@ export default function CommunicationPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">
-                    Calls Made
+                    Phone Calls
                   </p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {
-                      communicationHistory.filter(
-                        (c) => c.type === "call" || c.type === "video"
-                      ).length
-                    }
+                    {stats?.byType?.PHONE || 0}
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-purple-100">
@@ -405,10 +283,7 @@ export default function CommunicationPage() {
                     WhatsApp Messages
                   </p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {
-                      communicationHistory.filter((c) => c.type === "whatsapp")
-                        .length
-                    }
+                    {stats?.byType?.WHATSAPP || 0}
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-green-100">
@@ -421,17 +296,10 @@ export default function CommunicationPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">
-                    Response Rate
+                    Delivered
                   </p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {Math.round(
-                      (communicationHistory.filter(
-                        (c) => c.status === "replied"
-                      ).length /
-                        communicationHistory.length) *
-                        100
-                    )}
-                    %
+                    {stats?.byStatus?.DELIVERED || 0}
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-[#0fc4b5]/10">
@@ -472,10 +340,8 @@ export default function CommunicationPage() {
                     <option value="all">All Types</option>
                     <option value="email">Email</option>
                     <option value="whatsapp">WhatsApp</option>
-                    <option value="call">Phone Call</option>
-                    <option value="video">Video Call</option>
+                    <option value="phone">Phone</option>
                     <option value="sms">SMS</option>
-                    <option value="linkedin">LinkedIn</option>
                   </select>
                 </div>
 
@@ -489,7 +355,6 @@ export default function CommunicationPage() {
                     <option value="sent">Sent</option>
                     <option value="delivered">Delivered</option>
                     <option value="read">Read</option>
-                    <option value="replied">Replied</option>
                     <option value="failed">Failed</option>
                   </select>
                 </div>
@@ -522,7 +387,31 @@ export default function CommunicationPage() {
             </div>
 
             <div className="divide-y divide-gray-200">
-              {filteredCommunications.map((comm) => (
+              {loading ? (
+                <div className="p-12 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13ead9] mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading communications...</p>
+                </div>
+              ) : error ? (
+                <div className="p-12 text-center">
+                  <p className="text-red-600 mb-4">{error}</p>
+                  <button 
+                    onClick={() => fetchCommunications()}
+                    className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : filteredCommunications.length === 0 ? (
+                <div className="p-12 text-center">
+                  <ChatBubbleLeftRightIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-2">No communications found</p>
+                  <p className="text-sm text-gray-400">
+                    {searchTerm ? 'Try adjusting your search terms' : 'Start communicating with candidates to see messages here'}
+                  </p>
+                </div>
+              ) : (
+                filteredCommunications.map((comm) => (
                 <div
                   key={comm.id}
                   className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
@@ -543,22 +432,20 @@ export default function CommunicationPage() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
                           <h3 className="text-sm font-semibold text-gray-900">
-                            {comm.candidateName}
+                            {comm.candidate.firstName} {comm.candidate.lastName}
                           </h3>
                           <span className="text-sm text-gray-500">
-                            {comm.position}
+                            {comm.job?.title || 'No job specified'}
                           </span>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                              comm.priority
-                            )}`}
-                          >
-                            {comm.priority}
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            comm.direction === 'OUTBOUND' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                          }`}>
+                            {comm.direction.toLowerCase()}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-gray-500">
-                            {formatTimestamp(comm.timestamp)}
+                            {formatTimestamp(comm.sentAt || comm.createdAt)}
                           </span>
                           {getStatusIcon(comm.status)}
                         </div>
@@ -576,20 +463,14 @@ export default function CommunicationPage() {
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>By: {comm.hrUser}</span>
-                          {comm.duration && (
-                            <span>Duration: {comm.duration} min</span>
+                          <span>Type: {comm.type}</span>
+                          {comm.phoneNumber && (
+                            <span>Phone: {comm.phoneNumber}</span>
                           )}
-                          {comm.attachments && (
+                          {comm.whatsappId && (
                             <span className="flex items-center gap-1">
                               <DocumentTextIcon className="w-3 h-3" />
-                              {comm.attachments.length} attachment(s)
-                            </span>
-                          )}
-                          {comm.followUp && (
-                            <span className="flex items-center gap-1">
-                              <CalendarDaysIcon className="w-3 h-3" />
-                              Follow-up: {comm.followUp}
+                              WhatsApp ID: {comm.whatsappId.slice(0, 8)}...
                             </span>
                           )}
                         </div>
@@ -616,24 +497,37 @@ export default function CommunicationPage() {
                           </button>
                         </div>
                       </div>
-
-                      {comm.tags && comm.tags.length > 0 && (
-                        <div className="flex items-center gap-1 mt-2">
-                          {comm.tags.map((tag, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
+
+            {/* Pagination */}
+            {!loading && !error && filteredCommunications.length > 0 && totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Page {page} of {totalPages}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

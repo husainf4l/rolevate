@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/common/logo";
@@ -80,14 +80,51 @@ const navigationItems = [
   },
 ];
 
+interface CompanyData {
+  name?: string;
+  logo?: string;
+}
+
 export default function UserSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [companyData, setCompanyData] = useState<CompanyData>({});
   const pathname = usePathname();
   const router = useRouter();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  // Fetch company data for logo display
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          "http://localhost:4005/api/company/me/company",
+          {
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setCompanyData({
+            name: data.name,
+            logo: data.logo,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching company data:", error);
+      }
+    };
+
+    fetchCompanyData();
+  }, []);
 
   // Logout handler
   const handleLogout = async () => {

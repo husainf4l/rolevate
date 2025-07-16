@@ -22,9 +22,11 @@ async function bootstrap() {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
+        imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:3000', 'http://localhost:4005'],
+        connectSrc: ["'self'", 'http://localhost:3000', 'http://localhost:4005'],
       },
     },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
@@ -39,7 +41,7 @@ async function bootstrap() {
   app.use(
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
+      max: process.env.NODE_ENV === 'development' ? 10000 : 10000, // Higher limit in development
       message: 'Too many requests from this IP, please try again later.',
       standardHeaders: true,
       legacyHeaders: false,
@@ -54,7 +56,8 @@ async function bootstrap() {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       // Allow requests with no origin in development (for testing tools)
       // In production, this should be removed
-      if ((process.env.NODE_ENV === 'development' && !origin) || 
+      if (process.env.NODE_ENV === 'development' || 
+          !origin || 
           (origin && allowedOrigins.includes(origin))) {
         callback(null, true);
       } else {
@@ -62,8 +65,10 @@ async function bootstrap() {
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Length', 'Content-Type'],
+    optionsSuccessStatus: 200 // Some legacy browsers choke on 204
   });
 
   // Enhanced validation

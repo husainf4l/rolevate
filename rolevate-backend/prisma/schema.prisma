@@ -4,12 +4,12 @@
 
 model SecurityLog {
   id            String   @id @default(cuid())
-  type          String   // AUTH_FAILURE, UNAUTHORIZED_ACCESS, etc.
+  type          String // AUTH_FAILURE, UNAUTHORIZED_ACCESS, etc.
   userId        String?
-  ipHash        String   // Hashed IP for privacy
-  userAgentHash String?  // Hashed user agent
-  details       Json     // Additional event details
-  severity      String   // LOW, MEDIUM, HIGH, CRITICAL
+  ipHash        String // Hashed IP for privacy
+  userAgentHash String? // Hashed user agent
+  details       Json // Additional event details
+  severity      String // LOW, MEDIUM, HIGH, CRITICAL
   createdAt     DateTime @default(now())
 
   @@index([type, createdAt])
@@ -155,6 +155,7 @@ model User {
   password         String?
   email            String?           @unique
   name             String?
+  avatar           String? // Path to user avatar image
   isActive         Boolean           @default(true)
   companyId        String?
   company          Company?          @relation(fields: [companyId], references: [id])
@@ -191,21 +192,21 @@ model RefreshToken {
 // =======================================
 
 model Notification {
-  id         String               @id @default(cuid())
-  type       NotificationType
-  category   NotificationCategory
-  title      String
-  message    String               @db.Text
-  timestamp  DateTime             @default(now())
-  read       Boolean              @default(false)
-  actionUrl  String?
-  metadata   Json?
-  userId     String?
-  user       User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyId  String?
-  company    Company?             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
+  id        String               @id @default(cuid())
+  type      NotificationType
+  category  NotificationCategory
+  title     String
+  message   String               @db.Text
+  timestamp DateTime             @default(now())
+  read      Boolean              @default(false)
+  actionUrl String?
+  metadata  Json?
+  userId    String?
+  user      User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String?
+  company   Company?             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
 
   @@index([userId, read])
   @@index([companyId, read])
@@ -238,6 +239,7 @@ model Company {
   email             String?
   phone             String?
   website           String?
+  logo              String? // Path to company logo image
   industry          Industry?
   numberOfEmployees Int?
   address           Address?
@@ -245,6 +247,7 @@ model Company {
   jobs              Job[] // Add jobs relationship
   invitations       Invitation[]
   notifications     Notification[]
+  communications    Communication[]
   subscription      SubscriptionType @default(FREE)
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
@@ -330,6 +333,9 @@ model Job {
 
   // Applications
   applications Application[]
+
+  // Communications
+  communications Communication[]
 
   // AI prompts for analysis (optional)
   cvAnalysisPrompt        String? @db.Text
@@ -432,6 +438,9 @@ model CandidateProfile {
 
   // CVs
   cvs CV[]
+
+  // Communications
+  communications Communication[]
 
   // Work Experience
   workExperiences WorkExperience[]
@@ -605,4 +614,71 @@ enum NoteSource {
   USER
   AI
   SYSTEM
+}
+
+// =======================================
+// COMMUNICATION SYSTEM
+// =======================================
+
+enum CommunicationType {
+  WHATSAPP
+  EMAIL
+  PHONE
+  SMS
+}
+
+enum CommunicationDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CommunicationStatus {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model Communication {
+  id String @id @default(cuid())
+
+  // Relationships
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  jobId String?
+  job   Job?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  // Communication Details
+  type      CommunicationType
+  direction CommunicationDirection
+  status    CommunicationStatus    @default(SENT)
+
+  content String  @db.Text
+  subject String? // For emails
+
+  // External IDs for tracking
+  whatsappId String? // WhatsApp message ID
+  emailId    String? // Email service ID
+
+  // Metadata
+  phoneNumber String? // WhatsApp phone number used
+  metadata    Json? // Additional data
+
+  // Timestamps
+  sentAt      DateTime  @default(now())
+  deliveredAt DateTime?
+  readAt      DateTime?
+  failedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, candidateId])
+  @@index([companyId, type])
+  @@index([sentAt])
+  @@map("communications")
 }

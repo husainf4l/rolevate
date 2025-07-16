@@ -6,6 +6,7 @@ import Link from "next/link";
 import { logout } from "@/services/auth";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { API_CONFIG } from "@/lib/config";
 
 interface HeaderProps {
   title?: string;
@@ -26,66 +27,6 @@ interface Notification {
     jobTitle?: string;
   };
 }
-
-// Sample notifications data - in a real app, this would come from an API
-const recentNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "success",
-    category: "application",
-    title: "New Application Received",
-    message:
-      "Sarah Al-Ahmad has applied for Senior Frontend Developer position",
-    timestamp: "2024-12-08T10:30:00Z",
-    read: false,
-    actionUrl: "/dashboard/candidates/1",
-    metadata: {
-      candidateName: "Sarah Al-Ahmad",
-      jobTitle: "Senior Frontend Developer",
-    },
-  },
-  {
-    id: "2",
-    type: "info",
-    category: "interview",
-    title: "AI Interview Completed",
-    message: "Mohammed Hassan has completed AI Interview 1 with a score of 76%",
-    timestamp: "2024-12-08T09:15:00Z",
-    read: false,
-    actionUrl: "/dashboard/candidates/2",
-  },
-  {
-    id: "3",
-    type: "warning",
-    category: "interview",
-    title: "HR Interview Scheduled",
-    message: "Nour El-Din is scheduled for HR interview tomorrow at 2:00 PM",
-    timestamp: "2024-12-08T08:45:00Z",
-    read: false,
-    actionUrl: "/dashboard/candidates/7",
-  },
-  {
-    id: "4",
-    type: "success",
-    category: "offer",
-    title: "Offer Accepted",
-    message:
-      "Omar Khalil has accepted the offer for Full Stack Developer position",
-    timestamp: "2024-12-08T07:20:00Z",
-    read: false,
-    actionUrl: "/dashboard/candidates/4",
-  },
-  {
-    id: "5",
-    type: "error",
-    category: "system",
-    title: "System Alert",
-    message: "AI Interview system experienced a brief downtime",
-    timestamp: "2024-12-08T06:30:00Z",
-    read: false,
-    actionUrl: "/dashboard/system-status",
-  },
-];
 
 const formatTimestamp = (timestamp: string) => {
   const date = new Date(timestamp);
@@ -126,6 +67,8 @@ export default function Header({
 }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -152,8 +95,31 @@ export default function Header({
     return "Company User";
   };
 
-  const unreadNotifications = recentNotifications.filter((n) => !n.read);
+  // Fetch notifications from API
+  const fetchNotifications = async () => {
+    setNotificationsLoading(true);
+    try {
+      const res = await fetch(`${API_CONFIG.API_BASE_URL}/notifications`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch notifications");
+      const data = await res.json();
+      setNotifications(Array.isArray(data) ? data : data.notifications || []);
+    } catch (err: any) {
+      console.error("Error fetching notifications:", err);
+      setNotifications([]);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  const unreadNotifications = notifications.filter((n) => !n.read);
   const unreadCount = unreadNotifications.length;
+
+  // Fetch notifications on component mount
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   // Close menus on outside click
   useEffect(() => {
@@ -176,12 +142,34 @@ export default function Header({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen, notificationOpen]);
 
-  const markNotificationAsRead = (notificationId: string) => {
-    const notification = recentNotifications.find(
-      (n) => n.id === notificationId
-    );
-    if (notification) {
-      notification.read = true;
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      // Update local state optimistically
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+      );
+
+      // Make API call to mark as read
+      const res = await fetch(
+        `${API_CONFIG.API_BASE_URL}/notifications/${notificationId}/read`,
+        {
+          method: "PUT",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        // Revert on error
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notificationId ? { ...n, read: false } : n))
+        );
+      }
+    } catch (err) {
+      console.error("Error marking notification as read:", err);
+      // Revert on error
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, read: false } : n))
+      );
     }
   };
 
@@ -247,7 +235,12 @@ export default function Header({
                       </div>
 
                       <div className="max-h-64 overflow-y-auto">
-                        {unreadNotifications.length === 0 ? (
+                        {notificationsLoading ? (
+                          <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#13ead9] mx-auto mb-2"></div>
+                            Loading notifications...
+                          </div>
+                        ) : unreadNotifications.length === 0 ? (
                           <div className="px-4 py-6 text-center text-gray-500 text-sm">
                             No new notifications
                           </div>
@@ -262,8 +255,7 @@ export default function Header({
                                   markNotificationAsRead(notification.id);
                                   setNotificationOpen(false);
                                   if (notification.actionUrl) {
-                                    window.location.href =
-                                      notification.actionUrl;
+                                    router.push(notification.actionUrl);
                                   }
                                 }}
                               >
@@ -308,8 +300,24 @@ export default function Header({
                     className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors"
                     onClick={() => setMenuOpen((v) => !v)}
                   >
-                    <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">TC</span>
+                    <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center overflow-hidden">
+                      {user?.avatar ? (
+                        <img
+                          src={`/api/proxy-image?url=${encodeURIComponent(`${API_CONFIG.UPLOADS_URL}/${user.avatar}`)}`}
+                          alt={user.name || "User"}
+                          className="w-full h-full object-cover rounded-full"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
+                          }}
+                        />
+                      ) : null}
+                      <span 
+                        className="text-white text-sm font-medium flex items-center justify-center w-full h-full"
+                        style={{ display: user?.avatar ? 'none' : 'flex' }}
+                      >
+                        {user?.name ? getUserInitials(user.name) : "U"}
+                      </span>
                     </div>
                   </button>
                   {menuOpen && (
@@ -382,7 +390,12 @@ export default function Header({
                     </div>
 
                     <div className="max-h-64 overflow-y-auto">
-                      {unreadNotifications.length === 0 ? (
+                      {notificationsLoading ? (
+                        <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#13ead9] mx-auto mb-2"></div>
+                          Loading notifications...
+                        </div>
+                      ) : unreadNotifications.length === 0 ? (
                         <div className="px-4 py-6 text-center text-gray-500 text-sm">
                           No new notifications
                         </div>
@@ -395,7 +408,7 @@ export default function Header({
                               markNotificationAsRead(notification.id);
                               setNotificationOpen(false);
                               if (notification.actionUrl) {
-                                window.location.href = notification.actionUrl;
+                                router.push(notification.actionUrl);
                               }
                             }}
                           >
@@ -440,8 +453,22 @@ export default function Header({
                   className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                   onClick={() => setMenuOpen((v) => !v)}
                 >
-                  <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
+                  <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center overflow-hidden">
+                    {user?.avatar ? (
+                      <img
+                        src={`/api/proxy-image?url=${encodeURIComponent(`${API_CONFIG.UPLOADS_URL}/${user.avatar}`)}`}
+                        alt={user.name || "User"}
+                        className="w-full h-full object-cover rounded-full"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
+                        }}
+                      />
+                    ) : null}
+                    <span 
+                      className="text-white text-sm font-medium flex items-center justify-center w-full h-full"
+                      style={{ display: user?.avatar ? 'none' : 'flex' }}
+                    >
                       {user?.name ? getUserInitials(user.name) : "U"}
                     </span>
                   </div>

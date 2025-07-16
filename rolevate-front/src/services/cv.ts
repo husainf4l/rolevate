@@ -1,6 +1,8 @@
 // src/services/cv.ts
 
-const BASE_API = "http://localhost:4005/api";
+import { API_CONFIG } from '@/lib/config';
+
+const BASE_API = API_CONFIG.API_BASE_URL;
 
 export interface CVData {
   id: string;

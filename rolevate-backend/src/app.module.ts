@@ -14,6 +14,7 @@ import { LiveKitModule } from './livekit/livekit.module';
 import { ApplicationModule } from './application/application.module';
 import { SecurityModule } from './security/security.module';
 import { NotificationModule } from './notification/notification.module';
+import { CommunicationModule } from './communication/communication.module';
 
 @Module({
   // Removed duplicate imports property
@@ -31,6 +32,7 @@ import { NotificationModule } from './notification/notification.module';
     ApplicationModule,
     SecurityModule,
     NotificationModule,
+    CommunicationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -43,13 +43,34 @@ interface CandidateProfile {
   updatedAt: string;
 }
 
+interface Company {
+  id: string;
+  name: string;
+  description?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  logo?: string;
+  industry?: string;
+  numberOfEmployees?: number;
+  subscription?: string;
+  address?: {
+    id: string;
+    street: string;
+    city: string;
+    country: string;
+    companyId: string;
+  };
+}
+
 interface User {
   id: string;
   email: string;
   name: string;
   userType: "COMPANY" | "CANDIDATE";
   phone?: string;
-  company?: any;
+  avatar?: string;
+  company?: Company;
   companyId?: string;
   candidateProfile?: CandidateProfile;
   createdAt?: string;

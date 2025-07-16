@@ -315,4 +315,23 @@ export class AuthService {
       user: userWithCompany,
     };
   }
+
+  async updateAvatar(userId: string, avatarPath: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatar: avatarPath },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        userType: true,
+        isActive: true,
+        companyId: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
+  }
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import StatsCards from "@/components/dashboard/StatsCards";
 import Calendar from "@/components/dashboard/Calendar";
 import RecentJobs from "@/components/dashboard/RecentJobs";

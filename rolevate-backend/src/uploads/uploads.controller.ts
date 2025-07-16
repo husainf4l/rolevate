@@ -6,6 +6,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
+import { Public } from '../auth/public.decorator';
 
 @Controller('uploads')
 export class UploadsController {
@@ -64,6 +65,7 @@ export class UploadsController {
     };
   }
 
+  @Public()
   @Get('cvs/:userId/:filename')
   async serveCV(
     @Param('userId') userId: string,
@@ -80,6 +82,7 @@ export class UploadsController {
     }
 
     // Set appropriate headers for PDF files
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
     res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
@@ -88,6 +91,7 @@ export class UploadsController {
     return res.sendFile(filePath);
   }
 
+  @Public()
   @Get('cvs/anonymous/:filename')
   async serveAnonymousCV(
     @Param('filename') filename: string,
@@ -114,11 +118,84 @@ export class UploadsController {
       contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     }
 
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
     res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
     
     this.logger.log(`Successfully serving anonymous CV: ${filename}`);
+    return res.sendFile(filePath);
+  }
+
+  @Public()
+  @Get('logos/:filename')
+  async getLogo(@Param('filename') filename: string, @Res() res: Response) {
+    const filePath = join(process.cwd(), 'uploads', 'logos', filename);
+    
+    if (!existsSync(filePath)) {
+      this.logger.error(`Logo not found: ${filePath}`);
+      throw new NotFoundException(`Logo file not found: ${filename}`);
+    }
+
+    // Determine content type based on file extension
+    const ext = extname(filename).toLowerCase();
+    let contentType = 'application/octet-stream';
+    
+    if (ext === '.jpg' || ext === '.jpeg') {
+      contentType = 'image/jpeg';
+    } else if (ext === '.png') {
+      contentType = 'image/png';
+    } else if (ext === '.gif') {
+      contentType = 'image/gif';
+    } else if (ext === '.webp') {
+      contentType = 'image/webp';
+    }
+
+    // Set CORS headers for images
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    
+    this.logger.log(`Successfully serving logo: ${filename}`);
+    return res.sendFile(filePath);
+  }
+
+  @Public()
+  @Get('avatars/:filename')
+  async getAvatar(@Param('filename') filename: string, @Res() res: Response) {
+    const filePath = join(process.cwd(), 'uploads', 'avatars', filename);
+    
+    if (!existsSync(filePath)) {
+      this.logger.error(`Avatar not found: ${filePath}`);
+      throw new NotFoundException(`Avatar file not found: ${filename}`);
+    }
+
+    // Determine content type based on file extension
+    const ext = extname(filename).toLowerCase();
+    let contentType = 'application/octet-stream';
+    
+    if (ext === '.jpg' || ext === '.jpeg') {
+      contentType = 'image/jpeg';
+    } else if (ext === '.png') {
+      contentType = 'image/png';
+    } else if (ext === '.gif') {
+      contentType = 'image/gif';
+    } else if (ext === '.webp') {
+      contentType = 'image/webp';
+    }
+
+    // Set CORS headers for images
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    
+    this.logger.log(`Successfully serving avatar: ${filename}`);
     return res.sendFile(filePath);
   }
 }

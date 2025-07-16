@@ -1,4 +1,6 @@
 // Application service for job applications and CV upload
+import { API_CONFIG } from '@/lib/config';
+
 export type ApplicationData = {
   jobId: string;
   coverLetter: string;
@@ -67,7 +69,7 @@ export interface Application {
 export async function uploadCV(file: File): Promise<string> {
   const uploadData = new FormData();
   uploadData.append("file", file);
-  const uploadRes = await fetch("http://localhost:4005/api/uploads/cvs", {
+  const uploadRes = await fetch(`${API_CONFIG.UPLOADS_URL}/cvs`, {
     method: "POST",
     body: uploadData,
     credentials: "include",
@@ -80,7 +82,7 @@ export async function uploadCV(file: File): Promise<string> {
 }
 
 export async function applyToJob(data: ApplicationData): Promise<{ message: string; applicationId?: string }> {
-  const response = await fetch("http://localhost:4005/api/applications", {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -110,7 +112,7 @@ export type AnonymousApplicationData = {
 };
 
 export async function applyToJobAnonymously(data: AnonymousApplicationData): Promise<{ message: string; applicationId?: string }> {
-  const response = await fetch("http://localhost:4005/api/applications/apply-with-cv", {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/apply-with-cv`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -133,7 +135,7 @@ export async function applyToJobAnonymously(data: AnonymousApplicationData): Pro
 
 // Get all applications for a specific job
 export async function getApplicationsByJob(jobId: string): Promise<Application[]> {
-  const response = await fetch(`http://localhost:4005/api/applications/job/${jobId}`, {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/job/${jobId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -150,10 +152,9 @@ export async function getApplicationsByJob(jobId: string): Promise<Application[]
 }
 
 // Get all applications for a company with optional filtering
-export async function getCompanyApplications(jobId?: string): Promise<Application[]> {
-  const url = jobId 
-    ? `http://localhost:4005/api/applications/company?jobId=${jobId}`
-    : `http://localhost:4005/api/applications/company`;
+export async function getCompanyApplications(jobId?: string): Promise<Application[]> {  const url = jobId
+    ? `${API_CONFIG.API_BASE_URL}/applications/company?jobId=${jobId}`
+    : `${API_CONFIG.API_BASE_URL}/applications/company`;
     
   const response = await fetch(url, {
     method: "GET",
@@ -173,7 +174,7 @@ export async function getCompanyApplications(jobId?: string): Promise<Applicatio
 
 // Get a single application by ID using the company endpoint with applicationId query
 export async function getApplicationById(applicationId: string): Promise<Application> {
-  const response = await fetch(`http://localhost:4005/api/applications/company?applicationId=${applicationId}`, {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/company?applicationId=${applicationId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -215,7 +216,7 @@ export async function updateApplicationStatus(
   applicationId: string, 
   status: Application["status"]
 ): Promise<{ message: string }> {
-  const response = await fetch(`http://localhost:4005/api/applications/${applicationId}/status`, {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/${applicationId}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -269,7 +270,7 @@ export interface UpdateNoteData {
 
 // Get application notes
 export async function getApplicationNotes(applicationId: string): Promise<ApplicationNote[]> {
-  const response = await fetch(`http://localhost:4005/api/applications/${applicationId}/notes`, {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/${applicationId}/notes`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -290,7 +291,7 @@ export async function createApplicationNote(
   applicationId: string, 
   noteData: CreateNoteData
 ): Promise<ApplicationNote> {
-  const response = await fetch(`http://localhost:4005/api/applications/${applicationId}/notes`, {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/${applicationId}/notes`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -313,7 +314,7 @@ export async function updateApplicationNote(
   noteId: string,
   noteData: UpdateNoteData
 ): Promise<ApplicationNote> {
-  const response = await fetch(`http://localhost:4005/api/applications/${applicationId}/notes/${noteId}`, {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/${applicationId}/notes/${noteId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
