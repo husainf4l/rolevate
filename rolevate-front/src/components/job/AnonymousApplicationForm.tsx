@@ -25,6 +25,11 @@ export default function AnonymousApplicationForm({
   onClose,
 }: AnonymousApplicationFormProps) {
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    portfolioUrl: '',
     coverLetter: '',
     expectedSalary: '',
     noticePeriod: '',
@@ -109,6 +114,11 @@ export default function AnonymousApplicationForm({
       const response = await AnonymousApplicationService.applyWithCV(
         jobId,
         selectedFile,
+        formData.firstName || undefined,
+        formData.lastName || undefined,
+        formData.email || undefined,
+        formData.phone || undefined,
+        formData.portfolioUrl || undefined,
         formData.coverLetter || undefined,
         formData.expectedSalary || undefined,
         formData.noticePeriod || undefined
@@ -127,6 +137,11 @@ export default function AnonymousApplicationForm({
 
       // Reset form
       setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        portfolioUrl: '',
         coverLetter: '',
         expectedSalary: '',
         noticePeriod: '',
@@ -182,6 +197,85 @@ export default function AnonymousApplicationForm({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Personal Information */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                First Name
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                placeholder="Enter your first name"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Last Name
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                placeholder="Enter your last name"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                placeholder="your.email@example.com"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                placeholder="+962 7XXXXXXXX"
+              />
+            </div>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Portfolio/Website <span className="text-gray-400">(optional)</span>
+            </label>
+            <input
+              type="url"
+              name="portfolioUrl"
+              value={formData.portfolioUrl}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+              placeholder="https://your-portfolio.com"
+            />
+          </div>
+        </div>
+
         {/* CV Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -246,7 +340,7 @@ export default function AnonymousApplicationForm({
         {/* Cover Letter */}
         <div>
           <label htmlFor="coverLetter" className="block text-sm font-medium text-gray-700 mb-2">
-            Cover Letter
+            Cover Letter <span className="text-gray-400">(optional)</span>
           </label>
           <textarea
             id="coverLetter"
@@ -259,36 +353,37 @@ export default function AnonymousApplicationForm({
           />
         </div>
 
-        {/* Expected Salary */}
-        <div>
-          <label htmlFor="expectedSalary" className="block text-sm font-medium text-gray-700 mb-2">
-            Expected Salary
-          </label>
-          <input
-            type="text"
-            id="expectedSalary"
-            name="expectedSalary"
-            value={formData.expectedSalary}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
-            placeholder="e.g., 5000 JOD"
-          />
-        </div>
+        {/* Expected Salary and Notice Period */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="expectedSalary" className="block text-sm font-medium text-gray-700 mb-2">
+              Expected Salary <span className="text-gray-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              id="expectedSalary"
+              name="expectedSalary"
+              value={formData.expectedSalary}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+              placeholder="e.g., 5000 JOD"
+            />
+          </div>
 
-        {/* Notice Period */}
-        <div>
-          <label htmlFor="noticePeriod" className="block text-sm font-medium text-gray-700 mb-2">
-            Notice Period
-          </label>
-          <input
-            type="text"
-            id="noticePeriod"
-            name="noticePeriod"
-            value={formData.noticePeriod}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
-            placeholder="e.g., 1 month, 2 weeks, Immediate"
-          />
+          <div>
+            <label htmlFor="noticePeriod" className="block text-sm font-medium text-gray-700 mb-2">
+              Notice Period <span className="text-gray-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              id="noticePeriod"
+              name="noticePeriod"
+              value={formData.noticePeriod}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+              placeholder="e.g., 1 month, 2 weeks, Immediate"
+            />
+          </div>
         </div>
 
         {/* Submit Button */}
@@ -319,8 +414,9 @@ export default function AnonymousApplicationForm({
       {/* Info Note */}
       <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> If you don't have an account, we'll automatically create one for you 
-          and send login credentials to your email address extracted from your CV.
+          <strong>Note:</strong> If you don't provide your email, we'll extract it from your CV. 
+          If you don't have an account, we'll automatically create one for you and send login 
+          credentials to your email address.
         </p>
       </div>
     </div>

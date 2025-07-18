@@ -2,6 +2,11 @@ import { API_CONFIG } from '@/lib/config';
 
 export interface AnonymousApplicationData {
   jobId: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  portfolioUrl?: string;
   resumeUrl?: string;
   coverLetter?: string;
   expectedSalary?: string;
@@ -33,6 +38,11 @@ export class AnonymousApplicationService {
   static async applyWithCV(
     jobId: string,
     cvFile: File,
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    phone?: string,
+    portfolioUrl?: string,
     coverLetter?: string,
     expectedSalary?: string,
     noticePeriod?: string
@@ -42,6 +52,21 @@ export class AnonymousApplicationService {
       formData.append('cv', cvFile);
       formData.append('jobId', jobId);
       
+      if (firstName) {
+        formData.append('firstName', firstName);
+      }
+      if (lastName) {
+        formData.append('lastName', lastName);
+      }
+      if (email) {
+        formData.append('email', email);
+      }
+      if (phone) {
+        formData.append('phone', phone);
+      }
+      if (portfolioUrl) {
+        formData.append('portfolioUrl', portfolioUrl);
+      }
       if (coverLetter) {
         formData.append('coverLetter', coverLetter);
       }

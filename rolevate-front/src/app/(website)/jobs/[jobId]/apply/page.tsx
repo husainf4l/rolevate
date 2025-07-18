@@ -5,10 +5,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/common/Button";
 import { JobData } from "@/components/common/JobCard";
-import AnonymousApplicationForm from "@/components/job/AnonymousApplicationForm";
+
 import { JobService, JobPost } from "@/services/job";
-import { applyToJob, uploadCV } from "@/services/application";
-import { AnonymousApplicationResponse } from "@/services/anonymousApplication";
+import {
+  applyToJob,
+  applyToJobAnonymously,
+  uploadCV,
+} from "@/services/application";
 
 export default function JobApplyPage() {
   const router = useRouter();
@@ -229,11 +232,15 @@ export default function JobApplyPage() {
           noticePeriod: "",
         });
       } else {
-        // Note: This old API call needs to be updated on the backend
-        // For now, we'll show an error directing users to use the new form
-        setError("Please use the simplified application form below for anonymous applications.");
-        setSubmitting(false);
-        return;
+        await applyToJobAnonymously({
+          jobId,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          coverLetter: formData.coverLetter,
+          resumeUrl,
+          portfolio: formData.portfolio,
+        });
       }
       setSuccess(true);
     } catch (err: any) {
@@ -241,11 +248,6 @@ export default function JobApplyPage() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleAnonymousApplicationSuccess = (response: AnonymousApplicationResponse) => {
-    setSuccess(true);
-    // You could also store the response data for showing in success page
   };
 
   // Loading state
@@ -549,17 +551,7 @@ export default function JobApplyPage() {
 
           {/* Application Form */}
           <div className="lg:col-span-3">
-            {!isAuthenticated ? (
-              /* Anonymous Application Form */
-              <AnonymousApplicationForm
-                jobId={jobId}
-                jobTitle={job.title}
-                companyName={typeof job.company === "string" ? job.company : job.company}
-                onApplicationSuccess={handleAnonymousApplicationSuccess}
-              />
-            ) : (
-              /* Authenticated User Form */
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
               <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-900">
                   Submit Your Application
@@ -799,7 +791,6 @@ export default function JobApplyPage() {
                 </div>
               </form>
             </div>
-            )}
           </div>
         </div>
       </div>
