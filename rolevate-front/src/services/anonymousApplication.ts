@@ -77,7 +77,7 @@ export class AnonymousApplicationService {
         formData.append('noticePeriod', noticePeriod);
       }
 
-      const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/apply-with-cv`, {
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/anonymous`, {
         method: 'POST',
         body: formData,
         // Don't set Content-Type header for FormData - browser will set it automatically with boundary

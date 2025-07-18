@@ -95,7 +95,7 @@ export default function InterviewSchedule() {
         </h2>
         <div className="flex items-center gap-3">
           <Link
-            href="/interview/test-room-123"
+            href="/room?phone=962796026659&jobId=test_job_123&roomName=interview_123_456"
             className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white text-sm rounded-lg hover:from-[#0891b2] hover:to-[#13ead9] transition-all duration-200 font-medium shadow-sm"
           >
             <PlayIcon className="w-4 h-4" />

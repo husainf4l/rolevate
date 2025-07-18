@@ -9,9 +9,9 @@ import { JobData } from "@/components/common/JobCard";
 import { JobService, JobPost } from "@/services/job";
 import {
   applyToJob,
-  applyToJobAnonymously,
   uploadCV,
 } from "@/services/application";
+import { AnonymousApplicationService } from "@/services/anonymousApplication";
 
 export default function JobApplyPage() {
   const router = useRouter();
@@ -198,32 +198,33 @@ export default function JobApplyPage() {
     setError(null);
 
     try {
-      let resumeUrl = undefined;
-      if (
-        formData.cv &&
-        typeof formData.cv === "object" &&
-        "fileUrl" in formData.cv &&
-        formData.cv.fileUrl
-      ) {
-        resumeUrl = formData.cv.fileUrl;
-      } else if (formData.cv && formData.cv instanceof File) {
-        resumeUrl = await uploadCV(formData.cv);
-      }
-
-      // Prevent submission if no valid resumeUrl
-      if (
-        !resumeUrl ||
-        typeof resumeUrl !== "string" ||
-        !/^https?:\/\//.test(resumeUrl)
-      ) {
-        setError(
-          "Please select or upload a valid CV before submitting your application."
-        );
-        setSubmitting(false);
-        return;
-      }
-
       if (isAuthenticated) {
+        // Authenticated user flow - upload CV separately then apply
+        let resumeUrl = undefined;
+        if (
+          formData.cv &&
+          typeof formData.cv === "object" &&
+          "fileUrl" in formData.cv &&
+          formData.cv.fileUrl
+        ) {
+          resumeUrl = formData.cv.fileUrl;
+        } else if (formData.cv && formData.cv instanceof File) {
+          resumeUrl = await uploadCV(formData.cv);
+        }
+
+        // Prevent submission if no valid resumeUrl
+        if (
+          !resumeUrl ||
+          typeof resumeUrl !== "string" ||
+          !/^https?:\/\//.test(resumeUrl)
+        ) {
+          setError(
+            "Please select or upload a valid CV before submitting your application."
+          );
+          setSubmitting(false);
+          return;
+        }
+
         await applyToJob({
           jobId,
           coverLetter: formData.coverLetter,
@@ -232,15 +233,28 @@ export default function JobApplyPage() {
           noticePeriod: "",
         });
       } else {
-        await applyToJobAnonymously({
+        // Anonymous user flow - send CV directly as multipart form data
+        if (!formData.cv || !(formData.cv instanceof File)) {
+          setError("Please upload a CV before submitting your application.");
+          setSubmitting(false);
+          return;
+        }
+
+        // Split name into firstName and lastName
+        const nameParts = formData.name.trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        await AnonymousApplicationService.applyWithCV(
           jobId,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          coverLetter: formData.coverLetter,
-          resumeUrl,
-          portfolio: formData.portfolio,
-        });
+          formData.cv,
+          firstName,
+          lastName,
+          formData.email,
+          formData.phone,
+          formData.portfolio || undefined,
+          formData.coverLetter || undefined
+        );
       }
       setSuccess(true);
     } catch (err: any) {
@@ -353,8 +367,8 @@ export default function JobApplyPage() {
             {typeof job.company === "string" ? job.company : job.company}
           </p>
           <p className="text-gray-700 mb-8">
-            Thank you for your application. You will be invited to an AI
-            interview in the next 5 minutes. Please be ready!
+            Thank you for your application. You will be invited to join an
+            interview room in the next 5 minutes. Please be ready!
           </p>
           <div className="space-y-3">
             <Button
