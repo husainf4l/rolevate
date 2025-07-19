@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/common/Button';
-import AnonymousApplicationService, { AnonymousApplicationResponse } from '@/services/anonymousApplication';
+import React, { useState } from "react";
+import { Button } from "@/components/common/Button";
+import AnonymousApplicationService, {
+  AnonymousApplicationResponse,
+} from "@/services/anonymousApplication";
 import {
   CloudArrowUpIcon,
   DocumentIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   XMarkIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 interface AnonymousApplicationFormProps {
   jobId: string;
@@ -25,27 +27,29 @@ export default function AnonymousApplicationForm({
   onClose,
 }: AnonymousApplicationFormProps) {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    portfolioUrl: '',
-    coverLetter: '',
-    expectedSalary: '',
-    noticePeriod: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    portfolioUrl: "",
+    coverLetter: "",
+    expectedSalary: "",
+    noticePeriod: "",
   });
-  
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     message: string;
   } | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -54,9 +58,9 @@ export default function AnonymousApplicationForm({
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
+    if (e.type === "dragenter" || e.type === "dragover") {
       setDragActive(true);
-    } else if (e.type === 'dragleave') {
+    } else if (e.type === "dragleave") {
       setDragActive(false);
     }
   };
@@ -65,7 +69,7 @@ export default function AnonymousApplicationForm({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileSelect(e.dataTransfer.files[0]);
     }
@@ -73,15 +77,15 @@ export default function AnonymousApplicationForm({
 
   const handleFileSelect = (file: File) => {
     const validation = AnonymousApplicationService.validateCVFile(file);
-    
+
     if (!validation.isValid) {
       setSubmitStatus({
-        type: 'error',
-        message: validation.error || 'Invalid file',
+        type: "error",
+        message: validation.error || "Invalid file",
       });
       return;
     }
-    
+
     setSelectedFile(file);
     setSubmitStatus(null);
   };
@@ -98,11 +102,11 @@ export default function AnonymousApplicationForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedFile) {
       setSubmitStatus({
-        type: 'error',
-        message: 'Please upload your CV/Resume',
+        type: "error",
+        message: "Please upload your CV/Resume",
       });
       return;
     }
@@ -125,10 +129,10 @@ export default function AnonymousApplicationForm({
       );
 
       setSubmitStatus({
-        type: 'success',
-        message: response.isNewAccount 
+        type: "success",
+        message: response.isNewAccount
           ? `Application submitted successfully! A new account has been created for ${response.email}. Check your email for login credentials.`
-          : 'Application submitted successfully!',
+          : "Application submitted successfully!",
       });
 
       if (onApplicationSuccess) {
@@ -137,21 +141,20 @@ export default function AnonymousApplicationForm({
 
       // Reset form
       setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        portfolioUrl: '',
-        coverLetter: '',
-        expectedSalary: '',
-        noticePeriod: '',
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        portfolioUrl: "",
+        coverLetter: "",
+        expectedSalary: "",
+        noticePeriod: "",
       });
       setSelectedFile(null);
-
     } catch (error: any) {
       setSubmitStatus({
-        type: 'error',
-        message: error.message || 'Failed to submit application',
+        type: "error",
+        message: error.message || "Failed to submit application",
       });
     } finally {
       setIsSubmitting(false);
@@ -163,7 +166,9 @@ export default function AnonymousApplicationForm({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Apply for Position</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Apply for Position
+          </h2>
           <p className="text-gray-600 mt-1">
             {jobTitle} at {companyName}
           </p>
@@ -182,12 +187,12 @@ export default function AnonymousApplicationForm({
       {submitStatus && (
         <div
           className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
-            submitStatus.type === 'success'
-              ? 'bg-green-100 text-green-800 border border-green-200'
-              : 'bg-red-100 text-red-800 border border-red-200'
+            submitStatus.type === "success"
+              ? "bg-green-100 text-green-800 border border-green-200"
+              : "bg-red-100 text-red-800 border border-red-200"
           }`}
         >
-          {submitStatus.type === 'success' ? (
+          {submitStatus.type === "success" ? (
             <CheckCircleIcon className="w-5 h-5" />
           ) : (
             <ExclamationTriangleIcon className="w-5 h-5" />
@@ -199,8 +204,10 @@ export default function AnonymousApplicationForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-          
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Personal Information
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -215,7 +222,7 @@ export default function AnonymousApplicationForm({
                 placeholder="Enter your first name"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Last Name
@@ -230,7 +237,7 @@ export default function AnonymousApplicationForm({
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -245,7 +252,7 @@ export default function AnonymousApplicationForm({
                 placeholder="your.email@example.com"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Phone Number
@@ -260,10 +267,11 @@ export default function AnonymousApplicationForm({
               />
             </div>
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Portfolio/Website <span className="text-gray-400">(optional)</span>
+              Portfolio/Website{" "}
+              <span className="text-gray-400">(optional)</span>
             </label>
             <input
               type="url"
@@ -281,13 +289,13 @@ export default function AnonymousApplicationForm({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             CV/Resume *
           </label>
-          
+
           {!selectedFile ? (
             <div
               className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                 dragActive
-                  ? 'border-[#13ead9] bg-[#13ead9]/5'
-                  : 'border-gray-300 hover:border-gray-400'
+                  ? "border-[#13ead9] bg-[#13ead9]/5"
+                  : "border-gray-300 hover:border-gray-400"
               }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -298,8 +306,10 @@ export default function AnonymousApplicationForm({
               <div className="mt-4">
                 <label htmlFor="cv-upload" className="cursor-pointer">
                   <span className="mt-2 block text-sm font-medium text-gray-900">
-                    Drop your CV here, or{' '}
-                    <span className="text-[#13ead9] hover:text-[#0891b2]">browse</span>
+                    Drop your CV here, or{" "}
+                    <span className="text-[#13ead9] hover:text-[#0891b2]">
+                      browse
+                    </span>
                   </span>
                   <input
                     id="cv-upload"
@@ -320,9 +330,13 @@ export default function AnonymousApplicationForm({
               <div className="flex items-center gap-3">
                 <DocumentIcon className="w-8 h-8 text-gray-400" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {selectedFile.name}
+                  </p>
                   <p className="text-xs text-gray-500">
-                    {AnonymousApplicationService.formatFileSize(selectedFile.size)}
+                    {AnonymousApplicationService.formatFileSize(
+                      selectedFile.size
+                    )}
                   </p>
                 </div>
               </div>
@@ -339,7 +353,10 @@ export default function AnonymousApplicationForm({
 
         {/* Cover Letter */}
         <div>
-          <label htmlFor="coverLetter" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="coverLetter"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Cover Letter <span className="text-gray-400">(optional)</span>
           </label>
           <textarea
@@ -356,7 +373,10 @@ export default function AnonymousApplicationForm({
         {/* Expected Salary and Notice Period */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="expectedSalary" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="expectedSalary"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Expected Salary <span className="text-gray-400">(optional)</span>
             </label>
             <input
@@ -371,7 +391,10 @@ export default function AnonymousApplicationForm({
           </div>
 
           <div>
-            <label htmlFor="noticePeriod" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="noticePeriod"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Notice Period <span className="text-gray-400">(optional)</span>
             </label>
             <input
@@ -395,9 +418,9 @@ export default function AnonymousApplicationForm({
             disabled={isSubmitting || !selectedFile}
             className="flex-1"
           >
-            {isSubmitting ? 'Submitting Application...' : 'Submit Application'}
+            {isSubmitting ? "Submitting Application..." : "Submit Application"}
           </Button>
-          
+
           {onClose && (
             <Button
               type="button"
@@ -414,9 +437,9 @@ export default function AnonymousApplicationForm({
       {/* Info Note */}
       <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> If you don't provide your email, we'll extract it from your CV. 
-          If you don't have an account, we'll automatically create one for you and send login 
-          credentials to your email address.
+          <strong>Note:</strong> If you don't provide your email, we'll extract
+          it from your CV. If you don't have an account, we'll automatically
+          create one for you and send login credentials to your email address.
         </p>
       </div>
     </div>

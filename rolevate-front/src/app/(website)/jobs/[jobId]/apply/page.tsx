@@ -7,10 +7,7 @@ import { Button } from "@/components/common/Button";
 import { JobData } from "@/components/common/JobCard";
 
 import { JobService, JobPost } from "@/services/job";
-import {
-  applyToJob,
-  uploadCV,
-} from "@/services/application";
+import { applyToJob, uploadCV } from "@/services/application";
 import { AnonymousApplicationService } from "@/services/anonymousApplication";
 
 export default function JobApplyPage() {
@@ -241,9 +238,9 @@ export default function JobApplyPage() {
         }
 
         // Split name into firstName and lastName
-        const nameParts = formData.name.trim().split(' ');
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts.slice(1).join(' ') || '';
+        const nameParts = formData.name.trim().split(" ");
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || "";
 
         await AnonymousApplicationService.applyWithCV(
           jobId,

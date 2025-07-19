@@ -31,6 +31,23 @@ function RoomContent() {
   const jobId = searchParams.get("jobId");
   const roomName = searchParams.get("roomName");
 
+  // Handle leaving the room
+  const handleLeaveRoom = async () => {
+    try {
+      if (roomName && candidateId) {
+        console.log('🚪 Leaving room:', roomName, 'candidate:', candidateId);
+        await RoomService.leaveRoom(roomName, candidateId);
+        console.log('✅ Successfully left room');
+      }
+      // Redirect to a success page or close the window
+      window.location.href = '/';
+    } catch (error) {
+      console.error('❌ Error leaving room:', error);
+      // Still redirect even if API call fails
+      window.location.href = '/';
+    }
+  };
+
   useEffect(() => {
     // Validate required parameters
     if (!phone || !jobId || !roomName) {
@@ -46,7 +63,11 @@ function RoomContent() {
         setError(null);
 
         // Validate parameters
-        const validationError = RoomService.validateRoomParams(phone, jobId, roomName);
+        const validationError = RoomService.validateRoomParams(
+          phone,
+          jobId,
+          roomName
+        );
         if (validationError) {
           setError(validationError);
           setLoading(false);
@@ -74,7 +95,9 @@ function RoomContent() {
         setCandidateId(response.candidate.id);
       } catch (err: any) {
         console.error("Error joining room:", err);
-        setError(err.message || "Failed to join the interview room. Please try again.");
+        setError(
+          err.message || "Failed to join the interview room. Please try again."
+        );
       } finally {
         setLoading(false);
       }
@@ -151,15 +174,11 @@ function RoomContent() {
       <div className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-semibold text-white">
-              Interview Room
-            </h1>
+            <h1 className="text-xl font-semibold text-white">Interview Room</h1>
             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
               Live
             </span>
-            <span className="text-gray-400 text-sm">
-              {roomData.roomName}
-            </span>
+            <span className="text-gray-400 text-sm">{roomData.roomName}</span>
           </div>
           <div className="text-sm text-gray-300">
             <span>{roomData.jobTitle}</span>
@@ -179,6 +198,7 @@ function RoomContent() {
         jobTitle={roomData.jobTitle}
         companyName={roomData.companyName}
         candidateName={roomData.candidateName}
+        onLeave={handleLeaveRoom}
       />
     </div>
   );
