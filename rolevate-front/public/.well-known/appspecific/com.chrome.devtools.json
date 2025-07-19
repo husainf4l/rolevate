@@ -1,0 +1,10 @@
+{
+  "origins": ["*"],
+  "devtools": {
+    "version": "1.0",
+    "capabilities": {
+      "websocket": true,
+      "devtools": true
+    }
+  }
+}
