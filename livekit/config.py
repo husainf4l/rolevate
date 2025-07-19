@@ -16,9 +16,11 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class AppConfig:
     """Typed configuration for the application."""
+
     openai_api_key: str
     aws_bucket_name: str
     aws_region: str
@@ -33,6 +35,7 @@ class AppConfig:
             logger.error("CRITICAL: OPENAI_API_KEY is not set.")
             raise ValueError("OPENAI_API_KEY environment variable is missing.")
         logger.info("Application configuration loaded and validated.")
+
 
 def load_config() -> AppConfig:
     """
@@ -53,6 +56,7 @@ def load_config() -> AppConfig:
         aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         livekit_agent_port=port,
     )
+
 
 # Create a global config instance to be used throughout the application
 try:

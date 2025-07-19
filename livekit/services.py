@@ -50,10 +50,15 @@ class MetadataExtractor:
         try:
             metadata = json.loads(room_metadata)
             extracted = {key: metadata.get(key, defaults[key]) for key in defaults}
-            logger.info(f"Successfully extracted metadata for: {extracted['candidateName']}")
+            logger.info(
+                f"Successfully extracted metadata for: {extracted['candidateName']}"
+            )
             return extracted
         except json.JSONDecodeError:
-            logger.error("Failed to parse room metadata JSON. Using default values.", exc_info=True)
+            logger.error(
+                "Failed to parse room metadata JSON. Using default values.",
+                exc_info=True,
+            )
             return defaults
 
 
@@ -99,10 +104,13 @@ class RecordingManager:
             logger.error("Failed to start recording.", exc_info=True)
             return None
 
-    def setup_transcript_saving(self, session: AgentSession, recording_url: Optional[str]):
+    def setup_transcript_saving(
+        self, session: AgentSession, recording_url: Optional[str]
+    ):
         """
         Adds a shutdown callback to save the session transcript.
         """
+
         async def save_transcript():
             logger.info("Saving transcript...")
             filename = f"{self.recordings_dir}/transcript_{self.ctx.room.name}_{self.ctx.job.id}.json"
@@ -112,7 +120,11 @@ class RecordingManager:
                     "job_id": self.ctx.job.id,
                     "timestamp": datetime.now().isoformat(),
                     "recording_url": recording_url or "N/A",
-                    "session_history": session.history.to_dict() if hasattr(session.history, "to_dict") else str(session.history),
+                    "session_history": (
+                        session.history.to_dict()
+                        if hasattr(session.history, "to_dict")
+                        else str(session.history)
+                    ),
                 }
                 with open(filename, "w", encoding="utf-8") as f:
                     json.dump(transcript_data, f, indent=2, ensure_ascii=False)
@@ -133,7 +145,9 @@ class RecordingManager:
     def _generate_presigned_url(self) -> Optional[str]:
         """Generates a presigned URL for the S3 recording."""
         if not all([self.config.aws_access_key_id, self.config.aws_secret_access_key]):
-            logger.warning("AWS credentials not provided. Cannot generate presigned URL.")
+            logger.warning(
+                "AWS credentials not provided. Cannot generate presigned URL."
+            )
             return None
         try:
             s3_client = boto3.client(
@@ -144,13 +158,18 @@ class RecordingManager:
             )
             url = s3_client.generate_presigned_url(
                 "get_object",
-                Params={"Bucket": self.config.aws_bucket_name, "Key": self._get_s3_filepath()},
+                Params={
+                    "Bucket": self.config.aws_bucket_name,
+                    "Key": self._get_s3_filepath(),
+                },
                 ExpiresIn=86400,  # 24 hours
             )
             logger.info("Successfully generated presigned URL for recording.")
             return url
         except NoCredentialsError:
-            logger.error("AWS credentials not found by boto3. Cannot generate presigned URL.")
+            logger.error(
+                "AWS credentials not found by boto3. Cannot generate presigned URL."
+            )
             return None
         except Exception:
             logger.error("Failed to generate presigned URL.", exc_info=True)

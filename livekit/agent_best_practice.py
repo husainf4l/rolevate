@@ -20,7 +20,6 @@ import logging
 import os
 from typing import Optional, Dict, Any
 from datetime import datetime
-
 from dotenv import load_dotenv
 from livekit import agents, api
 from livekit.agents import Agent, AgentSession, JobContext

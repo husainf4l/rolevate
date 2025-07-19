@@ -168,7 +168,7 @@ export function useRoomConnection({
       onError(err.message || "Failed to connect to room");
       onConnectionChange(false, false);
     }
-  }, [room, searchParams, onConnectionChange, onError, onJobDataUpdate]);
+  }, [room, onConnectionChange, onError, onJobDataUpdate]);
 
   // Cleanup on unmount
   useEffect(() => {

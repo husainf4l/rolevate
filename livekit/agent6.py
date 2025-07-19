@@ -76,7 +76,9 @@ class InterviewAgent(Agent):
         if self.interview_prompt:
             interview_section = f"\n\nINTERVIEW PROTOCOL:\n{self.interview_prompt}"
         else:
-            interview_section = f"\n\nConduct a structured interview for the {self.job_name} position."
+            interview_section = (
+                f"\n\nConduct a structured interview for the {self.job_name} position."
+            )
         return f"{base_instructions}{interview_section}"
 
 
@@ -117,7 +119,7 @@ async def entrypoint(ctx: JobContext):
         logger.critical("Fatal error in agent entrypoint.", exc_info=True)
     finally:
         logger.info("Agent entrypoint finished.")
-        if 'recording_manager' in locals():
+        if "recording_manager" in locals():
             await recording_manager.close()
 
 

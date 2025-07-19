@@ -15,7 +15,7 @@ export default function Room4Page() {
   const searchParams = useSearchParams();
   const [room] = useState(() => new Room());
   const connectionAttemptedRef = useRef(false);
-  
+
   const {
     isConnected,
     isConnecting,
@@ -25,13 +25,12 @@ export default function Room4Page() {
     companyInfo,
     jobInfo,
     handleStartInterview,
-    setNeedsPermission,
     setIsConnected,
     setIsConnecting,
     setError,
     setJobInfo,
     setCompanyInfo,
-    setParticipantName
+    setParticipantName,
   } = useInterviewState();
 
   const { connectToRoom } = useRoomConnection({
@@ -48,7 +47,7 @@ export default function Room4Page() {
       if (jobData) setJobInfo(jobData);
       if (companyData) setCompanyInfo(companyData);
       if (participantData) setParticipantName(participantData);
-    }
+    },
   });
 
   // Debug URL parameters
@@ -59,13 +58,28 @@ export default function Room4Page() {
       serverUrl: searchParams.get("serverUrl"),
       phone: searchParams.get("phone"),
       jobId: searchParams.get("jobId"),
-      allParams: Object.fromEntries(searchParams.entries())
+      allParams: Object.fromEntries(searchParams.entries()),
     });
   }, [searchParams]);
 
   // Connect to room when permissions are granted
   useEffect(() => {
-    if (!needsPermission && !isConnected && !isConnecting && !error && !connectionAttemptedRef.current) {
+    console.log("🔍 Connection effect triggered:", {
+      needsPermission,
+      isConnected,
+      isConnecting,
+      hasError: !!error,
+      connectionAttempted: connectionAttemptedRef.current
+    });
+
+    if (
+      !needsPermission &&
+      !isConnected &&
+      !isConnecting &&
+      !error &&
+      !connectionAttemptedRef.current
+    ) {
+      console.log("🚀 Triggering room connection...");
       connectionAttemptedRef.current = true;
       connectToRoom();
     }
@@ -87,7 +101,7 @@ export default function Room4Page() {
     <RoomContext.Provider value={room}>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 relative overflow-hidden">
         <ParticleBackground />
-        
+
         <InterviewLayout
           jobInfo={jobInfo}
           companyInfo={companyInfo}

@@ -9,7 +9,7 @@ export function useInterviewState() {
   const [companyInfo, setCompanyInfo] = useState<any>(null);
   const [jobInfo, setJobInfo] = useState<any>(null);
 
-  const handleStartInterview = useCallback(async () => {
+  const handleStartInterview = useCallback(async (connectCallback?: () => Promise<void>) => {
     console.log("🎬 Starting interview setup...");
     
     try {
@@ -22,6 +22,11 @@ export function useInterviewState() {
       console.log("✅ Full media permissions granted");
       setNeedsPermission(false);
       setError(null);
+      
+      // Call the connection callback if provided
+      if (connectCallback) {
+        await connectCallback();
+      }
       return;
     } catch (fullMediaError) {
       console.warn("⚠️ Full media access denied, trying audio-only...", fullMediaError);
@@ -37,6 +42,11 @@ export function useInterviewState() {
       console.log("✅ Audio-only permissions granted");
       setNeedsPermission(false);
       setError(null);
+      
+      // Call the connection callback if provided
+      if (connectCallback) {
+        await connectCallback();
+      }
       return;
     } catch (audioError) {
       console.warn("⚠️ Audio access also denied, proceeding without media...", audioError);
@@ -47,6 +57,11 @@ export function useInterviewState() {
     console.log("ℹ️ Proceeding without media permissions");
     setNeedsPermission(false);
     setError(null);
+    
+    // Call the connection callback if provided
+    if (connectCallback) {
+      await connectCallback();
+    }
   }, []);
 
   const updateConnectionState = useCallback((connected: boolean, connecting: boolean) => {

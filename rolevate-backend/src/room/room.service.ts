@@ -338,7 +338,17 @@ export class RoomService {
         candidateName: `${application.candidate.firstName} ${application.candidate.lastName}`,
         jobName: application.job.title,
         companyName: application.job.company.name,
-        interviewPrompt: application.job.interviewPrompt || "Conduct a professional interview for this position."
+        interviewPrompt: application.job.interviewPrompt || "Conduct a professional interview for this position.",
+        cvAnalysis: application.cvAnalysisResults ? (() => {
+          const cvAnalysis = application.cvAnalysisResults as any;
+          return {
+            score: cvAnalysis.score,
+            summary: cvAnalysis.summary,
+            overallFit: cvAnalysis.overallFit,
+            strengths: cvAnalysis.strengths,
+            weaknesses: cvAnalysis.weaknesses
+          };
+        })() : null
       };
 
       // Step 4: Create room on LiveKit server AND database with metadata
@@ -376,7 +386,8 @@ export class RoomService {
           candidateName: newMetadata.candidateName,
           jobName: newMetadata.jobName,
           companyName: newMetadata.companyName,
-          interviewPrompt: newMetadata.interviewPrompt
+          interviewPrompt: newMetadata.interviewPrompt,
+          cvAnalysis: newMetadata.cvAnalysis
         },
         
         // Summary for quick reference
