@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Trigger Test - New Room</title>
+    <script src="https://unpkg.com/livekit-client@2.0.7/dist/livekit-client.umd.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success { background-color: #d4edda; color: #155724; }
+        .status.error { background-color: #f8d7da; color: #721c24; }
+        .status.info { background-color: #d1ecf1; color: #0c5460; }
+        .status.warning { background-color: #fff3cd; color: #856404; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 8px 4px;
+            font-size: 14px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        button.success { background-color: #28a745; }
+        button.danger { background-color: #dc3545; }
+        .room-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .logs {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        #videoContainer {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+        }
+        video {
+            width: 100%;
+            height: 200px;
+            background-color: #000;
+            border-radius: 4px;
+        }
+        .participant {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Agent Trigger Test - Fresh Room</h1>
+        <p>This will create a brand new room and join it to trigger your LiveKit agent.</p>
+        
+        <div id="status" class="status info">Ready to create new room and connect...</div>
+        
+        <div>
+            <h3>🚀 Quick Start:</h3>
+            <button onclick="createAndJoinRoom()" id="quickStartBtn" class="success">
+                🎯 Create New Room & Join (Trigger Agent)
+            </button>
+            <button onclick="disconnectFromRoom()" id="disconnectBtn" disabled class="danger">
+                ❌ Disconnect
+            </button>
+        </div>
+
+        <div id="roomInfo" class="room-info" style="display: none;">
+            <h4>📋 Room Information:</h4>
+            <div id="roomDetails"></div>
+        </div>
+
+        <div>
+            <h3>🎛️ Controls:</h3>
+            <button onclick="enableMicrophone()" id="micBtn" disabled>🎤 Enable Microphone</button>
+            <button onclick="enableCamera()" id="cameraBtn" disabled>📹 Enable Camera</button>
+            <button onclick="sendTestMessage()" id="messageBtn" disabled>💬 Send Test Message</button>
+        </div>
+
+        <div id="videoContainer"></div>
+        
+        <div class="logs" id="logs">
+            <div>🔍 Logs will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        let room;
+        let connected = false;
+        let roomToken = null;
+        let roomName = null;
+
+        function log(message, highlight = false) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = highlight ? 'highlight' : '';
+            logs.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        async function createAndJoinRoom() {
+            updateStatus('Creating new room...', 'info');
+            log('🚀 Starting room creation process...');
+
+            try {
+                // Step 1: Create new room with same metadata
+                log('📡 Step 1: Creating new room with API...');
+                
+                const createResponse = await fetch('/api/room/create-new-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        jobId: "cmcxmffqf000diuc17tbhwwiy",
+                        phone: "962796026659",
+                        roomName: "interview_cmd9hrag1001c3ssw6k20uuh1_1752883802865"
+                    })
+                });
+
+                const createResult = await createResponse.json();
+                
+                if (createResponse.ok) {
+                    log('✅ New room created successfully!', true);
+                    log(`📝 Room Name: ${createResult.newRoom.name}`);
+                    log(`👤 Participant: ${createResult.participantName}`);
+                    log(`⏰ Token Expires: ${new Date(createResult.expiresAt).toLocaleString()}`);
+                    
+                    // Store room info
+                    roomToken = createResult.token;
+                    roomName = createResult.newRoom.name;
+                    
+                    // Show room info
+                    const roomInfo = document.getElementById('roomInfo');
+                    const roomDetails = document.getElementById('roomDetails');
+                    roomDetails.innerHTML = `
+                        <strong>New Room:</strong> ${createResult.newRoom.name}<br>
+                        <strong>Original Room:</strong> ${createResult.originalRoom}<br>
+                        <strong>Participant:</strong> ${createResult.participantName}<br>
+                        <strong>Job Title:</strong> ${createResult.newRoom.metadata.jobTitle}<br>
+                        <strong>Token Expires:</strong> ${new Date(createResult.expiresAt).toLocaleString()}
+                    `;
+                    roomInfo.style.display = 'block';
+                    
+                    // Step 2: Connect to the room
+                    log('🔗 Step 2: Connecting to LiveKit room...');
+                    await connectToLiveKitRoom();
+                    
+                } else {
+                    throw new Error('Failed to create room: ' + JSON.stringify(createResult));
+                }
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+                updateStatus('Failed to create/join room', 'error');
+            }
+        }
+
+        async function connectToLiveKitRoom() {
+            if (!roomToken || !roomName) {
+                log('❌ No room token or name available');
+                return;
+            }
+
+            try {
+                updateStatus('Connecting to LiveKit...', 'info');
+                log('🎯 Connecting to LiveKit with fresh token...');
+
+                // Create room instance
+                room = new LiveKitCore.Room({
+                    adaptiveStream: true,
+                    dynacast: true,
+                });
+
+                // Set up event listeners
+                room.on(LiveKitCore.RoomEvent.Connected, () => {
+                    log('✅ Connected to LiveKit room!', true);
+                    updateStatus(`Connected to ${roomName}`, 'success');
+                    connected = true;
+                    
+                    document.getElementById('quickStartBtn').disabled = true;
+                    document.getElementById('disconnectBtn').disabled = false;
+                    document.getElementById('micBtn').disabled = false;
+                    document.getElementById('cameraBtn').disabled = false;
+                    document.getElementById('messageBtn').disabled = false;
+
+                    log('🤖 Watch your agent terminal for activity!', true);
+                    log('🎤 Click "Enable Microphone" to trigger voice processing');
+                });
+
+                room.on(LiveKitCore.RoomEvent.Disconnected, () => {
+                    log('❌ Disconnected from room');
+                    updateStatus('Disconnected', 'error');
+                    connected = false;
+                    
+                    document.getElementById('quickStartBtn').disabled = false;
+                    document.getElementById('disconnectBtn').disabled = true;
+                    document.getElementById('micBtn').disabled = true;
+                    document.getElementById('cameraBtn').disabled = true;
+                    document.getElementById('messageBtn').disabled = true;
+                });
+
+                room.on(LiveKitCore.RoomEvent.ParticipantConnected, (participant) => {
+                    log(`👤 Participant joined: ${participant.identity}`, true);
+                    if (participant.identity.toLowerCase().includes('agent') || 
+                        participant.identity.toLowerCase().includes('ai') ||
+                        participant.identity.toLowerCase().includes('bot')) {
+                        log('🤖 🎉 AGENT DETECTED! Your LiveKit agent has joined the room!', true);
+                        updateStatus('🤖 Agent connected and active!', 'success');
+                    }
+                });
+
+                room.on(LiveKitCore.RoomEvent.ParticipantDisconnected, (participant) => {
+                    log(`👋 Participant left: ${participant.identity}`);
+                });
+
+                room.on(LiveKitCore.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+                    log(`📺 Track subscribed: ${track.kind} from ${participant.identity}`);
+                    
+                    if (track.kind === 'video') {
+                        const videoElement = track.attach();
+                        videoElement.style.width = '100%';
+                        
+                        const container = document.createElement('div');
+                        container.className = 'participant';
+                        container.innerHTML = `<h4>${participant.identity}</h4>`;
+                        container.appendChild(videoElement);
+                        
+                        document.getElementById('videoContainer').appendChild(container);
+                    }
+                });
+
+                room.on(LiveKitCore.RoomEvent.DataReceived, (payload, participant) => {
+                    const message = new TextDecoder().decode(payload);
+                    log(`💬 Data received from ${participant?.identity}: ${message}`, true);
+                });
+
+                // Connect to room
+                const wsUrl = 'wss://rolvate2-ckmk80qb.livekit.cloud';
+                await room.connect(wsUrl, roomToken);
+
+            } catch (error) {
+                log(`❌ Connection failed: ${error.message}`);
+                updateStatus('Connection failed', 'error');
+            }
+        }
+
+        async function disconnectFromRoom() {
+            if (room && connected) {
+                log('🔌 Disconnecting from room...');
+                await room.disconnect();
+                document.getElementById('videoContainer').innerHTML = '';
+                document.getElementById('roomInfo').style.display = 'none';
+            }
+        }
+
+        async function enableMicrophone() {
+            if (room && connected) {
+                try {
+                    log('🎤 Enabling microphone...', true);
+                    await room.localParticipant.enableCameraAndMicrophone();
+                    log('✅ Microphone enabled - Agent should detect audio!', true);
+                } catch (error) {
+                    log(`❌ Failed to enable microphone: ${error.message}`);
+                }
+            }
+        }
+
+        async function enableCamera() {
+            if (room && connected) {
+                try {
+                    log('📹 Enabling camera...', true);
+                    await room.localParticipant.enableCameraAndMicrophone();
+                    log('✅ Camera enabled');
+                } catch (error) {
+                    log(`❌ Failed to enable camera: ${error.message}`);
+                }
+            }
+        }
+
+        async function sendTestMessage() {
+            if (room && connected) {
+                try {
+                    const message = `Hello Agent! Test message at ${new Date().toLocaleTimeString()}`;
+                    log(`💬 Sending message: ${message}`, true);
+                    await room.localParticipant.publishData(new TextEncoder().encode(message), { reliable: true });
+                    log('✅ Message sent to room');
+                } catch (error) {
+                    log(`❌ Failed to send message: ${error.message}`);
+                }
+            }
+        }
+
+        // Initialize
+        log('🌐 Agent Trigger Test Client ready');
+        log('📋 Instructions:');
+        log('1. Make sure your agent is running in terminal');
+        log('2. Click "Create New Room & Join" button');
+        log('3. Watch your agent terminal for new activity');
+        log('4. Enable microphone to trigger voice processing');
+        log('5. Look for agent joining the room!');
+    </script>
+</body>
+</html>

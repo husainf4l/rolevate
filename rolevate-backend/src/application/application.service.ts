@@ -4,8 +4,10 @@ import { CacheService } from '../cache/cache.service';
 import { OpenaiCvAnalysisService } from '../services/openai-cv-analysis.service';
 import { CvParsingService } from '../services/cv-parsing.service';
 import { NotificationService } from '../notification/notification.service';
+import { LiveKitService } from '../livekit/livekit.service';
+import { CommunicationService } from '../communication/communication.service';
 import { CreateApplicationDto, ApplicationResponseDto, CVAnalysisResultDto, UpdateApplicationStatusDto } from './dto/application.dto';
-import { ApplicationStatus, UserType } from '@prisma/client';
+import { ApplicationStatus, UserType, CommunicationType, CommunicationDirection } from '@prisma/client';
 import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -17,6 +19,8 @@ export class ApplicationService {
     private openaiCvAnalysisService: OpenaiCvAnalysisService,
     private cvParsingService: CvParsingService,
     private notificationService: NotificationService,
+    private liveKitService: LiveKitService,
+    private communicationService: CommunicationService,
   ) {}
 
   async createApplication(createApplicationDto: CreateApplicationDto, candidateId: string): Promise<ApplicationResponseDto> {
@@ -125,6 +129,9 @@ export class ApplicationService {
       this.analyzeCVInBackground(application.id, resumeUrl, job.cvAnalysisPrompt, job);
     }
 
+    // Create LiveKit room and send WhatsApp invitation
+    this.createLiveKitRoomAndNotifyCandidate(application, application.candidate, job);
+
     // Clear cache
     await this.cacheService.clear(); // Clear all cache since we don't have pattern matching
 
@@ -159,9 +166,27 @@ export class ApplicationService {
       throw new BadRequestException('Job application deadline has passed');
     }
 
-    // Extract candidate information from CV
+    // Extract candidate information from CV and merge with manual input
     console.log('📄 Extracting candidate information from CV...');
-    const candidateInfo = await this.cvParsingService.extractCandidateInfoFromCV(createApplicationDto.resumeUrl);
+    const cvCandidateInfo = await this.cvParsingService.extractCandidateInfoFromCV(createApplicationDto.resumeUrl);
+    
+    // Merge manual input with CV-extracted data (manual input takes priority)
+    const candidateInfo = {
+      ...cvCandidateInfo,
+      firstName: createApplicationDto.firstName || cvCandidateInfo.firstName,
+      lastName: createApplicationDto.lastName || cvCandidateInfo.lastName,
+      email: createApplicationDto.email || cvCandidateInfo.email,
+      phone: createApplicationDto.phone || cvCandidateInfo.phone,
+      portfolioUrl: createApplicationDto.portfolioUrl,
+    };
+
+    // Validate required fields
+    if (!candidateInfo.email) {
+      throw new BadRequestException('Email is required (either provide manually or include in CV)');
+    }
+    if (!candidateInfo.firstName) {
+      throw new BadRequestException('First name is required (either provide manually or include in CV)');
+    }
 
     // Check if user already exists with this email
     let existingUser = await this.prisma.user.findUnique({
@@ -267,6 +292,9 @@ export class ApplicationService {
       this.analyzeCVInBackground(application.id, createApplicationDto.resumeUrl, job.cvAnalysisPrompt, job);
     }
 
+    // Create LiveKit room and send WhatsApp invitation
+    this.createLiveKitRoomAndNotifyCandidate(application, application.candidate, job);
+
     // Clear cache
     await this.cacheService.clear();
 
@@ -370,6 +398,111 @@ export class ApplicationService {
   async performAICVAnalysis(resumeUrl: string, analysisPrompt: string, job: any): Promise<CVAnalysisResultDto> {
     // Use OpenAI GPT-4o for real CV analysis with text extraction
     return await this.openaiCvAnalysisService.analyzeCVWithOpenAI(resumeUrl, analysisPrompt, job);
+  }
+
+  async createLiveKitRoomAndNotifyCandidate(
+    application: any, 
+    candidate: any, 
+    job: any
+  ): Promise<void> {
+    try {
+      console.log('🎥 Creating LiveKit room for interview...');
+      
+      // Create unique room name
+      const roomName = `interview_${application.id}_${Date.now()}`;
+      
+      // Prepare metadata
+      const metadata = {
+        applicationId: application.id,
+        candidateId: candidate.id,
+        candidatePhone: candidate.phone,
+        jobId: job.id,
+        jobTitle: job.title,
+        companyId: job.companyId,
+        createdAt: new Date().toISOString(),
+        type: 'interview'
+      };
+
+      // Create room with token for candidate
+      const participantName = `${candidate.firstName} ${candidate.lastName}`;
+      const { room, token } = await this.liveKitService.createRoomWithToken(
+        roomName,
+        metadata,
+        'system', // Created by system
+        participantName
+      );
+
+      console.log('✅ LiveKit room created:', {
+        roomId: room.id,
+        roomName: room.name,
+        candidateToken: token.substring(0, 20) + '...'
+      });
+
+      // Generate interview link (you should replace with your actual frontend URL)
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const interviewLink = `${frontendUrl}/interview/${room.name}?token=${token}`;
+
+      // Send WhatsApp template message to candidate
+      if (candidate.phone) {
+        console.log('📱 Sending WhatsApp template invitation to candidate...');
+        
+        // Use cv_received_notification template
+        // Template parameters: 
+        // - Body {{1}}: Candidate name
+        // - Button URL {{1}}: Query parameters for https://rolevate.com/room{{1}}
+        const candidateName = `${candidate.firstName} ${candidate.lastName}`;
+        
+        // Clean phone number (remove + and any spaces/special chars)
+        const cleanPhone = candidate.phone.replace(/[\+\s\-\(\)]/g, '');
+        
+        // Create query parameters for the interview room
+        const queryParams = `?phone=${cleanPhone}&jobId=${encodeURIComponent(job.id)}&roomName=${encodeURIComponent(room.name)}`;
+        
+        const templateParams = [
+          candidateName,  // Body parameter: candidate name
+          queryParams     // Button URL parameter: query string for room URL
+        ];
+
+        // Send WhatsApp template message using communication service
+        await this.communicationService.create({
+          candidateId: candidate.id,
+          companyId: job.companyId,
+          jobId: job.id,
+          type: CommunicationType.WHATSAPP,
+          direction: CommunicationDirection.OUTBOUND,
+          content: `Interview invitation sent to ${candidateName} for ${job.title}`,
+          phoneNumber: candidate.phone,
+          templateName: 'cv_received_notification',
+          templateParams: templateParams,
+        });
+
+        console.log('✅ WhatsApp template invitation sent to:', candidate.phone);
+        console.log('📋 Template params:', { candidateName, queryParams });
+      } else {
+        console.log('⚠️ No phone number available for candidate, skipping WhatsApp notification');
+      }
+
+      // Update application with room information
+      await this.prisma.application.update({
+        where: { id: application.id },
+        data: {
+          companyNotes: `LiveKit room created: ${room.name}. Interview link sent via WhatsApp.`,
+        },
+      });
+
+      console.log('🎬 Interview setup completed successfully!');
+
+    } catch (error) {
+      console.error('❌ Failed to create LiveKit room or send notification:', error);
+      
+      // Log the error but don't fail the application creation
+      await this.prisma.application.update({
+        where: { id: application.id },
+        data: {
+          companyNotes: `Error creating interview room: ${error.message}`,
+        },
+      });
+    }
   }
 
   async getApplicationsByCandidate(candidateId: string): Promise<ApplicationResponseDto[]> {

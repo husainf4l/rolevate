@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  livekit-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /home/husain/Desktop/rolevate/livekit/widd-459718-7e011203dde7.json:/app/widd-459718-7e011203dde7.json:ro
+      - /home/husain/Desktop/rolevate/livekit/.env:/app/.env:ro
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+    # Port exposed for LiveKit agent
+    ports:
+      - "8005:8005"

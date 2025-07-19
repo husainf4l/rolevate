@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Get, Patch, Param, Query, Req, UseGuards, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException, SetMetadata } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApplicationService } from './application.service';
-import { CreateApplicationDto, ApplicationResponseDto, UpdateApplicationStatusDto } from './dto/application.dto';
+import { CreateApplicationDto, CreateAnonymousApplicationDto, ApplicationResponseDto, UpdateApplicationStatusDto } from './dto/application.dto';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { diskStorage } from 'multer';
@@ -28,10 +28,58 @@ export class ApplicationController {
 
   @SetMetadata('skipAuth', true)
   @Post('anonymous')
+  @UseInterceptors(FileInterceptor('cv', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        // Create directory for anonymous uploads
+        const uploadDir = join(process.cwd(), 'uploads', 'cvs', 'anonymous');
+        if (!existsSync(uploadDir)) {
+          mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+      },
+      filename: (req, file, cb) => {
+        const fileExtension = extname(file.originalname);
+        const fileName = `cv_${uuidv4()}${fileExtension}`;
+        cb(null, fileName);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      // Accept only PDF and DOC files
+      const allowedMimes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only PDF and DOC/DOCX files are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+  }))
   async createAnonymousApplication(
-    @Body() createApplicationDto: CreateApplicationDto
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createAnonymousApplicationDto: CreateAnonymousApplicationDto
   ): Promise<ApplicationResponseDto & { candidateCredentials?: { email: string; password: string } }> {
-    // No authentication required - creates candidate account from CV
+    if (!file) {
+      throw new BadRequestException('CV file is required for anonymous applications');
+    }
+
+    // Generate the resume URL for the uploaded file (relative to project root)
+    const resumeUrl = `uploads/cvs/anonymous/${file.filename}`;
+
+    // Create the full application DTO with the uploaded CV
+    const createApplicationDto: CreateApplicationDto = {
+      ...createAnonymousApplicationDto,
+      resumeUrl: resumeUrl,
+    };
+
+    // Process the anonymous application
     return this.applicationService.createAnonymousApplication(createApplicationDto);
   }
 
@@ -73,31 +121,19 @@ export class ApplicationController {
   }))
   async applyWithCV(
     @UploadedFile() file: Express.Multer.File,
-    @Body() applicationData: { 
-      jobId: string; 
-      coverLetter?: string; 
-      expectedSalary?: string; 
-      noticePeriod?: string; 
-    }
+    @Body() applicationData: CreateAnonymousApplicationDto
   ): Promise<ApplicationResponseDto & { candidateCredentials?: { email: string; password: string } }> {
     if (!file) {
       throw new BadRequestException('CV file is required');
     }
 
-    if (!applicationData.jobId) {
-      throw new BadRequestException('Job ID is required');
-    }
-
-    // Create the resume URL for the uploaded file
-    const resumeUrl = `/uploads/cvs/anonymous/${file.filename}`;
+    // Create the resume URL for the uploaded file (relative to project root)
+    const resumeUrl = `uploads/cvs/anonymous/${file.filename}`;
 
     // Create application DTO with the uploaded CV
     const createApplicationDto: CreateApplicationDto = {
-      jobId: applicationData.jobId,
+      ...applicationData,
       resumeUrl: resumeUrl,
-      coverLetter: applicationData.coverLetter,
-      expectedSalary: applicationData.expectedSalary,
-      noticePeriod: applicationData.noticePeriod,
     };
 
     // Process the anonymous application

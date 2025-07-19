@@ -19,7 +19,67 @@ export class CreateApplicationDto {
 
   @IsOptional()
   @IsString()
-  resumeUrl?: string; // Optional custom resume for this application
+  resumeUrl?: string; // For authenticated users with existing resumes
+
+  // Anonymous application fields
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  portfolioUrl?: string;
+}
+
+// Separate DTO for anonymous applications with file upload
+export class CreateAnonymousApplicationDto {
+  @IsString()
+  jobId: string;
+
+  @IsOptional()
+  @IsString()
+  coverLetter?: string;
+
+  @IsOptional()
+  @IsString()
+  expectedSalary?: string;
+
+  @IsOptional()
+  @IsString()
+  noticePeriod?: string;
+
+  // Manual candidate information
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  portfolioUrl?: string;
 }
 
 export class UpdateApplicationStatusDto {

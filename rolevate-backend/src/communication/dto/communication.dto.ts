@@ -1,15 +1,12 @@
-import { IsString, IsEnum, IsOptional, IsDateString, IsUUID } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsDateString } from 'class-validator';
 import { CommunicationType, CommunicationDirection, CommunicationStatus } from '@prisma/client';
 
-export class CreateCommunicationDto {
-  @IsUUID()
+export class CreateCommunicationRequestDto {
+  @IsString()
   candidateId: string;
 
-  @IsUUID()
-  companyId: string;
-
   @IsOptional()
-  @IsUUID()
+  @IsString()
   jobId?: string;
 
   @IsEnum(CommunicationType)
@@ -32,6 +29,46 @@ export class CreateCommunicationDto {
   @IsOptional()
   @IsString()
   phoneNumber?: string;
+}
+
+export class CreateCommunicationDto {
+  @IsString()
+  candidateId: string;
+
+  @IsString()
+  companyId: string;
+
+  @IsOptional()
+  @IsString()
+  jobId?: string;
+
+  @IsEnum(CommunicationType)
+  type: CommunicationType;
+
+  @IsEnum(CommunicationDirection)
+  direction: CommunicationDirection;
+
+  @IsString()
+  content: string;
+
+  @IsOptional()
+  @IsString()
+  subject?: string;
+
+  @IsOptional()
+  @IsString()
+  whatsappId?: string;
+
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  templateName?: string;
+
+  @IsOptional()
+  templateParams?: string[];
 }
 
 export class SendWhatsAppDto {

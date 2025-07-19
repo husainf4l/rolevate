@@ -98,4 +98,38 @@ export class WhatsAppService {
         this.logger.log('Template message sent:', result);
         return result;
     }
+
+    async sendTextMessage(to: string, text: string) {
+        const phoneNumberId = this.configService.get<string>('WHATSAPP_PHONE_NUMBER_ID');
+        const apiVersion = this.configService.get<string>('WHATSAPP_API_VERSION') || 'v18.0';
+        const accessToken = await this.tokenManager.getAccessToken();
+        const url = `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`;
+
+        const payload = {
+            messaging_product: 'whatsapp',
+            to,
+            type: 'text',
+            text: {
+                body: text
+            }
+        };
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const result = await res.json();
+        if (!res.ok) {
+            this.logger.error('Error sending text message:', result);
+            throw new Error(`WhatsApp API error: ${result.error?.message || 'Unknown error'}`);
+        }
+
+        this.logger.log('Text message sent:', result);
+        return result;
+    }
 }

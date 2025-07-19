@@ -15,6 +15,7 @@ import { ApplicationModule } from './application/application.module';
 import { SecurityModule } from './security/security.module';
 import { NotificationModule } from './notification/notification.module';
 import { CommunicationModule } from './communication/communication.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
   // Removed duplicate imports property
@@ -33,6 +34,7 @@ import { CommunicationModule } from './communication/communication.module';
     SecurityModule,
     NotificationModule,
     CommunicationModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [AppService],

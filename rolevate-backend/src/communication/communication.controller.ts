@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { CommunicationService } from './communication.service';
 import { 
+  CreateCommunicationRequestDto,
   CreateCommunicationDto, 
   SendWhatsAppDto, 
   CommunicationFiltersDto 
@@ -80,15 +81,18 @@ export class CommunicationController {
   @Post()
   async createCommunication(
     @Request() req: any,
-    @Body() createCommunicationDto: CreateCommunicationDto,
+    @Body() createCommunicationRequestDto: CreateCommunicationRequestDto,
   ) {
     const companyId = req.user.companyId;
     if (!companyId) {
       throw new BadRequestException('User must be associated with a company');
     }
 
-    // Override companyId from JWT token
-    createCommunicationDto.companyId = companyId;
+    // Transform request DTO to service DTO with companyId
+    const createCommunicationDto: CreateCommunicationDto = {
+      ...createCommunicationRequestDto,
+      companyId,
+    };
 
     return this.communicationService.create(createCommunicationDto);
   }

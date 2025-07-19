@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Recording Viewer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .header p {
+            color: #666;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .info-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .timestamp {
+            color: #999;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 200px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #c33;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Interview Recording</h1>
+            <p>Capital Bank AI Interview Session</p>
+            <p class="timestamp">Generated on: <span id="currentDate"></span></p>
+        </div>
+
+        <div class="video-container">
+            <video id="recordingVideo" controls preload="metadata">
+                <!-- Try direct S3 URL first -->
+                <source src="https://4wk-garage-media.s3.me-central-1.amazonaws.com/recordings/interview_cmczxtdqd000biu9rvb6jcrde_1752897762788_AJ_pYPuVR489V8C.mp4" type="video/mp4">
+                <!-- Fallback to signed URL -->
+                <source src="https://4wk-garage-media.s3.me-central-1.amazonaws.com/recordings/interview_cmczxtdqd000biu9rvb6jcrde_1752897762788_AJ_pYPuVR489V8C.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA46ALPORV5VMEIW63%2F20250719%2Fme-central-1%2Fs3%2Faws4_request&X-Amz-Date=20250719T040345Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=d69376fe9c21ccaf5095f1180e8994601ddf43c0d405e24c0abccffbdc5beb14" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="playPause()">▶️ Play/Pause</button>
+            <button class="btn btn-secondary" onclick="skipBackward()">⏪ -10s</button>
+            <button class="btn btn-secondary" onclick="skipForward()">⏩ +10s</button>
+            <button class="btn btn-secondary" onclick="toggleFullscreen()">🔍 Fullscreen</button>
+            <button class="btn btn-secondary" onclick="downloadVideo()">📥 Download</button>
+        </div>
+
+        <div class="info-card">
+            <h3>📋 Recording Information</h3>
+            <p><strong>Room:</strong> interview_cmczxtdqd000biu9rvb6jcrde_1752897762788</p>
+            <p><strong>Job ID:</strong> AJ_pYPuVR489V8C</p>
+            <p><strong>Format:</strong> MP4 Video</p>
+            <p><strong>Source:</strong> LiveKit Agent Recording</p>
+            <p><strong>Storage:</strong> AWS S3 (4wk-garage-media)</p>
+            <p><strong>Agent:</strong> Laila Al Noor - Capital Bank HR Assistant</p>
+        </div>
+
+        <div id="errorMessage" class="error" style="display: none;">
+            <h3>⚠️ Playback Error</h3>
+            <p>If the video doesn't load, the presigned URL may have expired. Please generate a new link or check your AWS permissions.</p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('recordingVideo');
+        const errorDiv = document.getElementById('errorMessage');
+
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleString();
+
+        // Video event handlers
+        video.addEventListener('error', function() {
+            errorDiv.style.display = 'block';
+            console.error('Video failed to load');
+        });
+
+        video.addEventListener('loadstart', function() {
+            console.log('Video loading started');
+        });
+
+        video.addEventListener('canplay', function() {
+            console.log('Video can start playing');
+            errorDiv.style.display = 'none';
+        });
+
+        // Control functions
+        function playPause() {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+
+        function skipBackward() {
+            video.currentTime = Math.max(0, video.currentTime - 10);
+        }
+
+        function skipForward() {
+            video.currentTime = Math.min(video.duration, video.currentTime + 10);
+        }
+
+        function toggleFullscreen() {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+                video.msRequestFullscreen();
+            }
+        }
+
+        function downloadVideo() {
+            const link = document.createElement('a');
+            link.href = video.src;
+            link.download = 'interview_recording_AJ_pYPuVR489V8C.mp4';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            switch(e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    playPause();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    skipBackward();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    skipForward();
+                    break;
+                case 'KeyF':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+            }
+        });
+
+        // Update page title with video duration when loaded
+        video.addEventListener('loadedmetadata', function() {
+            const duration = Math.round(video.duration);
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            document.title = `Interview Recording (${minutes}:${seconds.toString().padStart(2, '0')})`;
+        });
+    </script>
+</body>
+</html>

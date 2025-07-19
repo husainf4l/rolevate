@@ -1,0 +1,14 @@
+[Unit]
+Description=Livekit AI Agent Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/husain/rolvate/livekit
+EnvironmentFile=/home/husain/rolvate/livekit/.env
+ExecStart=/bin/bash -c '/home/husain/rolvate/livekit/.venv/bin/python /home/husain/rolvate/livekit/agent.py start'
+Restart=always
+User=husain
+
+[Install]
+WantedBy=multi-user.target

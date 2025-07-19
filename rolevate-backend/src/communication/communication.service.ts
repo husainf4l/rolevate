@@ -126,10 +126,54 @@ export class CommunicationService {
       }
     }
 
+    let whatsappId: string | undefined;
+    let communicationStatus: CommunicationStatus = CommunicationStatus.SENT;
+
+    // If it's a WhatsApp message and direction is OUTBOUND, actually send it
+    if (data.type === CommunicationType.WHATSAPP && data.direction === CommunicationDirection.OUTBOUND) {
+      try {
+        if (!candidate.phone) {
+          throw new BadRequestException('Candidate has no phone number for WhatsApp');
+        }
+
+        // Send WhatsApp message
+        console.log(`Sending WhatsApp message to ${candidate.phone}: ${data.content}`);
+        
+        let whatsappResult;
+        
+        if (data.templateName) {
+          // Send template message with parameters
+          console.log(`Using template: ${data.templateName} with params:`, data.templateParams);
+          whatsappResult = await this.whatsappService.sendTemplateMessage(
+            candidate.phone,
+            data.templateName,
+            undefined, // Auto-detect language
+            data.templateParams
+          );
+        } else {
+          // Send regular text message
+          whatsappResult = await this.whatsappService.sendTextMessage(
+            candidate.phone,
+            data.content
+          );
+        }
+        
+        whatsappId = whatsappResult.messages?.[0]?.id;
+        console.log(`WhatsApp message sent successfully. Message ID: ${whatsappId}`);
+        
+      } catch (error) {
+        console.error('Failed to send WhatsApp message:', error.message);
+        communicationStatus = CommunicationStatus.FAILED;
+        // Continue to create the record but mark as failed
+      }
+    }
+
     return this.prisma.communication.create({
       data: {
         ...data,
-        status: CommunicationStatus.SENT,
+        status: communicationStatus,
+        whatsappId,
+        phoneNumber: candidate.phone,
       },
       include: {
         candidate: {
