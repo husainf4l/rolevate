@@ -1,5 +1,6 @@
 "use client";
 
+import "@livekit/components-styles";
 import React, { useState, useEffect, useCallback } from "react";
 import { Room, RoomEvent, RemoteParticipant } from "livekit-client";
 import {
@@ -17,7 +18,6 @@ import {
   ExclamationTriangleIcon,
   ComputerDesktopIcon,
 } from "@heroicons/react/24/outline";
-import ParticleBackground from "./ParticleBackground";
 
 // Custom CSS for enhanced animations
 const customStyles = `
@@ -99,6 +99,117 @@ export default function InterviewRoom({
     screenShare: false,
   });
 
+  // Force audio initialization
+  useEffect(() => {
+    // Unlock audio context on first user interaction
+    const unlockAudio = () => {
+      console.log("🔓 Attempting to unlock audio context...");
+
+      // Create a temporary audio context
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+
+      // Create a buffer source with a short sound
+      const buffer = audioContext.createBuffer(1, 1, 22050);
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+
+      // Play and immediately stop the sound
+      source.start(0);
+      source.stop(0.001);
+
+      console.log("✅ Audio context unlocked:", audioContext.state);
+
+      // Clean up event listeners
+      document.removeEventListener("click", unlockAudio);
+      document.removeEventListener("touchstart", unlockAudio);
+      document.removeEventListener("keydown", unlockAudio);
+    };
+
+    // Attach the unlock function to user interaction events
+    document.addEventListener("click", unlockAudio);
+    document.addEventListener("touchstart", unlockAudio);
+    document.addEventListener("keydown", unlockAudio);
+
+    // Try to unlock audio context right away (might work in some browsers)
+    unlockAudio();
+
+    return () => {
+      // Clean up event listeners
+      document.removeEventListener("click", unlockAudio);
+      document.removeEventListener("touchstart", unlockAudio);
+      document.removeEventListener("keydown", unlockAudio);
+    };
+  }, []);
+
+  // Effect to ensure RoomAudioRenderer is set up correctly after connection
+  useEffect(() => {
+    if (isConnected) {
+      console.log("🔊 Setting up audio renderer...");
+
+      // Small delay to ensure the DOM is updated
+      setTimeout(() => {
+        const audioRenderer = document.querySelector("lk-audio-renderer");
+        if (audioRenderer) {
+          console.log("✅ Found RoomAudioRenderer element:", audioRenderer);
+
+          // Force the audio renderer to update
+          const event = new Event("forceUpdate");
+          audioRenderer.dispatchEvent(event);
+        } else {
+          console.warn("⚠️ Could not find RoomAudioRenderer element");
+        }
+
+        // Check for audio elements
+        const audioElements = document.querySelectorAll("audio");
+        console.log(
+          `🔊 Found ${audioElements.length} audio elements:`,
+          audioElements
+        );
+
+        // Try to force audio elements to play
+        audioElements.forEach((audio, i) => {
+          audio.muted = false;
+          audio.volume = 1.0;
+
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() =>
+                console.log(`✅ Audio element ${i} playing successfully`)
+              )
+              .catch((err) =>
+                console.warn(`⚠️ Could not play audio element ${i}:`, err)
+              );
+          }
+        });
+      }, 1500);
+
+      // Set up event listener for refreshing audio renderer
+      const handleRefreshAudio = () => {
+        console.log("🔄 Refreshing audio renderer...");
+        const audioRenderer = document.querySelector("lk-audio-renderer");
+        if (audioRenderer) {
+          // Force the audio renderer to update
+          const event = new Event("forceUpdate");
+          audioRenderer.dispatchEvent(event);
+        }
+      };
+
+      document.addEventListener("refreshAudioRenderer", handleRefreshAudio);
+
+      return () => {
+        document.removeEventListener(
+          "refreshAudioRenderer",
+          handleRefreshAudio
+        );
+      };
+    }
+
+    return () => {}; // Return empty cleanup function when not connected
+  }, [isConnected]);
+
   // Timer for call duration
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -109,6 +220,43 @@ export default function InterviewRoom({
     }
     return () => clearInterval(timer);
   }, [isConnected]);
+
+  // Periodic state synchronization to ensure UI reflects actual LiveKit state
+  useEffect(() => {
+    const stateChecker = setInterval(() => {
+      const actualState = room.state;
+      const shouldBeConnected = actualState === "connected";
+      const shouldBeConnecting =
+        actualState === "connecting" || actualState === "reconnecting";
+
+      // Only update if there's a mismatch
+      if (shouldBeConnected && !isConnected) {
+        console.log("🔄 STATE SYNC: Updating to connected (was disconnected)");
+        setIsConnected(true);
+        setIsConnecting(false);
+      } else if (!shouldBeConnected && !shouldBeConnecting && isConnected) {
+        console.log("🔄 STATE SYNC: Updating to disconnected (was connected)");
+        setIsConnected(false);
+        setIsConnecting(false);
+      } else if (shouldBeConnecting && !isConnecting) {
+        console.log("🔄 STATE SYNC: Updating to connecting");
+        setIsConnecting(true);
+        setIsConnected(false);
+      }
+
+      // Log current state for debugging
+      if (actualState !== "disconnected") {
+        console.log("🔍 STATE CHECK:", {
+          roomState: actualState,
+          uiConnected: isConnected,
+          uiConnecting: isConnecting,
+          participantCount: room.numParticipants,
+        });
+      }
+    }, 2000); // Check every 2 seconds
+
+    return () => clearInterval(stateChecker);
+  }, [room, isConnected, isConnecting]);
 
   // Format duration to MM:SS
   const formatDuration = useCallback((seconds: number) => {
@@ -125,25 +273,64 @@ export default function InterviewRoom({
       setIsConnecting(true);
       setError(null);
 
-      console.log("Connecting to LiveKit room:", { roomName, serverUrl });
+      console.log("🚀 STARTING LIVEKIT CONNECTION PROCESS");
+      console.log("📊 Connection Details:", {
+        roomName,
+        serverUrl,
+        tokenLength: token?.length,
+        tokenStart: token?.substring(0, 20) + "...",
+        currentRoomState: room.state,
+      });
 
-      // Set up room event listeners
+      // Check if already connected
+      if (room.state === "connected") {
+        console.log("✅ ALREADY CONNECTED TO LIVEKIT ROOM");
+        setIsConnected(true);
+        setIsConnecting(false);
+        return;
+      }
+
+      // Clear any existing event listeners to prevent duplicates
+      room.removeAllListeners();
+
+      // Set up room event listeners BEFORE connecting
       room.on(RoomEvent.Connected, () => {
-        console.log("✅ Connected to room");
+        console.log("✅ SUCCESSFULLY CONNECTED TO LIVEKIT ROOM");
+        console.log("🏠 Room State:", room.state);
+        console.log("👥 Local Participant:", room.localParticipant.identity);
+        console.log("🔗 Server URL:", serverUrl);
+        console.log("📱 Room Name:", room.name);
         setIsConnected(true);
         setIsConnecting(false);
       });
 
       room.on(RoomEvent.Disconnected, (reason) => {
-        console.log("❌ Disconnected from room:", reason);
+        console.log("❌ DISCONNECTED FROM LIVEKIT ROOM");
+        console.log("🔍 Disconnect Reason:", reason);
+        console.log("🏠 Room State:", room.state);
         setIsConnected(false);
+        setIsConnecting(false);
+      });
+
+      room.on(RoomEvent.Reconnecting, () => {
+        console.log("🔄 LIVEKIT RECONNECTING...");
+        setIsConnecting(true);
+      });
+
+      room.on(RoomEvent.Reconnected, () => {
+        console.log("✅ LIVEKIT RECONNECTED");
+        setIsConnected(true);
         setIsConnecting(false);
       });
 
       room.on(
         RoomEvent.ParticipantConnected,
         (participant: RemoteParticipant) => {
-          console.log("👤 Participant connected:", participant.identity);
+          console.log("👤 NEW PARTICIPANT JOINED:");
+          console.log("  - Identity:", participant.identity);
+          console.log("  - SID:", participant.sid);
+          console.log("  - Is Agent:", participant.isAgent);
+          console.log("  - Metadata:", participant.metadata);
 
           // Check if this is an AI agent
           if (
@@ -151,7 +338,7 @@ export default function InterviewRoom({
             participant.identity.includes("agent") ||
             participant.identity.includes("ai")
           ) {
-            console.log("🤖 AI Agent detected");
+            console.log("🤖 AI AGENT DETECTED AND CONNECTED!");
             setAiAgent(participant);
           }
         }
@@ -160,31 +347,174 @@ export default function InterviewRoom({
       room.on(
         RoomEvent.ParticipantDisconnected,
         (participant: RemoteParticipant) => {
-          console.log("👤 Participant disconnected:", participant.identity);
+          console.log("👤 PARTICIPANT LEFT:");
+          console.log("  - Identity:", participant.identity);
+          console.log("  - SID:", participant.sid);
 
           if (participant === aiAgent) {
+            console.log("🤖 AI Agent disconnected");
             setAiAgent(null);
           }
         }
       );
 
+      // Handle track subscriptions (CRITICAL for audio playback)
+      room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        console.log("🎵 TRACK SUBSCRIBED:");
+        console.log("  - Track Kind:", track.kind);
+        console.log("  - Track Source:", track.source);
+        console.log("  - Participant:", participant.identity);
+        console.log("  - Track SID:", track.sid);
+        console.log("  - Is Muted:", track.isMuted);
+
+        if (track.kind === "audio") {
+          console.log("🔊 AUDIO TRACK SUBSCRIBED FROM AGENT!");
+          console.log("  - Audio Track Details:", track);
+          console.log("  - Publication Details:", publication);
+
+          // Ensure the audio track is enabled and not muted
+          if (track.isMuted) {
+            console.warn("⚠️ Audio track is muted!");
+            track.setMuted(false);
+            console.log("✅ Attempted to unmute audio track");
+          } else {
+            console.log("✅ Audio track is unmuted and ready for playback");
+          }
+
+          // Force track to be audible
+          if ("mediaStreamTrack" in track && track.mediaStreamTrack) {
+            const mediaTrack = track.mediaStreamTrack;
+            if (mediaTrack.enabled === false) {
+              console.log("🔄 Enabling disabled media track...");
+              mediaTrack.enabled = true;
+            }
+
+            // Create a temporary audio element to force audio context creation
+            const tempAudio = new Audio();
+            tempAudio.srcObject = new MediaStream([mediaTrack]);
+            tempAudio.muted = false;
+            tempAudio.volume = 1.0;
+            document.body.appendChild(tempAudio); // Explicitly add to DOM
+
+            // Create a second audio element with different approach
+            const tempAudio2 = document.createElement("audio");
+            tempAudio2.srcObject = new MediaStream([mediaTrack]);
+            tempAudio2.autoplay = true;
+            tempAudio2.muted = false;
+            tempAudio2.volume = 1.0;
+            document.body.appendChild(tempAudio2);
+
+            // Try to play it to kick-start audio context
+            const playPromise = tempAudio.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  console.log("✅ Successfully forced audio track playback");
+                  // Keep playing longer to ensure audio is heard
+                  setTimeout(() => {
+                    tempAudio.pause();
+                    tempAudio.srcObject = null;
+                    tempAudio2.pause();
+                    tempAudio2.srcObject = null;
+                    document.body.removeChild(tempAudio);
+                    document.body.removeChild(tempAudio2);
+                  }, 5000);
+                })
+                .catch((err) => {
+                  console.warn("⚠️ Could not force audio playback:", err);
+                });
+            }
+          }
+
+          // Refresh the RoomAudioRenderer
+          setTimeout(() => {
+            const event = new CustomEvent("refreshAudioRenderer");
+            document.dispatchEvent(event);
+          }, 1000);
+        }
+      });
+
+      room.on(
+        RoomEvent.TrackUnsubscribed,
+        (track, _publication, participant) => {
+          console.log("❌ TRACK UNSUBSCRIBED:");
+          console.log("  - Track Kind:", track.kind);
+          console.log("  - Participant:", participant.identity);
+
+          if (track.kind === "audio") {
+            console.log("🔇 AUDIO TRACK UNSUBSCRIBED!");
+          }
+        }
+      );
+
       room.on(RoomEvent.MediaDevicesError, (error: Error) => {
-        console.error("Media devices error:", error);
+        console.error("🎤 MEDIA DEVICES ERROR:", error);
         setError(
           "Failed to access camera/microphone. Please check permissions."
         );
       });
 
-      // Connect to the room
-      await room.connect(serverUrl, token);
+      room.on(RoomEvent.ConnectionQualityChanged, (quality, participant) => {
+        console.log("📊 Connection Quality Changed:", {
+          quality,
+          participant: participant?.identity || "local",
+        });
+      });
+
+      // Add error event listener
+      room.on(RoomEvent.RoomMetadataChanged, (metadata) => {
+        console.log("📝 Room Metadata Changed:", metadata);
+      });
+
+      console.log("🔌 ATTEMPTING TO CONNECT TO LIVEKIT...");
+      console.log("🌐 Server URL:", serverUrl);
+      console.log("🎫 Token (first 50 chars):", token.substring(0, 50) + "...");
+
+      // Connect to the room with proper options for audio handling
+      await room.connect(serverUrl, token, {
+        // Auto-subscribe to all tracks (critical for audio)
+        autoSubscribe: true,
+        // Ensure proper audio handling with multiple ICE servers
+        rtcConfig: {
+          iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" },
+            { urls: "stun:stun3.l.google.com:19302" },
+            { urls: "stun:stun4.l.google.com:19302" },
+          ],
+          // Enable ICE TCP to help with certain firewall situations
+          iceTransportPolicy: "all",
+        },
+      });
+
+      console.log("🎯 CONNECTION COMMAND COMPLETED");
+      console.log("🏠 Final Room State:", room.state);
+      console.log("👥 Participants Count:", room.numParticipants);
+      console.log("🔗 Connected to Room:", room.name);
 
       // Enable microphone by default
+      console.log("🎤 Enabling microphone...");
       await room.localParticipant.setMicrophoneEnabled(mediaDevices.microphone);
+      console.log("✅ Microphone enabled:", mediaDevices.microphone);
     } catch (err) {
-      console.error("Failed to connect to room:", err);
+      console.error("💥 LIVEKIT CONNECTION FAILED:");
+      console.error(
+        "  - Error Type:",
+        err instanceof Error ? err.constructor.name : typeof err
+      );
+      console.error(
+        "  - Error Message:",
+        err instanceof Error ? err.message : String(err)
+      );
+      console.error("  - Full Error:", err);
+      console.error("  - Room State:", room.state);
+      console.error("  - Server URL:", serverUrl);
+      console.error("  - Token Valid:", !!token);
+
       setError(
         err instanceof Error
-          ? err.message
+          ? `LiveKit Connection Failed: ${err.message}`
           : "Failed to connect to interview room"
       );
       setIsConnecting(false);
@@ -239,12 +569,88 @@ export default function InterviewRoom({
   useEffect(() => {
     connectToRoom();
 
-    return () => {
+    // Handle manual reconnect events
+    const handleForceReconnect = (event: CustomEvent) => {
+      console.log("🔄 MANUAL RECONNECT EVENT RECEIVED:", event.detail);
+
       if (room.state === "connected") {
+        console.log(
+          "🔌 Disconnecting from current room before reconnecting..."
+        );
         room.disconnect();
       }
+
+      // Wait a bit then reconnect
+      setTimeout(() => {
+        console.log("🔄 Attempting manual reconnection...");
+        connectToRoom();
+      }, 1000);
     };
-  }, [connectToRoom, room]);
+
+    // Handle manual state refresh events
+    const handleRefreshState = (event: CustomEvent) => {
+      console.log("🔄 MANUAL STATE REFRESH EVENT RECEIVED:", event.detail);
+
+      const actualState = room.state;
+      const actualConnected = actualState === "connected";
+      const actualConnecting =
+        actualState === "connecting" || actualState === "reconnecting";
+
+      console.log("📊 FORCE STATE SYNC:", {
+        roomState: actualState,
+        participantCount: room.numParticipants,
+        currentUIConnected: isConnected,
+        currentUIConnecting: isConnecting,
+        willUpdateToConnected: actualConnected,
+        willUpdateToConnecting: actualConnecting,
+      });
+
+      // Force update the state
+      setIsConnected(actualConnected);
+      setIsConnecting(actualConnecting);
+
+      if (actualConnected) {
+        setError(null);
+      }
+    };
+
+    // Add event listener for manual reconnection and state refresh
+    const roomElement = document.querySelector("[data-interview-room]");
+    if (roomElement) {
+      roomElement.addEventListener(
+        "forceReconnect",
+        handleForceReconnect as EventListener
+      );
+      roomElement.addEventListener(
+        "refreshState",
+        handleRefreshState as EventListener
+      );
+    }
+
+    return () => {
+      // Clean up event listeners
+      if (roomElement) {
+        roomElement.removeEventListener(
+          "forceReconnect",
+          handleForceReconnect as EventListener
+        );
+        roomElement.removeEventListener(
+          "refreshState",
+          handleRefreshState as EventListener
+        );
+      }
+
+      // Only disconnect if we're actually leaving the page, not just re-rendering
+      // This prevents the agent session from closing due to premature disconnection
+      if (room.state === "connected") {
+        console.log(
+          "🧹 Component unmounting, but keeping room connection alive for agent"
+        );
+        // Don't disconnect here to keep agent session alive
+        // room.disconnect();
+      }
+    };
+  }, [connectToRoom]);
 
   // Connection status indicator
   const getConnectionStatus = () => {
@@ -259,10 +665,13 @@ export default function InterviewRoom({
 
   return (
     <RoomContext.Provider value={room}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex flex-col relative overflow-hidden">
-        {/* Particle Background */}
-        <ParticleBackground />
-
+      <div
+        className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex flex-col relative overflow-hidden"
+        data-interview-room="true"
+        data-room-name={roomName}
+        data-is-connected={isConnected}
+        data-is-connecting={isConnecting}
+      >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-[0.02] z-[2]">
           <div
@@ -640,14 +1049,17 @@ export default function InterviewRoom({
           </div>
         </div>
 
-        {/* Audio Renderer */}
-        <RoomAudioRenderer />
+        {/* Audio Renderer - Making visible but positioned offscreen */}
+        <div
+          id="audio-container"
+          className="fixed top-0 left-0 w-0 h-0 overflow-visible"
+        >
+          <RoomAudioRenderer volume={1.0} muted={false} />
+        </div>
       </div>
     </RoomContext.Provider>
   );
-}
-
-// Enhanced Audio Visualizer Component
+} // Enhanced Audio Visualizer Component
 function AudioVisualizer() {
   const { state: agentState, audioTrack } = useVoiceAssistant();
 
