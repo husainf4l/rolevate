@@ -52,9 +52,7 @@ export function InterviewHeader() {
       <div className="flex items-center gap-3">
         <ControlButton
           onClick={toggleMicrophone}
-          ariaLabel={
-            isMicEnabled ? "Mute microphone" : "Unmute microphone"
-          }
+          ariaLabel={isMicEnabled ? "Mute microphone" : "Unmute microphone"}
           className={
             isMicEnabled
               ? "bg-slate-200 text-slate-800 hover:bg-slate-300"

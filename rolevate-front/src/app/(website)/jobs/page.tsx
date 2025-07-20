@@ -40,7 +40,6 @@ const salaryRanges = [
   "35K - 50K",
   "50K+",
 ];
-const companies = ["All"];
 const industries = [
   "All",
   "Technology",
@@ -59,7 +58,6 @@ export default function JobsPage() {
   const [selectedLocation, setSelectedLocation] = useState("All");
   const [selectedExperience, setSelectedExperience] = useState("All");
   const [selectedSalary, setSelectedSalary] = useState("All");
-  const [selectedCompany, setSelectedCompany] = useState("All");
   const [selectedIndustry, setSelectedIndustry] = useState("All");
   const [sortBy, setSortBy] = useState("latest");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -80,7 +78,7 @@ export default function JobsPage() {
 
   // Helper function to convert JobPost to JobData format
   const convertJobPostToJobData = (jobPost: JobPost): JobData => {
-    return {
+    const jobData: JobData = {
       id: jobPost.id, // Use string ID directly (UUID from backend)
       title: jobPost.title,
       company: jobPost.company?.name || "Company", // Use actual company name from API
@@ -92,15 +90,26 @@ export default function JobsPage() {
           ? "Part-time"
           : jobPost.type === "CONTRACT"
           ? "Contract"
-          : "Remote",
+          : jobPost.type === "REMOTE"
+          ? "Remote"
+          : "Other",
       salary: jobPost.salary,
       skills: jobPost.skills || [],
       posted: new Date(jobPost.postedAt).toLocaleDateString(),
-      applicants: jobPost.applicants,
-      logo: getCompanyLogo(jobPost.company?.name), // Dynamic logo based on company
+      applicants: jobPost.applicants || 0,
+      // Use actual logo from API if available, otherwise fallback to emoji
+      logo:
+        (jobPost.company as any)?.logo || getCompanyLogo(jobPost.company?.name),
       description: jobPost.shortDescription || jobPost.description,
-      urgent: false, // You might want to add this field to JobPost interface
+      urgent: false, // Default to false for now
     };
+
+    // Only add experience field if it exists
+    if (jobPost.experience) {
+      jobData.experience = jobPost.experience;
+    }
+
+    return jobData;
   };
 
   // Helper function to get company logo/emoji based on company name
@@ -185,12 +194,222 @@ export default function JobsPage() {
   const filteredJobs = jobs.filter((job) => {
     const matchesType = selectedType === "All" || job.type === selectedType;
     const matchesLocation =
-      selectedLocation === "All" || job.location.includes(selectedLocation);
-    const matchesCompany =
-      selectedCompany === "All" || job.company === selectedCompany;
+      selectedLocation === "All" ||
+      job.location.toLowerCase().includes(selectedLocation.toLowerCase()) ||
+      selectedLocation === "All";
 
-    // Add other filter logic here
-    return matchesType && matchesLocation && matchesCompany;
+    // Experience level matching (implement based on job experience field and description)
+    const matchesExperience =
+      selectedExperience === "All" ||
+      (() => {
+        if (selectedExperience === "All") return true;
+
+        // Create a combined text to search through, including the experience field
+        const searchText = `${job.title} ${job.description || ""} ${
+          job.experience || ""
+        } ${job.skills.join(" ")}`.toLowerCase();
+        const experience = selectedExperience.toLowerCase();
+
+        // If there's an explicit experience field, prioritize that
+        if (job.experience) {
+          const expText = job.experience.toLowerCase();
+
+          // Direct matches
+          if (expText.includes(experience.replace(" level", ""))) return true;
+
+          // Year-based matching for experience field
+          const yearMatch = expText.match(/(\d+)[-\s]*(\d+)?\s*years?/);
+          if (yearMatch && yearMatch[1]) {
+            const minYears = parseInt(yearMatch[1]);
+            const maxYears = yearMatch[2] ? parseInt(yearMatch[2]) : minYears;
+
+            switch (experience) {
+              case "entry level":
+                return maxYears <= 2;
+              case "mid level":
+                return minYears >= 2 && maxYears <= 7;
+              case "senior level":
+                return minYears >= 5;
+              default:
+                break;
+            }
+          }
+        }
+
+        // Fallback to text-based matching
+        switch (experience) {
+          case "entry level":
+            return (
+              searchText.includes("entry") ||
+              searchText.includes("junior") ||
+              searchText.includes("beginner") ||
+              searchText.includes("graduate") ||
+              searchText.includes("0-2 years") ||
+              searchText.includes("fresh") ||
+              searchText.includes("trainee")
+            );
+
+          case "mid level":
+            return (
+              searchText.includes("mid") ||
+              searchText.includes("intermediate") ||
+              searchText.includes("3-5 years") ||
+              searchText.includes("2-4 years") ||
+              searchText.includes("3-7 years") ||
+              (!searchText.includes("senior") &&
+                !searchText.includes("junior") &&
+                !searchText.includes("entry"))
+            );
+
+          case "senior level":
+            return (
+              searchText.includes("senior") ||
+              searchText.includes("lead") ||
+              searchText.includes("principal") ||
+              searchText.includes("5+ years") ||
+              searchText.includes("7+ years") ||
+              searchText.includes("expert") ||
+              searchText.includes("specialist")
+            );
+
+          case "executive":
+            return (
+              searchText.includes("executive") ||
+              searchText.includes("vp") ||
+              searchText.includes("vice president") ||
+              searchText.includes("ceo") ||
+              searchText.includes("cto") ||
+              searchText.includes("cfo") ||
+              searchText.includes("chief")
+            );
+
+          case "director":
+            return (
+              searchText.includes("director") ||
+              searchText.includes("head of") ||
+              searchText.includes("manager") ||
+              searchText.includes("10+ years")
+            );
+
+          default:
+            return true;
+        }
+      })();
+
+    // Salary matching (basic implementation)
+    const matchesSalary =
+      selectedSalary === "All" ||
+      (() => {
+        if (selectedSalary === "All") return true;
+
+        const salaryText = job.salary.toLowerCase();
+        switch (selectedSalary) {
+          case "Below 10K":
+            return (
+              salaryText.includes("below") ||
+              (salaryText.match(/\d+/) &&
+                parseInt(salaryText.match(/\d+/)?.[0] || "0") < 10000)
+            );
+          case "10K - 20K":
+            return (
+              (salaryText.includes("10") && salaryText.includes("20")) ||
+              salaryText.includes("15")
+            );
+          case "20K - 35K":
+            return (
+              (salaryText.includes("20") && salaryText.includes("35")) ||
+              salaryText.includes("25") ||
+              salaryText.includes("30")
+            );
+          case "35K - 50K":
+            return (
+              (salaryText.includes("35") && salaryText.includes("50")) ||
+              salaryText.includes("40") ||
+              salaryText.includes("45")
+            );
+          case "50K+":
+            return (
+              salaryText.includes("50") ||
+              salaryText.includes("60") ||
+              salaryText.includes("70") ||
+              salaryText.includes("80")
+            );
+          default:
+            return true;
+        }
+      })();
+
+    // Industry matching (basic implementation based on job description/company)
+    const matchesIndustry =
+      selectedIndustry === "All" ||
+      (() => {
+        if (selectedIndustry === "All") return true;
+
+        const searchText = `${job.title} ${job.company} ${
+          job.description || ""
+        }`.toLowerCase();
+        const industry = selectedIndustry.toLowerCase();
+
+        switch (industry) {
+          case "technology":
+            return (
+              searchText.includes("tech") ||
+              searchText.includes("software") ||
+              searchText.includes("developer") ||
+              searchText.includes("engineer")
+            );
+          case "healthcare":
+            return (
+              searchText.includes("health") ||
+              searchText.includes("medical") ||
+              searchText.includes("pharma") ||
+              searchText.includes("hospital")
+            );
+          case "finance":
+            return (
+              searchText.includes("finance") ||
+              searchText.includes("bank") ||
+              searchText.includes("accounting") ||
+              searchText.includes("investment")
+            );
+          case "education":
+            return (
+              searchText.includes("education") ||
+              searchText.includes("school") ||
+              searchText.includes("university") ||
+              searchText.includes("teacher")
+            );
+          default:
+            return searchText.includes(industry);
+        }
+      })();
+
+    return (
+      matchesType &&
+      matchesLocation &&
+      matchesExperience &&
+      matchesSalary &&
+      matchesIndustry
+    );
+  });
+
+  // Sort the filtered jobs
+  const sortedJobs = [...filteredJobs].sort((a, b) => {
+    switch (sortBy) {
+      case "latest":
+        return new Date(b.posted).getTime() - new Date(a.posted).getTime();
+      case "salary":
+        // Extract numeric values from salary strings for comparison
+        const getSalaryValue = (salary: string) => {
+          const numbers = salary.match(/\d+/g);
+          return numbers ? parseInt(numbers[0]) : 0;
+        };
+        return getSalaryValue(b.salary) - getSalaryValue(a.salary);
+      case "applicants":
+        return b.applicants - a.applicants;
+      default:
+        return 0;
+    }
   });
 
   const handleApply = (jobId: string) => {
@@ -349,22 +568,6 @@ export default function JobsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Company
-                    </label>
-                    <select
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base"
-                      value={selectedCompany}
-                      onChange={(e) => setSelectedCompany(e.target.value)}
-                    >
-                      {companies.map((company) => (
-                        <option key={company} value={company}>
-                          {company}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Industry
                     </label>
                     <select
@@ -386,7 +589,6 @@ export default function JobsPage() {
                       setSelectedLocation("All");
                       setSelectedExperience("All");
                       setSelectedSalary("All");
-                      setSelectedCompany("All");
                       setSelectedIndustry("All");
                     }}
                     className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors text-base"
@@ -521,22 +723,6 @@ export default function JobsPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        Company
-                      </label>
-                      <select
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base transition-all duration-200"
-                        value={selectedCompany}
-                        onChange={(e) => setSelectedCompany(e.target.value)}
-                      >
-                        {companies.map((company) => (
-                          <option key={company} value={company}>
-                            {company}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
                         Industry
                       </label>
                       <select
@@ -558,7 +744,6 @@ export default function JobsPage() {
                         setSelectedLocation("All");
                         setSelectedExperience("All");
                         setSelectedSalary("All");
-                        setSelectedCompany("All");
                         setSelectedIndustry("All");
                       }}
                       className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors text-base"
@@ -576,9 +761,9 @@ export default function JobsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <div className="text-lg sm:text-xl font-semibold text-gray-900">
-                      {filteredJobs.length}{" "}
-                      {filteredJobs.length === 1 ? "Job" : "Jobs"} Found
-                      {totalJobs > 0 && totalJobs !== filteredJobs.length && (
+                      {sortedJobs.length}{" "}
+                      {sortedJobs.length === 1 ? "Job" : "Jobs"} Found
+                      {totalJobs > 0 && totalJobs !== sortedJobs.length && (
                         <span className="text-sm text-gray-500 ml-2">
                           (filtered from {totalJobs} total)
                         </span>
@@ -589,7 +774,6 @@ export default function JobsPage() {
                       selectedLocation !== "All" ||
                       selectedExperience !== "All" ||
                       selectedSalary !== "All" ||
-                      selectedCompany !== "All" ||
                       selectedIndustry !== "All") && (
                       <div className="flex flex-wrap gap-2">
                         {searchTerm && (
@@ -657,7 +841,7 @@ export default function JobsPage() {
                   ) : (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 xl:gap-10">
-                        {filteredJobs.map((job) => (
+                        {sortedJobs.map((job) => (
                           <div
                             key={job.id}
                             className="animate-fade-in group relative flex flex-col h-full"
@@ -678,7 +862,7 @@ export default function JobsPage() {
                         ))}
                       </div>
                       {/* No Results */}
-                      {filteredJobs.length === 0 && !loading && (
+                      {sortedJobs.length === 0 && !loading && (
                         <div className="text-center py-12 sm:py-16 lg:py-20">
                           <div
                             className="text-gray-400 text-5xl sm:text-6xl lg:text-7xl mb-4 sm:mb-6"
@@ -701,7 +885,6 @@ export default function JobsPage() {
                               setSelectedLocation("All");
                               setSelectedExperience("All");
                               setSelectedSalary("All");
-                              setSelectedCompany("All");
                               setSelectedIndustry("All");
                             }}
                             className="px-6 py-3 text-base"

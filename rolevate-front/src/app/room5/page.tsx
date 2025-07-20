@@ -44,7 +44,7 @@ export default function Room5Page() {
       setJobInfo(jobData);
       setCompanyInfo(companyData);
       setParticipantName(participantData);
-    }
+    },
   });
 
   useEffect(() => {

@@ -69,7 +69,7 @@ export default function Room4Page() {
       isConnected,
       isConnecting,
       hasError: !!error,
-      connectionAttempted: connectionAttemptedRef.current
+      connectionAttempted: connectionAttemptedRef.current,
     });
 
     if (

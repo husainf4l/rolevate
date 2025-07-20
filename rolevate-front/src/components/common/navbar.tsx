@@ -17,7 +17,6 @@ interface User {
   companyId?: string;
 }
 
-
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -50,13 +49,11 @@ export default function Navbar() {
     try {
       const userData = await getCurrentUser();
       setUser(userData);
-      
     } catch (error) {
       console.log("Auth check failed:", error);
       setUser(null);
     }
   };
-
 
   const handleLogout = async () => {
     try {
@@ -107,12 +104,7 @@ export default function Navbar() {
             >
               Jobs
             </Link>
-            <Link
-              href="/corporates"
-              className="font-text text-gray-700 hover:text-primary-600 transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-            >
-              Corporates
-            </Link>
+
             <Link
               href="/employers"
               className="font-text text-gray-700 hover:text-primary-600 transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
@@ -353,13 +345,7 @@ export default function Navbar() {
                 >
                   Jobs
                 </Link>
-                <Link
-                  href="/corporates"
-                  className="font-text text-gray-700 hover:text-primary-600 hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95"
-                  onClick={closeMenu}
-                >
-                  Corporates
-                </Link>
+
                 <Link
                   href="/employers"
                   className="font-text text-gray-700 hover:text-primary-600 hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95"

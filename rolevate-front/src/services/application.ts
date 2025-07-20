@@ -43,6 +43,10 @@ export interface Application {
     recommendations: string[];
   };
   analyzedAt: string;
+  aiCvRecommendations?: string;
+  aiInterviewRecommendations?: string;
+  aiSecondInterviewRecommendations?: string;
+  recommendationsGeneratedAt?: string;
   companyNotes?: string;
   reviewedAt?: string;
   interviewScheduledAt?: string;
@@ -82,6 +86,10 @@ export async function uploadCV(file: File): Promise<string> {
 }
 
 export async function applyToJob(data: ApplicationData): Promise<{ message: string; applicationId?: string }> {
+  console.log('applyToJob called with data:', data);
+  console.log('Making request to:', `${API_CONFIG.API_BASE_URL}/applications`);
+  console.log('Document cookies:', document.cookie);
+  
   const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications`, {
     method: "POST",
     headers: {
@@ -90,11 +98,17 @@ export async function applyToJob(data: ApplicationData): Promise<{ message: stri
     credentials: "include",
     body: JSON.stringify(data),
   });
+  
+  console.log('Response status:', response.status);
+  console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+  
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Failed to apply to job" }));
+    console.error('Application submission failed:', error);
     throw new Error(error.message || "Failed to apply to job");
   }
   const resJson = await response.json();
+  console.log('Application submitted successfully:', resJson);
   return {
     message: resJson.message || "Application submitted successfully",
     applicationId: resJson.id || resJson.applicationId,
@@ -326,6 +340,42 @@ export async function updateApplicationNote(
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Failed to update application note" }));
     throw new Error(error.message || "Failed to update application note");
+  }
+  
+  return response.json();
+}
+
+// Get all applications for the authenticated candidate
+export async function getCandidateApplications(): Promise<Application[]> {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/my-applications`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Failed to fetch applications" }));
+    throw new Error(error.message || "Failed to fetch applications");
+  }
+  
+  return response.json();
+}
+
+// Get a specific application details for the authenticated candidate
+export async function getCandidateApplicationDetails(jobId: string): Promise<Application> {
+  const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications/my-application/${jobId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Failed to fetch application details" }));
+    throw new Error(error.message || "Failed to fetch application details");
   }
   
   return response.json();

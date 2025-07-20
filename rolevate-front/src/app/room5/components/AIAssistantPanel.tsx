@@ -13,7 +13,9 @@ const Message = ({ text, sender }: { text: string; sender: "user" | "ai" }) => {
     >
       <div
         className={`w-8 h-8 rounded-full flex-shrink-0 ${
-          isAI ? "bg-gradient-to-br from-[#13ead9] to-[#0891b2]" : "bg-slate-300"
+          isAI
+            ? "bg-gradient-to-br from-[#13ead9] to-[#0891b2]"
+            : "bg-slate-300"
         }`}
       >
         {isAI && <SparklesIcon className="w-5 h-5 text-white m-auto" />}

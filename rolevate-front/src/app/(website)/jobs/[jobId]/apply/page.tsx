@@ -9,6 +9,7 @@ import { JobData } from "@/components/common/JobCard";
 import { JobService, JobPost } from "@/services/job";
 import { applyToJob, uploadCV } from "@/services/application";
 import { AnonymousApplicationService } from "@/services/anonymousApplication";
+import { getCurrentUser } from "@/services/auth";
 
 export default function JobApplyPage() {
   const router = useRouter();
@@ -35,6 +36,15 @@ export default function JobApplyPage() {
   const { user } = useAuth();
   const isAuthenticated = !!user;
   const isCandidate = user?.userType === "CANDIDATE" && !!user.candidateProfile;
+
+  // Debug authentication state
+  useEffect(() => {
+    console.log("Authentication state updated:");
+    console.log("user:", user);
+    console.log("isAuthenticated:", isAuthenticated);
+    console.log("isCandidate:", isCandidate);
+    console.log("Document cookies:", document.cookie);
+  }, [user, isAuthenticated, isCandidate]);
 
   // Prefill user info and CVs if candidate
   useEffect(() => {
@@ -194,8 +204,31 @@ export default function JobApplyPage() {
     setSubmitting(true);
     setError(null);
 
+    console.log("Submit handler called");
+    console.log("isAuthenticated:", isAuthenticated);
+    console.log("user:", user);
+    console.log("Document cookies:", document.cookie);
+
     try {
       if (isAuthenticated) {
+        console.log("Processing authenticated user application...");
+
+        // Double-check authentication status before making the API call
+        try {
+          const currentUser = await getCurrentUser();
+          console.log("Current user from API:", currentUser);
+          if (!currentUser) {
+            setError("Authentication expired. Please log in again.");
+            setSubmitting(false);
+            return;
+          }
+        } catch (authError) {
+          console.error("Authentication check failed:", authError);
+          setError("Authentication expired. Please log in again.");
+          setSubmitting(false);
+          return;
+        }
+
         // Authenticated user flow - upload CV separately then apply
         let resumeUrl = undefined;
         if (
@@ -205,8 +238,11 @@ export default function JobApplyPage() {
           formData.cv.fileUrl
         ) {
           resumeUrl = formData.cv.fileUrl;
+          console.log("Using saved CV URL:", resumeUrl);
         } else if (formData.cv && formData.cv instanceof File) {
+          console.log("Uploading new CV file...");
           resumeUrl = await uploadCV(formData.cv);
+          console.log("CV uploaded, URL:", resumeUrl);
         }
 
         // Prevent submission if no valid resumeUrl
@@ -222,14 +258,18 @@ export default function JobApplyPage() {
           return;
         }
 
-        await applyToJob({
+        const applicationData = {
           jobId,
           coverLetter: formData.coverLetter,
           resumeUrl,
           expectedSalary: formData.experience || "",
           noticePeriod: "",
-        });
+        };
+
+        console.log("Submitting application with data:", applicationData);
+        await applyToJob(applicationData);
       } else {
+        console.log("Processing anonymous user application...");
         // Anonymous user flow - send CV directly as multipart form data
         if (!formData.cv || !(formData.cv instanceof File)) {
           setError("Please upload a CV before submitting your application.");
@@ -255,6 +295,7 @@ export default function JobApplyPage() {
       }
       setSuccess(true);
     } catch (err: any) {
+      console.error("Application submission error:", err);
       setError(err.message || "Failed to submit application");
     } finally {
       setSubmitting(false);
@@ -590,9 +631,14 @@ export default function JobApplyPage() {
                       <Button
                         type="button"
                         variant="primary"
-                        onClick={() =>
-                          window.open("http://localhost:3000/login", "_blank")
-                        }
+                        onClick={() => {
+                          // Create login URL with current page as redirect
+                          const redirectUrl = encodeURIComponent(
+                            window.location.href
+                          );
+                          const loginUrl = `/login?redirect=${redirectUrl}`;
+                          window.location.href = loginUrl;
+                        }}
                         className="ml-4"
                       >
                         Login

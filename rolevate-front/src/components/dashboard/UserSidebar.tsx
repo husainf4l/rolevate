@@ -53,31 +53,6 @@ const navigationItems = [
     label: "Profile",
     href: "/userdashboard/profile",
   },
-  {
-    icon: CalendarDaysIcon,
-    label: "Interview Schedule",
-    href: "/userdashboard/interviews",
-  },
-  {
-    icon: ChartBarIcon,
-    label: "Career Insights",
-    href: "/userdashboard/insights",
-  },
-  {
-    icon: BellIcon,
-    label: "Notifications",
-    href: "/userdashboard/notifications",
-  },
-  {
-    icon: ChatBubbleLeftRightIcon,
-    label: "Messages",
-    href: "/userdashboard/messages",
-  },
-  {
-    icon: Cog6ToothIcon,
-    label: "Settings",
-    href: "/userdashboard/settings",
-  },
 ];
 
 interface CompanyData {

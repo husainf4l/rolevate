@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {  useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signin } from "@/services/auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Form state
   const [email, setEmail] = useState("");
@@ -20,7 +21,26 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      await signin({ email, password, router });
+      // Get redirect URL from search params
+      const redirect = searchParams.get("redirect");
+
+      const signinParams: {
+        email: string;
+        password: string;
+        router: any;
+        redirectUrl?: string;
+      } = {
+        email,
+        password,
+        router,
+      };
+
+      // If there's a redirect parameter, use it
+      if (redirect) {
+        signinParams.redirectUrl = decodeURIComponent(redirect);
+      }
+
+      await signin(signinParams);
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
@@ -42,9 +62,15 @@ export default function LoginPage() {
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1] px-2 sm:px-0 w-full text-left">
             Sign in to your account
           </h1>
-          <form className="w-full max-w-sm space-y-6 mt-4" onSubmit={handleSubmit}>
+          <form
+            className="w-full max-w-sm space-y-6 mt-4"
+            onSubmit={handleSubmit}
+          >
             <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1 text-left"
+              >
                 Email address
               </label>
               <input
@@ -53,13 +79,16 @@ export default function LoginPage() {
                 autoComplete="email"
                 required
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
                 disabled={loading}
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1 text-left"
+              >
                 Password
               </label>
               <input
@@ -68,7 +97,7 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 required
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
                 disabled={loading}
               />
@@ -82,11 +111,17 @@ export default function LoginPage() {
                   className="h-4 w-4 rounded border-gray-300 text-[#13ead9] focus:ring-[#13ead9]"
                   disabled={loading}
                 />
-                <label htmlFor="remember" className="ml-2 block text-sm text-gray-600">
+                <label
+                  htmlFor="remember"
+                  className="ml-2 block text-sm text-gray-600"
+                >
                   Remember me
                 </label>
               </div>
-              <a href="#" className="text-sm text-[#0891b2] hover:underline w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
+              <a
+                href="#"
+                className="text-sm text-[#0891b2] hover:underline w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0"
+              >
                 Forgot password?
               </a>
             </div>
@@ -102,8 +137,11 @@ export default function LoginPage() {
             </button>
           </form>
           <p className="mt-8 text-sm text-gray-500 text-left">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-[#0891b2] hover:underline font-medium">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/signup"
+              className="text-[#0891b2] hover:underline font-medium"
+            >
               Sign up
             </Link>
           </p>

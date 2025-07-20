@@ -31,7 +31,22 @@ export async function signup(data: CreateUserDto) {
 }
 
 // Helper function to handle user redirection
-function redirectUserByType(user: any, router: any) {
+function redirectUserByType(user: any, router: any, customRedirect?: string) {
+  // If there's a custom redirect URL, use it
+  if (customRedirect) {
+    try {
+      // Validate that the redirect URL is safe (same origin)
+      const url = new URL(customRedirect, window.location.origin);
+      if (url.origin === window.location.origin) {
+        router.replace(customRedirect);
+        return;
+      }
+    } catch (e) {
+      console.warn('Invalid redirect URL:', customRedirect);
+    }
+  }
+
+  // Default redirects based on user type
   switch (user.userType) {
     case "CANDIDATE":
       router.replace("/userdashboard");
@@ -77,9 +92,19 @@ export async function login({ email, password }: { email: string; password: stri
 }
 
 // Professional signin function - handles login and redirect
-export async function signin({ email, password, router }: { email: string; password: string; router: any }) {
+export async function signin({ 
+  email, 
+  password, 
+  router, 
+  redirectUrl 
+}: { 
+  email: string; 
+  password: string; 
+  router: any;
+  redirectUrl?: string;
+}) {
   const user = await login({ email, password });
-  redirectUserByType(user, router);
+  redirectUserByType(user, router, redirectUrl);
   return user;
 }
 

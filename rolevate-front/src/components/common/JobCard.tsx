@@ -1,8 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/common/Button";
 import { useSavedJobsStandalone } from "@/hooks/useSavedJobsStandalone";
+
+// Get the base URL without the /api suffix for static files
+const getBaseStaticUrl = () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4005/api";
+  return apiUrl.replace("/api", "");
+};
 
 export interface JobData {
   id: string;
@@ -17,6 +24,7 @@ export interface JobData {
   logo: string;
   description?: string;
   urgent?: boolean;
+  experience?: string; // Add experience field
 }
 
 interface JobCardProps {
@@ -30,7 +38,6 @@ interface JobCardProps {
 
 export default function JobCard({
   job,
-  onApply,
   onSave,
   isSaved, // This prop is now optional and mainly for override
   showDescription = false,
@@ -42,12 +49,6 @@ export default function JobCard({
   // Use hook's saved state or external prop as fallback
   const jobIsSaved = isSaved !== undefined ? isSaved : isJobSaved(job.id);
   const showSaveButton = canSaveJobs();
-
-  const handleApply = () => {
-    if (onApply) {
-      onApply(job.id);
-    }
-  };
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -138,8 +139,74 @@ export default function JobCard({
       <div className="relative">
         {/* Company Info */}
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-xl border border-gray-200 flex-shrink-0">
-            {job.logo}
+          <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-xl border border-gray-200 flex-shrink-0 overflow-hidden relative">
+            {/* Debug info */}
+            <div className="absolute -top-6 left-0 text-xs text-red-500 whitespace-nowrap z-10">
+              {job.logo ? "Has logo" : "No logo"} |{" "}
+              {job.logo &&
+              (job.logo.includes(".jpg") ||
+                job.logo.includes(".png") ||
+                job.logo.includes(".jpeg") ||
+                job.logo.includes(".svg") ||
+                job.logo.includes(".webp"))
+                ? "Valid ext"
+                : "Invalid ext"}
+            </div>
+
+            {job.logo &&
+            (job.logo.includes(".jpg") ||
+              job.logo.includes(".png") ||
+              job.logo.includes(".jpeg") ||
+              job.logo.includes(".svg") ||
+              job.logo.includes(".webp")) ? (
+              <Image
+                src={`/api/proxy-image?url=${encodeURIComponent(
+                  `${getBaseStaticUrl()}/${job.logo}`
+                )}`}
+                alt={`${job.company} logo`}
+                width={48}
+                height={48}
+                className="w-full h-full object-contain p-1 border-2 border-green-500"
+                onError={() => {
+                  console.error(
+                    "Image failed to load for company:",
+                    job.company
+                  );
+                  console.error("Logo path:", job.logo);
+                  console.error(
+                    "Full logo URL:",
+                    `${getBaseStaticUrl()}/${job.logo}`
+                  );
+                  console.error(
+                    "Proxy URL:",
+                    `/api/proxy-image?url=${encodeURIComponent(
+                      `${getBaseStaticUrl()}/${job.logo}`
+                    )}`
+                  );
+                }}
+                onLoad={() => {
+                  console.log(
+                    "✓ Logo loaded successfully for:",
+                    job.company,
+                    job.logo
+                  );
+                }}
+              />
+            ) : null}
+            <span
+              className={`logo-fallback text-sm font-semibold text-gray-600 ${
+                job.logo &&
+                (job.logo.includes(".jpg") ||
+                  job.logo.includes(".png") ||
+                  job.logo.includes(".jpeg") ||
+                  job.logo.includes(".svg") ||
+                  job.logo.includes(".webp"))
+                  ? "hidden"
+                  : ""
+              }`}
+            >
+              {job.company.charAt(0).toUpperCase()}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 text-base leading-tight group-hover:text-gray-700 transition-colors duration-300 truncate">
@@ -236,17 +303,9 @@ export default function JobCard({
 
           <div className="flex items-center gap-2 sm:gap-3">
             <Button
-              variant="outline"
-              size="sm"
-              href={`/jobs/${job.id}`}
-              className="hidden sm:inline-flex text-xs px-3 py-1.5"
-            >
-              View Details
-            </Button>
-            <Button
               variant="primary"
               size="sm"
-              onClick={handleApply}
+              href={`/jobs/${job.id}`}
               className="text-xs px-3 py-1.5 sm:px-4 sm:py-2"
             >
               Apply Now
