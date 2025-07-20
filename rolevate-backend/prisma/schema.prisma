@@ -645,6 +645,53 @@ enum CommunicationStatus {
   FAILED
 }
 
+// =======================================
+// AVAILABLE CANDIDATE CV (JobFit Feature)
+// =======================================
+
+model AvailableCandidate {
+  id String @id @default(cuid())
+
+  // Personal Information
+  firstName String
+  lastName  String
+  email     String? @unique
+  phone     String?
+
+  // CV Information
+  cvUrl      String
+  cvFileName String
+
+  // Professional Information
+  currentJobTitle String?
+  currentCompany  String?
+  totalExperience Int     @default(0)
+  skills          String[]
+  education       String?
+  location        String?
+
+  // Additional Information
+  expectedSalary   String?
+  profileSummary   String? @db.Text
+  keyStrengths     String[]
+  industryExperience String[]
+
+  // Status
+  isActive     Boolean @default(true)
+  isOpenToWork Boolean @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([isActive, isOpenToWork])
+  @@index([currentJobTitle])
+  @@index([totalExperience])
+  @@index([createdAt])
+  @@map("available_candidates")
+}
+
 model Communication {
   id String @id @default(cuid())
 

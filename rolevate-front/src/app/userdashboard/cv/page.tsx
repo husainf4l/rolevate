@@ -232,10 +232,6 @@ export default function CVPage() {
             <PlusIcon className="w-4 h-4" />
             <span>{uploading ? "Uploading..." : "Upload New CV"}</span>
           </button>
-          <button className="inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
-            <PencilIcon className="w-4 h-4" />
-            <span>Create from Template</span>
-          </button>
         </div>
 
         {/* Hidden File Input */}

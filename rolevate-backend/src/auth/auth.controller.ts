@@ -8,10 +8,14 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { AwsS3Service } from '../services/aws-s3.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly awsS3Service: AwsS3Service
+  ) {}
 
   @Post('login')
   async login(
@@ -213,5 +217,60 @@ export class AuthController {
       avatarPath,
       user: updatedUser
     };
+  }
+
+  @Post('upload-avatar-s3')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('avatar', {
+    fileFilter: (req, file, cb) => {
+      // Accept only image files
+      const allowedMimes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp'
+      ];
+      
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only image files (JPEG, PNG, GIF, WebP) are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+  }))
+  async uploadAvatarToS3(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const user = req.user as any;
+    
+    try {
+      // Upload to S3
+      const fileName = `${uuidv4()}.${file.originalname.split('.').pop()}`;
+      const s3Url = await this.awsS3Service.uploadFile(
+        file.buffer,
+        fileName,
+        `avatars/${user.userId}`
+      );
+
+      // Update user with S3 avatar URL
+      const updatedUser = await this.authService.updateAvatar(user.userId, s3Url);
+
+      return {
+        message: 'Avatar uploaded to S3 successfully',
+        avatarUrl: s3Url,
+        user: updatedUser
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to upload avatar to S3');
+    }
   }
 }

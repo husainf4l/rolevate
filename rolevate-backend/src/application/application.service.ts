@@ -6,6 +6,7 @@ import { CvParsingService } from '../services/cv-parsing.service';
 import { NotificationService } from '../notification/notification.service';
 import { LiveKitService } from '../livekit/livekit.service';
 import { CommunicationService } from '../communication/communication.service';
+import { AwsS3Service } from '../services/aws-s3.service';
 import { CreateApplicationDto, ApplicationResponseDto, CVAnalysisResultDto, UpdateApplicationStatusDto } from './dto/application.dto';
 import { ApplicationStatus, UserType, CommunicationType, CommunicationDirection } from '@prisma/client';
 import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
@@ -21,6 +22,7 @@ export class ApplicationService {
     private notificationService: NotificationService,
     private liveKitService: LiveKitService,
     private communicationService: CommunicationService,
+    private awsS3Service: AwsS3Service,
   ) {}
 
   async createApplication(createApplicationDto: CreateApplicationDto, candidateId: string): Promise<ApplicationResponseDto> {

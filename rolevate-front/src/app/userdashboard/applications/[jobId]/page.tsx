@@ -126,7 +126,10 @@ export default function ApplicationDetailsPage() {
       <div className="flex-1 min-h-screen bg-[#fafbfc]">
         <div className="container-corporate py-12">
           <div className="flex items-center justify-center py-24">
-            <div className="glass-strong rounded-3xl p-8 max-w-md w-full" style={{boxShadow: "var(--shadow-medium)"}}>
+            <div
+              className="glass-strong rounded-3xl p-8 max-w-md w-full"
+              style={{ boxShadow: "var(--shadow-medium)" }}
+            >
               <div className="text-center">
                 <div className="w-16 h-16 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
                   <XCircleIcon className="w-8 h-8 text-red-600" />
@@ -171,7 +174,10 @@ export default function ApplicationDetailsPage() {
             <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back to Applications</span>
           </button>
-          <div className="glass-strong rounded-3xl p-8" style={{boxShadow: "var(--shadow-soft)"}}>
+          <div
+            className="glass-strong rounded-3xl p-8"
+            style={{ boxShadow: "var(--shadow-soft)" }}
+          >
             <h1 className="text-4xl font-bold text-[#1d1d1f] mb-3">
               Application Details
             </h1>
@@ -184,7 +190,10 @@ export default function ApplicationDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Job Information */}
           <div className="lg:col-span-1">
-            <div className="glass-strong rounded-3xl overflow-hidden sticky top-8" style={{boxShadow: "var(--shadow-medium)"}}>
+            <div
+              className="glass-strong rounded-3xl overflow-hidden sticky top-8"
+              style={{ boxShadow: "var(--shadow-medium)" }}
+            >
               {/* Header with gradient */}
               <div className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] p-6 text-white">
                 <div className="flex items-center space-x-3 mb-2">
@@ -200,21 +209,22 @@ export default function ApplicationDetailsPage() {
 
               <div className="p-6 space-y-6">
                 {/* Job Details */}
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                <div
+                  className="bg-[#f0fdfa] rounded-2xl p-5 border border-[#13ead9]/20"
+                  style={{ boxShadow: "var(--shadow-soft)" }}
+                >
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary-600 text-xl font-bold">
-                        {application.job.company.name.charAt(0).toUpperCase()}
-                      </span>
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center flex-shrink-0 text-white font-bold text-xl">
+                      {application.job.company.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-900 text-lg mb-1 truncate">
+                      <h3 className="font-bold text-[#1d1d1f] text-lg mb-1 truncate">
                         {application.job.title}
                       </h3>
-                      <p className="text-primary-600 font-semibold mb-3">
+                      <p className="text-[#0891b2] font-semibold mb-3">
                         {application.job.company.name}
                       </p>
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <div className="flex items-center space-x-2 text-sm text-[#6b7280]">
                         <ClockIcon className="w-4 h-4" />
                         <span>
                           Applied{" "}
@@ -233,9 +243,12 @@ export default function ApplicationDetailsPage() {
                 </div>
 
                 {/* Status Card */}
-                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center">
-                    <span className="w-2 h-2 bg-primary-600 rounded-full mr-3"></span>
+                <div
+                  className="glass rounded-2xl p-5"
+                  style={{ boxShadow: "var(--shadow-soft)" }}
+                >
+                  <h4 className="text-sm font-semibold text-[#4b5563] mb-4 flex items-center">
+                    <span className="w-2 h-2 bg-[#0891b2] rounded-full mr-3"></span>
                     Current Status
                   </h4>
                   <div className="flex items-center space-x-4 mb-4">
@@ -254,8 +267,8 @@ export default function ApplicationDetailsPage() {
                   </div>
 
                   {/* Status description */}
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                    <p className="text-sm text-gray-700 leading-relaxed">
+                  <div className="bg-[#f0fdfa] rounded-2xl p-4 border border-[#13ead9]/20">
+                    <p className="text-sm text-[#4b5563] leading-relaxed">
                       {application.status === "SUBMITTED" &&
                         "Your application has been received and is awaiting review."}
                       {application.status === "REVIEWING" &&
@@ -325,11 +338,15 @@ export default function ApplicationDetailsPage() {
                       </li>
                       <li className="flex items-start space-x-2">
                         <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>You'll receive an update within 3-5 business days</span>
+                        <span>
+                          You'll receive an update within 3-5 business days
+                        </span>
                       </li>
                       <li className="flex items-start space-x-2">
                         <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>If selected, we'll contact you for an interview</span>
+                        <span>
+                          If selected, we'll contact you for an interview
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -356,27 +373,30 @@ export default function ApplicationDetailsPage() {
           {/* CV Analysis */}
           <div className="lg:col-span-2 space-y-6">
             {/* Analysis Status Header */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-300">
+            <div
+              className="glass-strong rounded-3xl p-8 hover:shadow-lg transition-all duration-300"
+              style={{ boxShadow: "var(--shadow-medium)" }}
+            >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <span className="text-primary-600 text-xl">📊</span>
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-2xl flex items-center justify-center">
+                    <span className="text-[#0891b2] text-xl">📊</span>
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-[#1d1d1f]">
                     Your Application Analysis
                   </h2>
                 </div>
                 {application.cvAnalysisResults?.summary?.includes("failed") ? (
-                  <div className="flex items-center space-x-3 bg-amber-50 px-4 py-3 rounded-xl border border-amber-200">
+                  <div className="flex items-center space-x-3 bg-amber-50 px-4 py-3 rounded-2xl border border-amber-200">
                     <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
                     <span className="text-sm font-semibold text-amber-700">
                       Manual Review
                     </span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-3 bg-green-50 px-4 py-3 rounded-xl border border-green-200">
-                    <CheckCircleIcon className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-semibold text-green-700">
+                  <div className="flex items-center space-x-3 bg-[#f0fdfa] px-4 py-3 rounded-2xl border border-[#13ead9]/20">
+                    <CheckCircleIcon className="w-5 h-5 text-[#0891b2]" />
+                    <span className="text-sm font-semibold text-[#0891b2]">
                       Analysis Complete
                     </span>
                   </div>
@@ -499,7 +519,9 @@ export default function ApplicationDetailsPage() {
                             <span className="text-2xl font-bold text-gray-900 block">
                               {application.cvAnalysisResults.overallFit}
                             </span>
-                            <span className="text-sm text-gray-500">Fit Rating</span>
+                            <span className="text-sm text-gray-500">
+                              Fit Rating
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -579,7 +601,8 @@ export default function ApplicationDetailsPage() {
                             <div className="bg-orange-100 rounded-lg p-3 border border-orange-200">
                               <p className="text-xs text-orange-700 italic">
                                 💡 Consider highlighting these skills in future
-                                applications or developing them through training.
+                                applications or developing them through
+                                training.
                               </p>
                             </div>
                           </div>
@@ -593,392 +616,382 @@ export default function ApplicationDetailsPage() {
             {/* AI Recommendations - Show regardless of CV analysis status */}
             {(application.aiCvRecommendations ||
               application.aiInterviewRecommendations) && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-300">
+              <div
+                className="glass-strong rounded-3xl p-8 hover:shadow-lg transition-all duration-300"
+                style={{ boxShadow: "var(--shadow-medium)" }}
+              >
                 <div className="flex items-center space-x-4 mb-8">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center">
                     <span className="text-purple-600 text-xl">🤖</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">
+                  <h3 className="text-2xl font-bold text-[#1d1d1f]">
                     AI Career Recommendations
                   </h3>
                 </div>
 
                 <div className="space-y-6">
                   {application.aiCvRecommendations && (
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div
+                      className="bg-[#f0fdfa] rounded-3xl p-8 border border-[#13ead9]/20"
+                      style={{ boxShadow: "var(--shadow-soft)" }}
+                    >
                       <div className="flex items-center space-x-4 mb-6">
-                        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                          <span className="text-blue-600 text-lg">📄</span>
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-xl flex items-center justify-center text-white">
+                          <span className="text-sm">📄</span>
                         </div>
-                        <h4 className="text-xl font-bold text-gray-900">
-                          CV Enhancement Tips
-                        </h4>
+                        <div>
+                          <h4 className="text-lg font-medium text-[#1d1d1f] mb-1">
+                            CV Enhancement Tips
+                          </h4>
+                          <p className="text-[#6b7280] text-xs">
+                            Personalized recommendations to improve your CV
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-gray-800 max-w-none">
-                        <div className="space-y-4">
-                          {application.aiCvRecommendations
-                            .split("\n\n")
-                            .map((section: string, sectionIndex: number) => {
-                              if (section.trim().startsWith("###")) {
-                                const title = section.replace("###", "").trim();
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="bg-white rounded-xl p-5 border border-blue-200 shadow-sm"
-                                  >
-                                    <h5 className="font-bold text-gray-900 text-lg mb-2 flex items-center">
-                                      <span className="w-3 h-3 bg-primary-600 rounded-full mr-3"></span>
-                                      {title}
-                                    </h5>
-                                  </div>
-                                );
-                              } else if (
-                                section.trim().startsWith("**") &&
-                                section.trim().endsWith("**")
-                              ) {
-                                const boldText = section
-                                  .replace(/\*\*/g, "")
-                                  .trim();
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="bg-blue-50 rounded-xl p-4 border-l-4 border-primary-600"
-                                  >
-                                    <p className="font-bold text-gray-900 text-base">
-                                      {boldText}
-                                    </p>
-                                  </div>
-                                );
-                              } else if (section.trim().startsWith("-")) {
-                                const items = section
-                                  .split("\n")
-                                  .filter((line) =>
-                                    line.trim().startsWith("-")
-                                  );
-                                return (
-                                  <div key={sectionIndex} className="space-y-2">
-                                    {items.map(
-                                      (item: string, itemIndex: number) => {
-                                        const cleanItem = item
-                                          .replace(/^-\s*/, "")
-                                          .trim();
-                                        const splitResult =
-                                          cleanItem.split(":");
-                                        const boldPart = splitResult[0] || "";
-                                        const description = splitResult
-                                          .slice(1)
-                                          .join(":")
-                                          .trim();
 
-                                        return (
-                                          <div
-                                            key={itemIndex}
-                                            className="flex items-start space-x-3 bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all duration-200"
-                                          >
-                                            <div className="w-2 h-2 bg-[#0891b2] rounded-full mt-2 flex-shrink-0"></div>
-                                            <div className="flex-1">
-                                              {description ? (
-                                                <>
-                                                  <span className="font-semibold text-gray-900 text-sm">
-                                                    {boldPart.replace(
-                                                      /\*\*/g,
-                                                      ""
-                                                    )}
-                                                    :
-                                                  </span>
-                                                  <span className="text-gray-600 text-sm ml-1">
-                                                    {description}
-                                                  </span>
-                                                </>
-                                              ) : (
-                                                <span className="text-gray-700 text-sm">
-                                                  {boldPart.replace(
-                                                    /\*\*/g,
-                                                    ""
-                                                  )}
-                                                </span>
-                                              )}
-                                            </div>
+                      <div className="space-y-4">
+                        {application.aiCvRecommendations
+                          .split(/\n\s*\n/)
+                          .filter((section) => section.trim())
+                          .map((section: string, sectionIndex: number) => {
+                            // Parse content with better text handling
+                            const parseContent = (text: string) => {
+                              // Handle **bold** text
+                              const parts = text.split(/(\*\*[^*]+\*\*)/g);
+                              return parts.map((part, index) => {
+                                if (
+                                  part.startsWith("**") &&
+                                  part.endsWith("**")
+                                ) {
+                                  return (
+                                    <span
+                                      key={index}
+                                      className="font-medium text-[#1d1d1f]"
+                                    >
+                                      {part.slice(2, -2)}
+                                    </span>
+                                  );
+                                }
+                                return part;
+                              });
+                            };
+
+                            // Section headers (###)
+                            if (section.trim().startsWith("###")) {
+                              const title = section.replace("###", "").trim();
+                              return (
+                                <div
+                                  key={sectionIndex}
+                                  className="glass rounded-xl p-4 border border-[#0891b2]/20"
+                                  style={{ boxShadow: "var(--shadow-soft)" }}
+                                >
+                                  <h5 className="font-medium text-[#1d1d1f] text-base flex items-center">
+                                    <div className="w-5 h-5 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-lg flex items-center justify-center mr-3">
+                                      <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                    </div>
+                                    {title}
+                                  </h5>
+                                </div>
+                              );
+                            }
+
+                            // List items (-)
+                            if (section.trim().startsWith("-")) {
+                              const items = section
+                                .split("\n")
+                                .filter((line) => line.trim().startsWith("-"))
+                                .map((line) =>
+                                  line.replace(/^-\s*/, "").trim()
+                                );
+
+                              return (
+                                <div key={sectionIndex} className="space-y-2">
+                                  {items.map(
+                                    (item: string, itemIndex: number) => (
+                                      <div
+                                        key={itemIndex}
+                                        className="glass rounded-xl p-3 hover:shadow-md transition-all duration-200"
+                                        style={{
+                                          boxShadow: "var(--shadow-soft)",
+                                        }}
+                                      >
+                                        <div className="flex items-start space-x-3">
+                                          <div className="w-5 h-5 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <div className="w-1.5 h-1.5 bg-[#0891b2] rounded-full"></div>
                                           </div>
-                                        );
-                                      }
-                                    )}
+                                          <div className="flex-1">
+                                            <p className="text-[#4b5563] text-xs leading-relaxed">
+                                              {parseContent(item)}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              );
+                            }
+
+                            // Regular paragraphs
+                            if (section.trim()) {
+                              return (
+                                <div
+                                  key={sectionIndex}
+                                  className="bg-white/60 rounded-xl p-3 border border-[#13ead9]/20"
+                                >
+                                  <div className="text-[#4b5563] text-xs leading-relaxed">
+                                    {parseContent(section.trim())}
                                   </div>
-                                );
-                              } else if (section.trim()) {
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="text-gray-700 text-sm leading-relaxed bg-gray-50 rounded-lg p-3 border border-gray-200"
-                                  >
-                                    {section
-                                      .split("\n")
-                                      .map(
-                                        (line: string, lineIndex: number) => (
-                                          <p
-                                            key={lineIndex}
-                                            className="mb-2 last:mb-0"
-                                          >
-                                            {line.replace(/\*\*/g, "").trim()}
-                                          </p>
-                                        )
-                                      )}
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })}
-                        </div>
+                                </div>
+                              );
+                            }
+
+                            return null;
+                          })}
                       </div>
                     </div>
                   )}
 
                   {application.aiInterviewRecommendations && (
-                    <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <span className="mr-2">🎤</span>
-                        Interview Preparation Guide
-                      </h4>
-                      <div className="text-gray-800 max-w-none">
-                        <div className="space-y-4">
-                          {application.aiInterviewRecommendations
-                            .split("\n\n")
-                            .map((section: string, sectionIndex: number) => {
-                              if (section.trim().startsWith("###")) {
-                                const title = section.replace("###", "").trim();
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
-                                  >
-                                    <h5 className="font-semibold text-gray-900 text-base mb-2 flex items-center">
-                                      <span className="w-2 h-2 bg-[#0891b2] rounded-full mr-3"></span>
-                                      {title}
-                                    </h5>
-                                  </div>
-                                );
-                              } else if (
-                                section.trim().startsWith("**") &&
-                                section.trim().endsWith("**")
-                              ) {
-                                const boldText = section
-                                  .replace(/\*\*/g, "")
-                                  .trim();
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="bg-gray-50 rounded-lg p-3 border-l-4 border-[#0891b2]"
-                                  >
-                                    <p className="font-semibold text-gray-900 text-sm">
-                                      {boldText}
-                                    </p>
-                                  </div>
-                                );
-                              } else if (section.trim().startsWith("-")) {
-                                const items = section
-                                  .split("\n")
-                                  .filter((line) =>
-                                    line.trim().startsWith("-")
-                                  );
-                                return (
-                                  <div key={sectionIndex} className="space-y-2">
-                                    {items.map(
-                                      (item: string, itemIndex: number) => {
-                                        const cleanItem = item
-                                          .replace(/^-\s*/, "")
-                                          .trim();
-                                        const splitResult =
-                                          cleanItem.split(":");
-                                        const boldPart = splitResult[0] || "";
-                                        const description = splitResult
-                                          .slice(1)
-                                          .join(":")
-                                          .trim();
-
-                                        return (
-                                          <div
-                                            key={itemIndex}
-                                            className="flex items-start space-x-3 bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all duration-200"
-                                          >
-                                            <div className="w-2 h-2 bg-[#0891b2] rounded-full mt-2 flex-shrink-0"></div>
-                                            <div className="flex-1">
-                                              {description ? (
-                                                <>
-                                                  <span className="font-semibold text-gray-900 text-sm">
-                                                    {boldPart.replace(
-                                                      /\*\*/g,
-                                                      ""
-                                                    )}
-                                                    :
-                                                  </span>
-                                                  <span className="text-gray-600 text-sm ml-1">
-                                                    {description}
-                                                  </span>
-                                                </>
-                                              ) : (
-                                                <span className="text-gray-700 text-sm">
-                                                  {boldPart.replace(
-                                                    /\*\*/g,
-                                                    ""
-                                                  )}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        );
-                                      }
-                                    )}
-                                  </div>
-                                );
-                              } else if (section.trim()) {
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="text-gray-700 text-sm leading-relaxed bg-gray-50 rounded-lg p-3 border border-gray-200"
-                                  >
-                                    {section
-                                      .split("\n")
-                                      .map(
-                                        (line: string, lineIndex: number) => (
-                                          <p
-                                            key={lineIndex}
-                                            className="mb-2 last:mb-0"
-                                          >
-                                            {line.replace(/\*\*/g, "").trim()}
-                                          </p>
-                                        )
-                                      )}
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })}
+                    <div
+                      className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-3xl p-8 border border-purple-200/50"
+                      style={{ boxShadow: "var(--shadow-soft)" }}
+                    >
+                      <div className="flex items-center space-x-4 mb-6">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-white">
+                          <span className="text-sm">🎤</span>
                         </div>
+                        <div>
+                          <h4 className="text-lg font-medium text-[#1d1d1f] mb-1">
+                            Interview Preparation Guide
+                          </h4>
+                          <p className="text-[#6b7280] text-xs">
+                            Strategic advice to ace your interview
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {application.aiInterviewRecommendations
+                          .split(/\n\s*\n/)
+                          .filter((section) => section.trim())
+                          .map((section: string, sectionIndex: number) => {
+                            // Parse content with better text handling
+                            const parseContent = (text: string) => {
+                              // Handle **bold** text
+                              const parts = text.split(/(\*\*[^*]+\*\*)/g);
+                              return parts.map((part, index) => {
+                                if (
+                                  part.startsWith("**") &&
+                                  part.endsWith("**")
+                                ) {
+                                  return (
+                                    <span
+                                      key={index}
+                                      className="font-medium text-[#1d1d1f]"
+                                    >
+                                      {part.slice(2, -2)}
+                                    </span>
+                                  );
+                                }
+                                return part;
+                              });
+                            };
+
+                            // Section headers (###)
+                            if (section.trim().startsWith("###")) {
+                              const title = section.replace("###", "").trim();
+                              return (
+                                <div
+                                  key={sectionIndex}
+                                  className="glass rounded-xl p-4 border border-purple-300/30"
+                                  style={{ boxShadow: "var(--shadow-soft)" }}
+                                >
+                                  <h5 className="font-medium text-[#1d1d1f] text-base flex items-center">
+                                    <div className="w-5 h-5 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                                      <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                    </div>
+                                    {title}
+                                  </h5>
+                                </div>
+                              );
+                            }
+
+                            // List items (-)
+                            if (section.trim().startsWith("-")) {
+                              const items = section
+                                .split("\n")
+                                .filter((line) => line.trim().startsWith("-"))
+                                .map((line) =>
+                                  line.replace(/^-\s*/, "").trim()
+                                );
+
+                              return (
+                                <div key={sectionIndex} className="space-y-2">
+                                  {items.map(
+                                    (item: string, itemIndex: number) => (
+                                      <div
+                                        key={itemIndex}
+                                        className="glass rounded-xl p-3 hover:shadow-md transition-all duration-200"
+                                        style={{
+                                          boxShadow: "var(--shadow-soft)",
+                                        }}
+                                      >
+                                        <div className="flex items-start space-x-3">
+                                          <div className="w-5 h-5 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <div className="w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
+                                          </div>
+                                          <div className="flex-1">
+                                            <p className="text-[#4b5563] text-xs leading-relaxed">
+                                              {parseContent(item)}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              );
+                            }
+
+                            // Regular paragraphs
+                            if (section.trim()) {
+                              return (
+                                <div
+                                  key={sectionIndex}
+                                  className="bg-white/60 rounded-xl p-3 border border-purple-200/30"
+                                >
+                                  <div className="text-[#4b5563] text-xs leading-relaxed">
+                                    {parseContent(section.trim())}
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            return null;
+                          })}
                       </div>
                     </div>
                   )}
 
                   {application.aiSecondInterviewRecommendations && (
-                    <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <span className="mr-2">🚀</span>
-                        Advanced Interview Strategy
-                      </h4>
-                      <div className="text-gray-800 max-w-none">
-                        <div className="space-y-4">
-                          {application.aiSecondInterviewRecommendations
-                            .split("\n\n")
-                            .map((section: string, sectionIndex: number) => {
-                              if (section.trim().startsWith("###")) {
-                                const title = section.replace("###", "").trim();
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
-                                  >
-                                    <h5 className="font-semibold text-gray-900 text-base mb-2 flex items-center">
-                                      <span className="w-2 h-2 bg-[#0891b2] rounded-full mr-3"></span>
-                                      {title}
-                                    </h5>
-                                  </div>
-                                );
-                              } else if (
-                                section.trim().startsWith("**") &&
-                                section.trim().endsWith("**")
-                              ) {
-                                const boldText = section
-                                  .replace(/\*\*/g, "")
-                                  .trim();
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="bg-gray-50 rounded-lg p-3 border-l-4 border-[#0891b2]"
-                                  >
-                                    <p className="font-semibold text-gray-900 text-sm">
-                                      {boldText}
-                                    </p>
-                                  </div>
-                                );
-                              } else if (section.trim().startsWith("-")) {
-                                const items = section
-                                  .split("\n")
-                                  .filter((line) =>
-                                    line.trim().startsWith("-")
-                                  );
-                                return (
-                                  <div key={sectionIndex} className="space-y-2">
-                                    {items.map(
-                                      (item: string, itemIndex: number) => {
-                                        const cleanItem = item
-                                          .replace(/^-\s*/, "")
-                                          .trim();
-                                        const splitResult =
-                                          cleanItem.split(":");
-                                        const boldPart = splitResult[0] || "";
-                                        const description = splitResult
-                                          .slice(1)
-                                          .join(":")
-                                          .trim();
-
-                                        return (
-                                          <div
-                                            key={itemIndex}
-                                            className="flex items-start space-x-3 bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all duration-200"
-                                          >
-                                            <div className="w-2 h-2 bg-[#0891b2] rounded-full mt-2 flex-shrink-0"></div>
-                                            <div className="flex-1">
-                                              {description ? (
-                                                <>
-                                                  <span className="font-semibold text-gray-900 text-sm">
-                                                    {boldPart.replace(
-                                                      /\*\*/g,
-                                                      ""
-                                                    )}
-                                                    :
-                                                  </span>
-                                                  <span className="text-gray-600 text-sm ml-1">
-                                                    {description}
-                                                  </span>
-                                                </>
-                                              ) : (
-                                                <span className="text-gray-700 text-sm">
-                                                  {boldPart.replace(
-                                                    /\*\*/g,
-                                                    ""
-                                                  )}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        );
-                                      }
-                                    )}
-                                  </div>
-                                );
-                              } else if (section.trim()) {
-                                return (
-                                  <div
-                                    key={sectionIndex}
-                                    className="text-gray-700 text-sm leading-relaxed bg-gray-50 rounded-lg p-3 border border-gray-200"
-                                  >
-                                    {section
-                                      .split("\n")
-                                      .map(
-                                        (line: string, lineIndex: number) => (
-                                          <p
-                                            key={lineIndex}
-                                            className="mb-2 last:mb-0"
-                                          >
-                                            {line.replace(/\*\*/g, "").trim()}
-                                          </p>
-                                        )
-                                      )}
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })}
+                    <div
+                      className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-8 border border-emerald-200/50"
+                      style={{ boxShadow: "var(--shadow-soft)" }}
+                    >
+                      <div className="flex items-center space-x-4 mb-6">
+                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white">
+                          <span className="text-sm">🚀</span>
                         </div>
+                        <div>
+                          <h4 className="text-lg font-medium text-[#1d1d1f] mb-1">
+                            Advanced Interview Strategy
+                          </h4>
+                          <p className="text-[#6b7280] text-xs">
+                            Expert-level preparation for senior interviews
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {application.aiSecondInterviewRecommendations
+                          .split(/\n\s*\n/)
+                          .filter((section) => section.trim())
+                          .map((section: string, sectionIndex: number) => {
+                            // Parse content with better text handling
+                            const parseContent = (text: string) => {
+                              // Handle **bold** text
+                              const parts = text.split(/(\*\*[^*]+\*\*)/g);
+                              return parts.map((part, index) => {
+                                if (
+                                  part.startsWith("**") &&
+                                  part.endsWith("**")
+                                ) {
+                                  return (
+                                    <span
+                                      key={index}
+                                      className="font-medium text-[#1d1d1f]"
+                                    >
+                                      {part.slice(2, -2)}
+                                    </span>
+                                  );
+                                }
+                                return part;
+                              });
+                            };
+
+                            // Section headers (###)
+                            if (section.trim().startsWith("###")) {
+                              const title = section.replace("###", "").trim();
+                              return (
+                                <div
+                                  key={sectionIndex}
+                                  className="glass rounded-xl p-4 border border-emerald-300/30"
+                                  style={{ boxShadow: "var(--shadow-soft)" }}
+                                >
+                                  <h5 className="font-medium text-[#1d1d1f] text-base flex items-center">
+                                    <div className="w-5 h-5 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center mr-3">
+                                      <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                    </div>
+                                    {title}
+                                  </h5>
+                                </div>
+                              );
+                            }
+
+                            // List items (-)
+                            if (section.trim().startsWith("-")) {
+                              const items = section
+                                .split("\n")
+                                .filter((line) => line.trim().startsWith("-"))
+                                .map((line) =>
+                                  line.replace(/^-\s*/, "").trim()
+                                );
+
+                              return (
+                                <div key={sectionIndex} className="space-y-2">
+                                  {items.map(
+                                    (item: string, itemIndex: number) => (
+                                      <div
+                                        key={itemIndex}
+                                        className="glass rounded-xl p-3 hover:shadow-md transition-all duration-200"
+                                        style={{
+                                          boxShadow: "var(--shadow-soft)",
+                                        }}
+                                      >
+                                        <div className="flex items-start space-x-3">
+                                          <div className="w-5 h-5 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></div>
+                                          </div>
+                                          <div className="flex-1">
+                                            <p className="text-[#4b5563] text-xs leading-relaxed">
+                                              {parseContent(item)}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              );
+                            }
+
+                            // Regular paragraphs
+                            if (section.trim()) {
+                              return (
+                                <div
+                                  key={sectionIndex}
+                                  className="bg-white/60 rounded-xl p-3 border border-emerald-200/30"
+                                >
+                                  <div className="text-[#4b5563] text-xs leading-relaxed">
+                                    {parseContent(section.trim())}
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            return null;
+                          })}
                       </div>
                     </div>
                   )}
@@ -988,21 +1001,24 @@ export default function ApplicationDetailsPage() {
 
             {/* Loading state for when no CV analysis results exist */}
             {!application.cvAnalysisResults && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 sm:p-12 hover:shadow-md transition-all duration-300">
+              <div
+                className="glass-strong rounded-3xl p-12 hover:shadow-lg transition-all duration-300"
+                style={{ boxShadow: "var(--shadow-medium)" }}
+              >
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <div className="w-20 h-20 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
                     <div className="text-4xl animate-pulse">⏳</div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  <h3 className="text-2xl font-bold text-[#1d1d1f] mb-4">
                     Analysis In Progress
                   </h3>
-                  <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg leading-relaxed">
+                  <p className="text-[#6b7280] mb-8 max-w-md mx-auto text-lg leading-relaxed">
                     Our AI is carefully reviewing your CV against the job
                     requirements. This usually takes just a few minutes!
                   </p>
-                  <div className="inline-flex items-center space-x-3 bg-primary-50 px-6 py-4 rounded-xl border border-primary-200">
-                    <div className="w-3 h-3 bg-primary-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-semibold text-primary-700">
+                  <div className="inline-flex items-center space-x-3 bg-[#f0fdfa] px-6 py-4 rounded-2xl border border-[#13ead9]/20">
+                    <div className="w-3 h-3 bg-[#0891b2] rounded-full animate-pulse"></div>
+                    <span className="text-sm font-semibold text-[#0891b2]">
                       Processing your application...
                     </span>
                   </div>

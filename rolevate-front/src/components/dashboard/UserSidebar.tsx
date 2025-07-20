@@ -7,17 +7,12 @@ import Logo from "@/components/common/logo";
 import {
   HomeIcon,
   BriefcaseIcon,
-  ChatBubbleLeftRightIcon,
-  Cog6ToothIcon,
   DocumentTextIcon,
   UserIcon,
   Bars3Icon,
   XMarkIcon,
-  BellIcon,
   ClipboardDocumentListIcon,
   BookmarkIcon,
-  ChartBarIcon,
-  CalendarDaysIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { logout } from "@/services/auth";
@@ -55,14 +50,15 @@ const navigationItems = [
   },
 ];
 
-interface CompanyData {
+interface UserData {
   name?: string;
-  logo?: string;
+  email?: string;
+  avatar?: string;
 }
 
 export default function UserSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [companyData, setCompanyData] = useState<CompanyData>({});
+  const [userData, setUserData] = useState<UserData>({});
   const pathname = usePathname();
   const router = useRouter();
 
@@ -70,35 +66,48 @@ export default function UserSidebar() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Fetch company data for logo display
+  // Fetch user data for profile display
   useEffect(() => {
-    const fetchCompanyData = async () => {
+    const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(
-          "http://localhost:4005/api/company/me/company",
-          {
-            credentials: "include",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        if (!token) return;
+
+        const response = await fetch("http://localhost:4005/api/users/me", {
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (response.ok) {
-          const data = await response.json();
-          setCompanyData({
-            name: data.name,
-            logo: data.logo,
-          });
+          // Check if response has content and is JSON
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const text = await response.text();
+            if (text) {
+              try {
+                const data = JSON.parse(text);
+                setUserData({
+                  name: data.name || data.firstName + " " + data.lastName,
+                  email: data.email,
+                  avatar: data.avatar,
+                });
+              } catch (parseError) {
+                console.error("Error parsing JSON:", parseError);
+              }
+            }
+          }
+        } else {
+          console.error("API request failed with status:", response.status);
         }
       } catch (error) {
-        console.error("Error fetching company data:", error);
+        console.error("Error fetching user data:", error);
       }
     };
 
-    fetchCompanyData();
+    fetchUserData();
   }, []);
 
   // Logout handler
@@ -184,14 +193,26 @@ export default function UserSidebar() {
             <div className="flex items-center px-3 py-2 text-sm mb-2">
               <div className="flex items-center gap-3 flex-1">
                 <div className="w-8 h-8 bg-[#0fc4b5] rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">JD</span>
+                  {userData.avatar ? (
+                    <img
+                      src={userData.avatar}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-sm font-medium">
+                      {userData.name
+                        ? userData.name.charAt(0).toUpperCase()
+                        : "U"}
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    John Doe
+                    {userData.name || "User"}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    john.doe@example.com
+                    {userData.email || "user@example.com"}
                   </p>
                 </div>
               </div>

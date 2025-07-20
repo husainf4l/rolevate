@@ -9,12 +9,14 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { AwsS3Service } from '../services/aws-s3.service';
 
 @Controller('company')
 export class CompanyController {
   constructor(
     private readonly companyService: CompanyService,
     private readonly invitationService: InvitationService,
+    private readonly awsS3Service: AwsS3Service,
   ) {}
 
   @Get()
@@ -223,5 +225,65 @@ export class CompanyController {
       logoPath,
       company: updatedCompany
     };
+  }
+
+  @Post('upload-logo-s3')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('logo', {
+    fileFilter: (req, file, cb) => {
+      // Accept only image files
+      const allowedMimes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp'
+      ];
+      
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only image files (JPEG, PNG, GIF, WebP) are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+  }))
+  async uploadLogoToS3(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const user = req.user as any;
+    const userCompany = await this.companyService.getUserCompany(user.userId);
+    
+    if (!userCompany) {
+      throw new UnauthorizedException('User must belong to a company to upload logo');
+    }
+
+    try {
+      // Upload to S3
+      const fileName = `${uuidv4()}.${file.originalname.split('.').pop()}`;
+      const s3Url = await this.awsS3Service.uploadFile(
+        file.buffer,
+        fileName,
+        `logos/${userCompany.id}`
+      );
+
+      // Update company with S3 logo URL
+      const updatedCompany = await this.companyService.updateLogo(userCompany.id, s3Url);
+
+      return {
+        message: 'Logo uploaded to S3 successfully',
+        logoUrl: s3Url,
+        company: updatedCompany
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to upload logo to S3');
+    }
   }
 }

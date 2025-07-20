@@ -13,6 +13,8 @@ import { AwsS3Service } from '../services/aws-s3.service';
 export class UploadsController {
   private readonly logger = new Logger(UploadsController.name);
 
+  constructor(private readonly awsS3Service: AwsS3Service) {}
+
   @Post('cvs')
   @UseInterceptors(FileInterceptor('cv', {
     storage: diskStorage({
@@ -64,6 +66,53 @@ export class UploadsController {
       cvUrl,
       message: 'CV uploaded successfully. You can now apply for jobs using this CV.'
     };
+  }
+
+  @Post('cvs/s3')
+  @UseInterceptors(FileInterceptor('cv', {
+    fileFilter: (req, file, cb) => {
+      // Accept only PDF and DOC files
+      const allowedMimes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only PDF and DOC/DOCX files are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+  }))
+  async uploadCVToS3(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ cvUrl: string; message: string }> {
+    if (!file) {
+      throw new BadRequestException('No CV file uploaded');
+    }
+
+    try {
+      // Upload to S3
+      const s3Url = await this.awsS3Service.uploadCV(
+        file.buffer, 
+        file.originalname, 
+        'anonymous'
+      );
+      
+      this.logger.log(`CV uploaded to S3 successfully: ${s3Url}`);
+      
+      return {
+        cvUrl: s3Url,
+        message: 'CV uploaded to S3 successfully. You can now apply for jobs using this CV.'
+      };
+    } catch (error) {
+      this.logger.error('Failed to upload CV to S3:', error);
+      throw new BadRequestException('Failed to upload CV to S3');
+    }
   }
 
   @Public()
