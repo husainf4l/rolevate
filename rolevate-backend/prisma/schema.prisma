@@ -575,6 +575,12 @@ model Application {
   cvAnalysisResults Json? // Detailed analysis results
   analyzedAt        DateTime? // When the CV was analyzed
 
+  // AI Recommendations
+  aiCvRecommendations              String?   @db.Text // AI recommendations for CV improvement
+  aiInterviewRecommendations       String?   @db.Text // AI recommendations for first interview preparation
+  aiSecondInterviewRecommendations String?   @db.Text // AI recommendations for second interview preparation
+  recommendationsGeneratedAt       DateTime? // When recommendations were generated
+
   // Company Notes (internal)
   companyNotes String? @db.Text
 

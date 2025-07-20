@@ -771,6 +771,7 @@ export class JobService {
       company: job.company ? {
         id: job.company.id,
         name: job.company.name,
+        logo: job.company.logo,
         address: job.company.address ? {
           id: job.company.address.id,
           street: job.company.address.street,

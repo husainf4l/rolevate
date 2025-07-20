@@ -40,7 +40,7 @@ async function bootstrap() {
   // Rate limiting
   app.use(
     rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
+      windowMs: 60 * 60 * 1000, // 1 hour (60 minutes)
       max: process.env.NODE_ENV === 'development' ? 10000 : 10000, // Higher limit in development
       message: 'Too many requests from this IP, please try again later.',
       standardHeaders: true,

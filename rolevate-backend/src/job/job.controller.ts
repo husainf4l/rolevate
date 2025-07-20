@@ -377,6 +377,104 @@ export class JobController {
     return this.jobService.findOnePublic(id, ipAddress);
   }
 
+  @Get('candidate/:id')
+  async findOneJobForCandidate(
+    @Param('id') id: string,
+    @Request() req: any,
+  ): Promise<JobResponseDto> {
+    const userId = req.user.userId;
+    
+    // Verify user is a candidate
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { candidateProfile: true }
+    });
+
+    if (!user || user.userType !== 'CANDIDATE') {
+      throw new BadRequestException('This endpoint is only for candidates');
+    }
+
+    if (!user.candidateProfile) {
+      throw new BadRequestException('User must have a candidate profile');
+    }
+
+    // Check if candidate has applied to this job
+    const application = await this.prisma.application.findFirst({
+      where: {
+        jobId: id,
+        candidateId: user.candidateProfile.id,
+      },
+    });
+
+    if (!application) {
+      throw new BadRequestException('You can only view details of jobs you have applied to');
+    }
+
+    // Extract IP address from request for view tracking (but don't increment for applied jobs)
+    const ipAddress = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 
+                     (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+                     req.headers['x-forwarded-for']?.split(',')[0] || 
+                     req.headers['x-real-ip'] || 
+                     '127.0.0.1';
+    
+    // Get job details using the public method (since candidates should see public jobs)
+    return this.jobService.findOnePublic(id, ipAddress);
+  }
+
+  @Get('my-application/:jobId')
+  async findJobApplicationDetails(
+    @Param('jobId') jobId: string,
+    @Request() req: any,
+  ): Promise<JobResponseDto & { applicationStatus?: string; appliedAt?: Date; cvAnalysisResults?: any; cvAnalysisScore?: number }> {
+    const userId = req.user.userId;
+    
+    // Verify user is a candidate
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { candidateProfile: true }
+    });
+
+    if (!user || user.userType !== 'CANDIDATE' || !user.candidateProfile) {
+      throw new BadRequestException('This endpoint is only for candidates with profiles');
+    }
+
+    // Find the application and job details
+    const application = await this.prisma.application.findFirst({
+      where: {
+        jobId: jobId,
+        candidateId: user.candidateProfile.id
+      },
+      include: {
+        job: {
+          include: {
+            company: {
+              include: {
+                address: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!application) {
+      throw new BadRequestException('You have not applied to this job or the job does not exist');
+    }
+
+    // Map the job to the response format using a type assertion since the method is private
+    const jobService = this.jobService as any;
+    const jobResponse = jobService.mapToJobResponse(application.job);
+
+    // Add application-specific information
+    return {
+      ...jobResponse,
+      applicationStatus: application.status,
+      appliedAt: application.appliedAt,
+      cvAnalysisResults: application.cvAnalysisResults,
+      cvAnalysisScore: application.cvAnalysisScore
+    };
+  }
+
   @Patch(':id/restore')
   async restore(
     @Param('id') id: string,

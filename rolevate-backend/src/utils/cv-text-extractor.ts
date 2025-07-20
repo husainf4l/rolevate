@@ -18,6 +18,16 @@ export async function downloadFile(url: string, dest: string): Promise<void> {
   });
 }
 
+export async function downloadFileBuffer(url: string): Promise<Buffer> {
+  console.log('📥 Downloading file buffer from URL:', url);
+  const response = await axios({
+    url,
+    method: 'GET',
+    responseType: 'arraybuffer',
+  });
+  return Buffer.from(response.data);
+}
+
 export async function extractTextFromCV(fileUrl: string): Promise<string> {
   console.log('📥 Starting CV text extraction from URL:', fileUrl);
   
@@ -26,50 +36,59 @@ export async function extractTextFromCV(fileUrl: string): Promise<string> {
     throw new Error('Invalid file URL provided');
   }
 
-  const ext = path.extname(fileUrl).toLowerCase();
+  const ext = path.extname(fileUrl).toLowerCase() || '.pdf';
   console.log('📎 File extension detected:', ext);
   
   if (!ext || !['.pdf', '.docx', '.doc', '.txt'].includes(ext)) {
     throw new Error(`Unsupported file type: ${ext}. Supported types: .pdf, .docx, .doc, .txt`);
   }
 
-  // Check if it's a local file path or a URL
-  const isLocalFile = fileUrl.startsWith('/') || fileUrl.includes('uploads/cvs/');
-  let tempFile: string;
-  let needsCleanup = false;
+  // Check if it's a remote URL (S3, HTTP) or local file
+  const isRemoteFile = fileUrl.startsWith('http') || fileUrl.includes('amazonaws.com');
+  const isLocalFile = fileUrl.startsWith('/') || fileUrl.includes('uploads/cvs/') || fileUrl.startsWith('/api/uploads/');
+  
+  let fileBuffer: Buffer;
 
-  if (isLocalFile) {
-    // Use the file directly if it's a local path
-    const localPath = fileUrl.startsWith('http') 
-      ? fileUrl.replace(/^https?:\/\/[^\/]+/, '') // Remove domain from URL
-      : fileUrl;
+  if (isRemoteFile) {
+    console.log('🌐 Processing remote file (S3/HTTP)...');
+    fileBuffer = await downloadFileBuffer(fileUrl);
+  } else if (isLocalFile) {
+    console.log('📁 Processing local file...');
     
-    const fullPath = path.isAbsolute(localPath) 
-      ? localPath 
-      : path.join(process.cwd(), localPath);
+    // Clean up the path to remove API prefix and construct proper local path
+    let localPath = fileUrl;
     
-    console.log('📁 Using local file:', fullPath);
+    // Remove /api prefix if present
+    if (localPath.startsWith('/api/')) {
+      localPath = localPath.replace('/api/', '');
+    }
+    
+    // Remove leading slash if present (for relative paths)
+    if (localPath.startsWith('/uploads/')) {
+      localPath = localPath.substring(1); // Remove leading slash to make it relative
+    }
+    
+    // Construct full path from project root
+    const fullPath = path.join(process.cwd(), localPath);
+    
+    console.log('📁 Original URL:', fileUrl);
+    console.log('📁 Cleaned path:', localPath);
+    console.log('📁 Full path:', fullPath);
     
     if (!(await fs.pathExists(fullPath))) {
       throw new Error(`Local file not found: ${fullPath}`);
     }
     
-    tempFile = fullPath;
-    needsCleanup = false;
+    fileBuffer = await fs.readFile(fullPath);
   } else {
-    // Download remote file
-    tempFile = path.join('/tmp', `cv-${Date.now()}${ext}`);
-    console.log('💾 Downloading file to temp location:', tempFile);
-    await downloadFile(fileUrl, tempFile);
-    needsCleanup = true;
+    throw new Error('Unsupported file URL format');
   }
   
   try {
-    // Check if file exists and has content
-    const stats = await fs.stat(tempFile);
-    console.log('📊 File size:', stats.size, 'bytes');
+    // Check if buffer has content
+    console.log('📊 File buffer size:', fileBuffer.length, 'bytes');
     
-    if (stats.size === 0) {
+    if (fileBuffer.length === 0) {
       throw new Error('File is empty');
     }
 
@@ -77,19 +96,17 @@ export async function extractTextFromCV(fileUrl: string): Promise<string> {
     
     if (ext === '.pdf') {
       console.log('📄 Processing PDF file...');
-      const data = await fs.readFile(tempFile);
-      const pdf = await pdfParse(data);
+      const pdf = await pdfParse(fileBuffer);
       text = pdf.text;
       console.log('📄 PDF text extracted, length:', text.length);
     } else if (ext === '.docx' || ext === '.doc') {
       console.log('📄 Processing Word document...');
-      const data = await fs.readFile(tempFile);
-      const result = await mammoth.extractRawText({ buffer: data });
+      const result = await mammoth.extractRawText({ buffer: fileBuffer });
       text = result.value;
       console.log('📄 Word text extracted, length:', text.length);
     } else if (ext === '.txt') {
       console.log('📄 Processing text file...');
-      text = await fs.readFile(tempFile, 'utf-8');
+      text = fileBuffer.toString('utf-8');
       console.log('📄 Text file read, length:', text.length);
     }
 
@@ -106,17 +123,5 @@ export async function extractTextFromCV(fileUrl: string): Promise<string> {
   } catch (error) {
     console.error('❌ CV text extraction failed:', error.message);
     throw error;
-  } finally {
-    // Clean up temp file only if it was downloaded
-    if (needsCleanup) {
-      try {
-        if (await fs.pathExists(tempFile)) {
-          await fs.remove(tempFile);
-          console.log('🗑️ Temp file cleaned up');
-        }
-      } catch (cleanupError) {
-        console.warn('⚠️ Failed to clean up temp file:', cleanupError.message);
-      }
-    }
   }
 }

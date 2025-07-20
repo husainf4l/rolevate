@@ -375,12 +375,19 @@ export class ApplicationService {
         try {
           const analysisResult = await this.performAICVAnalysis(resumeUrl, analysisPrompt, job);
           
+          // Generate AI recommendations based on the analysis
+          const recommendations = await this.generateAIRecommendations(analysisResult, job);
+          
           await this.prisma.application.update({
             where: { id: applicationId },
             data: {
               cvAnalysisScore: analysisResult.score,
               cvAnalysisResults: analysisResult as any, // Cast to any for JSON field
               analyzedAt: new Date(),
+              aiCvRecommendations: recommendations.cvRecommendations,
+              aiInterviewRecommendations: null,         // Not generated yet
+              aiSecondInterviewRecommendations: null,   // Not generated yet
+              recommendationsGeneratedAt: new Date(),
             },
           });
 
@@ -398,6 +405,184 @@ export class ApplicationService {
   async performAICVAnalysis(resumeUrl: string, analysisPrompt: string, job: any): Promise<CVAnalysisResultDto> {
     // Use OpenAI GPT-4o for real CV analysis with text extraction
     return await this.openaiCvAnalysisService.analyzeCVWithOpenAI(resumeUrl, analysisPrompt, job);
+  }
+
+  async generateAIRecommendations(analysisResult: CVAnalysisResultDto, job: any): Promise<{
+    cvRecommendations: string;
+    interviewRecommendations: null;
+    secondInterviewRecommendations: null;
+  }> {
+    try {
+      // Generate CV improvement recommendations based on analysis
+      const cvRecommendations = await this.generateCVRecommendations(analysisResult, job);
+      
+      return {
+        cvRecommendations,                    // Generated now based on CV analysis
+        interviewRecommendations: null,       // Will be generated when interview is implemented
+        secondInterviewRecommendations: null  // Will be generated after first interview
+      };
+    } catch (error) {
+      console.error('Failed to generate CV recommendations:', error);
+      return {
+        cvRecommendations: 'Unable to generate CV recommendations at this time.',
+        interviewRecommendations: null,
+        secondInterviewRecommendations: null
+      };
+    }
+  }
+
+  private async generateCVRecommendations(analysisResult: CVAnalysisResultDto, job: any): Promise<string> {
+    const prompt = `Based on the CV analysis results for a ${job.title} position, provide specific recommendations for CV improvement.
+
+CV Analysis Results:
+- Score: ${analysisResult.score}/100
+- Overall Fit: ${analysisResult.overallFit}
+- Strengths: ${analysisResult.strengths.join(', ')}
+- Weaknesses: ${analysisResult.weaknesses.join(', ')}
+- Missing Skills: ${analysisResult.skillsMatch.missing.join(', ')}
+
+Job Requirements:
+- Title: ${job.title}
+- Skills: ${job.skills?.join(', ') || 'Not specified'}
+- Experience: ${job.experience || 'Not specified'}
+- Education: ${job.education || 'Not specified'}
+
+Please provide specific, actionable recommendations to improve the CV for this position. Focus on:
+1. Skills to highlight or add
+2. Experience sections to enhance
+3. Keywords to include
+4. Format improvements
+5. Specific achievements to emphasize
+
+Format as clear, numbered recommendations.`;
+
+    return await this.openaiCvAnalysisService.generateRecommendations(prompt);
+  }
+
+  private async generateInterviewRecommendations(analysisResult: CVAnalysisResultDto, job: any): Promise<string> {
+    const prompt = `Based on the CV analysis for a ${job.title} position, provide interview preparation recommendations.
+
+CV Analysis Results:
+- Score: ${analysisResult.score}/100
+- Overall Fit: ${analysisResult.overallFit}
+- Strengths: ${analysisResult.strengths.join(', ')}
+- Weaknesses: ${analysisResult.weaknesses.join(', ')}
+
+Job Details:
+- Title: ${job.title}
+- Department: ${job.department || 'Not specified'}
+- Responsibilities: ${job.responsibilities || 'Not specified'}
+- Requirements: ${job.requirements || 'Not specified'}
+
+Provide first interview preparation recommendations focusing on:
+1. Key points to emphasize based on strengths
+2. How to address potential weaknesses
+3. Specific examples to prepare
+4. Questions likely to be asked
+5. Company research suggestions
+
+Format as clear, actionable advice.`;
+
+    return await this.openaiCvAnalysisService.generateRecommendations(prompt);
+  }
+
+  private async generateSecondInterviewRecommendations(analysisResult: CVAnalysisResultDto, job: any): Promise<string> {
+    const prompt = `For a second interview for a ${job.title} position, provide advanced preparation recommendations.
+
+CV Analysis Results:
+- Score: ${analysisResult.score}/100
+- Overall Fit: ${analysisResult.overallFit}
+- Strengths: ${analysisResult.strengths.join(', ')}
+
+Job Details:
+- Title: ${job.title}
+- Department: ${job.department || 'Not specified'}
+- Benefits: ${job.benefits || 'Not specified'}
+
+Provide second interview preparation focusing on:
+1. Advanced technical/role-specific questions
+2. Leadership and teamwork scenarios
+3. Company culture fit questions
+4. Questions about long-term goals
+5. Salary and benefits negotiation tips
+6. Questions to ask the interviewer
+
+Format as strategic advice for a final interview round.`;
+
+    return await this.openaiCvAnalysisService.generateRecommendations(prompt);
+  }
+
+  // Method to generate interview recommendations (to be implemented when interview feature is ready)
+  async generateInterviewRecommendationsForApplication(applicationId: string): Promise<void> {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: { job: true },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+
+    const analysisResult = application.cvAnalysisResults as any;
+    if (!analysisResult) {
+      throw new BadRequestException('CV analysis must be completed first');
+    }
+
+    try {
+      const interviewRecommendations = await this.generateInterviewRecommendations(analysisResult, application.job);
+      
+      await this.prisma.application.update({
+        where: { id: applicationId },
+        data: {
+          aiInterviewRecommendations: interviewRecommendations,
+        },
+      });
+      
+      console.log(`Interview recommendations generated for application ${applicationId}`);
+    } catch (error) {
+      console.error('Failed to generate interview recommendations:', error);
+      throw error;
+    }
+  }
+
+  // Method to generate second interview recommendations after first interview
+  async generateSecondInterviewRecommendationsAfterFirstInterview(applicationId: string): Promise<void> {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: {
+        job: true,
+      },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+
+    // Only generate if not already generated
+    if (application.aiSecondInterviewRecommendations) {
+      return;
+    }
+
+    const analysisResult = application.cvAnalysisResults as any;
+    if (!analysisResult) {
+      throw new BadRequestException('CV analysis must be completed first');
+    }
+
+    try {
+      const secondInterviewRecommendations = await this.generateSecondInterviewRecommendations(analysisResult, application.job);
+      
+      await this.prisma.application.update({
+        where: { id: applicationId },
+        data: {
+          aiSecondInterviewRecommendations: secondInterviewRecommendations,
+        },
+      });
+      
+      console.log(`Second interview recommendations generated for application ${applicationId}`);
+    } catch (error) {
+      console.error('Failed to generate second interview recommendations:', error);
+      throw error;
+    }
   }
 
   async createLiveKitRoomAndNotifyCandidate(
@@ -551,6 +736,33 @@ export class ApplicationService {
     });
 
     return applications.map(app => this.mapToApplicationResponse(app));
+  }
+
+  async getApplicationByJobAndCandidate(jobId: string, candidateId: string): Promise<ApplicationResponseDto | null> {
+    const application = await this.prisma.application.findFirst({
+      where: {
+        jobId: jobId,
+        candidateId: candidateId,
+      },
+      include: {
+        candidate: true,
+        job: {
+          include: {
+            company: {
+              include: {
+                address: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!application) {
+      return null;
+    }
+
+    return this.mapToApplicationResponse(application);
   }
 
   async updateApplicationStatus(applicationId: string, updateDto: UpdateApplicationStatusDto, companyId: string): Promise<ApplicationResponseDto> {
@@ -819,6 +1031,10 @@ export class ApplicationService {
       cvAnalysisScore: application.cvAnalysisScore,
       cvAnalysisResults: application.cvAnalysisResults as CVAnalysisResultDto,
       analyzedAt: application.analyzedAt,
+      aiCvRecommendations: application.aiCvRecommendations,
+      aiInterviewRecommendations: application.aiInterviewRecommendations,
+      aiSecondInterviewRecommendations: application.aiSecondInterviewRecommendations,
+      recommendationsGeneratedAt: application.recommendationsGeneratedAt,
       companyNotes: application.companyNotes,
       appliedAt: application.appliedAt,
       reviewedAt: application.reviewedAt,

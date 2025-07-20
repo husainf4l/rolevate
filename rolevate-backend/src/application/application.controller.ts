@@ -14,15 +14,26 @@ export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createApplication(
     @Body() createApplicationDto: CreateApplicationDto,
-    @Req() req: Request & { user?: { id: string; candidateProfileId?: string } }
+    @Req() req: Request & { user?: { id: string; candidateProfileId?: string; userType?: string } }
   ): Promise<ApplicationResponseDto> {
     // Require JWT and extract candidate profile from user
     const user = req.user;
-    if (!user || !user.candidateProfileId) {
-      throw new UnauthorizedException('Candidate authentication required');
+    
+    if (!user) {
+      throw new UnauthorizedException('Authentication required');
     }
+    
+    if (user.userType !== 'CANDIDATE') {
+      throw new UnauthorizedException('Only candidates can apply for jobs');
+    }
+    
+    if (!user.candidateProfileId) {
+      throw new BadRequestException('Candidate profile is required. Please complete your profile first.');
+    }
+    
     return this.applicationService.createApplication(createApplicationDto, user.candidateProfileId);
   }
 
@@ -177,6 +188,39 @@ export class ApplicationController {
     }
     // Otherwise, return all applications for the company, optionally filtered by status
     return this.applicationService.getAllApplicationsForCompany(user.companyId, status);
+  }
+
+  @Get('my-applications')
+  @UseGuards(JwtAuthGuard)
+  async getCandidateApplications(
+    @Req() req: Request & { user?: { id: string; candidateProfileId?: string; userType?: string } }
+  ): Promise<ApplicationResponseDto[]> {
+    const user = req.user;
+    if (!user || user.userType !== 'CANDIDATE' || !user.candidateProfileId) {
+      throw new UnauthorizedException('Candidate authentication required');
+    }
+    return this.applicationService.getApplicationsByCandidate(user.candidateProfileId);
+  }
+
+  @Get('my-application/:jobId')
+  @UseGuards(JwtAuthGuard)
+  async getCandidateApplicationForJob(
+    @Param('jobId') jobId: string,
+    @Req() req: Request & { user?: { id: string; candidateProfileId?: string; userType?: string } }
+  ): Promise<ApplicationResponseDto> {
+    const user = req.user;
+    if (!user || user.userType !== 'CANDIDATE' || !user.candidateProfileId) {
+      throw new UnauthorizedException('Candidate authentication required');
+    }
+    
+    // Find the specific application for this job
+    const application = await this.applicationService.getApplicationByJobAndCandidate(jobId, user.candidateProfileId);
+    
+    if (!application) {
+      throw new BadRequestException('You have not applied to this job or the job does not exist');
+    }
+    
+    return application;
   }
 
   @UseGuards(JwtAuthGuard)

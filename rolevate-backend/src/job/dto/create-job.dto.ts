@@ -157,6 +157,7 @@ export class JobResponseDto {
   company?: {
     id: string;
     name: string;
+    logo?: string;
     address?: {
       id: string;
       street: string;

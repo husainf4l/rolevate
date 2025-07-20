@@ -5,15 +5,18 @@
 Your LiveKit rooms now include **comprehensive interview context** automatically extracted from your database:
 
 ### 👤 Candidate Information
+
 - **candidateName**: Full name of the candidate
 - **phone**: Contact number (for verification)
 
-### 💼 Job Context  
+### 💼 Job Context
+
 - **jobName**: Exact position title
 - **companyName**: Company conducting the interview
 - **interviewPrompt**: AI-generated interview script tailored to the specific job
 
 ### 🤖 CV Analysis Results
+
 - **score**: Numerical fit score (1-100)
 - **summary**: Professional assessment of candidate vs job fit
 - **overallFit**: Quick classification (Excellent/Good/Fair/Poor)
@@ -24,7 +27,7 @@ Your LiveKit rooms now include **comprehensive interview context** automatically
 
 1. **Room Creation**: When you call `/api/room/create-new-room` with `jobId` and `phone`
 2. **Database Query**: System finds the application and loads all related data
-3. **CV Analysis**: If CV exists, runs OpenAI analysis against job requirements  
+3. **CV Analysis**: If CV exists, runs OpenAI analysis against job requirements
 4. **Metadata Creation**: Builds comprehensive metadata object
 5. **LiveKit Transmission**: Sends JSON metadata to LiveKit server
 6. **Agent Access**: Your agents can access via `room.metadata`
@@ -60,7 +63,7 @@ console.log(`Key Strengths: ${candidateStrengths.join(', ')}`);
 ```json
 {
   "candidateName": "alhussein abdullah",
-  "jobName": "Optometrist", 
+  "jobName": "Optometrist",
   "companyName": "papaya trading",
   "interviewPrompt": "Optometrist – Initial Screening Interview\n\nWelcome! I'm here to conduct your screening interview for the Optometrist position...",
   "cvAnalysis": {
@@ -91,7 +94,7 @@ console.log(`Key Strengths: ${candidateStrengths.join(', ')}`);
 ## 🚀 Benefits for Your Agents
 
 1. **Personalized Interviews**: Know candidate's name, background, and fit
-2. **Informed Questions**: Use CV analysis to focus on strengths/weaknesses  
+2. **Informed Questions**: Use CV analysis to focus on strengths/weaknesses
 3. **Company Context**: Tailor questions to specific company and role
 4. **Pre-built Script**: Use generated interview prompts as starting point
 5. **Real-time Adaptation**: Adjust interview based on CV fit score

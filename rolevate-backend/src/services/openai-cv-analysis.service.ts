@@ -230,4 +230,39 @@ Focus on being objective and providing specific examples from the CV to support 
       };
     }
   }
+
+  async generateRecommendations(prompt: string): Promise<string> {
+    try {
+      console.log('🤖 Generating AI recommendations...');
+      
+      const completion = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert career counselor and HR professional. Provide specific, actionable recommendations in a clear, organized format.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 800,
+        temperature: 0.7,
+      });
+
+      const recommendations = completion.choices[0]?.message?.content?.trim();
+      
+      if (!recommendations) {
+        return 'Unable to generate specific recommendations at this time. Please consult with your career advisor for personalized guidance.';
+      }
+
+      console.log('✅ AI recommendations generated successfully');
+      return recommendations;
+
+    } catch (error) {
+      console.error('OpenAI recommendations generation error:', error);
+      return 'Unable to generate recommendations due to technical issues. Please try again later or consult with a career advisor.';
+    }
+  }
 }

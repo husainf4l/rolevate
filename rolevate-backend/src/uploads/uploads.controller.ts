@@ -7,6 +7,7 @@ import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
 import { Public } from '../auth/public.decorator';
+import { AwsS3Service } from '../services/aws-s3.service';
 
 @Controller('uploads')
 export class UploadsController {

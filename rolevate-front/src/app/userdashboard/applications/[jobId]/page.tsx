@@ -184,16 +184,16 @@ export default function ApplicationDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Job Information */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden sticky top-8">
+            <div className="glass-strong rounded-3xl overflow-hidden sticky top-8" style={{boxShadow: "var(--shadow-medium)"}}>
               {/* Header with gradient */}
-              <div className="bg-gradient-to-r from-primary-600 to-primary-700 p-6 text-white">
+              <div className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] p-6 text-white">
                 <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
                     <span className="text-xl">📋</span>
                   </div>
                   <h2 className="text-xl font-bold">Application Summary</h2>
                 </div>
-                <p className="text-primary-100 text-sm">
+                <p className="text-white/80 text-sm">
                   Track your progress and status
                 </p>
               </div>

@@ -107,6 +107,12 @@ export class ApplicationResponseDto {
   cvAnalysisResults?: CVAnalysisResultDto;
   analyzedAt?: Date;
   
+  // AI Recommendations
+  aiCvRecommendations?: string;
+  aiInterviewRecommendations?: string;
+  aiSecondInterviewRecommendations?: string;
+  recommendationsGeneratedAt?: Date;
+  
   // Company Notes
   companyNotes?: string;
   
