@@ -381,7 +381,7 @@ export default function CandidateProfile() {
         // Fetch interviews
         try {
           const res = await fetch(
-            `http://localhost:4005/api/interviews/candidate/${application.candidate.id}/job/${application.job.id}`
+            `https://rolevate.com/api/interviews/candidate/${application.candidate.id}/job/${application.job.id}`
           );
           if (res.ok) {
             const data = await res.json();

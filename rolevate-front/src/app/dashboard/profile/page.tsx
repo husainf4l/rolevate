@@ -370,9 +370,13 @@ export default function UserProfilePage() {
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-tr from-[#13ead9] to-[#0891b2] flex items-center justify-center">
                 {userProfile.avatar ? (
                   <img
-                    src={`/api/proxy-image?url=${encodeURIComponent(
-                      `${API_CONFIG.UPLOADS_URL}/${userProfile.avatar}`
-                    )}`}
+                    src={
+                      userProfile.avatar.startsWith('http') 
+                        ? userProfile.avatar 
+                        : `/api/proxy-image?url=${encodeURIComponent(
+                            `${API_CONFIG.UPLOADS_URL}/${userProfile.avatar}`
+                          )}`
+                    }
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />

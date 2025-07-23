@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/common/Button";
 import { getCurrentUser, logout } from "@/services/auth";
+import { API_CONFIG } from "@/lib/config";
 
 interface User {
   id: string;
@@ -15,6 +16,7 @@ interface User {
   phone?: string;
   company?: any;
   companyId?: string;
+  avatar?: string;
 }
 
 export default function Navbar() {
@@ -135,8 +137,22 @@ export default function Navbar() {
                   }}
                   className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full bg-gray-100/60 hover:bg-gray-200/80 transition-all duration-200 border border-gray-200/50 backdrop-blur-sm"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    {user.name.charAt(0).toUpperCase()}
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                    {user.avatar ? (
+                      <img
+                        src={
+                          user.avatar.startsWith('http') 
+                            ? user.avatar 
+                            : `/api/proxy-image?url=${encodeURIComponent(
+                                `${API_CONFIG.UPLOADS_URL}/${user.avatar}`
+                              )}`
+                        }
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      user.name.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div className="flex flex-col items-start">
                     <span className="text-sm font-medium text-gray-900 font-display">

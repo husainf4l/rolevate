@@ -99,7 +99,7 @@ export default function NotificationsPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:4005/api/notifications", {
+        const res = await fetch("https://rolevate.com/api/notifications", {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Failed to fetch notifications");

@@ -128,7 +128,7 @@ export default function CommunicationPage() {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:4005/api/communications?${params}`,
+        `https://rolevate.com/api/communications?${params}`,
         {
           credentials: "include",
           headers: {
@@ -156,7 +156,7 @@ export default function CommunicationPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:4005/api/communications/stats",
+        "https://rolevate.com/api/communications/stats",
         {
           credentials: "include",
           headers: {

@@ -115,7 +115,7 @@ export default function MessageDetailsPage() {
       setError(null);
       
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4005/api/communications/${messageId}`, {
+      const response = await fetch(`https://rolevate.com/api/communications/${messageId}`, {
         credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -207,7 +207,7 @@ export default function MessageDetailsPage() {
   const handleSendReply = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4005/api/communications', {
+      const response = await fetch('https://rolevate.com/api/communications', {
         method: 'POST',
         credentials: 'include',
         headers: {

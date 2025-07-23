@@ -18,7 +18,7 @@ export function useRoomConnection({
   onJobDataUpdate
 }: UseRoomConnectionProps) {
   const isConnectingRef = useRef(false);
-  
+
   const connectToRoom = useCallback(async () => {
     if (isConnectingRef.current) {
       console.log("⚠️ Connection already in progress, skipping...");
@@ -55,7 +55,7 @@ export function useRoomConnection({
       if (!token && phone && jobId && backendRoomName) {
         console.log("🏗️ Creating room via backend...");
         const createResponse = await fetch(
-          "http://localhost:4005/api/room/create-new-room",
+          "https://rolevate.com/api/room/create-new-room",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -69,19 +69,19 @@ export function useRoomConnection({
 
         const createData = await createResponse.json();
         console.log("✅ Room created successfully:", createData);
-        
+
         token = createData.token;
         roomName = createData.room?.name || createData.roomName;
         serverUrl = createData.liveKitUrl;
-        
-        console.log("🔍 Extracted connection details:", { 
-          token: !!token, 
-          roomName, 
+
+        console.log("🔍 Extracted connection details:", {
+          token: !!token,
+          roomName,
           serverUrl,
           roomFromResponse: createData.room?.name,
           fallbackRoom: createData.roomName
         });
-        
+
         // Extract enhanced data from backend response
         if (onJobDataUpdate) {
           // Extract job data from the response structure
@@ -90,13 +90,13 @@ export function useRoomConnection({
             location: null, // Not provided in response
             experience: null // Not provided in response
           };
-          
+
           const companyData = {
             name: createData.room?.metadata?.companyName || createData.interviewContext?.companyName
           };
-          
+
           const participantData = createData.participantName || createData.room?.metadata?.candidateName || createData.interviewContext?.candidateName;
-          
+
           console.log("📊 Extracted data:", { jobData, companyData, participantData });
           onJobDataUpdate(jobData, companyData, participantData);
         }
@@ -159,7 +159,7 @@ export function useRoomConnection({
       } catch (camError) {
         console.warn("⚠️ Could not enable camera:", camError);
       }
-      
+
       console.log("✅ Room connection completed (media may be limited)");
 
     } catch (err: any) {
@@ -176,7 +176,7 @@ export function useRoomConnection({
       e.preventDefault();
       return "Are you sure you want to leave? This will end the interview.";
     };
-    
+
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);

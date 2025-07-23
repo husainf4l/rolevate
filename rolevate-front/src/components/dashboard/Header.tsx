@@ -303,7 +303,11 @@ export default function Header({
                     <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center overflow-hidden">
                       {user?.avatar ? (
                         <img
-                          src={`/api/proxy-image?url=${encodeURIComponent(`${API_CONFIG.UPLOADS_URL}/${user.avatar}`)}`}
+                          src={
+                            user.avatar.startsWith('http') 
+                              ? user.avatar 
+                              : `/api/proxy-image?url=${encodeURIComponent(`${API_CONFIG.UPLOADS_URL}/${user.avatar}`)}`
+                          }
                           alt={user.name || "User"}
                           className="w-full h-full object-cover rounded-full"
                           onError={(e) => {
@@ -456,7 +460,11 @@ export default function Header({
                   <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center overflow-hidden">
                     {user?.avatar ? (
                       <img
-                        src={`/api/proxy-image?url=${encodeURIComponent(`${API_CONFIG.UPLOADS_URL}/${user.avatar}`)}`}
+                        src={
+                          user.avatar.startsWith('http') 
+                            ? user.avatar 
+                            : `/api/proxy-image?url=${encodeURIComponent(`${API_CONFIG.UPLOADS_URL}/${user.avatar}`)}`
+                        }
                         alt={user.name || "User"}
                         className="w-full h-full object-cover rounded-full"
                         onError={(e) => {

@@ -164,20 +164,6 @@ export class AuthController {
   @Post('upload-avatar')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('avatar', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadDir = join(process.cwd(), 'uploads', 'avatars');
-        if (!existsSync(uploadDir)) {
-          mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-      },
-      filename: (req, file, cb) => {
-        const fileExtension = extname(file.originalname);
-        const fileName = `avatar_${uuidv4()}${fileExtension}`;
-        cb(null, fileName);
-      },
-    }),
     fileFilter: (req, file, cb) => {
       // Accept only image files
       const allowedMimes = [
@@ -202,21 +188,41 @@ export class AuthController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
   ) {
+    console.log('=== Avatar Upload Request ===');
+    console.log('File received:', !!file);
+    
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
 
     const user = req.user as any;
+    console.log('User ID:', user.userId);
     
-    // Update user with avatar path
-    const avatarPath = `avatars/${file.filename}`;
-    const updatedUser = await this.authService.updateAvatar(user.userId, avatarPath);
+    try {
+      // Upload to S3 (default behavior now)
+      const fileExtension = file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${uuidv4()}.${fileExtension}`;
+      const s3Url = await this.awsS3Service.uploadFile(
+        file.buffer,
+        fileName,
+        `avatars/${user.userId}`
+      );
 
-    return {
-      message: 'Avatar uploaded successfully',
-      avatarPath,
-      user: updatedUser
-    };
+      console.log('Avatar uploaded to S3:', s3Url);
+
+      // Update user with S3 avatar URL
+      const updatedUser = await this.authService.updateAvatar(user.userId, s3Url);
+
+      return {
+        message: 'Avatar uploaded successfully',
+        avatarPath: s3Url, // Keep backward compatibility
+        avatarUrl: s3Url,
+        user: updatedUser
+      };
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      throw new BadRequestException(`Failed to upload avatar: ${error.message}`);
+    }
   }
 
   @Post('upload-avatar-s3')
@@ -246,20 +252,32 @@ export class AuthController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
   ) {
+    console.log('=== Avatar S3 Upload Request ===');
+    console.log('File received:', !!file);
+    console.log('File details:', file ? {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    } : 'No file');
+
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
 
     const user = req.user as any;
+    console.log('User ID:', user.userId);
     
     try {
-      // Upload to S3
-      const fileName = `${uuidv4()}.${file.originalname.split('.').pop()}`;
+      // Upload to S3 with proper folder structure
+      const fileExtension = file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${uuidv4()}.${fileExtension}`;
       const s3Url = await this.awsS3Service.uploadFile(
         file.buffer,
         fileName,
         `avatars/${user.userId}`
       );
+
+      console.log('Avatar uploaded to S3:', s3Url);
 
       // Update user with S3 avatar URL
       const updatedUser = await this.authService.updateAvatar(user.userId, s3Url);
@@ -270,7 +288,8 @@ export class AuthController {
         user: updatedUser
       };
     } catch (error) {
-      throw new BadRequestException('Failed to upload avatar to S3');
+      console.error('Avatar upload error:', error);
+      throw new BadRequestException(`Failed to upload avatar to S3: ${error.message}`);
     }
   }
 }

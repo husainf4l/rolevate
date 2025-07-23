@@ -59,13 +59,19 @@ export class AwsS3Service {
   async uploadFile(file: Buffer, fileName: string, folder: string = 'files'): Promise<string> {
     try {
       const key = `${folder}/${fileName}`;
+      
+      // Determine content type from file extension
+      const fileExtension = fileName.split('.').pop()?.toLowerCase() || '';
+      const contentType = this.getContentType(fileExtension);
 
       console.log('☁️ Uploading file to S3:', key);
+      console.log('Content-Type:', contentType);
 
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
         Body: file,
+        ContentType: contentType,
         Metadata: {
           uploadedAt: new Date().toISOString(),
         },
@@ -183,6 +189,12 @@ export class AwsS3Service {
         return 'image/jpeg';
       case 'png':
         return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      case 'svg':
+        return 'image/svg+xml';
       default:
         return 'application/octet-stream';
     }

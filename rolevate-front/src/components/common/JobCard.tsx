@@ -7,7 +7,7 @@ import { useSavedJobsStandalone } from "@/hooks/useSavedJobsStandalone";
 
 // Get the base URL without the /api suffix for static files
 const getBaseStaticUrl = () => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4005/api";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://rolevate.com/api";
   return apiUrl.replace("/api", "");
 };
 

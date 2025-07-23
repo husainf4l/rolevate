@@ -48,7 +48,7 @@ export default function CVUploadSection() {
         formData.append("cv", file);
 
         const response = await fetch(
-          "http://localhost:4005/api/jobfit/upload-cv",
+          "https://rolevate.com/api/jobfit/upload-cv",
           {
             method: "POST",
             body: formData,

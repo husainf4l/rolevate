@@ -61,7 +61,7 @@ export default function JoinCompanyPage() {
       setSigning(true);
       
       // First, sign up the user
-      const signupResponse = await fetch('http://localhost:4005/api/auth/signup', {
+      const signupResponse = await fetch('https://rolevate.com/api/auth/signup', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -84,7 +84,7 @@ export default function JoinCompanyPage() {
         }
         
         // Then join the company with the invitation code
-        const joinResponse = await fetch('http://localhost:4005/api/company/join', {
+        const joinResponse = await fetch('https://rolevate.com/api/company/join', {
           method: 'POST',
           credentials: 'include',
           headers: {
