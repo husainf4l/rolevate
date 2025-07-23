@@ -39,9 +39,9 @@ export default function NavigationButtons({
           className="flex items-center gap-2 px-6 py-3 bg-white/80 border border-[#d2d2d7] text-[#1d1d1f] rounded-xl hover:bg-white/90 transition-all duration-200 font-medium backdrop-blur-sm"
         >
           <ChevronLeftIcon className="w-4 h-4" />
-          {isFirstStep ? 'Cancel' : 'Previous'}
+          {isFirstStep ? "Cancel" : "Previous"}
         </button>
-        
+
         <button
           type="button"
           onClick={isLastStep ? onSubmit : onNext}

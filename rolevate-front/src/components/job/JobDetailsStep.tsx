@@ -25,41 +25,43 @@ interface JobDetailsStepProps {
   skillSuggestions: string[];
 }
 
-export default function JobDetailsStep({ 
-  jobData, 
-  errors, 
+export default function JobDetailsStep({
+  jobData,
+  errors,
   aiGenerating,
   regeneratingRequirements,
   regeneratingBenefits,
   regeneratingResponsibilities,
-  onInputChange, 
-  onAddSkill, 
+  onInputChange,
+  onAddSkill,
   onRemoveSkill,
   onRegenerateDescription,
   onRegenerateRequirements,
   onRegenerateBenefits,
   onRegenerateResponsibilities,
-  skillSuggestions 
+  skillSuggestions,
 }: JobDetailsStepProps) {
   // State to track if custom experience range is selected
   const [showCustomExperience, setShowCustomExperience] = useState(false);
   const [minYears, setMinYears] = useState("");
   const [maxYears, setMaxYears] = useState("");
-  
+
   // Predefined experience options
   const experienceOptions = [
     "0-1 years",
-    "1-3 years", 
+    "1-3 years",
     "3-5 years",
     "5-7 years",
-    "7+ years"
+    "7+ years",
   ];
 
   // Check if current experience value is a predefined option and parse custom values
   useEffect(() => {
-    const isCustom = Boolean(jobData.experience && !experienceOptions.includes(jobData.experience));
+    const isCustom = Boolean(
+      jobData.experience && !experienceOptions.includes(jobData.experience)
+    );
     setShowCustomExperience(isCustom);
-    
+
     // Parse custom range if it exists (e.g., "2-4 years" -> min: 2, max: 4)
     if (isCustom && jobData.experience) {
       const match = jobData.experience.match(/(\d+)\s*-\s*(\d+)/);
@@ -114,15 +116,22 @@ export default function JobDetailsStep({
           <DocumentTextIcon className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-[#1d1d1f] tracking-tight">Job Details</h2>
-          <p className="text-[#6e6e73] text-sm mt-1">Detailed description and requirements</p>
+          <h2 className="text-2xl font-bold text-[#1d1d1f] tracking-tight">
+            Job Details
+          </h2>
+          <p className="text-[#6e6e73] text-sm mt-1">
+            Detailed description and requirements
+          </p>
         </div>
       </div>
-      
+
       <div className="space-y-8">
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label htmlFor="description" className="block text-sm font-semibold text-[#1d1d1f]">
+            <label
+              htmlFor="description"
+              className="block text-sm font-semibold text-[#1d1d1f]"
+            >
               Job Description *
             </label>
             {onRegenerateDescription && jobData.description.trim() && (
@@ -139,8 +148,18 @@ export default function JobDetailsStep({
                   </>
                 ) : (
                   <>
-                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <svg
+                      className="w-3 h-3 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
                     </svg>
                     Regenerate with AI
                   </>
@@ -155,7 +174,7 @@ export default function JobDetailsStep({
               value={jobData.description}
               onChange={(e) => onInputChange("description", e.target.value)}
               className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent resize-none transition-all duration-200 placeholder-[#86868b] text-[#1d1d1f] backdrop-blur-sm ${
-                errors.description ? 'border-red-400' : 'border-[#d2d2d7]'
+                errors.description ? "border-red-400" : "border-[#d2d2d7]"
               }`}
               placeholder="Provide a comprehensive description of the role, including key responsibilities, day-to-day tasks, and what success looks like in this position..."
               maxLength={2000}
@@ -164,11 +183,16 @@ export default function JobDetailsStep({
               {jobData.description.length}/2000
             </div>
           </div>
-          {errors.description && <p className="mt-2 text-sm text-red-500">{errors.description}</p>}
+          {errors.description && (
+            <p className="mt-2 text-sm text-red-500">{errors.description}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="shortDescription" className="block text-sm font-semibold text-[#1d1d1f] mb-3">
+          <label
+            htmlFor="shortDescription"
+            className="block text-sm font-semibold text-[#1d1d1f] mb-3"
+          >
             Short Description *
           </label>
           <div className="relative">
@@ -176,9 +200,11 @@ export default function JobDetailsStep({
               id="shortDescription"
               rows={3}
               value={jobData.shortDescription}
-              onChange={(e) => onInputChange("shortDescription", e.target.value)}
+              onChange={(e) =>
+                onInputChange("shortDescription", e.target.value)
+              }
               className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent resize-none transition-all duration-200 placeholder-[#86868b] text-[#1d1d1f] backdrop-blur-sm ${
-                errors.shortDescription ? 'border-red-400' : 'border-[#d2d2d7]'
+                errors.shortDescription ? "border-red-400" : "border-[#d2d2d7]"
               }`}
               placeholder="A brief summary of the role that will appear in job listings and search results..."
               maxLength={200}
@@ -187,45 +213,65 @@ export default function JobDetailsStep({
               {jobData.shortDescription.length}/200
             </div>
           </div>
-          {errors.shortDescription && <p className="mt-2 text-sm text-red-500">{errors.shortDescription}</p>}
+          {errors.shortDescription && (
+            <p className="mt-2 text-sm text-red-500">
+              {errors.shortDescription}
+            </p>
+          )}
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label htmlFor="responsibilities" className="block text-sm font-semibold text-[#1d1d1f]">
+            <label
+              htmlFor="responsibilities"
+              className="block text-sm font-semibold text-[#1d1d1f]"
+            >
               Key Responsibilities *
             </label>
-            {onRegenerateResponsibilities && jobData.responsibilities.trim() && (
-              <button
-                type="button"
-                onClick={onRegenerateResponsibilities}
-                disabled={regeneratingResponsibilities}
-                className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-lg disabled:opacity-50 hover:from-[#0891b2] hover:to-[#0e7490] transition-all duration-200"
-              >
-                {regeneratingResponsibilities ? (
-                  <>
-                    <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                    Rewriting...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Regenerate with AI
-                  </>
-                )}
-              </button>
-            )}
+            {onRegenerateResponsibilities &&
+              jobData.responsibilities.trim() && (
+                <button
+                  type="button"
+                  onClick={onRegenerateResponsibilities}
+                  disabled={regeneratingResponsibilities}
+                  className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-lg disabled:opacity-50 hover:from-[#0891b2] hover:to-[#0e7490] transition-all duration-200"
+                >
+                  {regeneratingResponsibilities ? (
+                    <>
+                      <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      Rewriting...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-3 h-3 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                      Regenerate with AI
+                    </>
+                  )}
+                </button>
+              )}
           </div>
           <div className="relative">
             <textarea
               id="responsibilities"
               rows={6}
               value={jobData.responsibilities}
-              onChange={(e) => onInputChange("responsibilities", e.target.value)}
+              onChange={(e) =>
+                onInputChange("responsibilities", e.target.value)
+              }
               className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent resize-none transition-all duration-200 placeholder-[#86868b] text-[#1d1d1f] backdrop-blur-sm ${
-                errors.responsibilities ? 'border-red-400' : 'border-[#d2d2d7]'
+                errors.responsibilities ? "border-red-400" : "border-[#d2d2d7]"
               }`}
               placeholder="List the main duties and responsibilities for this role, including day-to-day tasks, key deliverables, and expected outcomes..."
               maxLength={1500}
@@ -234,12 +280,19 @@ export default function JobDetailsStep({
               {jobData.responsibilities.length}/1500
             </div>
           </div>
-          {errors.responsibilities && <p className="mt-2 text-sm text-red-500">{errors.responsibilities}</p>}
+          {errors.responsibilities && (
+            <p className="mt-2 text-sm text-red-500">
+              {errors.responsibilities}
+            </p>
+          )}
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label htmlFor="requirements" className="block text-sm font-semibold text-[#1d1d1f]">
+            <label
+              htmlFor="requirements"
+              className="block text-sm font-semibold text-[#1d1d1f]"
+            >
               Requirements & Qualifications *
             </label>
             {onRegenerateRequirements && jobData.requirements.trim() && (
@@ -256,8 +309,18 @@ export default function JobDetailsStep({
                   </>
                 ) : (
                   <>
-                    <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <svg
+                      className="w-3 h-3 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
                     </svg>
                     Regenerate with AI
                   </>
@@ -272,7 +335,7 @@ export default function JobDetailsStep({
               value={jobData.requirements}
               onChange={(e) => onInputChange("requirements", e.target.value)}
               className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent resize-none transition-all duration-200 placeholder-[#86868b] text-[#1d1d1f] backdrop-blur-sm ${
-                errors.requirements ? 'border-red-400' : 'border-[#d2d2d7]'
+                errors.requirements ? "border-red-400" : "border-[#d2d2d7]"
               }`}
               placeholder="List essential qualifications, skills, experience level, education requirements, and any certifications needed..."
               maxLength={1500}
@@ -281,43 +344,69 @@ export default function JobDetailsStep({
               {jobData.requirements.length}/1500
             </div>
           </div>
-          {errors.requirements && <p className="mt-2 text-sm text-red-500">{errors.requirements}</p>}
+          {errors.requirements && (
+            <p className="mt-2 text-sm text-red-500">{errors.requirements}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="experience" className="block text-sm font-semibold text-[#1d1d1f] mb-3">
+          <label
+            htmlFor="experience"
+            className="block text-sm font-semibold text-[#1d1d1f] mb-3"
+          >
             Experience Level *
           </label>
-          
+
           <div className="space-y-4">
             <select
               id="experience"
-              value={showCustomExperience ? "custom" : (experienceOptions.includes(jobData.experience) ? jobData.experience : "")}
+              value={
+                showCustomExperience
+                  ? "custom"
+                  : experienceOptions.includes(jobData.experience)
+                  ? jobData.experience
+                  : ""
+              }
               onChange={(e) => handleExperienceChange(e.target.value)}
               className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none ${
-                errors.experience ? 'border-red-400' : 'border-[#d2d2d7]'
+                errors.experience ? "border-red-400" : "border-[#d2d2d7]"
               }`}
             >
               <option value="">Select experience level</option>
-              {experienceOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
+              {experienceOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
               ))}
               <option value="custom">Custom Range</option>
             </select>
-            
+
             {/* Custom Range Inputs */}
             {showCustomExperience && (
               <div className="bg-white/50 border border-[#d2d2d7] rounded-xl p-4 space-y-3">
                 <div className="flex items-center gap-2 text-sm font-medium text-[#1d1d1f] mb-3">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Custom Experience Range
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="min-years" className="block text-xs font-medium text-[#6e6e73] mb-2">
+                    <label
+                      htmlFor="min-years"
+                      className="block text-xs font-medium text-[#6e6e73] mb-2"
+                    >
                       Minimum Years
                     </label>
                     <input
@@ -331,10 +420,16 @@ export default function JobDetailsStep({
                       placeholder="0"
                     />
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="max-years" className="block text-xs font-medium text-[#6e6e73] mb-2">
-                      Maximum Years <span className="text-[#86868b]">(Leave empty for "X+ years")</span>
+                    <label
+                      htmlFor="max-years"
+                      className="block text-xs font-medium text-[#6e6e73] mb-2"
+                    >
+                      Maximum Years{" "}
+                      <span className="text-[#86868b]">
+                        (Leave empty for "X+ years")
+                      </span>
                     </label>
                     <input
                       type="number"
@@ -348,22 +443,23 @@ export default function JobDetailsStep({
                     />
                   </div>
                 </div>
-                
+
                 {/* Preview */}
                 {(minYears || maxYears) && (
                   <div className="mt-3 p-3 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 rounded-lg border border-[#13ead9]/20">
-                    <div className="text-xs font-medium text-[#6e6e73] mb-1">Preview:</div>
+                    <div className="text-xs font-medium text-[#6e6e73] mb-1">
+                      Preview:
+                    </div>
                     <div className="text-sm font-semibold text-[#1d1d1f]">
-                      {minYears && maxYears 
-                        ? `${minYears}-${maxYears} years experience` 
-                        : minYears 
-                          ? `${minYears}+ years experience`
-                          : "Please enter minimum years"
-                      }
+                      {minYears && maxYears
+                        ? `${minYears}-${maxYears} years experience`
+                        : minYears
+                        ? `${minYears}+ years experience`
+                        : "Please enter minimum years"}
                     </div>
                   </div>
                 )}
-                
+
                 {/* Back to predefined options */}
                 <button
                   type="button"
@@ -375,20 +471,35 @@ export default function JobDetailsStep({
                   }}
                   className="text-xs text-[#6e6e73] hover:text-[#13ead9] transition-colors duration-200 flex items-center gap-1"
                 >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
                   </svg>
                   Back to predefined options
                 </button>
               </div>
             )}
           </div>
-          
-          {errors.experience && <p className="mt-2 text-sm text-red-500">{errors.experience}</p>}
+
+          {errors.experience && (
+            <p className="mt-2 text-sm text-red-500">{errors.experience}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="education" className="block text-sm font-semibold text-[#1d1d1f] mb-3">
+          <label
+            htmlFor="education"
+            className="block text-sm font-semibold text-[#1d1d1f] mb-3"
+          >
             Education Requirements
           </label>
           <select
@@ -402,13 +513,18 @@ export default function JobDetailsStep({
             <option value="Bachelor's Degree">Bachelor's Degree</option>
             <option value="Master's Degree">Master's Degree</option>
             <option value="PhD">PhD</option>
-            <option value="Professional Certification">Professional Certification</option>
+            <option value="Professional Certification">
+              Professional Certification
+            </option>
             <option value="Not Required">Not Required</option>
           </select>
         </div>
 
         <div>
-          <label htmlFor="salary" className="text-sm font-semibold text-[#1d1d1f] mb-3 flex items-center gap-2">
+          <label
+            htmlFor="salary"
+            className="text-sm font-semibold text-[#1d1d1f] mb-3 flex items-center gap-2"
+          >
             <CurrencyDollarIcon className="w-4 h-4 text-[#6e6e73]" />
             Salary Range *
           </label>
@@ -418,11 +534,13 @@ export default function JobDetailsStep({
             value={jobData.salary}
             onChange={(e) => onInputChange("salary", e.target.value)}
             className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 placeholder-[#86868b] text-[#1d1d1f] backdrop-blur-sm ${
-              errors.salary ? 'border-red-400' : 'border-[#d2d2d7]'
+              errors.salary ? "border-red-400" : "border-[#d2d2d7]"
             }`}
             placeholder="e.g. AED 15,000 - 20,000 (AI will suggest based on job details)"
           />
-          {errors.salary && <p className="mt-2 text-sm text-red-500">{errors.salary}</p>}
+          {errors.salary && (
+            <p className="mt-2 text-sm text-red-500">{errors.salary}</p>
+          )}
         </div>
 
         <SkillsManager
@@ -435,9 +553,14 @@ export default function JobDetailsStep({
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label htmlFor="benefits" className="block text-sm font-semibold text-[#1d1d1f]">
+            <label
+              htmlFor="benefits"
+              className="block text-sm font-semibold text-[#1d1d1f]"
+            >
               Benefits & Perks
-              <span className="text-[#6e6e73] font-normal ml-1">(Optional)</span>
+              <span className="text-[#6e6e73] font-normal ml-1">
+                (Optional)
+              </span>
             </label>
             {onRegenerateBenefits && jobData.benefits.trim() && (
               <button
@@ -453,8 +576,18 @@ export default function JobDetailsStep({
                   </>
                 ) : (
                   <>
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
                     </svg>
                     Regenerate with AI
                   </>
