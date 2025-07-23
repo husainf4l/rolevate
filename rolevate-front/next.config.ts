@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
         port: '4005',
         pathname: '/api/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: '4wk-garage-media.s3.me-central-1.amazonaws.com',
+        pathname: '/logos/**',
+      },
     ],
   },
   poweredByHeader: false,

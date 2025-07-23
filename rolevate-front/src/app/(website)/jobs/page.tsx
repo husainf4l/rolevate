@@ -53,7 +53,11 @@ const industries = [
 ];
 
 export default function JobsPage() {
+  console.log("🏠 JobsPage component rendered!");
+  console.log("🧪 Console logging test - this should always show!");
+
   const [searchTerm, setSearchTerm] = useState("");
+  console.log("🔍 Current searchTerm:", searchTerm);
   const [selectedType, setSelectedType] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("All");
   const [selectedExperience, setSelectedExperience] = useState("All");
@@ -78,6 +82,12 @@ export default function JobsPage() {
 
   // Helper function to convert JobPost to JobData format
   const convertJobPostToJobData = (jobPost: JobPost): JobData => {
+    console.log("=== convertJobPostToJobData Debug ===");
+    console.log("Raw jobPost from API:", JSON.stringify(jobPost, null, 2));
+
+    const logoResult = getJobLogo(jobPost);
+    console.log("Final logo result:", logoResult);
+
     const jobData: JobData = {
       id: jobPost.id, // Use string ID directly (UUID from backend)
       title: jobPost.title,
@@ -97,12 +107,16 @@ export default function JobsPage() {
       skills: jobPost.skills || [],
       posted: new Date(jobPost.postedAt).toLocaleDateString(),
       applicants: jobPost.applicants || 0,
-      // Use actual logo from API if available, otherwise fallback to emoji
-      logo:
-        (jobPost.company as any)?.logo || getCompanyLogo(jobPost.company?.name),
       description: jobPost.shortDescription || jobPost.description,
       urgent: false, // Default to false for now
     };
+
+    // Only add logo field if it exists (handles exactOptionalPropertyTypes)
+    if (logoResult !== undefined) {
+      jobData.logo = logoResult;
+    }
+
+    console.log("Final JobData:", JSON.stringify(jobData, null, 2));
 
     // Only add experience field if it exists
     if (jobPost.experience) {
@@ -112,63 +126,48 @@ export default function JobsPage() {
     return jobData;
   };
 
-  // Helper function to get company logo/emoji based on company name
-  const getCompanyLogo = (companyName?: string): string => {
-    if (!companyName) return "🏢";
+  // Helper function to get job logo from API response (no emoji fallback)
+  const getJobLogo = (jobPost: JobPost): string | undefined => {
+    console.log("=== getJobLogo Debug ===");
+    console.log("jobPost.companyLogo:", jobPost.companyLogo);
+    console.log("jobPost.company?.logo:", jobPost.company?.logo);
+    console.log("Company name:", jobPost.company?.name);
 
-    const name = companyName.toLowerCase();
+    // Priority order: companyLogo -> company.logo -> undefined (no fallback)
+    if (jobPost.companyLogo) {
+      console.log("✓ Using companyLogo:", jobPost.companyLogo);
+      return jobPost.companyLogo;
+    }
 
-    // Map company names to appropriate emojis
-    if (name.includes("tech") || name.includes("software")) return "💻";
-    if (
-      name.includes("health") ||
-      name.includes("medical") ||
-      name.includes("pharma")
-    )
-      return "🏥";
-    if (name.includes("finance") || name.includes("bank")) return "🏦";
-    if (
-      name.includes("education") ||
-      name.includes("school") ||
-      name.includes("university")
-    )
-      return "🎓";
-    if (name.includes("food") || name.includes("restaurant")) return "🍽️";
-    if (
-      name.includes("travel") ||
-      name.includes("airline") ||
-      name.includes("tourism")
-    )
-      return "✈️";
-    if (
-      name.includes("retail") ||
-      name.includes("shop") ||
-      name.includes("store")
-    )
-      return "🛍️";
-    if (name.includes("energy") || name.includes("oil") || name.includes("gas"))
-      return "⚡";
-    if (name.includes("construction") || name.includes("building")) return "🏗️";
-    if (name.includes("telecom") || name.includes("communication")) return "📱";
-    if (name.includes("automotive") || name.includes("car")) return "🚗";
-    if (name.includes("media") || name.includes("entertainment")) return "🎬";
+    if (jobPost.company?.logo) {
+      console.log("✓ Using company.logo:", jobPost.company.logo);
+      return jobPost.company.logo;
+    }
 
-    return "🏢"; // Default logo
+    // No fallback - return undefined if no logo is available
+    console.log("⚠️ No logo available - returning undefined");
+    return undefined;
   };
 
   // Fetch jobs from API
   const fetchJobs = async (page: number = 1, search?: string) => {
+    console.log("🚀 fetchJobs called!", { page, search, searchTerm });
     try {
       setLoading(true);
       setApiError(null);
 
+      console.log("📡 Calling JobService.getAllPublicJobs...");
       const response = await JobService.getAllPublicJobs(
         page,
         jobsPerPage,
         search || searchTerm || undefined
       );
 
+      console.log("✅ API Response received:", response);
+
       const convertedJobs = response.jobs.map(convertJobPostToJobData);
+      console.log("🔄 Converted jobs:", convertedJobs);
+
       setJobs(convertedJobs);
       setTotalJobs(response.total);
       setPagination(response.pagination);
@@ -187,7 +186,10 @@ export default function JobsPage() {
 
   // Initial fetch and search effect
   useEffect(() => {
+    console.log("🎯 useEffect triggered!", { searchTerm });
+    console.log("🎯 About to call fetchJobs(1, searchTerm)");
     fetchJobs(1, searchTerm);
+    console.log("🎯 fetchJobs call completed (but async)");
   }, [searchTerm]);
 
   // Filter jobs locally (since API doesn't support all filter types yet)
@@ -429,6 +431,8 @@ export default function JobsPage() {
   const handlePageChange = (page: number) => {
     fetchJobs(page);
   };
+
+  console.log("🔥 RENDER: This should appear in browser console!");
 
   return (
     <div className="min-h-screen bg-gray-50">

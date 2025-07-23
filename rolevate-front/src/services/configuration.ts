@@ -24,6 +24,7 @@ export interface GenerateDescriptionRequest {
   country: string;
   numberOfEmployees: number;
   currentDescription: string;
+  website?: string;
 }
 
 export interface GenerateDescriptionResponse {

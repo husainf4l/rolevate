@@ -10,15 +10,12 @@ import {
   ChatBubbleLeftRightIcon,
   PhoneIcon,
   EnvelopeIcon,
-  VideoCameraIcon,
   PaperAirplaneIcon,
-  UserIcon,
   ClockIcon,
   CheckIcon,
   XMarkIcon,
   EllipsisVerticalIcon,
   DocumentTextIcon,
-  CalendarDaysIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 
@@ -54,7 +51,6 @@ interface CommunicationStats {
   byType: { [key: string]: number };
   byStatus: { [key: string]: number };
 }
-
 
 const getTypeIcon = (type: string) => {
   switch (type?.toLowerCase()) {
@@ -106,7 +102,9 @@ export default function CommunicationPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [communications, setCommunications] = useState<CommunicationRecord[]>([]);
+  const [communications, setCommunications] = useState<CommunicationRecord[]>(
+    []
+  );
   const [stats, setStats] = useState<CommunicationStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -118,31 +116,35 @@ export default function CommunicationPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const params = new URLSearchParams({
         page: page.toString(),
         limit: "20",
       });
-      
+
       if (filterType !== "all") params.append("type", filterType.toUpperCase());
-      if (filterStatus !== "all") params.append("status", filterStatus.toUpperCase());
-      
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4005/api/communications?${params}`, {
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) throw new Error('Failed to fetch communications');
-      
+      if (filterStatus !== "all")
+        params.append("status", filterStatus.toUpperCase());
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:4005/api/communications?${params}`,
+        {
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch communications");
+
       const data = await response.json();
       setCommunications(data.communications || []);
       setTotalPages(data.totalPages || 1);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch communications');
+      setError(err.message || "Failed to fetch communications");
       setCommunications([]);
     } finally {
       setLoading(false);
@@ -152,31 +154,34 @@ export default function CommunicationPage() {
   // Fetch communication stats
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4005/api/communications/stats', {
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        "http://localhost:4005/api/communications/stats",
+        {
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       }
     } catch (err) {
-      console.error('Failed to fetch stats:', err);
+      console.error("Failed to fetch stats:", err);
     }
   };
 
   // Filter communications locally by search term
   const filteredCommunications = communications.filter((comm) => {
     if (!searchTerm) return true;
-    
+
     const candidateName = `${comm.candidate.firstName} ${comm.candidate.lastName}`;
-    const jobTitle = comm.job?.title || '';
-    
+    const jobTitle = comm.job?.title || "";
+
     return (
       candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comm.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -216,14 +221,6 @@ export default function CommunicationPage() {
           {/* Action Buttons */}
           <div className="mb-8 flex justify-between items-center">
             <div></div>
-            <div className="flex items-center gap-3">
-              <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium">
-                Export Report
-              </button>
-              <button className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium">
-                New Communication
-              </button>
-            </div>
           </div>
 
           {/* Communication Stats */}
@@ -295,9 +292,7 @@ export default function CommunicationPage() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Delivered
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Delivered</p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
                     {stats?.byStatus?.DELIVERED || 0}
                   </p>
@@ -395,7 +390,7 @@ export default function CommunicationPage() {
               ) : error ? (
                 <div className="p-12 text-center">
                   <p className="text-red-600 mb-4">{error}</p>
-                  <button 
+                  <button
                     onClick={() => fetchCommunications()}
                     className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors"
                   >
@@ -407,127 +402,139 @@ export default function CommunicationPage() {
                   <ChatBubbleLeftRightIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-2">No communications found</p>
                   <p className="text-sm text-gray-400">
-                    {searchTerm ? 'Try adjusting your search terms' : 'Start communicating with candidates to see messages here'}
+                    {searchTerm
+                      ? "Try adjusting your search terms"
+                      : "Start communicating with candidates to see messages here"}
                   </p>
                 </div>
               ) : (
                 filteredCommunications.map((comm) => (
-                <div
-                  key={comm.id}
-                  className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/dashboard/messages/${comm.id}`)}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center ${getTypeColor(
-                          comm.type
-                        )}`}
-                      >
-                        {getTypeIcon(comm.type)}
-                      </div>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <h3 className="text-sm font-semibold text-gray-900">
-                            {comm.candidate.firstName} {comm.candidate.lastName}
-                          </h3>
-                          <span className="text-sm text-gray-500">
-                            {comm.job?.title || 'No job specified'}
-                          </span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            comm.direction === 'OUTBOUND' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-                          }`}>
-                            {comm.direction.toLowerCase()}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">
-                            {formatTimestamp(comm.sentAt || comm.createdAt)}
-                          </span>
-                          {getStatusIcon(comm.status)}
+                  <div
+                    key={comm.id}
+                    className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() =>
+                      router.push(`/dashboard/messages/${comm.id}`)
+                    }
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center ${getTypeColor(
+                            comm.type
+                          )}`}
+                        >
+                          {getTypeIcon(comm.type)}
                         </div>
                       </div>
 
-                      {comm.subject && (
-                        <p className="text-sm font-medium text-gray-700 mb-1">
-                          {comm.subject}
-                        </p>
-                      )}
-
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                        {comm.content}
-                      </p>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>Type: {comm.type}</span>
-                          {comm.phoneNumber && (
-                            <span>Phone: {comm.phoneNumber}</span>
-                          )}
-                          {comm.whatsappId && (
-                            <span className="flex items-center gap-1">
-                              <DocumentTextIcon className="w-3 h-3" />
-                              WhatsApp ID: {comm.whatsappId.slice(0, 8)}...
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-sm font-semibold text-gray-900">
+                              {comm.candidate.firstName}{" "}
+                              {comm.candidate.lastName}
+                            </h3>
+                            <span className="text-sm text-gray-500">
+                              {comm.job?.title || "No job specified"}
                             </span>
-                          )}
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                comm.direction === "OUTBOUND"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {comm.direction.toLowerCase()}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500">
+                              {formatTimestamp(comm.sentAt || comm.createdAt)}
+                            </span>
+                            {getStatusIcon(comm.status)}
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/dashboard/candidates/${comm.candidateId}`}
-                            className="text-[#0891b2] hover:text-[#0fc4b5] font-medium text-sm"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            View Profile
-                          </Link>
-                          <button
-                            className="text-gray-600 hover:text-gray-800 font-medium text-sm"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Reply
-                          </button>
-                          <button
-                            className="text-gray-400 hover:text-gray-600"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <EllipsisVerticalIcon className="w-4 h-4" />
-                          </button>
+                        {comm.subject && (
+                          <p className="text-sm font-medium text-gray-700 mb-1">
+                            {comm.subject}
+                          </p>
+                        )}
+
+                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                          {comm.content}
+                        </p>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <span>Type: {comm.type}</span>
+                            {comm.phoneNumber && (
+                              <span>Phone: {comm.phoneNumber}</span>
+                            )}
+                            {comm.whatsappId && (
+                              <span className="flex items-center gap-1">
+                                <DocumentTextIcon className="w-3 h-3" />
+                                WhatsApp ID: {comm.whatsappId.slice(0, 8)}...
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/dashboard/candidates/${comm.candidateId}`}
+                              className="text-[#0891b2] hover:text-[#0fc4b5] font-medium text-sm"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              View Profile
+                            </Link>
+                            <button
+                              className="text-gray-600 hover:text-gray-800 font-medium text-sm"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Reply
+                            </button>
+                            <button
+                              className="text-gray-400 hover:text-gray-600"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <EllipsisVerticalIcon className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
                 ))
               )}
             </div>
 
             {/* Pagination */}
-            {!loading && !error && filteredCommunications.length > 0 && totalPages > 1 && (
-              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  Page {page} of {totalPages}
+            {!loading &&
+              !error &&
+              filteredCommunications.length > 0 &&
+              totalPages > 1 && (
+                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Page {page} of {totalPages}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setPage(Math.max(1, page - 1))}
+                      disabled={page === 1}
+                      className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setPage(Math.min(totalPages, page + 1))}
+                      disabled={page === totalPages}
+                      className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       </div>

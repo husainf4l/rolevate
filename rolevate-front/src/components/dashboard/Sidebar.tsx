@@ -4,13 +4,10 @@ import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/common/logo";
-import { useAuth } from "@/hooks/useAuth";
-import { API_CONFIG } from "@/lib/config";
 import {
   HomeIcon,
   BriefcaseIcon,
   ChatBubbleLeftRightIcon,
-  ChartBarIcon,
   Bars3Icon,
   XMarkIcon,
   UsersIcon,
@@ -45,11 +42,7 @@ const navigationItems: NavigationItem[] = [
     label: "Notifications",
     href: "/dashboard/notifications",
   },
-  {
-    icon: ChartBarIcon,
-    label: "Analytics",
-    href: "/dashboard/analytics",
-  },
+
   {
     icon: BuildingOfficeIcon,
     label: "Company Profile",
@@ -65,7 +58,6 @@ const navigationItems: NavigationItem[] = [
 export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { user } = useAuth();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -103,7 +95,13 @@ export default function Sidebar() {
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex justify-center items-center px-6 py-6">
-            <Logo size={48} />
+            <Link
+              href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="transition-transform duration-200 hover:scale-105"
+            >
+              <Logo size={48} />
+            </Link>
           </div>
 
           {/* Navigation */}

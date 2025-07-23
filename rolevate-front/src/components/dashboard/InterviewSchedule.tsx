@@ -1,13 +1,11 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import {
   CalendarDaysIcon,
   ClockIcon,
   VideoCameraIcon,
   MapPinIcon,
-  PlayIcon,
 } from "@heroicons/react/24/outline";
 
 interface Interview {
@@ -22,39 +20,7 @@ interface Interview {
   status: "upcoming" | "completed" | "cancelled";
 }
 
-const mockInterviews: Interview[] = [
-  {
-    id: "1",
-    jobTitle: "Senior Frontend Developer",
-    company: "TechCorp Inc.",
-    date: "2025-01-10",
-    time: "10:00 AM",
-    type: "video",
-    interviewer: "Sarah Johnson",
-    status: "upcoming",
-  },
-  {
-    id: "2",
-    jobTitle: "UI/UX Designer",
-    company: "DesignHub",
-    date: "2025-01-12",
-    time: "2:00 PM",
-    type: "in-person",
-    location: "123 Design St, New York, NY",
-    interviewer: "Mike Chen",
-    status: "upcoming",
-  },
-  {
-    id: "3",
-    jobTitle: "Full Stack Developer",
-    company: "StartupXYZ",
-    date: "2025-01-08",
-    time: "11:30 AM",
-    type: "phone",
-    interviewer: "Alex Rodriguez",
-    status: "completed",
-  },
-];
+const mockInterviews: Interview[] = [];
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -93,21 +59,12 @@ export default function InterviewSchedule() {
         <h2 className="text-xl font-semibold text-gray-900">
           Upcoming Interviews
         </h2>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/room?phone=962796026659&jobId=test_job_123&roomName=interview_123_456"
-            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white text-sm rounded-lg hover:from-[#0891b2] hover:to-[#13ead9] transition-all duration-200 font-medium shadow-sm"
-          >
-            <PlayIcon className="w-4 h-4" />
-            Test Interview
-          </Link>
-          <a
-            href="/userdashboard/interviews"
-            className="text-[#0fc4b5] hover:text-[#0ba399] font-medium text-sm transition-colors"
-          >
-            View all
-          </a>
-        </div>
+        <a
+          href="/userdashboard/interviews"
+          className="text-[#0fc4b5] hover:text-[#0ba399] font-medium text-sm transition-colors"
+        >
+          View all
+        </a>
       </div>
 
       {upcomingInterviews.length === 0 ? (

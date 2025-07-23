@@ -256,18 +256,19 @@ export default function CompanyProfilePage() {
                 <div className="w-24 h-24 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden">
                   {companyProfile.logo ? (
                     <Image
-                      src={`/api/proxy-image?url=${encodeURIComponent(`${API_CONFIG.UPLOADS_URL}/${companyProfile.logo}`)}`}
+                      src={companyProfile.logo}
                       alt="Company Logo"
                       width={96}
                       height={96}
                       className="w-full h-full object-cover rounded-2xl"
                       onError={() => {
-                        console.error('Image failed to load:', `${API_CONFIG.UPLOADS_URL}/${companyProfile.logo}`);
-                        console.error('Company profile logo value:', companyProfile.logo);
-                        console.error('Full API_CONFIG:', API_CONFIG);
+                        console.error(
+                          "Image failed to load:",
+                          companyProfile.logo
+                        );
                       }}
                       onLoad={() => {
-                        console.log('Image loaded successfully!');
+                        console.log("Image loaded successfully!");
                       }}
                     />
                   ) : (
@@ -405,16 +406,21 @@ export default function CompanyProfilePage() {
                     <div className="w-20 h-20 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg overflow-hidden">
                       {companyProfile.logo ? (
                         <Image
-                          src={`/api/proxy-image?url=${encodeURIComponent(`${API_CONFIG.UPLOADS_URL}/${companyProfile.logo}`)}`}
+                          src={companyProfile.logo}
                           alt="Company Logo"
                           width={80}
                           height={80}
                           className="w-full h-full object-cover rounded-2xl"
                           onError={() => {
-                            console.error('Logo section image failed to load:', `${API_CONFIG.UPLOADS_URL}/${companyProfile.logo}`);
+                            console.error(
+                              "Logo section image failed to load:",
+                              companyProfile.logo
+                            );
                           }}
                           onLoad={() => {
-                            console.log('Logo section image loaded successfully!');
+                            console.log(
+                              "Logo section image loaded successfully!"
+                            );
                           }}
                         />
                       ) : (

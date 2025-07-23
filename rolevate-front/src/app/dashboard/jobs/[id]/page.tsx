@@ -271,17 +271,27 @@ export default function EditJobPage() {
 
           {error && <div className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg">{error}</div>}
 
-          <div className="flex justify-end items-center gap-4 pt-8">
-            <button type="button" onClick={() => router.back()} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold">
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-6 py-3 bg-gradient-to-r from-[#0fc4b5] to-[#0891b2] text-white rounded-lg hover:from-[#0891b2] hover:to-[#0369a1] transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
+          <div className="flex justify-between items-center pt-8">
+            <button 
+              type="button" 
+              onClick={() => router.push(`/dashboard/jobs/${jobId}/applications`)}
+              className="px-6 py-3 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0891b2] transition-colors font-semibold"
             >
-              {isUpdating ? 'Updating...' : 'Save Changes'}
+              View Applications
             </button>
+            
+            <div className="flex items-center gap-4">
+              <button type="button" onClick={() => router.back()} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="px-6 py-3 bg-gradient-to-r from-[#0fc4b5] to-[#0891b2] text-white rounded-lg hover:from-[#0891b2] hover:to-[#0369a1] transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? 'Updating...' : 'Save Changes'}
+              </button>
+            </div>
           </div>
         </form>
       </div>

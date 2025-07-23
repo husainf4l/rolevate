@@ -6,7 +6,6 @@ import {
   PhoneIcon,
   MapPinIcon,
   CalendarIcon,
-  PencilIcon,
   CheckCircleIcon,
   StarIcon,
 } from "@heroicons/react/24/outline";
@@ -68,14 +67,10 @@ export default function ProfilePage() {
 
         {/* Profile Card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Personal Information
             </h2>
-            <button className="inline-flex items-center space-x-2 px-4 py-2 text-[#0fc4b5] border border-[#0fc4b5] rounded-md hover:bg-[#0fc4b5] hover:text-white transition-colors">
-              <PencilIcon className="w-4 h-4" />
-              <span>Edit Profile</span>
-            </button>
           </div>
 
           <div className="flex items-start space-x-6">
@@ -119,29 +114,21 @@ export default function ProfilePage() {
 
         {/* Professional Summary */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Professional Summary
             </h2>
-            <button className="inline-flex items-center space-x-2 px-3 py-1 text-[#0fc4b5] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
-              <PencilIcon className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
           </div>
           <p className="text-gray-700 leading-relaxed">
             {profile.profileSummary ||
-              `Welcome to ${fullName}'s profile. Professional summary not yet provided. Click edit to add your professional background, experience, and career highlights.`}
+              `Welcome to ${fullName}'s profile. Professional summary not yet provided.`}
           </p>
         </div>
 
         {/* Skills */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Skills</h2>
-            <button className="inline-flex items-center space-x-2 px-3 py-1 text-[#0fc4b5] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
-              <PencilIcon className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -159,7 +146,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm">
-                  No skills added yet. Click edit to add your skills.
+                  No skills added yet.
                 </p>
               )}
             </div>
@@ -209,12 +196,8 @@ export default function ProfilePage() {
 
         {/* Experience */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Experience</h2>
-            <button className="inline-flex items-center space-x-2 px-3 py-1 text-[#0fc4b5] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
-              <PencilIcon className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
           </div>
           <div className="space-y-6">
             {profile.workExperiences && profile.workExperiences.length > 0 ? (
@@ -255,7 +238,7 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <p className="text-sm text-gray-400 mt-4">
-                  Click edit to add your work experience.
+                  Work experience will appear here when available.
                 </p>
               </div>
             )}
@@ -264,14 +247,10 @@ export default function ProfilePage() {
 
         {/* Documents & Resume */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Documents & Resume
             </h2>
-            <button className="inline-flex items-center space-x-2 px-3 py-1 text-[#0fc4b5] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
-              <PencilIcon className="w-4 h-4" />
-              <span>Manage</span>
-            </button>
           </div>
 
           <div className="space-y-4">
@@ -395,12 +374,8 @@ export default function ProfilePage() {
 
         {/* Education */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Education</h2>
-            <button className="inline-flex items-center space-x-2 px-3 py-1 text-[#0fc4b5] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
-              <PencilIcon className="w-4 h-4" />
-              <span>Edit</span>
-            </button>
           </div>
           <div className="space-y-6">
             {profile.educationHistory && profile.educationHistory.length > 0 ? (
@@ -448,7 +423,7 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <p className="text-sm text-gray-400 mt-4">
-                  Click edit to add your education details.
+                  Education details will appear here when available.
                 </p>
               </div>
             )}

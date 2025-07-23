@@ -17,7 +17,6 @@ export interface JobFormData {
   jobLevel: "ENTRY" | "MID" | "SENIOR" | "EXECUTIVE";
   workType: "ONSITE" | "REMOTE" | "HYBRID";
   industry: string;
-  companyDescription: string;
   aiCvAnalysisPrompt: string;
   aiFirstInterviewPrompt: string;
   aiSecondInterviewPrompt: string;

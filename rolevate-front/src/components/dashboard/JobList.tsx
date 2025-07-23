@@ -352,7 +352,10 @@ const JobListItem: React.FC<JobListItemProps> = ({
           </div>
           
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 text-[#0fc4b5] hover:bg-[#0fc4b5]/10 rounded-lg transition-all duration-200 font-medium text-sm border border-[#0fc4b5]/20 hover:border-[#0fc4b5]/40">
+            <button 
+              onClick={() => router.push(`/dashboard/jobs/${job.id}/applications`)}
+              className="px-4 py-2 text-[#0fc4b5] hover:bg-[#0fc4b5]/10 rounded-lg transition-all duration-200 font-medium text-sm border border-[#0fc4b5]/20 hover:border-[#0fc4b5]/40"
+            >
               View Applications
             </button>
             <button 

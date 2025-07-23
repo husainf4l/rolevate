@@ -61,7 +61,6 @@ export interface CreateJobRequest {
   jobLevel: string; // entry, mid, senior, executive
   workType: string; // onsite, remote, hybrid
   industry: string;
-  companyDescription: string;
   aiCvAnalysisPrompt: string;
   aiFirstInterviewPrompt: string;
   aiSecondInterviewPrompt: string;
@@ -96,16 +95,17 @@ export interface JobPost {
   jobLevel?: string;
   workType?: string;
   industry?: string;
-  companyDescription?: string;
   aiCvAnalysisPrompt?: string;
   aiFirstInterviewPrompt?: string;
   aiSecondInterviewPrompt?: string;
   cvAnalysisPrompt?: string;
   interviewPrompt?: string;
+  companyLogo?: string; // Direct company logo URL
   // Add company information
   company?: {
     id: string;
     name: string;
+    logo?: string; // Company logo URL in nested company object
     address?: {
       id: string;
       street: string;
@@ -295,7 +295,10 @@ export class JobService {
   /**
    * Rewrite job description using AI
    */
-  static async rewriteJobDescription(currentDescription: string): Promise<string> {
+  static async rewriteJobDescription(currentDescription: string): Promise<{
+    rewrittenDescription: string;
+    rewrittenShortDescription: string;
+  }> {
     const response = await fetch(`${this.baseUrl}/aiautocomplete/rewrite-job-description`, {
       method: 'POST',
       headers: {
@@ -312,7 +315,10 @@ export class JobService {
     }
 
     const data = await response.json();
-    return data.rewrittenDescription || data.description || currentDescription;
+    return {
+      rewrittenDescription: data.rewrittenDescription || currentDescription,
+      rewrittenShortDescription: data.rewrittenShortDescription || ''
+    };
   }
 
   /**
@@ -453,45 +459,6 @@ export class JobService {
   }
 
   /**
-   * Rewrite company description using AI
-   */
-  static async rewriteCompanyDescription(
-    currentDescription: string,
-    industry?: string,
-    companyName?: string,
-    companySize?: string,
-    location?: string
-  ): Promise<string> {
-    const payload: any = {
-      aboutCompany: currentDescription,
-    };
-
-    // Add optional fields if provided
-    if (industry) payload.industry = industry;
-    if (companyName) payload.companyName = companyName;
-    if (companySize) payload.companySize = companySize;
-    if (location) payload.location = location;
-
-    const response = await fetch(`${this.baseUrl}/aiautocomplete/rewrite-company-description`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      mode: 'cors',
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to rewrite company description' }));
-      throw new Error(error.message || 'Failed to rewrite company description');
-    }
-
-    const data = await response.json();
-    return data.polishedAboutCompany || currentDescription;
-  }
-
-  /**
    * Generate AI configuration prompts based on job details
    */
   static async generateAIConfiguration(request: AIConfigRequest): Promise<AIConfigResponse> {
@@ -613,7 +580,6 @@ export class JobService {
       jobLevel: job.jobLevel || '',
       workType: job.workType || '',
       industry: job.industry || '',
-      companyDescription: job.companyDescription || '',
       aiCvAnalysisPrompt: job.aiCvAnalysisPrompt || '',
       aiFirstInterviewPrompt: job.aiFirstInterviewPrompt || '',
       aiSecondInterviewPrompt: job.aiSecondInterviewPrompt || '',
@@ -813,11 +779,12 @@ export class JobService {
         jobLevel: job.jobLevel || '',
         workType: job.workType || '',
         industry: job.industry || '',
-        companyDescription: job.companyDescription || '',
+        companyLogo: job.companyLogo || '', // Add direct company logo field
         // Add company information
         company: job.company ? {
           id: job.company.id || '',
           name: job.company.name || '',
+          logo: job.company.logo || '', // Add nested company logo field
           address: job.company.address || null
         } : null,
         companyId: job.companyId || '',
@@ -877,11 +844,12 @@ export class JobService {
         jobLevel: data.jobLevel || '',
         workType: data.workType || '',
         industry: data.industry || '',
-        companyDescription: data.companyDescription || '',
+        companyLogo: data.companyLogo || '', // Add direct company logo field
         // Add company information
         company: data.company ? {
           id: data.company.id || '',
           name: data.company.name || '',
+          logo: data.company.logo || '', // Add nested company logo field
           address: data.company.address || null
         } : null,
         companyId: data.companyId || '',

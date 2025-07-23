@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Logo from '@/components/common/logo';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Logo from "@/components/common/logo";
 import {
   CreateCompanyForm,
   JoinCompanyForm,
   SetupIllustration,
-  CompanyData
-} from '@/components/setup-company';
-import { ConfigurationService } from '@/services/configuration';
+  CompanyData,
+} from "@/components/setup-company";
+import { ConfigurationService } from "@/services/configuration";
 
 export default function SetupCompanyPage() {
-  const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
+  const [activeTab, setActiveTab] = useState<"create" | "join">("create");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
@@ -26,13 +26,21 @@ export default function SetupCompanyPage() {
 
   // Company create state
   const [companyData, setCompanyData] = useState<CompanyData>({
-    name: '', industry: '', size: '', website: '', email: '', description: '',
-    country: '', city: '', street: '', phone: ''
+    name: "",
+    industry: "",
+    size: "",
+    website: "",
+    email: "",
+    description: "",
+    country: "",
+    city: "",
+    street: "",
+    phone: "",
   });
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [descriptionError, setDescriptionError] = useState<string | null>(null);
   // Join code
-  const [invitationCode, setInvitationCode] = useState('');
+  const [invitationCode, setInvitationCode] = useState("");
 
   // AI Description
   const generateDescription = async () => {
@@ -43,12 +51,16 @@ export default function SetupCompanyPage() {
         industry: companyData.industry,
         location: companyData.city,
         country: companyData.country,
-        numberOfEmployees: Number(companyData.size.split('-')[0]) || 0,
-        currentDescription: companyData.description
+        numberOfEmployees: Number(companyData.size.split("-")[0]) || 0,
+        currentDescription: companyData.description,
+        website: companyData.website,
       });
-      setCompanyData(prev => ({ ...prev, description: response.generatedDescription }));
+      setCompanyData((prev) => ({
+        ...prev,
+        description: response.generatedDescription,
+      }));
     } catch (error: any) {
-      setDescriptionError(error.message || 'Failed to generate description');
+      setDescriptionError(error.message || "Failed to generate description");
     } finally {
       setIsGeneratingDescription(false);
     }
@@ -61,9 +73,9 @@ export default function SetupCompanyPage() {
     setError(null);
     try {
       await ConfigurationService.createCompany(companyData);
-      router.replace('/dashboard');
+      router.replace("/dashboard");
     } catch (error: any) {
-      setError(error.message || 'Failed to create company');
+      setError(error.message || "Failed to create company");
     } finally {
       setLoading(false);
     }
@@ -75,22 +87,23 @@ export default function SetupCompanyPage() {
     setError(null);
     try {
       await ConfigurationService.joinCompany({ invitationCode });
-      router.replace('/dashboard');
+      router.replace("/dashboard");
     } catch (error: any) {
-      setError(error.message || 'Failed to join company');
+      setError(error.message || "Failed to join company");
     } finally {
       setLoading(false);
     }
   };
 
-  if (pageLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13ead9] mx-auto mb-4"></div>
-        <p className="text-gray-600 text-sm">Setting up your workspace...</p>
+  if (pageLoading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13ead9] mx-auto mb-4"></div>
+          <p className="text-gray-600 text-sm">Setting up your workspace...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <section className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
@@ -99,7 +112,7 @@ export default function SetupCompanyPage() {
         <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20 bg-white/95 backdrop-blur-lg border-b border-gray-100">
           <Logo size={32} />
           <button
-            onClick={() => router.push('/login')}
+            onClick={() => router.push("/login")}
             className="flex items-center text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100/80 text-sm"
           >
             <span className="font-medium">Back</span>
@@ -113,53 +126,82 @@ export default function SetupCompanyPage() {
                 Company Setup
               </h1>
               <p className="text-base lg:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Create your company profile or join an existing organization to get started.
+                Create your company profile or join an existing organization to
+                get started.
               </p>
             </div>
             <div className="relative bg-gradient-to-r from-gray-50 to-gray-100/80 rounded-2xl p-1.5 mb-8 w-1/2 max-w-5xl mx-auto shadow-sm border border-gray-200/50 backdrop-blur-sm">
               <div className="flex relative">
                 {/* Sliding Background */}
-                <div 
+                <div
                   className={`absolute top-0 bottom-0 w-1/2 bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-xl shadow-lg transition-all duration-300 ease-out ${
-                    activeTab === 'create' ? 'left-0' : 'left-1/2'
+                    activeTab === "create" ? "left-0" : "left-1/2"
                   }`}
                 />
-                
+
                 <button
-                  onClick={() => setActiveTab('create')}
+                  onClick={() => setActiveTab("create")}
                   className={`relative flex-1 py-3.5 px-4 rounded-xl font-semibold text-sm transition-all duration-300 ease-out ${
-                    activeTab === 'create'
-                      ? 'text-white scale-[1.02] shadow-sm' 
-                      : 'text-gray-700 hover:text-gray-900 hover:scale-[1.01]'
+                    activeTab === "create"
+                      ? "text-white scale-[1.02] shadow-sm"
+                      : "text-gray-700 hover:text-gray-900 hover:scale-[1.01]"
                   }`}
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    <svg className={`w-4 h-4 transition-all duration-300 ${activeTab === 'create' ? 'text-white' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    <svg
+                      className={`w-4 h-4 transition-all duration-300 ${
+                        activeTab === "create" ? "text-white" : "text-gray-500"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
                     </svg>
                     Create Company
                   </span>
                 </button>
-                
+
                 <button
-                  onClick={() => setActiveTab('join')}
+                  onClick={() => setActiveTab("join")}
                   className={`relative flex-1 py-3.5 px-4 rounded-xl font-semibold text-sm transition-all duration-300 ease-out ${
-                    activeTab === 'join'
-                      ? 'text-white scale-[1.02] shadow-sm' 
-                      : 'text-gray-700 hover:text-gray-900 hover:scale-[1.01]'
+                    activeTab === "join"
+                      ? "text-white scale-[1.02] shadow-sm"
+                      : "text-gray-700 hover:text-gray-900 hover:scale-[1.01]"
                   }`}
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    <svg className={`w-4 h-4 transition-all duration-300 ${activeTab === 'join' ? 'text-white' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <svg
+                      className={`w-4 h-4 transition-all duration-300 ${
+                        activeTab === "join" ? "text-white" : "text-gray-500"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
                     </svg>
                     Join Company
                   </span>
                 </button>
               </div>
             </div>
-            {error && <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-medium">{error}</div>}
-            {activeTab === 'create' ? (
+            {error && (
+              <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-medium">
+                {error}
+              </div>
+            )}
+            {activeTab === "create" ? (
               <CreateCompanyForm
                 loading={loading}
                 companyData={companyData}

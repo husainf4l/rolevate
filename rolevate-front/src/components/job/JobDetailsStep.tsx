@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   DocumentTextIcon,
   CurrencyDollarIcon,
@@ -41,6 +41,72 @@ export default function JobDetailsStep({
   onRegenerateResponsibilities,
   skillSuggestions 
 }: JobDetailsStepProps) {
+  // State to track if custom experience range is selected
+  const [showCustomExperience, setShowCustomExperience] = useState(false);
+  const [minYears, setMinYears] = useState("");
+  const [maxYears, setMaxYears] = useState("");
+  
+  // Predefined experience options
+  const experienceOptions = [
+    "0-1 years",
+    "1-3 years", 
+    "3-5 years",
+    "5-7 years",
+    "7+ years"
+  ];
+
+  // Check if current experience value is a predefined option and parse custom values
+  useEffect(() => {
+    const isCustom = Boolean(jobData.experience && !experienceOptions.includes(jobData.experience));
+    setShowCustomExperience(isCustom);
+    
+    // Parse custom range if it exists (e.g., "2-4 years" -> min: 2, max: 4)
+    if (isCustom && jobData.experience) {
+      const match = jobData.experience.match(/(\d+)\s*-\s*(\d+)/);
+      if (match && match[1] && match[2]) {
+        setMinYears(match[1]);
+        setMaxYears(match[2]);
+      } else if (jobData.experience.includes("+")) {
+        const plusMatch = jobData.experience.match(/(\d+)\+/);
+        if (plusMatch && plusMatch[1]) {
+          setMinYears(plusMatch[1]);
+          setMaxYears("");
+        }
+      }
+    }
+  }, [jobData.experience]);
+
+  // Handle experience selection change
+  const handleExperienceChange = (value: string) => {
+    if (value === "custom") {
+      setShowCustomExperience(true);
+      setMinYears("");
+      setMaxYears("");
+      onInputChange("experience", "");
+    } else {
+      setShowCustomExperience(false);
+      onInputChange("experience", value);
+    }
+  };
+
+  // Handle custom range changes
+  const handleCustomRangeChange = () => {
+    if (minYears && maxYears) {
+      onInputChange("experience", `${minYears}-${maxYears} years`);
+    } else if (minYears && !maxYears) {
+      onInputChange("experience", `${minYears}+ years`);
+    } else {
+      onInputChange("experience", "");
+    }
+  };
+
+  // Update experience when min/max changes
+  useEffect(() => {
+    if (showCustomExperience) {
+      handleCustomRangeChange();
+    }
+  }, [minYears, maxYears, showCustomExperience]);
+
   return (
     <div className="p-8 lg:p-12 space-y-8">
       <div className="flex items-center gap-3">
@@ -222,21 +288,102 @@ export default function JobDetailsStep({
           <label htmlFor="experience" className="block text-sm font-semibold text-[#1d1d1f] mb-3">
             Experience Level *
           </label>
-          <select
-            id="experience"
-            value={jobData.experience}
-            onChange={(e) => onInputChange("experience", e.target.value)}
-            className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none ${
-              errors.experience ? 'border-red-400' : 'border-[#d2d2d7]'
-            }`}
-          >
-            <option value="">Select experience level</option>
-            <option value="0-1 years">0-1 years</option>
-            <option value="1-3 years">1-3 years</option>
-            <option value="3-5 years">3-5 years</option>
-            <option value="5-7 years">5-7 years</option>
-            <option value="7+ years">7+ years</option>
-          </select>
+          
+          <div className="space-y-4">
+            <select
+              id="experience"
+              value={showCustomExperience ? "custom" : (experienceOptions.includes(jobData.experience) ? jobData.experience : "")}
+              onChange={(e) => handleExperienceChange(e.target.value)}
+              className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none ${
+                errors.experience ? 'border-red-400' : 'border-[#d2d2d7]'
+              }`}
+            >
+              <option value="">Select experience level</option>
+              {experienceOptions.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+              <option value="custom">Custom Range</option>
+            </select>
+            
+            {/* Custom Range Inputs */}
+            {showCustomExperience && (
+              <div className="bg-white/50 border border-[#d2d2d7] rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-[#1d1d1f] mb-3">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Custom Experience Range
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="min-years" className="block text-xs font-medium text-[#6e6e73] mb-2">
+                      Minimum Years
+                    </label>
+                    <input
+                      type="number"
+                      id="min-years"
+                      min="0"
+                      max="50"
+                      value={minYears}
+                      onChange={(e) => setMinYears(e.target.value)}
+                      className="w-full px-3 py-2 bg-white/80 border border-[#d2d2d7] rounded-lg focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] text-sm"
+                      placeholder="0"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="max-years" className="block text-xs font-medium text-[#6e6e73] mb-2">
+                      Maximum Years <span className="text-[#86868b]">(Leave empty for "X+ years")</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="max-years"
+                      min="0"
+                      max="50"
+                      value={maxYears}
+                      onChange={(e) => setMaxYears(e.target.value)}
+                      className="w-full px-3 py-2 bg-white/80 border border-[#d2d2d7] rounded-lg focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] text-sm"
+                      placeholder="Optional"
+                    />
+                  </div>
+                </div>
+                
+                {/* Preview */}
+                {(minYears || maxYears) && (
+                  <div className="mt-3 p-3 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 rounded-lg border border-[#13ead9]/20">
+                    <div className="text-xs font-medium text-[#6e6e73] mb-1">Preview:</div>
+                    <div className="text-sm font-semibold text-[#1d1d1f]">
+                      {minYears && maxYears 
+                        ? `${minYears}-${maxYears} years experience` 
+                        : minYears 
+                          ? `${minYears}+ years experience`
+                          : "Please enter minimum years"
+                      }
+                    </div>
+                  </div>
+                )}
+                
+                {/* Back to predefined options */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCustomExperience(false);
+                    setMinYears("");
+                    setMaxYears("");
+                    onInputChange("experience", "");
+                  }}
+                  className="text-xs text-[#6e6e73] hover:text-[#13ead9] transition-colors duration-200 flex items-center gap-1"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Back to predefined options
+                </button>
+              </div>
+            )}
+          </div>
+          
           {errors.experience && <p className="mt-2 text-sm text-red-500">{errors.experience}</p>}
         </div>
 

@@ -21,7 +21,7 @@ export interface JobData {
   skills: string[];
   posted: string;
   applicants: number;
-  logo: string;
+  logo?: string; // Make logo optional - can be undefined if no logo available
   description?: string;
   urgent?: boolean;
   experience?: string; // Add experience field
@@ -140,19 +140,6 @@ export default function JobCard({
         {/* Company Info */}
         <div className="flex items-start gap-3 mb-4">
           <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-xl border border-gray-200 flex-shrink-0 overflow-hidden relative">
-            {/* Debug info */}
-            <div className="absolute -top-6 left-0 text-xs text-red-500 whitespace-nowrap z-10">
-              {job.logo ? "Has logo" : "No logo"} |{" "}
-              {job.logo &&
-              (job.logo.includes(".jpg") ||
-                job.logo.includes(".png") ||
-                job.logo.includes(".jpeg") ||
-                job.logo.includes(".svg") ||
-                job.logo.includes(".webp"))
-                ? "Valid ext"
-                : "Invalid ext"}
-            </div>
-
             {job.logo &&
             (job.logo.includes(".jpg") ||
               job.logo.includes(".png") ||
@@ -160,41 +147,37 @@ export default function JobCard({
               job.logo.includes(".svg") ||
               job.logo.includes(".webp")) ? (
               <Image
-                src={`/api/proxy-image?url=${encodeURIComponent(
-                  `${getBaseStaticUrl()}/${job.logo}`
-                )}`}
+                src={
+                  job.logo.startsWith("http")
+                    ? job.logo
+                    : `/api/proxy-image?url=${encodeURIComponent(
+                        `${getBaseStaticUrl()}/${job.logo}`
+                      )}`
+                }
                 alt={`${job.company} logo`}
                 width={48}
                 height={48}
-                className="w-full h-full object-contain p-1 border-2 border-green-500"
-                onError={() => {
+                className="w-full h-full object-contain p-1"
+                onError={(e) => {
                   console.error(
                     "Image failed to load for company:",
                     job.company
                   );
-                  console.error("Logo path:", job.logo);
-                  console.error(
-                    "Full logo URL:",
-                    `${getBaseStaticUrl()}/${job.logo}`
-                  );
-                  console.error(
-                    "Proxy URL:",
-                    `/api/proxy-image?url=${encodeURIComponent(
-                      `${getBaseStaticUrl()}/${job.logo}`
-                    )}`
-                  );
-                }}
-                onLoad={() => {
-                  console.log(
-                    "✓ Logo loaded successfully for:",
-                    job.company,
-                    job.logo
-                  );
+                  console.error("Logo URL:", job.logo);
+                  // Hide the broken image and show fallback
+                  e.currentTarget.style.display = "none";
+                  const fallback =
+                    e.currentTarget.parentElement?.querySelector(
+                      ".logo-fallback"
+                    );
+                  if (fallback) {
+                    fallback.classList.remove("hidden");
+                  }
                 }}
               />
             ) : null}
             <span
-              className={`logo-fallback text-sm font-semibold text-gray-600 ${
+              className={`logo-fallback text-xl font-semibold text-gray-600 ${
                 job.logo &&
                 (job.logo.includes(".jpg") ||
                   job.logo.includes(".png") ||
@@ -205,7 +188,11 @@ export default function JobCard({
                   : ""
               }`}
             >
-              {job.company.charAt(0).toUpperCase()}
+              {job.logo &&
+              !job.logo.startsWith("http") &&
+              !job.logo.includes(".")
+                ? job.logo
+                : job.company.charAt(0).toUpperCase()}
             </span>
           </div>
           <div className="flex-1 min-w-0">

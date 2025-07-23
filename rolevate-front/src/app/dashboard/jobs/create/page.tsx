@@ -35,7 +35,6 @@ export default function CreateJobPage() {
   const [regeneratingTitle, setRegeneratingTitle] = useState(false);
   const [regeneratingBenefits, setRegeneratingBenefits] = useState(false);
   const [regeneratingResponsibilities, setRegeneratingResponsibilities] = useState(false);
-  const [regeneratingCompanyDescription, setRegeneratingCompanyDescription] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [currentStep, setCurrentStep] = useState<FormStep>("basic");
   const [jobData, setJobData] = useState<JobFormData>({
@@ -57,7 +56,6 @@ export default function CreateJobPage() {
     jobLevel: "MID",
     workType: "ONSITE",
     industry: "",
-    companyDescription: "",
     aiCvAnalysisPrompt: "",
     aiFirstInterviewPrompt: "",
     aiSecondInterviewPrompt: "",
@@ -145,7 +143,6 @@ export default function CreateJobPage() {
             ...prev,
             industry: mapIndustryToFormValue(userData.company.industry),
             location: mapLocationToFormValue(userData.company.address),
-            companyDescription: userData.company.description || "",
           }));
         }
       } catch (error) {
@@ -303,8 +300,13 @@ export default function CreateJobPage() {
     
     setRegeneratingDescription(true);
     try {
-      const rewrittenDescription = await JobService.rewriteJobDescription(jobData.description);
-      setJobData(prev => ({ ...prev, description: rewrittenDescription }));
+      const result = await JobService.rewriteJobDescription(jobData.description);
+      setJobData(prev => ({ 
+        ...prev, 
+        description: result.rewrittenDescription,
+        // Update short description only if it's not already filled or if it seems related
+        shortDescription: result.rewrittenShortDescription || prev.shortDescription
+      }));
     } catch (error) {
       console.error('Failed to regenerate job description:', error);
       // Could show a toast notification here
@@ -394,33 +396,6 @@ export default function CreateJobPage() {
     }
   };
 
-  const regenerateCompanyDescription = async () => {
-    if (!jobData.companyDescription.trim()) return;
-    
-    setRegeneratingCompanyDescription(true);
-    try {
-      // Get company info from user data if available
-      const userData = await getCurrentUser();
-      const companyName = userData?.company?.name;
-      const companySize = userData?.company?.numberOfEmployees ? 
-        `${userData.company.numberOfEmployees} employees` : undefined;
-      
-      const rewrittenCompanyDescription = await JobService.rewriteCompanyDescription(
-        jobData.companyDescription,
-        jobData.industry,
-        companyName,
-        companySize,
-        jobData.location
-      );
-      setJobData(prev => ({ ...prev, companyDescription: rewrittenCompanyDescription }));
-    } catch (error) {
-      console.error('Failed to regenerate company description:', error);
-      // Could show a toast notification here
-    } finally {
-      setRegeneratingCompanyDescription(false);
-    }
-  };
-
   const generateAIConfiguration = async () => {
     setAiGenerating(true);
     try {
@@ -504,7 +479,6 @@ export default function CreateJobPage() {
         jobLevel: jobData.jobLevel,
         workType: jobData.workType,
         industry: jobData.industry,
-        companyDescription: jobData.companyDescription.trim(),
         aiCvAnalysisPrompt: jobData.aiCvAnalysisPrompt.trim(),
         aiFirstInterviewPrompt: jobData.aiFirstInterviewPrompt.trim(),
         aiSecondInterviewPrompt: jobData.aiSecondInterviewPrompt.trim(),
@@ -594,8 +568,6 @@ export default function CreateJobPage() {
                 onInputChange={handleInputChange}
                 onRegenerateTitle={regenerateTitle}
                 regeneratingTitle={regeneratingTitle}
-                onRegenerateCompanyDescription={regenerateCompanyDescription}
-                regeneratingCompanyDescription={regeneratingCompanyDescription}
               />
             )}
 
@@ -637,7 +609,7 @@ export default function CreateJobPage() {
               isFirstStep={isFirstStep()}
               isLastStep={isLastStep()}
               loading={loading}
-              aiGenerating={aiGenerating || regeneratingDescription || regeneratingRequirements || regeneratingTitle || regeneratingBenefits || regeneratingResponsibilities || regeneratingCompanyDescription}
+              aiGenerating={aiGenerating || regeneratingDescription || regeneratingRequirements || regeneratingTitle || regeneratingBenefits || regeneratingResponsibilities}
               currentStep={currentStep}
               onPrevious={handlePrevious}
               onNext={handleNext}

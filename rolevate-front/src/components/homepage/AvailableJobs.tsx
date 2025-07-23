@@ -29,17 +29,23 @@ export default function AvailableJobs() {
       skills: jobPost.skills || [],
       posted: new Date(jobPost.postedAt).toLocaleDateString(),
       applicants: jobPost.applicants,
-      logo: getCompanyLogo(jobPost.company?.name), // Dynamic logo based on company
+      logo: getCompanyLogo(jobPost.company), // Pass the entire company object
       description: jobPost.shortDescription || jobPost.description,
       urgent: false, // You might want to add this field to JobPost interface
     };
   };
 
-  // Helper function to get company logo/emoji based on company name
-  const getCompanyLogo = (companyName?: string): string => {
-    if (!companyName) return "🏢";
+  // Helper function to get company logo based on company data
+  const getCompanyLogo = (company?: { name: string; logo?: string } | null): string => {
+    // If company has a logo, return the full URL (it's already a complete AWS S3 URL)
+    if (company?.logo) {
+      return company.logo;
+    }
 
-    const name = companyName.toLowerCase();
+    // Fallback to emoji based on company name if no logo
+    if (!company?.name) return "🏢";
+
+    const name = company.name.toLowerCase();
 
     // Map company names to appropriate emojis
     if (name.includes("tech") || name.includes("software")) return "💻";

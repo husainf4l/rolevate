@@ -14,7 +14,6 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
-
 interface Notification {
   id: string;
   type: "SUCCESS" | "WARNING" | "INFO" | "ERROR";
@@ -115,28 +114,28 @@ export default function NotificationsPage() {
     fetchNotifications();
   }, []);
 
-  const filteredNotifications = notifications.filter((notification: Notification) => {
-    const matchesReadFilter =
-      filter === "all" ||
-      (filter === "read" && notification.read) ||
-      (filter === "unread" && !notification.read);
+  const filteredNotifications = notifications.filter(
+    (notification: Notification) => {
+      const matchesReadFilter =
+        filter === "all" ||
+        (filter === "read" && notification.read) ||
+        (filter === "unread" && !notification.read);
 
-    const matchesCategoryFilter =
-      categoryFilter === "all" || notification.category === categoryFilter;
+      const matchesCategoryFilter =
+        categoryFilter === "all" || notification.category === categoryFilter;
 
-    const matchesSearchTerm =
-      searchTerm === "" ||
-      notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      notification.message.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearchTerm =
+        searchTerm === "" ||
+        notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        notification.message.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesReadFilter && matchesCategoryFilter && matchesSearchTerm;
-  });
+      return matchesReadFilter && matchesCategoryFilter && matchesSearchTerm;
+    }
+  );
 
   const markAsRead = (notificationId: string) => {
     setNotifications((prev) =>
-      prev.map((n) =>
-        n.id === notificationId ? { ...n, read: true } : n
-      )
+      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
     );
   };
 
