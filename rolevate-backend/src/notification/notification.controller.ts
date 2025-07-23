@@ -20,20 +20,49 @@ interface RequestWithUser {
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto, UpdateNotificationDto, NotificationQueryDto } from './dto/notification.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
 export class NotificationController {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly notificationService: NotificationService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Post()
-  async create(@Body() createNotificationDto: CreateNotificationDto) {
-    return this.notificationService.create(createNotificationDto);
+  async create(@Request() req: RequestWithUser, @Body() createNotificationDto: CreateNotificationDto) {
+    const userId = req.user.id;
+    
+    // Automatically set the userId from the authenticated user
+    const enhancedDto = {
+      ...createNotificationDto,
+      userId: userId,
+      // If companyId is not provided, get it from the user's profile
+      companyId: createNotificationDto.companyId || await this.getUserCompanyId(userId),
+    };
+    
+    return this.notificationService.create(enhancedDto);
+  }
+
+  private async getUserCompanyId(userId: string): Promise<string | undefined> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { companyId: true }
+      });
+      
+      return user?.companyId || undefined;
+    } catch (error) {
+      console.error('Error fetching user company:', error);
+      return undefined;
+    }
   }
 
   @Get()
-  async findAll(@Query() query: NotificationQueryDto) {
-    return this.notificationService.findAll(query);
+  async findAll(@Request() req: RequestWithUser, @Query() query: NotificationQueryDto) {
+    const userId = req.user.id;
+    return this.notificationService.findByUser(userId, query);
   }
 
   @Get('my')

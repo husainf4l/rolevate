@@ -245,6 +245,7 @@ model Company {
   address           Address?
   users             User[]
   jobs              Job[] // Add jobs relationship
+  interviews        Interview[]
   invitations       Invitation[]
   notifications     Notification[]
   communications    Communication[]
@@ -334,6 +335,9 @@ model Job {
   // Applications
   applications Application[]
 
+  // Interviews
+  interviews Interview[]
+
   // Communications
   communications Communication[]
 
@@ -341,6 +345,9 @@ model Job {
   cvAnalysisPrompt        String? @db.Text
   interviewPrompt         String? @db.Text
   aiSecondInterviewPrompt String? @db.Text
+
+  // Interview Settings
+  interviewLanguage String @default("english")
 
   // Metadata
   featured   Boolean  @default(false)
@@ -435,6 +442,9 @@ model CandidateProfile {
 
   // Applications
   applications Application[]
+
+  // Interviews
+  interviews Interview[]
 
   // CVs
   cvs CV[]
@@ -665,15 +675,15 @@ model AvailableCandidate {
   // Professional Information
   currentJobTitle String?
   currentCompany  String?
-  totalExperience Int     @default(0)
+  totalExperience Int      @default(0)
   skills          String[]
   education       String?
   location        String?
 
   // Additional Information
-  expectedSalary   String?
-  profileSummary   String? @db.Text
-  keyStrengths     String[]
+  expectedSalary     String?
+  profileSummary     String?  @db.Text
+  keyStrengths       String[]
   industryExperience String[]
 
   // Status
@@ -690,6 +700,138 @@ model AvailableCandidate {
   @@index([totalExperience])
   @@index([createdAt])
   @@map("available_candidates")
+}
+
+// =======================================
+// INTERVIEW MANAGEMENT
+// =======================================
+
+enum InterviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum InterviewType {
+  FIRST_ROUND
+  SECOND_ROUND
+  TECHNICAL
+  HR
+  FINAL
+}
+
+model Interview {
+  id String @id @default(cuid())
+
+  // Relationships
+  jobId       String
+  job         Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Interview Details
+  title       String
+  description String?         @db.Text
+  type        InterviewType   @default(FIRST_ROUND)
+  status      InterviewStatus @default(SCHEDULED)
+
+  // Scheduling
+  scheduledAt DateTime
+  startedAt   DateTime?
+  endedAt     DateTime?
+  duration    Int? // Duration in minutes
+
+  // Video Conference
+  roomId       String? // LiveKit room ID
+  videoLink    String? // Direct video conference link
+  recordingUrl String? // URL to recorded interview
+
+  // AI Analysis
+  aiAnalysis       Json? // AI analysis of the interview
+  aiScore          Float?    @db.DoublePrecision // AI-generated score (0-100)
+  aiRecommendation String?   @db.Text // AI recommendation for hiring decision
+  analyzedAt       DateTime? // When AI analysis was completed
+
+  // Interview Results
+  interviewerNotes  String? @db.Text // Notes from interviewer
+  candidateFeedback String? @db.Text // Feedback from candidate
+  overallRating     Int? // 1-5 scale rating
+
+  // Technical Assessment (if applicable)
+  technicalQuestions Json? // Array of technical questions asked
+  technicalAnswers   Json? // Candidate's answers with scores
+
+  // Interview Transcripts
+  transcripts Transcript[]
+
+  // Metadata
+  metadata Json? // Additional interview data
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([jobId])
+  @@index([candidateId])
+  @@index([companyId])
+  @@index([roomId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([type])
+  @@map("interviews")
+}
+
+enum SpeakerType {
+  INTERVIEWER
+  CANDIDATE
+  SYSTEM
+  AI_ASSISTANT
+}
+
+model Transcript {
+  id String @id @default(cuid())
+
+  // Relationship
+  interviewId String
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  // Speaker Information
+  speakerType SpeakerType
+  speakerName String? // Name of the speaker (optional)
+  speakerId   String? // ID of the speaker (user ID, participant ID, etc.)
+
+  // Transcript Content
+  content    String  @db.Text // The actual spoken text
+  confidence Float?  @db.DoublePrecision // Speech-to-text confidence score (0-1)
+  language   String? @default("en") // Language code (e.g., "en", "ar")
+
+  // Timing Information
+  startTime Float // Start time in seconds from interview start
+  endTime   Float // End time in seconds from interview start
+  duration  Float // Duration of this speech segment in seconds
+
+  // AI Analysis
+  sentiment  String? // POSITIVE, NEGATIVE, NEUTRAL
+  keywords   String[] // Key topics/words extracted from this segment
+  aiSummary  String?  @db.Text // AI-generated summary of this segment
+  importance Int?     @default(1) // Importance score 1-5 (5 being most important)
+
+  // Metadata
+  sequenceNumber Int // Order of this transcript in the interview
+  metadata       Json? // Additional data (emotions, technical terms, etc.)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([interviewId])
+  @@index([speakerType])
+  @@index([startTime])
+  @@index([sequenceNumber])
+  @@index([sentiment])
+  @@map("transcripts")
 }
 
 model Communication {

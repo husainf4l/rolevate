@@ -10,8 +10,13 @@ export class JobDescriptionRewriteRequestDto {
   @IsNotEmpty()
   @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  shortDescription?: string;
 }
 
 export class JobDescriptionRewriteResponseDto {
   rewrittenDescription: string;
+  rewrittenShortDescription: string;
 }

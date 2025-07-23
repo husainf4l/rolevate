@@ -20,7 +20,7 @@ export class AiautocompleteService {
   }
   
   async generateCompanyDescription(requestDto: CompanyDescriptionRequestDto): Promise<CompanyDescriptionResponseDto> {
-    const { industry, location, country, numberOfEmployees, currentDescription } = requestDto;
+    const { industry, location, country, numberOfEmployees, currentDescription, website } = requestDto;
     
     const contextParts: string[] = [];
     
@@ -30,17 +30,57 @@ export class AiautocompleteService {
     else if (location) contextParts.push(`Location: ${location}`);
     if (numberOfEmployees) contextParts.push(`Employees: ${numberOfEmployees}`);
     if (currentDescription) contextParts.push(`Current: ${currentDescription}`);
+    if (website) contextParts.push(`Website: ${website}`);
     
     const context = contextParts.join('\n');
     
-    const prompt = `Generate a concise and professional company description (max 400 characters) based on the following details:\n\n${context}\n\nGuidelines:\n- Use a formal and engaging tone.\n- Highlight the company's value proposition and unique strengths.\n- Include impactful phrases that convey leadership, innovation, and commitment to excellence.\n- Ensure clarity and precision in the description.`;
+    const prompt = `You are an expert business analyst and copywriter specializing in creating compelling company descriptions. Your task is to generate a professional, engaging company description based on the provided information.
+
+Company Information:
+${context}
+
+RESEARCH INSTRUCTIONS:
+1. If a website is provided, analyze the company's online presence, services, products, mission, and values from their website
+2. Research the company's industry positioning, competitive advantages, and market presence
+3. Look for information about the company's culture, achievements, and unique selling propositions
+4. Consider the company's target market and customer base
+5. Identify key differentiators and competitive advantages
+
+DESCRIPTION REQUIREMENTS:
+- Maximum 400 characters including spaces
+- Professional and engaging tone that attracts top talent
+- Highlight the company's unique value proposition and strengths
+- Include compelling language that conveys leadership, innovation, and excellence
+- Focus on what makes this company special and why people would want to work there
+- Use industry-appropriate terminology and language
+- Ensure clarity, precision, and impact in every word
+- Make it sound attractive to potential employees and candidates
+
+CONTENT STRATEGY:
+- Lead with the company's core mission or primary value proposition
+- Highlight industry leadership, innovation, or unique market position
+- Include growth trajectory, market impact, or notable achievements if evident
+- Emphasize company culture, values, or employee-focused aspects
+- End with forward-looking vision or commitment statements
+
+OPTIMIZATION GUIDELINES:
+- Every word must add value due to the 400-character limit
+- Use powerful, action-oriented language
+- Avoid generic phrases or corporate jargon
+- Focus on concrete achievements and unique differentiators
+- Balance professional credibility with engaging personality
+- Ensure the description reflects the company's actual positioning and industry
+
+Based on your research and analysis of the provided information (especially the website if available), create a compelling company description that would attract top talent and accurately represent the organization's value proposition and culture.
+
+Return ONLY the optimized company description without any additional text, explanations, or formatting.`;
 
     try {
       const completion = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 150,
-        temperature: 0.7,
+        max_tokens: 200,
+        temperature: 0.6,
       });
 
       const generatedDescription = completion.choices[0]?.message?.content?.trim() || '';
@@ -288,45 +328,71 @@ Format your response as JSON with this exact structure:
     }
   }
 
-  async rewriteJobDescription(jobDescription: string): Promise<{ rewrittenDescription: string }> {
-    const prompt = `Rewrite the following job description to make it more professional, engaging, and well-structured. Return ONLY the rewritten job description without any titles, headers, or prefixes:
+  async rewriteJobDescription(requestDto: { jobDescription: string }): Promise<{ rewrittenDescription: string; rewrittenShortDescription: string }> {
+    const { jobDescription } = requestDto;
+
+    const prompt = `Rewrite the following job description to make it more professional, engaging, and well-structured. Then create a very concise short description (1-2 sentences maximum) that captures the essence of the role.
 
 Original Job Description:
 "${jobDescription}"
+
+Please provide the response in the following JSON format:
+{
+  "jobDescription": "Rewritten full job description here",
+  "shortDescription": "Very concise 1-2 sentence summary that captures the essence of the role"
+}
 
 Guidelines:
 - Use professional and clear language
 - Structure the content logically with proper flow
 - Remove any grammatical errors and typos
-- Make it more engaging and appealing to candidates
-- Ensure it follows industry best practices
+- Make them engaging and appealing to candidates
+- Ensure they follow industry best practices
 - Maintain the core requirements and responsibilities
 - Use active voice where appropriate
 - Include compelling language that attracts top talent
-- Start directly with the job description content
-- Do not include titles like "Revised Job Description:" or any headers
+- The short description should be derived from the rewritten full description
+- The short description should be very concise (1-2 sentences maximum) and highlight only the key aspects of the role
+- Keep the short description under 50 words if possible
 
-Provide only the clean, professional job description content.`;
+Provide only the JSON response with both the rewritten full description and the generated short description.`;
 
     try {
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 500,
+        max_tokens: 800,
         temperature: 0.4,
       });
 
-      let rewrittenDescription = completion.choices[0]?.message?.content?.trim() || '';
-      
-      // Remove any potential titles or headers that might slip through
-      rewrittenDescription = rewrittenDescription
-        .replace(/^(Revised Job Description:|Job Description:|Description:)\s*/i, '')
-        .replace(/^(Here is the|Here's the|The following is|Below is).*?:\s*/i, '')
-        .trim();
+      const responseContent = completion.choices[0]?.message?.content?.trim() || '';
 
-      return {
-        rewrittenDescription
-      };
+      // Parse JSON response for both descriptions
+      try {
+        const parsedResponse = JSON.parse(responseContent);
+        return {
+          rewrittenDescription: parsedResponse.jobDescription || '',
+          rewrittenShortDescription: parsedResponse.shortDescription || ''
+        };
+      } catch (parseError) {
+        // Fallback if JSON parsing fails - generate short description from the rewritten content
+        console.warn('Failed to parse JSON response, using fallback');
+        
+        // Clean up the response content
+        let rewrittenDescription = responseContent
+          .replace(/^(Revised Job Description:|Job Description:|Description:)\s*/i, '')
+          .replace(/^(Here is the|Here's the|The following is|Below is).*?:\s*/i, '')
+          .trim();
+
+        // Generate a basic short description from the first sentence only
+        const sentences = rewrittenDescription.split(/[.!?]+/).filter(s => s.trim().length > 0);
+        const shortDescription = sentences[0] ? sentences[0].trim() + '.' : rewrittenDescription.substring(0, 100) + '...';
+
+        return {
+          rewrittenDescription,
+          rewrittenShortDescription: shortDescription
+        };
+      }
     } catch (error) {
       console.error('OpenAI API error:', error);
       throw new InternalServerErrorException('Failed to rewrite job description');
@@ -754,7 +820,7 @@ Return ONLY the culture and values-focused company description without any title
       skills: skills?.join(', ') || ''
     };
 
-    const prompt = `You are an expert HR technology specialist who creates sophisticated AI prompts for recruitment processes. Generate three comprehensive AI prompts for the following position:
+    const prompt = `You are an expert HR technology specialist who creates comprehensive AI agent instructions for recruitment processes. Generate three specialized AI agent instruction sets for the following position:
 
 Job Details:
 - Title: ${jobContext.title}
@@ -766,33 +832,80 @@ Job Details:
 - Requirements: ${jobContext.req}
 - Key Skills: ${jobContext.skills}
 
-Generate three specialized AI prompts:
+Generate three specialized AI agent instruction sets:
 
-1. CV ANALYSIS PROMPT: Create a comprehensive prompt for AI to analyze candidate CVs against this job position. The prompt should guide AI to evaluate qualifications, experience relevance, skills match, and provide scoring with detailed feedback.
+1. CV ANALYSIS PROMPT: Create comprehensive instructions for an AI agent to analyze candidate CVs against this job position. Must include:
+   - Detailed evaluation criteria with specific scoring methodology (0-100 scale)
+   - Skills assessment that accurately reflects job requirements match
+   - Experience relevance evaluation that considers both direct and transferable experience
+   - Clear scoring guidelines that ensure consistency between AI Score and Overall Fit assessment
+   - Balanced feedback that highlights both strengths and areas for improvement
+   - Realistic assessment that doesn't overrate or underrate candidates
+   - Specific guidance on how to handle career transitions, entrepreneurial backgrounds, and non-traditional experience
+   - Instructions to provide actionable feedback for candidate improvement
 
-2. FIRST INTERVIEW PROMPT: Create a prompt for conducting initial screening interviews. Should include behavioral questions, technical assessments relevant to the role, and evaluation criteria for determining if candidates proceed to next round.
+2. FIRST INTERVIEW PROMPT: Create conversational AI agent instructions optimized for real-time voice/video interviews. The agent should conduct a natural, flowing conversation rather than a rigid Q&A session.
 
-3. SECOND INTERVIEW PROMPT: Create a prompt for in-depth final interviews. Should include advanced technical questions, culture fit assessment, scenario-based questions, and final evaluation criteria.
+   CONVERSATIONAL AI GUIDELINES:
+   You are an experienced HR professional conducting a screening interview. Your goal is to have a natural conversation that assesses the candidate's potential, motivation, and fit for the role.
 
-Each prompt should be:
-- Professional and comprehensive
-- Tailored specifically to this job position
-- Include clear evaluation criteria
-- Provide structured assessment guidelines
-- Be ready to use by AI systems
+   CONVERSATION FLOW:
+   - Start with a warm, professional greeting: "Hello [Candidate's Name], thank you for joining us today. I'm [AI Agent Name], and I'll be conducting your initial interview for the [Job Title] position."
+   - Ask ONE question at a time and wait for the complete response
+   - Listen actively and ask natural follow-up questions based on their answers
+   - Build on their responses to create a flowing conversation
+   - Show genuine interest in their experiences and perspectives
+
+   CORE AREAS TO EXPLORE (through natural conversation):
+   1. Experience & Background: "Tell me about your background and what led you to apply for this role."
+   2. Technical Skills: Discuss relevant skills mentioned in their CV or ask about specific technologies/methods
+   3. Problem-Solving: "Can you walk me through how you approach challenging problems in your work?"
+   4. Motivation: "What interests you most about this position and our industry?"
+   5. Learning & Growth: "How do you stay current with new developments in your field?"
+   6. Team Collaboration: "Describe a time when you worked effectively with a team."
+   7. Career Goals: "Where do you see your career heading, and how does this role fit those goals?"
+   8. Salary Expectations: "What are your salary expectations for this position?"
+
+   CONVERSATION BEST PRACTICES:
+   - Keep questions open-ended to encourage detailed responses
+   - Use phrases like "That's interesting, tell me more about..." or "Can you elaborate on..."
+   - Acknowledge their responses: "I see," "That makes sense," "Great example"
+   - If their background doesn't perfectly match, explore transferable skills with curiosity
+   - Focus on potential, learning ability, and cultural fit over perfect qualification match
+   - Make them feel comfortable to share authentically
+
+   EVALUATION FOCUS:
+   - Communication skills and professionalism
+   - Learning agility and adaptability
+   - Problem-solving approach and thinking process
+   - Motivation and genuine interest in the role
+   - Cultural fit and team collaboration potential
+   - Growth mindset and career trajectory
+
+   INTERVIEW CONCLUSION:
+   When you've covered all key areas and feel you have sufficient information, conclude professionally: "Thank you for your time today, [Candidate's Name]. This has been a great conversation. Thank you for your time. This concludes the interview."
+
+3. SECOND INTERVIEW PROMPT: Create detailed instructions for an AI agent to conduct in-depth final interviews. Include advanced questions, technical assessments, culture fit evaluation, and final decision criteria.
+
+CRITICAL REQUIREMENTS for Interview Prompts:
+- Include the exact contextual strategy: "CONTEXTUAL INTERVIEW STRATEGY: 1. Review the CV Analysis in conjunction with the Interview Focus Points. 2. If the CV analysis indicates a mismatch with the job requirements, your primary goal is to understand the candidate's motivation, assess their transferable skills, and explore their learning potential. 3. Always approach mismatches with curiosity rather than dismissal. For example, you could ask: 'Your background seems quite strong in [candidate's area of strength]. Could you walk me through what interested you in the ${jobContext.title} position and how you see your skills translating to this role?' 4. Focus on potential and growth mindset. Give candidates multiple opportunities to demonstrate their problem-solving abilities, learning agility, and passion for the role. 5. Only consider concluding early if a candidate explicitly states they are not interested in the role or are completely unaware of what the position entails after thorough discussion. 6. Aim to conduct a full interview exploring all key areas before making any conclusions. 7. After you have completed the full interview discussion and covered all relevant topics, you must end the interview by saying the specific phrase 'Thank you for your time. This concludes the interview.' This exact phrase will be used to signal the end of the session."
+- Include specific job-related questions (8-12 questions)
+- Include salary expectation discussion
+- Professional interview flow and structure
+- Clear evaluation guidelines
 
 Return ONLY valid JSON with this exact structure:
 {
-  "aiCvAnalysisPrompt": "Comprehensive CV analysis prompt text here...",
-  "aiFirstInterviewPrompt": "Detailed first interview prompt text here...",
-  "aiSecondInterviewPrompt": "Advanced second interview prompt text here..."
+  "aiCvAnalysisPrompt": "Comprehensive CV analysis agent instructions...",
+  "aiFirstInterviewPrompt": "Complete first interview agent instructions with questions and salary discussion...",
+  "aiSecondInterviewPrompt": "Detailed second interview agent instructions..."
 }`;
 
     try {
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 2000,
+        max_tokens: 4000,
         temperature: 0.3,
       });
 

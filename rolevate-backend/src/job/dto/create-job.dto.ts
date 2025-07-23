@@ -106,10 +106,13 @@ export class CreateJobDto {
   @IsString()
   industry: string;
 
+  @IsOptional()
   @IsString()
-  companyDescription: string;
+  companyDescription?: string;
 
-
+  @IsOptional()
+  @IsString()
+  interviewLanguage?: string = 'english';
 
   @IsOptional()
   @IsString()
@@ -152,6 +155,8 @@ export class JobResponseDto {
   workType: WorkType;
   industry: string;
   companyDescription: string;
+  companyLogo?: string;
+  interviewLanguage: string;
   status: string;
   companyId: string;
   company?: {

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateJobDto, JobResponseDto } from './dto/create-job.dto';
 import { JobType, JobLevel, WorkType, JobStatus } from '@prisma/client';
@@ -17,6 +17,16 @@ export class JobService {
   ) {}
 
   async create(createJobDto: CreateJobDto, companyId: string): Promise<JobResponseDto> {
+    // Get company information to use as fallback for description
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: { description: true }
+    });
+
+    if (!company) {
+      throw new BadRequestException('Company not found');
+    }
+
     // Convert frontend enums to Prisma enums
     const jobData = {
       title: createJobDto.title,
@@ -36,7 +46,8 @@ export class JobService {
       jobLevel: createJobDto.jobLevel as JobLevel,
       workType: createJobDto.workType as WorkType,
       industry: createJobDto.industry,
-      companyDescription: createJobDto.companyDescription,
+      companyDescription: createJobDto.companyDescription || company.description || '', // Use company description as fallback
+      interviewLanguage: createJobDto.interviewLanguage || 'english',
       cvAnalysisPrompt: createJobDto.cvAnalysisPrompt || createJobDto.aiCvAnalysisPrompt,
       interviewPrompt: createJobDto.interviewPrompt || createJobDto.aiFirstInterviewPrompt,
       aiSecondInterviewPrompt: createJobDto.aiSecondInterviewPrompt || null,
@@ -53,6 +64,7 @@ export class JobService {
           select: {
             id: true,
             name: true,
+            description: true,
           }
         }
       },
@@ -76,6 +88,7 @@ export class JobService {
           select: {
             id: true,
             name: true,
+            description: true,
           }
         }
       },
@@ -108,6 +121,7 @@ export class JobService {
           select: {
             id: true,
             name: true,
+            description: true,
           }
         }
       },
@@ -499,13 +513,13 @@ export class JobService {
   }
 
   async findAllPublicPaginated(limit: number, offset: number, search?: string): Promise<JobResponseDto[]> {
-    // Try to get from cache first
-    const cacheKey = this.cacheService.generatePublicJobsKey(limit, offset, search);
-    const cachedJobs = await this.cacheService.get<JobResponseDto[]>(cacheKey);
+    // Temporarily disable cache to ensure fresh data with logo
+    // const cacheKey = this.cacheService.generatePublicJobsKey(limit, offset, search);
+    // const cachedJobs = await this.cacheService.get<JobResponseDto[]>(cacheKey);
     
-    if (cachedJobs) {
-      return cachedJobs;
-    }
+    // if (cachedJobs) {
+    //   return cachedJobs;
+    // }
 
     const searchCondition = search ? {
       OR: [
@@ -536,6 +550,7 @@ export class JobService {
         type: true,
         deadline: true,
         shortDescription: true, // Use short description for listing
+        companyDescription: true, // Include stored company description for fallback
         skills: true,
         experience: true,
         education: true,
@@ -551,6 +566,8 @@ export class JobService {
           select: {
             id: true,
             name: true,
+            logo: true,
+            description: true,
             industry: true,
             numberOfEmployees: true,
             address: {
@@ -572,8 +589,8 @@ export class JobService {
 
     const jobResponses = jobs.map(job => this.mapToJobResponse(job));
     
-    // Cache for 10 minutes (increased from 5 for better performance)
-    await this.cacheService.set(cacheKey, jobResponses, 600);
+    // Temporarily disable cache to ensure fresh data with logo
+    // await this.cacheService.set(cacheKey, jobResponses, 600);
 
     return jobResponses;
   }
@@ -608,6 +625,7 @@ export class JobService {
         company: {
           select: {
             name: true,
+            logo: true,
             address: {
               select: {
                 city: true,
@@ -670,11 +688,11 @@ export class JobService {
   async findFeaturedJobs(limit: number = 6): Promise<JobResponseDto[]> {
     const cacheKey = `featured_jobs:limit:${limit}`;
     
-    // Check cache first
-    const cached = await this.cacheService.get(cacheKey);
-    if (cached) {
-      return cached as JobResponseDto[];
-    }
+    // Temporarily disable cache to ensure fresh data
+    // const cached = await this.cacheService.get(cacheKey);
+    // if (cached) {
+    //   return cached as JobResponseDto[];
+    // }
 
     // Get featured jobs that are active and have future deadlines
     const jobs = await this.prisma.job.findMany({
@@ -700,8 +718,8 @@ export class JobService {
 
     const result = jobs.map(job => this.mapToJobResponse(job));
     
-    // Cache for 10 minutes
-    await this.cacheService.set(cacheKey, result, 600);
+    // Temporarily disable cache to ensure fresh data
+    // await this.cacheService.set(cacheKey, result, 600);
     
     return result;
   }
@@ -765,7 +783,9 @@ export class JobService {
       jobLevel: job.jobLevel,
       workType: job.workType,
       industry: job.industry,
-      companyDescription: job.companyDescription,
+      companyDescription: job.company?.description || job.companyDescription, // Use current company description, fallback to stored value
+      companyLogo: job.company?.logo, // Use current company logo
+      interviewLanguage: job.interviewLanguage,
       status: job.status,
       companyId: job.companyId,
       company: job.company ? {

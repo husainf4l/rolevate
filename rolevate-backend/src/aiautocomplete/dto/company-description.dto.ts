@@ -21,6 +21,10 @@ export class CompanyDescriptionRequestDto {
   @IsString()
   @IsOptional()
   currentDescription?: string;
+
+  @IsString()
+  @IsOptional()
+  website?: string;
 }
 
 export class CompanyDescriptionResponseDto {

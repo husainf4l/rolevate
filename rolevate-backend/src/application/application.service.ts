@@ -606,6 +606,7 @@ Format as strategic advice for a final interview round.`;
         jobId: job.id,
         jobTitle: job.title,
         companyId: job.companyId,
+        interviewLanguage: job.interviewLanguage || 'english',
         createdAt: new Date().toISOString(),
         type: 'interview'
       };

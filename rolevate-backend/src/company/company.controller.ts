@@ -167,20 +167,6 @@ export class CompanyController {
   @Post('upload-logo')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('logo', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadDir = join(process.cwd(), 'uploads', 'logos');
-        if (!existsSync(uploadDir)) {
-          mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-      },
-      filename: (req, file, cb) => {
-        const fileExtension = extname(file.originalname);
-        const fileName = `logo_${uuidv4()}${fileExtension}`;
-        cb(null, fileName);
-      },
-    }),
     fileFilter: (req, file, cb) => {
       // Accept only image files
       const allowedMimes = [
@@ -216,15 +202,27 @@ export class CompanyController {
       throw new UnauthorizedException('User must belong to a company to upload logo');
     }
 
-    // Update company with logo path
-    const logoPath = `logos/${file.filename}`;
-    const updatedCompany = await this.companyService.updateLogo(userCompany.id, logoPath);
+    try {
+      // Upload to S3 instead of local storage
+      const fileName = `logo_${uuidv4()}.${file.originalname.split('.').pop()}`;
+      const s3Url = await this.awsS3Service.uploadFile(
+        file.buffer,
+        fileName,
+        `logos/${userCompany.id}`
+      );
 
-    return {
-      message: 'Logo uploaded successfully',
-      logoPath,
-      company: updatedCompany
-    };
+      // Update company with S3 logo URL
+      const updatedCompany = await this.companyService.updateLogo(userCompany.id, s3Url);
+
+      return {
+        message: 'Logo uploaded successfully',
+        logoUrl: s3Url,
+        logoPath: s3Url, // Keep for backward compatibility
+        company: updatedCompany
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to upload logo to S3');
+    }
   }
 
   @Post('upload-logo-s3')

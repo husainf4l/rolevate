@@ -38,7 +38,12 @@ export class AiautocompleteController {
     if (!jobDescription) {
       throw new BadRequestException('Either jobDescription or description field is required');
     }
-    return this.aiautocompleteService.rewriteJobDescription(jobDescription);
+    
+    const serviceRequest = {
+      jobDescription
+    };
+    
+    return this.aiautocompleteService.rewriteJobDescription(serviceRequest);
   }
 
   @Post('rewrite-requirements')
