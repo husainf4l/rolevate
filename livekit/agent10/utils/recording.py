@@ -16,8 +16,6 @@ class RecordingManager:
 
     def __init__(self, ctx: JobContext):
         self.ctx = ctx
-        self.recordings_dir = "recordings"
-        os.makedirs(self.recordings_dir, exist_ok=True)
 
     async def start_recording(self) -> Optional[str]:
         """
@@ -88,30 +86,16 @@ class RecordingManager:
     def setup_transcript_saving(
         self, session: AgentSession, recording_url: Optional[str] = None
     ):
-        """Setup automatic transcript saving on session end."""
+        """Setup automatic transcript saving on session end (removed local file saving)."""
 
-        async def save_transcript():
-            filename = f"{self.recordings_dir}/transcript_{self.ctx.room.name}_{self.ctx.job.id}.json"
-
+        async def log_session_end():
             try:
-                transcript_data = {
-                    "room_name": self.ctx.room.name,
-                    "job_id": self.ctx.job.id,
-                    "timestamp": datetime.now().isoformat(),
-                    "recording_url": recording_url or "N/A",
-                    "session_history": (
-                        session.history.to_dict()
-                        if hasattr(session.history, "to_dict")
-                        else str(session.history)
-                    ),
-                }
-
-                with open(filename, "w", encoding="utf-8") as f:
-                    json.dump(transcript_data, f, indent=2, ensure_ascii=False)
-
-                logger.info(f"Transcript saved: {filename}")
+                logger.info(f"Session ended for room: {self.ctx.room.name}")
+                logger.info(f"Job ID: {self.ctx.job.id}")
+                logger.info(f"Recording URL: {recording_url or 'N/A'}")
+                logger.info("Session history logged (no local file saving)")
 
             except Exception as e:
-                logger.error(f"Failed to save transcript: {e}")
+                logger.error(f"Failed to log session end: {e}")
 
-        self.ctx.add_shutdown_callback(save_transcript)
+        self.ctx.add_shutdown_callback(log_session_end)
