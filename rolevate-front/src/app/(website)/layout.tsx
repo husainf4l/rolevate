@@ -37,9 +37,6 @@ export const metadata: Metadata = {
     description: "Transform your career with Rolevate's AI-powered job matching platform. Connect with top employers and find your perfect role.",
     images: ["/images/twitter-card.jpg"],
   },
-  alternates: {
-    canonical: "https://rolevate.com",
-  },
 };
 
 export default function WebsiteLayout({

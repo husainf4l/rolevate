@@ -60,15 +60,7 @@ export default function CorporateHero() {
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto px-2 sm:px-0">
-          <button className="group relative px-8 py-4 bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 text-base">
-            <span className="relative z-10">Schedule Enterprise Demo</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0891b2] to-[#13ead9] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
-          <button className="px-8 py-4 bg-white/70 backdrop-blur-sm text-gray-700 font-semibold rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md hover:bg-white/90 transition-all duration-300 text-base">
-            View Case Studies
-          </button>
-        </div>
+   
       </div>
     </section>
   );

@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "@/components/common/Button";
 
 export default function CorporateCTA() {
   return (
@@ -85,21 +84,7 @@ export default function CorporateCTA() {
                   </div>
                 </div>
 
-                <Button 
-                  variant="primary" 
-                  size="lg"
-                  fullWidth
-                  ripple
-                  icon={
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  }
-                  iconPosition="right"
-                  className="font-semibold"
-                >
-                  Schedule Executive Meeting
-                </Button>
+             
               </div>
             </div>
 
@@ -150,20 +135,7 @@ export default function CorporateCTA() {
                   </div>
                 </div>
 
-                <Button 
-                  variant="secondary" 
-                  size="lg"
-                  fullWidth
-                  icon={
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                    </svg>
-                  }
-                  iconPosition="left"
-                  className="font-semibold"
-                >
-                  Download Enterprise Kit
-                </Button>
+      
               </div>
             </div>
           </div>
@@ -177,28 +149,7 @@ export default function CorporateCTA() {
               </p>
             </div>
             
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              <div className="text-center group cursor-pointer">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-600 mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300">500+</div>
-                <div className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 mb-1">Enterprise Clients</div>
-                <div className="text-xs sm:text-sm text-gray-500">Fortune 500 Organizations</div>
-              </div>
-              <div className="text-center group cursor-pointer">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-600 mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300">50k+</div>
-                <div className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 mb-1">Executive Placements</div>
-                <div className="text-xs sm:text-sm text-gray-500">Senior & C-Level Positions</div>
-              </div>
-              <div className="text-center group cursor-pointer">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-600 mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300">90%</div>
-                <div className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 mb-1">Efficiency Gain</div>
-                <div className="text-xs sm:text-sm text-gray-500">Faster Screening Process</div>
-              </div>
-              <div className="text-center group cursor-pointer">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-600 mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300">24hr</div>
-                <div className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 mb-1">Rapid Implementation</div>
-                <div className="text-xs sm:text-sm text-gray-500">Enterprise Setup Time</div>
-              </div>
-            </div>
+     
           </div>       
         </div>
       </div>

@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import React from "react";
 import { Button } from "@/components/common/Button";
+
+export const metadata: Metadata = {
+  title: "About Us - Rolevate | Revolutionizing Recruitment with AI",
+  description: "Learn about Rolevate's mission to transform the recruitment industry with AI-powered job matching technology. Discover our story, values, and commitment to connecting talent with opportunity.",
+  alternates: {
+    canonical: "https://rolevate.com/about",
+  },
+};
 
 export default function About() {
   return (
