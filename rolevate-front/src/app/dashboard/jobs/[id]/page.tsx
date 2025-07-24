@@ -9,7 +9,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 export default function EditJobPage() {
   const router = useRouter();
   const params = useParams();
-  const jobId = params.id as string;
+  const jobId = params?.id as string;
 
   const [job, setJob] = useState<UpdateJobRequest | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,6 @@ export default function EditJobPage() {
           jobLevel: jobData.jobLevel || '',
           workType: jobData.workType || '',
           industry: jobData.industry || '',
-          companyDescription: jobData.companyDescription || '',
           aiCvAnalysisPrompt: jobData.cvAnalysisPrompt || jobData.aiCvAnalysisPrompt || '',
           aiFirstInterviewPrompt: jobData.interviewPrompt || jobData.aiFirstInterviewPrompt || '',
           aiSecondInterviewPrompt: jobData.aiSecondInterviewPrompt || '',
@@ -242,10 +241,6 @@ export default function EditJobPage() {
               <div>
                 <label htmlFor="education" className="block text-sm font-medium text-gray-700 mb-2">Education</label>
                 <input type="text" name="education" id="education" value={job.education} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" />
-              </div>
-              <div>
-                <label htmlFor="companyDescription" className="block text-sm font-medium text-gray-700 mb-2">Company Description</label>
-                <textarea name="companyDescription" id="companyDescription" value={job.companyDescription} onChange={handleChange} rows={4} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"></textarea>
               </div>
             </div>
           </div>
