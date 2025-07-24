@@ -14,11 +14,11 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="font-semibold text-lg mb-1">1. Introduction</h2>
             <p>
-              Rolevate ("we," "our," or "us") is committed to protecting your
+              Rolevate (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your
               privacy. This Privacy Policy explains how we collect, use,
               disclose, and safeguard your information when you use our website
               and services, including our interview platform and related
-              features (collectively, the "Service").
+              features (collectively, the &quot;Service&quot;).
             </p>
             <p>
               Please read this Privacy Policy carefully. By accessing or using

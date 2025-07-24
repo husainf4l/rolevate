@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/dashboard/Header";
 import JobList from "@/components/dashboard/JobList";
@@ -12,7 +12,7 @@ import {
 
 // Remove the local JobPost interface since we're importing it from the service
 
-export default function JobsPage() {
+function JobsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [jobPosts, setJobPosts] = useState<JobPost[]>([]);
@@ -489,5 +489,13 @@ export default function JobsPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <JobsContent />
+    </Suspense>
   );
 }

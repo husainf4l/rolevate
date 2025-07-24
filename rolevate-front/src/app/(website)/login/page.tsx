@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signin } from "@/services/auth";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -27,6 +27,7 @@ export default function LoginPage() {
       const signinParams: {
         email: string;
         password: string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         router: any;
         redirectUrl?: string;
       } = {
@@ -41,8 +42,8 @@ export default function LoginPage() {
       }
 
       await signin(signinParams);
-    } catch (err: any) {
-      setError(err.message || "Login failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
     }
@@ -165,5 +166,13 @@ export default function LoginPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

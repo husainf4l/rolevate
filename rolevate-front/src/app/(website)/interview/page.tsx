@@ -49,7 +49,7 @@ export default function InterviewPage() {
   // Generate token on component mount
   useEffect(() => {
     generateToken();
-  }, []);
+  }, [generateToken]);
 
   const handleLeaveInterview = () => {
     setRoomToken("");

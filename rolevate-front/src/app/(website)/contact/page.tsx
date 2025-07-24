@@ -37,7 +37,7 @@ export default function Contact() {
         subject: '',
         message: ''
       });
-    } catch (error) {
+    } catch {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -58,7 +58,7 @@ export default function Contact() {
             </div>
             
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1]">
-              Let's Start a{" "}
+              Let&apos;s Start a{" "}
               <span 
                 className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent font-bold"
                 style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -67,8 +67,8 @@ export default function Contact() {
             </h1>
             
             <p className="font-text text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Whether you're a job seeker looking for your next opportunity or a company seeking top talent, 
-              we're here to help you succeed.
+              Whether you&apos;re a job seeker looking for your next opportunity or a company seeking top talent, 
+              we&apos;re here to help you succeed.
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function Contact() {
               <div className="space-y-8">
                 <div>
                   <h2 className="font-display text-2xl lg:text-3xl font-bold text-gray-900 mb-6">
-                    We'd Love to Hear From You
+                    We&apos;d Love to Hear From You
                   </h2>
                   <p className="font-text text-lg text-gray-600 leading-relaxed">
                     Our team is always ready to assist you with any questions, partnerships, 
@@ -156,7 +156,7 @@ export default function Contact() {
                       <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <p className="text-green-800 font-medium">Message sent successfully! We'll get back to you soon.</p>
+                      <p className="text-green-800 font-medium">Message sent successfully! We&apos;ll get back to you soon.</p>
                     </div>
                   </div>
                 )}

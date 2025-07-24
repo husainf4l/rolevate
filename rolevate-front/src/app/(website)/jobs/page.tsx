@@ -75,6 +75,7 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<JobData[]>([]);
   const [totalJobs, setTotalJobs] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [pagination, setPagination] = useState<any>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -190,7 +191,7 @@ export default function JobsPage() {
     console.log("🎯 About to call fetchJobs(1, searchTerm)");
     fetchJobs(1, searchTerm);
     console.log("🎯 fetchJobs call completed (but async)");
-  }, [searchTerm]);
+  }, [searchTerm, fetchJobs]);
 
   // Filter jobs locally (since API doesn't support all filter types yet)
   const filteredJobs = jobs.filter((job) => {
@@ -782,7 +783,7 @@ export default function JobsPage() {
                       <div className="flex flex-wrap gap-2">
                         {searchTerm && (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            Search: "{searchTerm}"
+                            Search: &quot;{searchTerm}&quot;
                           </span>
                         )}
                         {selectedType !== "All" && (

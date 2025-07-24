@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/common/Button";
 
-export default function JoinCompanyPage() {
+function JoinCompanyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [invitationCode, setInvitationCode] = useState<string>("");
@@ -304,5 +304,13 @@ export default function JoinCompanyPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function JoinCompanyPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <JoinCompanyContent />
+    </Suspense>
   );
 }

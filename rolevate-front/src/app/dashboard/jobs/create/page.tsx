@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeftIcon, BriefcaseIcon, UserGroupIcon, DocumentTextIcon, EyeIcon } from "@heroicons/react/24/outline";
 import {
@@ -25,7 +25,7 @@ const getDefaultDeadline = () => {
   return deadline.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 };
 
-export default function CreateJobPage() {
+function CreateJobContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -620,5 +620,13 @@ export default function CreateJobPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CreateJobPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreateJobContent />
+    </Suspense>
   );
 }

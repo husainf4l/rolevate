@@ -38,8 +38,8 @@ export default function DataDeletionPage() {
           <h2 className="font-semibold text-lg mb-2">Information to Include</h2>
           <ul className="list-disc ml-6">
             <li>
-              <span className="font-semibold">Subject Line:</span> "Data
-              Deletion Request"
+              <span className="font-semibold">Subject Line:</span> &quot;Data
+              Deletion Request&quot;
             </li>
             <li>
               <span className="font-semibold">Full Name:</span> As registered on

@@ -23,7 +23,7 @@ export default function Hero() {
             <div className="absolute -bottom-6 -left-6 w-6 h-6 bg-[#0891b2] rounded-full shadow-corporate animate-pulse delay-1000"></div>
           </div>
         </div>
-        
+
         {/* Text Section - Second on Mobile */}
         <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left max-w-2xl order-2 lg:order-1">
           <div className="mb-6">
@@ -32,35 +32,29 @@ export default function Hero() {
               AI-Powered Platform
             </span>
           </div>
-          
+
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1] px-2 sm:px-0">
             Land Your Dream Job{" "}
-            <span 
+            <span
               className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent font-bold"
-              style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              style={{
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
               10x Faster
             </span>
           </h1>
-          
+
           <p className="font-text text-lg lg:text-xl text-gray-600 mb-8 max-w-xl leading-relaxed px-2 sm:px-0">
-            Transform your job search with AI-powered interviews and intelligent career matching. 
-            Connect with top employers across the Middle East faster than ever before.
+            Transform your job search with AI-powered interviews and intelligent
+            career matching. Connect with top employers across the Middle East
+            faster than ever before.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-2 sm:px-0">
-            <Button 
-              variant="hero-primary" 
-              size="md"
-              href="/jobs"
-            >
+            <Button variant="hero-primary" size="md" href="/jobs">
               Explore Opportunities
-            </Button>
-            <Button 
-              variant="hero-secondary" 
-              size="md"
-              href="/corporate"
-            >
-              See Top Companies
             </Button>
           </div>
         </div>

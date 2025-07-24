@@ -99,7 +99,7 @@ export default function CorporatePage() {
             Featured Companies
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Explore career opportunities with the region's leading employers
+            Explore career opportunities with the region&apos;s leading employers
           </p>
         </div>
 

@@ -28,6 +28,7 @@ export default function JobApplyPage() {
     experience: "",
     portfolio: "",
   });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [savedCVs, setSavedCVs] = useState<any[]>([]);
   const [selectedCVId, setSelectedCVId] = useState<string | null>(null);
   // Removed unused profileLoading
@@ -64,7 +65,7 @@ export default function JobApplyPage() {
         setSelectedCVId(cvs[0].id);
         setFormData((prev) => ({ ...prev, cv: cvs[0] }));
       }
-    } catch (err) {
+    } catch {
       // Ignore errors for now
     } finally {
       // removed setProfileLoading
@@ -294,9 +295,9 @@ export default function JobApplyPage() {
         );
       }
       setSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Application submission error:", err);
-      setError(err.message || "Failed to submit application");
+      setError(err instanceof Error ? err.message : "Failed to submit application");
     } finally {
       setSubmitting(false);
     }
@@ -768,6 +769,7 @@ export default function JobApplyPage() {
                         </svg>
                         <span>
                           {(() => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const cv = formData.cv as any;
                             if (cv && typeof cv === "object") {
                               if (

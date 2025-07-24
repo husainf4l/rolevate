@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 import { Button } from "@/components/common/Button";
 
 export default function About() {
@@ -26,7 +25,7 @@ export default function About() {
             </h1>
             
             <p className="font-text text-lg lg:text-xl text-gray-600 mb-8 max-w-xl leading-relaxed px-2 sm:px-0">
-              At Rolevate, we're transforming how talent meets opportunity in the Middle East. 
+              At Rolevate, we&apos;re transforming how talent meets opportunity in the Middle East. 
               Our AI-powered platform connects exceptional candidates with leading companies through 
               intelligent matching and seamless interview experiences.
             </p>
@@ -197,7 +196,7 @@ export default function About() {
               Ready to Transform Your Career?
             </h2>
             <p className="font-text text-xl text-gray-600 mb-8">
-              Join thousands of professionals who have found their dream jobs through Rolevate's AI-powered platform.
+              Join thousands of professionals who have found their dream jobs through Rolevate&apos;s AI-powered platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 

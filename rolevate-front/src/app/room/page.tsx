@@ -1,7 +1,7 @@
 "use client";
 
 import "@livekit/components-styles";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Room } from "livekit-client";
 import { RoomContext, RoomAudioRenderer } from "@livekit/components-react";
@@ -11,7 +11,7 @@ import { ConnectionManager } from "./components/ConnectionManager";
 import { useInterviewState } from "./hooks/useInterviewState";
 import { useRoomConnection } from "./hooks/useRoomConnection";
 
-export default function Room4Page() {
+function Room4Content() {
   const searchParams = useSearchParams();
   const [room] = useState(() => new Room());
   const connectionAttemptedRef = useRef(false);
@@ -113,5 +113,13 @@ export default function Room4Page() {
         </div>
       </div>
     </RoomContext.Provider>
+  );
+}
+
+export default function Room4Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Room4Content />
+    </Suspense>
   );
 }
