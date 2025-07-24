@@ -218,13 +218,14 @@ export class CandidateService {
       throw new NotFoundException('CV not found');
     }
 
-    // Delete the file from filesystem
-    const fs = require('fs-extra');
+    // Delete the file from S3
     try {
-      const filePath = `./uploads/cvs/${userId}/${cv.fileName}`;
-      await fs.remove(filePath);
+      if (cv.fileUrl && this.awsS3Service.isS3Url(cv.fileUrl)) {
+        await this.awsS3Service.deleteFile(cv.fileUrl);
+        console.log('✅ CV file deleted from S3:', cv.fileUrl);
+      }
     } catch (error) {
-      console.warn('Could not delete file from filesystem:', error.message);
+      console.warn('Could not delete file from S3:', error.message);
     }
 
     // Delete CV record from database
