@@ -81,7 +81,7 @@ export class CandidateController {
 
     return this.candidateService.uploadCV(
       userId,
-      file.filename,
+      file.buffer,
       file.originalname,
       file.size,
       file.mimetype,

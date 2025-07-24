@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
 import { NotificationService } from '../notification/notification.service';
+import { AwsS3Service } from '../services/aws-s3.service';
 import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
 import {
   CreateBasicCandidateProfileDto,
@@ -19,6 +20,7 @@ export class CandidateService {
     private prisma: PrismaService,
     private cacheService: CacheService,
     private notificationService: NotificationService,
+    private awsS3Service: AwsS3Service,
   ) {}
 
   async createBasicProfile(createBasicDto: CreateBasicCandidateProfileDto, userId?: string): Promise<CandidateProfileResponseDto> {
@@ -110,7 +112,7 @@ export class CandidateService {
     return this.mapToBasicProfileResponse(updatedProfile);
   }
 
-  async uploadCV(userId: string, fileName: string, originalFileName: string, fileSize?: number, mimeType?: string): Promise<CVResponseDto> {
+  async uploadCV(userId: string, fileBuffer: Buffer, originalFileName: string, fileSize?: number, mimeType?: string): Promise<CVResponseDto> {
     // First ensure the candidate profile exists
     const profile = await this.prisma.candidateProfile.findUnique({
       where: { userId },
@@ -120,9 +122,8 @@ export class CandidateService {
       throw new NotFoundException('Candidate profile not found');
     }
 
-    // Generate the public URL for the CV
-    const appDomain = process.env.APP_DOMAIN || 'http://localhost:4005';
-    const publicUrl = `${appDomain}/api/uploads/cvs/${userId}/${fileName}`;
+    // Upload file to S3
+    const s3Url = await this.awsS3Service.uploadCV(fileBuffer, originalFileName, profile.id);
 
     // Use transaction to ensure only one CV is active
     const cv = await this.prisma.$transaction(async (prisma) => {
@@ -139,9 +140,9 @@ export class CandidateService {
       // Create new CV record as active
       const newCV = await prisma.cV.create({
         data: {
-          fileName,
+          fileName: originalFileName,
           originalFileName,
-          fileUrl: publicUrl,
+          fileUrl: s3Url,
           fileSize,
           mimeType,
           status: 'UPLOADED',
@@ -153,7 +154,7 @@ export class CandidateService {
       // Update candidate profile's resumeUrl to the latest CV
       await prisma.candidateProfile.update({
         where: { id: profile.id },
-        data: { resumeUrl: publicUrl },
+        data: { resumeUrl: s3Url },
       });
 
       return newCV;

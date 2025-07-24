@@ -4,10 +4,6 @@ import { ApplicationService } from './application.service';
 import { CreateApplicationDto, CreateAnonymousApplicationDto, ApplicationResponseDto, UpdateApplicationStatusDto } from './dto/application.dto';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
-import { v4 as uuidv4 } from 'uuid';
 
 @Controller('applications')
 export class ApplicationController {
@@ -40,21 +36,6 @@ export class ApplicationController {
   @SetMetadata('skipAuth', true)
   @Post('anonymous')
   @UseInterceptors(FileInterceptor('cv', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        // Create directory for anonymous uploads
-        const uploadDir = join(process.cwd(), 'uploads', 'cvs', 'anonymous');
-        if (!existsSync(uploadDir)) {
-          mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-      },
-      filename: (req, file, cb) => {
-        const fileExtension = extname(file.originalname);
-        const fileName = `cv_${uuidv4()}${fileExtension}`;
-        cb(null, fileName);
-      },
-    }),
     fileFilter: (req, file, cb) => {
       // Accept only PDF and DOC files
       const allowedMimes = [
@@ -81,10 +62,10 @@ export class ApplicationController {
       throw new BadRequestException('CV file is required for anonymous applications');
     }
 
-    // Generate the resume URL for the uploaded file (relative to project root)
-    const resumeUrl = `uploads/cvs/anonymous/${file.filename}`;
+    // Upload CV to S3 first
+    const resumeUrl = await this.applicationService.uploadCVToS3(file.buffer, file.originalname);
 
-    // Create the full application DTO with the uploaded CV
+    // Create the full application DTO with the S3 CV URL
     const createApplicationDto: CreateApplicationDto = {
       ...createAnonymousApplicationDto,
       resumeUrl: resumeUrl,
@@ -97,21 +78,6 @@ export class ApplicationController {
   @SetMetadata('skipAuth', true)
   @Post('apply-with-cv')
   @UseInterceptors(FileInterceptor('cv', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        // Create temp directory for anonymous uploads
-        const uploadDir = join(process.cwd(), 'uploads', 'cvs', 'anonymous');
-        if (!existsSync(uploadDir)) {
-          mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-      },
-      filename: (req, file, cb) => {
-        const fileExtension = extname(file.originalname);
-        const fileName = `cv_${uuidv4()}${fileExtension}`;
-        cb(null, fileName);
-      },
-    }),
     fileFilter: (req, file, cb) => {
       // Accept only PDF and DOC files
       const allowedMimes = [
@@ -138,13 +104,36 @@ export class ApplicationController {
       throw new BadRequestException('CV file is required');
     }
 
-    // Create the resume URL for the uploaded file (relative to project root)
-    const resumeUrl = `uploads/cvs/anonymous/${file.filename}`;
+    // Upload CV to S3 first
+    const resumeUrl = await this.applicationService.uploadCVToS3(file.buffer, file.originalname);
 
-    // Create application DTO with the uploaded CV
+    // Create application DTO with the S3 CV URL
     const createApplicationDto: CreateApplicationDto = {
       ...applicationData,
       resumeUrl: resumeUrl,
+    };
+
+    // Process the anonymous application
+    return this.applicationService.createAnonymousApplication(createApplicationDto);
+  }
+
+  @SetMetadata('skipAuth', true)
+  @Post('anonymous/s3')
+  async createAnonymousApplicationWithS3URL(
+    @Body() createAnonymousApplicationDto: CreateAnonymousApplicationDto & { resumeUrl: string }
+  ): Promise<ApplicationResponseDto & { candidateCredentials?: { email: string; password: string } }> {
+    if (!createAnonymousApplicationDto.resumeUrl) {
+      throw new BadRequestException('Resume URL is required for S3 anonymous applications');
+    }
+
+    // Validate that the URL is an S3 URL
+    if (!createAnonymousApplicationDto.resumeUrl.includes('amazonaws.com')) {
+      throw new BadRequestException('Only S3 URLs are supported');
+    }
+
+    // Create application DTO with the provided S3 CV URL
+    const createApplicationDto: CreateApplicationDto = {
+      ...createAnonymousApplicationDto,
     };
 
     // Process the anonymous application

@@ -1,22 +1,6 @@
 import axios from 'axios';
-import * as fs from 'fs-extra';
-import * as path from 'path';
 const pdfParse = require('pdf-parse');
 import mammoth from 'mammoth';
-
-export async function downloadFile(url: string, dest: string): Promise<void> {
-  const writer = fs.createWriteStream(dest);
-  const response = await axios({
-    url,
-    method: 'GET',
-    responseType: 'stream',
-  });
-  response.data.pipe(writer);
-  return new Promise((resolve, reject) => {
-    writer.on('finish', resolve);
-    writer.on('error', reject);
-  });
-}
 
 export async function downloadFileBuffer(url: string): Promise<Buffer> {
   console.log('📥 Downloading file buffer from URL:', url);
@@ -36,52 +20,25 @@ export async function extractTextFromCV(fileUrl: string): Promise<string> {
     throw new Error('Invalid file URL provided');
   }
 
-  const ext = path.extname(fileUrl).toLowerCase() || '.pdf';
+  // Extract file extension from URL
+  const urlParts = fileUrl.split('.');
+  const ext = urlParts.length > 1 ? '.' + urlParts[urlParts.length - 1].toLowerCase().split('?')[0] : '.pdf';
   console.log('📎 File extension detected:', ext);
   
   if (!ext || !['.pdf', '.docx', '.doc', '.txt'].includes(ext)) {
     throw new Error(`Unsupported file type: ${ext}. Supported types: .pdf, .docx, .doc, .txt`);
   }
 
-  // Check if it's a remote URL (S3, HTTP) or local file
-  const isRemoteFile = fileUrl.startsWith('http') || fileUrl.includes('amazonaws.com');
-  const isLocalFile = fileUrl.startsWith('/') || fileUrl.includes('uploads/cvs/') || fileUrl.startsWith('/api/uploads/');
+  // All CV files are now stored in S3
+  const isS3File = fileUrl.startsWith('http') || fileUrl.includes('amazonaws.com');
   
   let fileBuffer: Buffer;
 
-  if (isRemoteFile) {
-    console.log('🌐 Processing remote file (S3/HTTP)...');
+  if (isS3File) {
+    console.log('☁️ Processing S3 file...');
     fileBuffer = await downloadFileBuffer(fileUrl);
-  } else if (isLocalFile) {
-    console.log('📁 Processing local file...');
-    
-    // Clean up the path to remove API prefix and construct proper local path
-    let localPath = fileUrl;
-    
-    // Remove /api prefix if present
-    if (localPath.startsWith('/api/')) {
-      localPath = localPath.replace('/api/', '');
-    }
-    
-    // Remove leading slash if present (for relative paths)
-    if (localPath.startsWith('/uploads/')) {
-      localPath = localPath.substring(1); // Remove leading slash to make it relative
-    }
-    
-    // Construct full path from project root
-    const fullPath = path.join(process.cwd(), localPath);
-    
-    console.log('📁 Original URL:', fileUrl);
-    console.log('📁 Cleaned path:', localPath);
-    console.log('📁 Full path:', fullPath);
-    
-    if (!(await fs.pathExists(fullPath))) {
-      throw new Error(`Local file not found: ${fullPath}`);
-    }
-    
-    fileBuffer = await fs.readFile(fullPath);
   } else {
-    throw new Error('Unsupported file URL format');
+    throw new Error('Only S3 URLs are supported. All CV files must be stored in AWS S3.');
   }
   
   try {

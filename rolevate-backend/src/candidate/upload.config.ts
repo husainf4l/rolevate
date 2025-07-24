@@ -1,38 +1,19 @@
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import { ensureDirSync } from 'fs-extra';
+import { memoryStorage } from 'multer';
 
 export const multerConfig = {
-  storage: diskStorage({
-    destination: (req, file, cb) => {
-      const user = req.user as any;
-      const userId = user?.userId;
-      
-      if (!userId) {
-        return cb(new Error('User not authenticated'), '');
-      }
-      
-      const uploadPath = `./uploads/cvs/${userId}`;
-      // Ensure directory exists
-      ensureDirSync(uploadPath);
-      cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-      const user = req.user as any;
-      const userId = user?.userId;
-      const uniqueId = uuidv4();
-      const fileExtension = extname(file.originalname);
-      const filename = `cv_${uniqueId}${fileExtension}`;
-      cb(null, filename);
-    },
-  }),
+  storage: memoryStorage(), // Use memory storage for S3 uploads
   fileFilter: (req, file, cb) => {
-    // Only allow PDF files
-    if (file.mimetype === 'application/pdf') {
+    // Allow PDF, DOC, and DOCX files
+    const allowedMimes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF files are allowed'), false);
+      cb(new Error('Only PDF and DOC/DOCX files are allowed'), false);
     }
   },
   limits: {
@@ -40,6 +21,6 @@ export const multerConfig = {
   },
 };
 
-export const createUploadPath = (userId: string): string => {
-  return `./uploads/cvs/${userId}`;
+export const createS3UploadPath = (userId: string): string => {
+  return `cvs/${userId}`;
 };

@@ -358,6 +358,15 @@ export class ApplicationService {
     });
   }
 
+  async uploadCVToS3(fileBuffer: Buffer, originalName: string, candidateId?: string): Promise<string> {
+    try {
+      return await this.awsS3Service.uploadCV(fileBuffer, originalName, candidateId || 'anonymous');
+    } catch (error) {
+      console.error('Failed to upload CV to S3:', error);
+      throw new BadRequestException('Failed to upload CV to S3');
+    }
+  }
+
   private generateRandomPassword(): string {
     const length = 12;
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';

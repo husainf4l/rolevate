@@ -1,22 +1,19 @@
 import { Module } from '@nestjs/common';
-import { MulterModule } from '@nestjs/platform-express';
 import { CandidateController } from './candidate.controller';
 import { CandidateService } from './candidate.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AppCacheModule } from '../cache/cache.module';
 import { NotificationModule } from '../notification/notification.module';
+import { AwsS3Service } from '../services/aws-s3.service';
 
 @Module({
   imports: [
     PrismaModule, 
     AppCacheModule,
     NotificationModule,
-    MulterModule.register({
-      dest: './uploads',
-    }),
   ],
   controllers: [CandidateController],
-  providers: [CandidateService],
+  providers: [CandidateService, AwsS3Service],
   exports: [CandidateService],
 })
 export class CandidateModule {}
