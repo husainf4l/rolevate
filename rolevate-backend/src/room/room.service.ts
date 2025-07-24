@@ -26,7 +26,7 @@ export class RoomService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly liveKitService: LiveKitService,
-  ) {}
+  ) { }
 
   async leaveRoom(leaveRoomDto: LeaveRoomDto) {
     const { candidateId, roomName } = leaveRoomDto;
@@ -79,11 +79,11 @@ export class RoomService {
 
     } catch (error) {
       console.error('Error leaving room:', error);
-      
+
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      
+
       throw new BadRequestException('Failed to leave interview room');
     }
   }
@@ -167,11 +167,11 @@ export class RoomService {
 
     } catch (error) {
       console.error('Error getting room status:', error);
-      
+
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      
+
       throw new BadRequestException('Failed to get room status');
     }
   }
@@ -236,11 +236,11 @@ export class RoomService {
 
     } catch (error) {
       console.error('Error refreshing token:', error);
-      
+
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      
+
       throw new BadRequestException('Failed to refresh token');
     }
   }
@@ -248,10 +248,10 @@ export class RoomService {
   async getLiveKitServerStatus(roomName: string) {
     try {
       console.log(`🔍 Getting real-time LiveKit server status for room: ${roomName}`);
-      
+
       // Get real-time status from LiveKit server
       const serverStatus = await this.liveKitService.getLiveKitRoomStatus(roomName);
-      
+
       // Also get database status for comparison
       const dbRoom = await this.prisma.liveKitRoom.findFirst({
         where: { name: roomName }
@@ -293,13 +293,28 @@ export class RoomService {
       console.log(`🔄 Creating new interview room for phone: ${phone}, jobId: ${jobId}`);
 
       // Step 1: Find the application/candidate
+      // Clean phone number (remove + and any spaces/special chars) to match format used elsewhere
+      const cleanPhone = phone.replace(/[\+\s\-\(\)]/g, '');
+      console.log(`🔍 Looking for application with jobId: ${jobId}, original phone: ${phone}, cleanPhone: ${cleanPhone}`);
+
       const application = await this.prisma.application.findFirst({
         where: {
           jobId: jobId,
           candidate: {
-            phone: {
-              contains: phone.replace('+', '') // Support both +962 and 962 formats
-            }
+            OR: [
+              // Try exact match with cleaned phone
+              { phone: cleanPhone },
+              // Try contains with cleaned phone
+              { phone: { contains: cleanPhone } },
+              // Try exact match with original phone
+              { phone: phone },
+              // Try contains with original phone
+              { phone: { contains: phone } },
+              // Try matching last 8 digits (common phone number length)
+              { phone: { endsWith: cleanPhone.slice(-8) } },
+              // Try matching without country code if present
+              ...(cleanPhone.length > 8 ? [{ phone: { contains: cleanPhone.slice(-8) } }] : []),
+            ]
           }
         },
         include: {
@@ -326,8 +341,32 @@ export class RoomService {
       });
 
       if (!application) {
+        // Debug: Let's check if there are any applications for this job
+        const jobApplications = await this.prisma.application.findMany({
+          where: { jobId: jobId },
+          include: {
+            candidate: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                phone: true
+              }
+            }
+          }
+        });
+
+        console.log(`❌ No application found for jobId: ${jobId}, original phone: ${phone}, cleanPhone: ${cleanPhone}`);
+        console.log(`📋 Found ${jobApplications.length} applications for this job:`);
+        jobApplications.forEach(app => {
+          const candidateCleanPhone = app.candidate.phone?.replace(/[\+\s\-\(\)]/g, '') || '';
+          console.log(`  - Candidate: ${app.candidate.firstName} ${app.candidate.lastName}, Phone: ${app.candidate.phone}, Clean: ${candidateCleanPhone}`);
+        });
+
         throw new NotFoundException('Application not found for the given jobId and phone');
       }
+
+      console.log(`✅ Found application: ${application.candidate.firstName} ${application.candidate.lastName} (Phone: ${application.candidate.phone}) for job: ${application.job.title}`);
 
       // Step 2: Generate room name with timestamp
       const timestamp = Date.now();
@@ -353,10 +392,10 @@ export class RoomService {
 
       // Step 4: Create room on LiveKit server AND database with metadata
       const participantName = `${application.candidate.firstName} ${application.candidate.lastName}`;
-      
+
       console.log(`🏗️ Creating room on LiveKit server: ${roomName}`);
       console.log(`📋 Metadata includes: job, company, candidate, application details`);
-      
+
       const { room: newRoom, token } = await this.liveKitService.createRoomWithToken(
         roomName,
         newMetadata,
@@ -380,7 +419,7 @@ export class RoomService {
         candidateId: application.candidateId,
         liveKitUrl: process.env.LIVEKIT_URL,
         expiresAt: new Date(Date.now() + (2 * 60 * 60 * 1000)).toISOString(),
-        
+
         // Simple interview context for agent
         interviewContext: {
           candidateName: newMetadata.candidateName,
@@ -389,7 +428,7 @@ export class RoomService {
           interviewPrompt: newMetadata.interviewPrompt,
           cvAnalysis: newMetadata.cvAnalysis
         },
-        
+
         // Summary for quick reference
         interviewSummary: {
           candidateName: newMetadata.candidateName,
@@ -397,7 +436,7 @@ export class RoomService {
           company: newMetadata.companyName,
           interviewType: "video_interview"
         },
-        
+
         message: 'Interview room created with minimal metadata sent to LiveKit server. AI agent will have access to essential interview information.',
         instructions: {
           step1: 'Use the provided token to join the LiveKit room',
@@ -409,11 +448,11 @@ export class RoomService {
 
     } catch (error) {
       console.error('Error creating new room:', error);
-      
+
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      
+
       throw new BadRequestException('Failed to create new room');
     }
   }
@@ -421,13 +460,13 @@ export class RoomService {
   async closeAllLiveKitSessions() {
     try {
       console.log('🧹 Initiating closure of all LiveKit sessions...');
-      
+
       // Use the LiveKit service to close all sessions
       const result = await this.liveKitService.closeAllSessions();
-      
+
       if (result.success) {
         console.log(`✅ Successfully closed ${result.roomsClosed} rooms`);
-        
+
         return {
           success: true,
           message: result.message,
@@ -443,14 +482,14 @@ export class RoomService {
         console.log('❌ Failed to close sessions:', result.error);
         throw new BadRequestException(`Failed to close sessions: ${result.error}`);
       }
-      
+
     } catch (error) {
       console.error('Error closing all LiveKit sessions:', error);
-      
+
       if (error instanceof BadRequestException) {
         throw error;
       }
-      
+
       throw new BadRequestException('Failed to close all LiveKit sessions');
     }
   }

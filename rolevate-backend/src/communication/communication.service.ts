@@ -2,9 +2,9 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { CommunicationType, CommunicationDirection, CommunicationStatus } from '@prisma/client';
-import { 
-  CreateCommunicationDto, 
-  SendWhatsAppDto, 
+import {
+  CreateCommunicationDto,
+  SendWhatsAppDto,
   CommunicationFiltersDto
 } from './dto/communication.dto';
 
@@ -13,7 +13,7 @@ export class CommunicationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly whatsappService: WhatsAppService,
-  ) {}
+  ) { }
 
   async findByCompany(companyId: string, filters: CommunicationFiltersDto) {
     const { page = 1, limit = 20, candidateId, jobId, type, status, dateFrom, dateTo } = filters;
@@ -99,6 +99,9 @@ export class CommunicationService {
   }
 
   async create(data: CreateCommunicationDto) {
+    // Extract template-related fields that are not part of the database model
+    const { templateName, templateParams, ...dbData } = data;
+
     // Verify candidate and company exist
     const candidate = await this.prisma.candidateProfile.findUnique({
       where: { id: data.candidateId },
@@ -138,17 +141,17 @@ export class CommunicationService {
 
         // Send WhatsApp message
         console.log(`Sending WhatsApp message to ${candidate.phone}: ${data.content}`);
-        
+
         let whatsappResult;
-        
-        if (data.templateName) {
+
+        if (templateName) {
           // Send template message with parameters
-          console.log(`Using template: ${data.templateName} with params:`, data.templateParams);
+          console.log(`Using template: ${templateName} with params:`, templateParams);
           whatsappResult = await this.whatsappService.sendTemplateMessage(
             candidate.phone,
-            data.templateName,
+            templateName,
             undefined, // Auto-detect language
-            data.templateParams
+            templateParams
           );
         } else {
           // Send regular text message
@@ -157,10 +160,10 @@ export class CommunicationService {
             data.content
           );
         }
-        
+
         whatsappId = whatsappResult.messages?.[0]?.id;
         console.log(`WhatsApp message sent successfully. Message ID: ${whatsappId}`);
-        
+
       } catch (error) {
         console.error('Failed to send WhatsApp message:', error.message);
         communicationStatus = CommunicationStatus.FAILED;
@@ -170,7 +173,7 @@ export class CommunicationService {
 
     return this.prisma.communication.create({
       data: {
-        ...data,
+        ...dbData,
         status: communicationStatus,
         whatsappId,
         phoneNumber: candidate.phone,
