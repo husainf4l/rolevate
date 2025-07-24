@@ -11,6 +11,21 @@ import { applyToJob, uploadCV } from "@/services/application";
 import { AnonymousApplicationService } from "@/services/anonymousApplication";
 import { getCurrentUser } from "@/services/auth";
 
+// Middle Eastern country codes
+const MIDDLE_EAST_COUNTRY_CODES = [
+  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦" },
+  { code: "+971", country: "UAE", flag: "🇦🇪" },
+  { code: "+974", country: "Qatar", flag: "🇶🇦" },
+  { code: "+965", country: "Kuwait", flag: "🇰🇼" },
+  { code: "+973", country: "Bahrain", flag: "🇧🇭" },
+  { code: "+968", country: "Oman", flag: "🇴🇲" },
+  { code: "+962", country: "Jordan", flag: "🇯🇴" },
+  { code: "+961", country: "Lebanon", flag: "🇱🇧" },
+  { code: "+963", country: "Syria", flag: "🇸🇾" },
+  { code: "+964", country: "Iraq", flag: "🇮🇶" },
+  { code: "+972", country: "Palestine", flag: "🇵🇸" },
+];
+
 export default function JobApplyPage() {
   const router = useRouter();
   const params = useParams();
@@ -23,6 +38,7 @@ export default function JobApplyPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    countryCode: "+962", // Default to Jordan
     phone: "",
     cv: null as File | null,
     coverLetter: "",
@@ -53,11 +69,32 @@ export default function JobApplyPage() {
     if (!isAuthenticated || !isCandidate) return;
     // removed setProfileLoading
     try {
+      // Parse existing phone number to extract country code and number
+      const parsePhoneNumber = (phoneNumber: string) => {
+        if (!phoneNumber) return { countryCode: "+966", phone: "" };
+
+        // Find matching country code
+        for (const country of MIDDLE_EAST_COUNTRY_CODES) {
+          if (phoneNumber.startsWith(country.code)) {
+            return {
+              countryCode: country.code,
+              phone: phoneNumber.slice(country.code.length),
+            };
+          }
+        }
+
+        // If no country code found, assume it's a local number
+        return { countryCode: "+966", phone: phoneNumber };
+      };
+
+      const parsedPhone = parsePhoneNumber(user?.phone || "");
+
       setFormData((prev) => ({
         ...prev,
         name: user?.name || prev.name,
         email: user?.email || prev.email,
-        phone: user?.phone || prev.phone,
+        countryCode: parsedPhone.countryCode,
+        phone: parsedPhone.phone,
       }));
       // Get saved CVs from candidateProfile
       const cvs = user.candidateProfile?.cvs || [];
@@ -274,7 +311,9 @@ export default function JobApplyPage() {
         console.log("Processing anonymous user application...");
         // Anonymous user flow - send CV directly as multipart form data
         if (!formData.cv || !(formData.cv instanceof File)) {
-          setSubmissionError("Please upload a CV before submitting your application.");
+          setSubmissionError(
+            "Please upload a CV before submitting your application."
+          );
           setSubmitting(false);
           return;
         }
@@ -290,7 +329,7 @@ export default function JobApplyPage() {
           firstName,
           lastName,
           formData.email,
-          formData.phone,
+          `${formData.countryCode}${formData.phone}`, // Combine country code with phone number
           formData.portfolio || undefined,
           formData.coverLetter || undefined
         );
@@ -298,32 +337,47 @@ export default function JobApplyPage() {
       setSuccess(true);
     } catch (err: unknown) {
       console.error("Application submission error:", err);
-      
+
       // Handle specific error cases
       if (err instanceof Error) {
         // Try to parse JSON error response
         try {
           const errorData = JSON.parse(err.message);
           if (errorData.statusCode === 409) {
-            setSubmissionError("You have already applied for this job. Please check your applications in your dashboard.");
+            setSubmissionError(
+              "You have already applied for this job. Please check your applications in your dashboard."
+            );
           } else {
             setSubmissionError(errorData.message || err.message);
           }
         } catch {
           // If it's not JSON, use the error message directly
-          if (err.message.includes("already applied") || err.message.includes("Conflict")) {
-            setSubmissionError("You have already applied for this job. Please check your applications in your dashboard.");
+          if (
+            err.message.includes("already applied") ||
+            err.message.includes("Conflict")
+          ) {
+            setSubmissionError(
+              "You have already applied for this job. Please check your applications in your dashboard."
+            );
           } else {
             setSubmissionError(err.message);
           }
         }
-      } else if (typeof err === 'object' && err !== null) {
+      } else if (typeof err === "object" && err !== null) {
         // Handle error objects with statusCode
-        const errorObj = err as { statusCode?: number; message?: string; error?: string };
+        const errorObj = err as {
+          statusCode?: number;
+          message?: string;
+          error?: string;
+        };
         if (errorObj.statusCode === 409) {
-          setSubmissionError("You have already applied for this job. Please check your applications in your dashboard.");
+          setSubmissionError(
+            "You have already applied for this job. Please check your applications in your dashboard."
+          );
         } else {
-          setSubmissionError(errorObj.message || errorObj.error || "Failed to submit application");
+          setSubmissionError(
+            errorObj.message || errorObj.error || "Failed to submit application"
+          );
         }
       } else {
         setSubmissionError("Failed to submit application");
@@ -575,7 +629,9 @@ export default function JobApplyPage() {
                       <p className="font-semibold text-gray-900 text-sm lg:text-base">
                         {job.location}
                       </p>
-                      <p className="text-xs lg:text-sm text-gray-600">{job.type}</p>
+                      <p className="text-xs lg:text-sm text-gray-600">
+                        {job.type}
+                      </p>
                     </div>
                   </div>
 
@@ -632,7 +688,14 @@ export default function JobApplyPage() {
 
                 {/* Simplified description for mobile */}
                 <div className="lg:hidden p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <p className="text-gray-700 text-sm leading-relaxed line-clamp-3 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                  <p
+                    className="text-gray-700 text-sm leading-relaxed line-clamp-3 overflow-hidden"
+                    style={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                    }}
+                  >
                     {job.description}
                   </p>
                 </div>
@@ -653,7 +716,10 @@ export default function JobApplyPage() {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-4 lg:p-8 space-y-6 lg:space-y-8">
+              <form
+                onSubmit={handleSubmit}
+                className="p-4 lg:p-8 space-y-6 lg:space-y-8"
+              >
                 {/* Error Display */}
                 {submissionError && (
                   <div className="p-3 lg:p-4 bg-red-50 border border-red-200 rounded-xl lg:rounded-2xl">
@@ -677,7 +743,9 @@ export default function JobApplyPage() {
                         <h3 className="text-sm font-semibold text-red-800 mb-1">
                           Application Error
                         </h3>
-                        <p className="text-sm text-red-700">{submissionError}</p>
+                        <p className="text-sm text-red-700">
+                          {submissionError}
+                        </p>
                         {submissionError.includes("already applied") && (
                           <div className="mt-3">
                             <Button
@@ -692,7 +760,9 @@ export default function JobApplyPage() {
                               }}
                               className="text-sm"
                             >
-                              {isAuthenticated ? "View My Applications" : "Login to View Applications"}
+                              {isAuthenticated
+                                ? "View My Applications"
+                                : "Login to View Applications"}
                             </Button>
                           </div>
                         )}
@@ -780,16 +850,44 @@ export default function JobApplyPage() {
                     <label className="block text-sm font-medium text-gray-700">
                       Phone Number <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={(e) =>
-                        handleInputChange("phone", e.target.value)
-                      }
-                      className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 text-sm lg:text-base"
-                      placeholder="+966 5XXXXXXXX"
-                    />
+                    <div className="flex space-x-2">
+                      {/* Country Code Selector */}
+                      <select
+                        value={formData.countryCode}
+                        onChange={(e) =>
+                          handleInputChange("countryCode", e.target.value)
+                        }
+                        className="px-2 lg:px-3 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 text-sm lg:text-base min-w-0 flex-shrink-0"
+                        style={{ width: "120px" }}
+                        title="Select country code"
+                      >
+                        {MIDDLE_EAST_COUNTRY_CODES.map((country) => (
+                          <option
+                            key={country.code}
+                            value={country.code}
+                            title={country.country}
+                          >
+                            {country.flag} {country.code}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Phone Number Input */}
+                      <input
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
+                        className="flex-1 px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 text-sm lg:text-base"
+                        placeholder="790002033"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Select your country code and enter your phone number
+                      without the country code
+                    </p>
                   </div>
                 </div>
 
