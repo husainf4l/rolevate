@@ -18,6 +18,7 @@ export default function JobApplyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -72,7 +73,7 @@ export default function JobApplyPage() {
     }
   }, [isAuthenticated, isCandidate, user]);
 
-  const jobId = params.jobId as string;
+  const jobId = params?.jobId as string;
 
   // Helper function to convert JobPost to JobData format (same as job details page)
   const convertJobPostToJobData = (jobPost: JobPost): JobData => {
@@ -203,7 +204,7 @@ export default function JobApplyPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setError(null);
+    setSubmissionError(null);
 
     console.log("Submit handler called");
     console.log("isAuthenticated:", isAuthenticated);
@@ -219,13 +220,13 @@ export default function JobApplyPage() {
           const currentUser = await getCurrentUser();
           console.log("Current user from API:", currentUser);
           if (!currentUser) {
-            setError("Authentication expired. Please log in again.");
+            setSubmissionError("Authentication expired. Please log in again.");
             setSubmitting(false);
             return;
           }
         } catch (authError) {
           console.error("Authentication check failed:", authError);
-          setError("Authentication expired. Please log in again.");
+          setSubmissionError("Authentication expired. Please log in again.");
           setSubmitting(false);
           return;
         }
@@ -252,7 +253,7 @@ export default function JobApplyPage() {
           typeof resumeUrl !== "string" ||
           !/^https?:\/\//.test(resumeUrl)
         ) {
-          setError(
+          setSubmissionError(
             "Please select or upload a valid CV before submitting your application."
           );
           setSubmitting(false);
@@ -273,7 +274,7 @@ export default function JobApplyPage() {
         console.log("Processing anonymous user application...");
         // Anonymous user flow - send CV directly as multipart form data
         if (!formData.cv || !(formData.cv instanceof File)) {
-          setError("Please upload a CV before submitting your application.");
+          setSubmissionError("Please upload a CV before submitting your application.");
           setSubmitting(false);
           return;
         }
@@ -297,7 +298,36 @@ export default function JobApplyPage() {
       setSuccess(true);
     } catch (err: unknown) {
       console.error("Application submission error:", err);
-      setError(err instanceof Error ? err.message : "Failed to submit application");
+      
+      // Handle specific error cases
+      if (err instanceof Error) {
+        // Try to parse JSON error response
+        try {
+          const errorData = JSON.parse(err.message);
+          if (errorData.statusCode === 409) {
+            setSubmissionError("You have already applied for this job. Please check your applications in your dashboard.");
+          } else {
+            setSubmissionError(errorData.message || err.message);
+          }
+        } catch {
+          // If it's not JSON, use the error message directly
+          if (err.message.includes("already applied") || err.message.includes("Conflict")) {
+            setSubmissionError("You have already applied for this job. Please check your applications in your dashboard.");
+          } else {
+            setSubmissionError(err.message);
+          }
+        }
+      } else if (typeof err === 'object' && err !== null) {
+        // Handle error objects with statusCode
+        const errorObj = err as { statusCode?: number; message?: string; error?: string };
+        if (errorObj.statusCode === 409) {
+          setSubmissionError("You have already applied for this job. Please check your applications in your dashboard.");
+        } else {
+          setSubmissionError(errorObj.message || errorObj.error || "Failed to submit application");
+        }
+      } else {
+        setSubmissionError("Failed to submit application");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -483,32 +513,32 @@ export default function JobApplyPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-8">
           {/* Job Summary Card */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden sticky top-24">
+            <div className="bg-white rounded-2xl lg:rounded-3xl shadow-lg lg:shadow-xl border border-gray-200 overflow-hidden lg:sticky lg:top-24">
               {/* Job Header */}
-              <div className="bg-gradient-to-r from-[#0891b2] to-[#13ead9] p-8 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full transform translate-x-16 -translate-y-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full transform -translate-x-12 translate-y-12"></div>
+              <div className="bg-gradient-to-r from-[#0891b2] to-[#13ead9] p-4 lg:p-8 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 lg:w-32 h-20 lg:h-32 bg-white/10 rounded-full transform translate-x-10 lg:translate-x-16 -translate-y-10 lg:-translate-y-16"></div>
+                <div className="absolute bottom-0 left-0 w-16 lg:w-24 h-16 lg:h-24 bg-white/10 rounded-full transform -translate-x-8 lg:-translate-x-12 translate-y-8 lg:translate-y-12"></div>
                 <div className="relative">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+                  <div className="flex items-center space-x-3 lg:space-x-4 mb-4 lg:mb-6">
+                    <div className="w-12 h-12 lg:w-16 lg:h-16 bg-white/20 backdrop-blur-sm rounded-xl lg:rounded-2xl flex items-center justify-center text-2xl lg:text-3xl shadow-lg">
                       {job.logo}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-2xl font-bold truncate">
+                      <h2 className="text-lg lg:text-2xl font-bold truncate">
                         {job.title}
                       </h2>
-                      <p className="text-white/90 font-medium">
+                      <p className="text-white/90 font-medium text-sm lg:text-base">
                         {typeof job.company === "string"
                           ? job.company
                           : job.company}
                       </p>
                     </div>
                     {job.urgent && (
-                      <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-3 py-2 rounded-full text-xs font-bold animate-pulse shadow-lg">
+                      <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-2 lg:px-3 py-1 lg:py-2 rounded-full text-xs font-bold animate-pulse shadow-lg">
                         URGENT
                       </span>
                     )}
@@ -517,12 +547,12 @@ export default function JobApplyPage() {
               </div>
 
               {/* Job Details */}
-              <div className="p-8 space-y-6">
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                    <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
+              <div className="p-4 lg:p-8 space-y-4 lg:space-y-6">
+                <div className="grid grid-cols-1 gap-3 lg:gap-4">
+                  <div className="flex items-center space-x-3 p-3 lg:p-4 bg-gray-50 rounded-xl lg:rounded-2xl border border-gray-200">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gray-200 rounded-lg lg:rounded-xl flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-gray-600"
+                        className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -542,17 +572,17 @@ export default function JobApplyPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-gray-900 text-sm lg:text-base">
                         {job.location}
                       </p>
-                      <p className="text-sm text-gray-600">{job.type}</p>
+                      <p className="text-xs lg:text-sm text-gray-600">{job.type}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                    <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
+                  <div className="flex items-center space-x-3 p-3 lg:p-4 bg-gray-50 rounded-xl lg:rounded-2xl border border-gray-200">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gray-200 rounded-lg lg:rounded-xl flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-gray-600"
+                        className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -566,10 +596,10 @@ export default function JobApplyPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900 text-lg">
+                      <p className="font-bold text-gray-900 text-base lg:text-lg">
                         {job.salary}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-xs lg:text-sm text-gray-600">
                         Competitive package
                       </p>
                     </div>
@@ -577,7 +607,7 @@ export default function JobApplyPage() {
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-3 flex items-center space-x-2">
+                  <h3 className="font-bold text-gray-900 mb-2 lg:mb-3 flex items-center space-x-2 text-sm lg:text-base">
                     <div className="w-2 h-2 bg-[#0891b2] rounded-full"></div>
                     <span>Required Skills</span>
                   </h3>
@@ -585,7 +615,7 @@ export default function JobApplyPage() {
                     {(job.skills || []).map((skill: string, idx: number) => (
                       <span
                         key={idx}
-                        className="px-3 py-2 rounded-xl text-sm font-semibold border border-[#0891b2]/20 hover:scale-105 transition-transform cursor-default"
+                        className="px-2 lg:px-3 py-1 lg:py-2 rounded-lg lg:rounded-xl text-xs lg:text-sm font-semibold border border-[#0891b2]/20 hover:scale-105 transition-transform cursor-default"
                       >
                         {skill}
                       </span>
@@ -593,8 +623,16 @@ export default function JobApplyPage() {
                   </div>
                 </div>
 
-                <div className="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                {/* Hide description on mobile to save space */}
+                <div className="hidden lg:block p-6 bg-gray-50 rounded-2xl border border-gray-200">
                   <p className="text-gray-700 leading-relaxed">
+                    {job.description}
+                  </p>
+                </div>
+
+                {/* Simplified description for mobile */}
+                <div className="lg:hidden p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <p className="text-gray-700 text-sm leading-relaxed line-clamp-3 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
                     {job.description}
                   </p>
                 </div>
@@ -604,24 +642,71 @@ export default function JobApplyPage() {
 
           {/* Application Form */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
-              <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
-                <h2 className="text-2xl font-bold text-gray-900">
+            <div className="bg-white rounded-2xl lg:rounded-3xl shadow-lg lg:shadow-xl border border-gray-200 overflow-hidden">
+              <div className="bg-gray-50 px-4 lg:px-8 py-4 lg:py-6 border-b border-gray-200">
+                <h2 className="text-xl lg:text-2xl font-bold text-gray-900">
                   Submit Your Application
                 </h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-gray-600 mt-1 text-sm lg:text-base">
                   Please fill out all required fields to complete your
                   application
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-8 space-y-8">
+              <form onSubmit={handleSubmit} className="p-4 lg:p-8 space-y-6 lg:space-y-8">
+                {/* Error Display */}
+                {submissionError && (
+                  <div className="p-3 lg:p-4 bg-red-50 border border-red-200 rounded-xl lg:rounded-2xl">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        <svg
+                          className="w-5 h-5 lg:w-6 lg:h-6 text-red-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-semibold text-red-800 mb-1">
+                          Application Error
+                        </h3>
+                        <p className="text-sm text-red-700">{submissionError}</p>
+                        {submissionError.includes("already applied") && (
+                          <div className="mt-3">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={() => {
+                                if (isAuthenticated) {
+                                  router.push("/userdashboard/applications");
+                                } else {
+                                  router.push("/login");
+                                }
+                              }}
+                              className="text-sm"
+                            >
+                              {isAuthenticated ? "View My Applications" : "Login to View Applications"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Login Option - Prominently placed at top (only if not authenticated) */}
                 {!isAuthenticated && (
-                  <div className="p-6 bg-blue-50 border border-blue-200 rounded-2xl">
-                    <div className="flex items-center justify-between">
+                  <div className="p-4 lg:p-6 bg-blue-50 border border-blue-200 rounded-xl lg:rounded-2xl">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-blue-900 mb-1">
+                        <h3 className="text-base lg:text-lg font-semibold text-blue-900 mb-1">
                           Already have an account?
                         </h3>
                         <p className="text-sm text-blue-700">
@@ -640,7 +725,7 @@ export default function JobApplyPage() {
                           const loginUrl = `/login?redirect=${redirectUrl}`;
                           window.location.href = loginUrl;
                         }}
-                        className="ml-4"
+                        className="lg:ml-4 w-full lg:w-auto"
                       >
                         Login
                       </Button>
@@ -649,15 +734,15 @@ export default function JobApplyPage() {
                 )}
 
                 {/* Personal Information */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="space-y-4 lg:space-y-6">
+                  <h3 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-gray-100 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
                     </div>
                     <span>Personal Information</span>
                   </h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-gray-700">
                         Full Name <span className="text-red-500">*</span>
@@ -669,7 +754,7 @@ export default function JobApplyPage() {
                         onChange={(e) =>
                           handleInputChange("name", e.target.value)
                         }
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500"
+                        className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 text-sm lg:text-base"
                         placeholder="Enter your full name"
                       />
                     </div>
@@ -685,7 +770,7 @@ export default function JobApplyPage() {
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
                         }
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500"
+                        className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 text-sm lg:text-base"
                         placeholder="your.email@example.com"
                       />
                     </div>
@@ -702,16 +787,16 @@ export default function JobApplyPage() {
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
                       }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 text-sm lg:text-base"
                       placeholder="+966 5XXXXXXXX"
                     />
                   </div>
                 </div>
 
                 {/* CV Upload / Saved CVs */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="space-y-4 lg:space-y-6">
+                  <h3 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-gray-100 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
                     </div>
                     <span>Documents</span>
@@ -725,7 +810,7 @@ export default function JobApplyPage() {
                       <select
                         value={selectedCVId || ""}
                         onChange={(e) => handleCVSelect(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900"
+                        className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 text-sm lg:text-base"
                       >
                         {savedCVs.map((cv) => (
                           <option key={cv.id} value={cv.id}>
@@ -749,7 +834,7 @@ export default function JobApplyPage() {
                         required={!selectedCVId}
                         accept=".pdf,.doc,.docx"
                         onChange={handleFileChange}
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+                        className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-sm lg:text-base file:mr-2 lg:file:mr-4 file:py-1 lg:file:py-2 file:px-2 lg:file:px-4 file:rounded-lg lg:file:rounded-xl file:border-0 file:text-xs lg:file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                       />
                     </div>
                     {formData.cv && (
@@ -799,16 +884,16 @@ export default function JobApplyPage() {
                       onChange={(e) =>
                         handleInputChange("portfolio", e.target.value)
                       }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 text-sm lg:text-base"
                       placeholder="https://your-portfolio.com"
                     />
                   </div>
                 </div>
 
                 {/* Additional Information */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="space-y-4 lg:space-y-6">
+                  <h3 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-gray-100 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
                     </div>
                     <span>Additional Information</span>
@@ -820,30 +905,30 @@ export default function JobApplyPage() {
                       <span className="text-gray-400">(optional)</span>
                     </label>
                     <textarea
-                      rows={6}
+                      rows={4}
                       value={formData.coverLetter}
                       onChange={(e) =>
                         handleInputChange("coverLetter", e.target.value)
                       }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 resize-none"
+                      className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-gray-900 placeholder-gray-500 resize-none text-sm lg:text-base"
                       placeholder="Tell us why you're perfect for this role..."
                     />
                   </div>
                 </div>
 
                 {/* Submit Button */}
-                <div className="pt-6 border-t border-gray-200">
+                <div className="pt-4 lg:pt-6 border-t border-gray-200">
                   <Button
                     type="submit"
                     variant="primary"
                     loading={submitting}
-                    className="w-full py-4 text-lg font-semibold rounded-2xl"
+                    className="w-full py-3 lg:py-4 text-base lg:text-lg font-semibold rounded-xl lg:rounded-2xl"
                   >
                     {submitting
                       ? "Submitting Application..."
                       : "Submit Application"}
                   </Button>
-                  <p className="text-sm text-gray-500 text-center mt-3">
+                  <p className="text-xs lg:text-sm text-gray-500 text-center mt-2 lg:mt-3">
                     By submitting this application, you agree to our terms and
                     privacy policy.
                   </p>

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+/* Non-critical styles - loaded after initial render */
+
 :root {
   --background: #fafbfc;
   --foreground: #1d1d1f;
@@ -76,13 +78,15 @@ body {
 
 
 /* Smooth transitions for all interactive elements */
-button, a, [role="button"] {
+button,
+a,
+[role="button"] {
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Focus states */
-button:focus-visible, 
-a:focus-visible, 
+button:focus-visible,
+a:focus-visible,
 [role="button"]:focus-visible {
   outline: 2px solid var(--secondary-teal);
   outline-offset: 2px;

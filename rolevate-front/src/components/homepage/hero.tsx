@@ -17,6 +17,9 @@ export default function Hero() {
                 fill
                 className="object-cover rounded-[2rem]"
                 priority
+                fetchPriority="high"
+                sizes="(max-width: 768px) 384px, (max-width: 1024px) 576px, 576px"
+                quality={85}
               />
             </div>
             <div className="absolute -top-4 -right-4 w-8 h-8 bg-[#13ead9] rounded-full shadow-corporate animate-pulse"></div>

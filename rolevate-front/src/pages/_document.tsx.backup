@@ -1,0 +1,60 @@
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+import fs from 'fs';
+import path from 'path';
+
+class MyDocument extends Document {
+  static async getInitialProps(ctx: any) {
+    const initialProps = await Document.getInitialProps(ctx);
+    return { ...initialProps };
+  }
+
+  render() {
+    const criticalCss = this.getCriticalCss();
+    
+    return (
+      <Html lang="en">
+        <Head>
+          {/* Preconnect to external domains */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link rel="dns-prefetch" href="https://4wk-garage-media.s3.me-central-1.amazonaws.com" />
+          
+          {/* Inline critical CSS */}
+          {criticalCss && (
+            <style
+              dangerouslySetInnerHTML={{
+                __html: criticalCss,
+              }}
+            />
+          )}
+          
+          {/* Preload hero image */}
+          <link
+            rel="preload"
+            as="image"
+            href="/images/hero.png"
+            fetchPriority="high"
+          />
+        </Head>
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+
+  private getCriticalCss() {
+    try {
+      const criticalCssPath = path.join(process.cwd(), 'src/styles/critical.css');
+      if (fs.existsSync(criticalCssPath)) {
+        return fs.readFileSync(criticalCssPath, 'utf8');
+      }
+    } catch (error) {
+      console.warn('Could not load critical CSS:', error);
+    }
+    return null;
+  }
+}
+
+export default MyDocument;

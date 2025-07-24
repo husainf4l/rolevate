@@ -111,50 +111,113 @@ export function useRoomConnection({
 
       // Setup room event listeners
       room.removeAllListeners();
+
+      // Add mobile-specific error handling
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
       room.on("connected", () => {
         console.log("✅ Room connected successfully");
         isConnectingRef.current = false;
         onConnectionChange(true, false);
       });
+
       room.on("disconnected", (reason) => {
         console.log("❌ Room disconnected:", reason);
         isConnectingRef.current = false;
         onConnectionChange(false, false);
+
+        // Handle mobile-specific disconnection scenarios
+        if (isMobile) {
+          console.log("🔄 Mobile disconnection detected, preparing for potential recovery...");
+          setTimeout(() => {
+            if (room.state !== 'connected') {
+              console.log("🔄 Room still disconnected on mobile device");
+              // Don't automatically reconnect to avoid loops, let user retry
+            }
+          }, 2000);
+        }
       });
+
       room.on("reconnecting", () => {
         console.log("🔄 Room reconnecting...");
         onConnectionChange(false, true);
       });
+
       room.on("reconnected", () => {
         console.log("✅ Room reconnected");
         isConnectingRef.current = false;
         onConnectionChange(true, false);
       });
 
-      // Connect to room
-      await room.connect(serverUrl, token, {
+      // Add mobile-specific connection error handling
+      room.on("connectionQualityChanged", (quality) => {
+        if (isMobile && quality === 'poor') {
+          console.warn("⚠️ Poor connection quality detected on mobile device");
+          // Could implement automatic quality reduction here
+        }
+      });
+
+      // Connect to room with mobile-optimized settings
+      const connectionConfig: any = {
         autoSubscribe: true,
         rtcConfig: {
           iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
             { urls: "stun:stun1.l.google.com:19302" },
           ],
+          // Add mobile-specific ICE configuration
+          ...(isMobile && {
+            iceTransportPolicy: 'all' as RTCIceTransportPolicy,
+            bundlePolicy: 'max-bundle' as RTCBundlePolicy,
+            rtcpMuxPolicy: 'require' as RTCRtcpMuxPolicy,
+          }),
         },
-      });
+        // Mobile-specific audio optimizations for better clarity
+        ...(isMobile && {
+          audioCaptureDefaults: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            sampleRate: 48000, // Higher sample rate for better quality
+            channelCount: 1, // Mono to reduce bandwidth
+          },
+          audioPlaybackDefaults: {
+            autoGainControl: false, // Disable AGC for playback
+            echoCancellation: false, // Not needed for playback
+            noiseSuppression: false, // Not needed for playback
+          },
+        }),
+      };
+
+      await room.connect(serverUrl, token, connectionConfig);
 
       console.log("🎤📹 Attempting to enable microphone and camera...");
-      // Enable media with graceful fallback
+      // Enable media with graceful fallback and simplified mobile handling
       try {
-        await room.localParticipant.setMicrophoneEnabled(true);
+        // Simplified microphone settings to prevent crashes
+        const micOptions = isMobile ?
+          { echoCancellation: true, noiseSuppression: true } :
+          { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+
+        await room.localParticipant.setMicrophoneEnabled(true, micOptions);
         console.log("✅ Microphone enabled successfully");
       } catch (micError) {
         console.warn("⚠️ Could not enable microphone:", micError);
+        // Try with basic settings if advanced ones fail
+        try {
+          await room.localParticipant.setMicrophoneEnabled(true);
+          console.log("✅ Microphone enabled with basic settings");
+        } catch (basicMicError) {
+          console.error("❌ Failed to enable microphone with basic settings:", basicMicError);
+        }
       }
 
       try {
-        await room.localParticipant.setCameraEnabled(true, {
-          resolution: { width: 1280, height: 720, frameRate: 30 }
-        });
+        const cameraConstraints = isMobile ?
+          { resolution: { width: 640, height: 480, frameRate: 15 } } :
+          { resolution: { width: 1280, height: 720, frameRate: 30 } };
+
+        await room.localParticipant.setCameraEnabled(true, cameraConstraints);
         console.log("✅ Camera enabled successfully");
       } catch (camError) {
         console.warn("⚠️ Could not enable camera:", camError);
@@ -165,7 +228,20 @@ export function useRoomConnection({
     } catch (err: any) {
       console.error("💥 Connection failed:", err);
       isConnectingRef.current = false;
-      onError(err.message || "Failed to connect to room");
+
+      // Provide mobile-specific error messages
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      let errorMessage = err.message || "Failed to connect to room";
+
+      if (isMobile) {
+        if (err.message?.includes('websocket') || err.message?.includes('network')) {
+          errorMessage = "Mobile connection issue detected. Please check your internet connection and try again.";
+        } else if (err.message?.includes('media') || err.message?.includes('camera') || err.message?.includes('microphone')) {
+          errorMessage = "Camera or microphone access failed. Please check permissions and try again.";
+        }
+      }
+
+      onError(errorMessage);
       onConnectionChange(false, false);
     }
   }, [room, searchParams, onConnectionChange, onError, onJobDataUpdate]);
