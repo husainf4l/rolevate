@@ -15,7 +15,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly awsS3Service: AwsS3Service
-  ) {}
+  ) { }
 
   @Post('login')
   async login(
@@ -27,7 +27,7 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials');
     }
     const result = await this.authService.login(user);
-    
+
     // Set HTTP-only cookies
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
@@ -35,14 +35,14 @@ export class AuthController {
       sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
-    
+
     res.cookie('refresh_token', result.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-    
+
     return { message: 'Login successful', user: result.user };
   }
 
@@ -52,7 +52,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.authService.signup(createUserDto);
-    
+
     // Set HTTP-only cookies
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
@@ -60,14 +60,14 @@ export class AuthController {
       sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
-    
+
     res.cookie('refresh_token', result.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-    
+
     return { message: 'Signup successful', user: result.user };
   }
 
@@ -86,11 +86,11 @@ export class AuthController {
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     console.log('=== /refresh endpoint called ===');
     console.log('Cookies:', req.cookies);
-    
+
     const refreshToken = req.cookies?.refresh_token;
     console.log('Refresh token found:', !!refreshToken);
     console.log('Refresh token (truncated):', refreshToken ? refreshToken.substring(0, 20) + '...' : 'null');
-    
+
     if (!refreshToken) {
       console.log('No refresh token found in cookies');
       throw new UnauthorizedException('Refresh token not found');
@@ -100,7 +100,7 @@ export class AuthController {
       console.log('Calling authService.refreshAccessToken...');
       const result = await this.authService.refreshAccessToken(refreshToken);
       console.log('Refresh successful, new access token generated');
-      
+
       // Set new access token
       res.cookie('access_token', result.access_token, {
         httpOnly: true,
@@ -122,11 +122,11 @@ export class AuthController {
   async getMe(@Req() req: Request) {
     console.log('=== /me endpoint called ===');
     console.log('req.user:', req.user);
-    
+
     const user = req.user as any;
     console.log('user object:', user);
     console.log('user.userId:', user?.userId);
-    
+
     try {
       const result = await this.authService.getUserById(user.userId);
       console.log('getUserById result:', result);
@@ -173,7 +173,7 @@ export class AuthController {
         'image/gif',
         'image/webp'
       ];
-      
+
       if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
       } else {
@@ -190,14 +190,14 @@ export class AuthController {
   ) {
     console.log('=== Avatar Upload Request ===');
     console.log('File received:', !!file);
-    
+
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
 
     const user = req.user as any;
     console.log('User ID:', user.userId);
-    
+
     try {
       // Upload to S3 (default behavior now)
       const fileExtension = file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
@@ -237,7 +237,7 @@ export class AuthController {
         'image/gif',
         'image/webp'
       ];
-      
+
       if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
       } else {
@@ -266,7 +266,7 @@ export class AuthController {
 
     const user = req.user as any;
     console.log('User ID:', user.userId);
-    
+
     try {
       // Upload to S3 with proper folder structure
       const fileExtension = file.originalname.split('.').pop()?.toLowerCase() || 'jpg';

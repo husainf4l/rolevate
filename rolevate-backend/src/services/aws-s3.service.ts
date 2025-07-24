@@ -48,7 +48,7 @@ export class AwsS3Service {
       // Return the S3 URL
       const s3Url = `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
       console.log('✅ CV uploaded to S3:', s3Url);
-      
+
       return s3Url;
     } catch (error) {
       console.error('❌ Failed to upload CV to S3:', error);
@@ -59,7 +59,7 @@ export class AwsS3Service {
   async uploadFile(file: Buffer, fileName: string, folder: string = 'files'): Promise<string> {
     try {
       const key = `${folder}/${fileName}`;
-      
+
       // Determine content type from file extension
       const fileExtension = fileName.split('.').pop()?.toLowerCase() || '';
       const contentType = this.getContentType(fileExtension);
@@ -82,7 +82,7 @@ export class AwsS3Service {
       // Return the S3 URL
       const s3Url = `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
       console.log('✅ File uploaded to S3:', s3Url);
-      
+
       return s3Url;
     } catch (error) {
       console.error('❌ Failed to upload file to S3:', error);
@@ -94,7 +94,7 @@ export class AwsS3Service {
     try {
       // Extract key from S3 URL
       const key = this.extractKeyFromUrl(s3Url);
-      
+
       console.log('📥 Downloading file from S3:', key);
 
       const command = new GetObjectCommand({
@@ -103,7 +103,7 @@ export class AwsS3Service {
       });
 
       const response = await this.s3Client.send(command);
-      
+
       if (!response.Body) {
         throw new Error('Empty response body');
       }
@@ -111,14 +111,14 @@ export class AwsS3Service {
       // Convert stream to buffer
       const chunks: Buffer[] = [];
       const stream = response.Body as any;
-      
+
       for await (const chunk of stream) {
         chunks.push(chunk);
       }
-      
+
       const buffer = Buffer.concat(chunks);
       console.log('✅ File downloaded from S3, size:', buffer.length, 'bytes');
-      
+
       return buffer;
     } catch (error) {
       console.error('❌ Failed to download file from S3:', error);

@@ -7,7 +7,7 @@ interface LogoProps {
 }
 
 export default function Logo({
-  size = 48,
+  size = 190,
   companyLogo,
   companyName,
 }: LogoProps) {
