@@ -3,10 +3,10 @@ module.exports = {
         {
             name: 'rolevate-frontend',
             script: 'npm',
-            args: 'run dev',
+            args: 'run start',
             cwd: '/home/husain/rolevate/rolevate-front',
             env: {
-                NODE_ENV: 'development',
+                NODE_ENV: 'production',
                 PORT: 3005
             },
             instances: 1,

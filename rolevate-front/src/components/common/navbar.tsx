@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Logo from "./logo";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/common/Button";
 import { getCurrentUser, logout } from "@/services/auth";
 import { API_CONFIG } from "@/lib/config";
@@ -24,6 +24,14 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Helper function to check if current path is active
+  const isActivePage = (path: string) => {
+    if (path === "/" && pathname === "/") return true;
+    if (path !== "/" && pathname.startsWith(path)) return true;
+    return false;
+  };
 
   // Check authentication status on mount
   useEffect(() => {
@@ -101,27 +109,54 @@ export default function Navbar() {
           </Link>
           <nav className="hidden items-center gap-10 text-sm font-medium md:flex">
             <Link
+              href="/"
+              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+                isActivePage("/")
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
+              }`}
+            >
+              Home
+            </Link>
+
+            <Link
               href="/jobs"
-              className="font-text text-gray-700 hover:text-primary-600 transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+                isActivePage("/jobs")
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
+              }`}
             >
               Jobs
             </Link>
 
             <Link
               href="/employers"
-              className="font-text text-gray-700 hover:text-primary-600 transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+                isActivePage("/employers")
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
+              }`}
             >
               For Employers
             </Link>
             <Link
               href="/about"
-              className="font-text text-gray-700 hover:text-primary-600 transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+                isActivePage("/about")
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
+              }`}
             >
               About
             </Link>
             <Link
               href="/contact"
-              className="font-text text-gray-700 hover:text-primary-600 transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+                isActivePage("/contact")
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
+              }`}
             >
               Contact
             </Link>
@@ -355,8 +390,24 @@ export default function Navbar() {
             <nav className="container mx-auto px-6 py-8">
               <div className="flex flex-col gap-1">
                 <Link
+                  href="/"
+                  className={`font-text hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95 ${
+                    isActivePage("/")
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
+                  }`}
+                  onClick={closeMenu}
+                >
+                  Home
+                </Link>
+
+                <Link
                   href="/jobs"
-                  className="font-text text-gray-700 hover:text-primary-600 hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95"
+                  className={`font-text hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95 ${
+                    isActivePage("/jobs")
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
+                  }`}
                   onClick={closeMenu}
                 >
                   Jobs
@@ -364,21 +415,33 @@ export default function Navbar() {
 
                 <Link
                   href="/employers"
-                  className="font-text text-gray-700 hover:text-primary-600 hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95"
+                  className={`font-text hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95 ${
+                    isActivePage("/employers")
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
+                  }`}
                   onClick={closeMenu}
                 >
                   For Employers
                 </Link>
                 <Link
                   href="/about"
-                  className="font-text text-gray-700 hover:text-primary-600 hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95"
+                  className={`font-text hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95 ${
+                    isActivePage("/about")
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
+                  }`}
                   onClick={closeMenu}
                 >
                   About
                 </Link>
                 <Link
                   href="/contact"
-                  className="font-text text-gray-700 hover:text-primary-600 hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95"
+                  className={`font-text hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95 ${
+                    isActivePage("/contact")
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
+                  }`}
                   onClick={closeMenu}
                 >
                   Contact

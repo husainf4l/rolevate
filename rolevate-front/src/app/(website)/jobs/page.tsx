@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import JobCard, { JobData } from "@/components/common/JobCard";
 import { Button } from "@/components/common/Button";
 import { JobService, JobPost } from "@/services/job";
@@ -151,7 +151,7 @@ export default function JobsPage() {
   };
 
   // Fetch jobs from API
-  const fetchJobs = async (page: number = 1, search?: string) => {
+  const fetchJobs = useCallback(async (page: number = 1, search?: string) => {
     console.log("🚀 fetchJobs called!", { page, search, searchTerm });
     try {
       setLoading(true);
@@ -183,7 +183,7 @@ export default function JobsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm]); // Only depend on searchTerm
 
   // Initial fetch and search effect
   useEffect(() => {
