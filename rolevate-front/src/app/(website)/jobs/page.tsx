@@ -479,7 +479,7 @@ export default function JobsPage() {
                   </svg>
                   <input
                     type="text"
-                    placeholder="Job title, company, or skills..."
+                    placeholder="Job title"
                     className="w-full pl-12 pr-6 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500 text-base shadow-sm transition-all duration-200"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
