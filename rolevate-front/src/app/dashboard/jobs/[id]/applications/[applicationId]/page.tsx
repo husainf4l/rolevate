@@ -205,7 +205,7 @@ const transformApplicationToDetail = (
   // Check if CV analysis failed or has no meaningful data
   const hasValidAnalysis =
     application.cvAnalysisResults &&
-    application.cvAnalysisResults.overallFit !== "Poor" &&
+    application.cvAnalysisResults.overallFit &&
     !application.cvAnalysisResults.summary?.includes("analysis failed") &&
     !application.cvAnalysisResults.summary?.includes("CV analysis failed");
 
@@ -315,8 +315,8 @@ const getStatusIcon = (status: Application["status"]) => {
 
 export default function JobCandidateProfile() {
   const params = useParams();
-  const jobId = params.id as string;
-  const applicationId = params.applicationId as string;
+  const jobId = params?.id as string;
+  const applicationId = params?.applicationId as string;
   const [candidate, setCandidate] = useState<CandidateDetail | null>(null);
   const [job, setJob] = useState<JobPost | null>(null);
   const [loading, setLoading] = useState(true);
@@ -608,9 +608,12 @@ export default function JobCandidateProfile() {
                     CV Analysis Results
                   </h3>
 
-                  {candidate.cvAnalysisResults.overallFit === "Poor" ||
+                  {!candidate.cvAnalysisResults.overallFit ||
                   candidate.cvAnalysisResults.summary?.includes(
                     "analysis failed"
+                  ) ||
+                  candidate.cvAnalysisResults.summary?.includes(
+                    "CV analysis failed"
                   ) ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                       <div className="flex items-center">

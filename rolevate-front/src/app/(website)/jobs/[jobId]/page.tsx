@@ -93,7 +93,7 @@ export default function JobDetailPage() {
   // Application modal state
   // Removed unused applying state
   const params = useParams();
-  const jobId = params.jobId as string;
+  const jobId = params?.jobId as string;
 
   const [job, setJob] = useState<JobDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);

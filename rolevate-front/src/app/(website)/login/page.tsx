@@ -22,7 +22,7 @@ function LoginContent() {
     setError(null);
     try {
       // Get redirect URL from search params
-      const redirect = searchParams.get("redirect");
+      const redirect = searchParams?.get("redirect");
 
       const signinParams: {
         email: string;

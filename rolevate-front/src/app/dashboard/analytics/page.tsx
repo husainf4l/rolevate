@@ -454,7 +454,6 @@ const StatCard = ({
   value,
   change,
   icon: Icon,
-  color = "text-gray-600",
 }: {
   title: string;
   value: string | number;
@@ -607,7 +606,7 @@ const TimelineChart = ({ data }: { data: TimelineData[] }) => {
 
         {/* Chart bars and lines */}
         <div className="absolute inset-0 flex items-end justify-between px-4">
-          {data.map((item, index) => (
+          {data.map((item) => (
             <div
               key={item.month}
               className="flex flex-col items-center flex-1 relative"

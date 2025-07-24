@@ -19,15 +19,15 @@ function JobsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(() => {
-    const searchParam = searchParams.get('search');
-    return searchParam === null ? "" : searchParam;
+    const searchParam = searchParams?.get('search');
+    return searchParam ?? "";
   });
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(() => {
-    const searchParam = searchParams.get('search');
-    return searchParam === null ? "" : searchParam;
+    const searchParam = searchParams?.get('search');
+    return searchParam ?? "";
   });
-  const [filterStatus, setFilterStatus] = useState<string>(() => searchParams.get('status') || "all");
-  const [filterType, setFilterType] = useState<string>(() => searchParams.get('type') || "all");
+  const [filterStatus, setFilterStatus] = useState<string>(() => searchParams?.get('status') || "all");
+  const [filterType, setFilterType] = useState<string>(() => searchParams?.get('type') || "all");
 
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -49,7 +49,7 @@ function JobsContent() {
   // Initialize state from URL and mark as initialized
   useEffect(() => {
     // Set initial debouncedSearchTerm to prevent immediate second fetch
-    const initialSearchTerm = searchParams.get('search') || '';
+    const initialSearchTerm = searchParams?.get('search') || '';
     console.log('Initializing with search term:', initialSearchTerm);
     setDebouncedSearchTerm(initialSearchTerm);
     setIsInitialized(true);
@@ -124,7 +124,7 @@ function JobsContent() {
 
   // Check for success message from job creation
   useEffect(() => {
-    if (searchParams.get('created') === 'true') {
+    if (searchParams?.get('created') === 'true') {
       // Show success message or toast
       console.log('Job created successfully!');
       // You might want to show a toast notification here

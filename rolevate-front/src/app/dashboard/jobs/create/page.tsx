@@ -115,19 +115,19 @@ function CreateJobContent() {
 
   // Helper function to update URL with current step
   const updateUrlStep = (step: FormStep) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || '');
     params.set('step', step);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   // Initialize step from URL on component mount
   useEffect(() => {
-    const stepFromUrl = searchParams.get('step') as FormStep;
+    const stepFromUrl = searchParams?.get('step') as FormStep;
     const validSteps: FormStep[] = ['basic', 'details', 'ai-config', 'preview'];
     
     if (stepFromUrl && validSteps.includes(stepFromUrl)) {
       setCurrentStep(stepFromUrl);
-    } else if (!searchParams.get('step')) {
+    } else if (!searchParams?.get('step')) {
       // Set default step in URL if not present
       updateUrlStep('basic');
     }

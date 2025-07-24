@@ -107,7 +107,7 @@ const transformApplicationToCandidate = (
 
 export default function JobApplicationsPage() {
   const params = useParams();
-  const jobId = params.id as string;
+  const jobId = params?.id as string;
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
