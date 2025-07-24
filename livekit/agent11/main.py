@@ -7,6 +7,7 @@ that integrates with backend APIs for prompt management and transcript saving.
 
 import asyncio
 import logging
+import logging.config
 import os
 import sys
 import time
@@ -34,9 +35,60 @@ from utils.transcript_saver import create_transcript_saver
 # Load environment variables from parent directory
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("agent10-main")
+# Configure production logging
+def setup_logging():
+    """Setup production-ready logging configuration"""
+    log_dir = os.path.join(os.path.dirname(__file__), "..", "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    
+    LOGGING_CONFIG = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'detailed': {
+                'format': '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+            },
+            'simple': {
+                'format': '%(levelname)s - %(message)s'
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'level': 'INFO',
+                'formatter': 'detailed',
+                'stream': 'ext://sys.stdout'
+            },
+            'file': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'level': 'DEBUG',
+                'formatter': 'detailed',
+                'filename': os.path.join(log_dir, 'agent11-debug.log'),
+                'maxBytes': 10485760,  # 10MB
+                'backupCount': 5
+            },
+            'error_file': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'level': 'ERROR',
+                'formatter': 'detailed',
+                'filename': os.path.join(log_dir, 'agent11-errors.log'),
+                'maxBytes': 10485760,  # 10MB
+                'backupCount': 3
+            }
+        },
+        'loggers': {
+            '': {
+                'level': 'INFO',
+                'handlers': ['console', 'file', 'error_file']
+            }
+        }
+    }
+    
+    logging.config.dictConfig(LOGGING_CONFIG)
+
+# Setup logging
+setup_logging()
+logger = logging.getLogger("agent11-main")
 
 
 async def save_video_to_backend(
@@ -85,7 +137,20 @@ async def entrypoint(ctx: JobContext):
     """
     try:
         logger.info("🚀 Starting Agent10...")
-        await ctx.connect()
+        
+        # Connection with retry logic
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                await ctx.connect()
+                logger.info(f"✅ Connected to LiveKit on attempt {attempt + 1}")
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(f"❌ Failed to connect after {max_retries} attempts")
+                    raise
+                logger.warning(f"Connection attempt {attempt + 1} failed: {e}")
+                await asyncio.sleep(2 ** attempt)  # Exponential backoff
 
         # Extract metadata
         metadata = MetadataExtractor.extract_from_room(ctx.room.metadata, ctx.room.name)
@@ -108,10 +173,18 @@ async def entrypoint(ctx: JobContext):
         logger.info("=" * 50)
 
         # Validate environment variables
-        required_vars = ["OPENAI_API_KEY"]
-        for var in required_vars:
-            if not os.getenv(var):
-                raise ValueError(f"Required environment variable {var} is not set")
+        required_vars = [
+            "OPENAI_API_KEY",
+            "LIVEKIT_URL", 
+            "LIVEKIT_API_KEY",
+            "LIVEKIT_API_SECRET",
+            "ELEVENLABS_API_KEY"
+        ]
+        missing_vars = [var for var in required_vars if not os.getenv(var)]
+        if missing_vars:
+            raise ValueError(f"Required environment variables missing: {', '.join(missing_vars)}")
+        
+        logger.info("✅ All required environment variables validated")
 
         # Configure session with clean setup
         session = AgentSession(
@@ -134,14 +207,30 @@ async def entrypoint(ctx: JobContext):
             ),
         )
 
-        # Setup recording
+        # Setup recording with error handling
         recording_manager = RecordingManager(ctx)
-        recording_url = await recording_manager.start_recording()
-        logger.info(f"Recording started: {recording_url}")
+        recording_url = None
+        try:
+            recording_url = await asyncio.wait_for(
+                recording_manager.start_recording(), 
+                timeout=15.0
+            )
+            logger.info(f"✅ Recording started: {recording_url}")
+        except asyncio.TimeoutError:
+            logger.error("❌ Recording start timed out")
+            # Continue without recording - decide based on requirements
+        except Exception as e:
+            logger.error(f"❌ Failed to start recording: {e}")
+            # Continue without recording - could be made fatal if required
 
-        # Setup transcript saver
-        transcript_saver = create_transcript_saver(ctx.room.name)
-        logger.info(f"✅ Transcript saver initialized for room: {ctx.room.name}")
+        # Setup transcript saver with error handling
+        transcript_saver = None
+        try:
+            transcript_saver = create_transcript_saver(ctx.room.name)
+            logger.info(f"✅ Transcript saver initialized for room: {ctx.room.name}")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize transcript saver: {e}")
+            # Continue without transcript saving or fail based on requirements
 
         # Save video URL to backend
         video_url_to_save = recording_url
@@ -186,29 +275,32 @@ async def entrypoint(ctx: JobContext):
                         f"📝 Conversation item: {item.role} - {item.text_content[:100]}..."
                     )
 
-                    # Save transcript based on role
-                    if item.role == "user":
-                        transcript_saver.save_user_speech(
-                            content=item.text_content,
-                            start_time=time.time(),
-                            end_time=time.time(),
-                            confidence=None,
-                            language=metadata.get("interviewLanguage", "english"),
-                            speaker_name=metadata.get("candidateName", "Candidate"),
-                        )
-                        logger.info("✅ User transcript saved")
+                    # Save transcript based on role (only if transcript_saver is available)
+                    if transcript_saver:
+                        if item.role == "user":
+                            transcript_saver.save_user_speech(
+                                content=item.text_content,
+                                start_time=time.time(),
+                                end_time=time.time(),
+                                confidence=None,
+                                language=metadata.get("interviewLanguage", "english"),
+                                speaker_name=metadata.get("candidateName", "Candidate"),
+                            )
+                            logger.info("✅ User transcript saved")
 
-                    elif item.role == "assistant":
-                        transcript_saver.save_agent_speech(
-                            content=item.text_content,
-                            start_time=time.time(),
-                            end_time=time.time(),
-                            language=metadata.get("interviewLanguage", "english"),
-                        )
-                        logger.info("✅ Agent transcript saved")
+                        elif item.role == "assistant":
+                            transcript_saver.save_agent_speech(
+                                content=item.text_content,
+                                start_time=time.time(),
+                                end_time=time.time(),
+                                language=metadata.get("interviewLanguage", "english"),
+                            )
+                            logger.info("✅ Agent transcript saved")
+                    else:
+                        logger.warning("⚠️ Transcript saver not available, skipping transcript save")
 
             except Exception as e:
-                logger.error(f"Error handling conversation item: {e}")
+                logger.error(f"❌ Error handling conversation item: {e}", exc_info=True)
 
         @session.on("user_input_transcribed")
         def on_user_input_transcribed(event):
@@ -218,7 +310,7 @@ async def entrypoint(ctx: JobContext):
                     logger.info(f"🎤 User transcript: {event.transcript[:100]}...")
                     # Note: conversation_item_added will handle the actual saving
             except Exception as e:
-                logger.error(f"Error handling user input: {e}")
+                logger.error(f"❌ Error handling user input: {e}", exc_info=True)
 
         @session.on("close")
         def on_session_close(event):
@@ -246,14 +338,21 @@ async def entrypoint(ctx: JobContext):
                     )
 
             except Exception as e:
-                logger.error(f"Error in session close handler: {e}")
+                logger.error(f"❌ Error in session close handler: {e}", exc_info=True)
 
-        # Test transcript saving
-        logger.info("🧪 Testing transcript saving...")
-        transcript_saver.save_system_message(
-            "Agent10 session started with proper LiveKit event handlers",
-            "SESSION_START",
-        )
+        # Test transcript saving (only if available)
+        if transcript_saver:
+            logger.info("🧪 Testing transcript saving...")
+            try:
+                transcript_saver.save_system_message(
+                    "Agent11 session started with proper LiveKit event handlers",
+                    "SESSION_START",
+                )
+                logger.info("✅ Transcript test successful")
+            except Exception as e:
+                logger.error(f"❌ Transcript test failed: {e}")
+        else:
+            logger.warning("⚠️ Skipping transcript test - transcript saver not available")
 
         # Start session with agent
         logger.info("🎬 Starting agent session...")
@@ -264,26 +363,34 @@ async def entrypoint(ctx: JobContext):
             instructions="Greet the user and start the interview"
         )
 
-        logger.info("✅ Agent10 session active and ready")
+        logger.info("✅ Agent11 session active and ready")
 
         # Setup recording transcript saving (only for session history, not local files)
-        recording_manager.setup_transcript_saving(session, recording_url)
+        if recording_url:
+            try:
+                recording_manager.setup_transcript_saving(session, recording_url)
+                logger.info("✅ Recording transcript saving configured")
+            except Exception as e:
+                logger.error(f"❌ Failed to setup recording transcript saving: {e}")
+        else:
+            logger.warning("⚠️ No recording URL available, skipping transcript saving setup")
 
         # Create completion event and wait
         completion_event = asyncio.Event()
 
         # Setup shutdown with timeout
         async def on_shutdown():
-            logger.info("Session ending - cleaning up")
+            logger.info("🔄 Session ending - cleaning up...")
 
-            try:
-                # Save any remaining transcripts with timeout
-                await asyncio.wait_for(transcript_saver.cleanup(), timeout=5.0)
-                logger.info("Transcript cleanup completed")
-            except asyncio.TimeoutError:
-                logger.warning("Transcript cleanup timed out")
-            except Exception as e:
-                logger.error(f"Error during transcript cleanup: {e}")
+            # Save any remaining transcripts with timeout
+            if transcript_saver:
+                try:
+                    await asyncio.wait_for(transcript_saver.cleanup(), timeout=5.0)
+                    logger.info("✅ Transcript cleanup completed")
+                except asyncio.TimeoutError:
+                    logger.warning("⚠️ Transcript cleanup timed out")
+                except Exception as e:
+                    logger.error(f"❌ Error during transcript cleanup: {e}", exc_info=True)
 
             # Save video URL again as backup with timeout
             if video_url_to_save:
@@ -294,37 +401,37 @@ async def entrypoint(ctx: JobContext):
                         ),
                         timeout=10.0,
                     )
-                    logger.info("Video URL backup save completed")
+                    logger.info("✅ Video URL backup save completed")
                 except asyncio.TimeoutError:
-                    logger.warning("Video URL backup save timed out")
+                    logger.warning("⚠️ Video URL backup save timed out")
                 except Exception as e:
-                    logger.error(f"Error saving video URL backup: {e}")
+                    logger.error(f"❌ Error saving video URL backup: {e}", exc_info=True)
 
             completion_event.set()
-            logger.info("Cleanup completed, session ending")
+            logger.info("✅ Cleanup completed, session ending")
 
         ctx.add_shutdown_callback(on_shutdown)
 
         # Wait for completion with timeout
         try:
             await asyncio.wait_for(completion_event.wait(), timeout=30.0)
-            logger.info("Agent10 session completed")
+            logger.info("✅ Agent11 session completed successfully")
         except asyncio.TimeoutError:
-            logger.warning("Session completion timed out, forcing exit")
-            logger.info("Agent10 session completed (timeout)")
+            logger.warning("⚠️ Session completion timed out, forcing exit")
+            logger.info("✅ Agent11 session completed (timeout)")
 
     except Exception as e:
-        logger.error(f"❌ Error in Agent10: {e}")
+        logger.error(f"❌ Critical error in Agent11: {e}", exc_info=True)
         raise
 
 
 if __name__ == "__main__":
     # Configure worker
-    port = int(os.getenv("LIVEKIT_AGENT_PORT", "8010"))
+    port = int(os.getenv("LIVEKIT_AGENT_PORT", "8008"))  # Changed default to match PM2 config
     options = agents.WorkerOptions(
         entrypoint_fnc=entrypoint,
         port=port,
     )
 
-    logger.info(f"Starting Agent10 on port {port}")
+    logger.info(f"🚀 Starting Agent11 on port {port}")
     agents.cli.run_app(options)

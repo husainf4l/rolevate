@@ -1,0 +1,22 @@
+[Unit]
+Description=PM2 process manager
+Documentation=https://pm2.keymetrics.io/
+After=network.target
+
+[Service]
+Type=simple
+User=husain
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+Environment=PATH=/home/husain/rolevate/livekit/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+Environment=PM2_HOME=/home/husain/.pm2
+Restart=on-failure
+RestartSec=5
+
+ExecStart=/usr/local/lib/node_modules/pm2/bin/pm2 resurrect --no-daemon
+ExecReload=/usr/local/lib/node_modules/pm2/bin/pm2 reload all
+ExecStop=/usr/local/lib/node_modules/pm2/bin/pm2 kill
+
+[Install]
+WantedBy=multi-user.target
