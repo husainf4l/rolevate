@@ -4,7 +4,7 @@ module.exports = {
       name: 'livekit-agent11',
       cwd: '/home/husain/rolevate/livekit',
       script: './agent11/main.py',
-      args: 'dev',
+      args: 'start',
       instances: 1,
       autorestart: true,
       watch: false,
