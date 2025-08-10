@@ -192,7 +192,7 @@ async def entrypoint(ctx: JobContext):
                 model="whisper-1",
             ),
             llm=openai.LLM(
-                model="gpt-4o-mini",
+                model="gpt-5-mini",
                 api_key=os.getenv("OPENAI_API_KEY"),
                 timeout=5.0,  # Reduced timeout for faster responses
             ),
