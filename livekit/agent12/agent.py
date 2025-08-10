@@ -80,9 +80,11 @@ class InterviewAgent(Agent):
         # Simple base personality
         if self.interview_language == "arabic":
             base = (
+                f"تحدثي بالعربية فقط - لا تستخدمي الإنجليزية مطلقاً!\n\n"
                 f"أنت ليلى النور، مسؤولة موارد بشرية من {self.company_name}. "
-                f"تقومين بإجراء مقابلة عمل لمنصب {self.job_name} مع {self.candidate_name}. "
-                f"أنت المُحاورة المحترفة. تحدثي بالعربية بشكل مهني ومحترم."
+                f"تقومين بإجراء مقابلة عمل لمنصب ({self.job_name}) مع {self.candidate_name}. "
+                f"أنت المُحاورة المحترفة. تحدثي بالعربية بشكل مهني ومحترم. "
+                f"مهم جداً: يجب أن تتحدثي بالعربية فقط في جميع الأوقات. لا تستخدمي الإنجليزية أبداً مهما حدث."
             )
         else:
             base = (
@@ -93,26 +95,50 @@ class InterviewAgent(Agent):
 
         # Main interview prompt from backend - this is the key part
         if self.interview_prompt and self.interview_prompt.strip():
-            interview_instructions = (
-                f"\n\nCV ANALYSIS:\n{self.cv_analysis}"
-                f"\n\nINTERVIEW INSTRUCTIONS:\n{self.interview_prompt}"
-                f"\n\nIMPORTANT: Do not ask more than 1 question at a time. Wait for the candidate's response before asking additional questions."
-                f"\n\nNOTE: If the candidate asks about something you don't know or that's outside the scope of this interview, politely redirect them back to the interview questions. Stay focused on your role as an interviewer."
-            )
+            if self.interview_language == "arabic":
+                interview_instructions = (
+                    f"\n\nتحليل السيرة الذاتية:\n{self.cv_analysis}"
+                    f"\n\nتعليمات المقابلة:\n{self.interview_prompt}"
+                    f"\n\nمهم جداً: يجب أن تتحدثي بالعربية فقط في جميع الأوقات. لا تستخدمي الإنجليزية أبداً."
+                    f"\n\nتعليمات مهمة: لا تطرحي أكثر من سؤال واحد في كل مرة. انتظري إجابة المرشح قبل طرح أسئلة إضافية."
+                    f"\n\nملاحظة: إذا سأل المرشح عن شيء لا تعرفينه أو خارج نطاق هذه المقابلة، وجهيه بأدب إلى أسئلة المقابلة. ركزي على دورك كمُحاورة."
+                )
+            else:
+                interview_instructions = (
+                    f"\n\nCV ANALYSIS:\n{self.cv_analysis}"
+                    f"\n\nINTERVIEW INSTRUCTIONS:\n{self.interview_prompt}"
+                    f"\n\nIMPORTANT: Do not ask more than 1 question at a time. Wait for the candidate's response before asking additional questions."
+                    f"\n\nNOTE: If the candidate asks about something you don't know or that's outside the scope of this interview, politely redirect them back to the interview questions. Stay focused on your role as an interviewer."
+                )
         else:
             # Fallback if no specific prompt
-            interview_instructions = (
-                f"\n\nINTERVIEW INSTRUCTIONS:\n"
-                f"Conduct a professional interview for the {self.job_name} position. "
-                f"Ask relevant questions about experience, skills, and qualifications. "
-                f"Keep it focused and professional."
-                f"\n\nCV ANALYSIS:\n{self.cv_analysis}"
-                f"\n\nIMPORTANT: Do not ask more than 2 questions at a time. Wait for the candidate's response before asking additional questions."
-                f"\n\nNOTE: If the candidate asks about something you don't know or that's outside the scope of this interview, politely redirect them back to the interview questions. Stay focused on your role as an interviewer."
-            )
+            if self.interview_language == "arabic":
+                interview_instructions = (
+                    f"\n\nتعليمات المقابلة:\n"
+                    f"أجري مقابلة مهنية لمنصب {self.job_name}. "
+                    f"اطرحي أسئلة ذات صلة حول الخبرة والمهارات والمؤهلات. "
+                    f"حافظي على الطابع المهني والمركز."
+                    f"\n\nتحليل السيرة الذاتية:\n{self.cv_analysis}"
+                    f"\n\nمهم جداً: يجب أن تتحدثي بالعربية فقط في جميع الأوقات."
+                    f"\n\nتعليمات مهمة: لا تطرحي أكثر من سؤالين في كل مرة. انتظري إجابة المرشح قبل طرح أسئلة إضافية."
+                    f"\n\nملاحظة: إذا سأل المرشح عن شيء لا تعرفينه أو خارج نطاق هذه المقابلة، وجهيه بأدب إلى أسئلة المقابلة. ركزي على دورك كمُحاورة."
+                )
+            else:
+                interview_instructions = (
+                    f"\n\nINTERVIEW INSTRUCTIONS:\n"
+                    f"Conduct a professional interview for the {self.job_name} position. "
+                    f"Ask relevant questions about experience, skills, and qualifications. "
+                    f"Keep it focused and professional."
+                    f"\n\nCV ANALYSIS:\n{self.cv_analysis}"
+                    f"\n\nIMPORTANT: Do not ask more than 2 questions at a time. Wait for the candidate's response before asking additional questions."
+                    f"\n\nNOTE: If the candidate asks about something you don't know or that's outside the scope of this interview, politely redirect them back to the interview questions. Stay focused on your role as an interviewer."
+                )
 
         # Simple ending rule
-        ending_rule = "\n\nEnd the interview with: 'Thank you for your time. This concludes the interview.'"
+        if self.interview_language == "arabic":
+            ending_rule = "\n\nاختتمي المقابلة بقول: 'شكراً لوقتك. هذا يختتم المقابلة.'"
+        else:
+            ending_rule = "\n\nEnd the interview with: 'Thank you for your time. This concludes the interview.'"
 
         return f"{base}{interview_instructions}{ending_rule}"
 
@@ -129,6 +155,11 @@ class InterviewAgent(Agent):
                     "Thank you for your time",
                     "The interview is now complete",
                     "That concludes our interview",
+                    "شكراً لوقتك. هذا يختتم المقابلة",
+                    "هذا يختتم المقابلة",
+                    "شكراً لوقتك",
+                    "المقابلة مكتملة الآن",
+                    "هذا يختتم مقابلتنا",
                 ]
 
                 message_content = last_message.content.lower()

@@ -153,6 +153,10 @@ async def entrypoint(ctx: JobContext):
         metadata = MetadataExtractor.extract_from_room(ctx.room.metadata, ctx.room.name)
         room_id = ctx.room.name
 
+        # DEBUG: Log the raw room metadata to see what we're getting
+        logger.info(f"🔍 RAW ROOM METADATA: {ctx.room.metadata}")
+        logger.info(f"🔍 EXTRACTED METADATA: {metadata}")
+
         # Log session info
         logger.info("=" * 50)
         logger.info("🎯 AGENT10 SESSION INFO")
@@ -197,7 +201,7 @@ async def entrypoint(ctx: JobContext):
                 timeout=5.0,  # Reduced timeout for faster responses
             ),
             tts=ElevenLabsTTS(
-                voice_id="21m00Tcm4TlvDq8ikWAM",  # Rachel voice
+                voice_id="21m00Tcm4TlvDq8ikWAM",  # Rachel voice - stable multilingual voice
             ),
             vad=VAD.load(
                 activation_threshold=0.6,
