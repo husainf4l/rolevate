@@ -22,8 +22,8 @@ async function bootstrap() {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com"],
-        imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:3005', 'http://localhost:4005', 'http://localhost:3000', 'http://localhost:4200'],
-        connectSrc: ["'self'", 'http://localhost:3005', 'http://localhost:4005', 'http://localhost:3000', 'http://localhost:4200', 'wss://rolvate2-ckmk80qb.livekit.cloud', 'https://rolvate2-ckmk80qb.livekit.cloud'],
+        imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:3005', 'http://localhost:4005', 'http://localhost:3000', 'http://localhost:4200', 'https://admin.rolevate.com'],
+        connectSrc: ["'self'", 'http://localhost:3005', 'http://localhost:4005', 'http://localhost:3000', 'http://localhost:4200', 'https://admin.rolevate.com', 'wss://rolvate2-ckmk80qb.livekit.cloud', 'https://rolvate2-ckmk80qb.livekit.cloud'],
       },
     },
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -59,7 +59,8 @@ async function bootstrap() {
     'http://localhost:3005',
     'http://localhost:3000',
     'https://rolevate.com',
-    'https://www.rolevate.com'
+    'https://www.rolevate.com',
+    'https://admin.rolevate.com'
   ];
 
   console.log('Allowed CORS origins:', allowedOrigins);

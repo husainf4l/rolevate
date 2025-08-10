@@ -10,7 +10,7 @@ import { environment } from '../../environments/environment';
 })
 export class AuthService {
   private readonly API_URL = environment.apiUrl;
-  
+
   // Using Angular signals for reactive state management
   private authState = signal<AuthState>({
     isAuthenticated: false,
@@ -48,7 +48,6 @@ export class AuthService {
     this.clearError();
 
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, credentials, {
-      withCredentials: true, // Important: This ensures HTTP-only cookies are sent/received
       headers: {
         'Content-Type': 'application/json'
       }
@@ -68,10 +67,8 @@ export class AuthService {
    */
   logout(): Observable<any> {
     this.setLoading(true);
-    
-    return this.http.post(`${this.API_URL}/auth/logout`, {}, {
-      withCredentials: true
-    }).pipe(
+
+    return this.http.post(`${this.API_URL}/auth/logout`, {}).pipe(
       tap(() => {
         this.clearAuthState();
       }),
@@ -85,10 +82,8 @@ export class AuthService {
    */
   checkAuthStatus(): Observable<User | null> {
     this.setLoading(true);
-    
-    return this.http.get<User>(`${this.API_URL}/auth/me`, {
-      withCredentials: true
-    }).pipe(
+
+    return this.http.get<User>(`${this.API_URL}/auth/me`).pipe(
       tap(user => {
         console.log('Auth check successful:', user);
         this.setAuthenticatedUser(user);
@@ -190,7 +185,7 @@ export class AuthService {
    */
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An unexpected error occurred';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
@@ -206,7 +201,7 @@ export class AuthService {
         errorMessage = `Server error: ${error.status}`;
       }
     }
-    
+
     this.setError(errorMessage);
     return throwError(() => new Error(errorMessage));
   }

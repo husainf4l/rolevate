@@ -8,21 +8,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Clone the request and add withCredentials: true if not already set
-  const authReq = req.clone({
-    setHeaders: {},
-    // Ensure credentials are sent with every request
-    ...(!req.headers.has('skip-auth') && { 
-      setHeaders: {}, 
-      withCredentials: true 
-    })
-  });
+  // Only add credentials for same-origin API calls
+  const isApi = req.url.startsWith('/api');
+  const authReq = isApi
+    ? req.clone({ withCredentials: true })
+    : req;
 
   return next(authReq).pipe(
     catchError((error) => {
-      if (error.status === 401) {
-        console.log('401 Unauthorized - redirecting to login');
-        // Token is invalid or expired
+      if (error.status === 401 && isApi) {
+        // Token invalid/expired: logout and redirect
         authService.logout().subscribe(() => {
           router.navigate(['/login']);
         });

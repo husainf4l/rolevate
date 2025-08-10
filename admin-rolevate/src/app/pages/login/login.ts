@@ -20,10 +20,10 @@ export class LoginComponent {
 
   loginForm: FormGroup;
   showPassword = signal(false);
-  
+
   // Get auth state from service
   authState = this.authService.state;
-  
+
   // Computed properties for template
   isLoading = computed(() => this.authState().loading);
   errorMessage = computed(() => this.authState().error);
@@ -48,7 +48,7 @@ export class LoginComponent {
   onSubmit(): void {
     if (this.loginForm.valid && !this.isLoading()) {
       const credentials = this.loginForm.value;
-      
+
       this.authService.login(credentials).subscribe({
         next: (response) => {
           if (response.message === "Login successful" && response.user) {
@@ -65,9 +65,7 @@ export class LoginComponent {
       // Mark all fields as touched to show validation errors
       this.markFormGroupTouched();
     }
-  }
-
-  /**
+  }  /**
    * Check if a form field has an error
    */
   hasFieldError(fieldName: string): boolean {
@@ -80,7 +78,7 @@ export class LoginComponent {
    */
   getFieldError(fieldName: string): string {
     const field = this.loginForm.get(fieldName);
-    
+
     if (field?.errors) {
       if (field.errors['required']) {
         return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
@@ -92,7 +90,7 @@ export class LoginComponent {
         return `Password must be at least ${field.errors['minlength'].requiredLength} characters`;
       }
     }
-    
+
     return '';
   }
 
