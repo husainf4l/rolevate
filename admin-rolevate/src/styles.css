@@ -1,25 +1,27 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --apple-gray-800: #48484a;
   --apple-gray-900: #1d1d1f;
-  
+
   /* Rolevate Brand (Apple-ized) */
   --rolevate-primary: #0891b2;
   --rolevate-primary-light: #06b6d4;
   --rolevate-primary-dark: #155e75;
-  
+
   /* Status Colors (Apple-style) */
   --apple-green: #30d158;
   --apple-orange: #ff9500;
   --apple-red: #ff3b30;
   --apple-purple: #af52de;
-  
+
   /* Spacing & Layout */
   --apple-border-radius: 10px;
   --apple-border-radius-lg: 16px;
   --apple-border-radius-xl: 20px;
-  
+
   /* Shadows */
   --apple-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   --apple-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -145,27 +147,34 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { 
+  from {
     opacity: 0;
     transform: translateY(20px);
   }
-  to { 
+
+  to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
 @keyframes scaleIn {
-  from { 
+  from {
     opacity: 0;
     transform: scale(0.95);
   }
-  to { 
+
+  to {
     opacity: 1;
     transform: scale(1);
   }

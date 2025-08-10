@@ -37,6 +37,10 @@ async function bootstrap() {
   // Compression
   app.use(compression());
 
+  // Trust proxy (needed when behind reverse proxy/load balancer)
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.set('trust proxy', true);
+
   // Rate limiting
   app.use(
     rateLimit({
