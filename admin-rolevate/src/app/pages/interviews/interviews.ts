@@ -29,82 +29,73 @@ export class InterviewsComponent implements OnInit {
   currentPage = signal<number>(1);
   itemsPerPage = signal<number>(10);
 
-  // Computed properties
+  // Computed properties for server-side pagination
   filteredInterviews = computed(() => {
-    let interviews = this.interviewsService.interviews();
-    const search = this.searchTerm().toLowerCase();
-    const status = this.statusFilter();
-    const type = this.typeFilter();
-
-    // Apply filters
-    if (search) {
-      interviews = interviews.filter(interview =>
-        interview.candidate?.firstName?.toLowerCase().includes(search) ||
-        interview.candidate?.lastName?.toLowerCase().includes(search) ||
-        interview.candidate?.email?.toLowerCase().includes(search) ||
-        interview.job?.title?.toLowerCase().includes(search) ||
-        interview.company?.name?.toLowerCase().includes(search) ||
-        interview.title.toLowerCase().includes(search)
-      );
-    }
-
-    if (status) {
-      interviews = interviews.filter(interview => interview.status === status);
-    }
-
-    if (type) {
-      interviews = interviews.filter(interview => interview.type === type);
-    }
-
-    // Apply sorting
-    interviews.sort((a, b) => {
-      const field = this.sortField();
-      let aValue: any, bValue: any;
-
-      switch (field) {
-        case 'candidateName':
-          aValue = a.candidate ? `${a.candidate.firstName} ${a.candidate.lastName}` : '';
-          bValue = b.candidate ? `${b.candidate.firstName} ${b.candidate.lastName}` : '';
-          break;
-        case 'jobTitle':
-          aValue = a.job?.title || '';
-          bValue = b.job?.title || '';
-          break;
-        case 'company':
-          aValue = a.company?.name || '';
-          bValue = b.company?.name || '';
-          break;
-        case 'scheduledAt':
-        case 'status':
-        case 'type':
-        case 'aiScore':
-          aValue = a[field as keyof InterviewDetails];
-          bValue = b[field as keyof InterviewDetails];
-          break;
-        default:
-          aValue = a[field as keyof InterviewDetails];
-          bValue = b[field as keyof InterviewDetails];
-      }
-
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
-
-      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      return this.sortDirection() === 'asc' ? comparison : -comparison;
-    });
-
-    return interviews;
+    // For server-side pagination, we just return the interviews from the service
+    // Filtering is handled by the server
+    return this.interviewsService.interviews();
   });
 
   paginatedInterviews = computed(() => {
-    const interviews = this.filteredInterviews();
-    const start = (this.currentPage() - 1) * this.itemsPerPage();
-    const end = start + this.itemsPerPage();
-    return interviews.slice(start, end);
+    // For server-side pagination, we return all interviews since they're already paginated by the server
+    return this.interviewsService.interviews();
   });
 
   totalPages = computed(() => {
-    return Math.ceil(this.filteredInterviews().length / this.itemsPerPage());
+    // Use server-side pagination data instead of client-side calculation
+    const pagination = this.interviewsService.pagination();
+    return pagination?.totalPages || 1;
+  });
+
+  totalItems = computed(() => {
+    // Get total items from server pagination
+    const pagination = this.interviewsService.pagination();
+    return pagination?.totalItems || 0;
+  });
+
+  hasNextPage = computed(() => {
+    const pagination = this.interviewsService.pagination();
+    return pagination?.hasNextPage || false;
+  });
+
+  hasPrevPage = computed(() => {
+    const pagination = this.interviewsService.pagination();
+    return pagination?.hasPrevPage || false;
+  });
+
+  getPageNumbers = computed(() => {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+
+    if (total <= 7) {
+      // Show all pages if 7 or fewer
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show smart pagination
+      if (current <= 4) {
+        // Show first 5 pages + ... + last page
+        for (let i = 1; i <= 5; i++) pages.push(i);
+        if (total > 6) pages.push(-1); // ellipsis
+        pages.push(total);
+      } else if (current >= total - 3) {
+        // Show first page + ... + last 5 pages
+        pages.push(1);
+        if (total > 6) pages.push(-1); // ellipsis
+        for (let i = total - 4; i <= total; i++) pages.push(i);
+      } else {
+        // Show first + ... + current-1, current, current+1 + ... + last
+        pages.push(1);
+        pages.push(-1); // ellipsis
+        for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+        pages.push(-1); // ellipsis
+        pages.push(total);
+      }
+    }
+
+    return pages;
   });
 
   allSelected = computed(() => {

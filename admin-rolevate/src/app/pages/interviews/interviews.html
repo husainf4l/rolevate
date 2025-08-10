@@ -376,7 +376,7 @@
       @if (totalPages() > 1) {
         <div class="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
           <div class="flex items-center text-sm text-gray-700">
-            <span>Showing {{ (currentPage() - 1) * itemsPerPage() + 1 }} to {{ Math.min(currentPage() * itemsPerPage(), filteredInterviews().length) }} of {{ filteredInterviews().length }} results</span>
+            <span>Showing {{ (currentPage() - 1) * itemsPerPage() + 1 }} to {{ Math.min(currentPage() * itemsPerPage(), totalItems()) }} of {{ totalItems() }} results</span>
           </div>
 
           <div class="flex items-center space-x-2">
@@ -394,27 +394,37 @@
             <!-- Pagination Controls -->
             <button
               (click)="previousPage()"
-              [disabled]="currentPage() === 1"
+              [disabled]="!hasPrevPage()"
               class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-l-md">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
             </button>
 
-            @for (page of [].constructor(totalPages()); track $index) {
-              <button
-                (click)="goToPage($index + 1)"
-                [class.bg-blue-50]="currentPage() === $index + 1"
-                [class.border-blue-500]="currentPage() === $index + 1"
-                [class.text-blue-600]="currentPage() === $index + 1"
-                class="relative inline-flex items-center px-4 py-2 border text-sm font-medium hover:bg-gray-50">
-                {{ $index + 1 }}
-              </button>
+            <!-- Page Numbers -->
+            @for (pageNum of getPageNumbers(); track pageNum) {
+              @if (pageNum === -1) {
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                  ...
+                </span>
+              } @else {
+                <button
+                  (click)="goToPage(pageNum)"
+                  [class.bg-blue-50]="currentPage() === pageNum"
+                  [class.border-blue-500]="currentPage() === pageNum"
+                  [class.text-blue-600]="currentPage() === pageNum"
+                  [class.bg-white]="currentPage() !== pageNum"
+                  [class.border-gray-300]="currentPage() !== pageNum"
+                  [class.text-gray-500]="currentPage() !== pageNum"
+                  class="relative inline-flex items-center px-4 py-2 border text-sm font-medium hover:bg-gray-50">
+                  {{ pageNum }}
+                </button>
+              }
             }
 
             <button
               (click)="nextPage()"
-              [disabled]="currentPage() === totalPages()"
+              [disabled]="!hasNextPage()"
               class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-r-md">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
