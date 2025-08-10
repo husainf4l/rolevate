@@ -192,8 +192,9 @@ async def entrypoint(ctx: JobContext):
                 model="whisper-1",
             ),
             llm=openai.LLM(
-                model="gpt-5",  # Using GPT-5 as requested (announced Aug 7, 2025)
+                model="gpt-4o-mini",
                 api_key=os.getenv("OPENAI_API_KEY"),
+                timeout=5.0,  # Reduced timeout for faster responses
             ),
             tts=ElevenLabsTTS(
                 voice_id="21m00Tcm4TlvDq8ikWAM",  # Rachel voice
