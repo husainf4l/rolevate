@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { JobService, UpdateJobRequest } from '@/services/job';
-import Header from '@/components/dashboard/Header';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { JobService, UpdateJobRequest } from "@/services/job";
+import Header from "@/components/dashboard/Header";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 export default function EditJobPage() {
   const router = useRouter();
@@ -22,47 +22,52 @@ export default function EditJobPage() {
     const fetchJob = async () => {
       try {
         setLoading(true);
-        console.log('Fetching job with ID:', jobId);
+        console.log("Fetching job with ID:", jobId);
         const jobData = await JobService.getJobById(jobId);
-        
-        console.log('Received job data:', jobData);
-        
+
+        console.log("Received job data:", jobData);
+
         // Check if jobData exists
         if (!jobData) {
-          throw new Error('Job not found');
+          throw new Error("Job not found");
         }
-        
+
         // Format deadline properly to avoid type issues
-        const formattedDeadline = jobData.deadline 
-          ? new Date(jobData.deadline).toISOString().split('T')[0] 
-          : '';
-        
+        const formattedDeadline = jobData.deadline
+          ? new Date(jobData.deadline).toISOString().split("T")[0]
+          : "";
+
         const jobUpdateData: UpdateJobRequest = {
-          title: jobData.title || '',
-          department: jobData.department || '',
-          location: jobData.location || '',
-          salary: jobData.salary || '',
-          type: jobData.type || 'FULL_TIME',
+          title: jobData.title || "",
+          description: jobData.description || "",
+          shortDescription: jobData.shortDescription || "",
+          department: jobData.department || "",
+          location: jobData.location || "",
+          salary: jobData.salary || "",
+          type: jobData.type || "FULL_TIME",
           ...(formattedDeadline && { deadline: formattedDeadline }),
-          description: jobData.description || '',
-          shortDescription: jobData.shortDescription || '',
-          responsibilities: jobData.responsibilities || '',
-          requirements: jobData.requirements || '',
+          responsibilities: jobData.responsibilities || "",
+          requirements: jobData.requirements || "",
           skills: jobData.skills || [],
-          benefits: jobData.benefits || '',
-          experience: jobData.experience || '',
-          education: jobData.education || '',
-          jobLevel: jobData.jobLevel || '',
-          workType: jobData.workType || '',
-          industry: jobData.industry || '',
-          aiCvAnalysisPrompt: jobData.cvAnalysisPrompt || jobData.aiCvAnalysisPrompt || '',
-          aiFirstInterviewPrompt: jobData.interviewPrompt || jobData.aiFirstInterviewPrompt || '',
-          aiSecondInterviewPrompt: jobData.aiSecondInterviewPrompt || '',
+          benefits: jobData.benefits || "",
+          experience: jobData.experience || "",
+          education: jobData.education || "",
+          jobLevel: jobData.jobLevel || "",
+          workType: jobData.workType || "",
+          industry: jobData.industry || "",
+          interviewLanguage: jobData.interviewLanguage || "english",
+          aiCvAnalysisPrompt:
+            jobData.cvAnalysisPrompt || jobData.aiCvAnalysisPrompt || "",
+          aiFirstInterviewPrompt:
+            jobData.interviewPrompt || jobData.aiFirstInterviewPrompt || "",
+          aiSecondInterviewPrompt: jobData.aiSecondInterviewPrompt || "",
         };
-        
+
         setJob(jobUpdateData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch job details.');
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch job details."
+        );
         console.error(err);
       } finally {
         setLoading(false);
@@ -72,7 +77,11 @@ export default function EditJobPage() {
     fetchJob();
   }, [jobId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     if (!job) return;
     const { name, value } = e.target;
     setJob({
@@ -80,12 +89,12 @@ export default function EditJobPage() {
       [name]: value,
     });
   };
-  
+
   const handleSkillsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!job) return;
     setJob({
       ...job,
-      skills: e.target.value.split(',').map(skill => skill.trim()),
+      skills: e.target.value.split(",").map((skill) => skill.trim()),
     });
   };
 
@@ -98,10 +107,10 @@ export default function EditJobPage() {
 
     try {
       await JobService.updateJob(jobId, job);
-      alert('Job updated successfully!');
-      router.push('/dashboard/jobs');
+      alert("Job updated successfully!");
+      router.push("/dashboard/jobs");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update job.');
+      setError(err instanceof Error ? err.message : "Failed to update job.");
       console.error(err);
     } finally {
       setIsUpdating(false);
@@ -114,7 +123,9 @@ export default function EditJobPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-20">
             <div className="w-8 h-8 border-3 border-[#0fc4b5] border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4 text-lg font-semibold text-gray-700">Loading Job Details...</p>
+            <p className="mt-4 text-lg font-semibold text-gray-700">
+              Loading Job Details...
+            </p>
           </div>
         </div>
       </div>
@@ -126,7 +137,9 @@ export default function EditJobPage() {
       <div className="min-h-screen bg-gray-50 p-8 pt-24">
         <div className="max-w-4xl mx-auto">
           <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-6 text-center">
-            <h3 className="text-lg font-semibold">Failed to load job details</h3>
+            <h3 className="text-lg font-semibold">
+              Failed to load job details
+            </h3>
             <p className="mt-2">{error}</p>
             <button
               onClick={() => window.location.reload()}
@@ -139,7 +152,7 @@ export default function EditJobPage() {
       </div>
     );
   }
-  
+
   if (!job) {
     return null; // or some other placeholder
   }
@@ -147,7 +160,10 @@ export default function EditJobPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 pt-24">
       <div className="max-w-4xl mx-auto">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 font-medium">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 font-medium"
+        >
           <ArrowLeftIcon className="w-5 h-5" />
           Back to Jobs
         </button>
@@ -157,30 +173,99 @@ export default function EditJobPage() {
           subtitle={`Update the details for "${job.title}"`}
         />
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mt-8 space-y-8">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mt-8 space-y-8"
+        >
           {/* Basic Information */}
           <div className="border-b border-gray-200 pb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Basic Information</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              Basic Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
-                <input type="text" name="title" id="title" value={job.title} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" required />
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Job Title
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  id="title"
+                  value={job.title}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  required
+                />
               </div>
               <div>
-                <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                <input type="text" name="department" id="department" value={job.department} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" required />
+                <label
+                  htmlFor="department"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Department
+                </label>
+                <input
+                  type="text"
+                  name="department"
+                  id="department"
+                  value={job.department}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  required
+                />
               </div>
               <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                <input type="text" name="location" id="location" value={job.location} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" required />
+                <label
+                  htmlFor="location"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  id="location"
+                  value={job.location}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  required
+                />
               </div>
               <div>
-                <label htmlFor="salary" className="block text-sm font-medium text-gray-700 mb-2">Salary Range</label>
-                <input type="text" name="salary" id="salary" value={job.salary} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" required />
+                <label
+                  htmlFor="salary"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Salary Range
+                </label>
+                <input
+                  type="text"
+                  name="salary"
+                  id="salary"
+                  value={job.salary}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  required
+                />
               </div>
               <div>
-                <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
-                <select name="type" id="type" value={job.type} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" required>
+                <label
+                  htmlFor="type"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Job Type
+                </label>
+                <select
+                  name="type"
+                  id="type"
+                  value={job.type}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  required
+                >
                   <option value="FULL_TIME">Full-time</option>
                   <option value="PART_TIME">Part-time</option>
                   <option value="CONTRACT">Contract</option>
@@ -188,95 +273,310 @@ export default function EditJobPage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 mb-2">Application Deadline</label>
-                <input type="date" name="deadline" id="deadline" value={job.deadline || ''} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" />
+                <label
+                  htmlFor="deadline"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Application Deadline
+                </label>
+                <input
+                  type="date"
+                  name="deadline"
+                  id="deadline"
+                  value={job.deadline || ""}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                />
               </div>
               <div>
-                <label htmlFor="jobLevel" className="block text-sm font-medium text-gray-700 mb-2">Job Level</label>
-                <input type="text" name="jobLevel" id="jobLevel" value={job.jobLevel} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" />
+                <label
+                  htmlFor="jobLevel"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Job Level
+                </label>
+                <input
+                  type="text"
+                  name="jobLevel"
+                  id="jobLevel"
+                  value={job.jobLevel}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                />
               </div>
               <div>
-                <label htmlFor="workType" className="block text-sm font-medium text-gray-700 mb-2">Work Type</label>
-                <input type="text" name="workType" id="workType" value={job.workType} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" />
+                <label
+                  htmlFor="workType"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Work Type
+                </label>
+                <input
+                  type="text"
+                  name="workType"
+                  id="workType"
+                  value={job.workType}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                />
               </div>
               <div>
-                <label htmlFor="industry" className="block text-sm font-medium text-gray-700 mb-2">Industry</label>
-                <input type="text" name="industry" id="industry" value={job.industry} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" />
+                <label
+                  htmlFor="industry"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Industry
+                </label>
+                <input
+                  type="text"
+                  name="industry"
+                  id="industry"
+                  value={job.industry}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="interviewLanguage"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Interview Language
+                </label>
+                <select
+                  name="interviewLanguage"
+                  id="interviewLanguage"
+                  value={job.interviewLanguage || "english"}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  required
+                >
+                  <option value="english">English</option>
+                  <option value="arabic">Arabic</option>
+                </select>
               </div>
             </div>
           </div>
 
           {/* Job Details */}
           <div className="border-b border-gray-200 pb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Job Details</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              Job Details
+            </h3>
             <div className="space-y-6">
               <div>
-                <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700 mb-2">Short Description</label>
-                <textarea name="shortDescription" id="shortDescription" value={job.shortDescription} onChange={handleChange} rows={3} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" required></textarea>
+                <label
+                  htmlFor="shortDescription"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Short Description
+                </label>
+                <textarea
+                  name="shortDescription"
+                  id="shortDescription"
+                  value={job.shortDescription}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  required
+                ></textarea>
               </div>
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Full Description</label>
-                <textarea name="description" id="description" value={job.description} onChange={handleChange} rows={8} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" required></textarea>
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Full Description
+                </label>
+                <textarea
+                  name="description"
+                  id="description"
+                  value={job.description}
+                  onChange={handleChange}
+                  rows={8}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  required
+                ></textarea>
               </div>
               <div>
-                <label htmlFor="responsibilities" className="block text-sm font-medium text-gray-700 mb-2">Responsibilities</label>
-                <textarea name="responsibilities" id="responsibilities" value={job.responsibilities} onChange={handleChange} rows={5} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"></textarea>
+                <label
+                  htmlFor="responsibilities"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Responsibilities
+                </label>
+                <textarea
+                  name="responsibilities"
+                  id="responsibilities"
+                  value={job.responsibilities}
+                  onChange={handleChange}
+                  rows={5}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                ></textarea>
               </div>
               <div>
-                <label htmlFor="requirements" className="block text-sm font-medium text-gray-700 mb-2">Requirements</label>
-                <textarea name="requirements" id="requirements" value={job.requirements} onChange={handleChange} rows={5} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"></textarea>
+                <label
+                  htmlFor="requirements"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Requirements
+                </label>
+                <textarea
+                  name="requirements"
+                  id="requirements"
+                  value={job.requirements}
+                  onChange={handleChange}
+                  rows={5}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                ></textarea>
               </div>
               <div>
-                <label htmlFor="benefits" className="block text-sm font-medium text-gray-700 mb-2">Benefits</label>
-                <textarea name="benefits" id="benefits" value={job.benefits} onChange={handleChange} rows={4} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"></textarea>
+                <label
+                  htmlFor="benefits"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Benefits
+                </label>
+                <textarea
+                  name="benefits"
+                  id="benefits"
+                  value={job.benefits}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                ></textarea>
               </div>
               <div>
-                <label htmlFor="skills" className="block text-sm font-medium text-gray-700 mb-2">Skills (comma-separated)</label>
-                <input type="text" name="skills" id="skills" value={job.skills?.join(', ')} onChange={handleSkillsChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" />
+                <label
+                  htmlFor="skills"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Skills (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  name="skills"
+                  id="skills"
+                  value={job.skills?.join(", ")}
+                  onChange={handleSkillsChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                />
               </div>
               <div>
-                <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-2">Experience</label>
-                <input type="text" name="experience" id="experience" value={job.experience} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" />
+                <label
+                  htmlFor="experience"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Experience
+                </label>
+                <input
+                  type="text"
+                  name="experience"
+                  id="experience"
+                  value={job.experience}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                />
               </div>
               <div>
-                <label htmlFor="education" className="block text-sm font-medium text-gray-700 mb-2">Education</label>
-                <input type="text" name="education" id="education" value={job.education} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]" />
+                <label
+                  htmlFor="education"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Education
+                </label>
+                <input
+                  type="text"
+                  name="education"
+                  id="education"
+                  value={job.education}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                />
               </div>
             </div>
           </div>
-          
+
           {/* AI Prompts */}
           <div className="border-b border-gray-200 pb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">AI Recruitment Configuration</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              AI Recruitment Configuration
+            </h3>
             <div className="space-y-6">
               <div>
-                <label htmlFor="aiCvAnalysisPrompt" className="block text-sm font-medium text-gray-700 mb-2">AI CV Analysis Prompt</label>
-                <textarea name="aiCvAnalysisPrompt" id="aiCvAnalysisPrompt" value={job.aiCvAnalysisPrompt} onChange={handleChange} rows={5} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"></textarea>
+                <label
+                  htmlFor="aiCvAnalysisPrompt"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  AI CV Analysis Prompt
+                </label>
+                <textarea
+                  name="aiCvAnalysisPrompt"
+                  id="aiCvAnalysisPrompt"
+                  value={job.aiCvAnalysisPrompt}
+                  onChange={handleChange}
+                  rows={5}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                ></textarea>
               </div>
               <div>
-                <label htmlFor="aiFirstInterviewPrompt" className="block text-sm font-medium text-gray-700 mb-2">AI First Interview Prompt</label>
-                <textarea name="aiFirstInterviewPrompt" id="aiFirstInterviewPrompt" value={job.aiFirstInterviewPrompt} onChange={handleChange} rows={5} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"></textarea>
+                <label
+                  htmlFor="aiFirstInterviewPrompt"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  AI First Interview Prompt
+                </label>
+                <textarea
+                  name="aiFirstInterviewPrompt"
+                  id="aiFirstInterviewPrompt"
+                  value={job.aiFirstInterviewPrompt}
+                  onChange={handleChange}
+                  rows={5}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                ></textarea>
               </div>
               <div>
-                <label htmlFor="aiSecondInterviewPrompt" className="block text-sm font-medium text-gray-700 mb-2">AI Second Interview Prompt</label>
-                <textarea name="aiSecondInterviewPrompt" id="aiSecondInterviewPrompt" value={job.aiSecondInterviewPrompt} onChange={handleChange} rows={5} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"></textarea>
+                <label
+                  htmlFor="aiSecondInterviewPrompt"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  AI Second Interview Prompt
+                </label>
+                <textarea
+                  name="aiSecondInterviewPrompt"
+                  id="aiSecondInterviewPrompt"
+                  value={job.aiSecondInterviewPrompt}
+                  onChange={handleChange}
+                  rows={5}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                ></textarea>
               </div>
             </div>
           </div>
 
-          {error && <div className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg">{error}</div>}
+          {error && (
+            <div className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg">
+              {error}
+            </div>
+          )}
 
           <div className="flex justify-between items-center pt-8">
-            <button 
-              type="button" 
-              onClick={() => router.push(`/dashboard/jobs/${jobId}/applications`)}
+            <button
+              type="button"
+              onClick={() =>
+                router.push(`/dashboard/jobs/${jobId}/applications`)
+              }
               className="px-6 py-3 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0891b2] transition-colors font-semibold"
             >
               View Applications
             </button>
-            
+
             <div className="flex items-center gap-4">
-              <button type="button" onClick={() => router.back()} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
+              >
                 Cancel
               </button>
               <button
@@ -284,7 +584,7 @@ export default function EditJobPage() {
                 disabled={isUpdating}
                 className="px-6 py-3 bg-gradient-to-r from-[#0fc4b5] to-[#0891b2] text-white rounded-lg hover:from-[#0891b2] hover:to-[#0369a1] transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {isUpdating ? 'Updating...' : 'Save Changes'}
+                {isUpdating ? "Updating..." : "Save Changes"}
               </button>
             </div>
           </div>

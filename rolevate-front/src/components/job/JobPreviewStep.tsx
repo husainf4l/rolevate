@@ -52,6 +52,19 @@ const getWorkTypeDisplayText = (workType: JobFormData["workType"]) => {
   }
 };
 
+const getInterviewLanguageDisplayText = (
+  language: JobFormData["interviewLanguage"]
+) => {
+  switch (language) {
+    case "english":
+      return "English";
+    case "arabic":
+      return "Arabic";
+    default:
+      return language;
+  }
+};
+
 export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
   return (
     <div className="p-8 lg:p-12 space-y-8">
@@ -79,7 +92,10 @@ export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
             <span>💼 {getTypeDisplayText(jobData.type)}</span>
             <span>📈 {getJobLevelDisplayText(jobData.jobLevel)}</span>
             <span>🏢 {getWorkTypeDisplayText(jobData.workType)}</span>
-            <span>💰 {jobData.salary}</span>
+            <span>
+              �️ {getInterviewLanguageDisplayText(jobData.interviewLanguage)}
+            </span>
+            <span>�💰 {jobData.salary}</span>
           </div>
           {jobData.shortDescription && (
             <p className="text-[#6e6e73] bg-gray-50 p-3 rounded-lg text-sm">
@@ -221,6 +237,10 @@ export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
           </span>
           <span>🏢 {jobData.department}</span>
           <span>🏭 {jobData.industry}</span>
+          <span>
+            🗣️ Interview:{" "}
+            {getInterviewLanguageDisplayText(jobData.interviewLanguage)}
+          </span>
         </div>
       </div>
     </div>

@@ -221,6 +221,36 @@ export default function BasicInformationStep({
 
         <div>
           <label
+            htmlFor="interviewLanguage"
+            className="block text-sm font-semibold text-[#1d1d1f] mb-3"
+          >
+            Interview Language *
+          </label>
+          <select
+            id="interviewLanguage"
+            value={jobData.interviewLanguage}
+            onChange={(e) =>
+              onInputChange(
+                "interviewLanguage",
+                e.target.value as JobFormData["interviewLanguage"]
+              )
+            }
+            className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none ${
+              errors.interviewLanguage ? "border-red-400" : "border-[#d2d2d7]"
+            }`}
+          >
+            <option value="english">English</option>
+            <option value="arabic">Arabic</option>
+          </select>
+          {errors.interviewLanguage && (
+            <p className="mt-2 text-sm text-red-500">
+              {errors.interviewLanguage}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label
             htmlFor="location"
             className="text-sm font-semibold text-[#1d1d1f] mb-3 flex items-center gap-2"
           >

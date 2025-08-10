@@ -56,13 +56,13 @@ interface JobDetailClientProps {
 
 export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
   const { isJobSaved, canSaveJobs, toggleSaveJob } = useSavedJobs();
-  
+
   const isSaved = isJobSaved(jobId);
   const showSaveButton = canSaveJobs();
 
   // Generate the share URL
   const getShareUrl = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return `${window.location.origin}/jobs/${jobId}`;
     }
     // Fallback for SSR
@@ -94,7 +94,8 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
   };
 
   const formatWorkType = (workType: string) => {
-    if (!workType || workType === "Work Type Not Specified") return "Not Specified";
+    if (!workType || workType === "Work Type Not Specified")
+      return "Not Specified";
     return workType.charAt(0).toUpperCase() + workType.slice(1).toLowerCase();
   };
 
@@ -106,8 +107,13 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
 
     if (diffDays === 1) return "1 day ago";
     if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} week${Math.ceil(diffDays / 7) > 1 ? 's' : ''} ago`;
-    return `${Math.ceil(diffDays / 30)} month${Math.ceil(diffDays / 30) > 1 ? 's' : ''} ago`;
+    if (diffDays < 30)
+      return `${Math.ceil(diffDays / 7)} week${
+        Math.ceil(diffDays / 7) > 1 ? "s" : ""
+      } ago`;
+    return `${Math.ceil(diffDays / 30)} month${
+      Math.ceil(diffDays / 30) > 1 ? "s" : ""
+    } ago`;
   };
 
   return (
@@ -126,7 +132,7 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
         <div className="bg-white rounded-3xl shadow-lg border border-gray-200/50 p-8 mb-8 relative overflow-hidden">
           {/* Background decoration */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#13ead9]/5 to-[#0891b2]/5 rounded-full -translate-y-32 translate-x-32"></div>
-          
+
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-start lg:justify-between">
             <div className="flex-1 mb-8 lg:mb-0">
               {/* Title */}
@@ -247,8 +253,12 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
                   <div className="flex items-center justify-center">
                     <ShareButton
                       url={getShareUrl()}
-                      title={`${job.title} at ${job.company?.name || "Company"}`}
-                      description={`${job.shortDescription || job.description || ''} - ${job.location} - ${job.salary}`.slice(0, 150)}
+                      title={`${job.title} at ${
+                        job.company?.name || "Company"
+                      }`}
+                      description={`${
+                        job.shortDescription || job.description || ""
+                      } - ${job.location} - ${job.salary}`.slice(0, 150)}
                       variant="button"
                       className="w-full px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-2xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:border-[#0891b2] hover:text-[#0891b2] hover:shadow-md transform hover:scale-[1.02] transition-all duration-300 font-semibold text-base"
                     />
@@ -262,7 +272,9 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 font-medium">Applicants:</span>
+                      <span className="text-gray-600 font-medium">
+                        Applicants:
+                      </span>
                       <span className="text-gray-900 font-semibold">
                         {job.applicants}
                       </span>
@@ -357,7 +369,9 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
                       <UserGroupIcon className="w-4 h-4 text-[#0891b2]" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Experience</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Experience
+                      </p>
                       <p className="text-sm text-gray-900">{job.experience}</p>
                     </div>
                   </div>
@@ -369,7 +383,9 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
                       <BookmarkIcon className="w-4 h-4 text-[#0891b2]" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Education</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Education
+                      </p>
                       <p className="text-sm text-gray-900">{job.education}</p>
                     </div>
                   </div>
@@ -381,7 +397,9 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
                       <CalendarIcon className="w-4 h-4 text-[#0891b2]" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Job Level</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Job Level
+                      </p>
                       <p className="text-sm text-gray-900">{job.jobLevel}</p>
                     </div>
                   </div>
@@ -392,7 +410,9 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
                     <CalendarIcon className="w-4 h-4 text-[#0891b2]" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Application Deadline</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Application Deadline
+                    </p>
                     <p className="text-sm text-gray-900">
                       {new Date(job.deadline).toLocaleDateString("en-US", {
                         year: "numeric",

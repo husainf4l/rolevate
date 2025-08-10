@@ -1,6 +1,11 @@
 import { IsString, IsEnum, IsOptional, IsArray, IsDateString, IsBoolean, ValidateNested } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
+export enum InterviewLanguage {
+  ENGLISH = 'english',
+  ARABIC = 'arabic'
+}
+
 export enum JobType {
   FULL_TIME = 'FULL_TIME',
   PART_TIME = 'PART_TIME',
@@ -111,8 +116,9 @@ export class CreateJobDto {
   companyDescription?: string;
 
   @IsOptional()
-  @IsString()
-  interviewLanguage?: string = 'english';
+  @IsEnum(InterviewLanguage)
+  @Transform(({ value }) => value?.toLowerCase() || 'english')
+  interviewLanguage?: InterviewLanguage = InterviewLanguage.ENGLISH;
 
   @IsOptional()
   @IsString()
@@ -156,7 +162,7 @@ export class JobResponseDto {
   industry: string;
   companyDescription: string;
   companyLogo?: string;
-  interviewLanguage: string;
+  interviewLanguage: InterviewLanguage;
   status: string;
   companyId: string;
   company?: {

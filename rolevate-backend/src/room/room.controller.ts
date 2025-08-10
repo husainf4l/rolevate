@@ -34,7 +34,15 @@ export class RoomController {
 
   @Post('create-new-room')
   async createRoom(@Body() createRoomDto: CreateRoomDto) {
-    return this.roomService.createNewRoomWithMetadata(createRoomDto);
+    console.log('🎯 ROOM CONTROLLER: create-new-room endpoint called');
+    console.log('📦 Request data:', JSON.stringify(createRoomDto, null, 2));
+    
+    const result = await this.roomService.createNewRoomWithMetadata(createRoomDto);
+    
+    console.log('🎯 ROOM CONTROLLER: Response from service:');
+    console.log('📤 Metadata in response:', JSON.stringify(result.room?.metadata, null, 2));
+    
+    return result;
   }
 
   @Post('close-all-sessions')

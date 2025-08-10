@@ -61,6 +61,7 @@ export interface CreateJobRequest {
   jobLevel: string; // entry, mid, senior, executive
   workType: string; // onsite, remote, hybrid
   industry: string;
+  interviewLanguage: string; // EN, AR
   aiCvAnalysisPrompt: string;
   aiFirstInterviewPrompt: string;
   aiSecondInterviewPrompt: string;
@@ -95,6 +96,7 @@ export interface JobPost {
   jobLevel?: string;
   workType?: string;
   industry?: string;
+  interviewLanguage?: string;
   aiCvAnalysisPrompt?: string;
   aiFirstInterviewPrompt?: string;
   aiSecondInterviewPrompt?: string;

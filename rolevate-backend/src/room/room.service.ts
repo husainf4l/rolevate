@@ -287,6 +287,9 @@ export class RoomService {
   }
 
   async createNewRoomWithMetadata(createRoomDto: CreateRoomDto) {
+    console.log('🚀 ROOM SERVICE: createNewRoomWithMetadata method called');
+    console.log('📋 Input parameters:', JSON.stringify(createRoomDto, null, 2));
+    
     const { jobId, phone } = createRoomDto;
 
     try {
@@ -329,10 +332,23 @@ export class RoomService {
             }
           },
           job: {
-            include: {
+            select: {
+              id: true,
+              title: true,
+              interviewLanguage: true,
+              interviewPrompt: true,
+              cvAnalysisPrompt: true,
               company: {
-                include: {
-                  address: true
+                select: {
+                  id: true,
+                  name: true,
+                  address: {
+                    select: {
+                      street: true,
+                      city: true,
+                      country: true
+                    }
+                  }
                 }
               }
             }
@@ -367,16 +383,22 @@ export class RoomService {
       }
 
       console.log(`✅ Found application: ${application.candidate.firstName} ${application.candidate.lastName} (Phone: ${application.candidate.phone}) for job: ${application.job.title}`);
+      console.log(`🔍 DEBUG: Job data:`, JSON.stringify(application.job, null, 2));
+      console.log(`🔍 DEBUG: InterviewLanguage value:`, application.job.interviewLanguage);
+      console.log(`🔍 DEBUG: InterviewLanguage type:`, typeof application.job.interviewLanguage);
 
       // Step 2: Generate room name with timestamp
       const timestamp = Date.now();
       const roomName = `interview_${application.id}_${timestamp}`;
 
       // Step 3: Create minimal metadata for the agent
+      console.log(`🔧 BEFORE creating metadata - interviewLanguage:`, application.job.interviewLanguage || 'english');
+      
       const newMetadata = {
         candidateName: `${application.candidate.firstName} ${application.candidate.lastName}`,
         jobName: application.job.title,
         companyName: application.job.company.name,
+        interviewLanguage: application.job.interviewLanguage || 'english',
         interviewPrompt: application.job.interviewPrompt || "Conduct a professional interview for this position.",
         cvAnalysis: application.cvAnalysisResults ? (() => {
           const cvAnalysis = application.cvAnalysisResults as any;
@@ -390,11 +412,14 @@ export class RoomService {
         })() : null
       };
 
+      console.log(`🔧 AFTER creating metadata:`, JSON.stringify(newMetadata, null, 2));
+
       // Step 4: Create room on LiveKit server AND database with metadata
       const participantName = `${application.candidate.firstName} ${application.candidate.lastName}`;
 
       console.log(`🏗️ Creating room on LiveKit server: ${roomName}`);
-      console.log(`📋 Metadata includes: job, company, candidate, application details`);
+      console.log(`📋 Metadata includes: job, company, candidate, application details, interview language: ${newMetadata.interviewLanguage}`);
+      console.log(`🔍 FULL METADATA BEING SENT:`, JSON.stringify(newMetadata, null, 2));
 
       const { room: newRoom, token } = await this.liveKitService.createRoomWithToken(
         roomName,
@@ -425,6 +450,7 @@ export class RoomService {
           candidateName: newMetadata.candidateName,
           jobName: newMetadata.jobName,
           companyName: newMetadata.companyName,
+          interviewLanguage: newMetadata.interviewLanguage,
           interviewPrompt: newMetadata.interviewPrompt,
           cvAnalysis: newMetadata.cvAnalysis
         },
@@ -434,6 +460,7 @@ export class RoomService {
           candidateName: newMetadata.candidateName,
           position: newMetadata.jobName,
           company: newMetadata.companyName,
+          interviewLanguage: newMetadata.interviewLanguage,
           interviewType: "video_interview"
         },
 

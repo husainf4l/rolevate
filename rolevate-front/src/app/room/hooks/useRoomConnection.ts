@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Room } from "livekit-client";
 import { ReadonlyURLSearchParams } from "next/navigation";
+import { API_CONFIG } from "@/lib/config";
 
 interface UseRoomConnectionProps {
   room: Room;
@@ -55,7 +56,7 @@ export function useRoomConnection({
       if (!token && phone && jobId && backendRoomName) {
         console.log("🏗️ Creating room via backend...");
         const createResponse = await fetch(
-          "https://rolevate.com/api/room/create-new-room",
+          `${API_CONFIG.API_BASE_URL}/room/create-new-room`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
