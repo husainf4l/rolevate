@@ -1,0 +1,103 @@
+/* Candidates page styles */
+
+/* Custom styles that complement Tailwind classes */
+.candidates-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.candidates-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Smooth dropdown menu animation */
+.action-menu {
+  animation: slideDown 0.15s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus states for better accessibility */
+.filter-input:focus {
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+/* Custom scrollbar for table container */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Profile picture fallback */
+.profile-initials {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+/* Skills tags hover effect */
+.skill-tag {
+  transition: transform 0.1s ease;
+}
+
+.skill-tag:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .candidates-table {
+    font-size: 0.875rem;
+  }
+  
+  .candidates-table th,
+  .candidates-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .action-menu,
+  .filter-section,
+  .pagination {
+    display: none !important;
+  }
+  
+  .candidates-table {
+    font-size: 0.75rem;
+  }
+}

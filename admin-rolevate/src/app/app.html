@@ -1,0 +1,11 @@
+<!-- App Loading State -->
+@if (authService.isAuthLoading()) {
+  <div class="fixed inset-0 bg-white flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mb-4"></div>
+      <p class="text-gray-600 text-lg">Loading...</p>
+    </div>
+  </div>
+} @else {
+  <router-outlet />
+}

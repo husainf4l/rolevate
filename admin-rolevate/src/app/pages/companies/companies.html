@@ -1,0 +1,620 @@
+<!-- Companies Management Page -->
+<div class="space-y-8">
+  <!-- Page Header -->
+  <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              Companies
+            </h1>
+            <p class="text-gray-600 mt-2 text-lg">Manage and monitor registered companies</p>
+          </div>
+          <div class="flex items-center space-x-4">
+            @if (pagination(); as pag) {
+              <div class="bg-blue-50 px-4 py-2 rounded-full">
+                <span class="text-sm font-medium text-blue-700">
+                  {{ pag.totalItems }} total companies
+                </span>
+              </div>
+            }
+            <app-button
+              variant="outline"
+              size="sm"
+              (clicked)="exportCompanies()"
+              [disabled]="loading()"
+              class="shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              Export CSV
+            </app-button>
+            <app-button
+              variant="primary"
+              size="sm"
+              (clicked)="refreshData()"
+              [disabled]="loading()"
+              class="shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              Refresh
+            </app-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Filters -->
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-8">
+        <div class="space-y-6">
+          <!-- Primary Filters Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <!-- Search -->
+            <div class="lg:col-span-2">
+              <label class="block text-sm font-semibold text-gray-700 mb-3">Search</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="onSearch()"
+                  placeholder="Search by name, email, or industry..."
+                  class="w-full pl-10 px-4 py-3 border border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:bg-white/70"
+                />
+              </div>
+            </div>
+
+            <!-- Industry Filter -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">Industry</label>
+              <select
+                [(ngModel)]="selectedIndustry"
+                (ngModelChange)="onFilterChange()"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:bg-white/70"
+              >
+                <option value="">All Industries</option>
+                @for (industry of industries; track industry) {
+                  <option [value]="industry">{{ industry }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Subscription Filter -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">Subscription</label>
+              <select
+                [(ngModel)]="selectedSubscription"
+                (ngModelChange)="onFilterChange()"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:bg-white/70"
+              >
+                <option value="">All Subscriptions</option>
+                @for (type of subscriptionTypes; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">Status</label>
+              <select
+                [(ngModel)]="selectedStatus"
+                (ngModelChange)="onFilterChange()"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:bg-white/70"
+              >
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Secondary Filters Row -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Items per page -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">Items per page</label>
+              <select
+                [(ngModel)]="itemsPerPage"
+                (ngModelChange)="onItemsPerPageChange()"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:bg-white/70"
+              >
+                <option [value]="10">10</option>
+                <option [value]="25">25</option>
+                <option [value]="50">50</option>
+                <option [value]="100">100</option>
+              </select>
+            </div>
+
+            <!-- Sort by -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">Sort by</label>
+              <select
+                [(ngModel)]="sortBy"
+                (ngModelChange)="onSortChange()"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:bg-white/70"
+              >
+                <option value="name">Name</option>
+                <option value="createdAt">Date Created</option>
+                <option value="totalUsers">Total Users</option>
+                <option value="activeJobs">Active Jobs</option>
+                <option value="subscription">Subscription</option>
+              </select>
+            </div>
+
+            <!-- Sort order -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">Order</label>
+              <select
+                [(ngModel)]="sortOrder"
+                (ngModelChange)="onSortChange()"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:bg-white/70"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-end space-x-2">
+              <app-button
+                variant="outline"
+                size="sm"
+                (clicked)="clearFilters()"
+                class="flex-1 shadow-md hover:shadow-lg transition-all duration-200"
+              >
+                Clear Filters
+              </app-button>
+            </div>
+          </div>
+
+          <!-- Bulk Actions (show when companies are selected) -->
+          @if (selectedCompanies().length > 0) {
+            <div class="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
+              <span class="text-sm font-medium text-blue-700">
+                {{ selectedCompanies().length }} companies selected
+              </span>
+              <div class="flex items-center space-x-3">
+                <app-button
+                  variant="success"
+                  size="sm"
+                  (clicked)="bulkActivate()"
+                  class="shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  Activate Selected
+                </app-button>
+                <app-button
+                  variant="danger"
+                  size="sm"
+                  (clicked)="bulkDeactivate()"
+                  class="shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  Deactivate Selected
+                </app-button>
+                <app-button
+                  variant="outline"
+                  size="sm"
+                  (clicked)="clearSelection()"
+                  class="shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  Clear Selection
+                </app-button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-12">
+          <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent shadow-lg"></div>
+            <p class="text-gray-600 mt-4 font-medium">Loading companies...</p>
+          </div>
+        </div>
+      }
+
+      <!-- Error State -->
+      @if (error()) {
+        <div class="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-2xl shadow-lg p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h3 class="text-lg font-medium text-red-800">Error Loading Companies</h3>
+              <p class="text-red-700 mt-1">{{ error() }}</p>
+            </div>
+          </div>
+        </div>
+      }
+
+  <!-- Companies Table -->
+  @if (!loading() && companies().length > 0) {
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+          <!-- Table Container with horizontal scroll for mobile -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <!-- Table Header -->
+              <thead class="bg-gradient-to-r from-gray-50 to-blue-50/30">
+                <tr>
+                  <!-- Select All Checkbox -->
+                  <th scope="col" class="relative w-12 px-6 sm:w-16 sm:px-8">
+                    <input
+                      type="checkbox"
+                      class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 shadow-sm"
+                      [checked]="isAllSelected()"
+                      [indeterminate]="isPartiallySelected()"
+                      (change)="toggleSelectAll()"
+                    />
+                  </th>
+              
+                  <!-- Company Column (sortable) -->
+                  <th scope="col" class="min-w-[300px] py-4 pl-4 pr-3 text-left text-sm font-bold text-gray-900">
+                    <button
+                      class="group inline-flex items-center hover:text-blue-600 transition-colors duration-200"
+                      (click)="setSortField('name')"
+                    >
+                      Company
+                      <span class="ml-2 flex-none rounded text-gray-400 group-hover:text-blue-500 transition-colors duration-200">
+                        @if (sortBy() === 'name') {
+                          <svg class="h-4 w-4 text-blue-600" [class.rotate-180]="sortOrder() === 'desc'" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clip-rule="evenodd" />
+                          </svg>
+                        } @else {
+                          <svg class="h-4 w-4 opacity-40" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                          </svg>
+                        }
+                      </span>
+                    </button>
+                  </th>
+              
+                  <!-- Industry Column (sortable) -->
+                  <th scope="col" class="px-3 py-4 text-left text-sm font-bold text-gray-900">
+                    <button
+                      class="group inline-flex items-center hover:text-blue-600 transition-colors duration-200"
+                      (click)="setSortField('industry')"
+                    >
+                      Industry
+                      <span class="ml-2 flex-none rounded text-gray-400 group-hover:text-blue-500 transition-colors duration-200">
+                        @if (sortBy() === 'industry') {
+                          <svg class="h-4 w-4 text-blue-600" [class.rotate-180]="sortOrder() === 'desc'" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clip-rule="evenodd" />
+                          </svg>
+                        } @else {
+                          <svg class="h-4 w-4 opacity-40" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                          </svg>
+                        }
+                      </span>
+                    </button>
+                  </th>
+                  
+                  <!-- Subscription Column -->
+                  <th scope="col" class="px-3 py-4 text-left text-sm font-bold text-gray-900">Subscription</th>
+                  
+                  <!-- Users Column (sortable) -->
+                  <th scope="col" class="px-3 py-4 text-left text-sm font-bold text-gray-900">
+                    <button
+                      class="group inline-flex items-center hover:text-blue-600 transition-colors duration-200"
+                      (click)="setSortField('totalUsers')"
+                    >
+                      Users
+                      <span class="ml-2 flex-none rounded text-gray-400 group-hover:text-blue-500 transition-colors duration-200">
+                        @if (sortBy() === 'totalUsers') {
+                          <svg class="h-4 w-4 text-blue-600" [class.rotate-180]="sortOrder() === 'desc'" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clip-rule="evenodd" />
+                          </svg>
+                        } @else {
+                          <svg class="h-4 w-4 opacity-40" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                          </svg>
+                        }
+                      </span>
+                    </button>
+                  </th>
+              
+                  <!-- Jobs Column (sortable) -->
+                  <th scope="col" class="px-3 py-4 text-left text-sm font-bold text-gray-900">
+                    <button
+                      class="group inline-flex items-center hover:text-blue-600 transition-colors duration-200"
+                      (click)="setSortField('activeJobs')"
+                    >
+                      Jobs
+                      <span class="ml-2 flex-none rounded text-gray-400 group-hover:text-blue-500 transition-colors duration-200">
+                        @if (sortBy() === 'activeJobs') {
+                          <svg class="h-4 w-4 text-blue-600" [class.rotate-180]="sortOrder() === 'desc'" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clip-rule="evenodd" />
+                          </svg>
+                        } @else {
+                          <svg class="h-4 w-4 opacity-40" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                          </svg>
+                        }
+                      </span>
+                    </button>
+                  </th>
+                  
+                  <!-- Status Column -->
+                  <th scope="col" class="px-3 py-4 text-left text-sm font-bold text-gray-900">Status</th>
+                  
+                  <!-- Join Date Column (sortable) -->
+                  <th scope="col" class="px-3 py-4 text-left text-sm font-bold text-gray-900">
+                    <button
+                      class="group inline-flex items-center hover:text-blue-600 transition-colors duration-200"
+                      (click)="setSortField('createdAt')"
+                    >
+                      Joined
+                      <span class="ml-2 flex-none rounded text-gray-400 group-hover:text-blue-500 transition-colors duration-200">
+                        @if (sortBy() === 'createdAt') {
+                          <svg class="h-4 w-4 text-blue-600" [class.rotate-180]="sortOrder() === 'desc'" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clip-rule="evenodd" />
+                          </svg>
+                        } @else {
+                          <svg class="h-4 w-4 opacity-40" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                          </svg>
+                        }
+                      </span>
+                    </button>
+                  </th>
+                  
+                  <!-- Actions Column -->
+                  <th scope="col" class="relative py-4 pl-3 pr-4 sm:pr-6">
+                    <span class="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              
+              <!-- Table Body -->
+              <tbody class="divide-y divide-gray-100 bg-white/50 backdrop-blur-sm">
+                @for (company of companies(); track company.id) {
+                  <tr [class]="isCompanySelected(company.id) ? 'bg-blue-50/80' : 'hover:bg-blue-50/30'" class="transition-all duration-200">
+                    <!-- Select Checkbox -->
+                    <td class="relative w-12 px-6 sm:w-16 sm:px-8">
+                      <input
+                        type="checkbox"
+                        class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 shadow-sm"
+                        [checked]="isCompanySelected(company.id)"
+                        (change)="toggleCompanySelection(company.id)"
+                      />
+                    </td>
+                
+                <!-- Company Info -->
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm">
+                  <div class="flex items-center">
+                    <!-- Logo -->
+                    <div class="h-12 w-12 flex-shrink-0">
+                      @if (company.logo) {
+                        <img 
+                          [src]="company.logo" 
+                          [alt]="company.name + ' logo'"
+                          class="h-12 w-12 rounded-lg object-cover border border-gray-200"
+                        />
+                      } @else {
+                        <div class="h-12 w-12 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+                          <span class="text-white font-bold text-lg">{{ company.name.charAt(0).toUpperCase() }}</span>
+                        </div>
+                      }
+                    </div>
+                    
+                    <!-- Company Details -->
+                    <div class="ml-4 min-w-0 flex-1">
+                      <div class="font-medium text-gray-900 truncate">
+                        <a [routerLink]="['/companies', company.id]" class="hover:text-cyan-600">
+                          {{ company.name }}
+                        </a>
+                      </div>
+                      <div class="text-gray-500 truncate">{{ company.email }}</div>
+                      @if (company.address?.city && company.address?.country) {
+                        <div class="text-xs text-gray-400">{{ company.address?.city }}, {{ company.address?.country }}</div>
+                      }
+                    </div>
+                  </div>
+                </td>
+                
+                <!-- Industry -->
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    {{ company.industry }}
+                  </span>
+                </td>
+                
+                <!-- Subscription -->
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <span [class]="getSubscriptionBadgeClass(company.subscription)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                    {{ company.subscription }}
+                  </span>
+                </td>
+                
+                <!-- Users -->
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                  <div class="flex items-center">
+                    <svg class="h-4 w-4 text-gray-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                    </svg>
+                    {{ company.totalUsers }}
+                  </div>
+                </td>
+                
+                <!-- Jobs -->
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                  <div class="flex items-center space-x-1">
+                    <span class="font-medium text-green-600">{{ company.activeJobs }}</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-gray-600">{{ company.totalJobs }}</span>
+                  </div>
+                  @if (company.totalApplications > 0) {
+                    <div class="text-xs text-gray-500">{{ company.totalApplications }} applications</div>
+                  }
+                </td>
+                
+                <!-- Status -->
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <span [class]="getStatusBadgeClass(company.isActive)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                    {{ company.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                
+                <!-- Join Date -->
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  {{ formatDate(company.createdAt) }}
+                </td>
+                
+                <!-- Actions -->
+                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                  <div class="flex items-center justify-end space-x-2">
+                    <!-- Quick Status Toggle -->
+                    <button
+                      type="button"
+                      (click)="toggleCompanyStatus(company)"
+                      [class]="company.isActive 
+                        ? 'text-red-600 hover:text-red-700' 
+                        : 'text-green-600 hover:text-green-700'"
+                      class="transition-colors"
+                      [title]="company.isActive ? 'Deactivate' : 'Activate'"
+                    >
+                      @if (company.isActive) {
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      } @else {
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      }
+                    </button>
+                    
+                    <!-- View Details -->
+                    <a
+                      [routerLink]="['/companies', company.id]"
+                      class="text-cyan-600 hover:text-cyan-700 transition-colors"
+                      title="View Details"
+                    >
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </a>
+                    
+                    <!-- More Options Menu -->
+                    <div class="relative">
+                      <button
+                        type="button"
+                        class="text-gray-400 hover:text-gray-600 transition-colors"
+                        title="More options"
+                        (click)="toggleCompanyMenu(company.id)"
+                      >
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                        </svg>
+                      </button>
+                      
+                      <!-- Dropdown Menu (implement in component) -->
+                      @if (isCompanyMenuOpen(company.id)) {
+                        <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Company</a>
+                          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View Users</a>
+                          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Export Data</a>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && companies().length === 0) {
+    <div class="text-center py-12">
+      <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No companies found</h3>
+      <p class="text-gray-600">Try adjusting your search criteria or filters.</p>
+    </div>
+  }
+
+  <!-- Pagination -->
+  @if (pagination() && pagination().totalPages > 1) {
+    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg">
+      <div class="flex flex-1 justify-between sm:hidden">
+        <app-button
+          variant="outline"
+          [disabled]="!pagination().hasPrevPage"
+          (clicked)="onPageChange(currentPage() - 1)"
+        >
+          Previous
+        </app-button>
+        <app-button
+          variant="outline"
+          [disabled]="!pagination().hasNextPage"
+          (clicked)="onPageChange(currentPage() + 1)"
+        >
+          Next
+        </app-button>
+      </div>
+      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-700">
+            Showing
+            <span class="font-medium">{{ (currentPage() - 1) * itemsPerPage() + 1 }}</span>
+            to
+            <span class="font-medium">{{ Math.min(currentPage() * itemsPerPage(), pagination().totalItems) }}</span>
+            of
+            <span class="font-medium">{{ pagination().totalItems }}</span>
+            results
+          </p>
+        </div>
+        <div>
+          <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+            <!-- Previous Button -->
+            <button
+              [disabled]="!pagination().hasPrevPage"
+              (click)="onPageChange(currentPage() - 1)"
+              class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span class="sr-only">Previous</span>
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+              </svg>
+            </button>
+
+            <!-- Page Numbers -->
+            @for (page of getPaginationPages(); track page) {
+              <button
+                (click)="onPageChange(page)"
+                [class]="currentPage() === page 
+                  ? 'relative z-10 inline-flex items-center bg-cyan-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600'
+                  : 'relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'"
+              >
+                {{ page }}
+              </button>
+            }
+
+            <!-- Next Button -->
+            <button
+              [disabled]="!pagination().hasNextPage"
+              (click)="onPageChange(currentPage() + 1)"
+              class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span class="sr-only">Next</span>
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  }

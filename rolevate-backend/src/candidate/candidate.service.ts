@@ -21,7 +21,7 @@ export class CandidateService {
     private cacheService: CacheService,
     private notificationService: NotificationService,
     private awsS3Service: AwsS3Service,
-  ) { }
+  ) {}
 
   async createBasicProfile(createBasicDto: CreateBasicCandidateProfileDto, userId?: string): Promise<CandidateProfileResponseDto> {
     // Check if candidate profile with this email already exists
@@ -65,7 +65,7 @@ export class CandidateService {
   async findProfileByUserId(userId: string): Promise<CandidateProfileResponseDto | null> {
     console.log('=== findProfileByUserId called ===');
     console.log('userId parameter:', userId);
-
+    
     try {
       const profile = await this.prisma.candidateProfile.findUnique({
         where: { userId },
@@ -78,9 +78,9 @@ export class CandidateService {
           }
         }
       });
-
+      
       console.log('📋 Database query result:', profile);
-
+      
       if (profile) {
         const mappedProfile = this.mapToBasicProfileResponse(profile);
         console.log('✅ Mapped profile response:', mappedProfile);
@@ -201,7 +201,7 @@ export class CandidateService {
     // First ensure the candidate profile exists
     const profile = await this.prisma.candidateProfile.findUnique({
       where: { userId },
-      include: {
+      include: { 
         cvs: {
           where: { id: cvId }
         }
@@ -218,14 +218,13 @@ export class CandidateService {
       throw new NotFoundException('CV not found');
     }
 
-    // Delete the file from S3
+    // Delete the file from filesystem
+    const fs = require('fs-extra');
     try {
-      if (cv.fileUrl && this.awsS3Service.isS3Url(cv.fileUrl)) {
-        await this.awsS3Service.deleteFile(cv.fileUrl);
-        console.log('✅ CV file deleted from S3:', cv.fileUrl);
-      }
+      const filePath = `./uploads/cvs/${userId}/${cv.fileName}`;
+      await fs.remove(filePath);
     } catch (error) {
-      console.warn('Could not delete file from S3:', error.message);
+      console.warn('Could not delete file from filesystem:', error.message);
     }
 
     // Delete CV record from database
@@ -245,7 +244,7 @@ export class CandidateService {
       });
 
       const newResumeUrl = remainingCVs.length > 0 ? remainingCVs[0].fileUrl : null;
-
+      
       await this.prisma.candidateProfile.update({
         where: { id: profile.id },
         data: { resumeUrl: newResumeUrl },
@@ -306,7 +305,7 @@ export class CandidateService {
     // Update the CV status
     const updatedCV = await this.prisma.cV.update({
       where: { id: cvId },
-      data: {
+      data: { 
         status,
         processedAt: status === 'PROCESSED' ? new Date() : cv.processedAt
       }
@@ -495,7 +494,7 @@ export class CandidateService {
     }
 
     const savedJobIds = profile.savedJobs || [];
-
+    
     if (savedJobIds.length === 0) {
       return [];
     }

@@ -1,0 +1,385 @@
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+  <!-- Header with Back Button -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center space-x-6">
+      <app-button
+        variant="outline"
+        size="sm"
+        (clicked)="goBack()"
+        class="flex items-center"
+      >
+        <app-icon name="arrow-left" class="w-4 h-4 mr-2"></app-icon>
+        Back to Interviews
+      </app-button>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">
+          {{ interview()?.title || 'Interview Details' }}
+        </h1>
+        <p class="text-gray-600 mt-1">Interview Information & Details</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      @if (interview()?.videoLink && (interview()?.status === 'IN_PROGRESS' || interview()?.status === 'SCHEDULED')) {
+        <app-button
+          variant="outline"
+          size="sm"
+          (clicked)="openVideoLink()"
+          class="flex items-center"
+        >
+          <app-icon name="video" class="w-4 h-4 mr-2"></app-icon>
+          {{ interview()?.status === 'IN_PROGRESS' ? 'Join Interview' : 'Join Meeting' }}
+        </app-button>
+      } @else if (interview()?.videoLink && interview()?.status === 'COMPLETED') {
+        <app-button
+          variant="outline"
+          size="sm"
+          (clicked)="openVideoLink()"
+          class="flex items-center"
+        >
+          <app-icon name="video" class="w-4 h-4 mr-2"></app-icon>
+          View Recording
+        </app-button>
+      }
+      <app-button
+        variant="primary"
+        size="sm"
+        (clicked)="editInterview()"
+        class="flex items-center"
+      >
+        <app-icon name="pencil" class="w-4 h-4 mr-2"></app-icon>
+        Edit Interview
+      </app-button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600"></div>
+      <span class="ml-4 text-gray-600 text-lg">Loading interview details...</span>
+    </div>
+  } @else if (error()) {
+    <div class="text-center py-20">
+      <div class="text-red-600 mb-6 text-lg">{{ error() }}</div>
+      <app-button variant="outline" (clicked)="loadInterview(route.snapshot.paramMap.get('id')!)">
+        Try Again
+      </app-button>
+    </div>
+  } @else if (interview()) {
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-12">
+      <!-- Main Content -->
+      <div class="xl:col-span-3">
+        <!-- Interview Details -->
+        <app-card class="mb-6">
+          <div class="p-8">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6">Interview Details</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div class="space-y-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Interview Title</label>
+                  <p class="text-base text-gray-900">{{ interview()?.title }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Type</label>
+                  <p class="text-base text-gray-900">{{ formatInterviewType(interview()?.type) }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Status</label>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                        [ngClass]="getStatusClasses(interview()?.status)">
+                    {{ formatInterviewStatus(interview()?.status) }}
+                  </span>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Scheduled At</label>
+                  <p class="text-base text-gray-900">{{ formatDate(interview()?.scheduledAt) }}</p>
+                </div>
+              </div>
+              <div class="space-y-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Duration</label>
+                  <p class="text-base text-gray-900">
+                    {{ interview()?.duration ? interview()?.duration + ' minutes' : 'Not specified' }}
+                  </p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-1">Room ID</label>
+                  <p class="text-base text-gray-900 font-mono">{{ interview()?.roomId || 'Not assigned' }}</p>
+                </div>
+                @if (interview()?.aiScore !== null && interview()?.aiScore !== undefined) {
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">AI Score</label>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                          [ngClass]="getAiScoreClasses(interview()!.aiScore!)">
+                      {{ interview()?.aiScore }}/100
+                    </span>
+                  </div>
+                }
+                @if (interview()?.startedAt) {
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Started At</label>
+                    <p class="text-base text-gray-900">{{ formatDate(interview()!.startedAt) }}</p>
+                  </div>
+                }
+                @if (interview()?.endedAt) {
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Ended At</label>
+                    <p class="text-base text-gray-900">{{ formatDate(interview()!.endedAt) }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </app-card>
+
+        <!-- Description -->
+        @if (interview()?.description) {
+          <app-card class="mb-6">
+            <div class="p-8">
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Description</h3>
+              <p class="text-gray-700 leading-relaxed">{{ interview()?.description }}</p>
+            </div>
+          </app-card>
+        }
+
+        <!-- Job Information -->
+        @if (interview()?.job) {
+          <app-card class="mb-6">
+            <div class="p-8">
+              <h3 class="text-xl font-semibold text-gray-900 mb-6">Job Information</h3>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Job Title</label>
+                    <p class="text-base text-gray-900">{{ interview()?.job?.title }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Department</label>
+                    <p class="text-base text-gray-900">{{ interview()?.job?.department }}</p>
+                  </div>
+                </div>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Salary</label>
+                    <p class="text-base text-gray-900">{{ interview()?.job?.salary }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Company</label>
+                    <p class="text-base text-gray-900">{{ interview()?.job?.company?.name }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </app-card>
+        }
+
+        <!-- AI Recommendation -->
+        @if (interview()?.aiRecommendation) {
+          <app-card class="mb-6">
+            <div class="p-8">
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">AI Recommendation</h3>
+              <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                  <div class="h-10 w-10 rounded-full flex items-center justify-center"
+                       [ngClass]="interview()?.aiRecommendation === 'REJECT' ? 'bg-red-100 text-red-600' : 
+                                  interview()?.aiRecommendation === 'SECOND_INTERVIEW' ? 'bg-green-100 text-green-600' : 
+                                  'bg-yellow-100 text-yellow-600'">
+                    <app-icon [name]="interview()?.aiRecommendation === 'REJECT' ? 'x-mark' : 
+                                     interview()?.aiRecommendation === 'SECOND_INTERVIEW' ? 'check' : 
+                                     'clock'" class="w-5 h-5"></app-icon>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          [ngClass]="interview()?.aiRecommendation === 'REJECT' ? 'bg-red-100 text-red-800' : 
+                                     interview()?.aiRecommendation === 'SECOND_INTERVIEW' ? 'bg-green-100 text-green-800' : 
+                                     'bg-yellow-100 text-yellow-800'">
+                      {{ formatRecommendation(interview()?.aiRecommendation) }}
+                    </span>
+                    @if (interview()?.aiScore !== null && interview()?.aiScore !== undefined) {
+                      <span class="text-sm text-gray-500">
+                        Score: {{ interview()?.aiScore }}/100
+                      </span>
+                    }
+                  </div>
+                  <p class="text-gray-700 text-sm">
+                    Based on the AI analysis of the interview, this candidate is 
+                    <span class="font-medium"
+                          [ngClass]="interview()?.aiRecommendation === 'REJECT' ? 'text-red-600' : 
+                                     interview()?.aiRecommendation === 'SECOND_INTERVIEW' ? 'text-green-600' : 
+                                     'text-yellow-600'">
+                      {{ interview()?.aiRecommendation === 'REJECT' ? 'not recommended' : 
+                         interview()?.aiRecommendation === 'SECOND_INTERVIEW' ? 'recommended for a second interview' : 
+                         'pending further review' }}
+                    </span>
+                    for this position.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </app-card>
+        }
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+        <!-- Candidate Card -->
+        @if (interview()?.candidate) {
+          <app-card class="mb-6">
+            <div class="p-6 text-center">
+              <div class="mx-auto h-24 w-24 mb-4">
+                @if (interview()?.candidate?.user?.profilePicture) {
+                  <img class="h-24 w-24 rounded-full object-cover mx-auto border-2 border-gray-100" 
+                       [src]="interview()!.candidate!.user!.profilePicture" 
+                       [alt]="interview()?.candidate?.firstName + ' ' + interview()?.candidate?.lastName">
+                } @else {
+                  <div class="h-24 w-24 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-lg font-bold mx-auto border-2 border-gray-100">
+                    {{ interview()?.candidate?.firstName?.charAt(0) }}{{ interview()?.candidate?.lastName?.charAt(0) }}
+                  </div>
+                }
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                {{ interview()?.candidate?.firstName }} {{ interview()?.candidate?.lastName }}
+              </h3>
+              <p class="text-sm text-gray-600 mb-4">{{ interview()?.candidate?.email }}</p>
+              <app-button
+                variant="outline"
+                size="sm"
+                (clicked)="viewCandidate()"
+                class="w-full"
+              >
+                View Profile
+              </app-button>
+            </div>
+          </app-card>
+        }
+
+        <!-- Interview Actions -->
+        <app-card class="mb-6">
+          <div class="p-6">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Interview Actions</h3>
+            <div class="space-y-2">
+              @if (interview()?.status === 'SCHEDULED') {
+                <app-button
+                  variant="primary"
+                  size="sm"
+                  (clicked)="startInterview()"
+                  class="w-full justify-center text-xs py-2"
+                >
+                  Start Interview
+                </app-button>
+              } @else if (interview()?.status === 'IN_PROGRESS') {
+                <app-button
+                  variant="primary"
+                  size="sm"
+                  (clicked)="joinInterview()"
+                  class="w-full justify-center text-xs py-2"
+                >
+                  Join Interview
+                </app-button>
+              }
+              
+              @if (interview()?.status !== 'COMPLETED' && interview()?.status !== 'CANCELLED') {
+                <app-button
+                  variant="outline"
+                  size="sm"
+                  (clicked)="rescheduleInterview()"
+                  class="w-full justify-center text-xs py-2"
+                >
+                  Reschedule
+                </app-button>
+              }
+              
+              @if (interview()?.videoLink) {
+                <app-button
+                  variant="outline"
+                  size="sm"
+                  (clicked)="openVideoLink()"
+                  class="w-full justify-center text-xs py-2"
+                >
+                  <app-icon name="video" class="w-3 h-3 mr-1"></app-icon>
+                  {{ interview()?.status === 'COMPLETED' ? 'View Recording' : 'Join Meeting' }}
+                </app-button>
+              }
+              
+              @if (interview()?.recordingUrl) {
+                <app-button
+                  variant="outline"
+                  size="sm"
+                  (clicked)="openRecording()"
+                  class="w-full justify-center text-xs py-2"
+                >
+                  <app-icon name="video" class="w-3 h-3 mr-1"></app-icon>
+                  View Recording
+                </app-button>
+              }
+              
+              @if (interview()?.status !== 'COMPLETED' && interview()?.status !== 'CANCELLED') {
+                <app-button
+                  variant="outline"
+                  size="sm"
+                  (clicked)="cancelInterview()"
+                  class="w-full justify-center text-xs py-2 text-red-600 hover:text-red-700"
+                >
+                  Cancel Interview
+                </app-button>
+              }
+            </div>
+          </div>
+        </app-card>
+
+        <!-- Interview Stats -->
+        <app-card>
+          <div class="p-6">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Interview Stats</h3>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span class="text-xs font-medium text-gray-600">Duration</span>
+                <span class="text-sm font-bold text-gray-900">
+                  {{ interview()?.duration ? interview()?.duration + ' min' : 'Not specified' }}
+                </span>
+              </div>
+              @if (interview()?.aiScore !== null && interview()?.aiScore !== undefined) {
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span class="text-xs font-medium text-gray-600">AI Score</span>
+                  <span class="text-sm font-bold"
+                        [ngClass]="interview()!.aiScore! >= 80 ? 'text-green-600' : 
+                                   interview()!.aiScore! >= 60 ? 'text-yellow-600' : 'text-red-600'">
+                    {{ interview()?.aiScore }}/100
+                  </span>
+                </div>
+              }
+              @if (interview()?.aiRecommendation) {
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span class="text-xs font-medium text-gray-600">AI Recommendation</span>
+                  <span class="text-xs font-medium"
+                        [ngClass]="interview()?.aiRecommendation === 'REJECT' ? 'text-red-600' : 
+                                   interview()?.aiRecommendation === 'SECOND_INTERVIEW' ? 'text-green-600' : 
+                                   'text-yellow-600'">
+                    {{ formatRecommendation(interview()?.aiRecommendation) }}
+                  </span>
+                </div>
+              }
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span class="text-xs font-medium text-gray-600">Status</span>
+                <span class="text-xs font-medium"
+                      [ngClass]="interview()?.status === 'COMPLETED' ? 'text-green-600' : 
+                                 interview()?.status === 'SCHEDULED' ? 'text-blue-600' : 
+                                 interview()?.status === 'CANCELLED' ? 'text-red-600' : 
+                                 interview()?.status === 'IN_PROGRESS' ? 'text-yellow-600' : 'text-gray-600'">
+                  {{ formatInterviewStatus(interview()?.status) }}
+                </span>
+              </div>
+              @if (interview()?.videoLink) {
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span class="text-xs font-medium text-gray-600">Video Link</span>
+                  <span class="text-xs font-medium text-green-600">Available</span>
+                </div>
+              }
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  }
+</div>

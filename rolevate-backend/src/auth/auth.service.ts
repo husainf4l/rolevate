@@ -217,6 +217,11 @@ export class AuthService {
   }
 
   async signup(createUserDto: CreateUserDto) {
+    // SECURITY: Prevent ADMIN user creation through signup (runtime check)
+    if ((createUserDto as any).userType === 'ADMIN') {
+      throw new UnauthorizedException('Admin users cannot be created through signup');
+    }
+
     // Check if user already exists
     const existingUser = await this.userService.findByEmail(createUserDto.email);
     if (existingUser) {

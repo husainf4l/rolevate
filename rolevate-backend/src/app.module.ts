@@ -18,6 +18,7 @@ import { CommunicationModule } from './communication/communication.module';
 import { RoomModule } from './room/room.module';
 import { JobFitModule } from './jobfit/jobfit.module';
 import { InterviewModule } from './interview/interview.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   // Removed duplicate imports property
@@ -39,6 +40,7 @@ import { InterviewModule } from './interview/interview.module';
     RoomModule,
     JobFitModule,
     InterviewModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

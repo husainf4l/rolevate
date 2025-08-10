@@ -1,0 +1,113 @@
+/* Table Styles */
+.interviews-table {
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.table-header {
+  background-color: #f9fafb;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 150ms;
+}
+
+.table-row:hover {
+  background-color: #f9fafb;
+}
+
+.table-cell {
+  padding: 1rem 1.5rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Action Buttons */
+.action-button {
+  font-weight: 500;
+  transition: color 150ms;
+}
+
+.action-button-primary {
+  color: #2563eb;
+}
+
+.action-button-primary:hover {
+  color: #1e40af;
+}
+
+.action-button-success {
+  color: #059669;
+}
+
+.action-button-success:hover {
+  color: #047857;
+}
+
+.action-button-danger {
+  color: #dc2626;
+}
+
+.action-button-danger:hover {
+  color: #b91c1c;
+}
+
+/* Loading States */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  height: 2rem;
+  width: 2rem;
+  border: 2px solid transparent;
+  border-bottom-color: #2563eb;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 0;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .interviews-page {
+    padding: 1rem;
+  }
+  
+  .table-cell {
+    padding: 0.75rem 1rem;
+  }
+}

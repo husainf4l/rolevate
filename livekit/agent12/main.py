@@ -35,56 +35,53 @@ from utils.transcript_saver import create_transcript_saver
 # Load environment variables from parent directory
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
+
 # Configure production logging
 def setup_logging():
     """Setup production-ready logging configuration"""
     log_dir = os.path.join(os.path.dirname(__file__), "..", "logs")
     os.makedirs(log_dir, exist_ok=True)
-    
+
     LOGGING_CONFIG = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'detailed': {
-                'format': '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "detailed": {
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
             },
-            'simple': {
-                'format': '%(levelname)s - %(message)s'
-            }
+            "simple": {"format": "%(levelname)s - %(message)s"},
         },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'level': 'INFO',
-                'formatter': 'detailed',
-                'stream': 'ext://sys.stdout'
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "level": "INFO",
+                "formatter": "detailed",
+                "stream": "ext://sys.stdout",
             },
-            'file': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'level': 'DEBUG',
-                'formatter': 'detailed',
-                'filename': os.path.join(log_dir, 'agent11-debug.log'),
-                'maxBytes': 10485760,  # 10MB
-                'backupCount': 5
+            "file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "DEBUG",
+                "formatter": "detailed",
+                "filename": os.path.join(log_dir, "agent11-debug.log"),
+                "maxBytes": 10485760,  # 10MB
+                "backupCount": 5,
             },
-            'error_file': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'level': 'ERROR',
-                'formatter': 'detailed',
-                'filename': os.path.join(log_dir, 'agent11-errors.log'),
-                'maxBytes': 10485760,  # 10MB
-                'backupCount': 3
-            }
+            "error_file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "ERROR",
+                "formatter": "detailed",
+                "filename": os.path.join(log_dir, "agent11-errors.log"),
+                "maxBytes": 10485760,  # 10MB
+                "backupCount": 3,
+            },
         },
-        'loggers': {
-            '': {
-                'level': 'INFO',
-                'handlers': ['console', 'file', 'error_file']
-            }
-        }
+        "loggers": {
+            "": {"level": "INFO", "handlers": ["console", "file", "error_file"]}
+        },
     }
-    
+
     logging.config.dictConfig(LOGGING_CONFIG)
+
 
 # Setup logging
 setup_logging()
@@ -137,7 +134,7 @@ async def entrypoint(ctx: JobContext):
     """
     try:
         logger.info("🚀 Starting Agent10...")
-        
+
         # Connection with retry logic
         max_retries = 3
         for attempt in range(max_retries):
@@ -150,7 +147,7 @@ async def entrypoint(ctx: JobContext):
                     logger.error(f"❌ Failed to connect after {max_retries} attempts")
                     raise
                 logger.warning(f"Connection attempt {attempt + 1} failed: {e}")
-                await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                await asyncio.sleep(2**attempt)  # Exponential backoff
 
         # Extract metadata
         metadata = MetadataExtractor.extract_from_room(ctx.room.metadata, ctx.room.name)
@@ -175,15 +172,17 @@ async def entrypoint(ctx: JobContext):
         # Validate environment variables
         required_vars = [
             "OPENAI_API_KEY",
-            "LIVEKIT_URL", 
+            "LIVEKIT_URL",
             "LIVEKIT_API_KEY",
             "LIVEKIT_API_SECRET",
-            "ELEVENLABS_API_KEY"
+            "ELEVENLABS_API_KEY",
         ]
         missing_vars = [var for var in required_vars if not os.getenv(var)]
         if missing_vars:
-            raise ValueError(f"Required environment variables missing: {', '.join(missing_vars)}")
-        
+            raise ValueError(
+                f"Required environment variables missing: {', '.join(missing_vars)}"
+            )
+
         logger.info("✅ All required environment variables validated")
 
         # Configure session with clean setup
@@ -193,7 +192,7 @@ async def entrypoint(ctx: JobContext):
                 model="whisper-1",
             ),
             llm=openai.LLM(
-                model="gpt-4o",
+                model="gpt-5",  # Using GPT-5 as requested (announced Aug 7, 2025)
                 api_key=os.getenv("OPENAI_API_KEY"),
             ),
             tts=ElevenLabsTTS(
@@ -212,8 +211,7 @@ async def entrypoint(ctx: JobContext):
         recording_url = None
         try:
             recording_url = await asyncio.wait_for(
-                recording_manager.start_recording(), 
-                timeout=15.0
+                recording_manager.start_recording(), timeout=15.0
             )
             logger.info(f"✅ Recording started: {recording_url}")
         except asyncio.TimeoutError:
@@ -297,7 +295,9 @@ async def entrypoint(ctx: JobContext):
                             )
                             logger.info("✅ Agent transcript saved")
                     else:
-                        logger.warning("⚠️ Transcript saver not available, skipping transcript save")
+                        logger.warning(
+                            "⚠️ Transcript saver not available, skipping transcript save"
+                        )
 
             except Exception as e:
                 logger.error(f"❌ Error handling conversation item: {e}", exc_info=True)
@@ -352,7 +352,9 @@ async def entrypoint(ctx: JobContext):
             except Exception as e:
                 logger.error(f"❌ Transcript test failed: {e}")
         else:
-            logger.warning("⚠️ Skipping transcript test - transcript saver not available")
+            logger.warning(
+                "⚠️ Skipping transcript test - transcript saver not available"
+            )
 
         # Start session with agent
         logger.info("🎬 Starting agent session...")
@@ -373,7 +375,9 @@ async def entrypoint(ctx: JobContext):
             except Exception as e:
                 logger.error(f"❌ Failed to setup recording transcript saving: {e}")
         else:
-            logger.warning("⚠️ No recording URL available, skipping transcript saving setup")
+            logger.warning(
+                "⚠️ No recording URL available, skipping transcript saving setup"
+            )
 
         # Create completion event and wait
         completion_event = asyncio.Event()
@@ -390,7 +394,9 @@ async def entrypoint(ctx: JobContext):
                 except asyncio.TimeoutError:
                     logger.warning("⚠️ Transcript cleanup timed out")
                 except Exception as e:
-                    logger.error(f"❌ Error during transcript cleanup: {e}", exc_info=True)
+                    logger.error(
+                        f"❌ Error during transcript cleanup: {e}", exc_info=True
+                    )
 
             # Save video URL again as backup with timeout
             if video_url_to_save:
@@ -405,7 +411,9 @@ async def entrypoint(ctx: JobContext):
                 except asyncio.TimeoutError:
                     logger.warning("⚠️ Video URL backup save timed out")
                 except Exception as e:
-                    logger.error(f"❌ Error saving video URL backup: {e}", exc_info=True)
+                    logger.error(
+                        f"❌ Error saving video URL backup: {e}", exc_info=True
+                    )
 
             completion_event.set()
             logger.info("✅ Cleanup completed, session ending")
@@ -427,7 +435,9 @@ async def entrypoint(ctx: JobContext):
 
 if __name__ == "__main__":
     # Configure worker
-    port = int(os.getenv("LIVEKIT_AGENT_PORT", "8008"))  # Changed default to match PM2 config
+    port = int(
+        os.getenv("LIVEKIT_AGENT_PORT", "8008")
+    )  # Changed default to match PM2 config
     options = agents.WorkerOptions(
         entrypoint_fnc=entrypoint,
         port=port,

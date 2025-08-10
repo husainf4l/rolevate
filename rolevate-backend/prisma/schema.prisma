@@ -101,6 +101,7 @@ enum UserType {
   SYSTEM
   COMPANY
   CANDIDATE
+  ADMIN
 }
 
 enum InvitationStatus {

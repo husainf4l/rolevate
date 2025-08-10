@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+:root {
+  --apple-gray-800: #48484a;
+  --apple-gray-900: #1d1d1f;
+  
+  /* Rolevate Brand (Apple-ized) */
+  --rolevate-primary: #0891b2;
+  --rolevate-primary-light: #06b6d4;
+  --rolevate-primary-dark: #155e75;
+  
+  /* Status Colors (Apple-style) */
+  --apple-green: #30d158;
+  --apple-orange: #ff9500;
+  --apple-red: #ff3b30;
+  --apple-purple: #af52de;
+  
+  /* Spacing & Layout */
+  --apple-border-radius: 10px;
+  --apple-border-radius-lg: 16px;
+  --apple-border-radius-xl: 20px;
+  
+  /* Shadows */
+  --apple-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --apple-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --apple-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Global Apple-style Typography and Layout */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: var(--apple-gray-100);
+  color: var(--apple-gray-900);
+  line-height: 1.5;
+  letter-spacing: -0.003em;
+}
+
+/* Standard utility classes */
+.apple-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  border: 1px solid rgb(229 229 229);
+  backdrop-filter: blur(20px);
+  transition: all 0.2s ease-out;
+}
+
+.apple-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transform: translateY(-1px);
+}
+
+.apple-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 200ms ease-out;
+  letter-spacing: -0.003em;
+}
+
+.apple-button-primary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 200ms ease-out;
+  background-color: rgb(59 130 246);
+  color: white;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.apple-button-primary:hover {
+  background-color: rgb(37 99 235);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transform: translateY(-1px);
+}
+
+.apple-button-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 200ms ease-out;
+  background-color: rgb(245 245 245);
+  color: rgb(38 38 38);
+  border: 1px solid rgb(212 212 212);
+}
+
+.apple-button-secondary:hover {
+  background-color: rgb(229 229 229);
+  border-color: rgb(163 163 163);
+}
+
+/* Rolevate Brand Typography (Apple-ized) */
+.rolevate-brand {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  line-height: 1;
+  user-select: none;
+  background: linear-gradient(135deg, var(--rolevate-primary) 0%, var(--rolevate-primary-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Standard Form Elements */
+.apple-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(212 212 212);
+  background-color: white;
+  outline: none;
+  transition: all 0.2s ease-out;
+  letter-spacing: -0.003em;
+}
+
+.apple-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 0 0 2px rgb(59 130 246);
+  border-color: transparent;
+}
+
+/* Apple-style Animations */
+.apple-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.apple-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.apple-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Apple-style Scrollbars */
+.apple-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--apple-gray-400) transparent;
+}
+
+.apple-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.apple-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--apple-gray-400);
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.apple-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--apple-gray-500);
+}
