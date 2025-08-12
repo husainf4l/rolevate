@@ -24,15 +24,15 @@ const PageWrapper = ({
   title: string;
   description: string;
 }) => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center p-4 relative overflow-hidden">
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center p-2 sm:p-4 relative overflow-hidden">
     <ParticleBackground />
-    <div className="relative z-10 w-full max-w-4xl text-center">
-      <div className="bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/30 p-12 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="relative z-10 w-full max-w-5xl text-center">
+      <div className="bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/30 p-4 sm:p-8 lg:p-12 animate-in slide-in-from-bottom-4 duration-500">
         {children}
-        <h2 className="text-2xl font-bold text-gray-900 mb-3 mt-8 font-display tracking-tight">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-6 sm:mt-8 font-display tracking-tight">
           {title}
         </h2>
-        <p className="text-gray-600 mb-8 font-text leading-relaxed max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 font-text leading-relaxed max-w-2xl mx-auto">
           {description}
         </p>
       </div>
@@ -49,7 +49,7 @@ const PrimaryButton = ({
 }) => (
   <button
     onClick={onClick}
-    className="w-full bg-gradient-to-r from-[#13ead9] to-[#0891b2] hover:from-[#0891b2] hover:to-[#13ead9] text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:ring-offset-2"
+    className="w-full bg-gradient-to-r from-[#13ead9] to-[#0891b2] hover:from-[#0891b2] hover:to-[#13ead9] text-white px-4 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold text-base sm:text-lg transition-all duration-300 transform active:scale-95 sm:hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:ring-offset-2"
   >
     {children}
   </button>
@@ -63,11 +63,9 @@ export function ConnectionManager({
   onStartInterview,
 }: ConnectionManagerProps) {
   const [consentGiven, setConsentGiven] = useState(false);
-  const [showDeviceTest, setShowDeviceTest] = useState(false);
   const [micTested, setMicTested] = useState(false);
   const [videoTested, setVideoTested] = useState(false);
-  const [isTestingMic, setIsTestingMic] = useState(false);
-  const [isTestingVideo, setIsTestingVideo] = useState(false);
+  const [isAutoTesting, setIsAutoTesting] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
@@ -96,60 +94,34 @@ export function ConnectionManager({
     return cleanup;
   }, []);
 
-  // Test camera function
-  const testCamera = async () => {
-    try {
-      setIsTestingVideo(true);
-      setCameraError(null);
+  // Auto-test devices when component mounts
+  useEffect(() => {
+    if (!isAutoTesting && !videoTested && !micTested) {
+      autoTestDevices();
+    }
+  }, []);
 
+  // Auto test both camera and microphone
+  const autoTestDevices = async () => {
+    setIsAutoTesting(true);
+    setCameraError(null);
+    setMicError(null);
+
+    try {
+      // Test both camera and microphone together
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: false,
+        audio: true,
       });
 
+      // Setup video
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         await videoRef.current.play();
       }
-
-      setStream(mediaStream);
       setVideoTested(true);
-      setIsTestingVideo(false);
-    } catch (err: any) {
-      console.error("Error accessing camera:", err);
-      setIsTestingVideo(false);
 
-      let errorMessage = "Camera access failed";
-      if (
-        err.name === "NotFoundError" ||
-        err.message?.includes("Requested device not found")
-      ) {
-        errorMessage =
-          "No camera found. Please connect a camera and try again.";
-      } else if (err.name === "NotAllowedError") {
-        errorMessage =
-          "Camera access denied. Please allow camera permission and try again.";
-      } else if (err.name === "NotReadableError") {
-        errorMessage = "Camera is being used by another application.";
-      } else if (err.name === "OverconstrainedError") {
-        errorMessage = "Camera doesn't meet the requirements.";
-      }
-
-      setCameraError(errorMessage);
-    }
-  };
-
-  // Test microphone function
-  const testMicrophone = async () => {
-    try {
-      setIsTestingMic(true);
-      setMicError(null);
-
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false,
-      });
-
+      // Setup audio monitoring
       const audioCtx = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
       const analyserNode = audioCtx.createAnalyser();
@@ -159,6 +131,7 @@ export function ConnectionManager({
       source.connect(analyserNode);
 
       setAudioContext(audioCtx);
+      setStream(mediaStream);
 
       const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
 
@@ -166,369 +139,269 @@ export function ConnectionManager({
         analyserNode.getByteFrequencyData(dataArray);
         const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
         setMicLevel(Math.min(100, (average / 128) * 100));
-
-        if (isTestingMic) {
+        
+        if (isAutoTesting) {
           animationFrameRef.current = requestAnimationFrame(updateMicLevel);
         }
       };
 
       updateMicLevel();
 
-      // Auto-complete test after 3 seconds of detection
+      // Auto-complete mic test after 3 seconds
       setTimeout(() => {
         setMicTested(true);
-        setIsTestingMic(false);
-        mediaStream.getTracks().forEach((track) => track.stop());
+        setIsAutoTesting(false);
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
         }
       }, 3000);
-    } catch (err: any) {
-      console.error("Error accessing microphone:", err);
-      setIsTestingMic(false);
 
-      let errorMessage = "Microphone access failed";
-      if (
-        err.name === "NotFoundError" ||
-        err.message?.includes("Requested device not found")
-      ) {
-        errorMessage =
-          "No microphone found. Please connect a microphone and try again.";
+    } catch (err: any) {
+      console.error("Error accessing media devices:", err);
+      setIsAutoTesting(false);
+
+      let errorMessage = "Camera/Microphone access failed";
+      if (err.name === "NotFoundError") {
+        errorMessage = "No camera or microphone found. Please connect devices and try again.";
       } else if (err.name === "NotAllowedError") {
-        errorMessage =
-          "Microphone access denied. Please allow microphone permission and try again.";
+        errorMessage = "Camera/Microphone access denied. Please allow permissions and try again.";
       } else if (err.name === "NotReadableError") {
-        errorMessage = "Microphone is being used by another application.";
-      } else if (err.name === "OverconstrainedError") {
-        errorMessage = "Microphone doesn't meet the requirements.";
+        errorMessage = "Camera/Microphone is being used by another application.";
       }
 
+      setCameraError(errorMessage);
       setMicError(errorMessage);
     }
   };
 
-  // Show device testing after consent is given
-  if (consentGiven && showDeviceTest) {
+  const retryDeviceTest = () => {
+    setVideoTested(false);
+    setMicTested(false);
+    setCameraError(null);
+    setMicError(null);
+    setMicLevel(0);
+    cleanup();
+    
+    autoTestDevices();
+  };
+
+  if (needsPermission) {
+    const canStartInterview = consentGiven && micTested && videoTested && !isAutoTesting;
+    const hasErrors = cameraError || micError;
+
     return (
       <PageWrapper
-        title="Device Testing"
-        description="Let's make sure your camera and microphone are working properly before starting the interview."
+        title="Interview Setup"
+        description="We'll test your camera and microphone, then you can start your interview."
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Left Column - Video Test */}
-          <div className="flex flex-col items-center text-center">
-            <div className="w-full bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 h-48 flex items-center justify-center mb-4 overflow-hidden relative">
-              {videoTested || isTestingVideo ? (
+        <div className="space-y-6">
+          {/* Device Test Section - Top Priority */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Device Check
+              </h3>
+              <div className="text-sm text-gray-600">
+                {isAutoTesting ? "Testing..." : videoTested && micTested ? "Ready" : hasErrors ? "Failed" : "Checking..."}
+              </div>
+            </div>
+            
+            {/* Video Preview */}
+            <div className="w-full bg-gray-50 rounded-xl h-48 flex items-center justify-center mb-4 overflow-hidden relative">
+              {videoTested || isAutoTesting ? (
                 <video
                   ref={videoRef}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-xl"
                   muted
                   playsInline
                   autoPlay
                 />
-              ) : cameraError ? (
+              ) : hasErrors ? (
                 <div className="text-center p-4">
-                  <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-2" />
-                  <p className="text-sm text-red-600 font-medium">
-                    {cameraError}
-                  </p>
+                  <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
+                  </div>
+                  <p className="text-sm text-red-600 font-medium">{cameraError}</p>
                 </div>
               ) : (
                 <div className="text-center">
-                  <VideoCameraIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">
-                    Live video preview will appear here
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Click "Test Camera" to start
-                  </p>
-                </div>
-              )}
-              {isTestingVideo && !videoTested && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
-                  <div className="text-center text-white">
-                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-sm">Starting camera...</p>
-                  </div>
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-600">Starting camera...</p>
                 </div>
               )}
             </div>
-            <button
-              onClick={testCamera}
-              disabled={isTestingVideo}
-              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-                videoTested
-                  ? "bg-green-100 text-green-800 border border-green-200"
-                  : cameraError
-                  ? "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200"
-                  : isTestingVideo
-                  ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                  : "bg-[#0891b2] hover:bg-[#0fc4b5] text-white"
-              }`}
-            >
-              {videoTested
-                ? "✓ Camera Working"
-                : cameraError
-                ? "Try Again"
-                : isTestingVideo
-                ? "Starting Camera..."
-                : "Test Camera"}
-            </button>
-          </div>
 
-          {/* Right Column - Audio Test */}
-          <div className="flex flex-col items-center text-center">
-            <div className="w-full bg-gray-100 rounded-xl border border-gray-200 p-6 h-48 flex flex-col items-center justify-center mb-4">
-              <div className="text-center">
-                {micError ? (
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
-                    </div>
-                    <p className="text-sm text-red-600 font-medium px-2">
-                      {micError}
-                    </p>
+            {/* Audio Level Indicator */}
+            <div className="bg-gray-50 rounded-xl p-3 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isAutoTesting || micTested ? 'bg-blue-100' : 'bg-gray-200'}`}>
+                    <MicrophoneIcon className={`w-4 h-4 ${isAutoTesting || micTested ? 'text-blue-600' : 'text-gray-400'}`} />
                   </div>
-                ) : (
-                  <>
-                    <div
-                      className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors ${
-                        isTestingMic ? "bg-[#0891b2]" : "bg-gray-200"
-                      }`}
-                    >
-                      <MicrophoneIcon
-                        className={`w-8 h-8 ${
-                          isTestingMic ? "text-white" : "text-gray-400"
-                        }`}
-                      />
-                    </div>
-                    {isTestingMic && (
-                      <div className="mb-4">
-                        <div className="w-32 h-2 bg-gray-200 rounded-full mx-auto">
-                          <div
-                            className="h-2 bg-[#0891b2] rounded-full transition-all duration-150"
-                            style={{ width: `${micLevel}%` }}
-                          ></div>
-                        </div>
-                        <p className="text-xs text-gray-600 mt-1">
-                          Speak to test your microphone
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Level: {Math.round(micLevel)}%
-                        </p>
-                      </div>
-                    )}
-                    {!isTestingMic && !micTested && (
-                      <p className="text-sm text-gray-600">
-                        Click "Test Microphone" to start
-                      </p>
-                    )}
-                    {micTested && (
-                      <p className="text-sm text-green-700">
-                        ✓ Microphone is working
-                      </p>
-                    )}
-                  </>
+                  <span className="text-sm font-medium text-gray-900">Microphone</span>
+                </div>
+                {micTested && (
+                  <div className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                    Ready
+                  </div>
                 )}
               </div>
+              
+              {(isAutoTesting || micTested) && (
+                <div>
+                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-1.5 bg-blue-500 rounded-full transition-all duration-150"
+                      style={{ width: `${micLevel}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1 text-center">
+                    {isAutoTesting ? "Speak to test your microphone" : `Audio level: ${Math.round(micLevel)}%`}
+                  </p>
+                </div>
+              )}
             </div>
-            <button
-              onClick={testMicrophone}
-              disabled={isTestingMic && !micTested}
-              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-                micTested
-                  ? "bg-green-100 text-green-800 border border-green-200"
-                  : micError
-                  ? "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200"
-                  : isTestingMic
-                  ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                  : "bg-[#0891b2] hover:bg-[#0fc4b5] text-white"
-              }`}
-            >
-              {micTested
-                ? "✓ Microphone Working"
-                : micError
-                ? "Try Again"
-                : isTestingMic
-                ? "Testing... (3s)"
-                : "Test Microphone"}
-            </button>
-          </div>
-        </div>
 
-        <div className="space-y-4">
-          <PrimaryButton
-            onClick={async () => {
-              if (micTested && videoTested && !isStartingInterview) {
-                setIsStartingInterview(true);
-
-                // Show loading for 5 seconds
-                setTimeout(() => {
-                  setIsStartingInterview(false);
-                  onStartInterview();
-                }, 5000);
-              }
-            }}
-          >
-            {isStartingInterview ? (
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Starting Interview...</span>
+            {/* Device Status */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className={`p-3 rounded-lg text-center transition-all ${
+                videoTested 
+                  ? 'bg-green-50 border border-green-200' 
+                  : hasErrors 
+                    ? 'bg-red-50 border border-red-200'
+                    : isAutoTesting 
+                      ? 'bg-blue-50 border border-blue-200' 
+                      : 'bg-gray-50 border border-gray-200'
+              }`}>
+                <VideoCameraIcon className={`w-5 h-5 mx-auto mb-1 ${
+                  videoTested ? 'text-green-600' : hasErrors ? 'text-red-600' : isAutoTesting ? 'text-blue-600' : 'text-gray-400'
+                }`} />
+                <div className="text-xs font-medium">
+                  {videoTested ? 'Camera Ready' : hasErrors ? 'Camera Failed' : isAutoTesting ? 'Testing...' : 'Camera Pending'}
+                </div>
               </div>
-            ) : micTested && videoTested ? (
-              "Everything Looks Good - Start Interview"
-            ) : (
-              "Please test both camera and microphone"
+              
+              <div className={`p-3 rounded-lg text-center transition-all ${
+                micTested 
+                  ? 'bg-green-50 border border-green-200' 
+                  : hasErrors 
+                    ? 'bg-red-50 border border-red-200'
+                    : isAutoTesting 
+                      ? 'bg-blue-50 border border-blue-200' 
+                      : 'bg-gray-50 border border-gray-200'
+              }`}>
+                <MicrophoneIcon className={`w-5 h-5 mx-auto mb-1 ${
+                  micTested ? 'text-green-600' : hasErrors ? 'text-red-600' : isAutoTesting ? 'text-blue-600' : 'text-gray-400'
+                }`} />
+                <div className="text-xs font-medium">
+                  {micTested ? 'Mic Ready' : hasErrors ? 'Mic Failed' : isAutoTesting ? 'Testing...' : 'Mic Pending'}
+                </div>
+              </div>
+            </div>
+
+            {/* Helpful note when devices not found */}
+            {hasErrors && cameraError?.includes("No camera or microphone found") && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium mb-2">Device Setup Help:</p>
+                  <ul className="text-xs space-y-1 list-disc list-inside">
+                    <li>Make sure your camera and microphone are properly connected</li>
+                    <li>Check if other applications are using your devices</li>
+                    <li>Try refreshing the page after connecting devices</li>
+                    <li>You can still proceed with the interview if needed</li>
+                  </ul>
+                </div>
+              </div>
             )}
-          </PrimaryButton>
 
-          <div className="flex items-center justify-center gap-4 text-sm">
-            <button
-              onClick={() => {
-                if (!isStartingInterview) {
-                  cleanup();
-                  setShowDeviceTest(false);
-                  setVideoTested(false);
-                  setMicTested(false);
-                  setMicLevel(0);
-                  setCameraError(null);
-                  setMicError(null);
-                }
-              }}
-              disabled={isStartingInterview}
-              className={`py-2 px-3 transition-colors rounded ${
-                isStartingInterview
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Back to Setup
-            </button>
-            <span className="text-gray-300">|</span>
-            <button
-              onClick={() => {
-                if (!isStartingInterview) {
-                  window.location.href = "/";
-                }
-              }}
-              disabled={isStartingInterview}
-              className={`py-2 px-3 transition-colors rounded ${
-                isStartingInterview
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Cancel & Go Home
-            </button>
-          </div>
-        </div>
-      </PageWrapper>
-    );
-  }
-
-  if (needsPermission) {
-    return (
-      <PageWrapper
-        title="Interview Setup"
-        description="Please review the recording policy and grant camera/microphone permissions to begin."
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Left Column - Permission Request */}
-          <div className="flex flex-col items-center text-center">
-            <div className="relative w-24 h-24 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg animate-pulse">
-              <VideoCameraIcon className="w-12 h-12 text-white" />
-              <div className="absolute inset-0 rounded-2xl border-2 border-[#13ead9]/50 animate-ping"></div>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              Camera & Microphone Access
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              We'll request access to your camera and microphone to conduct the
-              interview.
-            </p>
-            <div className="bg-blue-50 rounded-lg p-4 text-left">
-              <div className="space-y-2 text-sm text-blue-800">
-                <p>✓ Camera for video recording</p>
-                <p>✓ Microphone for audio recording</p>
-                <p>✓ Screen sharing (if required)</p>
-              </div>
-            </div>
+            {hasErrors && (
+              <button
+                onClick={retryDeviceTest}
+                className="mt-4 w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+              >
+                Try Again
+              </button>
+            )}
           </div>
 
-          {/* Right Column - Recording Consent */}
-          <div className="text-left">
-            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-full flex flex-col">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Recording Notice
-                </h3>
-                <div className="space-y-3 text-sm text-gray-700">
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p>
-                      This interview session will be recorded (video and audio)
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p>
-                      Recording is used for evaluation and training purposes
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p>You can request recording deletion at any time</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto pt-4 border-t border-gray-200">
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    id="recordingConsent"
-                    checked={consentGiven}
-                    onChange={(e) => setConsentGiven(e.target.checked)}
-                    className="w-5 h-5 text-[#0891b2] border-2 border-gray-300 rounded focus:ring-2 focus:ring-[#0891b2] focus:ring-offset-2 transition-all duration-200 mt-0.5"
-                  />
-                  <label
-                    htmlFor="recordingConsent"
-                    className="cursor-pointer text-sm text-gray-900 font-medium"
-                  >
-                    I consent to having my interview recorded and understand it
-                    will be used for evaluation purposes.
-                  </label>
-                </div>
-              </div>
+          {/* Simple Privacy Consent */}
+          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="privacyConsent"
+                checked={consentGiven}
+                onChange={(e) => setConsentGiven(e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-0.5 flex-shrink-0"
+              />
+              <label
+                htmlFor="privacyConsent"
+                className="cursor-pointer text-sm text-gray-900 font-medium"
+              >
+                I have read and agree to the{" "}
+                <button
+                  onClick={() => window.open("/privacy-policy", "_blank")}
+                  className="text-blue-600 hover:text-blue-700 underline font-semibold"
+                >
+                  Privacy Policy
+                </button>
+                {" "}and consent to the recording of this interview.
+              </label>
             </div>
           </div>
         </div>
 
         <PrimaryButton
-          onClick={() => {
-            if (consentGiven) {
-              setShowDeviceTest(true);
+          onClick={async () => {
+            if (canStartInterview && !isStartingInterview) {
+              setIsStartingInterview(true);
+              
+              // Show loading for 2 seconds
+              setTimeout(() => {
+                setIsStartingInterview(false);
+                onStartInterview();
+              }, 2000);
             }
           }}
         >
-          {consentGiven
-            ? "Grant Permissions & Test Devices"
-            : "Please accept recording consent to continue"}
+          {isStartingInterview ? (
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Starting Interview...</span>
+            </div>
+          ) : canStartInterview ? (
+            "Start Interview"
+          ) : !consentGiven ? (
+            "Please accept our privacy policy to continue"
+          ) : isAutoTesting ? (
+            "Testing devices..."
+          ) : (
+            "Please wait for device test to complete"
+          )}
         </PrimaryButton>
 
-        <div className="flex items-center justify-center gap-4 mt-4 text-sm">
+        <div className="flex items-center justify-center gap-6 mt-6">
           <button
-            onClick={() => (window.location.href = "/")}
-            className="text-gray-500 hover:text-gray-700 py-2 px-3 transition-colors hover:bg-gray-100 rounded"
+            onClick={() => window.location.href = "/"}
+            disabled={isStartingInterview}
+            className={`text-sm transition-colors ${
+              isStartingInterview
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
             Cancel & Go Home
           </button>
-          <span className="text-gray-300">|</span>
           <button
-            onClick={() => (window.location.href = "/privacy-policy")}
-            className="text-[#0891b2] hover:text-[#0fc4b5] py-2 px-3 transition-colors hover:bg-gray-50 rounded"
+            onClick={() => window.open("/privacy-policy", "_blank")}
+            disabled={isStartingInterview}
+            className={`text-sm transition-colors ${
+              isStartingInterview
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-blue-600 hover:text-blue-700"
+            }`}
           >
-            Privacy Policy
+            View Privacy Policy
           </button>
         </div>
       </PageWrapper>
