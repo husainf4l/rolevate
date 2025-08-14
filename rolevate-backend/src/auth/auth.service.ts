@@ -21,11 +21,11 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly securityService: SecurityService,
     private readonly notificationService: NotificationService,
-  ) {}
+  ) { }
 
   async validateUser(email: string, pass: string, ip?: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
-    
+
     if (user && user.password && await bcrypt.compare(pass, user.password)) {
       // Log successful authentication
       await this.securityService.logSecurityEvent({
@@ -36,11 +36,11 @@ export class AuthService {
         timestamp: new Date(),
         severity: 'LOW',
       });
-      
+
       const { password, ...result } = user;
       return result;
     }
-    
+
     // Log failed authentication
     await this.securityService.logSecurityEvent({
       type: 'AUTH_FAILURE',
@@ -49,18 +49,18 @@ export class AuthService {
       timestamp: new Date(),
       severity: 'MEDIUM',
     });
-    
+
     return null;
   }
 
   async login(user: any) {
     // Get user with company information
     const userWithCompany = await this.getUserById(user.id);
-    
+
     const payload = { email: userWithCompany.email, sub: userWithCompany.id, userType: userWithCompany.userType };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '2h' });
     const refreshToken = await this.generateRefreshToken(userWithCompany.id);
-    
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -71,7 +71,7 @@ export class AuthService {
   async generateRefreshToken(userId: string) {
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    
+
     await this.prisma.refreshToken.create({
       data: {
         token,
@@ -79,40 +79,40 @@ export class AuthService {
         expiresAt,
       },
     });
-    
+
     return token;
   }
 
   async refreshAccessToken(refreshToken: string) {
     // Removed detailed logging for security
-    
+
     const tokenRecord = await this.prisma.refreshToken.findUnique({
       where: { token: refreshToken },
       include: { user: true },
     });
 
     // Security: Reduced logging
-    
+
     if (!tokenRecord) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
-    
+
     if (tokenRecord.isRevoked) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
-    
+
     if (tokenRecord.expiresAt < new Date()) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
     // Token is valid, proceeding
-    
+
     const user = tokenRecord.user;
     const payload = { email: user.email, sub: user.id, userType: user.userType };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '2h' });
 
     // Access token generated successfully
-    
+
     return {
       access_token: accessToken,
     };
@@ -134,7 +134,7 @@ export class AuthService {
 
   async getUserById(id: string) {
     // Getting user by ID
-    
+
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
@@ -146,15 +146,15 @@ export class AuthService {
           },
         },
       });
-      
+
       // User found in database
-      
+
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
-      
+
       const { password, ...result } = user;
-      
+
       // Add subscription status check
       const response: any = {
         ...result,
@@ -175,7 +175,7 @@ export class AuthService {
           // Error fetching candidate profile - continuing without it
         }
       }
-      
+
       // Returning user data (password excluded)
       return response;
     } catch (error) {
@@ -281,7 +281,7 @@ export class AuthService {
 
     // Get user with company information
     const userWithCompany = await this.getUserById(user.id);
-    
+
     // Create welcome notification
     try {
       let welcomeMessage = '';
@@ -308,12 +308,12 @@ export class AuthService {
     } catch (error) {
       console.error('Failed to create welcome notification:', error);
     }
-    
+
     // Generate tokens
     const payload = { email: userWithCompany.email, sub: userWithCompany.id, userType: userWithCompany.userType };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
     const refreshToken = await this.generateRefreshToken(userWithCompany.id);
-    
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
