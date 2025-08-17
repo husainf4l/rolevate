@@ -316,12 +316,12 @@ export default function AnonymousApplicationForm({
                     name="cv-upload"
                     type="file"
                     className="sr-only"
-                    accept=".pdf,.doc,.docx"
+                    accept=".pdf"
                     onChange={handleFileInputChange}
                   />
                 </label>
                 <p className="mt-1 text-xs text-gray-500">
-                  PDF, DOC, DOCX up to 5MB
+                  PDF only, up to 10MB
                 </p>
               </div>
             </div>

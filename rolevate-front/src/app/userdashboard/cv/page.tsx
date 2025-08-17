@@ -139,6 +139,21 @@ export default function CVPage() {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type - only allow PDF
+      if (file.type !== 'application/pdf') {
+        setError('Please upload only PDF files for your CV.');
+        event.target.value = ''; // Clear the input
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        setError('Please upload a CV file smaller than 10MB.');
+        event.target.value = ''; // Clear the input
+        return;
+      }
+      
       handleFileUpload(file);
     }
   };
@@ -238,7 +253,7 @@ export default function CVPage() {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.doc,.docx"
+          accept=".pdf"
           onChange={handleFileSelect}
           className="hidden"
         />
@@ -254,7 +269,10 @@ export default function CVPage() {
               Upload a new CV
             </h3>
             <p className="text-gray-600 mb-4">
-              Drag and drop your CV file here, or click to browse
+              Drag and drop your PDF CV file here, or click to browse
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              Only PDF files are accepted. Maximum file size: 10MB.
             </p>
             <button
               className="inline-flex items-center space-x-2 px-4 py-2 bg-[#0fc4b5] text-white rounded-md hover:bg-[#0ba399] transition-colors"

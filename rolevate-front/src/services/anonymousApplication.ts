@@ -30,7 +30,7 @@ export interface CVUploadResponse {
 }
 
 export class AnonymousApplicationService {
-  
+
   /**
    * Apply with CV upload (multipart form)
    * This handles the complete flow: upload CV + create application
@@ -51,7 +51,7 @@ export class AnonymousApplicationService {
       const formData = new FormData();
       formData.append('cv', cvFile);
       formData.append('jobId', jobId);
-      
+
       if (firstName) {
         formData.append('firstName', firstName);
       }
@@ -84,8 +84,8 @@ export class AnonymousApplicationService {
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ 
-          message: 'Failed to submit application' 
+        const error = await response.json().catch(() => ({
+          message: 'Failed to submit application'
         }));
         throw new Error(error.message || 'Failed to submit application');
       }
@@ -112,8 +112,8 @@ export class AnonymousApplicationService {
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ 
-          message: 'Failed to submit application' 
+        const error = await response.json().catch(() => ({
+          message: 'Failed to submit application'
         }));
         throw new Error(error.message || 'Failed to submit application');
       }
@@ -140,8 +140,8 @@ export class AnonymousApplicationService {
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ 
-          message: 'Failed to upload CV' 
+        const error = await response.json().catch(() => ({
+          message: 'Failed to upload CV'
         }));
         throw new Error(error.message || 'Failed to upload CV');
       }
@@ -157,26 +157,20 @@ export class AnonymousApplicationService {
    * Validate file before upload
    */
   static validateCVFile(file: File): { isValid: boolean; error?: string } {
-    // Check file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    // Check file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
     if (file.size > maxSize) {
       return {
         isValid: false,
-        error: 'File size must be less than 5MB'
+        error: 'File size must be less than 10MB'
       };
     }
 
-    // Check file type
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
-    
-    if (!allowedTypes.includes(file.type)) {
+    // Check file type - only PDF allowed
+    if (file.type !== 'application/pdf') {
       return {
         isValid: false,
-        error: 'File must be PDF, DOC, or DOCX format'
+        error: 'File must be PDF format only'
       };
     }
 
@@ -195,11 +189,11 @@ export class AnonymousApplicationService {
    */
   static formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 }

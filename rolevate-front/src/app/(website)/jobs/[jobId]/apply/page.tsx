@@ -227,6 +227,27 @@ export default function JobApplyPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    
+    if (file) {
+      // Validate file type - only allow PDF
+      if (file.type !== 'application/pdf') {
+        setSubmissionError('Please upload only PDF files for your CV.');
+        e.target.value = ''; // Clear the input
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        setSubmissionError('Please upload a CV file smaller than 10MB.');
+        e.target.value = ''; // Clear the input
+        return;
+      }
+      
+      // Clear any previous errors
+      setSubmissionError(null);
+    }
+    
     setFormData((prev) => ({ ...prev, cv: file }));
     setSelectedCVId(null);
   };
@@ -930,11 +951,14 @@ export default function JobApplyPage() {
                       <input
                         type="file"
                         required={!selectedCVId}
-                        accept=".pdf,.doc,.docx"
+                        accept=".pdf"
                         onChange={handleFileChange}
                         className="w-full px-3 lg:px-4 py-2.5 lg:py-3 bg-white border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors text-sm lg:text-base file:mr-2 lg:file:mr-4 file:py-1 lg:file:py-2 file:px-2 lg:file:px-4 file:rounded-lg lg:file:rounded-xl file:border-0 file:text-xs lg:file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                       />
                     </div>
+                    <p className="text-xs text-gray-500">
+                      Only PDF files are accepted. Maximum file size: 10MB.
+                    </p>
                     {formData.cv && (
                       <p className="text-sm text-gray-700 flex items-center space-x-2">
                         <svg

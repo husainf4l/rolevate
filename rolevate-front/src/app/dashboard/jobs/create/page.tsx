@@ -687,17 +687,17 @@ function CreateJobContent() {
               />
             )}
 
-            {currentStep === "interview-questions" && (
+            {currentStep === "interview-questions" && (   
               <div className="p-6 lg:p-8 space-y-6">
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-[#1d1d1f] mb-2">Interview Questions</h2>
+                  <h2 className="text-2xl font-bold text-[#1d1d1f] mb-2">Additional Interview Questions</h2>
                   <p className="text-[#6e6e73] text-lg">Add interview questions for the AI interviewer</p>
                 </div>
                 
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-semibold text-[#1d1d1f] mb-3">
-                      Interview Questions for AI System
+                      Otptional Interview Questions for AI System
                     </label>
                     <p className="text-sm text-[#6e6e73] mb-4">
                       These questions will be used by the AI interviewer during the interview process. 
@@ -706,7 +706,7 @@ function CreateJobContent() {
                     <textarea
                       value={jobData.interviewQuestions}
                       onChange={(e) => handleInputChange("interviewQuestions", e.target.value)}
-                      placeholder="Enter interview questions for the AI system...&#10;&#10;Example:&#10;Tell me about your experience with React&#10;How would you handle a challenging project deadline?&#10;What interests you most about this role?"
+                      placeholder="Add your questions ..."
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0fc4b5] focus:border-transparent bg-white text-[#1d1d1f] placeholder-[#6e6e73] resize-vertical"
                       rows={8}
                     />

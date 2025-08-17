@@ -125,7 +125,7 @@ export default function CVUploadSection() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf"
                 onChange={handleFileSelect}
                 className="hidden"
               />
@@ -303,7 +303,7 @@ export default function CVUploadSection() {
                     Choose File
                   </Button>
                   <p className="font-text text-sm text-gray-500 mt-6">
-                    Supports PDF, DOC, DOCX (Max 10MB)
+                    Support PDF (Max 10MB)
                   </p>
                 </div>
               )}

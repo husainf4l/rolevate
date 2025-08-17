@@ -18,7 +18,25 @@ export default function JobApplyModal({ open, onClose, onSubmit, loading }: JobA
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setCv(e.target.files[0]);
+      const file = e.target.files[0];
+      
+      // Validate file type - only allow PDF
+      if (file.type !== 'application/pdf') {
+        setError('Please upload only PDF files for your CV.');
+        e.target.value = ''; // Clear the input
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        setError('Please upload a CV file smaller than 10MB.');
+        e.target.value = ''; // Clear the input
+        return;
+      }
+      
+      setError(''); // Clear any previous errors
+      setCv(file);
     }
   };
 
@@ -73,12 +91,13 @@ export default function JobApplyModal({ open, onClose, onSubmit, loading }: JobA
               <label className="block text-base font-medium text-gray-700 mb-2">CV / Resume<span className="text-red-500">*</span></label>
               <input
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf"
                 className="w-full border border-gray-300 rounded-lg px-5 py-3 focus:ring-2 focus:ring-[#13ead9] focus:border-[#13ead9] outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#13ead9]/10 file:text-[#0891b2] text-base"
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">Only PDF files are accepted. Maximum file size: 10MB.</p>
               {cv && <div className="text-xs text-gray-500 mt-1">Selected: {cv.name}</div>}
             </div>
             <div>
