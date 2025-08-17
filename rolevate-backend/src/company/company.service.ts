@@ -1,18 +1,18 @@
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCompanyDto } from './dto/company.dto';
+import { CreateCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 import { getCompanySizeCategory, getCompanySizeRange } from './utils/company-size.util';
 
 @Injectable()
 export class CompanyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findAll() {
     return this.prisma.company.findMany();
   }
 
   async findById(id: string) {
-    const company = await this.prisma.company.findUnique({ 
+    const company = await this.prisma.company.findUnique({
       where: { id },
       include: {
         address: true,
@@ -82,18 +82,19 @@ export class CompanyService {
     }
 
     // Prepare address data from flat fields or nested address object
-    const addressData = createCompanyDto.address || 
+    const addressData = createCompanyDto.address ||
       (createCompanyDto.street || createCompanyDto.city || createCompanyDto.country) ? {
-        street: createCompanyDto.street,
-        city: createCompanyDto.city,
-        country: createCompanyDto.country as any
-      } : null;
+      street: createCompanyDto.street,
+      city: createCompanyDto.city,
+      country: createCompanyDto.country as any
+    } : null;
 
     // Create company
     const company = await this.prisma.company.create({
       data: {
         name: createCompanyDto.name,
         description: createCompanyDto.description,
+        spelling: createCompanyDto.spelling,
         email: createCompanyDto.email,
         phone: createCompanyDto.phone,
         website: createCompanyDto.website,
@@ -115,7 +116,7 @@ export class CompanyService {
     // Update user to be connected to the company
     await this.prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         companyId: company.id,
         userType: 'COMPANY' // Make user a company user
       },
@@ -160,7 +161,7 @@ export class CompanyService {
     // Update user to join the company
     await this.prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         companyId: invitation.companyId,
         userType: 'COMPANY' // Make user a company user
       },
@@ -169,7 +170,7 @@ export class CompanyService {
     // Mark invitation as used
     await this.prisma.invitation.update({
       where: { id: invitation.id },
-      data: { 
+      data: {
         status: 'ACCEPTED',
         usedAt: new Date()
       }
@@ -193,7 +194,7 @@ export class CompanyService {
 
   async getCompanyStats() {
     const totalCompanies = await this.prisma.company.count();
-    
+
     const industryStats = await this.prisma.company.groupBy({
       by: ['industry'],
       _count: true,
@@ -255,5 +256,68 @@ export class CompanyService {
         }
       }
     });
+  }
+
+  async update(companyId: string, updateCompanyDto: UpdateCompanyDto, userId: string) {
+    // Verify user belongs to this company
+    const userCompany = await this.getUserCompany(userId);
+    if (!userCompany || userCompany.id !== companyId) {
+      throw new UnauthorizedException('You can only update your own company');
+    }
+
+    // Convert size string to number of employees if provided
+    let numberOfEmployees = updateCompanyDto.numberOfEmployees;
+    if (updateCompanyDto.size && !numberOfEmployees) {
+      const sizeRanges: { [key: string]: number } = {
+        '1-10': 5,
+        '11-50': 30,
+        '51-200': 125,
+        '201-500': 350,
+        '501-1000': 750,
+        '1000+': 1500
+      };
+      numberOfEmployees = sizeRanges[updateCompanyDto.size] || undefined;
+    }
+
+    // Prepare address data from flat fields or nested address object
+    const addressData = updateCompanyDto.address ||
+      (updateCompanyDto.street || updateCompanyDto.city || updateCompanyDto.country) ? {
+      street: updateCompanyDto.street,
+      city: updateCompanyDto.city,
+      country: updateCompanyDto.country as any
+    } : null;
+
+    // Update company
+    const company = await this.prisma.company.update({
+      where: { id: companyId },
+      data: {
+        ...(updateCompanyDto.name && { name: updateCompanyDto.name }),
+        ...(updateCompanyDto.description !== undefined && { description: updateCompanyDto.description }),
+        ...(updateCompanyDto.spelling !== undefined && { spelling: updateCompanyDto.spelling }),
+        ...(updateCompanyDto.email !== undefined && { email: updateCompanyDto.email }),
+        ...(updateCompanyDto.phone !== undefined && { phone: updateCompanyDto.phone }),
+        ...(updateCompanyDto.website !== undefined && { website: updateCompanyDto.website }),
+        ...(updateCompanyDto.industry && { industry: updateCompanyDto.industry as any }),
+        ...(numberOfEmployees && { numberOfEmployees }),
+        ...(addressData && {
+          address: {
+            upsert: {
+              create: {
+                street: addressData.street,
+                city: addressData.city,
+                country: addressData.country,
+              },
+              update: {
+                ...(addressData.street !== undefined && { street: addressData.street }),
+                ...(addressData.city !== undefined && { city: addressData.city }),
+                ...(addressData.country !== undefined && { country: addressData.country }),
+              }
+            }
+          }
+        })
+      },
+    });
+
+    return this.findById(company.id);
   }
 }

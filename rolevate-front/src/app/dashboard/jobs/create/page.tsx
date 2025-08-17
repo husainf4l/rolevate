@@ -8,6 +8,7 @@ import {
   UserGroupIcon,
   DocumentTextIcon,
   EyeIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import {
   JobFormData,
@@ -43,32 +44,30 @@ function CreateJobContent() {
     useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [currentStep, setCurrentStep] = useState<FormStep>("basic");
-  const [jobData, setJobData] = useState<JobFormData>({
-    title: "",
-    department: "",
-    location: "",
-    salary: "",
-    type: "FULL_TIME",
-    deadline: "",
-    description: "",
-    shortDescription: "",
-    responsibilities: "",
-    requirements: "",
-    benefits: "",
-    skills: [],
-    experience: "",
-    education: "",
-    screeningQuestions: [],
-    jobLevel: "MID",
-    workType: "ONSITE",
-    industry: "",
-    interviewLanguage: "english",
-    aiCvAnalysisPrompt: "",
-    aiFirstInterviewPrompt: "",
-    aiSecondInterviewPrompt: "",
-  });
-
-  // Helper function to map industry from API to form values
+    const [jobData, setJobData] = useState<JobFormData>({
+      title: "",
+      department: "",
+      location: "",
+      salary: "",
+      type: "FULL_TIME",
+      deadline: "",
+      description: "",
+      shortDescription: "",
+      responsibilities: "",
+      requirements: "",
+      benefits: "",
+      skills: [],
+      experience: "",
+      education: "",
+      interviewQuestions: "",
+      jobLevel: "ENTRY",
+      workType: "ONSITE",
+      industry: "",
+      interviewLanguage: "english",
+      aiCvAnalysisPrompt: "",
+      aiFirstInterviewPrompt: "",
+      aiSecondInterviewPrompt: "",
+    });  // Helper function to map industry from API to form values
   const mapIndustryToFormValue = (apiIndustry: string): string => {
     const industryMap: { [key: string]: string } = {
       HEALTHCARE: "healthcare",
@@ -130,7 +129,7 @@ function CreateJobContent() {
   // Initialize step from URL on component mount
   useEffect(() => {
     const stepFromUrl = searchParams?.get("step") as FormStep;
-    const validSteps: FormStep[] = ["basic", "details", "ai-config", "preview"];
+    const validSteps: FormStep[] = ["basic", "details", "interview-questions", "ai-config", "preview"];
 
     if (stepFromUrl && validSteps.includes(stepFromUrl)) {
       setCurrentStep(stepFromUrl);
@@ -173,6 +172,12 @@ function CreateJobContent() {
       title: "Job Details",
       description: "Description, requirements, and skills",
       icon: DocumentTextIcon,
+    },
+    {
+      key: "interview-questions",
+      title: "Interview Questions",
+      description: "Add screening and interview questions",
+      icon: ChatBubbleLeftRightIcon,
     },
     {
       key: "ai-config",
@@ -238,6 +243,11 @@ function CreateJobContent() {
           newErrors.skills = "At least one skill is required";
         break;
 
+      case "interview-questions":
+        // Interview questions are optional, but we could add validation if needed
+        // For example, ensure at least one screening question if any are provided
+        break;
+
       case "ai-config":
         // AI configuration is optional, so no required validation
         // Users can leave prompts empty to use defaults
@@ -256,6 +266,7 @@ function CreateJobContent() {
     return (
       validateStep("basic") &&
       validateStep("details") &&
+      validateStep("interview-questions") &&
       validateStep("ai-config")
     );
   };
@@ -286,8 +297,8 @@ function CreateJobContent() {
           if (currentStep === "basic" && nextStep.key === "details") {
             await generateJobAnalysis();
           }
-          // If moving from details to ai-config, generate AI configuration prompts
-          else if (currentStep === "details" && nextStep.key === "ai-config") {
+          // If moving from interview-questions to ai-config, generate AI configuration prompts
+          else if (currentStep === "interview-questions" && nextStep.key === "ai-config") {
             await generateAIConfiguration();
           }
           setCurrentStep(nextStep.key);
@@ -453,6 +464,7 @@ function CreateJobContent() {
   const generateAIConfiguration = async () => {
     setAiGenerating(true);
     try {
+      // Use interview questions directly as string
       const configRequest: AIConfigRequest = {
         jobTitle: jobData.title,
         department: jobData.department,
@@ -462,6 +474,7 @@ function CreateJobContent() {
         responsibilities: jobData.responsibilities,
         requirements: jobData.requirements,
         skills: jobData.skills,
+        ...(jobData.interviewQuestions.trim() && { interviewQuestions: jobData.interviewQuestions }),
       };
 
       const aiConfig = await JobService.generateAIConfiguration(configRequest);
@@ -672,6 +685,45 @@ function CreateJobContent() {
                 onRegenerateResponsibilities={regenerateResponsibilities}
                 skillSuggestions={skillSuggestions}
               />
+            )}
+
+            {currentStep === "interview-questions" && (
+              <div className="p-6 lg:p-8 space-y-6">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-[#1d1d1f] mb-2">Interview Questions</h2>
+                  <p className="text-[#6e6e73] text-lg">Add interview questions for the AI interviewer</p>
+                </div>
+                
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1d1d1f] mb-3">
+                      Interview Questions for AI System
+                    </label>
+                    <p className="text-sm text-[#6e6e73] mb-4">
+                      These questions will be used by the AI interviewer during the interview process. 
+                      Enter one question per line or separate multiple questions with semicolons.
+                    </p>
+                    <textarea
+                      value={jobData.interviewQuestions}
+                      onChange={(e) => handleInputChange("interviewQuestions", e.target.value)}
+                      placeholder="Enter interview questions for the AI system...&#10;&#10;Example:&#10;Tell me about your experience with React&#10;How would you handle a challenging project deadline?&#10;What interests you most about this role?"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0fc4b5] focus:border-transparent bg-white text-[#1d1d1f] placeholder-[#6e6e73] resize-vertical"
+                      rows={8}
+                    />
+                  </div>
+
+                  <div className="bg-[#f5f7fa] rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-[#1d1d1f] mb-3">Tips for AI Interview Questions</h3>
+                    <ul className="space-y-2 text-sm text-[#6e6e73]">
+                      <li>• Focus on role-specific skills and experience</li>
+                      <li>• Ask behavioral questions to understand problem-solving approach</li>
+                      <li>• Include questions about motivation and career goals</li>
+                      <li>• Keep questions open-ended to allow detailed responses</li>
+                      <li>• Consider technical questions relevant to the position</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             )}
 
             {currentStep === "ai-config" && (

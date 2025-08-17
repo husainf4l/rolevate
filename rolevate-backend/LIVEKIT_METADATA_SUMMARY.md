@@ -13,6 +13,7 @@ Your LiveKit rooms now include **comprehensive interview context** automatically
 
 - **jobName**: Exact position title
 - **companyName**: Company conducting the interview
+- **companySpelling**: Optional phonetic spelling for AI pronunciation (falls back to companyName)
 - **interviewPrompt**: AI-generated interview script tailored to the specific job
 
 ### 🤖 CV Analysis Results
@@ -42,6 +43,7 @@ const metadata = JSON.parse(room.metadata);
 const candidateName = metadata.candidateName;
 const jobTitle = metadata.jobName;
 const company = metadata.companyName;
+const companyPronunciation = metadata.companySpelling || metadata.companyName;
 
 // Use interview script
 const interviewQuestions = metadata.interviewPrompt;
@@ -53,9 +55,12 @@ const candidateWeaknesses = metadata.cvAnalysis.weaknesses;
 const overallAssessment = metadata.cvAnalysis.summary;
 
 // Create personalized interview experience
-console.log(`Interviewing ${candidateName} for ${jobTitle} at ${company}`);
+console.log(`Interviewing ${candidateName} for ${jobTitle} at ${companyPronunciation}`);
 console.log(`CV Fit Score: ${fitScore}/100`);
 console.log(`Key Strengths: ${candidateStrengths.join(', ')}`);
+
+// AI agent can use proper pronunciation:
+const greeting = `Hello ${candidateName}, I'm conducting your interview for ${companyPronunciation}.`;
 ```
 
 ## 🎯 Real Example
@@ -65,6 +70,7 @@ console.log(`Key Strengths: ${candidateStrengths.join(', ')}`);
   "candidateName": "alhussein abdullah",
   "jobName": "Optometrist",
   "companyName": "papaya trading",
+  "companySpelling": "Pah-pie-yah Trading",
   "interviewPrompt": "Optometrist – Initial Screening Interview\n\nWelcome! I'm here to conduct your screening interview for the Optometrist position...",
   "cvAnalysis": {
     "score": 10,

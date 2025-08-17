@@ -1,9 +1,9 @@
-import { Controller, Get, Param, Post, Body, UseGuards, Req, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, UseGuards, Req, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException, Put, Patch } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { CompanyService } from './company.service';
 import { InvitationService } from './invitation.service';
-import { CreateCompanyDto, JoinCompanyDto } from './dto/company.dto';
+import { CreateCompanyDto, JoinCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
@@ -17,7 +17,7 @@ export class CompanyController {
     private readonly companyService: CompanyService,
     private readonly invitationService: InvitationService,
     private readonly awsS3Service: AwsS3Service,
-  ) {}
+  ) { }
 
   @Get()
   async findAll() {
@@ -71,7 +71,7 @@ export class CompanyController {
       { code: 'FINANCE', name: 'Finance' },
       { code: 'EDUCATION', name: 'Education' },
       { code: 'MANUFACTURING', name: 'Manufacturing' },
-      { code: 'RETAIL', name:  'Retail' },
+      { code: 'RETAIL', name: 'Retail' },
       { code: 'CONSTRUCTION', name: 'Construction' },
       { code: 'TRANSPORTATION', name: 'Transportation' },
       { code: 'HOSPITALITY', name: 'Hospitality' },
@@ -116,13 +116,13 @@ export class CompanyController {
     @Req() req: Request,
   ) {
     const user = req.user as any;
-    
+
     // Check if user belongs to this company
     const userCompany = await this.companyService.getUserCompany(user.userId);
     if (!userCompany || userCompany.id !== companyId) {
       throw new UnauthorizedException('You can only view invitations for your own company');
     }
-    
+
     const company = await this.companyService.findById(companyId);
     return company?.invitations || [];
   }
@@ -147,6 +147,28 @@ export class CompanyController {
     return this.companyService.joinCompany(user.userId, joinCompanyDto.invitationCode);
   }
 
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  async updateCompany(
+    @Param('id') companyId: string,
+    @Body() updateCompanyDto: UpdateCompanyDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    return this.companyService.update(companyId, updateCompanyDto, user.userId);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  async patchCompany(
+    @Param('id') companyId: string,
+    @Body() updateCompanyDto: UpdateCompanyDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    return this.companyService.update(companyId, updateCompanyDto, user.userId);
+  }
+
   @Post(':id/invitation')
   @UseGuards(JwtAuthGuard)
   async generateInvitation(
@@ -154,13 +176,13 @@ export class CompanyController {
     @Req() req: Request,
   ) {
     const user = req.user as any;
-    
+
     // Check if user belongs to this company
     const userCompany = await this.companyService.getUserCompany(user.userId);
     if (!userCompany || userCompany.id !== companyId) {
       throw new UnauthorizedException('You can only generate invitations for your own company');
     }
-    
+
     return this.invitationService.generateInvitation(companyId);
   }
 
@@ -176,7 +198,7 @@ export class CompanyController {
         'image/gif',
         'image/webp'
       ];
-      
+
       if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
       } else {
@@ -197,7 +219,7 @@ export class CompanyController {
 
     const user = req.user as any;
     const userCompany = await this.companyService.getUserCompany(user.userId);
-    
+
     if (!userCompany) {
       throw new UnauthorizedException('User must belong to a company to upload logo');
     }
@@ -237,7 +259,7 @@ export class CompanyController {
         'image/gif',
         'image/webp'
       ];
-      
+
       if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
       } else {
@@ -258,7 +280,7 @@ export class CompanyController {
 
     const user = req.user as any;
     const userCompany = await this.companyService.getUserCompany(user.userId);
-    
+
     if (!userCompany) {
       throw new UnauthorizedException('User must belong to a company to upload logo');
     }

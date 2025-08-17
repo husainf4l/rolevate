@@ -236,6 +236,7 @@ model Address {
 model Company {
   id                String           @id @default(cuid())
   name              String
+  spelling          String?          // Optional: How the company name should be pronounced/spelled
   description       String?          @db.Text
   email             String?
   phone             String?

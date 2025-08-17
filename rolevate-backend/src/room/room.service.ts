@@ -122,7 +122,7 @@ export class RoomService {
               candidate: true,
               job: {
                 include: {
-                  company: true
+                  company: true,
                 }
               }
             }
@@ -289,7 +289,7 @@ export class RoomService {
   async createNewRoomWithMetadata(createRoomDto: CreateRoomDto) {
     console.log('🚀 ROOM SERVICE: createNewRoomWithMetadata method called');
     console.log('📋 Input parameters:', JSON.stringify(createRoomDto, null, 2));
-    
+
     const { jobId, phone } = createRoomDto;
 
     try {
@@ -342,6 +342,7 @@ export class RoomService {
                 select: {
                   id: true,
                   name: true,
+                  spelling: true,
                   address: {
                     select: {
                       street: true,
@@ -393,11 +394,12 @@ export class RoomService {
 
       // Step 3: Create minimal metadata for the agent
       console.log(`🔧 BEFORE creating metadata - interviewLanguage:`, application.job.interviewLanguage || 'english');
-      
+
       const newMetadata = {
         candidateName: `${application.candidate.firstName} ${application.candidate.lastName}`,
         jobName: application.job.title,
         companyName: application.job.company.name,
+        companySpelling: application.job.company.spelling || application.job.company.name, // Add spelling for AI agent pronunciation
         interviewLanguage: application.job.interviewLanguage || 'english',
         interviewPrompt: application.job.interviewPrompt || "Conduct a professional interview for this position.",
         cvAnalysis: application.cvAnalysisResults ? (() => {

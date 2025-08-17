@@ -13,7 +13,7 @@ export interface JobFormData {
   skills: string[];
   experience: string;
   education: string;
-  screeningQuestions: ScreeningQuestion[];
+  interviewQuestions: string;
   jobLevel: "ENTRY" | "MID" | "SENIOR" | "EXECUTIVE";
   workType: "ONSITE" | "REMOTE" | "HYBRID";
   industry: string;
@@ -35,7 +35,7 @@ export interface FormErrors {
   [key: string]: string;
 }
 
-export type FormStep = "basic" | "details" | "ai-config" | "preview";
+export type FormStep = "basic" | "details" | "interview-questions" | "ai-config" | "preview";
 
 export interface StepConfig {
   key: FormStep;
