@@ -58,6 +58,9 @@ class MetadataExtractor:
                     ),
                     "jobName": metadata.get("jobName", defaults["jobName"]),
                     "companyName": company_name,
+                    "companySpelling": metadata.get(
+                        "companySpelling"
+                    ),  # Preserve original companySpelling
                     "interviewPrompt": metadata.get(
                         "interviewPrompt", defaults["interviewPrompt"]
                     ),

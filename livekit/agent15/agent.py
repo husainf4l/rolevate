@@ -58,6 +58,19 @@ class InterviewAgent(Agent):
         self.transcript_saver = transcript_saver
         self.metadata = metadata or {}
 
+        # Use companySpelling if available, otherwise use company_name
+        self.display_company_name = self.metadata.get("companySpelling", company_name)
+
+        # Debug logging for company spelling
+        logger.info(f"🔍 DEBUG - metadata keys: {list(self.metadata.keys())}")
+        logger.info(f"🔍 DEBUG - companyName from param: {company_name}")
+        logger.info(
+            f"🔍 DEBUG - companySpelling from metadata: {self.metadata.get('companySpelling')}"
+        )
+        logger.info(
+            f"🔍 DEBUG - final display_company_name: {self.display_company_name}"
+        )
+
         # Generate instructions
         instructions = self._build_instructions()
 
@@ -65,6 +78,10 @@ class InterviewAgent(Agent):
         logger.info(
             f"Creating InterviewAgent for {candidate_name} - {job_name} at {company_name}"
         )
+        if self.display_company_name != company_name:
+            logger.info(
+                f"🎯 Using companySpelling: '{self.display_company_name}' instead of '{company_name}'"
+            )
         logger.info(f"Language: {self.interview_language}")
         logger.info(f"Instructions length: {len(instructions)} characters")
 
@@ -87,12 +104,12 @@ class InterviewAgent(Agent):
             # Generate language-appropriate greeting
             if self.interview_language == "arabic":
                 greeting_instruction = (
-                    f"ابدأ بالترحيب وعرّف بنفسك بثقة بصفتك رامي من شركة {self.company_name}. "
+                    f"ابدأ بالترحيب وعرّف بنفسك بثقة بصفتك رامي من شركة {self.display_company_name}. "
                     f"أعلن بوضوح أنك ستجري مقابلة مع {self.candidate_name} لمنصب {self.job_name}. "
                     f"تحدث  بالعربية الفصحى، بأسلوب مهني وقوي يعكس خبرتك."
                 )
             else:
-                greeting_instruction = f"Greet and introduce yourself as Rami from {self.company_name} and start the interview with {self.candidate_name} for the {self.job_name} position."
+                greeting_instruction = f"Greet and introduce yourself as Rami from {self.display_company_name} and start the interview with {self.candidate_name} for the {self.job_name} position."
 
             self.session.generate_reply(instructions=greeting_instruction)
             logger.info("✅ Initial greeting generated")
