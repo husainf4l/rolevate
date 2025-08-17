@@ -89,7 +89,7 @@ class InterviewAgent(Agent):
                 greeting_instruction = (
                     f"ابدأ بالترحيب وعرّف بنفسك بثقة بصفتك رامي من شركة {self.company_name}. "
                     f"أعلن بوضوح أنك ستجري مقابلة مع {self.candidate_name} لمنصب {self.job_name}. "
-                    f"تحدث  بالعربية الفصحى، بأسلوب مهني وقوي يعكس خبرتك."
+                    f"تحدث  بالعربية الفصحى فقط، بأسلوب مهني وقوي يعكس خبرتك."
                 )
             else:
                 greeting_instruction = f"Greet and introduce yourself as Rami from {self.company_name} and start the interview with {self.candidate_name} for the {self.job_name} position."

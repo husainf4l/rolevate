@@ -33,6 +33,7 @@ export interface AIConfigRequest {
   responsibilities?: string;
   requirements?: string;
   skills?: string[];
+  interviewQuestions?: string;
 }
 
 export interface AIConfigResponse {
@@ -41,7 +42,7 @@ export interface AIConfigResponse {
   aiSecondInterviewPrompt: string;
 }
 
-export interface UpdateJobRequest extends Partial<CreateJobRequest> {}
+export interface UpdateJobRequest extends Partial<CreateJobRequest> { }
 
 export interface CreateJobRequest {
   title: string;
@@ -188,36 +189,36 @@ export class JobService {
     }
 
     const data = await response.json();
-    
+
     // Helper function to map AI experience level to form values
     const mapExperienceLevel = (aiExperience: string): string => {
       if (!aiExperience) return '';
       const experienceText = aiExperience.toLowerCase();
-      
+
       // Handle direct matches first
       if (experienceText === '0-1 years' || experienceText === '0-1') return '0-1 years';
       if (experienceText === '1-3 years' || experienceText === '1-3') return '1-3 years';
       if (experienceText === '3-5 years' || experienceText === '3-5') return '3-5 years';
       if (experienceText === '5-7 years' || experienceText === '5-7') return '5-7 years';
       if (experienceText === '7+ years' || experienceText === '7+') return '7+ years';
-      
+
       // Handle variations and keywords
       if (experienceText.includes('0-1') || experienceText.includes('entry')) return '0-1 years';
       if (experienceText.includes('1-3') || experienceText.includes('2-4')) return '1-3 years';
       if (experienceText.includes('3-5') || experienceText.includes('4-6')) return '3-5 years';
       if (experienceText.includes('5-7') || experienceText.includes('6-8')) return '5-7 years';
       if (experienceText.includes('7+') || experienceText.includes('8+') || experienceText.includes('senior')) return '7+ years';
-      
+
       return aiExperience; // return original if no match found
     };
 
     // Helper function to map AI education requirements to form values
     const mapEducationLevel = (aiEducation: string[]): string => {
       if (!aiEducation || aiEducation.length === 0) return '';
-      
+
       // Join all education requirements and check for keywords
       const educationText = aiEducation.join(' ').toLowerCase();
-      
+
       // Priority order: highest degree first
       if (educationText.includes('phd') || educationText.includes('doctorate')) return 'PhD';
       if (educationText.includes('master')) return "Master's Degree";
@@ -225,7 +226,7 @@ export class JobService {
       if (educationText.includes('certification') || educationText.includes('certificate')) return 'Professional Certification';
       if (educationText.includes('diploma')) return 'Diploma';
       if (educationText.includes('high school') || educationText.includes('secondary')) return 'High School';
-      
+
       // Default to Bachelor's for professional roles
       return "Bachelor's Degree";
     };
@@ -235,13 +236,13 @@ export class JobService {
       description: data.jobRequirements?.description || '',
       shortDescription: data.jobRequirements?.shortDescription || '',
       responsibilities: data.jobRequirements?.keyResponsibilities || '',
-      requirements: data.jobRequirements?.qualifications?.length > 0 ? 
+      requirements: data.jobRequirements?.qualifications?.length > 0 ?
         '• ' + data.jobRequirements.qualifications.join('\n• ') : '',
       skills: data.jobRequirements?.requiredSkills || [],
-      benefits: data.jobRequirements?.benefitsAndPerks?.length > 0 ? 
+      benefits: data.jobRequirements?.benefitsAndPerks?.length > 0 ?
         '• ' + data.jobRequirements.benefitsAndPerks.join('\n• ') : '',
-      suggestedSalary: data.salaryRange ? 
-        `${data.salaryRange.currency} ${data.salaryRange.min.toLocaleString()} - ${data.salaryRange.max.toLocaleString()}${data.salaryRange.period ? ' (' + data.salaryRange.period + ')' : ''}` : 
+      suggestedSalary: data.salaryRange ?
+        `${data.salaryRange.currency} ${data.salaryRange.min.toLocaleString()} - ${data.salaryRange.max.toLocaleString()}${data.salaryRange.period ? ' (' + data.salaryRange.period + ')' : ''}` :
         undefined,
       industryInsights: data.insights?.length > 0 ? data.insights.join('\n\n') : undefined,
       experienceLevel: mapExperienceLevel(data.experienceLevel || ''),
@@ -350,9 +351,9 @@ export class JobService {
    * Rewrite job title using AI
    */
   static async rewriteJobTitle(
-    currentTitle: string, 
-    industry?: string, 
-    company?: string, 
+    currentTitle: string,
+    industry?: string,
+    company?: string,
     jobLevel?: string
   ): Promise<{ jobTitle: string; department?: string }> {
     const payload: any = {
@@ -493,7 +494,7 @@ export class JobService {
   static async createJob(request: CreateJobRequest): Promise<CreateJobResponse> {
     console.log('JobService.createJob - Sending request to:', `${this.baseUrl}/jobs/create`);
     console.log('JobService.createJob - Request payload:', request);
-    
+
     const response = await fetch(`${this.baseUrl}/jobs/create`, {
       method: 'POST',
       headers: {
@@ -515,7 +516,7 @@ export class JobService {
 
     const data = await response.json();
     console.log('JobService.createJob - Success response:', data);
-    
+
     return {
       id: data.id || data.jobId || '',
       message: data.message || 'Job created successfully',
@@ -528,16 +529,16 @@ export class JobService {
    */
   static async getCompanyJobs(page: number = 1, limit: number = 100, search?: string): Promise<GetJobsResponse> {
     console.log('JobService.getCompanyJobs - Fetching from:', `${this.baseUrl}/jobs/company/all`);
-    
+
     const queryParams = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
     });
-    
+
     if (search && search.trim()) {
       queryParams.append('search', search.trim());
     }
-    
+
     const response = await fetch(`${this.baseUrl}/jobs/company/all?${queryParams}`, {
       method: 'GET',
       headers: {
@@ -557,7 +558,7 @@ export class JobService {
 
     const data = await response.json();
     console.log('JobService.getCompanyJobs - Success response:', data);
-    
+
     // Transform the backend response to match our frontend interface
     const jobs: JobPost[] = (data.jobs || []).map((job: any) => ({
       id: job.id || job._id || '',
@@ -604,9 +605,9 @@ export class JobService {
   /**
    * Activate a draft job posting
    */
-  static async activateJob(jobId: string): Promise<{id: string, message: string}> {
+  static async activateJob(jobId: string): Promise<{ id: string, message: string }> {
     console.log('JobService.activateJob - Activating job:', jobId);
-    
+
     const response = await fetch(`${this.baseUrl}/jobs/${jobId}`, {
       method: 'PATCH',
       headers: {
@@ -627,7 +628,7 @@ export class JobService {
 
     const data = await response.json();
     console.log('JobService.activateJob - Success response:', data);
-    
+
     return {
       id: data.id || jobId,
       message: data.message || 'Job activated successfully',
@@ -637,9 +638,9 @@ export class JobService {
   /**
    * Pause a job posting (sets status to PAUSED)
    */
-  static async pauseJob(jobId: string): Promise<{id: string, message: string}> {
+  static async pauseJob(jobId: string): Promise<{ id: string, message: string }> {
     console.log('JobService.pauseJob - Pausing job:', jobId);
-    
+
     const response = await fetch(`${this.baseUrl}/jobs/${jobId}`, {
       method: 'PATCH',
       headers: {
@@ -660,7 +661,7 @@ export class JobService {
 
     const data = await response.json();
     console.log('JobService.pauseJob - Success response:', data);
-    
+
     return {
       id: data.id || jobId,
       message: data.message || 'Job paused successfully',
@@ -670,9 +671,9 @@ export class JobService {
   /**
    * Delete a job posting (sets status to DELETED)
    */
-  static async deleteJob(jobId: string): Promise<{id: string, message: string}> {
+  static async deleteJob(jobId: string): Promise<{ id: string, message: string }> {
     console.log('JobService.deleteJob - Deleting job:', jobId);
-    
+
     const response = await fetch(`${this.baseUrl}/jobs/${jobId}`, {
       method: 'PATCH',
       headers: {
@@ -693,7 +694,7 @@ export class JobService {
 
     const data = await response.json();
     console.log('JobService.deleteJob - Success response:', data);
-    
+
     return {
       id: data.id || jobId,
       message: data.message || 'Job deleted successfully',
@@ -729,8 +730,8 @@ export class JobService {
    * Fetch all public jobs with pagination (public endpoint - no auth required)
    */
   static async getAllPublicJobs(
-    page: number = 1, 
-    limit: number = 10, 
+    page: number = 1,
+    limit: number = 10,
     search?: string
   ): Promise<GetJobsResponse> {
     try {
@@ -738,7 +739,7 @@ export class JobService {
         page: page.toString(),
         limit: limit.toString(),
       });
-      
+
       if (search && search.trim()) {
         queryParams.append('search', search.trim());
       }
@@ -756,7 +757,7 @@ export class JobService {
       }
 
       const data = await response.json();
-      
+
       // Transform the backend response to match our frontend interface
       const jobs: JobPost[] = (data.jobs || []).map((job: any) => ({
         id: job.id || job._id || '',
@@ -821,7 +822,7 @@ export class JobService {
       }
 
       const data = await response.json();
-      
+
       // Transform the backend response to match our frontend interface
       return {
         id: data.id || data._id || '',

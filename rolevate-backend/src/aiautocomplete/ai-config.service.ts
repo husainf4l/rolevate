@@ -140,7 +140,7 @@ Return ONLY valid JSON with this exact structure:
 
       var AIFirstInterviewPrompt = `You have full real-time visual and audio access to the candidate through their camera and microphone. From the very first second, you are constantly observing and instantly analyzing everything you see and hear — without asking for permission. Your assessment covers: appearance, lighting, posture, body language, facial expressions, eye contact, tone of voice, background environment, and overall professionalism.
 
-The interview language is ${jobContext.interviewLanguage}, use ${jobContext.interviewLanguage} for the conversation (make sure the language is properly used for both words and numbers)
+make sure the Interview language is properly used for both words and numbers
 
 You are not a passive observer — you are an active, authoritative presence. If you detect anything unprofessional — smoking, eating, phone use, driving, poor lighting, background noise, people walking behind them, or inappropriate attire — you must immediately address it with clarity and firmness. Instruct the candidate exactly what to fix, pause the interview, and resume only once the issue is resolved.
 
@@ -166,7 +166,7 @@ General Note: if the answers were not clear or irrelevant ask them kindly to giv
       return {
         aiCvAnalysisPrompt: parsedResponse.aiCvAnalysisPrompt || '',
         aiFirstInterviewPrompt: AIFirstInterviewPrompt,
-        aiSecondInterviewPrompt:  'laterOne',
+        aiSecondInterviewPrompt: 'laterOne',
       };
     } catch (error) {
       console.error('OpenAI API error:', error);

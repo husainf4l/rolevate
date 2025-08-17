@@ -210,23 +210,15 @@ export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
           </div>
         )}
 
-        {jobData.screeningQuestions.length > 0 && (
+        {jobData.interviewQuestions && jobData.interviewQuestions.trim() && (
           <div>
             <h4 className="font-semibold text-[#1d1d1f] mb-2">
-              Screening Questions
+              Interview Questions for AI System
             </h4>
-            <div className="space-y-2">
-              {jobData.screeningQuestions.map((question, index) => (
-                <div key={question.id} className="bg-white/50 p-3 rounded-lg">
-                  <p className="text-[#1d1d1f] font-medium">
-                    {index + 1}. {question.question}
-                  </p>
-                  <p className="text-sm text-[#6e6e73]">
-                    Type: {question.type.replace("_", " ")} •{" "}
-                    {question.required ? "Required" : "Optional"}
-                  </p>
-                </div>
-              ))}
+            <div className="bg-white/50 p-3 rounded-lg">
+              <pre className="whitespace-pre-wrap text-sm text-[#6e6e73]">
+                {jobData.interviewQuestions}
+              </pre>
             </div>
           </div>
         )}
