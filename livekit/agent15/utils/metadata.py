@@ -46,13 +46,18 @@ class MetadataExtractor:
                 cv_analysis = metadata.get("cvAnalysis", {})
                 cv_summary = cv_analysis.get("summary", defaults["cv_summary"])
 
+                # Check for companySpelling first, fallback to companyName
+                company_name = metadata.get("companySpelling")
+                if not company_name:
+                    company_name = metadata.get("companyName", defaults["companyName"])
+
                 # Extract and validate metadata
                 extracted = {
                     "candidateName": metadata.get(
                         "candidateName", defaults["candidateName"]
                     ),
                     "jobName": metadata.get("jobName", defaults["jobName"]),
-                    "companyName": metadata.get("companyName", defaults["companyName"]),
+                    "companyName": company_name,
                     "interviewPrompt": metadata.get(
                         "interviewPrompt", defaults["interviewPrompt"]
                     ),
@@ -87,4 +92,16 @@ class MetadataExtractor:
         logger.info(
             f"Successfully extracted metadata: {extracted['candidateName']} - {extracted['jobName']} at {extracted['companyName']}"
         )
+
+        # Log if companySpelling was used instead of companyName
+        if room_metadata:
+            try:
+                metadata = json.loads(room_metadata)
+                if "companySpelling" in metadata:
+                    logger.info(
+                        f"Using companySpelling: '{metadata['companySpelling']}' instead of companyName"
+                    )
+            except json.JSONDecodeError:
+                pass
+
         return extracted
