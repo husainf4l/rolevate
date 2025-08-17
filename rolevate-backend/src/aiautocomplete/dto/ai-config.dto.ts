@@ -32,6 +32,14 @@ export class AIConfigRequestDto {
   @IsArray()
   @IsOptional()
   skills?: string[];
+
+  @IsString()
+  @IsOptional()
+  interviewLanguage?: string;
+
+  @IsString()
+  @IsOptional()
+  interviewQuestions?: string;
 }
 
 export class AIConfigResponseDto {

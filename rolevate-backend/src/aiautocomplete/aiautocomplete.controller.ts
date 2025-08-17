@@ -1,5 +1,6 @@
-import { Controller, Post, Body, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, BadRequestException, Req, UnauthorizedException } from '@nestjs/common';
 import { AiautocompleteService } from './aiautocomplete.service';
+import { AiConfigService } from './ai-config.service';
 import { CompanyDescriptionRequestDto, CompanyDescriptionResponseDto } from './dto/company-description.dto';
 import { SalaryRecommendationRequestDto, SalaryRecommendationResponseDto } from './dto/salary-recommendation.dto';
 import { JobDescriptionRewriteRequestDto, JobDescriptionRewriteResponseDto } from './dto/job-description-rewrite.dto';
@@ -14,7 +15,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @Controller('aiautocomplete')
 @UseGuards(JwtAuthGuard)
 export class AiautocompleteController {
-  constructor(private readonly aiautocompleteService: AiautocompleteService) {}
+  constructor(
+    private readonly aiautocompleteService: AiautocompleteService,
+    private readonly aiConfigService: AiConfigService,
+  ) {}
 
   @Post('companydescription')
   async generateCompanyDescription(
@@ -84,7 +88,13 @@ export class AiautocompleteController {
   @Post('generate-ai-config')
   async generateAIConfig(
     @Body() requestDto: AIConfigRequestDto,
+    @Req() req: Request & { user?: { id: string; companyId?: string; userType?: string } }
   ): Promise<AIConfigResponseDto> {
-    return this.aiautocompleteService.generateAIConfig(requestDto);
+    const user = req.user;
+    if (!user || user.userType !== 'COMPANY' || !user.companyId) {
+      throw new UnauthorizedException('Company authentication required');
+    }
+    
+    return this.aiConfigService.generateAIConfig(requestDto, user.companyId);
   }
 }
