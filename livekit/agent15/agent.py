@@ -119,6 +119,11 @@ class InterviewAgent(Agent):
     def _build_instructions(self) -> str:
         """Build simple agent instructions focused on the backend interview prompt."""
 
+        # Initialize with default instructions
+        interview_instructions = (
+            "You are an AI interview agent. Please conduct a professional interview."
+        )
+
         # Main interview prompt from backend - this is the key part
         if self.interview_prompt and self.interview_prompt.strip():
             if self.interview_language == "arabic":

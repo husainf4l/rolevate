@@ -89,7 +89,7 @@ async def save_video_to_backend(
     room_id: str, video_url: str, metadata: Dict[str, Any]
 ) -> bool:
     """Save video URL to backend."""
-    backend_url = os.getenv("BACKEND_URL", "http://localhost:4005")
+    backend_url = os.getenv("BACKEND_URL", "http://localhost:4005/api")
     endpoint = f"{backend_url}/interviews/room/{room_id}/save-video"
 
     payload = {
