@@ -1,0 +1,458 @@
+@import "tailwindcss";
+
+:root {
+  /* ===== GOOGLE-STYLE MINIMAL MODERN PALETTE ===== */
+  /* Primary Colors - Pure and Clean */
+  --background: #ffffff;        /* Pure white background */
+  --foreground: #202124;        /* Google's near-black text */
+  --muted: #f8f9fa;            /* Google's subtle gray */
+  --muted-foreground: #5f6368;  /* Google's medium gray */
+
+  /* Card & Surface Colors */
+  --card: #ffffff;             /* Pure white cards */
+  --card-foreground: #202124;  /* Consistent text color */
+
+  /* Interactive Elements - Google's Signature Colors */
+  --primary: #1a73e8;          /* Google's signature blue */
+  --primary-foreground: #ffffff; /* Pure white on blue */
+  --secondary: #e8f0fe;        /* Google's light blue secondary */
+  --secondary-foreground: #1a73e8; /* Blue text on light blue */
+
+  /* Accent Colors - Minimal and Refined */
+  --accent: #34a853;           /* Google's green accent */
+  --accent-foreground: #ffffff; /* White on green */
+
+  /* Form Elements */
+  --input: #f8f9fa;            /* Subtle input background */
+  --border: #e8eaed;           /* Google's subtle border */
+
+  /* Status Colors - Clean and Accessible */
+  --destructive: #ea4335;      /* Google's red */
+  --destructive-foreground: #ffffff; /* White on red */
+
+  /* Focus & Interactive States */
+  --ring: #1a73e8;            /* Blue focus ring */
+
+  /* Additional Modern Professional Colors */
+  --success: #34a853;         /* Google's green */
+  --warning: #fbbc04;         /* Google's yellow */
+  --info: #4285f4;           /* Google's blue */
+
+  /* Extended Palette - Minimal variations */
+  --tertiary: #5f6368;        /* Google's medium gray */
+  --tertiary-foreground: #ffffff;
+  --highlight: #e8f0fe;       /* Light blue highlight */
+  --overlay: rgba(32, 33, 36, 0.6); /* Google's overlay */
+}
+
+[data-theme="dark"] {
+  /* ===== GOOGLE-STYLE DARK MINIMAL PALETTE ===== */
+  /* Primary Colors - Refined Dark Scale */
+  --background: #202124;        /* Google's dark background */
+  --foreground: #e8eaed;        /* Google's light text */
+  --muted: #303134;            /* Google's dark surface */
+  --muted-foreground: #9aa0a6;  /* Google's muted text */
+
+  /* Card & Surface Colors */
+  --card: #303134;             /* Dark card surface */
+  --card-foreground: #e8eaed;  /* Light text on dark */
+
+  /* Interactive Elements - Google's Dark Mode Colors */
+  --primary: #8ab4f8;          /* Google's bright blue for dark mode */
+  --primary-foreground: #202124; /* Dark text on bright blue */
+  --secondary: #3c4043;        /* Google's dark secondary */
+  --secondary-foreground: #e8eaed; /* Light text on dark */
+
+  /* Accent Colors - Minimal Dark Variations */
+  --accent: #81c995;           /* Google's green for dark mode */
+  --accent-foreground: #202124; /* Dark text on green */
+
+  /* Form Elements */
+  --input: #303134;            /* Dark input background */
+  --border: #5f6368;           /* Google's dark border */
+
+  /* Status Colors - Clean Dark Mode */
+  --destructive: #f28b82;      /* Google's red for dark mode */
+  --destructive-foreground: #202124; /* Dark text on red */
+
+  /* Focus & Interactive States */
+  --ring: #8ab4f8;            /* Bright blue focus */
+
+  /* Additional Modern Professional Colors */
+  --success: #81c995;         /* Google's green for dark */
+  --warning: #fdd663;         /* Google's yellow for dark */
+  --info: #8ab4f8;           /* Google's blue for dark */
+
+  /* Extended Palette - Minimal Dark variations */
+  --tertiary: #9aa0a6;        /* Google's medium gray */
+  --tertiary-foreground: #202124; /* Dark text */
+  --highlight: #3c4043;       /* Dark highlight */
+  --overlay: rgba(32, 33, 36, 0.8); /* Google's dark overlay */
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+/* Fallback for prefers-color-scheme when no theme is set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --background: #202124;
+    --foreground: #e8eaed;
+    --muted: #303134;
+    --muted-foreground: #9aa0a6;
+    --card: #303134;
+    --card-foreground: #e8eaed;
+    --border: #5f6368;
+    --input: #303134;
+    --primary: #8ab4f8;
+    --primary-foreground: #202124;
+    --secondary: #3c4043;
+    --secondary-foreground: #e8eaed;
+    --accent: #81c995;
+    --accent-foreground: #202124;
+    --destructive: #f28b82;
+    --destructive-foreground: #202124;
+    --ring: #8ab4f8;
+    --success: #81c995;
+    --warning: #fdd663;
+    --info: #8ab4f8;
+    --tertiary: #9aa0a6;
+    --tertiary-foreground: #202124;
+    --highlight: #3c4043;
+    --overlay: rgba(32, 33, 36, 0.8);
+  }
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ===== MODERN 2025 ANIMATIONS ===== */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-20px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-10px) rotate(-1deg);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-15px) rotate(-1deg);
+  }
+  66% {
+    transform: translateY(-25px) rotate(1deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes morphing {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes neon-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+@keyframes liquid {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  25% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.02);
+  }
+  75% {
+    transform: translateY(-15px) scale(1.08);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-morphing {
+  animation: morphing 8s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+.animate-liquid {
+  animation: liquid 4s ease-in-out infinite;
+}
+
+/* ===== GLASSMORPHISM ENHANCEMENTS ===== */
+.glass-effect {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-effect-dark {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ===== MODERN HOVER EFFECTS ===== */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 30px rgba(26, 115, 232, 0.3);
+}
+
+/* ===== GRADIENT TEXT EFFECTS ===== */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== MODERN SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  opacity: 0.8;
+}
+
+/* ===== MODERN 2025 UTILITY CLASSES ===== */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient-modern {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+}
+
+.border-gradient {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--background), var(--background)) padding-box,
+              linear-gradient(135deg, var(--primary), var(--accent)) border-box;
+}
+
+.shadow-modern {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.shadow-neon {
+  box-shadow: 0 0 20px rgba(26, 115, 232, 0.3), 0 0 40px rgba(26, 115, 232, 0.1);
+}
+
+.backdrop-blur-modern {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.neon-border {
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 10px rgba(26, 115, 232, 0.5);
+}
+
+.liquid-shape {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  animation: morphing 8s ease-in-out infinite;
+}
+
+.micro-interaction {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.micro-interaction:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.parallax-bg {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-shadow-lg {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.gradient-text-animated {
+  background: linear-gradient(45deg, var(--primary), var(--accent), var(--primary));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 3s ease infinite;
+}
+
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 30px rgba(26, 115, 232, 0.4);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-rotate {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-rotate:hover {
+  transform: rotate(5deg) scale(1.05);
+}
+
+.focus-ring {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.3);
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
