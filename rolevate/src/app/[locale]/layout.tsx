@@ -4,8 +4,6 @@ import {routing} from '@/i18n/routing';
 import { ThemeProvider } from '@/contexts/theme-context';
 import { AuthProvider } from '@/contexts/auth-context';
 import { setRequestLocale, getMessages } from 'next-intl/server';
-import InstallPrompt from '@/components/modern/InstallPrompt';
-import { Toaster } from 'sonner';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));
@@ -29,26 +27,14 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-      <body>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+      </head>
+      <body className="touch-manipulation">
         <ThemeProvider defaultTheme="system" storageKey="rolevate-theme">
           <NextIntlClientProvider messages={messages}>
             <AuthProvider>
               {children}
-              <InstallPrompt />
-              <Toaster 
-                position="top-right"
-                expand={true}
-                richColors
-                closeButton
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: 'hsl(var(--background))',
-                    color: 'hsl(var(--foreground))',
-                    border: '1px solid hsl(var(--border))',
-                  },
-                }}
-              />
             </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>

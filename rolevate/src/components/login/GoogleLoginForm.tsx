@@ -44,10 +44,10 @@ export default function GoogleLoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('title')}</h1>
-        <p className="text-gray-600">{t('subtitle')}</p>
+    <div className="w-full max-w-md bg-card/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-card-foreground mb-2">{t('title')}</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       {error && (
@@ -59,7 +59,7 @@ export default function GoogleLoginForm() {
       {/* Email/Password Form */}
       <form onSubmit={handleEmailLogin} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-800 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-card-foreground mb-2">
             {t('email')}
           </label>
           <input
@@ -67,14 +67,14 @@ export default function GoogleLoginForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-gray-800 focus:outline-none transition-all duration-200 bg-white shadow-sm"
+            className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-ring focus:outline-none transition-all duration-200 bg-input shadow-lg text-foreground"
             placeholder={t('emailPlaceholder')}
             required
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-800 mb-2">
+          <label htmlFor="password" className="block text-sm font-medium text-card-foreground mb-2">
             {t('password')}
           </label>
           <div className="relative">
@@ -83,14 +83,14 @@ export default function GoogleLoginForm() {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 pr-12 rounded-xl focus:ring-2 focus:ring-gray-800 focus:outline-none transition-all duration-200 bg-white shadow-sm"
+              className="w-full px-4 py-3 pr-12 rounded-xl focus:ring-2 focus:ring-ring focus:outline-none transition-all duration-200 bg-input shadow-lg text-foreground"
               placeholder={t('passwordPlaceholder')}
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -101,11 +101,11 @@ export default function GoogleLoginForm() {
           <label className="flex items-center">
             <input
               type="checkbox"
-              className="rounded text-gray-800 focus:ring-gray-800 shadow-sm"
+              className="rounded text-card-foreground focus:ring-ring shadow-sm"
             />
-            <span className="ml-2 text-sm text-gray-600">{t('rememberMe')}</span>
+            <span className="ml-2 text-sm text-muted-foreground">{t('rememberMe')}</span>
           </label>
-          <a href="#" className="text-sm text-gray-800 hover:text-gray-900">
+          <a href="#" className="text-sm text-card-foreground hover:text-foreground">
             {t('forgotPassword')}
           </a>
         </div>
@@ -113,7 +113,7 @@ export default function GoogleLoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gray-800 hover:bg-gray-900 disabled:bg-gray-600 text-white font-medium py-3 px-4 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+          className="w-full bg-primary hover:bg-primary/90 disabled:bg-muted text-primary-foreground font-medium py-3 px-4 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
         >
           {isLoading ? 'Signing In...' : t('signIn')}
         </button>
@@ -121,17 +121,17 @@ export default function GoogleLoginForm() {
 
       <div className="relative mb-6 mt-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
+          <div className="w-full border-t border-border"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-white text-gray-500">{t('or')}</span>
+          <span className="px-4 bg-card text-muted-foreground">{t('or')}</span>
         </div>
       </div>
 
       {/* Google Sign In Button */}
       <button
         onClick={handleGoogleLogin}
-        className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 transition-all duration-200 rounded-xl px-6 py-3 text-gray-800 font-medium mb-6 shadow-sm"
+        className="w-full flex items-center justify-center gap-3 bg-secondary hover:bg-secondary/80 transition-all duration-200 rounded-xl px-6 py-3 text-secondary-foreground font-medium mb-6 shadow-lg"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
@@ -154,9 +154,9 @@ export default function GoogleLoginForm() {
         {t('continueWithGoogle')}
       </button>
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-muted-foreground">
         {t('noAccount')}{' '}
-        <Link href="/registration" className="text-gray-800 hover:text-gray-900 font-medium">
+        <Link href="/registration" className="text-card-foreground hover:text-foreground font-medium">
           {t('signUp')}
         </Link>
       </p>

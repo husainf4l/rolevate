@@ -6,9 +6,27 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Filter, Search, MapPin, Briefcase } from 'lucide-react';
 import { Navbar } from '@/components/common';
 import Footer from '@/components/Footer';
-import { JobCard } from '@/components/jobs';
 import { Job, JobType, ExperienceLevel, SalaryRange } from '@/types/jobs';
 import { JobsService } from '@/services/jobsService';
+import dynamic from 'next/dynamic';
+import { Button } from '@/components/common';
+
+// Dynamically import JobCard to prevent hydration issues
+const JobCard = dynamic(() => import('@/components/jobs').then(mod => ({ default: mod.JobCard })), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-card rounded-xl p-8 animate-pulse">
+      <div className="flex gap-6">
+        <div className="w-16 h-16 bg-muted rounded-xl"></div>
+        <div className="flex-1 space-y-3">
+          <div className="h-5 bg-muted rounded w-3/4"></div>
+          <div className="h-4 bg-muted rounded w-1/2"></div>
+          <div className="h-4 bg-muted rounded w-1/3"></div>
+        </div>
+      </div>
+    </div>
+  )
+});
 
 export default function JobsPage({
   params
@@ -26,6 +44,7 @@ export default function JobsPage({
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isClient, setIsClient] = useState(false);
 
   const t = useTranslations('jobs');
   const searchParams = useSearchParams();
@@ -54,6 +73,7 @@ export default function JobsPage({
       setLocale(resolvedParams.locale);
     };
     fetchLocale();
+    setIsClient(true);
   }, [params]);
 
   useEffect(() => {
@@ -170,73 +190,121 @@ export default function JobsPage({
     setCurrentPage(1);
   };
 
-  const isRTL = locale === 'ar';
+  // const isRTL = isClient && locale === 'ar';
+
+  // Prevent hydration mismatch by showing loading state until client mounts
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-background antialiased">
+        <Navbar />
+        <div className="pt-20 bg-background">
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-16">
+            <div className="text-center mb-16">
+              <div className="h-16 bg-muted rounded-lg animate-pulse mb-6"></div>
+              <div className="h-6 bg-muted rounded-lg animate-pulse max-w-3xl mx-auto"></div>
+            </div>
+            <div className="w-full max-w-6xl mx-auto">
+              <div className="bg-card rounded-2xl shadow-lg h-16 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex gap-12">
+            <div className="w-full md:w-80">
+              <div className="bg-muted/20 rounded-2xl p-8 h-96 animate-pulse shadow-lg"></div>
+            </div>
+            <div className="flex-1">
+              <div className="space-y-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className={`rounded-2xl p-8 animate-pulse shadow-lg ${
+                    i % 2 === 0 ? 'bg-card' : 'bg-muted/30'
+                  }`}>
+                    <div className="flex gap-6">
+                      <div className="w-16 h-16 bg-muted rounded-xl"></div>
+                      <div className="flex-1 space-y-3">
+                        <div className="h-5 bg-muted rounded w-3/4"></div>
+                        <div className="h-4 bg-muted rounded w-1/2"></div>
+                        <div className="h-4 bg-muted rounded w-1/3"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer locale="en" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background antialiased">
+    <div className="min-h-screen bg-background antialiased transition-colors duration-300">
       <Navbar />
 
-      {/* Header Section */}
-      <div className="pt-16 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
+      {/* Header Section - Google Careers Style */}
+      <div className="pt-20 bg-background transition-colors duration-300">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-normal text-foreground mb-4 sm:mb-6 tracking-tight transition-colors duration-300">
               {t('title')}
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto font-normal leading-relaxed transition-colors duration-300">
               Discover amazing career opportunities and find your next role
             </p>
           </div>
 
-          {/* Search Bar */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-card/95 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="md:col-span-2">
+          {/* Search Bar - Google Style */}
+          <div className="w-full max-w-6xl mx-auto">
+            <div className="bg-card rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 backdrop-blur-sm">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
+                <div className="lg:col-span-2">
                   <div className="relative">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5 transition-colors duration-300" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => handleSearchInputChange(e.target.value, 'q')}
                       onKeyPress={handleKeyPress}
                       placeholder={t('searchPlaceholder')}
-                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-background/95 focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-300"
+                      className="w-full pl-14 pr-5 py-5 bg-transparent border-0 focus:ring-0 focus:outline-none text-foreground placeholder-muted-foreground text-lg transition-colors duration-300"
                     />
                   </div>
                 </div>
 
                 <div>
                   <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <MapPin className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5 transition-colors duration-300" />
                     <input
                       type="text"
                       value={location}
                       onChange={(e) => handleSearchInputChange(e.target.value, 'location')}
                       onKeyPress={handleKeyPress}
                       placeholder={t('locationPlaceholder')}
-                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-background/95 focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-300"
+                      className="w-full pl-14 pr-5 py-5 bg-transparent border-0 focus:ring-0 focus:outline-none text-foreground placeholder-muted-foreground text-lg transition-colors duration-300"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <button
+                <div className="flex">
+                  <Button
                     onClick={handleSearch}
-                    className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 flex items-center justify-center gap-2"
+                    variant="default"
+                    size="lg"
+                    leftIcon={<Search className="w-5 h-5" />}
+                    className="flex-1"
                   >
-                    <Search className="w-4 h-4" />
-                    <span>Search</span>
-                  </button>
+                    Search
+                  </Button>
 
-                  <button
+                  <Button
                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                    className={`bg-background/60 hover:bg-background p-3 rounded-xl transition-all duration-300 ${
-                      (jobType || experienceLevel || salaryRange) ? 'ring-2 ring-primary/50' : ''
-                    }`}
+                    variant="ghost"
+                    size="lg"
+                    className={(jobType || experienceLevel || salaryRange) ? 'bg-primary/10' : ''}
                   >
-                    <Filter className="w-5 h-5 text-muted-foreground" />
-                  </button>
+                    <Filter className="w-6 h-6" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -244,84 +312,85 @@ export default function JobsPage({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Filters Sidebar */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex gap-12">
+          {/* Filters Sidebar - Google Style */}
           <div className={`w-full md:w-80 ${isFiltersOpen ? 'block' : 'hidden md:block'}`}>
-            <div className="bg-card/95 backdrop-blur-md rounded-2xl p-6 shadow-xl sticky top-24">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-foreground">Filters</h3>
-                <button
+            <div className="bg-muted/20 rounded-2xl p-8 sticky top-28 transition-all duration-500 shadow-lg hover:shadow-xl backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-medium text-foreground transition-colors duration-300">Filters</h3>
+                <Button
                   onClick={clearFilters}
-                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                  variant="link"
+                  size="sm"
                 >
                   Clear All
-                </button>
+                </Button>
               </div>
 
               {/* Job Type Filter */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-foreground mb-3">
+              <div className="mb-8">
+                <label className="block text-base font-medium text-foreground mb-4 transition-colors duration-300">
                   Job Type
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {[
                     { value: '', label: t('allTypes') },
                     { value: 'full-time' as JobType, label: t('fullTime') },
                     { value: 'part-time' as JobType, label: t('partTime') },
                     { value: 'contract' as JobType, label: t('contract') }
                   ].map((type) => (
-                    <label key={type.value} className="flex items-center">
+                    <label key={type.value} className="flex items-center cursor-pointer group">
                       <input
                         type="radio"
                         name="jobType"
                         value={type.value}
                         checked={jobType === type.value}
                         onChange={(e) => handleFilterChange('type', e.target.value)}
-                        className="w-4 h-4 text-primary focus:ring-primary/50"
+                        className="w-5 h-5 text-primary focus:ring-primary focus:ring-2 transition-colors duration-300"
                       />
-                      <span className="ml-2 text-sm text-muted-foreground">{type.label}</span>
+                      <span className="ml-4 text-base text-muted-foreground group-hover:text-foreground transition-colors duration-300">{type.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               {/* Experience Level Filter */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-foreground mb-3">
+              <div className="mb-8">
+                <label className="block text-base font-medium text-foreground mb-4 transition-colors duration-300">
                   Experience Level
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {[
                     { value: '', label: t('anyExperience') },
                     { value: 'entry' as ExperienceLevel, label: t('entryLevel') },
                     { value: 'mid' as ExperienceLevel, label: t('midLevel') },
                     { value: 'senior' as ExperienceLevel, label: t('seniorLevel') }
                   ].map((level) => (
-                    <label key={level.value} className="flex items-center">
+                    <label key={level.value} className="flex items-center cursor-pointer group">
                       <input
                         type="radio"
                         name="experience"
                         value={level.value}
                         checked={experienceLevel === level.value}
                         onChange={(e) => handleFilterChange('experience', e.target.value)}
-                        className="w-4 h-4 text-primary focus:ring-primary/50"
+                        className="w-5 h-5 text-primary focus:ring-primary focus:ring-2 transition-colors duration-300"
                       />
-                      <span className="ml-2 text-sm text-muted-foreground">{level.label}</span>
+                      <span className="ml-4 text-base text-muted-foreground group-hover:text-foreground transition-colors duration-300">{level.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               {/* Salary Range Filter */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-foreground mb-3">
+              <div className="mb-8">
+                <label className="block text-base font-medium text-foreground mb-4 transition-colors duration-300">
                   Salary Range
                 </label>
                 <select
                   value={salaryRange}
                   onChange={(e) => handleFilterChange('salary', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-background/95 focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-xl bg-background/50 text-foreground focus:ring-2 focus:ring-primary transition-all duration-300 text-base hover:bg-background/80 shadow-sm hover:shadow-md"
                 >
                   <option value="">{t('anySalary')}</option>
                   <option value="0-30000">$0 - $30,000</option>
@@ -334,16 +403,16 @@ export default function JobsPage({
             </div>
           </div>
 
-          {/* Main Content */}
+          {/* Main Content - Google Style */}
           <div className="flex-1">
             {/* Results Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between mb-8">
+              <div className="text-base text-muted-foreground transition-colors duration-300">
                 {loading ? t('loading') : `${jobs.length} jobs found`}
               </div>
 
               {/* Sort Dropdown */}
-              <select className="px-3 py-2 rounded-lg bg-background/95 focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-300 text-sm">
+              <select className="px-4 py-3 rounded-xl bg-background/50 text-foreground focus:ring-2 focus:ring-primary transition-all duration-300 text-base hover:bg-background/80 shadow-sm hover:shadow-md">
                 <option>Most Recent</option>
                 <option>Most Relevant</option>
                 <option>Highest Salary</option>
@@ -355,13 +424,15 @@ export default function JobsPage({
             {loading ? (
               <div className="space-y-6">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-card/95 backdrop-blur-md rounded-2xl p-6 shadow-xl animate-pulse">
-                    <div className="flex gap-4">
-                      <div className="w-12 h-12 bg-muted rounded-xl"></div>
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-muted rounded w-3/4"></div>
-                        <div className="h-3 bg-muted rounded w-1/2"></div>
-                        <div className="h-3 bg-muted rounded w-1/3"></div>
+                  <div key={i} className={`rounded-2xl p-8 animate-pulse transition-all duration-300 shadow-lg ${
+                    i % 2 === 0 ? 'bg-card' : 'bg-muted/30'
+                  }`}>
+                    <div className="flex gap-6">
+                      <div className="w-16 h-16 bg-muted rounded-xl"></div>
+                      <div className="flex-1 space-y-3">
+                        <div className="h-5 bg-muted rounded w-3/4"></div>
+                        <div className="h-4 bg-muted rounded w-1/2"></div>
+                        <div className="h-4 bg-muted rounded w-1/3"></div>
                       </div>
                     </div>
                   </div>
@@ -369,57 +440,56 @@ export default function JobsPage({
               </div>
             ) : jobs.length > 0 ? (
               <div className="space-y-6">
-                {jobs.map((job) => (
-                  <JobCard key={job.id} job={job} locale={locale} />
+                {jobs.map((job, index) => (
+                  <JobCard key={job.id} job={job} locale={locale} variant={index % 2 === 0 ? 'primary' : 'secondary'} />
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Briefcase className="w-8 h-8 text-muted-foreground" />
+              <div className="text-center py-20">
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 transition-colors duration-300">
+                  <Briefcase className="w-10 h-10 text-muted-foreground transition-colors duration-300" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <h3 className="text-xl font-medium text-foreground mb-3 transition-colors duration-300">
                   {t('noJobsFound')}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-lg text-muted-foreground transition-colors duration-300">
                   {t('noJobsMessage')}
                 </p>
               </div>
             )}
 
-            {/* Pagination */}
+            {/* Pagination - Google Style */}
             {jobs.length > 0 && totalPages > 1 && (
-              <div className="flex items-center justify-center mt-12">
-                <div className="flex items-center gap-2">
-                  <button
+              <div className="flex items-center justify-center mt-16">
+                <div className="flex items-center gap-3">
+                  <Button
                     onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 rounded-lg bg-background/60 hover:bg-background disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    variant="outline"
+                    size="default"
                   >
                     Previous
-                  </button>
+                  </Button>
 
                   {[...Array(totalPages)].map((_, i) => (
-                    <button
+                    <Button
                       key={i + 1}
                       onClick={() => handlePageChange(i + 1)}
-                      className={`px-4 py-2 rounded-lg transition-all duration-300 ${
-                        currentPage === i + 1
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-background/60 hover:bg-background'
-                      }`}
+                      variant={currentPage === i + 1 ? 'default' : 'outline'}
+                      size="default"
                     >
                       {i + 1}
-                    </button>
+                    </Button>
                   ))}
 
-                  <button
+                  <Button
                     onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 rounded-lg bg-background/60 hover:bg-background disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    variant="outline"
+                    size="default"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/common';
 
 interface HeroSearchFormProps {
   messagePlaceholder: string;
@@ -58,34 +59,36 @@ export default function HeroSearchForm({ messagePlaceholder, countries, locale }
   };
 
   return (
-    <div className="bg-gray-800/95 backdrop-blur-sm rounded-sm p-6 shadow-xl max-w-lg w-full">
-      <div className="space-y-2">
+    <div className="bg-card/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl max-w-lg w-full">
+      <div className="space-y-3 sm:space-y-4">
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyPress}
           placeholder={messagePlaceholder}
-          className="w-full px-4 py-3 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-700 text-white placeholder-gray-300 transition-all duration-300 hover:bg-gray-600"
+          className="w-full px-3 sm:px-4 py-3 text-sm sm:text-base rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-ring bg-input text-foreground placeholder-muted-foreground transition-all duration-300 hover:bg-muted/80 shadow-sm"
         />
-        <div className="flex justify-between">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:justify-between">
           <div className="relative" ref={dropdownRef}>
-            <button
+            <Button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-32 px-4 py-3 rounded-sm bg-gray-700 text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 flex items-center justify-between"
+              variant="secondary"
+              size="default"
+              className="w-full sm:w-32 justify-between text-sm sm:text-base"
             >
-              <span className="text-sm font-medium">{selectedCountry}</span>
+              <span className="font-medium truncate">{selectedCountry}</span>
               <svg
-                className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
-            </button>
+            </Button>
             {isDropdownOpen && (
-              <div className="absolute left-0 top-full mt-1 w-32 bg-gray-800/95 backdrop-blur-sm rounded-sm shadow-xl z-10 overflow-hidden max-h-40 overflow-y-auto animate-in slide-in-from-top-2 duration-200">
+              <div className="absolute left-0 top-full mt-1 w-full sm:w-32 bg-popover/95 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-xl z-10 overflow-hidden max-h-40 overflow-y-auto animate-in slide-in-from-top-2 duration-200">
                 <div className="py-1">
                   {countries.map((country) => (
                     <button
@@ -94,7 +97,7 @@ export default function HeroSearchForm({ messagePlaceholder, countries, locale }
                         setSelectedCountry(country);
                         setIsDropdownOpen(false);
                       }}
-                      className="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700/80 transition-colors"
+                      className="w-full text-left px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
                     >
                       <span className="font-medium">{country}</span>
                     </button>
@@ -103,16 +106,18 @@ export default function HeroSearchForm({ messagePlaceholder, countries, locale }
               </div>
             )}
           </div>
-          <button
+          <Button
             onClick={handleSendClick}
-            className="px-4 py-3 rounded-sm bg-primary text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 hover:scale-105 active:scale-95 group relative overflow-hidden"
+            variant="default"
+            size="default"
+            className="w-full sm:w-auto hover:scale-105 active:scale-95 group relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <svg className={`w-5 h-5 transition-all duration-300 group-hover:scale-110 relative z-10 ${locale === 'ar' ? 'scale-x-[-1]' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
             </svg>
             <div className="absolute inset-0 rounded-sm bg-white/10 scale-0 group-hover:scale-100 transition-transform duration-500 origin-center"></div>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

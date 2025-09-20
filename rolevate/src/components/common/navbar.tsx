@@ -122,7 +122,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 lg:space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
             {/* Search Bar - Near Theme Switcher */}
             <div className="hidden lg:flex items-center">
               <form onSubmit={handleSearch} className="relative">
@@ -178,14 +178,14 @@ const Navbar: React.FC = () => {
 
             {/* Profile/Login Button */}
             {isLoading ? (
-              <div className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-foreground/10">
+              <div className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-foreground/10">
                 <div className="w-3 h-3 border border-foreground/30 border-t-foreground/60 rounded-full animate-spin"></div>
               </div>
             ) : user ? (
               <div className="relative profile-dropdown">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-primary hover:bg-primary/80 transition-all duration-200 hover:scale-105 text-primary-foreground font-medium text-sm"
+                  className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-primary hover:bg-primary/80 transition-all duration-200 hover:scale-105 text-primary-foreground font-medium text-sm"
                   aria-label="Profile menu"
                 >
                   {getUserInitials()}
@@ -231,7 +231,7 @@ const Navbar: React.FC = () => {
             ) : (
               <Link
                 href="/login"
-                className="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-all duration-200 hover:scale-105"
+                className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-all duration-200 hover:scale-105"
               >
                 <svg className="w-4 h-4 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -242,20 +242,20 @@ const Navbar: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden relative w-9 h-9 rounded-full bg-foreground/10 hover:bg-foreground/20 transition-all duration-200 flex items-center justify-center active:scale-95"
+              className="lg:hidden relative w-11 h-11 rounded-xl bg-primary/10 hover:bg-primary/20 transition-all duration-200 flex items-center justify-center active:scale-95 border border-primary/20 shadow-sm"
               aria-label="Toggle mobile menu"
             >
-              <div className="w-4 h-4 relative flex flex-col justify-center">
-                <span className={`block absolute h-0.5 w-4 bg-foreground transform transition-all duration-200 ${isOpen ? 'rotate-45' : '-translate-y-1'}`}></span>
-                <span className={`block absolute h-0.5 w-4 bg-foreground transition-all duration-200 ${isOpen ? 'opacity-0' : ''}`}></span>
-                <span className={`block absolute h-0.5 w-4 bg-foreground transform transition-all duration-200 ${isOpen ? '-rotate-45' : 'translate-y-1'}`}></span>
+              <div className="w-6 h-6 relative flex flex-col justify-center">
+                <span className={`block absolute h-0.5 w-6 bg-primary transform transition-all duration-300 ${isOpen ? 'rotate-45' : '-translate-y-2'}`}></span>
+                <span className={`block absolute h-0.5 w-6 bg-primary transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`}></span>
+                <span className={`block absolute h-0.5 w-6 bg-primary transform transition-all duration-300 ${isOpen ? '-rotate-45' : 'translate-y-2'}`}></span>
               </div>
             </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        <div className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${
+        <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-out ${
           isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}>
           <div className="py-4 space-y-1 mt-2 border-t border-foreground/10">

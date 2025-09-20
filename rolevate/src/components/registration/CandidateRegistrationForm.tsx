@@ -98,10 +98,10 @@ export default function CandidateRegistrationForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('title')}</h1>
-        <p className="text-gray-600">{t('subtitle')}</p>
+    <div className="w-full max-w-md bg-card/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-card-foreground mb-2">{t('title')}</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       {errors.general && (
@@ -112,9 +112,9 @@ export default function CandidateRegistrationForm() {
 
       {/* Registration Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-800 mb-2">
+            <label htmlFor="firstName" className="block text-sm font-medium text-card-foreground mb-2">
               {t('firstName')}
             </label>
             <input
@@ -122,7 +122,7 @@ export default function CandidateRegistrationForm() {
               type="text"
               value={formData.firstName}
               onChange={(e) => handleInputChange('firstName', e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-gray-800 focus:outline-none transition-all duration-200 bg-white shadow-sm ${
+              className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-ring focus:outline-none transition-all duration-200 bg-input shadow-lg text-foreground ${
                 errors.firstName ? 'border-red-500' : ''
               }`}
               placeholder={t('firstNamePlaceholder')}
@@ -134,7 +134,7 @@ export default function CandidateRegistrationForm() {
           </div>
 
           <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-800 mb-2">
+            <label htmlFor="lastName" className="block text-sm font-medium text-card-foreground mb-2">
               {t('lastName')}
             </label>
             <input
@@ -142,7 +142,7 @@ export default function CandidateRegistrationForm() {
               type="text"
               value={formData.lastName}
               onChange={(e) => handleInputChange('lastName', e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-gray-800 focus:outline-none transition-all duration-200 bg-white shadow-sm ${
+              className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-ring focus:outline-none transition-all duration-200 bg-input shadow-lg text-foreground ${
                 errors.lastName ? 'border-red-500' : ''
               }`}
               placeholder={t('lastNamePlaceholder')}
@@ -155,7 +155,7 @@ export default function CandidateRegistrationForm() {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-800 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-card-foreground mb-2">
             {t('email')}
           </label>
           <input
@@ -163,7 +163,7 @@ export default function CandidateRegistrationForm() {
             type="email"
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
-            className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-gray-800 focus:outline-none transition-all duration-200 bg-white shadow-sm ${
+            className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-ring focus:outline-none transition-all duration-200 bg-input shadow-lg text-foreground ${
               errors.email ? 'border-red-500' : ''
             }`}
             placeholder={t('emailPlaceholder')}
@@ -175,7 +175,7 @@ export default function CandidateRegistrationForm() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-800 mb-2">
+          <label htmlFor="password" className="block text-sm font-medium text-card-foreground mb-2">
             {t('password')}
           </label>
           <div className="relative">
@@ -193,7 +193,7 @@ export default function CandidateRegistrationForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -204,7 +204,7 @@ export default function CandidateRegistrationForm() {
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-800 mb-2">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-card-foreground mb-2">
             {t('confirmPassword')}
           </label>
           <div className="relative">
@@ -222,7 +222,7 @@ export default function CandidateRegistrationForm() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
             >
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -235,7 +235,7 @@ export default function CandidateRegistrationForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gray-800 hover:bg-gray-900 disabled:bg-gray-600 text-white font-medium py-3 px-4 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+          className="w-full bg-primary hover:bg-primary/90 disabled:bg-muted text-primary-foreground font-medium py-3 px-4 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
         >
           {isLoading ? t('creatingAccount') : t('createAccount')}
         </button>
@@ -243,17 +243,17 @@ export default function CandidateRegistrationForm() {
 
       <div className="relative mb-6 mt-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
+          <div className="w-full border-t border-border"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-white text-gray-500">{t('or')}</span>
+          <span className="px-4 bg-card text-muted-foreground">{t('or')}</span>
         </div>
       </div>
 
       {/* Google Sign Up Button */}
       <button
         onClick={handleGoogleRegister}
-        className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 transition-all duration-200 rounded-xl px-6 py-3 text-gray-800 font-medium mb-6 shadow-sm"
+        className="w-full flex items-center justify-center gap-3 bg-secondary hover:bg-secondary/80 transition-all duration-200 rounded-xl px-6 py-3 text-secondary-foreground font-medium mb-6 shadow-lg"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
@@ -276,9 +276,9 @@ export default function CandidateRegistrationForm() {
         {t('continueWithGoogle')}
       </button>
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-muted-foreground">
         {t('haveAccount')}{' '}
-        <Link href="/login" className="text-gray-800 hover:text-gray-900 font-medium">
+        <Link href="/login" className="text-card-foreground hover:text-foreground font-medium">
           {t('signIn')}
         </Link>
       </p>

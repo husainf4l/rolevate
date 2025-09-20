@@ -1,0 +1,27 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a73e8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#34a853;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="48" cy="48" r="38" fill="url(#gradient)"/>
+  
+  <!-- Briefcase Icon -->
+  <g transform="translate(24, 24)">
+    <!-- Briefcase Body -->
+    <rect x="6" y="15" width="35.95505617977528" height="24" rx="3" fill="#ffffff"/>
+    
+    <!-- Briefcase Handle -->
+    <rect x="12" y="7.5" width="18.01125703564728" height="8.997188378631678" rx="1.5" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+    
+    <!-- Briefcase Lock -->
+    <rect x="15" y="12" width="6" height="6" rx="0.75" fill="#1a73e8"/>
+    <circle cx="12" cy="10.50328227571116" r="1.5" fill="#ffffff"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="48" y="75" font-family="Arial, sans-serif" font-size="6" font-weight="bold" text-anchor="middle" fill="#ffffff">R</text>
+</svg>

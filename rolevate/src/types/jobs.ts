@@ -17,9 +17,15 @@ export interface Job {
   category?: string;
   requirements?: string[];
   benefits?: string[];
+  responsibilities?: string[];
+  qualifications?: string[];
+  companyDescription?: string;
   applicationDeadline?: string;
   companySize?: string;
   industry?: string;
+  website?: string;
+  contactEmail?: string;
+  applicationUrl?: string;
 }
 
 export type JobType = 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | 'temporary';
@@ -35,6 +41,7 @@ export interface JobCardProps {
   onApply?: (jobId: string) => void;
   isSaved?: boolean;
   className?: string;
+  variant?: 'primary' | 'secondary';
 }
 
 export interface JobFilters {

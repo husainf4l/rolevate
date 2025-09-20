@@ -19,8 +19,9 @@ export default async function HomePage({
       <main className="pt-16">
         <Hero locale={locale} />
         <JobSearchSection locale={locale} />
-        <FindJobsByCountry locale={locale} />
         <CVUploadSection locale={locale} />
+
+        <FindJobsByCountry locale={locale} />
         <AppDownloadSection locale={locale} />
       </main>
       <Footer locale={locale} />

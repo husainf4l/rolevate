@@ -15,7 +15,7 @@ export class JobsService {
       type: 'full-time' as JobType,
       salary: '$80,000 - $120,000',
       postedAt: '2 days ago',
-      description: 'We are looking for a Senior Software Engineer to join our dynamic team. You will be responsible for developing high-quality software solutions and leading technical initiatives.',
+      description: 'We are looking for a Senior Software Engineer to join our dynamic team. You will be responsible for developing high-quality software solutions and leading technical initiatives. This role offers an exciting opportunity to work on cutting-edge technologies and contribute to products that impact millions of users worldwide.',
       tags: ['React', 'Node.js', 'TypeScript', 'AWS'],
       urgent: true,
       remote: false,
@@ -24,7 +24,34 @@ export class JobsService {
       experienceLevel: 'senior' as ExperienceLevel,
       salaryRange: '80000-120000' as SalaryRange,
       category: 'Technology',
-      benefits: ['Health Insurance', 'Remote Work', 'Professional Development']
+      requirements: [
+        '5+ years of experience in software development',
+        'Strong proficiency in React, Node.js, and TypeScript',
+        'Experience with cloud platforms (AWS, Azure, or GCP)',
+        'Excellent problem-solving and communication skills',
+        'Bachelor\'s degree in Computer Science or related field'
+      ],
+      responsibilities: [
+        'Design and develop scalable web applications using modern technologies',
+        'Lead technical initiatives and mentor junior developers',
+        'Collaborate with cross-functional teams to deliver high-quality products',
+        'Participate in code reviews and maintain coding standards',
+        'Contribute to architectural decisions and system design'
+      ],
+      qualifications: [
+        'Advanced degree in Computer Science preferred',
+        'Experience with microservices architecture',
+        'Knowledge of DevOps practices and CI/CD pipelines',
+        'Strong understanding of software design patterns',
+        'Experience with agile development methodologies'
+      ],
+      benefits: ['Health Insurance', 'Remote Work', 'Professional Development', 'Flexible Hours', 'Stock Options'],
+      companyDescription: 'TechCorp is a leading technology company specializing in innovative software solutions for enterprise clients. With over 500 employees worldwide, we are committed to fostering a culture of innovation, collaboration, and continuous learning. Our team works on cutting-edge projects that make a real difference in how businesses operate in the digital age.',
+      applicationDeadline: 'October 15, 2025',
+      companySize: '500-1000',
+      industry: 'Software Development',
+      website: 'https://techcorp.com',
+      contactEmail: 'careers@techcorp.com'
     },
     {
       id: '2',
