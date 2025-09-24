@@ -1,0 +1,232 @@
+// Enhanced Job and Application models
+// This file contains improved job-related models with better performance and validation
+
+// Enhanced Job model with validation and indexes
+model Job {
+  id              String @id @default(cuid())
+  title_en        String @db.VarChar(300)
+  title_ar        String @db.VarChar(300)
+  description_en  String @db.Text
+  description_ar  String @db.Text
+  requirements_en String? @db.Text
+  requirements_ar String? @db.Text
+
+  // Company and Department
+  companyId       String
+  company         Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  departmentId    String?
+  department      Department? @relation(fields: [departmentId], references: [id])
+
+  // Job details
+  industryId      String?
+  industry        Industry? @relation(fields: [industryId], references: [id])
+
+  typeId          String?
+  jobType         JobType? @relation(fields: [typeId], references: [id])
+
+  levelId         String?
+  jobLevel        JobLevel? @relation(fields: [levelId], references: [id])
+
+  locationId      String?
+  location        JobLocation? @relation(fields: [locationId], references: [id])
+
+  // Enhanced salary information
+  salaryMin       Decimal? @db.Decimal(12,2)
+  salaryMax       Decimal? @db.Decimal(12,2)
+  currency        Currency? @default(USD)
+  salaryPeriod    SalaryPeriod? @default(YEARLY)
+  salaryNegotiable Boolean @default(false)
+
+  // Job status and timeline
+  statusId        String?
+  status          JobStatus? @relation(fields: [statusId], references: [id])
+
+  postedDate      DateTime @default(now())
+  closingDate     DateTime?
+
+  // Enhanced requirements
+  experienceYears Int? @db.SmallInt
+  experienceYearsMax Int? @db.SmallInt
+  educationLevel  String? @db.VarChar(100)
+
+  // Job preferences
+  remoteAllowed   Boolean @default(false)
+  urgentHiring    Boolean @default(false)
+  featured        Boolean @default(false)
+
+  // Performance tracking
+  viewsCount      Int @default(0)
+  applicationsCount Int @default(0)
+
+  // Relationships
+  applications    JobApplication[]
+  interviews      Interview[]
+
+  // Audit fields
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  version         Int @default(1)
+  lastModifiedBy  String?
+
+  // Performance indexes for job search
+  @@index([companyId])
+  @@index([statusId])
+  @@index([postedDate])
+  @@index([closingDate])
+  @@index([companyId, statusId])
+  @@index([industryId])
+  @@index([typeId])
+  @@index([levelId])
+  @@index([locationId])
+  @@index([currency])
+  @@index([experienceYears])
+  @@index([remoteAllowed])
+  @@index([featured])
+  @@index([urgentHiring])
+
+  // Full-text search indexes (PostgreSQL specific)
+  @@index([title_en], type: Gin)
+  @@index([title_ar], type: Gin)
+
+  // Note: Check constraints would validate salaryMin >= 0, salaryMax >= salaryMin,
+  // experienceYears >= 0, experienceYearsMax >= experienceYears
+  // These validations should be handled at application level
+
+  @@map("jobs")
+}
+
+// Enhanced Job Application with better tracking
+model JobApplication {
+  id          String @id @default(cuid())
+
+  // Candidate (User) relationship
+  candidateId String
+  candidate   User @relation("CandidateApplications", fields: [candidateId], references: [id], onDelete: Cascade)
+
+  // Job relationship
+  jobId       String
+  job         Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  // Application details
+  coverLetter String? @db.Text
+  resume      String? @db.VarChar(500) // URL to resume file
+
+  // Additional application fields
+  portfolioUrl String? @db.VarChar(500)
+  linkedinUrl  String? @db.VarChar(500)
+  githubUrl    String? @db.VarChar(500)
+  expectedSalary Decimal? @db.Decimal(12,2)
+  availableFrom DateTime?
+
+  // Application status
+  statusId    String?
+  status      ApplicationStatus? @relation(fields: [statusId], references: [id])
+
+  // Tracking
+  appliedAt   DateTime @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String? // User ID of reviewer
+
+  // Rating and scoring
+  initialScore Decimal? @db.Decimal(3,2) // Initial screening score
+  finalScore   Decimal? @db.Decimal(3,2) // Final evaluation score
+
+  // Notes and feedback
+  notes       String? @db.Text
+  feedback    String? @db.Text
+
+  // Communication tracking
+  lastContactAt DateTime?
+  nextFollowUp  DateTime?
+
+  // Relationships
+  interviews  Interview[]
+
+  // Audit fields
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Performance indexes
+  @@index([candidateId])
+  @@index([jobId])
+  @@index([statusId])
+  @@index([appliedAt])
+  @@index([reviewedAt])
+  @@index([candidateId, jobId])
+  @@index([jobId, statusId])
+  @@index([reviewedBy])
+
+  // Unique constraint
+  @@unique([candidateId, jobId])
+
+  @@map("job_applications")
+}
+
+// Enhanced Interview model with better scheduling
+model Interview {
+  id            String @id @default(cuid())
+
+  // Application relationship
+  applicationId String
+  application   JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  // Interview details
+  typeId        String?
+  interviewType InterviewType? @relation(fields: [typeId], references: [id])
+
+  // Enhanced scheduling
+  scheduledAt   DateTime
+  duration      Int? @db.SmallInt // Duration in minutes
+  location      String? @db.VarChar(500) // Physical location or meeting link
+  timeZone      String? @db.VarChar(50) // e.g., "UTC", "America/New_York"
+
+  // Participants
+  conductorId   String // Employee conducting the interview
+  conductor     Employee @relation("InterviewConductor", fields: [conductorId], references: [id])
+
+  // Additional participants
+  additionalInterviewers String? @db.Text // JSON array of interviewer IDs
+
+  // Interview status
+  statusId      String?
+  status        InterviewStatus? @relation(fields: [statusId], references: [id])
+
+  // Enhanced results and feedback
+  notes         String? @db.Text
+  feedback      String? @db.Text
+  rating        Int? @db.SmallInt // Rating out of 10
+  recommendation InterviewRecommendation?
+
+  // Skills assessment
+  technicalRating   Int? @db.SmallInt // Technical skills rating
+  communicationRating Int? @db.SmallInt // Communication skills rating
+  culturalFitRating  Int? @db.SmallInt // Cultural fit rating
+
+  // Meeting logistics
+  meetingUrl    String? @db.VarChar(500)
+  meetingId     String? @db.VarChar(100)
+  dialInNumber  String? @db.VarChar(50)
+
+  // Follow-up tracking
+  followUpRequired Boolean @default(false)
+  followUpNotes   String? @db.Text
+
+  // Audit fields
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Performance indexes
+  @@index([applicationId])
+  @@index([conductorId])
+  @@index([scheduledAt])
+  @@index([statusId])
+  @@index([typeId])
+  @@index([recommendation])
+
+  // Note: Check constraints would validate rating (1-10), technicalRating (1-10),
+  // communicationRating (1-10), culturalFitRating (1-10), duration > 0
+  // These validations should be handled at application level
+
+  @@map("interviews")
+}

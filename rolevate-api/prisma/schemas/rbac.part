@@ -1,0 +1,213 @@
+// Role-Based Access Control (RBAC) Models
+// This file contains all permission, role, and group models
+
+// Permission Actions Model for extensibility
+model PermissionAction {
+  id          String @id @default(cuid())
+  name_en     String
+  name_ar     String
+  code        String @unique // e.g., "create", "read", "update", "delete"
+  description String?
+  isActive    Boolean @default(true)
+  
+  permissions Permission[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("permission_actions")
+}
+
+// Permission Resources Model for modularity
+model PermissionResource {
+  id          String @id @default(cuid())
+  name_en     String
+  name_ar     String
+  code        String @unique // e.g., "user", "role", "job", "application"
+  description String?
+  isActive    Boolean @default(true)
+  
+  permissions Permission[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("permission_resources")
+}
+
+// Permission Categories for better organization
+model PermissionCategory {
+  id          String       @id @default(cuid())
+  name_en     String
+  name_ar     String
+  code        String       @unique
+  description String?
+  isActive    Boolean      @default(true)
+  
+  permissions Permission[]
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  @@map("permission_categories")
+}
+
+// Granular permissions
+model Permission {
+  id          String             @id @default(cuid())
+  name_en     String
+  name_ar     String
+  code        String             @unique // e.g., "user.create", "job.approve"
+  description String?
+  isActive    Boolean            @default(true)
+  
+  // Action relationship
+  actionId    String
+  action      PermissionAction   @relation(fields: [actionId], references: [id])
+  
+  // Resource relationship
+  resourceId  String
+  resource    PermissionResource @relation(fields: [resourceId], references: [id])
+  
+  // Category relationship
+  categoryId  String
+  category    PermissionCategory @relation(fields: [categoryId], references: [id])
+  
+  // Many-to-many with roles
+  rolePermissions RolePermission[]
+  
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  
+  @@unique([actionId, resourceId]) // Ensure unique action-resource combinations
+  @@map("permissions")
+}
+
+// Organization/Division Structure
+model Group {
+  id          String   @id @default(cuid())
+  name_en     String
+  name_ar     String
+  code        String   @unique // Unique identifier for the group
+  description String?
+  isActive    Boolean  @default(true)
+  
+  // Hierarchical structure - self-referencing
+  parentId    String?
+  parent      Group?   @relation("GroupHierarchy", fields: [parentId], references: [id])
+  children    Group[]  @relation("GroupHierarchy")
+  
+  // Many-to-many with users
+  userGroups  UserGroup[]
+  
+  // Many-to-many with roles (group can have specific roles)
+  groupRoles  GroupRole[]
+  
+  // User roles within this group
+  userRolesInGroup UserRole[] @relation("UserRoleGroup")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("groups")
+}
+
+// Roles with hierarchy support
+model Role {
+  id          String   @id @default(cuid())
+  name_en     String
+  name_ar     String
+  code        String   @unique // e.g., "admin", "hr_manager", "recruiter"
+  description String?
+  isActive    Boolean  @default(true)
+  isSystem    Boolean  @default(false) // System roles cannot be deleted
+  
+  // Role hierarchy - self-referencing
+  parentId    String?
+  parent      Role?    @relation("RoleHierarchy", fields: [parentId], references: [id])
+  children    Role[]   @relation("RoleHierarchy")
+  
+  // Many-to-many with permissions
+  rolePermissions RolePermission[]
+  
+  // Many-to-many with users
+  userRoles   UserRole[]
+  
+  // Many-to-many with groups
+  groupRoles  GroupRole[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("roles")
+}
+
+// Junction Tables
+model UserRole {
+  id       String @id @default(cuid())
+  userId   String
+  roleId   String
+  isActive Boolean @default(true)
+  
+  // Optional: Role assignment within specific groups
+  groupId  String?
+  
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  group    Group? @relation("UserRoleGroup", fields: [groupId], references: [id])
+  
+  assignedAt DateTime @default(now())
+  assignedBy String? // User ID who assigned this role
+  expiresAt  DateTime? // Optional expiration
+  
+  @@unique([userId, roleId, groupId])
+  @@map("user_roles")
+}
+
+model UserGroup {
+  id       String @id @default(cuid())
+  userId   String
+  groupId  String
+  isActive Boolean @default(true)
+  
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  joinedAt DateTime @default(now())
+  joinedBy String? // User ID who added user to group
+  
+  @@unique([userId, groupId])
+  @@map("user_groups")
+}
+
+model GroupRole {
+  id       String @id @default(cuid())
+  groupId  String
+  roleId   String
+  isActive Boolean @default(true)
+  
+  group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  role     Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  assignedAt DateTime @default(now())
+  assignedBy String? // User ID who assigned this role to group
+  
+  @@unique([groupId, roleId])
+  @@map("group_roles")
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+  isActive     Boolean @default(true)
+  
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  grantedAt    DateTime @default(now())
+  grantedBy    String? // User ID who granted this permission
+  
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}

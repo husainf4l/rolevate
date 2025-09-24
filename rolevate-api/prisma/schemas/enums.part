@@ -1,0 +1,269 @@
+// Prisma Enums for better type safety and performance
+// This file contains all enum definitions
+
+enum EmailFrequency {
+  IMMEDIATE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum Language {
+  EN
+  AR
+}
+
+enum Currency {
+  USD
+  EUR
+  SAR
+  AED
+  GBP
+  JPY
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+  BOUNCED
+  DELIVERED
+  OPENED
+  CLICKED
+}
+
+enum SalaryPeriod {
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum InterviewRecommendation {
+  HIRE
+  REJECT
+  MAYBE
+  PENDING
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  LOCKED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+// Missing lookup table models that act like enums
+model CompanySize {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  isActive    Boolean @default(true)
+
+  companies   Company[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("company_sizes")
+}
+
+model Industry {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  isActive    Boolean @default(true)
+
+  companies   Company[]
+  jobs        Job[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("industries")
+}
+
+model Department {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  isActive    Boolean @default(true)
+
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  employees   Employee[]
+  jobs        Job[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@map("departments")
+}
+
+model EmailType {
+  id            String @id @default(cuid())
+  name_en       String @db.VarChar(100)
+  name_ar       String @db.VarChar(100)
+  code          String @unique @db.VarChar(50)
+  description   String? @db.VarChar(500)
+  isActive      Boolean @default(true)
+
+  emailLogs     EmailLog[]
+  emailTemplates EmailTemplate[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("email_types")
+}
+
+model EmploymentStatus {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  isActive    Boolean @default(true)
+
+  employees   Employee[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("employment_statuses")
+}
+
+model JobType {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  isActive    Boolean @default(true)
+
+  jobs        Job[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("job_types")
+}
+
+model JobLevel {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  level       Int? // Numeric level (1-10)
+  isActive    Boolean @default(true)
+
+  jobs        Job[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("job_levels")
+}
+
+model JobLocation {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  city        String? @db.VarChar(100)
+  country     String? @db.VarChar(100)
+  isRemote    Boolean @default(false)
+  isActive    Boolean @default(true)
+
+  jobs        Job[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([country])
+  @@index([isRemote])
+  @@map("job_locations")
+}
+
+model JobStatus {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  isActive    Boolean @default(true)
+
+  jobs        Job[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("job_statuses")
+}
+
+model ApplicationStatus {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  isActive    Boolean @default(true)
+
+  applications JobApplication[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("application_statuses")
+}
+
+model InterviewType {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  duration    Int? @db.SmallInt // Default duration in minutes
+  isActive    Boolean @default(true)
+
+  interviews  Interview[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("interview_types")
+}
+
+model InterviewStatus {
+  id          String @id @default(cuid())
+  name_en     String @db.VarChar(100)
+  name_ar     String @db.VarChar(100)
+  code        String @unique @db.VarChar(50)
+  description String? @db.VarChar(500)
+  isActive    Boolean @default(true)
+
+  interviews  Interview[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("interview_statuses")
+}

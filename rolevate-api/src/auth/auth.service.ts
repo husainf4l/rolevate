@@ -15,7 +15,7 @@ export class AuthService {
     this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   }
 
-  async register(email: string, password: string, firstName?: string, lastName?: string, userType: 'CANDIDATE' | 'BUSINESS' = 'CANDIDATE') {
+  async register(email: string, password: string, firstName?: string, lastName?: string, userTypeCode: 'CANDIDATE' | 'BUSINESS' = 'CANDIDATE') {
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -25,6 +25,24 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Find or create default userType
+    let userType = await this.prisma.userType.findFirst({
+      where: { code: userTypeCode.toLowerCase() }
+    });
+
+    if (!userType) {
+      // Create default user type if it doesn't exist
+      userType = await this.prisma.userType.create({
+        data: {
+          name_en: userTypeCode === 'CANDIDATE' ? 'Candidate' : 'Business',
+          name_ar: userTypeCode === 'CANDIDATE' ? 'مرشح' : 'أعمال',
+          code: userTypeCode.toLowerCase(),
+          isActive: true,
+          isDefault: userTypeCode === 'CANDIDATE'
+        }
+      });
+    }
+
     // Create user
     const user = await this.prisma.user.create({
       data: {
@@ -32,8 +50,11 @@ export class AuthService {
         password: hashedPassword,
         firstName,
         lastName,
-        userType,
+        userTypeId: userType.id,
       },
+      include: {
+        userType: true
+      }
     });
 
     return user;
@@ -59,16 +80,41 @@ export class AuthService {
     const firstName = name.givenName;
     const lastName = name.familyName;
 
-    let user = await this.prisma.user.findUnique({ where: { googleId: id } });
+    let user = await this.prisma.user.findUnique({
+      where: { googleId: id },
+      include: { userType: true }
+    });
     if (!user) {
-      user = await this.prisma.user.findUnique({ where: { email } });
+      user = await this.prisma.user.findUnique({
+        where: { email },
+        include: { userType: true }
+      });
       if (user) {
         // Update with googleId
         user = await this.prisma.user.update({
           where: { email },
           data: { googleId: id, firstName, lastName },
+          include: { userType: true }
         });
       } else {
+        // Get default user type
+        let userType = await this.prisma.userType.findFirst({
+          where: { isDefault: true }
+        });
+
+        if (!userType) {
+          // Create default user type if it doesn't exist
+          userType = await this.prisma.userType.create({
+            data: {
+              name_en: 'Candidate',
+              name_ar: 'مرشح',
+              code: 'candidate',
+              isActive: true,
+              isDefault: true
+            }
+          });
+        }
+
         // Create new user
         user = await this.prisma.user.create({
           data: {
@@ -76,7 +122,9 @@ export class AuthService {
             firstName,
             lastName,
             googleId: id,
+            userTypeId: userType.id,
           },
+          include: { userType: true }
         });
       }
     }
@@ -102,16 +150,41 @@ export class AuthService {
       }
 
       // Find or create user
-      let user = await this.prisma.user.findUnique({ where: { googleId } });
+      let user = await this.prisma.user.findUnique({
+        where: { googleId },
+        include: { userType: true }
+      });
       if (!user) {
-        user = await this.prisma.user.findUnique({ where: { email } });
+        user = await this.prisma.user.findUnique({
+          where: { email },
+          include: { userType: true }
+        });
         if (user) {
           // Update with googleId
           user = await this.prisma.user.update({
             where: { email },
             data: { googleId, firstName, lastName },
+            include: { userType: true }
           });
         } else {
+          // Get default user type
+          let userType = await this.prisma.userType.findFirst({
+            where: { isDefault: true }
+          });
+
+          if (!userType) {
+            // Create default user type if it doesn't exist
+            userType = await this.prisma.userType.create({
+              data: {
+                name_en: 'Candidate',
+                name_ar: 'مرشح',
+                code: 'candidate',
+                isActive: true,
+                isDefault: true
+              }
+            });
+          }
+
           // Create new user
           user = await this.prisma.user.create({
             data: {
@@ -119,7 +192,9 @@ export class AuthService {
               firstName,
               lastName,
               googleId,
+              userTypeId: userType.id,
             },
+            include: { userType: true }
           });
         }
       }
@@ -139,7 +214,7 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        userType: user.userType,
+        userType: user.userType?.code || user.userTypeId,
       },
     };
   }

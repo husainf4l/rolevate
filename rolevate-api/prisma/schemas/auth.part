@@ -1,0 +1,168 @@
+// User Types and User Management Models
+// This file contains user-related models and authentication
+
+// User Types Model for flexibility
+model UserType {
+  id          String @id @default(cuid())
+  name_en     String
+  name_ar     String
+  code        String @unique // e.g., "candidate", "business", "admin"
+  description String?
+  isActive    Boolean @default(true)
+  isDefault   Boolean @default(false) // Mark default type for new users
+  
+  users       User[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("user_types")
+}
+
+// Enhanced User model with validation and security
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique @db.VarChar(255)
+  firstName String?  @db.VarChar(100)
+  lastName  String?  @db.VarChar(100)
+  password  String?  @db.VarChar(255) // For hashed passwords
+  googleId  String?  @unique @db.VarChar(100)
+
+  // Account status and security
+  accountStatus     AccountStatus @default(ACTIVE)
+  isActive          Boolean @default(true)
+  emailVerified     Boolean @default(false)
+  emailVerifiedAt   DateTime?
+  phoneVerified     Boolean @default(false)
+
+  // Security tracking
+  lastLoginAt       DateTime?
+  failedLoginAttempts Int @default(0)
+  lockedUntil       DateTime?
+  passwordChangedAt DateTime?
+
+  // User type relationship
+  userTypeId String
+  userType   UserType @relation(fields: [userTypeId], references: [id])
+
+  // Multi-language profile fields
+  firstName_ar String? @db.VarChar(100)
+  lastName_ar  String? @db.VarChar(100)
+
+  // Contact information
+  phone         String? @db.VarChar(20)
+
+  // Privacy and data management
+  isArchived    Boolean @default(false)
+  archivedAt    DateTime?
+  archiveReason String? @db.VarChar(500)
+
+  // RBAC Relationships
+  userRoles  UserRole[]
+  userGroups UserGroup[]
+
+  // HR System Relationships
+  employee     Employee?
+  applications JobApplication[] @relation("CandidateApplications")
+
+  // Google Auth Relationship
+  googleAuth   GoogleAuth?
+
+  // Email and Notification Relationships
+  emailsSentTo EmailLog[] @relation("EmailsSentTo")
+  emailsSentBy EmailLog[] @relation("EmailsSentBy")
+  notificationSettings NotificationSettings?
+
+  // Audit fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  version   Int @default(1)
+  lastModifiedBy String?
+
+  // Performance indexes
+  @@index([email])
+  @@index([userTypeId])
+  @@index([accountStatus])
+  @@index([isActive])
+  @@index([createdAt])
+  @@index([emailVerified])
+  @@index([lastLoginAt])
+
+  @@map("users")
+}
+
+// Enhanced Google Auth with better security
+model GoogleAuth {
+  id            String @id @default(cuid())
+
+  // User relationship
+  userId        String @unique
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Google OAuth data
+  googleId      String @unique @db.VarChar(100)
+  email         String @db.VarChar(255)
+  accessToken   String? @db.Text // For encrypted tokens
+  refreshToken  String? @db.Text // For encrypted tokens
+
+  // Security flags
+  tokensEncrypted Boolean @default(true)
+
+  // Profile information from Google
+  profile       Json? @db.JsonB // Use JsonB for better performance
+  picture       String? @db.VarChar(500)
+
+  // OAuth metadata
+  scope         String? @db.VarChar(500)
+  tokenType     String? @default("Bearer") @db.VarChar(20)
+  expiresAt     DateTime?
+
+  // Tracking
+  lastLoginAt   DateTime?
+  isActive      Boolean @default(true)
+
+  // Audit fields
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Performance indexes
+  @@index([userId])
+  @@index([googleId])
+  @@index([isActive])
+  @@index([lastLoginAt])
+
+  @@map("google_auth")
+}
+
+// Enhanced Notification Settings with enums
+model NotificationSettings {
+  id                String @id @default(cuid())
+
+  // User relationship
+  userId            String @unique
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Email notification preferences
+  emailEnabled      Boolean @default(true)
+  jobAlerts         Boolean @default(true)
+  applicationUpdates Boolean @default(true)
+  interviewReminders Boolean @default(true)
+  marketingEmails   Boolean @default(false)
+
+  // Frequency settings with enum
+  emailFrequency    EmailFrequency @default(IMMEDIATE)
+  digestTime        String? @default("09:00") @db.VarChar(5)
+
+  // Language preference with enum
+  preferredLanguage Language @default(EN)
+
+  // Audit fields
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([emailFrequency])
+  @@index([preferredLanguage])
+
+  @@map("notification_settings")
+}
