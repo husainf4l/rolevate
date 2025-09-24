@@ -1,0 +1,597 @@
+'use client';
+
+import React from 'react';
+import { Navbar } from '@/components/layout';
+import Footer from '@/components/common/footer';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  MapPin,
+  Clock,
+  Users,
+  Building2,
+  Star,
+  Search,
+  Filter,
+  Briefcase,
+  DollarSign,
+  Calendar,
+  ChevronDown,
+  X
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
+
+interface JobsPageProps {
+  params: Promise<{ locale: string }>;
+}
+
+// Mock job data
+const jobs = [
+  {
+    id: 1,
+    title: 'Senior Frontend Developer',
+    titleAr: 'مطور واجهة أمامية أول',
+    company: 'TechCorp Solutions',
+    companyAr: 'تك كورب سوليوشنز',
+    location: 'Dubai, UAE',
+    locationAr: 'دبي، الإمارات العربية المتحدة',
+    type: 'Full-time',
+    typeAr: 'دوام كامل',
+    salary: '$8,000 - $12,000',
+    posted: '2 days ago',
+    postedAr: 'منذ يومين',
+    applicants: 24,
+    featured: true,
+    urgent: false,
+    skills: ['React', 'TypeScript', 'Next.js'],
+    description: 'We are looking for a Senior Frontend Developer to join our dynamic team...',
+    descriptionAr: 'نبحث عن مطور واجهة أمامية أول للانضمام إلى فريقنا الديناميكي...'
+  },
+  {
+    id: 2,
+    title: 'UX/UI Designer',
+    titleAr: 'مصمم تجربة المستخدم والواجهة',
+    company: 'Design Studio',
+    companyAr: 'استوديو التصميم',
+    location: 'Riyadh, Saudi Arabia',
+    locationAr: 'الرياض، المملكة العربية السعودية',
+    type: 'Full-time',
+    typeAr: 'دوام كامل',
+    salary: '$6,000 - $9,000',
+    posted: '1 week ago',
+    postedAr: 'منذ أسبوع',
+    applicants: 18,
+    featured: false,
+    urgent: true,
+    skills: ['Figma', 'Adobe XD', 'Sketch'],
+    description: 'Join our creative team as a UX/UI Designer and help shape the future of digital experiences...',
+    descriptionAr: 'انضم إلى فريقنا الإبداعي كمصمم تجربة مستخدم وواجهة ومساعدتنا في تشكيل مستقبل التجارب الرقمية...'
+  },
+  {
+    id: 3,
+    title: 'Backend Developer',
+    titleAr: 'مطور خلفية',
+    company: 'StartupXYZ',
+    companyAr: 'ستارت أب XYZ',
+    location: 'Remote',
+    locationAr: 'عن بعد',
+    type: 'Full-time',
+    typeAr: 'دوام كامل',
+    salary: '$7,000 - $10,000',
+    posted: '3 days ago',
+    postedAr: 'منذ 3 أيام',
+    applicants: 31,
+    featured: false,
+    urgent: false,
+    skills: ['Node.js', 'Python', 'PostgreSQL'],
+    description: 'We are seeking a talented Backend Developer to build scalable web applications...',
+    descriptionAr: 'نبحث عن مطور خلفية موهوب لبناء تطبيقات الويب القابلة للتوسع...'
+  },
+  {
+    id: 4,
+    title: 'Product Manager',
+    titleAr: 'مدير المنتج',
+    company: 'Innovation Labs',
+    companyAr: 'مختبرات الابتكار',
+    location: 'Abu Dhabi, UAE',
+    locationAr: 'أبوظبي، الإمارات العربية المتحدة',
+    type: 'Full-time',
+    typeAr: 'دوام كامل',
+    salary: '$10,000 - $15,000',
+    posted: '5 days ago',
+    postedAr: 'منذ 5 أيام',
+    applicants: 12,
+    featured: true,
+    urgent: false,
+    skills: ['Product Strategy', 'Agile', 'Analytics'],
+    description: 'Lead product development initiatives and drive innovation in our organization...',
+    descriptionAr: 'قيادة مبادرات تطوير المنتج ودفع الابتكار في منظمتنا...'
+  },
+  {
+    id: 5,
+    title: 'DevOps Engineer',
+    titleAr: 'مهندس DevOps',
+    company: 'CloudTech Solutions',
+    companyAr: 'حلول التكنولوجيا السحابية',
+    location: 'Kuwait City, Kuwait',
+    locationAr: 'مدينة الكويت، الكويت',
+    type: 'Full-time',
+    typeAr: 'دوام كامل',
+    salary: '$9,000 - $13,000',
+    posted: '4 days ago',
+    postedAr: 'منذ 4 أيام',
+    applicants: 19,
+    featured: false,
+    urgent: false,
+    skills: ['AWS', 'Docker', 'Kubernetes'],
+    description: 'Manage our cloud infrastructure and ensure seamless deployment processes...',
+    descriptionAr: 'إدارة البنية التحتية السحابية وضمان عمليات النشر السلسة...'
+  },
+  {
+    id: 6,
+    title: 'Data Scientist',
+    titleAr: 'عالم البيانات',
+    company: 'AI Research Lab',
+    companyAr: 'مختبر أبحاث الذكاء الاصطناعي',
+    location: 'Doha, Qatar',
+    locationAr: 'الدوحة، قطر',
+    type: 'Full-time',
+    typeAr: 'دوام كامل',
+    salary: '$11,000 - $16,000',
+    posted: '6 days ago',
+    postedAr: 'منذ 6 أيام',
+    applicants: 27,
+    featured: true,
+    urgent: false,
+    skills: ['Python', 'Machine Learning', 'TensorFlow'],
+    description: 'Apply advanced analytics and machine learning techniques to solve complex business problems...',
+    descriptionAr: 'تطبيق التحليلات المتقدمة وتقنيات التعلم الآلي لحل المشكلات التجارية المعقدة...'
+  }
+];
+
+export default function JobsPage({
+  params
+}: JobsPageProps) {
+  const [locale, setLocale] = useState<string>('en');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchLocation, setSearchLocation] = useState('');
+  const [selectedJobType, setSelectedJobType] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedSalary, setSelectedSalary] = useState('');
+  const [selectedExperience, setSelectedExperience] = useState('');
+
+  // Initialize locale and search params from URL
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setLocale(resolvedParams.locale);
+    };
+    resolveParams();
+
+    // Initialize search states from URL params
+    setSearchQuery(searchParams.get('q') || '');
+    setSearchLocation(searchParams.get('location') || '');
+    setSelectedJobType(searchParams.get('jobType') || '');
+    setSelectedLocation(searchParams.get('filterLocation') || '');
+    setSelectedSalary(searchParams.get('salary') || '');
+    setSelectedExperience(searchParams.get('experience') || '');
+  }, [params, searchParams]);
+
+  // Update URL when search params change
+  const updateSearchParams = (updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    });
+
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  // Handle search form submission
+  const handleSearch = () => {
+    updateSearchParams({
+      q: searchQuery,
+      location: searchLocation
+    });
+  };
+
+  // Handle filter changes
+  const handleJobTypeChange = (value: string) => {
+    setSelectedJobType(value);
+    updateSearchParams({ jobType: value });
+  };
+
+  const handleLocationFilterChange = (value: string) => {
+    setSelectedLocation(value);
+    updateSearchParams({ filterLocation: value });
+  };
+
+  const handleSalaryChange = (value: string) => {
+    setSelectedSalary(value);
+    updateSearchParams({ salary: value });
+  };
+
+  const handleExperienceChange = (value: string) => {
+    setSelectedExperience(value);
+    updateSearchParams({ experience: value });
+  };
+
+  // Filter jobs based on current search params
+  const filteredJobs = jobs.filter(job => {
+    const query = searchParams.get('q')?.toLowerCase() || '';
+    const location = searchParams.get('location')?.toLowerCase() || '';
+    const jobType = searchParams.get('jobType') || '';
+    const filterLocation = searchParams.get('filterLocation') || '';
+    const salary = searchParams.get('salary') || '';
+    const experience = searchParams.get('experience') || '';
+
+    // Search query filter
+    if (query && !(job.title.toLowerCase().includes(query) ||
+                   job.company.toLowerCase().includes(query) ||
+                   job.description.toLowerCase().includes(query))) {
+      return false;
+    }
+
+    // Location filter (from search form)
+    if (location && !job.location.toLowerCase().includes(location)) {
+      return false;
+    }
+
+    // Job type filter
+    if (jobType && jobType !== 'all' && job.type !== jobType) {
+      return false;
+    }
+
+    // Location filter (from sidebar)
+    if (filterLocation && filterLocation !== 'all') {
+      const locationMap: Record<string, string> = {
+        'uae': 'UAE',
+        'saudi': 'Saudi Arabia',
+        'qatar': 'Qatar',
+        'kuwait': 'Kuwait',
+        'remote': 'Remote'
+      };
+      if (!job.location.includes(locationMap[filterLocation] || filterLocation)) {
+        return false;
+      }
+    }
+
+    // Salary filter
+    if (salary && salary !== 'all') {
+      const salaryRanges: Record<string, [number, number]> = {
+        '0-5000': [0, 5000],
+        '5000-10000': [5000, 10000],
+        '10000-15000': [10000, 15000],
+        '15000+': [15000, Infinity]
+      };
+      const [min, max] = salaryRanges[salary] || [0, Infinity];
+      const jobSalary = parseInt(job.salary.replace(/[^0-9]/g, ''));
+      if (jobSalary < min || jobSalary > max) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-background">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-primary to-primary/80 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white py-20 pt-32 relative overflow-hidden">
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center max-w-4xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg">
+                {locale === 'ar' ? 'اكتشف فرص العمل المثالية' : 'Discover Your Perfect Job'}
+              </h1>
+              <p className="text-xl text-primary-foreground/90 dark:text-white/90 mb-8 drop-shadow-md">
+                {locale === 'ar'
+                  ? 'ابحث عن آلاف الوظائف في الشرق الأوسط وابدأ رحلتك المهنية التالية'
+                  : 'Search thousands of jobs across the Middle East and start your next career journey'
+                }
+              </p>
+
+              {/* Search Form */}
+              <div className="bg-white/10 dark:bg-white/20 backdrop-blur-md rounded-xl p-6 max-w-4xl mx-auto border border-white/20 dark:border-white/30 shadow-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="md:col-span-2">
+                    <Input
+                      placeholder={locale === 'ar' ? 'المسمى الوظيفي أو الكلمات المفتاحية' : 'Job title or keywords'}
+                      className="bg-white/20 dark:bg-white/30 border-white/30 dark:border-white/40 text-white placeholder:text-white/70 dark:placeholder:text-white/80 focus:bg-white/25 dark:focus:bg-white/35 focus:border-white/50 dark:focus:border-white/50 h-12"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      placeholder={locale === 'ar' ? 'الموقع' : 'Location'}
+                      className="bg-white/20 dark:bg-white/30 border-white/30 dark:border-white/40 text-white placeholder:text-white/70 dark:placeholder:text-white/80 focus:bg-white/25 dark:focus:bg-white/35 focus:border-white/50 dark:focus:border-white/50 h-12"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Button
+                      className="w-full bg-white text-primary hover:bg-white/90 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 shadow-lg hover:shadow-xl transition-all duration-200 h-12 font-semibold border-0"
+                      onClick={handleSearch}
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      {locale === 'ar' ? 'بحث' : 'Search'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="container mx-auto px-4 py-12">
+          {/* Mobile Filter Toggle */}
+          <div className="lg:hidden mb-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="w-full border-2 hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              {locale === 'ar' ? 'تصفية النتائج' : 'Filter Results'}
+              <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${showMobileFilters ? 'rotate-180' : ''}`} />
+            </Button>
+          </div>
+
+          {/* Filters and Content */}
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Filters Sidebar */}
+            <aside className={`lg:w-1/4 lg:sticky lg:top-24 lg:self-start lg:h-fit ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
+              <Card className="shadow-sm border-border/50">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between lg:justify-start">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Filter className="w-5 h-5" />
+                      {locale === 'ar' ? 'تصفية النتائج' : 'Filter Results'}
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowMobileFilters(false)}
+                      className="lg:hidden hover:bg-muted ml-2"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-0">
+                  {/* Job Type */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {locale === 'ar' ? 'نوع الوظيفة' : 'Job Type'}
+                    </label>
+                    <Select value={selectedJobType} onValueChange={handleJobTypeChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={locale === 'ar' ? 'اختر نوع الوظيفة' : 'Select job type'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{locale === 'ar' ? 'الكل' : 'All'}</SelectItem>
+                        <SelectItem value="Full-time">{locale === 'ar' ? 'دوام كامل' : 'Full-time'}</SelectItem>
+                        <SelectItem value="Part-time">{locale === 'ar' ? 'دوام جزئي' : 'Part-time'}</SelectItem>
+                        <SelectItem value="Contract">{locale === 'ar' ? 'عقد' : 'Contract'}</SelectItem>
+                        <SelectItem value="Remote">{locale === 'ar' ? 'عن بعد' : 'Remote'}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {locale === 'ar' ? 'الموقع' : 'Location'}
+                    </label>
+                    <Select value={selectedLocation} onValueChange={handleLocationFilterChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={locale === 'ar' ? 'اختر الموقع' : 'Select location'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{locale === 'ar' ? 'الكل' : 'All'}</SelectItem>
+                        <SelectItem value="uae">{locale === 'ar' ? 'الإمارات العربية المتحدة' : 'UAE'}</SelectItem>
+                        <SelectItem value="saudi">{locale === 'ar' ? 'المملكة العربية السعودية' : 'Saudi Arabia'}</SelectItem>
+                        <SelectItem value="qatar">{locale === 'ar' ? 'قطر' : 'Qatar'}</SelectItem>
+                        <SelectItem value="kuwait">{locale === 'ar' ? 'الكويت' : 'Kuwait'}</SelectItem>
+                        <SelectItem value="remote">{locale === 'ar' ? 'عن بعد' : 'Remote'}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Salary Range */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {locale === 'ar' ? 'الراتب الشهري' : 'Monthly Salary'}
+                    </label>
+                    <Select value={selectedSalary} onValueChange={handleSalaryChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={locale === 'ar' ? 'اختر نطاق الراتب' : 'Select salary range'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{locale === 'ar' ? 'الكل' : 'All'}</SelectItem>
+                        <SelectItem value="0-5000">$0 - $5,000</SelectItem>
+                        <SelectItem value="5000-10000">$5,000 - $10,000</SelectItem>
+                        <SelectItem value="10000-15000">$10,000 - $15,000</SelectItem>
+                        <SelectItem value="15000+">$15,000+</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Experience Level */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {locale === 'ar' ? 'مستوى الخبرة' : 'Experience Level'}
+                    </label>
+                    <Select value={selectedExperience} onValueChange={handleExperienceChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={locale === 'ar' ? 'اختر مستوى الخبرة' : 'Select experience level'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{locale === 'ar' ? 'الكل' : 'All'}</SelectItem>
+                        <SelectItem value="entry">{locale === 'ar' ? 'مبتدئ' : 'Entry Level'}</SelectItem>
+                        <SelectItem value="mid">{locale === 'ar' ? 'متوسط' : 'Mid Level'}</SelectItem>
+                        <SelectItem value="senior">{locale === 'ar' ? 'خبير' : 'Senior Level'}</SelectItem>
+                        <SelectItem value="executive">{locale === 'ar' ? 'تنفيذي' : 'Executive'}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+            </aside>
+
+            {/* Main Content */}
+            <main className="lg:w-3/4">
+              {/* Results Header */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 p-6 bg-card rounded-lg border border-border/50 shadow-sm">
+                <div>
+                  <h2 className="text-2xl font-bold text-card-foreground mb-2">
+                    {locale === 'ar' ? 'فرص العمل المتاحة' : 'Available Job Opportunities'}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    {locale === 'ar'
+                      ? `${filteredJobs.length} وظيفة متاحة`
+                      : `${filteredJobs.length} jobs available`
+                    }
+                  </p>
+                </div>
+
+                {/* Sort */}
+                <Select defaultValue="newest">
+                  <SelectTrigger className="w-48 border-border/50">
+                    <SelectValue placeholder={locale === 'ar' ? 'ترتيب حسب' : 'Sort by'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">{locale === 'ar' ? 'الأحدث' : 'Newest'}</SelectItem>
+                    <SelectItem value="oldest">{locale === 'ar' ? 'الأقدم' : 'Oldest'}</SelectItem>
+                    <SelectItem value="salary-high">{locale === 'ar' ? 'الراتب الأعلى' : 'Highest Salary'}</SelectItem>
+                    <SelectItem value="salary-low">{locale === 'ar' ? 'الراتب الأقل' : 'Lowest Salary'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Jobs List */}
+              <div className="space-y-4 mb-8">
+                {filteredJobs.map((job) => (
+                  <Card key={job.id} className="hover:shadow-lg transition-all duration-300 border-border/30 hover:border-primary/30 group bg-card">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row gap-6">
+                        {/* Job Info */}
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-3">
+                                <h3 className="text-xl font-semibold text-card-foreground group-hover:text-primary transition-colors">
+                                  {locale === 'ar' ? job.titleAr : job.title}
+                                </h3>
+                                {job.featured && (
+                                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800">
+                                    <Star className="w-3 h-3 mr-1" />
+                                    {locale === 'ar' ? 'مميز' : 'Featured'}
+                                  </Badge>
+                                )}
+                                {job.urgent && (
+                                  <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-200 dark:border-red-800">
+                                    {locale === 'ar' ? 'عاجل' : 'Urgent'}
+                                  </Badge>
+                                )}
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
+                                <div className="flex items-center gap-1.5">
+                                  <Building2 className="w-4 h-4 text-muted-foreground/70" />
+                                  <span className="font-medium">{locale === 'ar' ? job.companyAr : job.company}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <MapPin className="w-4 h-4 text-muted-foreground/70" />
+                                  <span>{locale === 'ar' ? job.locationAr : job.location}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <Briefcase className="w-4 h-4 text-muted-foreground/70" />
+                                  <span>{locale === 'ar' ? job.typeAr : job.type}</span>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
+                                <div className="flex items-center gap-1.5">
+                                  <DollarSign className="w-4 h-4 text-muted-foreground/70" />
+                                  <span className="font-medium text-foreground">{job.salary}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <Calendar className="w-4 h-4 text-muted-foreground/70" />
+                                  <span>{locale === 'ar' ? job.postedAr : job.posted}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <Users className="w-4 h-4 text-muted-foreground/70" />
+                                  <span>{job.applicants} {locale === 'ar' ? 'متقدم' : 'applicants'}</span>
+                                </div>
+                              </div>
+
+                              <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">
+                                {locale === 'ar' ? job.descriptionAr : job.description}
+                              </p>
+
+                              <div className="flex flex-wrap gap-2">
+                                {job.skills.map((skill) => (
+                                  <Badge key={skill} variant="outline" className="text-xs border-border/50 bg-muted/50 hover:bg-muted">
+                                    {skill}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Check Details Button */}
+                        <div className="flex flex-col justify-center lg:justify-end">
+                          <Button variant="outline" className="whitespace-nowrap border-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors" asChild>
+                            <Link href={`/${locale}/jobs/${job.id}?${searchParams.toString()}`}>
+                              {locale === 'ar' ? 'عرض التفاصيل' : 'Check Details'}
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex justify-center pt-8 border-t border-border/50">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" disabled className="border-border/50">
+                    {locale === 'ar' ? 'السابق' : 'Previous'}
+                  </Button>
+                  <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90">1</Button>
+                  <Button variant="outline" size="sm" className="border-border/50 hover:bg-muted">2</Button>
+                  <Button variant="outline" size="sm" className="border-border/50 hover:bg-muted">3</Button>
+                  <Button variant="outline" size="sm" className="border-border/50 hover:bg-muted">
+                    {locale === 'ar' ? 'التالي' : 'Next'}
+                  </Button>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+      <Footer locale={locale} />
+    </>
+  );
+}
