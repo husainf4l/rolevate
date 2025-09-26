@@ -45,7 +45,7 @@ export interface FormData {
 
 export interface OrganizationSetupFormProps {
   locale: string;
-  onComplete: (data: any) => void;
+  onComplete: (data: FormData) => void;
 }
 
 export interface UserData {

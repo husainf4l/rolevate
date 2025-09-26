@@ -170,22 +170,23 @@ class AuthService {
   }
 
   // Helper method to determine user type based on response structure
-  private determineUserType(user: any): 'candidate' | 'business' {
+  private determineUserType(user: unknown): 'candidate' | 'business' {
+    const userObj = user as Record<string, unknown>;
     // Check role first
-    if (user.role) {
-      return user.role === Role.CANDIDATE ? 'candidate' : 'business';
+    if (userObj.role) {
+      return userObj.role === Role.CANDIDATE ? 'candidate' : 'business';
     }
     // Fallback to old logic
     // Check for business user properties
-    if (user.organizationId || user.organization || user.permissions || user.roles || user.isSuperAdmin !== undefined) {
+    if (userObj.organizationId || userObj.organization || userObj.permissions || userObj.roles || userObj.isSuperAdmin !== undefined) {
       return 'business';
     }
     // Check for candidate user properties
-    if (user.cvLink !== undefined || user.type === 'candidate') {
+    if (userObj.cvLink !== undefined || userObj.type === 'candidate') {
       return 'candidate';
     }
     // Default fallback based on type field
-    return user.type === 'user' ? 'business' : 'candidate';
+    return userObj.type === 'user' ? 'business' : 'candidate';
   }
 
   // Get navigation path based on user type

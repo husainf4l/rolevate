@@ -9,30 +9,28 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Building2,
-  Users,
+  User,
   Briefcase,
-  BarChart3,
+  FileText,
+  MessageSquare,
   Settings,
-  Bell,
   Search,
   Menu,
   X,
   Home,
-  FileText,
-  Calendar,
-  MessageSquare,
-  Shield,
+  Bookmark,
+  Send,
+  Bell,
   LogOut,
 } from "lucide-react";
 import { useAuthContext } from "@/providers/auth-provider";
 import ThemeSwitcher from "@/components/common/themeSwitcher";
 
-interface BusinessSidebarProps {
+interface CandidateSidebarProps {
   locale: string;
 }
 
-export default function BusinessSidebar({ locale }: BusinessSidebarProps) {
+export default function CandidateSidebar({ locale }: CandidateSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuthContext();
@@ -49,70 +47,71 @@ export default function BusinessSidebar({ locale }: BusinessSidebarProps) {
   const navigationItems = [
     {
       title: locale === "ar" ? "الرئيسية" : "Dashboard",
-      href: `/${locale}/business`,
+      href: `/${locale}/dashboard`,
       icon: Home,
-      isActive: pathname === `/${locale}/business`,
+      isActive: pathname === `/${locale}/dashboard`,
     },
     {
-      title: locale === "ar" ? "المواهب" : "Talents",
-      href: `/${locale}/business/talents`,
-      icon: Users,
-      badge: "12",
-      isActive: pathname.includes("/talents"),
+      title: locale === "ar" ? "الملف الشخصي" : "Profile",
+      href: `/${locale}/dashboard/profile`,
+      icon: User,
+      isActive: pathname.includes("/profile"),
     },
     {
       title: locale === "ar" ? "الوظائف" : "Jobs",
-      href: `/${locale}/business/jobs`,
+      href: `/${locale}/dashboard/jobs`,
       icon: Briefcase,
-      badge: "5",
       isActive: pathname.includes("/jobs"),
     },
     {
-      title: locale === "ar" ? "التقارير" : "Reports",
-      href: `/${locale}/business/reports`,
-      icon: BarChart3,
-      isActive: pathname.includes("/reports"),
+      title: locale === "ar" ? "الطلبات" : "Applications",
+      href: `/${locale}/dashboard/applications`,
+      icon: Send,
+      badge: "2",
+      isActive: pathname.includes("/applications"),
+    },
+    {
+      title: locale === "ar" ? "المحفوظات" : "Saved Jobs",
+      href: `/${locale}/dashboard/saved`,
+      icon: Bookmark,
+      badge: "5",
+      isActive: pathname.includes("/saved"),
+    },
+    {
+      title: locale === "ar" ? "السيرة الذاتية" : "Resume",
+      href: `/${locale}/dashboard/resume`,
+      icon: FileText,
+      isActive: pathname.includes("/resume"),
     },
     {
       title: locale === "ar" ? "الرسائل" : "Messages",
-      href: `/${locale}/business/messages`,
+      href: `/${locale}/dashboard/messages`,
       icon: MessageSquare,
-      badge: "3",
+      badge: "1",
       isActive: pathname.includes("/messages"),
     },
     {
-      title: locale === "ar" ? "التقويم" : "Calendar",
-      href: `/${locale}/business/calendar`,
-      icon: Calendar,
-      isActive: pathname.includes("/calendar"),
-    },
-    {
-      title: locale === "ar" ? "المستندات" : "Documents",
-      href: `/${locale}/business/documents`,
-      icon: FileText,
-      isActive: pathname.includes("/documents"),
+      title: locale === "ar" ? "الإشعارات" : "Notifications",
+      href: `/${locale}/dashboard/notifications`,
+      icon: Bell,
+      badge: "3",
+      isActive: pathname.includes("/notifications"),
     },
   ];
 
   const bottomItems = [
     {
       title: locale === "ar" ? "الإعدادات" : "Settings",
-      href: `/${locale}/business/settings`,
+      href: `/${locale}/dashboard/settings`,
       icon: Settings,
       isActive: pathname.includes("/settings"),
-    },
-    {
-      title: locale === "ar" ? "الأمان" : "Security",
-      href: `/${locale}/business/security`,
-      icon: Shield,
-      isActive: pathname.includes("/security"),
     },
   ];
 
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-background border-r border-border/50 transition-all duration-300",
+        "grid grid-rows-[auto,auto,1fr,auto,auto,auto] h-screen bg-background border-r border-border/50 transition-all duration-300 overflow-hidden",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
@@ -120,9 +119,9 @@ export default function BusinessSidebar({ locale }: BusinessSidebarProps) {
       <div className="flex items-center justify-between p-4 border-b border-border/50">
         {!isCollapsed && (
           <div className="flex items-center space-x-2">
-            <Building2 className="w-6 h-6 text-primary" />
+            <User className="w-6 h-6 text-primary" />
             <span className="font-semibold text-foreground">
-              {locale === "ar" ? "روليفيت" : "Rolevate"}
+              {locale === "ar" ? "لوحة المرشح" : "Candidate Dashboard"}
             </span>
           </div>
         )}
@@ -147,7 +146,9 @@ export default function BusinessSidebar({ locale }: BusinessSidebarProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder={locale === "ar" ? "البحث..." : "Search..."}
+              placeholder={
+                locale === "ar" ? "البحث عن وظائف..." : "Search jobs..."
+              }
               className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -155,7 +156,10 @@ export default function BusinessSidebar({ locale }: BusinessSidebarProps) {
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-2 space-y-1">
+      <nav
+        className="px-4 py-2 space-y-1 overflow-hidden"
+        style={{ height: "400px" }}
+      >
         {navigationItems.map((item) => (
           <Link
             key={item.href}
@@ -232,11 +236,9 @@ export default function BusinessSidebar({ locale }: BusinessSidebarProps) {
               <p className="text-sm font-medium text-foreground truncate">
                 {user?.name || user?.email}
               </p>
-              {user && "organization" in user && user.organization && (
-                <p className="text-xs text-muted-foreground truncate">
-                  {user.organization.name}
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground truncate">
+                {locale === "ar" ? "مرشح" : "Candidate"}
+              </p>
             </div>
           )}
         </div>

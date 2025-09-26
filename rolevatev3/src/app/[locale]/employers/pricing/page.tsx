@@ -1,91 +1,98 @@
-import { getTranslations } from 'next-intl/server';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Check, X, Star, Zap, Crown, Building } from 'lucide-react';
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, X, Star, Zap, Crown, Building } from "lucide-react";
 
 export default async function PricingPage({
-  params
+  params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations('employers.pricing');
+  const t = await getTranslations("employers.pricing");
 
   const plans = [
     {
-      name: t('plans.starter.name'),
-      price: t('plans.starter.price'),
-      period: t('plans.starter.period'),
-      description: t('plans.starter.description'),
+      name: t("plans.starter.name"),
+      price: t("plans.starter.price"),
+      period: t("plans.starter.period"),
+      description: t("plans.starter.description"),
       icon: Building,
       popular: false,
       features: [
-        { name: t('features.postJobs'), included: true },
-        { name: t('features.basicSearch'), included: true },
-        { name: t('features.emailSupport'), included: true },
-        { name: t('features.basicAnalytics'), included: true },
-        { name: t('features.aiMatching'), included: false },
-        { name: t('features.prioritySupport'), included: false },
-        { name: t('features.advancedAnalytics'), included: false },
-        { name: t('features.apiAccess'), included: false }
-      ]
+        { name: t("features.postJobs"), included: true },
+        { name: t("features.basicSearch"), included: true },
+        { name: t("features.emailSupport"), included: true },
+        { name: t("features.basicAnalytics"), included: true },
+        { name: t("features.aiMatching"), included: false },
+        { name: t("features.prioritySupport"), included: false },
+        { name: t("features.advancedAnalytics"), included: false },
+        { name: t("features.apiAccess"), included: false },
+      ],
     },
     {
-      name: t('plans.professional.name'),
-      price: t('plans.professional.price'),
-      period: t('plans.professional.period'),
-      description: t('plans.professional.description'),
+      name: t("plans.professional.name"),
+      price: t("plans.professional.price"),
+      period: t("plans.professional.period"),
+      description: t("plans.professional.description"),
       icon: Zap,
       popular: true,
       features: [
-        { name: t('features.postJobs'), included: true },
-        { name: t('features.basicSearch'), included: true },
-        { name: t('features.emailSupport'), included: true },
-        { name: t('features.basicAnalytics'), included: true },
-        { name: t('features.aiMatching'), included: true },
-        { name: t('features.prioritySupport'), included: true },
-        { name: t('features.advancedAnalytics'), included: false },
-        { name: t('features.apiAccess'), included: false }
-      ]
+        { name: t("features.postJobs"), included: true },
+        { name: t("features.basicSearch"), included: true },
+        { name: t("features.emailSupport"), included: true },
+        { name: t("features.basicAnalytics"), included: true },
+        { name: t("features.aiMatching"), included: true },
+        { name: t("features.prioritySupport"), included: true },
+        { name: t("features.advancedAnalytics"), included: false },
+        { name: t("features.apiAccess"), included: false },
+      ],
     },
     {
-      name: t('plans.enterprise.name'),
-      price: t('plans.enterprise.price'),
-      period: t('plans.enterprise.period'),
-      description: t('plans.enterprise.description'),
+      name: t("plans.enterprise.name"),
+      price: t("plans.enterprise.price"),
+      period: t("plans.enterprise.period"),
+      description: t("plans.enterprise.description"),
       icon: Crown,
       popular: false,
       features: [
-        { name: t('features.postJobs'), included: true },
-        { name: t('features.basicSearch'), included: true },
-        { name: t('features.emailSupport'), included: true },
-        { name: t('features.basicAnalytics'), included: true },
-        { name: t('features.aiMatching'), included: true },
-        { name: t('features.prioritySupport'), included: true },
-        { name: t('features.advancedAnalytics'), included: true },
-        { name: t('features.apiAccess'), included: true }
-      ]
-    }
+        { name: t("features.postJobs"), included: true },
+        { name: t("features.basicSearch"), included: true },
+        { name: t("features.emailSupport"), included: true },
+        { name: t("features.basicAnalytics"), included: true },
+        { name: t("features.aiMatching"), included: true },
+        { name: t("features.prioritySupport"), included: true },
+        { name: t("features.advancedAnalytics"), included: true },
+        { name: t("features.apiAccess"), included: true },
+      ],
+    },
   ];
 
   const faqs = [
     {
-      question: t('faqs.aiMatching.question'),
-      answer: t('faqs.aiMatching.answer')
+      question: t("faqs.aiMatching.question"),
+      answer: t("faqs.aiMatching.answer"),
     },
     {
-      question: t('faqs.support.question'),
-      answer: t('faqs.support.answer')
+      question: t("faqs.support.question"),
+      answer: t("faqs.support.answer"),
     },
     {
-      question: t('faqs.cancellation.question'),
-      answer: t('faqs.cancellation.answer')
+      question: t("faqs.cancellation.question"),
+      answer: t("faqs.cancellation.answer"),
     },
     {
-      question: t('faqs.upgrade.question'),
-      answer: t('faqs.upgrade.answer')
-    }
+      question: t("faqs.upgrade.question"),
+      answer: t("faqs.upgrade.answer"),
+    },
   ];
 
   return (
@@ -95,13 +102,13 @@ export default async function PricingPage({
         <div className="text-center mb-16">
           <Badge variant="secondary" className="mb-4">
             <Star className="h-3 w-3 mr-1" />
-            {t('badge')}
+            {t("badge")}
           </Badge>
           <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            {t('title')}
+            {t("title")}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t('subtitle')}
+            {t("subtitle")}
           </p>
         </div>
 
@@ -110,11 +117,16 @@ export default async function PricingPage({
           {plans.map((plan, index) => {
             const Icon = plan.icon;
             return (
-              <Card key={index} className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : ''}`}>
+              <Card
+                key={index}
+                className={`relative ${
+                  plan.popular ? "border-primary shadow-lg scale-105" : ""
+                }`}
+              >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground">
-                      {t('popular')}
+                      {t("popular")}
                     </Badge>
                   </div>
                 )}
@@ -128,7 +140,9 @@ export default async function PricingPage({
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <div className="mt-4">
                     <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">/{plan.period}</span>
+                    <span className="text-muted-foreground">
+                      /{plan.period}
+                    </span>
                   </div>
                   <CardDescription className="mt-2">
                     {plan.description}
@@ -137,22 +151,33 @@ export default async function PricingPage({
 
                 <CardContent>
                   <Button
-                    className={`w-full mb-6 ${plan.popular ? '' : 'variant-outline'}`}
-                    variant={plan.popular ? 'default' : 'outline'}
+                    className={`w-full mb-6 ${
+                      plan.popular ? "" : "variant-outline"
+                    }`}
+                    variant={plan.popular ? "default" : "outline"}
                     size="lg"
                   >
-                    {t('getStarted')}
+                    {t("getStarted")}
                   </Button>
 
                   <div className="space-y-3">
                     {plan.features.map((feature, featureIndex) => (
-                      <div key={featureIndex} className="flex items-center space-x-3">
+                      <div
+                        key={featureIndex}
+                        className="flex items-center space-x-3"
+                      >
                         {feature.included ? (
                           <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                         ) : (
                           <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         )}
-                        <span className={`text-sm ${feature.included ? '' : 'text-muted-foreground line-through'}`}>
+                        <span
+                          className={`text-sm ${
+                            feature.included
+                              ? ""
+                              : "text-muted-foreground line-through"
+                          }`}
+                        >
                           {feature.name}
                         </span>
                       </div>
@@ -167,9 +192,11 @@ export default async function PricingPage({
         {/* Feature Comparison Table */}
         <Card className="mb-16">
           <CardHeader>
-            <CardTitle className="text-center">{t('comparison.title')}</CardTitle>
+            <CardTitle className="text-center">
+              {t("comparison.title")}
+            </CardTitle>
             <CardDescription className="text-center">
-              {t('comparison.subtitle')}
+              {t("comparison.subtitle")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -177,10 +204,18 @@ export default async function PricingPage({
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-4 px-4 font-semibold">{t('comparison.feature')}</th>
-                    <th className="text-center py-4 px-4 font-semibold">{plans[0].name}</th>
-                    <th className="text-center py-4 px-4 font-semibold">{plans[1].name}</th>
-                    <th className="text-center py-4 px-4 font-semibold">{plans[2].name}</th>
+                    <th className="text-left py-4 px-4 font-semibold">
+                      {t("comparison.feature")}
+                    </th>
+                    <th className="text-center py-4 px-4 font-semibold">
+                      {plans[0].name}
+                    </th>
+                    <th className="text-center py-4 px-4 font-semibold">
+                      {plans[1].name}
+                    </th>
+                    <th className="text-center py-4 px-4 font-semibold">
+                      {plans[2].name}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -212,10 +247,10 @@ export default async function PricingPage({
             <CardContent className="p-8 lg:p-12">
               <div className="text-center mb-8">
                 <h2 className="text-2xl lg:text-3xl font-bold mb-4">
-                  {t('aiFeatures.title')}
+                  {t("aiFeatures.title")}
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  {t('aiFeatures.subtitle')}
+                  {t("aiFeatures.subtitle")}
                 </p>
               </div>
 
@@ -224,32 +259,48 @@ export default async function PricingPage({
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Check className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-2">{t('aiFeatures.intelligent.title')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('aiFeatures.intelligent.description')}</p>
+                  <h3 className="font-semibold mb-2">
+                    {t("aiFeatures.intelligent.title")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("aiFeatures.intelligent.description")}
+                  </p>
                 </div>
 
                 <div className="text-center">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Zap className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-2">{t('aiFeatures.automated.title')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('aiFeatures.automated.description')}</p>
+                  <h3 className="font-semibold mb-2">
+                    {t("aiFeatures.automated.title")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("aiFeatures.automated.description")}
+                  </p>
                 </div>
 
                 <div className="text-center">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Star className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-2">{t('aiFeatures.accurate.title')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('aiFeatures.accurate.description')}</p>
+                  <h3 className="font-semibold mb-2">
+                    {t("aiFeatures.accurate.title")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("aiFeatures.accurate.description")}
+                  </p>
                 </div>
 
                 <div className="text-center">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Building className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-2">{t('aiFeatures.scalable.title')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('aiFeatures.scalable.description')}</p>
+                  <h3 className="font-semibold mb-2">
+                    {t("aiFeatures.scalable.title")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("aiFeatures.scalable.description")}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -259,7 +310,7 @@ export default async function PricingPage({
         {/* FAQ */}
         <section className="mb-16">
           <h2 className="text-2xl lg:text-3xl font-bold text-center mb-12">
-            {t('faq.title')}
+            {t("faq.title")}
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             {faqs.map((faq, index) => (
@@ -278,21 +329,22 @@ export default async function PricingPage({
           <Card className="bg-primary text-primary-foreground">
             <CardContent className="p-8 lg:p-12">
               <h2 className="text-2xl lg:text-3xl font-bold mb-4">
-                {t('cta.title')}
+                {t("cta.title")}
               </h2>
               <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-                {t('cta.subtitle')}
+                {t("cta.subtitle")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" variant="secondary" asChild>
-                  <a href="/business-signup">
-                    {t('cta.primary')}
-                  </a>
+                  <Link href="/business-signup">{t("cta.primary")}</Link>
                 </Button>
-                <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10" asChild>
-                  <a href="/contact">
-                    {t('cta.secondary')}
-                  </a>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+                  asChild
+                >
+                  <Link href="/contact">{t("cta.secondary")}</Link>
                 </Button>
               </div>
             </CardContent>

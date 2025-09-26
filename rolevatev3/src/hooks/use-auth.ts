@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService, CandidateAuthenticatedUser, BusinessUser } from '@/services/auth';
+import { authService } from '@/services/auth';
+import { UserData } from '@/types/auth';
 
 export interface UseAuthReturn {
-  user: CandidateAuthenticatedUser | BusinessUser | null;
+  user: UserData | null;
   userType: 'candidate' | 'business' | null;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -13,7 +14,7 @@ export interface UseAuthReturn {
 }
 
 export function useAuth(): UseAuthReturn {
-  const [user, setUser] = useState<CandidateAuthenticatedUser | BusinessUser | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [userType, setUserType] = useState<'candidate' | 'business' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();

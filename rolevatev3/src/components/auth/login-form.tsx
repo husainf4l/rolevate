@@ -1,27 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from '@/i18n/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Lock, User, ArrowLeft } from 'lucide-react';
-import Logo from '@/components/common/logo';
-import { authService } from '@/services/auth';
-import { useAuthContext } from '@/providers/auth-provider';
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { Role, UserData } from "@/types/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mail, Lock, User, ArrowLeft } from "lucide-react";
+import Logo from "@/components/common/logo";
+import { authService } from "@/services/auth";
+import { useAuthContext } from "@/providers/auth-provider";
 
 export default function LoginForm() {
-  const [step, setStep] = useState<'email' | 'login' | 'signup'>('email');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [step, setStep] = useState<"email" | "login" | "signup">("email");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const t = useTranslations('login');
+  const [error, setError] = useState("");
+  const t = useTranslations("login");
   const router = useRouter();
   const { login } = useAuthContext();
 
@@ -33,43 +34,43 @@ export default function LoginForm() {
   const handleEmailChange = (value: string) => {
     setEmail(value);
     if (emailError) {
-      setEmailError('');
+      setEmailError("");
     }
   };
 
-  const handleEmailSubmit = async (action: 'login' | 'signup') => {
+  const handleEmailSubmit = async (action: "login" | "signup") => {
     if (!email) {
-      setEmailError(t('emailRequired'));
+      setEmailError(t("emailRequired"));
       return;
     }
-    
+
     if (!validateEmail(email)) {
-      setEmailError(t('emailInvalid'));
+      setEmailError(t("emailInvalid"));
       return;
     }
-    
+
     setStep(action);
   };
 
   const handleBackToEmail = () => {
-    setStep('email');
-    setEmailError('');
-    setError('');
+    setStep("email");
+    setEmailError("");
+    setError("");
   };
 
   const handleRegister = async () => {
     if (!firstName || !lastName || !password || !confirmPassword) {
-      setError(t('fillAllFields'));
+      setError(t("fillAllFields"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(t('passwordMismatch'));
+      setError(t("passwordMismatch"));
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const result = await authService.registerCandidate({
@@ -81,15 +82,22 @@ export default function LoginForm() {
       if (result.success && result.user) {
         // Store user data (token is already stored as HTTP-only cookie)
         // For registration, we know it's a candidate user
-        authService.storeUserData(result.user, 'candidate');
-        
+        const userWithRole: UserData = {
+          ...result.user,
+          role: Role.CANDIDATE,
+          image: result.user.image || undefined,
+          createdAt: new Date(result.user.createdAt),
+          updatedAt: new Date(result.user.updatedAt),
+        };
+        authService.storeUserData(userWithRole, "candidate");
+
         // Navigate to dashboard
-        router.push('/dashboard');
+        router.push("/dashboard");
       } else {
-        setError(result.message || t('registrationFailed'));
+        setError(result.message || t("registrationFailed"));
       }
     } catch (error) {
-      setError(t('networkError'));
+      setError(t("networkError"));
     } finally {
       setIsLoading(false);
     }
@@ -97,22 +105,22 @@ export default function LoginForm() {
 
   const handleLogin = async () => {
     if (!password) {
-      setError(t('passwordRequired'));
+      setError(t("passwordRequired"));
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const result = await login(email, password);
 
       if (!result.success) {
-        setError(result.message || t('loginFailed'));
+        setError(result.message || t("loginFailed"));
       }
       // Navigation is handled by the auth context
     } catch (error) {
-      setError(t('networkError'));
+      setError(t("networkError"));
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +133,7 @@ export default function LoginForm() {
           <Logo className="text-2xl" />
         </div>
         <p className="text-muted-foreground text-center text-sm">
-          {t('subtitle')}
+          {t("subtitle")}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -135,12 +143,14 @@ export default function LoginForm() {
             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="email"
-              placeholder={t('emailPlaceholder')}
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
-              className={`pl-10 ${emailError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+              className={`pl-10 ${
+                emailError ? "border-red-500 focus-visible:ring-red-500" : ""
+              }`}
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   // Don't auto-submit, let user choose login or signup
                 }
@@ -148,31 +158,29 @@ export default function LoginForm() {
             />
           </div>
           {emailError && (
-            <p className="text-sm text-red-500 mt-1">
-              {emailError}
-            </p>
+            <p className="text-sm text-red-500 mt-1">{emailError}</p>
           )}
         </div>
 
         {/* Login Button */}
-        <Button 
-          className="w-full" 
-          size="lg" 
-          onClick={() => handleEmailSubmit('login')}
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={() => handleEmailSubmit("login")}
           disabled={!email || !validateEmail(email)}
         >
-          {t('signIn')}
+          {t("signIn")}
         </Button>
 
         {/* Sign Up Button */}
-        <Button 
+        <Button
           variant="outline"
-          className="w-full" 
-          size="lg" 
-          onClick={() => handleEmailSubmit('signup')}
+          className="w-full"
+          size="lg"
+          onClick={() => handleEmailSubmit("signup")}
           disabled={!email || !validateEmail(email)}
         >
-          {t('signUp')}
+          {t("signUp")}
         </Button>
 
         {/* Divider */}
@@ -182,7 +190,7 @@ export default function LoginForm() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              {t('or')}
+              {t("or")}
             </span>
           </div>
         </div>
@@ -207,7 +215,7 @@ export default function LoginForm() {
               fill="#EA4335"
             />
           </svg>
-          {t('continueWithGoogle')}
+          {t("continueWithGoogle")}
         </Button>
       </CardContent>
     </Card>
@@ -217,9 +225,9 @@ export default function LoginForm() {
     <Card className="border-0 shadow-lg">
       <CardHeader className="space-y-1 pb-4">
         <div className="flex items-center justify-between mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleBackToEmail}
             className="p-1"
           >
@@ -229,11 +237,9 @@ export default function LoginForm() {
           <div className="w-8"></div> {/* Spacer for balance */}
         </div>
         <CardTitle className="text-2xl font-bold text-center">
-          {t('welcomeBack')}
+          {t("welcomeBack")}
         </CardTitle>
-        <p className="text-muted-foreground text-center text-sm">
-          {email}
-        </p>
+        <p className="text-muted-foreground text-center text-sm">{email}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Error Message */}
@@ -249,7 +255,7 @@ export default function LoginForm() {
             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="password"
-              placeholder={t('passwordPlaceholder')}
+              placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10"
@@ -258,19 +264,19 @@ export default function LoginForm() {
         </div>
 
         {/* Sign In Button */}
-        <Button 
-          className="w-full" 
-          size="lg" 
+        <Button
+          className="w-full"
+          size="lg"
           onClick={handleLogin}
           disabled={isLoading}
         >
-          {isLoading ? t('signingIn') : t('signIn')}
+          {isLoading ? t("signingIn") : t("signIn")}
         </Button>
 
         {/* Forgot Password */}
         <div className="text-center">
           <button className="text-sm text-primary hover:underline">
-            {t('forgotPassword')}
+            {t("forgotPassword")}
           </button>
         </div>
       </CardContent>
@@ -281,9 +287,9 @@ export default function LoginForm() {
     <Card className="border-0 shadow-lg">
       <CardHeader className="space-y-1 pb-4">
         <div className="flex items-center justify-between mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleBackToEmail}
             className="p-1"
           >
@@ -293,11 +299,9 @@ export default function LoginForm() {
           <div className="w-8"></div> {/* Spacer for balance */}
         </div>
         <CardTitle className="text-2xl font-bold text-center">
-          {t('registration.title')}
+          {t("registration.title")}
         </CardTitle>
-        <p className="text-muted-foreground text-center text-sm">
-          {email}
-        </p>
+        <p className="text-muted-foreground text-center text-sm">{email}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Error Message */}
@@ -313,7 +317,7 @@ export default function LoginForm() {
             <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={t('registration.firstNamePlaceholder')}
+              placeholder={t("registration.firstNamePlaceholder")}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               className="pl-10"
@@ -327,7 +331,7 @@ export default function LoginForm() {
             <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={t('registration.lastNamePlaceholder')}
+              placeholder={t("registration.lastNamePlaceholder")}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               className="pl-10"
@@ -341,7 +345,7 @@ export default function LoginForm() {
             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="password"
-              placeholder={t('registration.passwordPlaceholder')}
+              placeholder={t("registration.passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10"
@@ -355,7 +359,7 @@ export default function LoginForm() {
             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="password"
-              placeholder={t('registration.confirmPasswordPlaceholder')}
+              placeholder={t("registration.confirmPasswordPlaceholder")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="pl-10"
@@ -364,20 +368,22 @@ export default function LoginForm() {
         </div>
 
         {/* Sign Up Button */}
-        <Button 
-          className="w-full" 
-          size="lg" 
+        <Button
+          className="w-full"
+          size="lg"
           onClick={handleRegister}
           disabled={isLoading}
         >
-          {isLoading ? t('registration.creatingAccount') : t('registration.signUp')}
+          {isLoading
+            ? t("registration.creatingAccount")
+            : t("registration.signUp")}
         </Button>
 
         {/* Terms */}
         <p className="text-xs text-muted-foreground text-center">
-          {t('termsText')} {' '}
+          {t("termsText")}{" "}
           <button className="text-primary hover:underline">
-            {t('termsLink')}
+            {t("termsLink")}
           </button>
         </p>
       </CardContent>
@@ -386,9 +392,9 @@ export default function LoginForm() {
 
   return (
     <div className="space-y-6">
-          {step === 'email' && renderEmailStep()}
-      {step === 'login' && renderLoginStep()}
-      {step === 'signup' && renderSignupStep()}
+      {step === "email" && renderEmailStep()}
+      {step === "login" && renderLoginStep()}
+      {step === "signup" && renderSignupStep()}
     </div>
   );
 }
