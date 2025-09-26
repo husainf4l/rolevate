@@ -20,7 +20,11 @@ interface SetupData {
 
 interface OrganizationSetupFormProps {
   locale: string;
+<<<<<<< Updated upstream
   onComplete: (data: SetupData) => void;
+=======
+  onComplete: (data: Record<string, unknown>) => void;
+>>>>>>> Stashed changes
 }
 
 export default function OrganizationSetupForm({

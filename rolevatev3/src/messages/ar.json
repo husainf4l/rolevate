@@ -635,5 +635,49 @@
         "secondary": "اتصل بالمبيعات"
       }
     }
+  },
+  "invitation": {
+    "heroTitle": "انضم إلى فريقك",
+    "heroSubtitle": "لقد تمت دعوتك للانضمام إلى فريق على منصة رولفيت. أكمل تسجيلك لبدء الاستخدام.",
+    "title": "انضم إلى الفريق",
+    "subtitle": "لقد تمت دعوتك للانضمام إلى {organizationName}",
+    "invalidToken": "رمز الدعوة غير صالح أو منتهي الصلاحية",
+    "expiredToken": "انتهت صلاحية رمز الدعوة",
+    "alreadyAccepted": "تم قبول هذه الدعوة بالفعل",
+    "loading": "جاري التحقق من الدعوة...",
+    "validating": "جاري التحقق...",
+    "createAccount": "إنشاء حساب",
+    "creatingAccount": "جاري إنشاء الحساب...",
+    "success": {
+      "title": "مرحباً بك!",
+      "subtitle": "مرحباً بك في {organizationName}",
+      "description": "تم إنشاء حسابك بنجاح ويمكنك الآن الوصول إلى لوحة التحكم الخاصة بالفريق.",
+      "goToDashboard": "الذهاب إلى لوحة التحكم"
+    },
+    "form": {
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "firstNamePlaceholder": "أدخل اسمك الأول",
+      "lastNamePlaceholder": "أدخل اسم عائلتك",
+      "emailPlaceholder": "أدخل بريدك الإلكتروني",
+      "passwordPlaceholder": "أنشئ كلمة مرور آمنة",
+      "confirmPasswordPlaceholder": "أكد كلمة المرور",
+      "passwordHint": "8 أحرف على الأقل مع حروف وأرقام",
+      "termsText": "بتسجيل الدخول، فإنك توافق على",
+      "termsLink": "شروط الخدمة",
+      "validation": {
+        "firstNameRequired": "الاسم الأول مطلوب",
+        "lastNameRequired": "اسم العائلة مطلوب",
+        "emailRequired": "البريد الإلكتروني مطلوب",
+        "emailInvalid": "يرجى إدخال عنوان بريد إلكتروني صحيح",
+        "passwordRequired": "كلمة المرور مطلوبة",
+        "passwordMinLength": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+        "confirmPasswordRequired": "تأكيد كلمة المرور مطلوب",
+        "passwordMismatch": "كلمات المرور غير متطابقة"
+      }
+    }
   }
 }

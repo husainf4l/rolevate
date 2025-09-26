@@ -25,8 +25,20 @@ export default function NotFound() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 w-full">
+<<<<<<< Updated upstream
             <Button asChild className="flex-1" variant="default">
               <Link href="/en">Go Home</Link>
+=======
+            <Button 
+              asChild
+              className="flex-1"
+              variant="default"
+            >
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a href="/">
+                Go Home
+              </a>
+>>>>>>> Stashed changes
             </Button>
 
             <Button
@@ -40,10 +52,14 @@ export default function NotFound() {
           </div>
 
           <div className="text-sm text-muted-foreground">
+<<<<<<< Updated upstream
             Need help?{" "}
             <Link href="/contact" className="text-primary hover:underline">
               Contact us
             </Link>
+=======
+            Need help? <a href="/contact" className="text-primary hover:underline">Contact us</a> {/* eslint-disable-line @next/next/no-html-link-for-pages */}
+>>>>>>> Stashed changes
           </div>
         </CardContent>
       </Card>

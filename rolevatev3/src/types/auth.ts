@@ -10,7 +10,9 @@ export enum Role {
 export interface RegisterCandidateRequest {
   email: string;
   password: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  invitationToken?: string;
 }
 
 export interface LoginRequest {
@@ -45,7 +47,11 @@ export interface FormData {
 
 export interface OrganizationSetupFormProps {
   locale: string;
+<<<<<<< Updated upstream
   onComplete: (data: FormData) => void;
+=======
+  onComplete: (data: Record<string, unknown>) => void;
+>>>>>>> Stashed changes
 }
 
 export interface UserData {

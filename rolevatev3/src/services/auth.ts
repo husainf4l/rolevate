@@ -1,15 +1,4 @@
-import { Role, UserData } from '@/types/auth';
-
-export interface RegisterCandidateRequest {
-  email: string;
-  password: string;
-  name: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
+import { Role, UserData, RegisterCandidateRequest, LoginRequest } from '@/types/auth';
 
 export interface AuthResponse {
   success: boolean;
@@ -70,8 +59,10 @@ class AuthService {
         body: JSON.stringify({
           email: data.email,
           password: data.password,
-          name: data.name,
+          firstName: data.firstName,
+          lastName: data.lastName,
           role: Role.CANDIDATE,
+          invitationToken: data.invitationToken,
         }),
       });
 
@@ -170,14 +161,20 @@ class AuthService {
   }
 
   // Helper method to determine user type based on response structure
+<<<<<<< Updated upstream
   private determineUserType(user: unknown): 'candidate' | 'business' {
     const userObj = user as Record<string, unknown>;
+=======
+  private determineUserType(user: UserData | Record<string, unknown>): 'candidate' | 'business' {
+>>>>>>> Stashed changes
     // Check role first
     if (userObj.role) {
       return userObj.role === Role.CANDIDATE ? 'candidate' : 'business';
     }
     // Fallback to old logic
+    const userAny = user as Record<string, unknown>;
     // Check for business user properties
+<<<<<<< Updated upstream
     if (userObj.organizationId || userObj.organization || userObj.permissions || userObj.roles || userObj.isSuperAdmin !== undefined) {
       return 'business';
     }
@@ -187,6 +184,17 @@ class AuthService {
     }
     // Default fallback based on type field
     return userObj.type === 'user' ? 'business' : 'candidate';
+=======
+    if (userAny.organizationId || userAny.organization || userAny.permissions || userAny.roles || userAny.isSuperAdmin !== undefined) {
+      return 'business';
+    }
+    // Check for candidate user properties
+    if (userAny.cvLink !== undefined || userAny.type === 'candidate') {
+      return 'candidate';
+    }
+    // Default fallback based on type field
+    return (userAny.type as string) === 'user' ? 'business' : 'candidate';
+>>>>>>> Stashed changes
   }
 
   // Get navigation path based on user type

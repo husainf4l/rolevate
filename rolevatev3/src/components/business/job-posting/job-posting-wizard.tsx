@@ -312,7 +312,7 @@ export default function JobPostingWizard({
 
     try {
       // Prepare data for submission
-      const submitData = {
+      const { numberOfPositions, ...submitData } = {
         ...formData,
         // Convert applicationDeadline to ISO 8601 format if it exists
         applicationDeadline: formData.applicationDeadline
@@ -320,11 +320,15 @@ export default function JobPostingWizard({
           : undefined,
       };
 
+<<<<<<< Updated upstream
       // Remove numberOfPositions from the data before sending
       const dataToSubmit = submitData as CreateJobRequest;
       delete dataToSubmit.numberOfPositions;
 
       const result = await jobsService.createJob(dataToSubmit);
+=======
+      const result = await jobsService.createJob(submitData);
+>>>>>>> Stashed changes
 
       if (result.success) {
         console.log("Job created successfully:", result.job);

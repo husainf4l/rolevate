@@ -636,6 +636,50 @@
       "primary": "Start Today Free",
       "secondary": "View Pricing"
     }
+  },
+  "invitation": {
+    "heroTitle": "Join Your Team",
+    "heroSubtitle": "You've been invited to join a team on Rolevate. Complete your registration to get started.",
+    "title": "Join Your Team",
+    "subtitle": "You've been invited to join {organizationName}",
+    "invalidToken": "Invalid or expired invitation token",
+    "expiredToken": "Invitation token has expired",
+    "alreadyAccepted": "This invitation has already been accepted",
+    "loading": "Validating invitation...",
+    "validating": "Validating...",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "success": {
+      "title": "Welcome aboard!",
+      "subtitle": "Welcome to {organizationName}",
+      "description": "Your account has been created successfully and you can now access the team dashboard.",
+      "goToDashboard": "Go to Dashboard"
+    },
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastNamePlaceholder": "Enter your last name",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Create a secure password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "passwordHint": "8 characters minimum with letters and numbers",
+      "termsText": "By signing up, you agree to our",
+      "termsLink": "Terms of Service",
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "confirmPasswordRequired": "Password confirmation is required",
+        "passwordMismatch": "Passwords do not match"
+      }
+    }
   }
 }
 

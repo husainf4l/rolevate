@@ -165,11 +165,7 @@ export default function BlogSection({ locale }: BlogSectionProps) {
                 <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
                   <div className="flex items-center gap-1">
                     <User className="w-4 h-4" />
-                    <span>
-                      {locale === "ar" && blog.author.nameAr
-                        ? blog.author.nameAr
-                        : blog.author.name}
-                    </span>
+                    <span>{locale === 'ar' && blog.author?.nameAr ? blog.author.nameAr : blog.author?.name || (locale === 'ar' ? 'مجهول' : 'Unknown')}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
@@ -186,19 +182,10 @@ export default function BlogSection({ locale }: BlogSectionProps) {
                     <span>{formatDate(blog.publishedAt)}</span>
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                    className="group-hover:text-primary"
-                  >
+                  <Button variant="ghost" size="sm" asChild className="group-hover:text-primary">
                     <Link href={`/${locale}/blog/${blog.slug}`}>
-                      {locale === "ar" ? "اقرأ المزيد" : "Read More"}
-                      <ArrowRight
-                        className={`w-4 h-4 ml-1 transition-transform group-hover:translate-x-1 ${
-                          locale === "ar" ? "rotate-180" : ""
-                        }`}
-                      />
+                      {locale === 'ar' ? 'اقرأ المزيد' : 'Read More'}
+                      <ArrowRight className={`w-4 h-4 ml-1 transition-transform group-hover:translate-x-1 ${locale === 'ar' ? 'rotate-180' : ''}`} />
                     </Link>
                   </Button>
                 </div>
@@ -268,11 +255,7 @@ export default function BlogSection({ locale }: BlogSectionProps) {
                     <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
                       <div className="flex items-center gap-1">
                         <User className="w-4 h-4" />
-                        <span>
-                          {locale === "ar" && blog.author.nameAr
-                            ? blog.author.nameAr
-                            : blog.author.name}
-                        </span>
+                        <span>{locale === 'ar' && blog.author?.nameAr ? blog.author.nameAr : blog.author?.name || (locale === 'ar' ? 'مجهول' : 'Unknown')}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />

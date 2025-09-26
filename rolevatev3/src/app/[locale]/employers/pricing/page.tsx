@@ -336,6 +336,7 @@ export default async function PricingPage({
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" variant="secondary" asChild>
+<<<<<<< Updated upstream
                   <Link href="/business-signup">{t("cta.primary")}</Link>
                 </Button>
                 <Button
@@ -345,6 +346,18 @@ export default async function PricingPage({
                   asChild
                 >
                   <Link href="/contact">{t("cta.secondary")}</Link>
+=======
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                  <a href="/business-signup">
+                    {t('cta.primary')}
+                  </a>
+                </Button>
+                <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10" asChild>
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                  <a href="/contact">
+                    {t('cta.secondary')}
+                  </a>
+>>>>>>> Stashed changes
                 </Button>
               </div>
             </CardContent>
