@@ -47,11 +47,7 @@ export interface FormData {
 
 export interface OrganizationSetupFormProps {
   locale: string;
-<<<<<<< Updated upstream
-  onComplete: (data: FormData) => void;
-=======
   onComplete: (data: Record<string, unknown>) => void;
->>>>>>> Stashed changes
 }
 
 export interface UserData {

@@ -1,18 +1,5 @@
 "use client";
 
-<<<<<<< Updated upstream
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { Role, UserData } from "@/types/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Lock, User, ArrowLeft } from "lucide-react";
-import Logo from "@/components/common/logo";
-import { authService } from "@/services/auth";
-import { useAuthContext } from "@/providers/auth-provider";
-=======
 import { useState } from 'react';
 import { UserData, Role } from '@/types/auth';
 import { useTranslations } from 'next-intl';
@@ -24,7 +11,6 @@ import { Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import Logo from '@/components/common/logo';
 import { authService } from '@/services/auth';
 import { useAuthContext } from '@/providers/auth-provider';
->>>>>>> Stashed changes
 
 export default function LoginForm() {
   const [step, setStep] = useState<"email" | "login" | "signup">("email");
@@ -107,21 +93,7 @@ export default function LoginForm() {
         };
         
         // Store user data (token is already stored as HTTP-only cookie)
-<<<<<<< Updated upstream
-        // For registration, we know it's a candidate user
-        const userWithRole: UserData = {
-          ...result.user,
-          role: Role.CANDIDATE,
-          image: result.user.image || undefined,
-          createdAt: new Date(result.user.createdAt),
-          updatedAt: new Date(result.user.updatedAt),
-        };
-        authService.storeUserData(userWithRole, "candidate");
-
-=======
         authService.storeUserData(userData, 'candidate');
-        
->>>>>>> Stashed changes
         // Navigate to dashboard
         router.push("/dashboard");
       } else {

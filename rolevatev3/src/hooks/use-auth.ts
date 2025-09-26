@@ -2,13 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-<<<<<<< Updated upstream
-import { authService } from '@/services/auth';
-import { UserData } from '@/types/auth';
-=======
 import { UserData } from '@/types/auth';
 import { authService } from '@/services/auth';
->>>>>>> Stashed changes
 
 export interface UseAuthReturn {
   user: UserData | null;

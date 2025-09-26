@@ -1,18 +1,9 @@
-<<<<<<< Updated upstream
-import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-=======
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
->>>>>>> Stashed changes
 import {
   Star,
   Quote,
@@ -323,24 +314,13 @@ export default async function CustomersPage({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-<<<<<<< Updated upstream
               <Link href="/business-signup">
                 {t("cta.primary")}
-=======
-              <Link href="/[locale]/business-signup" as="/business-signup">
-                {t('cta.primary')}
->>>>>>> Stashed changes
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-<<<<<<< Updated upstream
               <Link href="/employers/pricing">{t("cta.secondary")}</Link>
-=======
-              <Link href="/[locale]/employers/pricing" as="/employers/pricing">
-                {t('cta.secondary')}
-              </Link>
->>>>>>> Stashed changes
             </Button>
           </div>
         </section>
