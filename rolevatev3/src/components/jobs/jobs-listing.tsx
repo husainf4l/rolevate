@@ -143,7 +143,12 @@ export default function JobsListing({ locale, initialJobs = [] }: JobsListingPro
   const fetchJobs = useCallback(async (page: number = currentPage) => {
     try {
       setLoading(true);
-      const response = await jobsService.getJobs(page, itemsPerPage);
+      const params = {
+        page: page.toString(),
+        limit: itemsPerPage.toString(),
+        ...(searchQuery && { search: searchQuery }),
+      };
+      const response = await jobsService.getPublicJobs(params);
 
       if (response.success && response.jobs) {
         const displayJobs: DisplayJob[] = response.jobs.map((job: Job) => ({

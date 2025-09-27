@@ -76,6 +76,7 @@
     "fillAllFields": "Please fill in all fields",
     "passwordMismatch": "Passwords do not match",
     "registrationFailed": "Registration failed. Please try again.",
+    "registrationSuccess": "Registration successful! Welcome to Rolevate!",
     "networkError": "Network error. Please check your connection.",
     "rememberMe": "Remember me",
     "forgotPassword": "Forgot password?",
@@ -598,6 +599,185 @@
       },
       "status": {
         "inDevelopment": "In Development"
+      }
+    },
+    "jobs": {
+      "title": "Jobs Management",
+      "description": "Manage your job postings and applications",
+      "subtitle": "Create, manage, and track your job postings",
+      "actions": {
+        "createJob": "Create New Job",
+        "view": "View",
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "delete": "Delete"
+      },
+      "stats": {
+        "totalJobs": "Total Jobs",
+        "activeJobs": "Active Jobs",
+        "totalApplications": "Total Applications",
+        "avgApplications": "Avg Applications"
+      },
+      "search": {
+        "placeholder": "Search jobs..."
+      },
+      "filters": {
+        "status": "Status",
+        "type": "Type",
+        "allStatuses": "All Statuses",
+        "allTypes": "All Types"
+      },
+      "statuses": {
+        "active": "Active",
+        "paused": "Paused",
+        "closed": "Closed",
+        "draft": "Draft"
+      },
+      "types": {
+        "fullTime": "Full-time",
+        "partTime": "Part-time",
+        "contract": "Contract",
+        "remote": "Remote"
+      },
+      "applicants": "applicants",
+      "salaryNotSpecified": "Salary not specified",
+      "noJobs": {
+        "title": "No jobs found",
+        "description": "Try adjusting your search criteria or create a new job"
+      },
+      "create": {
+        "title": "Create New Job",
+        "subtitle": "Use our AI-powered wizard to create compelling job postings",
+        "description": "Create job posting with AI assistance",
+        "backToJobs": "Back to Jobs",
+        "previous": "Previous",
+        "next": "Next",
+        "publish": "Publish Job",
+        "success": "Job created successfully!",
+        "error": "Failed to create job. Please try again.",
+        "validation": {
+          "required": "This field is required",
+          "skillsRequired": "Please add at least one skill"
+        },
+        "ai": {
+          "missingFields": "Please fill in job title, department, and industry to generate with AI",
+          "generated": "Job details generated successfully!",
+          "error": "Failed to generate job details with AI",
+          "promptsGenerated": "AI prompts generated successfully!",
+          "promptsError": "Failed to generate AI prompts"
+        },
+        "steps": {
+          "basic": {
+            "title": "Basic Information",
+            "description": "Job title, department, and basic details",
+            "aiGeneration": {
+              "title": "AI-Powered Job Generation",
+              "description": "Let our AI generate comprehensive job details based on your basic information",
+              "generate": "Generate with AI",
+              "generating": "Generating...",
+              "requirement": "Fill in title, department, and industry to enable AI generation"
+            },
+            "fields": {
+              "title": "Job Title",
+              "titlePlaceholder": "e.g., Senior Software Engineer",
+              "department": "Department",
+              "departmentPlaceholder": "e.g., Engineering",
+              "location": "Location",
+              "locationPlaceholder": "Select location",
+              "industry": "Industry",
+              "industryPlaceholder": "Select industry",
+              "jobType": "Job Type",
+              "jobLevel": "Job Level",
+              "workType": "Work Type",
+              "salary": "Salary Range",
+              "salaryPlaceholder": "e.g., 10,000 - 15,000 AED",
+              "deadline": "Application Deadline"
+            },
+            "jobTypes": {
+              "fullTime": "Full-time",
+              "partTime": "Part-time",
+              "contract": "Contract",
+              "freelance": "Freelance",
+              "internship": "Internship"
+            },
+            "jobLevels": {
+              "entry": "Entry Level",
+              "junior": "Junior",
+              "mid": "Mid-Level",
+              "senior": "Senior",
+              "executive": "Executive"
+            },
+            "workTypes": {
+              "onSite": "On-site",
+              "remote": "Remote",
+              "hybrid": "Hybrid"
+            },
+            "industries": {
+              "technology": "Technology",
+              "healthcare": "Healthcare",
+              "finance": "Finance",
+              "education": "Education",
+              "retail": "Retail",
+              "manufacturing": "Manufacturing",
+              "consulting": "Consulting",
+              "other": "Other"
+            }
+          },
+          "details": {
+            "title": "Job Details",
+            "description": "Description, requirements, and skills"
+          },
+          "interview": {
+            "title": "Interview Questions",
+            "description": "Add screening and interview questions"
+          },
+          "aiConfig": {
+            "title": "AI Configuration",
+            "description": "Configure AI prompts for recruitment"
+          },
+          "preview": {
+            "title": "Preview & Publish",
+            "description": "Review and publish your job posting"
+          }
+        }
+      }
+    },
+    "dashboard": {
+      "title": "Business Dashboard",
+      "description": "Manage your business operations and track performance",
+      "welcome": "Welcome back",
+      "subtitle": "Here's what's happening with your business today",
+      "actions": {
+        "postJob": "Post New Job"
+      },
+      "stats": {
+        "totalJobs": "Total Jobs",
+        "activeApplications": "Active Applications", 
+        "profileViews": "Profile Views",
+        "hireMade": "Hires Made",
+        "thisMonth": "this month",
+        "fromLastMonth": "from last month"
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "postNewJob": "Post New Job",
+        "viewCandidates": "View Candidates",
+        "checkMessages": "Check Messages",
+        "viewReports": "View Reports"
+      },
+      "recentJobs": {
+        "title": "Recent Jobs",
+        "postedToday": "Posted today",
+        "posted2DaysAgo": "Posted 2 days ago",
+        "posted1WeekAgo": "Posted 1 week ago",
+        "applicants": "applicants",
+        "active": "Active",
+        "closed": "Closed"
+      },
+      "upcomingInterviews": {
+        "title": "Upcoming Interviews",
+        "upcoming": "Upcoming",
+        "scheduled": "Scheduled"
       }
     }
   },

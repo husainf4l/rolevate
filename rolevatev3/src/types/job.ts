@@ -408,3 +408,92 @@ export interface JobApplication {
   notes?: string;
   rating?: number;
 }
+
+// AI-powered job creation interfaces
+export interface JobAnalysisRequest {
+  jobTitle: string;
+  department: string;
+  industry: string;
+  employeeType: string;
+  jobLevel: string;
+  workType: string;
+  location: string;
+  country: string;
+}
+
+export interface JobAnalysisResponse {
+  description: string;
+  shortDescription: string;
+  responsibilities: string;
+  requirements: string;
+  skills: string[];
+  benefits: string;
+  suggestedSalary?: string;
+  industryInsights?: string;
+  experienceLevel?: string;
+  educationLevel?: string;
+}
+
+export interface AIConfigRequest {
+  jobTitle: string;
+  department: string;
+  industry: string;
+  jobLevel: string;
+  description?: string;
+  responsibilities?: string;
+  requirements?: string;
+  skills?: string[];
+  interviewQuestions?: string;
+}
+
+export interface AIConfigResponse {
+  aiCvAnalysisPrompt: string;
+  aiFirstInterviewPrompt: string;
+  aiSecondInterviewPrompt: string;
+}
+
+// Job creation wizard form data
+export interface JobFormData {
+  // Basic Information (Step 1)
+  title: string;
+  department: string;
+  location: string;
+  salary: string;
+  type: JobType;
+  deadline: string;
+  jobLevel: ExperienceLevel;
+  workType: WorkLocation;
+  industry: string;
+
+  // Job Details (Step 2)
+  description: string;
+  shortDescription: string;
+  responsibilities: string;
+  requirements: string;
+  benefits: string;
+  skills: string[];
+  experience: string;
+  education: string;
+
+  // Interview Questions (Step 3)
+  interviewQuestions: string;
+
+  // AI Configuration (Step 4)
+  interviewLanguage: string;
+  aiCvAnalysisPrompt: string;
+  aiFirstInterviewPrompt: string;
+  aiSecondInterviewPrompt: string;
+}
+
+export interface FormErrors {
+  [key: string]: string;
+}
+
+export type FormStep = 'basic' | 'details' | 'interview-questions' | 'ai-config' | 'preview';
+
+export interface StepConfig {
+  key: FormStep;
+  title: string;
+  description: string;
+  icon: any; // React component
+}

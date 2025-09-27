@@ -47,15 +47,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
-        // Check if user is authenticated via HTTP-only cookie
+        // Clear any stale localStorage data first
+        const storedUser = authService.getStoredUser();
+        const storedUserType = authService.getUserType();
+
+        // Verify authentication with server (this is the source of truth)
         const user = await authService.verifyAuth();
 
         if (user) {
+          // User is authenticated via server verification
           const userType = user.role === 'CANDIDATE' ? 'candidate' : 'business';
           setUser(user);
           setUserType(userType);
-          // Store the user data
+          // Store/update the user data
           authService.storeUserData(user, userType);
+        } else {
+          // Server says user is not authenticated, clear any local data
+          if (storedUser || storedUserType) {
+            console.log('Server auth failed, clearing stale local data');
+            localStorage.removeItem('user_data');
+            localStorage.removeItem('organization_data');
+            localStorage.removeItem('user_type');
+          }
+          setUser(null);
+          setUserType(null);
         }
       } catch (error) {
         console.error('Auth verification failed:', error);
@@ -96,28 +111,67 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = async () => {
-    await authService.logout();
+    console.log('Starting logout process...');
+    setIsLoading(true);
+    
+    try {
+      // Call the logout service
+      await authService.logout();
+      console.log('Logout service completed');
+    } catch (error) {
+      console.error('Logout service error:', error);
+      // Continue with cleanup even if server logout fails
+    }
+
+    // Clear all state immediately
     setUser(null);
     setUserType(null);
-    router.push('/login');
+    setIsLoading(false);
+    
+    console.log('Local auth state cleared');
+    
+    // WORKAROUND: Since backend session-based auth doesn't properly logout,
+    // we need to force a complete browser refresh to clear any cached state
+    // This ensures the user can't navigate back to authenticated pages
+    
+    // Clear any cached API responses
+    if ('caches' in window) {
+      try {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      } catch (e) {
+        console.warn('Failed to clear caches:', e);
+      }
+    }
+    
+    // Force a complete page refresh with cache busting
+    const loginUrl = `/login?t=${Date.now()}`;
+    window.location.replace(loginUrl);
   };
 
   const refreshAuth = async () => {
     try {
-      const isAuth = await authService.verifyAuth();
-      if (isAuth) {
-        const storedUser = authService.getStoredUser();
-        const storedUserType = authService.getUserType();
-        if (storedUser && storedUserType) {
-          setUser(storedUser);
-          setUserType(storedUserType);
-        }
+      const verifiedUser = await authService.verifyAuth();
+      if (verifiedUser) {
+        // Use the verified user data from server, not local storage
+        const userType = verifiedUser.role === 'CANDIDATE' ? 'candidate' : 'business';
+        setUser(verifiedUser);
+        setUserType(userType);
+        // Update stored data with fresh server data
+        authService.storeUserData(verifiedUser, userType);
       } else {
+        // Clear everything if server verification fails
         setUser(null);
         setUserType(null);
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('organization_data');
+        localStorage.removeItem('user_type');
       }
     } catch (error) {
       console.error('Auth refresh failed:', error);
+      // Clear state on error
+      setUser(null);
+      setUserType(null);
     }
   };
 

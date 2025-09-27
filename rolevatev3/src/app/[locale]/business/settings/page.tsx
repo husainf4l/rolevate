@@ -1,5 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import BusinessLayout from '@/components/layout/business-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SubscriptionsContent from '@/components/business/subscriptions-content';
 import ApiKeysContent from '@/components/business/api-keys-content';
@@ -14,8 +13,7 @@ export default async function SettingsPage({
   const t = await getTranslations('business.settings');
 
   return (
-    <BusinessLayout locale={locale}>
-      <div className="space-y-6">
+    <div className="p-6 space-y-6">
         <div className={locale === 'ar' ? 'text-right' : 'text-left'}>
           <h1 className="text-3xl font-bold text-foreground">
             {t('title')}
@@ -50,7 +48,6 @@ export default async function SettingsPage({
             <InvitationManagementContent locale={locale} />
           </TabsContent>
         </Tabs>
-      </div>
-    </BusinessLayout>
+    </div>
   );
 }

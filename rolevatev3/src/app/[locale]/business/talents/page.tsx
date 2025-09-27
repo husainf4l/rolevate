@@ -1,5 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import BusinessLayout from '@/components/layout/business-layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +13,7 @@ export default async function TalentsPage({ params }: TalentsPageProps) {
   const t = await getTranslations('business.talents');
 
   return (
-    <BusinessLayout locale={locale}>
-      <div className="space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${locale === 'ar' ? 'sm:flex-row-reverse' : ''}`}>
           <div className={locale === 'ar' ? 'text-right' : 'text-left'}>
@@ -114,8 +112,7 @@ export default async function TalentsPage({ params }: TalentsPageProps) {
             </Badge>
           </div>
         </Card>
-      </div>
-    </BusinessLayout>
+    </div>
   );
 }
 

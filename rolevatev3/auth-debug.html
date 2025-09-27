@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Debug Tool</title>
+    <style>
+        body { font-family: monospace; margin: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .output { background: #f5f5f5; padding: 20px; margin: 10px 0; border-radius: 5px; max-height: 400px; overflow-y: auto; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        input { padding: 8px; margin: 5px; width: 250px; }
+        h2 { border-bottom: 2px solid #333; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Rolevate Authentication Debug Tool</h1>
+        
+        <h2>1. Current State</h2>
+        <div>
+            <button onclick="checkCurrentState()">Check Current Auth State</button>
+            <button onclick="showAllCookies()">Show All Cookies</button>
+            <button onclick="showLocalStorage()">Show LocalStorage</button>
+        </div>
+        
+        <h2>2. Authentication Test</h2>
+        <div>
+            <input type="email" id="email" placeholder="Email" value="al-hussein@papayatrading.com">
+            <input type="password" id="password" placeholder="Password" value="TT%%oo77">
+            <br>
+            <button onclick="testLogin()">Test Login</button>
+            <button onclick="testVerifyAuth()">Test Verify Auth</button>
+            <button onclick="testLogout()">Test Logout</button>
+        </div>
+        
+        <h2>3. Manual Cookie Management</h2>
+        <div>
+            <button onclick="clearAllCookies()">Clear All Cookies</button>
+            <button onclick="clearLocalStorage()">Clear LocalStorage</button>
+        </div>
+        
+        <div id="output" class="output"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://rolevate.com/api';
+        let output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : 
+                            type === 'success' ? 'success' : 
+                            type === 'warning' ? 'warning' : 'info';
+            
+            output.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function clearOutput() {
+            output.innerHTML = '';
+        }
+        
+        async function checkCurrentState() {
+            clearOutput();
+            log('🔍 Checking current authentication state...', 'info');
+            
+            // Check localStorage
+            const userData = localStorage.getItem('user_data');
+            const userType = localStorage.getItem('user_type');
+            const orgData = localStorage.getItem('organization_data');
+            
+            log(`LocalStorage user_data: ${userData ? 'EXISTS' : 'NOT FOUND'}`, userData ? 'success' : 'warning');
+            log(`LocalStorage user_type: ${userType || 'NOT FOUND'}`, userType ? 'success' : 'warning');
+            log(`LocalStorage organization_data: ${orgData ? 'EXISTS' : 'NOT FOUND'}`, orgData ? 'success' : 'warning');
+            
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    log(`User: ${user.email} (${user.role})`, 'info');
+                } catch (e) {
+                    log('Failed to parse user data', 'error');
+                }
+            }
+            
+            // Test verify auth endpoint
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                
+                log(`Verify Auth Response: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Server says: User ${data.email} is authenticated`, 'success');
+                } else {
+                    const error = await response.text();
+                    log(`Server error: ${error}`, 'error');
+                }
+            } catch (e) {
+                log(`Network error checking auth: ${e.message}`, 'error');
+            }
+        }
+        
+        async function testLogin() {
+            clearOutput();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                log('Please enter both email and password', 'error');
+                return;
+            }
+            
+            log(`🔑 Attempting login for: ${email}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', // Important for cookies
+                    body: JSON.stringify({ email, password })
+                });
+                
+                log(`Login Response: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Login successful!`, 'success');
+                    log(`User: ${data.user.email} (${data.user.role})`, 'info');
+                    
+                    // Show cookies after login
+                    setTimeout(() => {
+                        log('🍪 Cookies after login:', 'info');
+                        showAllCookies();
+                    }, 500);
+                } else {
+                    log(`❌ Login failed: ${data.message}`, 'error');
+                }
+            } catch (e) {
+                log(`Network error during login: ${e.message}`, 'error');
+            }
+        }
+        
+        async function testVerifyAuth() {
+            clearOutput();
+            log('🔍 Testing auth verification...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                
+                log(`Verify Response: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Authentication valid`, 'success');
+                    log(`User: ${data.email} (${data.role})`, 'info');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Authentication invalid: ${error}`, 'error');
+                }
+            } catch (e) {
+                log(`Network error during verification: ${e.message}`, 'error');
+            }
+        }
+        
+        async function testLogout() {
+            clearOutput();
+            log('🚪 Testing logout...', 'info');
+            
+            // Show cookies before logout
+            log('🍪 Cookies before logout:', 'info');
+            showAllCookies();
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({})
+                });
+                
+                log(`Logout Response: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    log(`✅ Server logout successful`, 'success');
+                } else {
+                    const error = await response.text();
+                    log(`❌ Server logout failed: ${error}`, 'error');
+                }
+                
+                // Show cookies after logout
+                setTimeout(() => {
+                    log('🍪 Cookies after logout:', 'info');
+                    showAllCookies();
+                    
+                    // Test if auth is still valid
+                    setTimeout(() => {
+                        testVerifyAuth();
+                    }, 500);
+                }, 500);
+                
+            } catch (e) {
+                log(`Network error during logout: ${e.message}`, 'error');
+            }
+        }
+        
+        function showAllCookies() {
+            const cookies = document.cookie.split(';');
+            
+            if (cookies.length === 0 || (cookies.length === 1 && cookies[0].trim() === '')) {
+                log('No cookies found', 'warning');
+                return;
+            }
+            
+            log(`Found ${cookies.length} cookies:`, 'info');
+            cookies.forEach(cookie => {
+                const [name, ...valueParts] = cookie.split('=');
+                const value = valueParts.join('=');
+                log(`  ${name.trim()} = ${value.trim()}`, 'info');
+            });
+        }
+        
+        function showLocalStorage() {
+            log('📦 LocalStorage contents:', 'info');
+            
+            if (localStorage.length === 0) {
+                log('LocalStorage is empty', 'warning');
+                return;
+            }
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                log(`  ${key} = ${value}`, 'info');
+            }
+        }
+        
+        function clearAllCookies() {
+            clearOutput();
+            log('🧹 Clearing all cookies...', 'info');
+            
+            const cookies = document.cookie.split(';');
+            let cleared = 0;
+            
+            cookies.forEach(cookie => {
+                const eqPos = cookie.indexOf('=');
+                const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+                
+                if (name) {
+                    // Clear with different path/domain combinations
+                    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+                    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+                    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/auth`;
+                    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/auth/login`;
+                    cleared++;
+                }
+            });
+            
+            log(`Attempted to clear ${cleared} cookies`, cleared > 0 ? 'success' : 'warning');
+            
+            // Verify clearing worked
+            setTimeout(() => {
+                showAllCookies();
+            }, 200);
+        }
+        
+        function clearLocalStorage() {
+            clearOutput();
+            log('🧹 Clearing LocalStorage...', 'info');
+            
+            const itemCount = localStorage.length;
+            localStorage.clear();
+            
+            log(`Cleared ${itemCount} localStorage items`, 'success');
+        }
+        
+        // Auto-check state on page load
+        window.onload = function() {
+            log('🚀 Auth Debug Tool loaded', 'success');
+            checkCurrentState();
+        };
+    </script>
+</body>
+</html>

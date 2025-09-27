@@ -184,20 +184,199 @@ class AuthService {
   }
 
   async logout(): Promise<void> {
+    console.log('Starting logout process...');
+    
     try {
-      await fetch(`${this.baseUrl}/auth/logout`, {
+      // Call server logout endpoint with proper error handling
+      console.log('Calling server logout endpoint:', `${this.baseUrl}/auth/logout`);
+      
+      const response = await fetch(`${this.baseUrl}/auth/logout`, {
         method: 'POST',
         credentials: 'include', // Include cookies in requests
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
       });
+      
+      console.log('Logout response status:', response.status);
+      console.log('Logout response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Server logout successful:', data);
+      } else {
+        const errorText = await response.text();
+        console.warn('Server logout failed:', response.status, response.statusText, errorText);
+      }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout API error:', error);
+      // Continue with cleanup even if server fails
+    }
+
+    // WORKAROUND: Backend has cookie path bug - it sets cookies on "/" but clears them on "/auth/"
+    console.log('Clearing local auth data...');
+    this.clearAllAuthData();
+    
+    // AGGRESSIVE WORKAROUND: Try to force logout by making multiple requests with different cookie paths
+    try {
+      console.log('Attempting aggressive session clearing...');
+      
+      // Try logout with different potential cookie configurations
+      const logoutAttempts = [
+        // Try with different path headers to trigger proper cookie clearing
+        fetch(`${this.baseUrl}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Cookie-Path': '/'  // Try to hint at correct path
+          },
+          body: JSON.stringify({})
+        }),
+        
+        // Make verify request to see if still authenticated
+        fetch(`${this.baseUrl}/auth/verify`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Cache-Control': 'no-cache' }
+        })
+      ];
+      
+      const results = await Promise.allSettled(logoutAttempts);
+      console.log('Aggressive logout results:', results);
+      
+    } catch (e) {
+      console.log('Aggressive logout failed, continuing with local cleanup:', e);
     }
     
-    // Clear any stored user data (but not token since it's HTTP-only)
+    console.log('Logout process completed - session should be cleared');
+  }
+
+  private clearAllAuthData(): void {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('user_data');
-      localStorage.removeItem('organization_data');
-      localStorage.removeItem('user_type');
+      // Clear localStorage items
+      const localStorageKeys = [
+        'user_data', 
+        'organization_data', 
+        'user_type', 
+        'access_token',
+        'refresh_token',
+        'authToken',
+        'token'
+      ];
+      
+      localStorageKeys.forEach(key => {
+        localStorage.removeItem(key);
+      });
+
+      // Clear any sessionStorage items that might contain auth data
+      const sessionStorageKeys = [
+        'user_data', 
+        'organization_data', 
+        'user_type',
+        'access_token',
+        'refresh_token',
+        'authToken',
+        'token'
+      ];
+      
+      sessionStorageKeys.forEach(key => {
+        sessionStorage.removeItem(key);
+      });
+
+      // Clear ALL cookies more comprehensively
+      this.clearAllCookies();
+    }
+  }
+
+  private clearAllCookies(): void {
+    if (typeof window !== 'undefined') {
+      console.log('Starting cookie cleanup...');
+      console.log('Cookies before cleanup:', document.cookie);
+      
+      // CRITICAL: Backend has a bug - it sets cookies on path="/" but tries to clear them on path="/auth/"
+      // This causes the logout to fail because cookie paths must match exactly
+      
+      // Common auth-related cookie names
+      const authCookieNames = [
+        'accessToken',
+        'access_token', 
+        'refreshToken',
+        'refresh_token',
+        'authToken',
+        'auth_token',
+        'token',
+        'session',
+        'sessionId',
+        'connect.sid',
+        'JSESSIONID'
+      ];
+
+      // Get all existing cookies (only non-HttpOnly ones are visible)
+      const allCookies = document.cookie.split(";");
+      const existingCookieNames = allCookies.map(c => {
+        const eqPos = c.indexOf("=");
+        return eqPos > -1 ? c.substring(0, eqPos).trim() : c.trim();
+      }).filter(name => name.length > 0);
+
+      console.log('Visible cookies found:', existingCookieNames);
+
+      // Combine existing cookies with known auth cookie names
+      const cookiesToClear = [...new Set([...existingCookieNames, ...authCookieNames])];
+
+      // WORKAROUND: Clear cookies from ALL possible paths to fix backend cookie path bug
+      cookiesToClear.forEach(name => {
+        if (name) {
+          // Comprehensive path list including the problematic "/auth/" path
+          const paths = [
+            '/',           // Root path (where cookies are actually set)
+            '/auth',       // Auth path
+            '/auth/',      // Auth path with trailing slash (backend tries to clear here!)
+            '/api',        // API path
+            '/login',      // Login path
+            '/dashboard'   // Dashboard path
+          ];
+          
+          const domains = [
+            '',                           // No domain specified
+            'localhost',                  // Localhost
+            '.localhost',                 // Localhost with dot
+            window.location.hostname,     // Current hostname
+            `.${window.location.hostname}` // Current hostname with dot
+          ];
+
+          console.log(`Clearing cookie: ${name} from all paths/domains`);
+
+          // Clear for each combination of domain and path
+          domains.forEach(domain => {
+            paths.forEach(path => {
+              // Try multiple combinations to ensure we catch the cookie
+              const cookieSettings = [
+                `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path}`,
+                `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path};domain=${domain}`,
+                `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path};secure`,
+                `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path};samesite=strict`,
+                `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path};samesite=lax`,
+                `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path};domain=${domain};secure`,
+                `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path};domain=${domain};samesite=strict`
+              ];
+
+              cookieSettings.forEach(setting => {
+                if (setting.includes('domain=;') || setting.includes('domain=.;')) {
+                  // Skip invalid domain settings
+                  return;
+                }
+                document.cookie = setting;
+              });
+            });
+          });
+        }
+      });
+
+      console.log('Attempted to clear cookies:', cookiesToClear);
+      console.log('Cookies after cleanup:', document.cookie);
+      console.log('⚠️  Note: HttpOnly cookies (like access_token) are not visible here but should be cleared by server');
     }
   }
 
@@ -231,29 +410,54 @@ class AuthService {
 
   async verifyAuth(): Promise<UserData | null> {
     try {
-      // Add timeout to prevent hanging requests
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-      
-      const response = await fetch(`${this.baseUrl}/auth/verify`, {
+      // Add cache busting to prevent cached responses after logout
+      const cacheBuster = Date.now();
+      const response = await fetch(`${this.baseUrl}/auth/verify?_cb=${cacheBuster}`, {
         method: 'GET',
-        credentials: 'include', // Include cookies in requests
-        signal: controller.signal,
+        credentials: 'include', // Include cookies for session-based auth
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
       });
-      
-      clearTimeout(timeoutId);
-      
+
       if (response.ok) {
         const data = await response.json();
-        return data.user;
-      } else {
-        return null;
+        if (data.user && data.authenticated) {
+          // Convert the user data to our UserData format
+          const userData: UserData = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.name,
+            image: data.user.image || undefined,
+            role: data.user.role as Role,
+            organizationId: data.user.organizationId,
+            organization: data.user.organization ? {
+              id: data.user.organizationId,
+              name: data.user.organization.name,
+              nameAr: data.user.organization.nameAr,
+              description: data.user.organization.description,
+              website: data.user.organization.website,
+              logo: data.user.organization.logo,
+              createdAt: new Date(data.user.organization.createdAt),
+              updatedAt: new Date(data.user.organization.updatedAt),
+            } : undefined,
+            createdAt: new Date(data.user.createdAt),
+            updatedAt: new Date(data.user.updatedAt),
+          };
+          return userData;
+        }
       }
-    } catch {
-      // Don't log network errors in development when backend isn't running
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('Auth verification skipped - backend not available');
-      }
+      
+      // If verification fails or user is not authenticated, clear any stale local data
+      this.clearAllAuthData();
+      return null;
+    } catch (error) {
+      console.error('Auth verification failed:', error);
+      // Clear local data on verification error
+      this.clearAllAuthData();
       return null;
     }
   }

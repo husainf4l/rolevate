@@ -75,6 +75,7 @@
     "fillAllFields": "يرجى ملء جميع الحقول",
     "passwordMismatch": "كلمات المرور غير متطابقة",
     "registrationFailed": "فشل في التسجيل. يرجى المحاولة مرة أخرى.",
+    "registrationSuccess": "تم التسجيل بنجاح! مرحباً بك في روليڤيت!",
     "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
     "rememberMe": "تذكرني",
     "forgotPassword": "نسيت كلمة المرور؟",
@@ -597,6 +598,89 @@
       },
       "status": {
         "inDevelopment": "قيد التطوير"
+      }
+    },
+    "jobs": {
+      "title": "إدارة الوظائف",
+      "description": "إدارة إعلانات الوظائف والطلبات",
+      "subtitle": "إنشاء وإدارة وتتبع إعلانات الوظائف الخاصة بك",
+      "actions": {
+        "createJob": "إنشاء وظيفة جديدة",
+        "view": "عرض",
+        "edit": "تعديل",
+        "duplicate": "نسخ",
+        "delete": "حذف"
+      },
+      "stats": {
+        "totalJobs": "إجمالي الوظائف",
+        "activeJobs": "الوظائف النشطة",
+        "totalApplications": "إجمالي الطلبات",
+        "avgApplications": "متوسط الطلبات"
+      },
+      "search": {
+        "placeholder": "البحث في الوظائف..."
+      },
+      "filters": {
+        "status": "الحالة",
+        "type": "النوع",
+        "allStatuses": "جميع الحالات",
+        "allTypes": "جميع الأنواع"
+      },
+      "statuses": {
+        "active": "نشطة",
+        "paused": "متوقفة",
+        "closed": "مغلقة",
+        "draft": "مسودة"
+      },
+      "types": {
+        "fullTime": "دوام كامل",
+        "partTime": "دوام جزئي",
+        "contract": "عقد",
+        "remote": "عن بعد"
+      },
+      "applicants": "متقدمين",
+      "salaryNotSpecified": "الراتب غير محدد",
+      "noJobs": {
+        "title": "لم يتم العثور على وظائف",
+        "description": "حاول تعديل معايير البحث أو إنشاء وظيفة جديدة"
+      }
+    },
+    "dashboard": {
+      "title": "لوحة تحكم الأعمال",
+      "description": "إدارة عمليات أعمالك وتتبع الأداء",
+      "welcome": "مرحباً بعودتك",
+      "subtitle": "إليك ما يحدث مع أعمالك اليوم",
+      "actions": {
+        "postJob": "نشر وظيفة جديدة"
+      },
+      "stats": {
+        "totalJobs": "إجمالي الوظائف",
+        "activeApplications": "الطلبات النشطة",
+        "profileViews": "مشاهدات الملف",
+        "hireMade": "التوظيفات المتمة",
+        "thisMonth": "هذا الشهر",
+        "fromLastMonth": "من الشهر الماضي"
+      },
+      "quickActions": {
+        "title": "إجراءات سريعة",
+        "postNewJob": "نشر وظيفة جديدة",
+        "viewCandidates": "عرض المرشحين",
+        "checkMessages": "فحص الرسائل",
+        "viewReports": "عرض التقارير"
+      },
+      "recentJobs": {
+        "title": "الوظائف الحديثة",
+        "postedToday": "نُشرت اليوم",
+        "posted2DaysAgo": "نُشرت منذ يومين",
+        "posted1WeekAgo": "نُشرت منذ أسبوع",
+        "applicants": "متقدمين",
+        "active": "نشطة",
+        "closed": "مغلقة"
+      },
+      "upcomingInterviews": {
+        "title": "المقابلات القادمة",
+        "upcoming": "قادمة",
+        "scheduled": "مجدولة"
       }
     }
   },

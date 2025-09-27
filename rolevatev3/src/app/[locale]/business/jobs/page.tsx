@@ -1,19 +1,27 @@
-import BusinessLayout from '@/components/layout/business-layout';
-import JobsManagement from '@/components/business/jobs-management';
+import { getTranslations } from 'next-intl/server';
+import BusinessJobsClient from '@/components/business/business-jobs-client';
 
-export default async function JobsPage({
-  params,
-  searchParams
-}: {
+interface BusinessJobsPageProps {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
+}
+
+export async function generateMetadata({ params }: BusinessJobsPageProps) {
+  const { locale } = await params;
+  const t = await getTranslations('business.jobs');
+  
+  return {
+    title: t('title'),
+    description: t('description')
+  };
+}
+
+export default async function BusinessJobsPage({
+  params,
+  searchParams
+}: BusinessJobsPageProps) {
   const { locale } = await params;
   const search = await searchParams;
 
-  return (
-    <BusinessLayout locale={locale}>
-      <JobsManagement locale={locale} searchParams={search} />
-    </BusinessLayout>
-  );
+  return <BusinessJobsClient locale={locale} searchParams={search} />;
 }

@@ -83,8 +83,12 @@ export default function BusinessSignupForm({ locale }: BusinessSignupFormProps) 
       if (!result.success) {
         throw new Error(result.message || 'Registration failed');
       }
+
+      // Registration successful - TODO: Navigate to business dashboard
+      // TODO: Navigate to business dashboard or show success message
+      
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Registration error:', error);
       // TODO: Show error message to user
     }
   };

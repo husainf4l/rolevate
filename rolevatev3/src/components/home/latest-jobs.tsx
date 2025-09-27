@@ -52,7 +52,7 @@ export default function LatestJobs({ locale }: LatestJobsProps) {
     try {
       setLoading(true);
       setError(null);
-      const response = await jobsService.getJobs();
+      const response = await jobsService.getPublicFeaturedJobs();
 
       if (response.success && response.jobs) {
         // Transform Job[] to DisplayJob[] format
