@@ -1,13 +1,11 @@
-import { getTranslations } from 'next-intl/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Calendar, Clock, User, ArrowLeft, Share2, Bookmark } from 'lucide-react';
-import { BlogPost, BlogCategory } from '@/types/blog';
+import { BlogCategory } from '@/types/blog';
 import { blogService } from '@/services/blog';
-import Footer from '@/components/common/footer';
 import { notFound } from 'next/navigation';
 
 interface BlogPostPageProps {

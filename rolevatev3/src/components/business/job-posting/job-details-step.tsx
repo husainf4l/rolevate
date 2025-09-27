@@ -2,7 +2,7 @@
 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CreateJobPostDto, JobType, ExperienceLevel, EducationLevel, WorkLocation, JobCategory } from '@/types/job';
+import { CreateJobPostDto, JobType, ExperienceLevel, EducationLevel, WorkLocation } from '@/types/job';
 import {
   getJobTypes,
   getExperienceLevels,

@@ -27,7 +27,7 @@ export default async function FindCandidatesPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { /* locale */ } = await params;
   const t = await getTranslations('employers.findCandidates');
 
   const aiMatchingFeatures = [
@@ -48,41 +48,9 @@ export default async function FindCandidatesPage({
     }
   ];
 
-  const mockCandidates = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      title: 'Senior React Developer',
-      location: 'Dubai, UAE',
-      experience: '5+ years',
-      matchScore: 95,
-      skills: ['React', 'TypeScript', 'Node.js', 'AWS'],
-      education: 'BSc Computer Science',
-      avatar: '/images/candidates/avatar1.jpg'
-    },
-    {
-      id: 2,
-      name: 'Ahmed Al-Rashid',
-      title: 'Full Stack Developer',
-      location: 'Riyadh, KSA',
-      experience: '4+ years',
-      matchScore: 88,
-      skills: ['Vue.js', 'Python', 'Django', 'PostgreSQL'],
-      education: 'MSc Software Engineering',
-      avatar: '/images/candidates/avatar2.jpg'
-    },
-    {
-      id: 3,
-      name: 'Maria Garcia',
-      title: 'UI/UX Designer',
-      location: 'Abu Dhabi, UAE',
-      experience: '6+ years',
-      matchScore: 92,
-      skills: ['Figma', 'Adobe XD', 'Sketch', 'Prototyping'],
-      education: 'BA Design',
-      avatar: '/images/candidates/avatar3.jpg'
-    }
-  ];
+  // Candidates will be loaded from API - no demo data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mockCandidates: any[] = [];
 
   return (
     <div className="min-h-screen py-8 lg:py-16">
@@ -181,7 +149,7 @@ export default async function FindCandidatesPage({
                   <div className="flex items-start space-x-4">
                     <Avatar className="h-16 w-16">
                       <AvatarImage src={candidate.avatar} alt={candidate.name} />
-                      <AvatarFallback>{candidate.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      <AvatarFallback>{candidate.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
                     </Avatar>
 
                     <div className="flex-1">
@@ -215,7 +183,7 @@ export default async function FindCandidatesPage({
                       </div>
 
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {candidate.skills.map((skill) => (
+                        {candidate.skills.map((skill: string) => (
                           <Badge key={skill} variant="outline" className="text-xs">
                             {skill}
                           </Badge>

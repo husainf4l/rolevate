@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, Mail, Trash2, Users, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { invitationsService, Invitation, CreateInvitationRequest } from '@/services/invitations';
 
 interface InvitationManagementContentProps {
@@ -17,7 +17,7 @@ interface InvitationManagementContentProps {
 }
 
 export default function InvitationManagementContent({ locale }: InvitationManagementContentProps) {
-  const { toast } = useToast();
+
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -26,23 +26,25 @@ export default function InvitationManagementContent({ locale }: InvitationManage
     role: 'USER',
   });
 
-  useEffect(() => {
-    fetchInvitations();
-  }, []);
-
-  const fetchInvitations = async () => {
+  const fetchInvitations = useCallback(async () => {
     const result = await invitationsService.getInvitations();
     if (result.success && result.invitations) {
       setInvitations(result.invitations);
     } else {
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: result.message || (locale === 'ar' ? 'فشل في تحميل الدعوات' : 'Failed to load invitations'),
-        variant: 'destructive',
-      });
+      toast.error(result.message || (locale === 'ar' ? 'فشل في تحميل الدعوات' : 'Failed to load invitations'));
     }
     setIsLoading(false);
-  };
+  }, [locale]);
+
+  useEffect(() => {
+    // Skip loading if API calls are disabled or no backend is configured
+    if (process.env.NEXT_PUBLIC_DISABLE_API_CALLS === 'true' || !process.env.NEXT_PUBLIC_API_URL) {
+      console.log('API calls disabled or no backend configured, skipping invitations load');
+      setIsLoading(false);
+      return;
+    }
+    fetchInvitations();
+  }, [fetchInvitations]);
 
   const createInvitation = async () => {
     if (!newInvitation.email.trim()) return;
@@ -53,16 +55,9 @@ export default function InvitationManagementContent({ locale }: InvitationManage
       setNewInvitation({ email: '', role: 'USER' });
       setIsCreateDialogOpen(false);
 
-      toast({
-        title: locale === 'ar' ? 'تم إرسال الدعوة' : 'Invitation Sent',
-        description: locale === 'ar' ? 'تم إرسال دعوة الانضمام بنجاح' : 'Invitation sent successfully',
-      });
+      toast.success(locale === 'ar' ? 'تم إرسال دعوة الانضمام بنجاح' : 'Invitation sent successfully');
     } else {
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: result.message || (locale === 'ar' ? 'فشل في إرسال الدعوة' : 'Failed to send invitation'),
-        variant: 'destructive',
-      });
+      toast.error(result.message || (locale === 'ar' ? 'فشل في إرسال الدعوة' : 'Failed to send invitation'));
     }
   };
 
@@ -70,16 +65,9 @@ export default function InvitationManagementContent({ locale }: InvitationManage
     const result = await invitationsService.cancelInvitation(id);
     if (result.success) {
       setInvitations(prev => prev.filter(inv => inv.id !== id));
-      toast({
-        title: locale === 'ar' ? 'تم إلغاء الدعوة' : 'Invitation Cancelled',
-        description: locale === 'ar' ? 'تم إلغاء الدعوة بنجاح' : 'Invitation cancelled successfully',
-      });
+      toast.success(locale === 'ar' ? 'تم إلغاء الدعوة بنجاح' : 'Invitation cancelled successfully');
     } else {
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: result.message || (locale === 'ar' ? 'فشل في إلغاء الدعوة' : 'Failed to cancel invitation'),
-        variant: 'destructive',
-      });
+      toast.error(result.message || (locale === 'ar' ? 'فشل في إلغاء الدعوة' : 'Failed to cancel invitation'));
     }
   };
 

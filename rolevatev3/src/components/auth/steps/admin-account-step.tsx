@@ -30,7 +30,7 @@ interface AdminAccountStepProps {
   onBack: () => void;
 }
 
-export default function AdminAccountStep({ locale, data, onUpdate, onNext, onBack }: AdminAccountStepProps) {
+export default function AdminAccountStep({ /*locale,*/ data, onUpdate, onNext, onBack }: AdminAccountStepProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   

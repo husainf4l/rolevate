@@ -40,6 +40,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // Skip auth verification if API calls are disabled or no backend is available
+        if (process.env.NEXT_PUBLIC_DISABLE_API_CALLS === 'true' || !process.env.NEXT_PUBLIC_API_URL) {
+          console.log('API calls disabled or no backend URL configured, skipping auth verification');
+          setIsLoading(false);
+          return;
+        }
+
         // Check if user is authenticated via HTTP-only cookie
         const user = await authService.verifyAuth();
 
@@ -52,6 +59,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       } catch (error) {
         console.error('Auth verification failed:', error);
+        // Don't keep retrying on failure
       } finally {
         setIsLoading(false);
       }
@@ -82,7 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } else {
         return { success: false, message: result.message || 'Login failed' };
       }
-    } catch (error) {
+    } catch {
       return { success: false, message: 'Network error. Please check your connection.' };
     }
   };
@@ -132,7 +140,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } else {
         return { success: false, message: result.message || 'Registration failed' };
       }
-    } catch (error) {
+    } catch {
       return { success: false, message: 'Network error. Please check your connection.' };
     }
   };

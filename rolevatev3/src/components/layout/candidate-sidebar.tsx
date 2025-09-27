@@ -22,6 +22,8 @@ import {
   Send,
   Bell,
   LogOut,
+  Calendar,
+  Shield,
 } from "lucide-react";
 import { useAuthContext } from "@/providers/auth-provider";
 import ThemeSwitcher from "@/components/common/themeSwitcher";
@@ -97,6 +99,18 @@ export default function CandidateSidebar({ locale }: CandidateSidebarProps) {
       badge: "3",
       isActive: pathname.includes("/notifications"),
     },
+    {
+      title: locale === "ar" ? "التقويم" : "Calendar",
+      href: `/${locale}/dashboard/calendar`,
+      icon: Calendar,
+      isActive: pathname.includes("/calendar"),
+    },
+    {
+      title: locale === "ar" ? "المستندات" : "Documents",
+      href: `/${locale}/dashboard/documents`,
+      icon: FileText,
+      isActive: pathname.includes("/documents"),
+    },
   ];
 
   const bottomItems = [
@@ -106,12 +120,18 @@ export default function CandidateSidebar({ locale }: CandidateSidebarProps) {
       icon: Settings,
       isActive: pathname.includes("/settings"),
     },
+    {
+      title: locale === "ar" ? "الأمان" : "Security",
+      href: `/${locale}/dashboard/security`,
+      icon: Shield,
+      isActive: pathname.includes("/security"),
+    },
   ];
 
   return (
     <div
       className={cn(
-        "grid grid-rows-[auto,auto,1fr,auto,auto,auto] h-screen bg-background border-r border-border/50 transition-all duration-300 overflow-hidden",
+        "flex flex-col h-screen bg-background border-r border-border/50 transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
@@ -156,10 +176,7 @@ export default function CandidateSidebar({ locale }: CandidateSidebarProps) {
       )}
 
       {/* Navigation */}
-      <nav
-        className="px-4 py-2 space-y-1 overflow-hidden"
-        style={{ height: "400px" }}
-      >
+      <nav className="flex-1 px-4 py-2 space-y-1">
         {navigationItems.map((item) => (
           <Link
             key={item.href}

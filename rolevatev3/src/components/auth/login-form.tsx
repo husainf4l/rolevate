@@ -11,6 +11,7 @@ import { Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import Logo from '@/components/common/logo';
 import { authService } from '@/services/auth';
 import { useAuthContext } from '@/providers/auth-provider';
+import { toast } from 'sonner';
 
 export default function LoginForm() {
   const [step, setStep] = useState<"email" | "login" | "signup">("email");
@@ -21,7 +22,6 @@ export default function LoginForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const t = useTranslations("login");
   const router = useRouter();
   const { login } = useAuthContext();
@@ -40,12 +40,12 @@ export default function LoginForm() {
 
   const handleEmailSubmit = async (action: "login" | "signup") => {
     if (!email) {
-      setEmailError(t("emailRequired"));
+      toast.error(t("emailRequired"));
       return;
     }
 
     if (!validateEmail(email)) {
-      setEmailError(t("emailInvalid"));
+      toast.error(t("emailInvalid"));
       return;
     }
 
@@ -55,22 +55,20 @@ export default function LoginForm() {
   const handleBackToEmail = () => {
     setStep("email");
     setEmailError("");
-    setError("");
   };
 
   const handleRegister = async () => {
     if (!firstName || !lastName || !password || !confirmPassword) {
-      setError(t("fillAllFields"));
+      toast.error(t("fillAllFields"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(t("passwordMismatch"));
+      toast.error(t("passwordMismatch"));
       return;
     }
 
     setIsLoading(true);
-    setError("");
 
     try {
       const result = await authService.registerCandidate({
@@ -94,13 +92,15 @@ export default function LoginForm() {
         
         // Store user data (token is already stored as HTTP-only cookie)
         authService.storeUserData(userData, 'candidate');
+        
+        toast.success(t("registrationSuccess") || "Registration successful! Welcome to Rolevate!");
         // Navigate to dashboard
         router.push("/dashboard");
       } else {
-        setError(result.message || t("registrationFailed"));
+        toast.error(result.message || t("registrationFailed"));
       }
-    } catch (error) {
-      setError(t("networkError"));
+    } catch {
+      toast.error(t("networkError"));
     } finally {
       setIsLoading(false);
     }
@@ -108,22 +108,23 @@ export default function LoginForm() {
 
   const handleLogin = async () => {
     if (!password) {
-      setError(t("passwordRequired"));
+      toast.error(t("passwordRequired"));
       return;
     }
 
     setIsLoading(true);
-    setError("");
 
     try {
       const result = await login(email, password);
 
       if (!result.success) {
-        setError(result.message || t("loginFailed"));
+        toast.error(result.message || t("loginFailed"));
+      } else {
+        toast.success(t("loginSuccess") || "Welcome back!");
       }
       // Navigation is handled by the auth context
-    } catch (error) {
-      setError(t("networkError"));
+    } catch {
+      toast.error(t("networkError"));
     } finally {
       setIsLoading(false);
     }
@@ -245,13 +246,6 @@ export default function LoginForm() {
         <p className="text-muted-foreground text-center text-sm">{email}</p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Error Message */}
-        {error && (
-          <div className="text-sm text-red-500 text-center p-2 bg-red-50 rounded">
-            {error}
-          </div>
-        )}
-
         {/* Password Input */}
         <div className="space-y-2">
           <div className="relative">
@@ -307,13 +301,6 @@ export default function LoginForm() {
         <p className="text-muted-foreground text-center text-sm">{email}</p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Error Message */}
-        {error && (
-          <div className="text-sm text-red-500 text-center p-2 bg-red-50 rounded">
-            {error}
-          </div>
-        )}
-
         {/* First Name */}
         <div className="space-y-2">
           <div className="relative">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 interface SetupData {
   // Organization details
@@ -235,11 +236,12 @@ export default function OrganizationSetupForm({
             <div className="flex items-center gap-4">
               {/* Logo Preview */}
               {logoPreview && (
-                <div className="w-16 h-16 rounded-lg border border-border overflow-hidden bg-muted">
-                  <img
+                <div className="relative w-16 h-16 rounded-lg border border-border overflow-hidden bg-muted">
+                  <Image
                     src={logoPreview}
                     alt="Logo preview"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 </div>
               )}

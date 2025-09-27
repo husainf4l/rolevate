@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from '@/i18n/navigation';
 import { Card } from '@/components/ui/card';
 import { useAuthContext } from '@/providers/auth-provider';
 import StepIndicator from './step-indicator';
@@ -33,7 +32,7 @@ interface FormData {
 
 export default function BusinessSignupForm({ locale }: BusinessSignupFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const router = useRouter();
+  // const router = useRouter();
   const { registerBusiness } = useAuthContext();
   const [formData, setFormData] = useState<FormData>({
     companyName: '',

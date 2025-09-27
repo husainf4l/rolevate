@@ -11,6 +11,7 @@ import Logo from '@/components/common/logo';
 import { authService } from '@/services/auth';
 import { useAuthContext } from '@/providers/auth-provider';
 import { invitationsService, Invitation } from '@/services/invitations';
+import { toast } from 'sonner';
 
 interface InvitationFormProps {
   token?: string;
@@ -25,14 +26,13 @@ export default function InvitationForm({ token }: InvitationFormProps) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const t = useTranslations('invitation');
   const router = useRouter();
   const { login } = useAuthContext();
 
   const validateInvitation = useCallback(async (invitationToken: string) => {
     setIsLoading(true);
-    setError('');
+
 
     try {
       const result = await invitationsService.validateInvitation(invitationToken);
@@ -42,11 +42,11 @@ export default function InvitationForm({ token }: InvitationFormProps) {
         setEmail(result.invitation.email);
         setStep('register');
       } else {
-        setError(result.message || t('invalidToken'));
+        toast.error(result.message || t('invalidToken'));
         setStep('validate');
       }
     } catch {
-      setError(t('invalidToken'));
+      toast.error(t('invalidToken'));
       setStep('validate');
     } finally {
       setIsLoading(false);
@@ -57,7 +57,7 @@ export default function InvitationForm({ token }: InvitationFormProps) {
     if (token) {
       validateInvitation(token);
     } else {
-      setError(t('invalidToken'));
+      toast.error(t('invalidToken'));
       setStep('validate');
     }
   }, [token, t, validateInvitation]);
@@ -66,32 +66,31 @@ export default function InvitationForm({ token }: InvitationFormProps) {
     e.preventDefault();
 
     if (!firstName.trim()) {
-      setError(t('form.validation.firstNameRequired'));
+      toast.error(t('form.validation.firstNameRequired'));
       return;
     }
 
     if (!lastName.trim()) {
-      setError(t('form.validation.lastNameRequired'));
+      toast.error(t('form.validation.lastNameRequired'));
       return;
     }
 
     if (!password) {
-      setError(t('form.validation.passwordRequired'));
+      toast.error(t('form.validation.passwordRequired'));
       return;
     }
 
     if (password.length < 8) {
-      setError(t('form.validation.passwordMinLength'));
+      toast.error(t('form.validation.passwordMinLength'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(t('form.validation.passwordMismatch'));
+      toast.error(t('form.validation.passwordMismatch'));
       return;
     }
 
     setIsLoading(true);
-    setError('');
 
     try {
       const registerResult = await authService.registerCandidate({
@@ -113,13 +112,13 @@ export default function InvitationForm({ token }: InvitationFormProps) {
             router.push('/dashboard');
           }, 2000);
         } else {
-          setError('Account created but login failed. Please try logging in manually.');
+          toast.error('Account created but login failed. Please try logging in manually.');
         }
       } else {
-        setError(registerResult.message || 'Registration failed');
+        toast.error(registerResult.message || 'Registration failed');
       }
     } catch {
-      setError('An error occurred during registration');
+      toast.error('An error occurred during registration');
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +147,7 @@ export default function InvitationForm({ token }: InvitationFormProps) {
                 <CheckCircle className="w-12 h-12 mx-auto mb-2" />
                 <p className="font-medium">{t('invalidToken')}</p>
               </div>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <p className="text-muted-foreground mb-4">{t('pleaseContactAdmin')}</p>
               <Button onClick={() => router.push('/login')}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Login
@@ -290,11 +289,7 @@ export default function InvitationForm({ token }: InvitationFormProps) {
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">
-              {error}
-            </div>
-          )}
+
 
           <Button
             type="submit"

@@ -59,8 +59,7 @@ class AuthService {
         body: JSON.stringify({
           email: data.email,
           password: data.password,
-          firstName: data.firstName,
-          lastName: data.lastName,
+          name: `${data.firstName} ${data.lastName}`.trim(),
           role: Role.CANDIDATE,
           invitationToken: data.invitationToken,
         }),
@@ -80,7 +79,7 @@ class AuthService {
           message: result.message || 'Registration failed',
         };
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Network error. Please check your connection.',
@@ -118,7 +117,7 @@ class AuthService {
           message: result.message || 'Login failed',
         };
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Network error. Please check your connection.',
@@ -152,7 +151,7 @@ class AuthService {
           message: result.message || 'Login failed',
         };
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Network error. Please check your connection.',
@@ -232,10 +231,17 @@ class AuthService {
 
   async verifyAuth(): Promise<UserData | null> {
     try {
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
       const response = await fetch(`${this.baseUrl}/auth/verify`, {
         method: 'GET',
         credentials: 'include', // Include cookies in requests
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
@@ -243,7 +249,11 @@ class AuthService {
       } else {
         return null;
       }
-    } catch (error) {
+    } catch {
+      // Don't log network errors in development when backend isn't running
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Auth verification skipped - backend not available');
+      }
       return null;
     }
   }
@@ -295,7 +305,7 @@ class AuthService {
           message: result.message || 'Registration failed',
         };
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Network error. Please check your connection.',

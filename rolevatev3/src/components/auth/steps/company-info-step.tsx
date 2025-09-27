@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import Image from 'next/image';
 
 interface FormData {
   companyName: string;
@@ -219,12 +220,13 @@ export default function CompanyInfoStep({ locale, data, onUpdate, onNext }: Comp
             
             <div className="flex items-start gap-4">
               {/* Logo Preview */}
-              <div className="w-20 h-20 rounded-xl border-2 border-dashed border-border bg-muted/30 flex items-center justify-center overflow-hidden">
+              <div className="relative w-20 h-20 rounded-xl border-2 border-dashed border-border bg-muted/30 flex items-center justify-center overflow-hidden">
                 {logoPreview ? (
-                  <img 
-                    src={logoPreview} 
-                    alt="Logo preview" 
-                    className="w-full h-full object-cover"
+                  <Image
+                    src={logoPreview}
+                    alt="Logo preview"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">

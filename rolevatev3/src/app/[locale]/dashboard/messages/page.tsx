@@ -3,16 +3,13 @@ import CandidateSidebar from "@/components/layout/candidate-sidebar";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MessageSquare,
   Send,
@@ -21,11 +18,9 @@ import {
   Mail,
   Phone,
   Calendar,
-  Building,
   User,
   Clock,
   CheckCircle,
-  AlertCircle,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -46,7 +41,7 @@ export default async function MessagesPage({
       company: "TechCorp Inc.",
       contact: "Sarah Johnson",
       position: "HR Manager",
-      avatar: "/placeholder-avatar.jpg",
+      avatar: "", // Use fallback avatar
       lastMessage:
         "Thank you for your application. We would like to schedule an interview with you.",
       timestamp: "2 hours ago",

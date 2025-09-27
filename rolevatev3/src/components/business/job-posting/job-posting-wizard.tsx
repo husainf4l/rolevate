@@ -19,7 +19,6 @@ import { jobsService } from "@/services/jobs";
 import { useAuthContext } from "@/providers/auth-provider";
 import {
   CreateJobPostDto,
-  CreateJobRequest,
   CreateAddressDto,
   WorkLocation,
   JobType,
@@ -312,7 +311,8 @@ export default function JobPostingWizard({
 
     try {
       // Prepare data for submission
-      const { numberOfPositions, ...submitData } = {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { numberOfPositions: _numberOfPositions, ...submitData } = {
         ...formData,
         // Convert applicationDeadline to ISO 8601 format if it exists
         applicationDeadline: formData.applicationDeadline

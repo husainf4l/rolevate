@@ -11,44 +11,6 @@ export const themeConfig = {
   forcedTheme: undefined,
 };
 
-export const themeColors = {
-  light: {
-    background: '#ffffff',
-    foreground: '#171717',
-    primary: '#0070f3',
-    secondary: '#f4f4f4',
-    muted: '#f8f9fa',
-    accent: '#e1e1e1',
-    destructive: '#ef4444',
-    border: '#e5e5e5',
-    input: '#ffffff',
-    ring: '#0070f3',
-    card: '#ffffff',
-    popover: '#ffffff',
-  },
-  dark: {
-    background: '#0a0a0a',
-    foreground: '#ededed',
-    primary: '#0ea5e9',
-    secondary: '#1a1a1a',
-    muted: '#171717',
-    accent: '#262626',
-    destructive: '#dc2626',
-    border: '#262626',
-    input: '#171717',
-    ring: '#0ea5e9',
-    card: '#0a0a0a',
-    popover: '#0a0a0a',
-  },
-} as const;
-
-export type ThemeColors = typeof themeColors;
-export type ColorScheme = keyof ThemeColors;
-
-export function getThemeColors(theme: ColorScheme): ThemeColors[ColorScheme] {
-  return themeColors[theme];
-}
-
 export const breakpoints = {
   sm: '640px',
   md: '768px',

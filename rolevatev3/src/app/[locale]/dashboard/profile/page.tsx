@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import CandidateSidebar from "@/components/layout/candidate-sidebar";
 import {
@@ -14,9 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   User,
   Mail,
@@ -33,33 +33,51 @@ import {
 export default function ProfilePage() {
   const params = useParams();
   const locale = params.locale as string;
-  const { toast } = useToast();
 
-  // Profile state
+
+  // Profile state - TODO: Load from user profile API
   const [profile, setProfile] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@email.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, NY",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    location: "",
     website: "",
-    title: "Software Developer",
-    professionalSummary:
-      "Experienced software developer with 5+ years in full-stack development, specializing in React, Node.js, and cloud technologies. Passionate about creating user-friendly applications and solving complex problems.",
-    skills: [
-      "JavaScript",
-      "React",
-      "Node.js",
-      "Python",
-      "AWS",
-      "Docker",
-      "Git",
-      "Agile",
-    ],
+    title: "",
+    professionalSummary: "",
+    skills: [] as string[],
   });
 
   const [newSkill, setNewSkill] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  // Load profile data on component mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      // Skip loading if API calls are disabled or no backend is configured
+      if (process.env.NEXT_PUBLIC_DISABLE_API_CALLS === 'true' || !process.env.NEXT_PUBLIC_API_URL) {
+        console.log('API calls disabled or no backend configured, skipping profile load');
+        setProfileLoading(false);
+        return;
+      }
+
+      try {
+        // TODO: Replace with actual API call to load user profile
+        // const userProfile = await userProfileService.getProfile();
+        // if (userProfile.success) {
+        //   setProfile(userProfile.profile);
+        // }
+        
+        setProfileLoading(false);
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+        setProfileLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setProfile((prev) => ({
@@ -88,29 +106,65 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Skip API call if disabled or no backend configured
+      if (process.env.NEXT_PUBLIC_DISABLE_API_CALLS === 'true' || !process.env.NEXT_PUBLIC_API_URL) {
+        // Just show success message for demo purposes
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        toast.success(
+          locale === "ar"
+            ? "تم حفظ التغييرات محلياً (بدون خادم)"
+            : "Changes saved locally (no backend)"
+        );
+        setIsLoading(false);
+        return;
+      }
 
-      toast({
-        title: locale === "ar" ? "تم حفظ التغييرات" : "Changes Saved",
-        description:
-          locale === "ar"
-            ? "تم تحديث ملفك الشخصي بنجاح"
-            : "Your profile has been updated successfully",
-      });
-    } catch (error) {
-      toast({
-        title: locale === "ar" ? "خطأ" : "Error",
-        description:
-          locale === "ar"
-            ? "حدث خطأ أثناء حفظ التغييرات"
-            : "An error occurred while saving changes",
-        variant: "destructive",
-      });
+      // TODO: Replace with actual API call to update user profile
+      // const result = await userProfileService.updateProfile(profile);
+      // if (result.success) {
+      //   toast.success(
+      //     locale === "ar"
+      //       ? "تم تحديث ملفك الشخصي بنجاح"
+      //       : "Your profile has been updated successfully"
+      //   );
+      // } else {
+      //   throw new Error(result.message);
+      // }
+
+      // Temporary success message for when backend is available but not implemented yet
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success(
+        locale === "ar"
+          ? "تم تحديث ملفك الشخصي بنجاح"
+          : "Your profile has been updated successfully"
+      );
+    } catch {
+      toast.error(
+        locale === "ar"
+          ? "حدث خطأ أثناء حفظ التغييرات"
+          : "An error occurred while saving changes"
+      );
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Show loading state while profile is being loaded
+  if (profileLoading) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <CandidateSidebar locale={locale} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">
+              {locale === "ar" ? "جاري تحميل الملف الشخصي..." : "Loading profile..."}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -144,10 +198,7 @@ export default function ProfilePage() {
                   <div className="flex flex-col items-center space-y-4">
                     <div className="relative">
                       <Avatar className="w-24 h-24">
-                        <AvatarImage
-                          src="/placeholder-avatar.jpg"
-                          alt={`${profile.firstName} ${profile.lastName}`}
-                        />
+                        {/* Remove src to prevent 404 requests - will use fallback */}
                         <AvatarFallback className="text-lg">
                           {profile.firstName.charAt(0)}
                           {profile.lastName.charAt(0)}
@@ -180,12 +231,12 @@ export default function ProfilePage() {
                       <span className="text-sm text-muted-foreground">
                         {locale === "ar" ? "الملف مكتمل" : "Profile Complete"}
                       </span>
-                      <span className="text-sm font-medium">85%</span>
+                      <span className="text-sm font-medium">0%</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
                         className="bg-primary h-2 rounded-full"
-                        style={{ width: "85%" }}
+                        style={{ width: "0%" }}
                       ></div>
                     </div>
                   </div>
@@ -208,8 +259,8 @@ export default function ProfilePage() {
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span>
                         {locale === "ar"
-                          ? "انضم في يناير 2024"
-                          : "Joined January 2024"}
+                          ? "تاريخ الانضمام غير متوفر"
+                          : "Join date not available"}
                       </span>
                     </div>
                   </div>

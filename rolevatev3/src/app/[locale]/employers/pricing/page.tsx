@@ -16,7 +16,7 @@ export default async function PricingPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { /* locale */ } = await params;
   const t = await getTranslations("employers.pricing");
 
   const plans = [

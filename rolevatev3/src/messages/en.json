@@ -244,7 +244,6 @@
     },
     "services": {
       "jobSearch": "Job Search",
-      "resumeBuilder": "Resume Builder",
       "careerAdvice": "Career Advice",
       "employerServices": "Employer Services"
     },
@@ -279,27 +278,48 @@
       "accessibility": "Accessibility"
     }
   },
-  "cvUpload": {
-    "title": "Not Sure What Fits You?",
-    "subtitle": "Upload your CV to match you with the best jobs and career enhancement opportunities. Our AI will provide a comprehensive analysis and personalized recommendations.",
-    "uploadTitle": "Upload Your CV",
-    "uploadSubtitle": "Drag and drop your CV here or click to browse",
-    "chooseFile": "Choose File",
-    "fileSupport": "Support PDF (Max 10MB)",
-    "analyzeButton": "Analyze My CV",
-    "features": {
-      "jobMatching": {
-        "title": "Perfect Job Matching",
-        "description": "Our AI analyzes your skills, experience, and preferences to match you with the most suitable job opportunities in Jordan, Qatar, and KSA."
-      },
-      "cvAnalysis": {
-        "title": "Comprehensive CV Analysis",
-        "description": "Get detailed insights on your CV including strengths, areas for improvement, keyword optimization, and formatting suggestions."
-      },
-      "careerEnhancement": {
-        "title": "Career Enhancement",
-        "description": "Receive personalized recommendations for skill development, certifications, and career progression paths tailored to the Middle East job market."
-      }
+  "room": {
+    "interview": {
+      "title": "Interview Room",
+      "subtitle": "Connect with your interviewer",
+      "connecting": "Connecting to room...",
+      "connected": "Connected successfully",
+      "reconnecting": "Reconnecting...",
+      "failed": "Connection failed",
+      "waiting": "Waiting for interviewer to join",
+      "duration": "Duration",
+      "participants": "Participants",
+      "startInterview": "Start Interview",
+      "endInterview": "End Interview",
+      "leaveRoom": "Leave Room",
+      "confirmLeave": "Are you sure you want to leave the interview?",
+      "yes": "Yes, Leave",
+      "cancel": "Cancel",
+      "micOn": "Microphone On",
+      "micOff": "Microphone Off",
+      "cameraOn": "Camera On",
+      "cameraOff": "Camera Off",
+      "shareScreen": "Share Screen",
+      "stopSharing": "Stop Sharing",
+      "fullscreen": "Fullscreen",
+      "settings": "Settings"
+    },
+    "permissions": {
+      "title": "Camera & Microphone Access Required",
+      "subtitle": "Please allow access to your camera and microphone to join the interview",
+      "allow": "Allow Access",
+      "denied": "Access Denied",
+      "deniedMessage": "Camera and microphone access is required for video interviews. Please refresh and allow access.",
+      "refresh": "Refresh Page"
+    },
+    "errors": {
+      "connectionFailed": "Failed to connect to the interview room",
+      "mediaError": "Could not access camera or microphone",
+      "roomNotFound": "Interview room not found",
+      "unauthorized": "You are not authorized to join this room",
+      "serverError": "Server connection error",
+      "tryAgain": "Try Again",
+      "contactSupport": "Contact Support"
     }
   },
   "employerSignup": {

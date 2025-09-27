@@ -1,7 +1,5 @@
-import { getTranslations } from 'next-intl/server';
 import BusinessSignupForm from '@/components/auth/business-signup-form';
 import Image from 'next/image';
-import { getDirection, type Locale } from '@/i18n/config';
 
 export default async function BusinessSignupPage({
   params
@@ -9,8 +7,6 @@ export default async function BusinessSignupPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations('businessSignup');
-  const direction = getDirection(locale as Locale);
 
   return (
     <div className="min-h-screen flex">

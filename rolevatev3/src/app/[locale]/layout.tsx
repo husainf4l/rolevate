@@ -2,22 +2,9 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { locales, getDirection, type Locale } from '@/i18n/config';
+import { locales, type Locale } from '@/i18n/config';
 import { Providers } from '@/providers';
-import { Inter } from 'next/font/google';
-import { Noto_Sans_Arabic } from 'next/font/google';
-
-const inter = Inter({ 
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const notoSansArabic = Noto_Sans_Arabic({ 
-  subsets: ['arabic'],
-  variable: '--font-noto-arabic',
-  display: 'swap',
-});
+import { LocaleAttributes } from '@/components/locale-attributes';
 
 export const metadata: Metadata = {
   title: {
@@ -52,23 +39,13 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
-  const direction = getDirection(locale as Locale);
-  const isArabic = locale === 'ar';
 
   return (
-    <html 
-      lang={locale} 
-      dir={direction} 
-      suppressHydrationWarning
-      className={`${inter.variable} ${notoSansArabic.variable}`}
-    >
-      <body className={isArabic ? 'font-arabic' : 'font-sans'}>
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <Providers>
-            {children}
-          </Providers>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider messages={messages} locale={locale}>
+      <LocaleAttributes locale={locale as Locale} />
+      <Providers>
+        {children}
+      </Providers>
+    </NextIntlClientProvider>
   );
 }

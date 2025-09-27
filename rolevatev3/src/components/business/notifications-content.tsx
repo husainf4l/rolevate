@@ -3,35 +3,22 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Bell,
-  BellRing,
   Check,
   CheckCheck,
   MoreVertical,
   Trash2,
-  Archive,
   Mail,
   Clock,
   User,
-  Briefcase,
-  FileText
 } from "lucide-react";
 import { useAuthContext } from "@/providers/auth-provider";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  category: 'application' | 'interview' | 'system' | 'message';
-  isRead: boolean;
-  createdAt: string;
-  actionUrl?: string;
-}
+import { Notification } from "@/types/notifications";
+import { notificationsService } from "@/services/notifications";
 
 interface NotificationsContentProps {
   locale: string;
@@ -46,15 +33,15 @@ export default function NotificationsContent({ locale }: NotificationsContentPro
   // Fetch notifications from API
   useEffect(() => {
     if (isAuthenticated && user) {
-      // TODO: Replace with actual API call
       const fetchNotifications = async () => {
         try {
-          // const response = await fetch('/api/notifications');
-          // const data = await response.json();
-          // setNotifications(data);
-          
-          // For now, show empty state
-          setNotifications([]);
+          const result = await notificationsService.findAll();
+          if (result.success && result.notifications) {
+            setNotifications(result.notifications);
+          } else {
+            console.error('Failed to fetch notifications:', result.message);
+            setNotifications([]);
+          }
           setLoading(false);
         } catch (error) {
           console.error('Failed to fetch notifications:', error);

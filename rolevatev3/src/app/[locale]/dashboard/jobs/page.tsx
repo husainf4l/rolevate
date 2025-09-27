@@ -4,9 +4,6 @@ import CandidateSidebar from "@/components/layout/candidate-sidebar";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,8 +27,9 @@ import {
   X,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { DisplayJob } from "@/types/job";
 import { useRouter } from "@/i18n/navigation";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function JobsPage({
   params,
@@ -43,7 +41,7 @@ export default function JobsPage({
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedJobType, setSelectedJobType] = useState("");
   const router = useRouter();
-  const { toast } = useToast();
+
 
   // Initialize locale from params
   useEffect(() => {
@@ -59,86 +57,17 @@ export default function JobsPage({
     initLocale();
   }, [params]);
 
-  const jobs = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      company: "TechCorp Inc.",
-      location: "New York, NY",
-      type: "Full-time",
-      salary: "$80k - $120k",
-      posted: "2 days ago",
-      description:
-        "We are looking for a Senior Frontend Developer to join our team...",
-      tags: ["React", "TypeScript", "JavaScript"],
-      isRemote: true,
-      urgent: true,
-    },
-    {
-      id: 2,
-      title: "Full Stack Developer",
-      company: "StartupXYZ",
-      location: "San Francisco, CA",
-      type: "Full-time",
-      salary: "$90k - $130k",
-      posted: "1 week ago",
-      description: "Join our fast-growing startup as a Full Stack Developer...",
-      tags: ["React", "Node.js", "MongoDB"],
-      isRemote: false,
-      urgent: false,
-    },
-    {
-      id: 3,
-      title: "React Developer",
-      company: "Digital Agency",
-      location: "Remote",
-      type: "Contract",
-      salary: "$50 - $80/hour",
-      posted: "3 days ago",
-      description:
-        "Looking for an experienced React Developer for a 6-month contract...",
-      tags: ["React", "Next.js", "Tailwind"],
-      isRemote: true,
-      urgent: false,
-    },
-    {
-      id: 4,
-      title: "Software Engineer",
-      company: "BigTech Corp",
-      location: "Seattle, WA",
-      type: "Full-time",
-      salary: "$100k - $150k",
-      posted: "5 days ago",
-      description:
-        "We are seeking a talented Software Engineer to work on our core platform...",
-      tags: ["Python", "Django", "AWS"],
-      isRemote: false,
-      urgent: true,
-    },
-    {
-      id: 5,
-      title: "Junior Developer",
-      company: "Local Startup",
-      location: "Austin, TX",
-      type: "Full-time",
-      salary: "$60k - $80k",
-      posted: "1 day ago",
-      description:
-        "Great opportunity for a Junior Developer to grow with our team...",
-      tags: ["JavaScript", "React", "Node.js"],
-      isRemote: false,
-      urgent: false,
-    },
-  ];
+    // Jobs will be loaded from API - no demo data
+  const mockJobs: DisplayJob[] = [];
 
   // Filter jobs based on search criteria
-  const filteredJobs = jobs.filter((job) => {
+  const filteredJobs = mockJobs.filter((job) => {
     const matchesSearch =
       !searchQuery ||
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.tags.some((tag) =>
+      job.tags?.some((tag: string) =>
         tag.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
@@ -163,19 +92,16 @@ export default function JobsPage({
 
   const hasActiveFilters = searchQuery || selectedLocation || selectedJobType;
 
-  const handleViewDetails = (jobId: number) => {
+  const handleViewDetails = (jobId: string) => {
     router.push(`/jobs/${jobId}`);
   };
 
   const handleApplyNow = (jobTitle: string, company: string) => {
-    toast({
-      title: locale === "ar" ? "تم التقديم بنجاح!" : "Application Submitted!",
-      description:
-        locale === "ar"
-          ? `تم إرسال طلبك للوظيفة "${jobTitle}" في ${company}`
-          : `Your application for "${jobTitle}" at ${company} has been submitted successfully.`,
-      variant: "default",
-    });
+    toast.success(
+      locale === "ar"
+        ? `تم إرسال طلبك للوظيفة "${jobTitle}" في ${company}`
+        : `Your application for "${jobTitle}" at ${company} has been submitted successfully.`
+    );
     // Optionally navigate to applications page
     setTimeout(() => {
       router.push("/dashboard/applications");
@@ -357,7 +283,7 @@ export default function JobsPage({
                       </p>
 
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {job.tags.map((tag) => (
+                        {job.tags?.map((tag: string) => (
                           <Badge
                             key={tag}
                             variant="secondary"

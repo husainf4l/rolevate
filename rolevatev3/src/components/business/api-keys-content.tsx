@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,40 +8,41 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Key, Plus, Copy, Trash2, Eye, EyeOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { ApiKey } from '@/types/common';
 import { apiKeysService } from '@/services/api-keys';
+import { toast } from 'sonner';
 
 interface ApiKeysContentProps {
   locale: string;
 }
 
 export default function ApiKeysContent({ locale }: ApiKeysContentProps) {
-  const { toast } = useToast();
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [newKeyName, setNewKeyName] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch API keys on component mount
-  useEffect(() => {
-    fetchApiKeys();
-  }, []);
-
-  const fetchApiKeys = async () => {
+  const fetchApiKeys = useCallback(async () => {
     const result = await apiKeysService.getApiKeys();
     if (result.success && result.apiKeys) {
       setApiKeys(result.apiKeys);
     } else {
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: result.message || (locale === 'ar' ? 'فشل في تحميل مفاتيح API' : 'Failed to load API keys'),
-        variant: 'destructive',
-      });
+      toast.error(result.message || (locale === 'ar' ? 'فشل في تحميل مفاتيح API' : 'Failed to load API keys'));
     }
     setIsLoading(false);
-  };
+  }, [locale]);
+
+  // Fetch API keys on component mount
+  useEffect(() => {
+    // Skip loading if API calls are disabled or no backend is configured
+    if (process.env.NEXT_PUBLIC_DISABLE_API_CALLS === 'true' || !process.env.NEXT_PUBLIC_API_URL) {
+      console.log('API calls disabled or no backend configured, skipping API keys load');
+      setIsLoading(false);
+      return;
+    }
+    fetchApiKeys();
+  }, [fetchApiKeys]);
 
   const toggleKeyVisibility = (keyId: string) => {
     setShowKeys(prev => ({
@@ -53,16 +54,9 @@ export default function ApiKeysContent({ locale }: ApiKeysContentProps) {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast({
-        title: locale === 'ar' ? 'تم النسخ' : 'Copied',
-        description: locale === 'ar' ? 'تم نسخ المفتاح إلى الحافظة' : 'API key copied to clipboard',
-      });
-    } catch (err) {
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: locale === 'ar' ? 'فشل في نسخ المفتاح' : 'Failed to copy API key',
-        variant: 'destructive',
-      });
+      toast.success(locale === 'ar' ? 'تم نسخ المفتاح إلى الحافظة' : 'API key copied to clipboard');
+    } catch {
+      toast.error(locale === 'ar' ? 'فشل في نسخ المفتاح' : 'Failed to copy API key');
     }
   };
 
@@ -75,16 +69,9 @@ export default function ApiKeysContent({ locale }: ApiKeysContentProps) {
       setNewKeyName('');
       setIsCreateDialogOpen(false);
 
-      toast({
-        title: locale === 'ar' ? 'تم إنشاء المفتاح' : 'API Key Created',
-        description: locale === 'ar' ? 'تم إنشاء مفتاح API جديد بنجاح' : 'New API key created successfully',
-      });
+      toast.success(locale === 'ar' ? 'تم إنشاء مفتاح API جديد بنجاح' : 'New API key created successfully');
     } else {
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: result.message || (locale === 'ar' ? 'فشل في إنشاء مفتاح API' : 'Failed to create API key'),
-        variant: 'destructive',
-      });
+      toast.error(result.message || (locale === 'ar' ? 'فشل في إنشاء مفتاح API' : 'Failed to create API key'));
     }
   };
 
@@ -92,16 +79,9 @@ export default function ApiKeysContent({ locale }: ApiKeysContentProps) {
     const result = await apiKeysService.deleteApiKey(keyId);
     if (result.success) {
       setApiKeys(prev => prev.filter(key => key.id !== keyId));
-      toast({
-        title: locale === 'ar' ? 'تم حذف المفتاح' : 'API Key Deleted',
-        description: locale === 'ar' ? 'تم حذف مفتاح API بنجاح' : 'API key deleted successfully',
-      });
+      toast.success(locale === 'ar' ? 'تم حذف مفتاح API بنجاح' : 'API key deleted successfully');
     } else {
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: result.message || (locale === 'ar' ? 'فشل في حذف مفتاح API' : 'Failed to delete API key'),
-        variant: 'destructive',
-      });
+      toast.error(result.message || (locale === 'ar' ? 'فشل في حذف مفتاح API' : 'Failed to delete API key'));
     }
   };
 

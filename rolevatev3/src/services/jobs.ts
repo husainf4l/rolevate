@@ -2,23 +2,36 @@ import {
   Job,
   CreateJobPostDto,
   JobsResponse,
-  JobStatus,
-  JobType,
-  ExperienceLevel,
-  EducationLevel,
-  JobPriority,
-  SalaryType,
-  Currency,
-  WorkLocation,
-  JobCategory
+  // JobStatus,
+  // JobType,
+  // ExperienceLevel,
+  // EducationLevel,
+  // JobPriority,
+  // SalaryType,
+  // Currency,
+  // WorkLocation,
+  // JobCategory
 } from '@/types/job';
 
 class JobsService {
   private baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
 
-  async getJobs(): Promise<JobsResponse> {
+  // Utility function to generate slug from title
+  private generateSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  }
+
+  async getJobs(page: number = 1, limit: number = 20): Promise<JobsResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/jobs`, {
+      const url = new URL(`${this.baseUrl}/jobs`);
+      url.searchParams.append('page', page.toString());
+      url.searchParams.append('limit', limit.toString());
+
+      const response = await fetch(url.toString(), {
         method: 'GET',
         credentials: 'include',
       });
@@ -29,13 +42,32 @@ class JobsService {
       if (response.ok) {
         // Handle different response formats
         let jobsArray: Job[] = [];
+        let pagination = {
+          total: 0,
+          page: page,
+          limit: limit,
+          totalPages: 1
+        };
 
         if (Array.isArray(result)) {
           jobsArray = result;
+          pagination.total = result.length;
         } else if (result.jobs && Array.isArray(result.jobs)) {
           jobsArray = result.jobs;
+          pagination = {
+            total: result.total || result.jobs.length,
+            page: result.page || page,
+            limit: result.limit || limit,
+            totalPages: result.totalPages || Math.ceil((result.total || result.jobs.length) / limit)
+          };
         } else if (result.data && Array.isArray(result.data)) {
           jobsArray = result.data;
+          pagination = {
+            total: result.total || result.data.length,
+            page: result.page || page,
+            limit: result.limit || limit,
+            totalPages: Math.ceil((result.total || result.data.length) / limit)
+          };
         } else {
           console.warn('Unexpected jobs response format:', result);
         }
@@ -43,6 +75,7 @@ class JobsService {
         return {
           success: true,
           jobs: jobsArray,
+          pagination,
         };
       } else {
         return {
@@ -59,7 +92,7 @@ class JobsService {
     }
   }
 
-  async getJobById(id: string): Promise<JobsResponse> {
+  async getJobById(id: string): Promise<{ success: boolean; job?: Job; message?: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/jobs/${id}`, {
         method: 'GET',
@@ -76,13 +109,43 @@ class JobsService {
       } else {
         return {
           success: false,
-          message: result.message || 'Failed to fetch job',
+          message: result.message || result.error || 'Job not found',
         };
       }
     } catch (error) {
+      console.error('Error fetching job:', error);
       return {
         success: false,
-        message: 'Network error. Please check your connection.',
+        message: 'Network error while fetching job',
+      };
+    }
+  }
+
+  async getJobBySlug(slug: string): Promise<{ success: boolean; job?: Job; message?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/jobs/slug/${slug}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        return {
+          success: true,
+          job: result.job || result,
+        };
+      } else {
+        return {
+          success: false,
+          message: result.message || result.error || 'Job not found',
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching job by slug:', error);
+      return {
+        success: false,
+        message: 'Network error while fetching job',
       };
     }
   }
@@ -112,7 +175,7 @@ class JobsService {
           message: result.message || 'Failed to create job',
         };
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Network error. Please check your connection.',
@@ -146,6 +209,7 @@ class JobsService {
         };
       }
     } catch (error) {
+      console.error('Network error:', error);
       return {
         success: false,
         message: 'Network error. Please check your connection.',
@@ -173,7 +237,7 @@ class JobsService {
           message: result.message || 'Failed to delete job',
         };
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Network error. Please check your connection.',

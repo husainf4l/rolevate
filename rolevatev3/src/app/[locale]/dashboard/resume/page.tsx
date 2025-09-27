@@ -20,7 +20,6 @@ import {
   Briefcase,
   GraduationCap,
   Award,
-  Languages,
   Upload,
   CheckCircle,
 } from "lucide-react";
@@ -39,82 +38,20 @@ export default async function ResumePage({
 
   const resumeData = {
     personalInfo: {
-      name: "John Doe",
-      title: "Senior Frontend Developer",
-      email: "john.doe@email.com",
-      phone: "+1 (555) 123-4567",
-      location: "New York, NY",
-      linkedin: "linkedin.com/in/johndoe",
-      website: "johndoe.dev",
+      name: "",
+      title: "",
+      email: "",
+      phone: "",
+      location: "",
+      linkedin: "",
+      website: "",
     },
-    summary:
-      "Experienced frontend developer with 5+ years of expertise in React, TypeScript, and modern web technologies. Passionate about creating user-friendly applications and solving complex problems.",
-    experience: [
-      {
-        id: 1,
-        title: "Senior Frontend Developer",
-        company: "TechCorp Inc.",
-        location: "New York, NY",
-        period: "Jan 2022 - Present",
-        description:
-          "Led a team of 4 developers in building scalable React applications. Improved performance by 40% and user engagement by 25%.",
-        achievements: [
-          "Reduced application load time by 40%",
-          "Implemented CI/CD pipeline",
-          "Mentored junior developers",
-        ],
-      },
-      {
-        id: 2,
-        title: "Frontend Developer",
-        company: "StartupXYZ",
-        location: "San Francisco, CA",
-        period: "Mar 2020 - Dec 2021",
-        description:
-          "Developed and maintained multiple client-facing applications using React and Node.js.",
-        achievements: [
-          "Built 5+ production applications",
-          "Collaborated with design team",
-          "Implemented responsive designs",
-        ],
-      },
-    ],
-    education: [
-      {
-        id: 1,
-        degree: "Bachelor of Science in Computer Science",
-        school: "University of Technology",
-        location: "New York, NY",
-        period: "2016 - 2020",
-        gpa: "3.8/4.0",
-      },
-    ],
-    skills: [
-      { name: "JavaScript", level: 95 },
-      { name: "React", level: 90 },
-      { name: "TypeScript", level: 85 },
-      { name: "Node.js", level: 80 },
-      { name: "Python", level: 75 },
-      { name: "AWS", level: 70 },
-    ],
-    certifications: [
-      {
-        name: "AWS Certified Developer",
-        issuer: "Amazon Web Services",
-        date: "2023",
-        expiry: "2026",
-      },
-      {
-        name: "React Developer Certification",
-        issuer: "Meta",
-        date: "2022",
-        expiry: "2025",
-      },
-    ],
-    languages: [
-      { name: "English", level: "Native" },
-      { name: "Spanish", level: "Intermediate" },
-    ],
+    summary: "",
+    experience: [],
+    education: [],
+    skills: [],
+    certifications: [],
+    languages: [],
   };
 
   return (
@@ -307,7 +244,8 @@ export default async function ResumePage({
             </TabsContent>
 
             <TabsContent value="experience" className="space-y-4">
-              {resumeData.experience.map((exp) => (
+              {resumeData.experience.length > 0 ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              resumeData.experience.map((exp: any) => (
                 <Card key={exp.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -334,7 +272,7 @@ export default async function ResumePage({
                           : "Key Achievements"}
                       </h4>
                       <ul className="text-sm text-muted-foreground space-y-1">
-                        {exp.achievements.map((achievement, index) => (
+                        {exp.achievements.map((achievement: string, index: number) => (
                           <li key={index} className="flex items-start gap-2">
                             <span className="text-green-600 mt-1">•</span>
                             {achievement}
@@ -344,7 +282,13 @@ export default async function ResumePage({
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">No experience added yet</p>
+                  </CardContent>
+                </Card>
+              )}
               <Button variant="outline" className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 {locale === "ar" ? "إضافة خبرة جديدة" : "Add New Experience"}
@@ -352,7 +296,8 @@ export default async function ResumePage({
             </TabsContent>
 
             <TabsContent value="education" className="space-y-4">
-              {resumeData.education.map((edu) => (
+              {resumeData.education.length > 0 ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              resumeData.education.map((edu: any) => (
                 <Card key={edu.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -374,7 +319,13 @@ export default async function ResumePage({
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">No education added yet</p>
+                  </CardContent>
+                </Card>
+              )}
               <Button variant="outline" className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 {locale === "ar" ? "إضافة تعليم جديد" : "Add New Education"}
@@ -383,7 +334,8 @@ export default async function ResumePage({
 
             <TabsContent value="skills" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {resumeData.skills.map((skill) => (
+                {resumeData.skills.length > 0 ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                resumeData.skills.map((skill: any) => (
                   <Card key={skill.name}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -395,7 +347,13 @@ export default async function ResumePage({
                       <Progress value={skill.level} className="h-2" />
                     </CardContent>
                   </Card>
-                ))}
+                )) : (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <p className="text-muted-foreground">No skills added yet</p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
               <Button variant="outline" className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
@@ -404,7 +362,8 @@ export default async function ResumePage({
             </TabsContent>
 
             <TabsContent value="certifications" className="space-y-4">
-              {resumeData.certifications.map((cert, index) => (
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {resumeData.certifications.length > 0 ? resumeData.certifications.map((cert: any, index: number) => (
                 <Card key={index}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -427,7 +386,13 @@ export default async function ResumePage({
                     </div>
                   </CardHeader>
                 </Card>
-              ))}
+              )) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">No certifications added yet</p>
+                  </CardContent>
+                </Card>
+              )}
               <Button variant="outline" className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 {locale === "ar"

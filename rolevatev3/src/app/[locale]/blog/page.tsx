@@ -1,11 +1,10 @@
-import { getTranslations } from 'next-intl/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Calendar, Clock, User, ArrowRight } from 'lucide-react';
-import { BlogPost, BlogCategory } from '@/types/blog';
+import { BlogCategory } from '@/types/blog';
 import { blogService } from '@/services/blog';
 import { Navbar } from '@/components/layout';
 import Footer from '@/components/common/footer';

@@ -48,6 +48,37 @@ export enum JobPriority {
   URGENT = 'URGENT',
 }
 
+export interface DisplayJob {
+  id: string;
+  title: string;
+  slug: string;
+  titleAr: string;
+  company: string;
+  companyAr: string;
+  location: string;
+  locationAr: string;
+  type: string;
+  typeAr: string;
+  salary: string;
+  posted: string;
+  postedAr: string;
+  applicants: number;
+  featured: boolean;
+  urgent: boolean;
+  isRemote?: boolean;
+  experience: string;
+  skills: string[];
+  tags?: string[];
+  description: string;
+  descriptionAr: string;
+  requirements: string[];
+  requirementsAr: string[];
+  benefits: string[];
+  benefitsAr: string[];
+  companyDescription: string;
+  companyDescriptionAr: string;
+}
+
 export enum SalaryType {
   HOURLY = 'HOURLY',
   DAILY = 'DAILY',
@@ -248,6 +279,12 @@ export interface JobsResponse {
   message?: string;
   jobs?: Job[];
   job?: Job;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 // Updated Job interface with proper enums
@@ -255,22 +292,43 @@ export interface JobsResponse {
 export interface Job {
   id: string;
   title: string;
+  titleAr?: string;
+  slug: string;
   description: string;
-  location: string;
+  descriptionAr?: string;
+  location?: string;
   workLocation: WorkLocation;
   jobType: JobType;
   experienceLevel: ExperienceLevel;
   educationLevel?: EducationLevel;
   category: JobCategory;
-  skills: string[];
+  skills?: string[];
   tags?: string[];
-  requirements?: string[];
+  requirements?: string;
+  requirementsAr?: string;
+  responsibilities?: string;
+  responsibilitiesAr?: string;
+  benefits?: string;
+  benefitsAr?: string;
+  address?: {
+    id?: string;
+    street?: string;
+    city?: string;
+    country?: string;
+    postalCode?: string;
+    cityAr?: string;
+    countryAr?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  };
   salaryMin?: number;
   salaryMax?: number;
   salaryType?: SalaryType;
-  currency: Currency;
+  currency?: Currency;
   status: JobStatus;
   priority: JobPriority;
+  featured?: boolean;
+  urgent?: boolean;
   isRemote?: boolean;
   isUrgent?: boolean;
   applicationDeadline?: string;

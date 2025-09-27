@@ -1,6 +1,4 @@
-import { getTranslations } from 'next-intl/server';
 import BusinessLayout from '@/components/layout/business-layout';
-import BusinessDashboardClient from '@/components/auth/business-dashboard-client';
 
 export default async function BusinessPage({
   params

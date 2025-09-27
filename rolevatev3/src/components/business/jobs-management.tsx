@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -40,7 +40,7 @@ interface JobsManagementProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default function JobsManagement({ locale, searchParams }: JobsManagementProps) {
+export default function JobsManagement({ locale /*, searchParams*/ }: JobsManagementProps) {
   const { user, isAuthenticated } = useAuthContext();
   const [jobs, setJobs] = useState<JobPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,13 +71,7 @@ export default function JobsManagement({ locale, searchParams }: JobsManagementP
     applicationDeadline: ''
   });
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      fetchJobs();
-    }
-  }, [isAuthenticated, user, searchTerm, jobTypeFilter, experienceFilter, statusFilter]);
-
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -102,7 +96,13 @@ export default function JobsManagement({ locale, searchParams }: JobsManagementP
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, jobTypeFilter, experienceFilter, statusFilter]);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchJobs();
+    }
+  }, [isAuthenticated, user, fetchJobs]);
 
   const handleCreateJob = async () => {
     try {

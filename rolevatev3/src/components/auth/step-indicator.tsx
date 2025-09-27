@@ -46,7 +46,7 @@ export default function StepIndicator({ currentStep, totalSteps, locale }: StepI
 
       {/* Step Indicators */}
       <div className="flex items-center justify-between">
-        {steps.map((step, index) => (
+        {steps.map((step) => (
           <div key={step.number} className="flex flex-col items-center space-y-1 flex-1">
             {/* Step Circle */}
             <div className={`

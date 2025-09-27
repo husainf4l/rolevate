@@ -2,9 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import LoginForm from '@/components/auth/login-form';
 import Image from 'next/image';
-import { getDirection, type Locale } from '@/i18n/config';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+// import { getDirection, type Locale } from '@/i18n/config';
 
 export const metadata: Metadata = {
   title: 'Login - Rolevate',
@@ -16,9 +14,9 @@ export default async function LoginPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { /*locale*/ } = await params;
   const t = await getTranslations('login');
-  const direction = getDirection(locale as Locale);
+  // const direction = getDirection(locale as Locale);
 
   return (
     <div className="min-h-screen flex">

@@ -92,6 +92,13 @@ export default function BusinessSidebar({ locale }: BusinessSidebarProps) {
       icon: FileText,
       isActive: pathname.includes("/documents"),
     },
+    {
+      title: locale === "ar" ? "الإشعارات" : "Notifications",
+      href: `/${locale}/business/notifications`,
+      icon: Bell,
+      badge: "4",
+      isActive: pathname.includes("/notifications"),
+    },
   ];
 
   const bottomItems = [
@@ -147,7 +154,9 @@ export default function BusinessSidebar({ locale }: BusinessSidebarProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder={locale === "ar" ? "البحث..." : "Search..."}
+              placeholder={
+                locale === "ar" ? "البحث عن المواهب..." : "Search talents..."
+              }
               className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>

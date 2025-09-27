@@ -1,4 +1,3 @@
-import { getTranslations } from 'next-intl/server';
 import BusinessLayout from '@/components/layout/business-layout';
 import NotificationsContent from '@/components/business/notifications-content';
 

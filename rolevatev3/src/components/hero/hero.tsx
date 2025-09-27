@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import {   HeroSearchForm } from './index';
 import { HeroProps } from '@/types/hero';
+import Image from 'next/image';
 
 export default function Hero({ locale }: HeroProps) {
   const t = useTranslations('hero');
@@ -16,10 +17,12 @@ export default function Hero({ locale }: HeroProps) {
         }`}>
           {/* Image Half */}
           <div className="w-full lg:w-1/2 relative h-48 sm:h-64 lg:h-auto">
-            <img
+            <Image
               src={`/images/hero/${locale === 'ar' ? 'hero1' : 'hero1'}.jpeg`}
               alt="Hero Image"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-black/5 lg:to-black/20" />
           </div>

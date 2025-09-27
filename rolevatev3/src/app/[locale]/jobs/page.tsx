@@ -6,7 +6,6 @@ import Footer from "@/components/common/footer";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -22,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import {
   MapPin,
-  Clock,
   Users,
   Building2,
   Star,
@@ -34,159 +32,53 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Job } from "@/types/job";
+import { jobsService } from "@/services/jobs";
+import { toast } from "sonner";
 
 interface JobsPageProps {
   params: Promise<{ locale: string }>;
 }
 
-// Mock job data
-const jobs = [
-  {
-    id: 1,
-    title: "Senior Frontend Developer",
-    titleAr: "مطور واجهة أمامية أول",
-    company: "TechCorp Solutions",
-    companyAr: "تك كورب سوليوشنز",
-    location: "Dubai, UAE",
-    locationAr: "دبي، الإمارات العربية المتحدة",
-    type: "Full-time",
-    typeAr: "دوام كامل",
-    salary: "$8,000 - $12,000",
-    posted: "2 days ago",
-    postedAr: "منذ يومين",
-    applicants: 24,
-    featured: true,
-    urgent: false,
-    experience: "senior",
-    skills: ["React", "TypeScript", "Next.js"],
-    description:
-      "We are looking for a Senior Frontend Developer to join our dynamic team...",
-    descriptionAr:
-      "نبحث عن مطور واجهة أمامية أول للانضمام إلى فريقنا الديناميكي...",
-  },
-  {
-    id: 2,
-    title: "UX/UI Designer",
-    titleAr: "مصمم تجربة المستخدم والواجهة",
-    company: "Design Studio",
-    companyAr: "استوديو التصميم",
-    location: "Riyadh, Saudi Arabia",
-    locationAr: "الرياض، المملكة العربية السعودية",
-    type: "Full-time",
-    typeAr: "دوام كامل",
-    salary: "$6,000 - $9,000",
-    posted: "1 week ago",
-    postedAr: "منذ أسبوع",
-    applicants: 18,
-    featured: false,
-    urgent: true,
-    experience: "mid",
-    skills: ["Figma", "Adobe XD", "Sketch"],
-    description:
-      "Join our creative team as a UX/UI Designer and help shape the future of digital experiences...",
-    descriptionAr:
-      "انضم إلى فريقنا الإبداعي كمصمم تجربة مستخدم وواجهة ومساعدتنا في تشكيل مستقبل التجارب الرقمية...",
-  },
-  {
-    id: 3,
-    title: "Backend Developer",
-    titleAr: "مطور خلفية",
-    company: "StartupXYZ",
-    companyAr: "ستارت أب XYZ",
-    location: "Remote",
-    locationAr: "عن بعد",
-    type: "Full-time",
-    typeAr: "دوام كامل",
-    salary: "$7,000 - $10,000",
-    posted: "3 days ago",
-    postedAr: "منذ 3 أيام",
-    applicants: 31,
-    featured: false,
-    urgent: false,
-    experience: "mid",
-    skills: ["Node.js", "Python", "PostgreSQL"],
-    description:
-      "We are seeking a talented Backend Developer to build scalable web applications...",
-    descriptionAr:
-      "نبحث عن مطور خلفية موهوب لبناء تطبيقات الويب القابلة للتوسع...",
-  },
-  {
-    id: 4,
-    title: "Product Manager",
-    titleAr: "مدير المنتج",
-    company: "Innovation Labs",
-    companyAr: "مختبرات الابتكار",
-    location: "Abu Dhabi, UAE",
-    locationAr: "أبوظبي، الإمارات العربية المتحدة",
-    type: "Full-time",
-    typeAr: "دوام كامل",
-    salary: "$10,000 - $15,000",
-    posted: "5 days ago",
-    postedAr: "منذ 5 أيام",
-    applicants: 12,
-    featured: true,
-    urgent: false,
-    experience: "senior",
-    skills: ["Product Strategy", "Agile", "Analytics"],
-    description:
-      "Lead product development initiatives and drive innovation in our organization...",
-    descriptionAr: "قيادة مبادرات تطوير المنتج ودفع الابتكار في منظمتنا...",
-  },
-  {
-    id: 5,
-    title: "DevOps Engineer",
-    titleAr: "مهندس DevOps",
-    company: "CloudTech Solutions",
-    companyAr: "حلول التكنولوجيا السحابية",
-    location: "Kuwait City, Kuwait",
-    locationAr: "مدينة الكويت، الكويت",
-    type: "Full-time",
-    typeAr: "دوام كامل",
-    salary: "$9,000 - $13,000",
-    posted: "4 days ago",
-    postedAr: "منذ 4 أيام",
-    applicants: 19,
-    featured: false,
-    urgent: false,
-    experience: "mid",
-    skills: ["AWS", "Docker", "Kubernetes"],
-    description:
-      "Manage our cloud infrastructure and ensure seamless deployment processes...",
-    descriptionAr: "إدارة البنية التحتية السحابية وضمان عمليات النشر السلسة...",
-  },
-  {
-    id: 6,
-    title: "Data Scientist",
-    titleAr: "عالم البيانات",
-    company: "AI Research Lab",
-    companyAr: "مختبر أبحاث الذكاء الاصطناعي",
-    location: "Doha, Qatar",
-    locationAr: "الدوحة، قطر",
-    type: "Full-time",
-    typeAr: "دوام كامل",
-    salary: "$11,000 - $16,000",
-    posted: "6 days ago",
-    postedAr: "منذ 6 أيام",
-    applicants: 27,
-    featured: true,
-    urgent: false,
-    experience: "senior",
-    skills: ["Python", "Machine Learning", "TensorFlow"],
-    description:
-      "Apply advanced analytics and machine learning techniques to solve complex business problems...",
-    descriptionAr:
-      "تطبيق التحليلات المتقدمة وتقنيات التعلم الآلي لحل المشكلات التجارية المعقدة...",
-  },
-];
+interface DisplayJob {
+  id: string;
+  title: string;
+  slug: string;
+  titleAr: string;
+  company: string;
+  companyAr: string;
+  location: string;
+  locationAr: string;
+  type: string;
+  typeAr: string;
+  salary: string;
+  posted: string;
+  postedAr: string;
+  applicants: number;
+  featured: boolean;
+  urgent: boolean;
+  experience: string;
+  skills: string[];
+  description: string;
+  descriptionAr: string;
+}
 
 export default function JobsPage({ params }: JobsPageProps) {
   const [locale, setLocale] = useState<string>("en");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [jobs, setJobs] = useState<DisplayJob[]>([]);
+  const [, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [itemsPerPage] = useState(20); // Fixed items per page
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -195,6 +87,63 @@ export default function JobsPage({ params }: JobsPageProps) {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedSalary, setSelectedSalary] = useState("");
   const [selectedExperience, setSelectedExperience] = useState("");
+
+  // Utility function to generate slug from title
+  const generateSlug = (title: string): string => {
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  };
+
+  const fetchJobs = useCallback(async (page: number = currentPage) => {
+    try {
+      setLoading(true);
+      const response = await jobsService.getJobs(page, itemsPerPage);
+
+      if (response.success && response.jobs) {
+        // Transform Job[] to DisplayJob[] format
+        const displayJobs: DisplayJob[] = response.jobs.map((job: Job) => ({
+          id: job.id,
+          title: job.title,
+          slug: job.slug || generateSlug(job.title),
+          titleAr: job.titleAr || job.title,
+          company: 'TechCorp Solutions', // TODO: Get from organization data
+          companyAr: 'تك كورب سولوشنز', // TODO: Get from organization data
+          location: job.address ? `${job.address.city}, ${job.address.country}` : 'Remote',
+          locationAr: job.address ? `${job.address.cityAr || job.address.city}, ${job.address.countryAr || job.address.country}` : 'عن بعد',
+          type: formatJobType(job.jobType),
+          typeAr: formatJobType(job.jobType), // TODO: Add Arabic job types
+          salary: formatSalary(job.salaryMin, job.salaryMax, job.currency),
+          posted: formatPostedDate(job.createdAt),
+          postedAr: formatPostedDate(job.createdAt), // TODO: Add Arabic date formatting
+          applicants: 0, // TODO: Add applicant count from API
+          featured: job.featured || false,
+          urgent: job.urgent || false,
+          experience: formatExperienceLevel(job.experienceLevel),
+          skills: job.tags || job.skills || [], // Use tags from API response as skills, fallback to skills
+          description: job.description,
+          descriptionAr: job.descriptionAr || job.description,
+        }));
+        
+        setJobs(displayJobs);
+        
+        // Update pagination state
+        if (response.pagination) {
+          setTotalJobs(response.pagination.total);
+          setTotalPages(response.pagination.totalPages);
+          setCurrentPage(response.pagination.page);
+        }
+      } else {
+        toast.error(response.message || 'Failed to load jobs');
+      }
+    } catch {
+      toast.error('Network error while loading jobs');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, itemsPerPage]);
 
   // Initialize locale and search params from URL
   useEffect(() => {
@@ -211,7 +160,99 @@ export default function JobsPage({ params }: JobsPageProps) {
     setSelectedLocation(searchParams.get("filterLocation") || "");
     setSelectedSalary(searchParams.get("salary") || "");
     setSelectedExperience(searchParams.get("experience") || "");
-  }, [params, searchParams]);
+    
+    // Initialize pagination from URL params
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    setCurrentPage(page);
+
+    // Fetch jobs
+    fetchJobs(page);
+  }, [params, searchParams, fetchJobs]);
+
+  // Pagination handlers
+  const updateUrlParams = (page: number) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (page > 1) {
+      newSearchParams.set('page', page.toString());
+    } else {
+      newSearchParams.delete('page');
+    }
+    router.push(`/${locale}/jobs?${newSearchParams.toString()}`);
+  };
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages && page !== currentPage) {
+      setCurrentPage(page);
+      updateUrlParams(page);
+      fetchJobs(page);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      goToPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      goToPage(currentPage + 1);
+    }
+  };
+
+  const formatJobType = (jobType: string): string => {
+    const typeMap: Record<string, string> = {
+      'FULL_TIME': 'Full-time',
+      'PART_TIME': 'Part-time',
+      'CONTRACT': 'Contract',
+      'FREELANCE': 'Freelance',
+      'INTERNSHIP': 'Internship',
+      'TEMPORARY': 'Temporary',
+      'REMOTE': 'Remote',
+      'HYBRID': 'Hybrid'
+    };
+    return typeMap[jobType] || jobType;
+  };
+
+  const formatSalary = (min?: number, max?: number, currency?: string): string => {
+    if (!min && !max) return 'Salary not specified';
+    const currencySymbol = currency === 'AED' ? 'AED' : '$';
+    if (min && max) {
+      return `${currencySymbol}${min.toLocaleString()} - ${currencySymbol}${max.toLocaleString()}`;
+    } else if (min) {
+      return `${currencySymbol}${min.toLocaleString()}+`;
+    } else if (max) {
+      return `Up to ${currencySymbol}${max.toLocaleString()}`;
+    }
+    return 'Salary not specified';
+  };
+
+  const formatPostedDate = (createdAt: string): string => {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diffTime = Math.abs(now.getTime() - created.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+    return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+  };
+
+  const formatExperienceLevel = (experienceLevel: string): string => {
+    const levelMap: Record<string, string> = {
+      'ENTRY_LEVEL': 'entry',
+      'JUNIOR': 'junior',
+      'MID_LEVEL': 'mid',
+      'SENIOR': 'senior',
+      'EXECUTIVE': 'executive',
+      'LEAD': 'lead',
+      'DIRECTOR': 'director',
+      'VP': 'vp',
+      'C_LEVEL': 'c-level'
+    };
+    return levelMap[experienceLevel] || experienceLevel.toLowerCase();
+  };
 
   // Update URL when search params change
   const updateSearchParams = (updates: Record<string, string>) => {
@@ -358,22 +399,22 @@ export default function JobsPage({ params }: JobsPageProps) {
       <Navbar />
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary to-primary/80 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white py-20 pt-32 relative overflow-hidden">
+        <section className="bg-gradient-to-r from-primary to-primary/80 dark:from-background dark:via-muted dark:to-secondary text-primary-foreground py-20 pt-32 relative overflow-hidden">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center max-w-4xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg text-white">
                 {locale === "ar"
                   ? "اكتشف فرص العمل المثالية"
                   : "Discover Your Perfect Job"}
               </h1>
-              <p className="text-xl text-primary-foreground/90 dark:text-white/90 mb-8 drop-shadow-md">
+              <p className="text-xl text-primary-foreground/90 dark:text-foreground/90 mb-8 drop-shadow-md">
                 {locale === "ar"
                   ? "ابحث عن آلاف الوظائف في الشرق الأوسط وابدأ رحلتك المهنية التالية"
                   : "Search thousands of jobs across the Middle East and start your next career journey"}
               </p>
 
               {/* Search Form */}
-              <div className="bg-white/10 dark:bg-white/20 backdrop-blur-md rounded-xl p-6 max-w-4xl mx-auto border border-white/20 dark:border-white/30 shadow-2xl">
+              <div className="bg-card/10 dark:bg-card/20 backdrop-blur-md rounded-xl p-6 max-w-4xl mx-auto border border-border/20 dark:border-border/30 shadow-2xl">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="md:col-span-2">
                     <Input
@@ -382,7 +423,7 @@ export default function JobsPage({ params }: JobsPageProps) {
                           ? "المسمى الوظيفي أو الكلمات المفتاحية"
                           : "Job title or keywords"
                       }
-                      className="bg-white/20 dark:bg-white/30 border-white/30 dark:border-white/40 text-white placeholder:text-white/70 dark:placeholder:text-white/80 focus:bg-white/25 dark:focus:bg-white/35 focus:border-white/50 dark:focus:border-white/50 h-12"
+                      className="bg-card/20 dark:bg-input/30 border-border/30 dark:border-border/40 text-primary-foreground dark:text-foreground placeholder:text-primary-foreground/70 dark:placeholder:text-foreground/80 focus:bg-card/25 dark:focus:bg-input/35 focus:border-border/50 dark:focus:border-border/50 h-12"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyPress={(e) => {
@@ -395,7 +436,7 @@ export default function JobsPage({ params }: JobsPageProps) {
                   <div>
                     <Input
                       placeholder={locale === "ar" ? "الموقع" : "Location"}
-                      className="bg-white/20 dark:bg-white/30 border-white/30 dark:border-white/40 text-white placeholder:text-white/70 dark:placeholder:text-white/80 focus:bg-white/25 dark:focus:bg-white/35 focus:border-white/50 dark:focus:border-white/50 h-12"
+                      className="bg-card/20 dark:bg-input/30 border-border/30 dark:border-border/40 text-primary-foreground dark:text-foreground placeholder:text-primary-foreground/70 dark:placeholder:text-foreground/80 focus:bg-card/25 dark:focus:bg-input/35 focus:border-border/50 dark:focus:border-border/50 h-12"
                       value={searchLocation}
                       onChange={(e) => setSearchLocation(e.target.value)}
                       onKeyPress={(e) => {
@@ -804,7 +845,7 @@ export default function JobsPage({ params }: JobsPageProps) {
                               </p>
 
                               <div className="flex flex-wrap gap-2">
-                                {job.skills.map((skill) => (
+                                {job.skills?.map((skill: string) => (
                                   <Badge
                                     key={skill}
                                     variant="outline"
@@ -827,7 +868,7 @@ export default function JobsPage({ params }: JobsPageProps) {
                           >
                             <Link
                               href={`/${locale}/jobs/${
-                                job.id
+                                job.slug
                               }?${searchParams.toString()}`}
                             >
                               {locale === "ar"
@@ -843,46 +884,69 @@ export default function JobsPage({ params }: JobsPageProps) {
               </div>
 
               {/* Pagination */}
-              <div className="flex justify-center pt-8 border-t border-border/50">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled
-                    className="border-border/50"
-                  >
-                    {locale === "ar" ? "السابق" : "Previous"}
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    1
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-border/50 hover:bg-muted"
-                  >
-                    2
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-border/50 hover:bg-muted"
-                  >
-                    3
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-border/50 hover:bg-muted"
-                  >
-                    {locale === "ar" ? "التالي" : "Next"}
-                  </Button>
+              {totalPages > 1 && (
+                <div className="flex flex-col items-center pt-8 border-t border-border/50">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage === 1}
+                      onClick={goToPreviousPage}
+                      className="border-border/50"
+                    >
+                      {locale === "ar" ? "السابق" : "Previous"}
+                    </Button>
+                    
+                    {/* Page Numbers */}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNumber;
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i;
+                      } else {
+                        pageNumber = currentPage - 2 + i;
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNumber}
+                          variant={currentPage === pageNumber ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => goToPage(pageNumber)}
+                          className={
+                            currentPage === pageNumber
+                              ? "bg-primary hover:bg-primary/90"
+                              : "border-border/50 hover:bg-muted"
+                          }
+                        >
+                          {pageNumber}
+                        </Button>
+                      );
+                    })}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage === totalPages}
+                      onClick={goToNextPage}
+                      className="border-border/50"
+                    >
+                      {locale === "ar" ? "التالي" : "Next"}
+                    </Button>
+                  </div>
+                  
+                  {/* Pagination Info */}
+                  <div className="text-sm text-muted-foreground">
+                    {locale === "ar" 
+                      ? `عرض ${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, totalJobs)} من ${totalJobs} وظائف`
+                      : `Showing ${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, totalJobs)} of ${totalJobs} jobs`
+                    }
+                  </div>
                 </div>
-              </div>
+              )}
             </main>
           </div>
         </div>

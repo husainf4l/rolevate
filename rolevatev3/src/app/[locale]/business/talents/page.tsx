@@ -121,3 +121,4 @@ export default async function TalentsPage({ params }: TalentsPageProps) {
   );
 }
 
+

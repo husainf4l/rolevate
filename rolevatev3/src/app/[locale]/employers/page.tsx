@@ -6,15 +6,11 @@ import { Link } from '@/i18n/navigation';
 import {
   Brain,
   Search,
-  MessageSquare,
   TrendingUp,
-  Users,
   Star,
   CheckCircle,
   ArrowRight,
   Sparkles,
-  Target,
-  Zap
 } from 'lucide-react';
 
 export default async function EmployersPage({
@@ -22,7 +18,7 @@ export default async function EmployersPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { /* locale */ } = await params;
   const t = await getTranslations('employers');
 
   const features = [

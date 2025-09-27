@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,8 +24,9 @@ import {
   UserPlus
 } from "lucide-react";
 import { useAuthContext } from "@/providers/auth-provider";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { permissionsService, type Permission, type User, type Group } from "@/services/permissions.service";
+import { SystemPermission } from "@/types/permissions";
 
 interface ExtendedPermission extends Permission {
   users?: User[];
@@ -38,9 +39,9 @@ interface PermissionsManagementProps {
 
 export default function PermissionsManagement({ locale }: PermissionsManagementProps) {
   const { user, isAuthenticated } = useAuthContext();
-  const { toast } = useToast();
+
   const [permissions, setPermissions] = useState<ExtendedPermission[]>([]);
-  const [systemPermissions, setSystemPermissions] = useState<{ id: string; name: string }[]>([]);
+  const [systemPermissions, setSystemPermissions] = useState<SystemPermission[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,14 +50,7 @@ export default function PermissionsManagement({ locale }: PermissionsManagementP
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newPermissionName, setNewPermissionName] = useState("");
 
-  // Load data from API
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      loadData();
-    }
-  }, [isAuthenticated, user]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -99,15 +93,18 @@ export default function PermissionsManagement({ locale }: PermissionsManagementP
       setGroups(groupsData);
     } catch (error) {
       console.error('Failed to load permissions data:', error);
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: locale === 'ar' ? 'فشل في تحميل البيانات' : 'Failed to load data',
-        variant: "destructive",
-      });
+      toast.error(locale === 'ar' ? 'فشل في تحميل البيانات' : 'Failed to load data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [locale]);
+
+  // Load data from API
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadData();
+    }
+  }, [isAuthenticated, user, loadData]);
 
   const createPermission = async () => {
     if (!newPermissionName.trim()) return;
@@ -127,17 +124,10 @@ export default function PermissionsManagement({ locale }: PermissionsManagementP
       setNewPermissionName("");
       setIsCreateDialogOpen(false);
 
-      toast({
-        title: locale === 'ar' ? 'تم إنشاء الصلاحية' : 'Permission Created',
-        description: locale === 'ar' ? 'تم إنشاء الصلاحية بنجاح' : 'Permission created successfully',
-      });
+      toast.success(locale === 'ar' ? 'تم إنشاء الصلاحية بنجاح' : 'Permission created successfully');
     } catch (error) {
       console.error('Failed to create permission:', error);
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: locale === 'ar' ? 'فشل في إنشاء الصلاحية' : 'Failed to create permission',
-        variant: "destructive",
-      });
+      toast.error(locale === 'ar' ? 'فشل في إنشاء الصلاحية' : 'Failed to create permission');
     }
   };
 
@@ -146,59 +136,40 @@ export default function PermissionsManagement({ locale }: PermissionsManagementP
       await permissionsService.deletePermission(id);
       setPermissions(prev => prev.filter(p => p.id !== id));
 
-      toast({
-        title: locale === 'ar' ? 'تم الحذف' : 'Deleted',
-        description: locale === 'ar' ? 'تم حذف الصلاحية بنجاح' : 'Permission deleted successfully',
-      });
+      toast.success(locale === 'ar' ? 'تم حذف الصلاحية بنجاح' : 'Permission deleted successfully');
     } catch (error) {
       console.error('Failed to delete permission:', error);
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: locale === 'ar' ? 'فشل في حذف الصلاحية' : 'Failed to delete permission',
-        variant: "destructive",
-      });
+      toast.error(locale === 'ar' ? 'فشل في حذف الصلاحية' : 'Failed to delete permission');
     }
   };
 
-  const adminAssignPermissionToUser = async (userId: string, permissionId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _adminAssignPermissionToUser = async (userId: string, permissionId: string) => {
     try {
       await permissionsService.adminAssignPermissionToUser(userId, permissionId);
 
       // Refresh data to reflect changes
       await loadData();
 
-      toast({
-        title: locale === 'ar' ? 'تم التعيين' : 'Assigned',
-        description: locale === 'ar' ? 'تم تعيين الصلاحية للمستخدم بنجاح' : 'Permission assigned to user successfully',
-      });
+      toast.success(locale === 'ar' ? 'تم تعيين الصلاحية للمستخدم بنجاح' : 'Permission assigned to user successfully');
     } catch (error) {
       console.error('Failed to assign permission to user:', error);
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: locale === 'ar' ? 'فشل في تعيين الصلاحية' : 'Failed to assign permission',
-        variant: "destructive",
-      });
+      toast.error(locale === 'ar' ? 'فشل في تعيين الصلاحية' : 'Failed to assign permission');
     }
   };
 
-  const adminRemovePermissionFromUser = async (userId: string, permissionId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _adminRemovePermissionFromUser = async (userId: string, permissionId: string) => {
     try {
       await permissionsService.adminRemovePermissionFromUser(userId, permissionId);
 
       // Refresh data to reflect changes
       await loadData();
 
-      toast({
-        title: locale === 'ar' ? 'تم الإزالة' : 'Removed',
-        description: locale === 'ar' ? 'تم إزالة الصلاحية من المستخدم بنجاح' : 'Permission removed from user successfully',
-      });
+      toast.success(locale === 'ar' ? 'تم إزالة الصلاحية من المستخدم بنجاح' : 'Permission removed from user successfully');
     } catch (error) {
       console.error('Failed to remove permission from user:', error);
-      toast({
-        title: locale === 'ar' ? 'خطأ' : 'Error',
-        description: locale === 'ar' ? 'فشل في إزالة الصلاحية' : 'Failed to remove permission',
-        variant: "destructive",
-      });
+      toast.error(locale === 'ar' ? 'فشل في إزالة الصلاحية' : 'Failed to remove permission');
     }
   };
 

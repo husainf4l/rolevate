@@ -1,52 +1,91 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Calendar, CheckCircle, XCircle, Crown } from 'lucide-react';
-
-interface Subscription {
-  id: string;
-  name: string;
-  plan: string;
-  status: 'active' | 'inactive' | 'expired';
-  startDate: string;
-  endDate: string;
-  price: number;
-  currency: string;
-  features: string[];
-}
+import { CreditCard, Calendar, CheckCircle, XCircle, Crown, Loader2 } from 'lucide-react';
+import { Subscription } from '@/types/subscriptions';
+import { subscriptionsService } from '@/services/subscriptions';
+import { toast } from 'sonner';
 
 interface SubscriptionsContentProps {
   locale: string;
 }
 
 export default function SubscriptionsContent({ locale }: SubscriptionsContentProps) {
-  // Mock data - replace with actual API call
-  const subscriptions: Subscription[] = [
-    {
-      id: '1',
-      name: 'Premium Job Posting',
-      plan: 'Monthly',
-      status: 'active',
-      startDate: '2024-01-01',
-      endDate: '2024-12-31',
-      price: 99,
-      currency: 'AED',
-      features: ['Unlimited job posts', 'Priority support', 'Advanced analytics']
-    },
-    {
-      id: '2',
-      name: 'Resume Database Access',
-      plan: 'Annual',
-      status: 'active',
-      startDate: '2024-01-01',
-      endDate: '2024-12-31',
-      price: 499,
-      currency: 'AED',
-      features: ['Full database access', 'Advanced search filters', 'Export capabilities']
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Skip loading if no backend API is configured
+    if (!process.env.NEXT_PUBLIC_API_URL) {
+      console.log('No backend API configured, skipping subscriptions load');
+      setLoading(false);
+      return;
     }
-  ];
+    fetchSubscriptions();
+  }, []);
+
+  const fetchSubscriptions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await subscriptionsService.getSubscriptions();
+
+      if (response.success && response.subscriptions) {
+        setSubscriptions(response.subscriptions);
+      } else {
+        setError(response.message || 'Failed to load subscriptions');
+      }
+    } catch {
+      setError('Network error while loading subscriptions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRenewSubscription = async (subscriptionId: string) => {
+    try {
+      setActionLoading(subscriptionId);
+      const response = await subscriptionsService.renewSubscription(subscriptionId);
+
+      if (response.success) {
+        toast.success(locale === 'ar' ? 'تم تجديد الاشتراك بنجاح' : 'Subscription renewed successfully');
+        fetchSubscriptions(); // Refresh the list
+      } else {
+        toast.error(response.message || (locale === 'ar' ? 'فشل في تجديد الاشتراك' : 'Failed to renew subscription'));
+      }
+    } catch {
+      toast.error(locale === 'ar' ? 'خطأ في الشبكة' : 'Network error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancelSubscription = async (subscriptionId: string) => {
+    if (!confirm(locale === 'ar' ? 'هل أنت متأكد من إلغاء هذا الاشتراك؟' : 'Are you sure you want to cancel this subscription?')) {
+      return;
+    }
+
+    try {
+      setActionLoading(subscriptionId);
+      const response = await subscriptionsService.cancelSubscription(subscriptionId);
+
+      if (response.success) {
+        toast.success(locale === 'ar' ? 'تم إلغاء الاشتراك بنجاح' : 'Subscription cancelled successfully');
+        fetchSubscriptions(); // Refresh the list
+      } else {
+        toast.error(response.message || (locale === 'ar' ? 'فشل في إلغاء الاشتراك' : 'Failed to cancel subscription'));
+      }
+    } catch {
+      toast.error(locale === 'ar' ? 'خطأ في الشبكة' : 'Network error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -60,6 +99,26 @@ export default function SubscriptionsContent({ locale }: SubscriptionsContentPro
         return <Badge>{status}</Badge>;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        <span className="ml-2">{locale === 'ar' ? 'جاري التحميل...' : 'Loading...'}</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button onClick={fetchSubscriptions}>
+          {locale === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -122,10 +181,26 @@ export default function SubscriptionsContent({ locale }: SubscriptionsContentPro
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRenewSubscription(subscription.id)}
+                    disabled={actionLoading === subscription.id}
+                  >
+                    {actionLoading === subscription.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : null}
                     {locale === 'ar' ? 'تجديد' : 'Renew'}
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCancelSubscription(subscription.id)}
+                    disabled={actionLoading === subscription.id}
+                  >
+                    {actionLoading === subscription.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : null}
                     {locale === 'ar' ? 'إلغاء' : 'Cancel'}
                   </Button>
                 </div>

@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { FullPageChatProps } from '@/types/hero';
+import { ChatMessage } from '@/types/chat';
 
-export default function FullPageChat({ isOpen, onClose, locale: _locale }: FullPageChatProps) {
-  const [chatMessages, setChatMessages] = useState<Array<{text: string, isUser: boolean}>>([]);
+export default function FullPageChat({ isOpen, onClose /*, locale: _locale*/ }: FullPageChatProps) {
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);

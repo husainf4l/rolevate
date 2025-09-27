@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuthContext } from '@/providers/auth-provider';
-import { useTranslations } from 'next-intl';
 
 interface BusinessDashboardClientProps {
   locale: string;
@@ -10,7 +9,7 @@ interface BusinessDashboardClientProps {
 
 export default function BusinessDashboardClient({ locale, children }: BusinessDashboardClientProps) {
   const { user, isLoading, isAuthenticated, userType } = useAuthContext();
-  const t = useTranslations('dashboard');
+  // const t = useTranslations('dashboard');
 
   if (isLoading) {
     return (

@@ -7,11 +7,9 @@ import SettingsMenu from '@/components/common/settingsMenu';
 import { Button } from '@/components/ui/button';
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -32,7 +30,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useAuthContext } from '@/providers/auth-provider';
-import { cn } from '@/lib/utils';
+// import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Menu, X, Home, Briefcase, Building2, FileText, Info, Phone, Settings, User, LogOut, ChevronRight } from 'lucide-react';
 

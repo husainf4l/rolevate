@@ -1,12 +1,12 @@
 'use client';
 
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/hooks/use-theme';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 export default function ThemeSwitcher() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, resolvedTheme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const t = useTranslations('theme');
 
@@ -20,15 +20,7 @@ export default function ThemeSwitcher() {
     );
   }
 
-  const cycleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark');
-    } else if (theme === 'dark') {
-      setTheme('system');
-    } else {
-      setTheme('light');
-    }
-  };
+  const cycleTheme = toggleTheme;
 
   const getThemeIcon = () => {
     if (theme === 'system') {

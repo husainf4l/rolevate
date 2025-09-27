@@ -3,9 +3,6 @@ import CandidateSidebar from "@/components/layout/candidate-sidebar";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +15,6 @@ import {
 } from "@/components/ui/select";
 import {
   Bookmark,
-  MapPin,
   Clock,
   DollarSign,
   ExternalLink,
@@ -40,82 +36,9 @@ export default async function SavedJobsPage({
 }) {
   const { locale } = await params;
 
-  const savedJobs = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      company: "TechCorp Inc.",
-      location: "New York, NY",
-      type: "Full-time",
-      salary: "$80k - $120k",
-      savedDate: "2024-01-15",
-      description:
-        "We are looking for a Senior Frontend Developer to join our team...",
-      tags: ["React", "TypeScript", "JavaScript"],
-      isRemote: true,
-      urgent: true,
-      matchScore: 95,
-    },
-    {
-      id: 2,
-      title: "Full Stack Developer",
-      company: "StartupXYZ",
-      location: "San Francisco, CA",
-      type: "Full-time",
-      salary: "$90k - $130k",
-      savedDate: "2024-01-12",
-      description: "Join our fast-growing startup as a Full Stack Developer...",
-      tags: ["React", "Node.js", "MongoDB"],
-      isRemote: false,
-      urgent: false,
-      matchScore: 88,
-    },
-    {
-      id: 3,
-      title: "React Developer",
-      company: "Digital Agency",
-      location: "Remote",
-      type: "Contract",
-      salary: "$50 - $80/hour",
-      savedDate: "2024-01-10",
-      description:
-        "Looking for an experienced React Developer for a 6-month contract...",
-      tags: ["React", "Next.js", "Tailwind"],
-      isRemote: true,
-      urgent: false,
-      matchScore: 92,
-    },
-    {
-      id: 4,
-      title: "Software Engineer",
-      company: "BigTech Corp",
-      location: "Seattle, WA",
-      type: "Full-time",
-      salary: "$100k - $150k",
-      savedDate: "2024-01-08",
-      description:
-        "We are seeking a talented Software Engineer to work on our core platform...",
-      tags: ["Python", "Django", "AWS"],
-      isRemote: false,
-      urgent: true,
-      matchScore: 85,
-    },
-    {
-      id: 5,
-      title: "Junior Developer",
-      company: "Local Startup",
-      location: "Austin, TX",
-      type: "Full-time",
-      salary: "$60k - $80k",
-      savedDate: "2024-01-05",
-      description:
-        "Great opportunity for a Junior Developer to grow with our team...",
-      tags: ["JavaScript", "React", "Node.js"],
-      isRemote: false,
-      urgent: false,
-      matchScore: 78,
-    },
-  ];
+    // Saved jobs will be loaded from API - no demo data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mockSavedJobs: any[] = [];
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -179,7 +102,7 @@ export default async function SavedJobsPage({
 
           {/* Saved Jobs List */}
           <div className="space-y-4">
-            {savedJobs.map((job) => (
+            {mockSavedJobs.map((job) => (
               <Card key={job.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -248,7 +171,7 @@ export default async function SavedJobsPage({
                       </p>
 
                       <div className="flex flex-wrap gap-2">
-                        {job.tags.map((tag) => (
+                        {job.tags?.map((tag: string) => (
                           <Badge
                             key={tag}
                             variant="secondary"
@@ -307,7 +230,7 @@ export default async function SavedJobsPage({
           </div>
 
           {/* Empty State (for when no jobs are saved) */}
-          {savedJobs.length === 0 && (
+          {mockSavedJobs.length === 0 && (
             <div className="text-center py-12">
               <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">

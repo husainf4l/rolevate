@@ -1,10 +1,11 @@
 'use client';
 
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/hooks/use-theme';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Settings, Sun, Moon, Globe, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { Theme } from '@/lib/theme';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Link, usePathname } from '@/i18n/navigation';
-import { locales, localeNames, type Locale } from '@/i18n/config';
+import { locales, type Locale } from '@/i18n/config';
 import { useParams } from 'next/navigation';
 
 export default function SettingsMenu() {
@@ -60,7 +61,7 @@ export default function SettingsMenu() {
         {themeOptions.map(({ value, label, icon: Icon }) => (
           <DropdownMenuItem
             key={value}
-            onClick={() => setTheme(value)}
+            onClick={() => setTheme(value as Theme)}
             className="flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center gap-2">
