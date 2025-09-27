@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from 'next-intl/server';
 import CandidateSidebar from "@/components/layout/candidate-sidebar";
 import {
   Card,
@@ -29,39 +30,34 @@ export default async function ApplicationsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations('dashboard.applications');
 
   const applications = [
     {
       id: 1,
-      jobTitle: "Senior Frontend Developer",
-      company: "TechCorp Inc.",
-      location: "New York, NY",
+      jobTitle: t('mockData.job1.title'),
+      company: t('mockData.job1.company'),
+      location: t('mockData.job1.location'),
       appliedDate: "2024-01-15",
       status: "under_review",
-      statusText: locale === "ar" ? "قيد المراجعة" : "Under Review",
-      statusColor: "bg-yellow-100 text-yellow-800",
+      statusText: t('status.underReview'),
+      statusColor: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
       statusIcon: Clock,
-      nextStep:
-        locale === "ar"
-          ? "في انتظار رد الموارد البشرية"
-          : "Waiting for HR response",
-      lastUpdate: "2 days ago",
+      nextStep: t('status.waitingHR'),
+      lastUpdate: t('timeAgo.days', { count: 2 }),
     },
     {
       id: 2,
-      jobTitle: "Full Stack Developer",
-      company: "StartupXYZ",
-      location: "San Francisco, CA",
+      jobTitle: t('mockData.job2.title'),
+      company: t('mockData.job2.company'),
+      location: t('mockData.job2.location'),
       appliedDate: "2024-01-10",
       status: "interview_scheduled",
-      statusText: locale === "ar" ? "مقابلة مجدولة" : "Interview Scheduled",
-      statusColor: "bg-blue-100 text-blue-800",
+      statusText: t('status.interviewScheduled'),
+      statusColor: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
       statusIcon: Calendar,
-      nextStep:
-        locale === "ar"
-          ? "مقابلة عبر الفيديو في 20 يناير"
-          : "Video interview on January 20th",
-      lastUpdate: "1 day ago",
+      nextStep: t('status.videoInterview'),
+      lastUpdate: t('timeAgo.days', { count: 1 }),
     },
   ];
 

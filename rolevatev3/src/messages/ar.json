@@ -5,6 +5,21 @@
     "aboutLink": "حول",
     "contactLink": "اتصل بنا"
   },
+  "setupCompany": {
+    "title": "إعداد الشركة",
+    "subtitle": "أنشئ ملف تعريف شركتك أو انضم إلى منظمة موجودة للبدء",
+    "loading": "جاري إعداد مساحة العمل...",
+    "back": "رجوع",
+    "tabs": {
+      "create": "إنشاء شركة",
+      "join": "الانضمام لشركة"
+    },
+    "error": {
+      "general": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+      "creation": "فشل في إنشاء الشركة",
+      "joining": "فشل في الانضمام للشركة"
+    }
+  },
   "hero": {
     "announcement": "ميزات جديدة قريباً! تجربة تطوير مهني محسّنة مع توصيات مدعومة بالذكاء الاصطناعي",
     "title": "مطوّر المسار المهني مدعوم بالذكاء الاصطناعي",
@@ -97,7 +112,34 @@
   },
   "dashboard": {
     "title": "لوحة التحكم",
-    "welcome": "مرحباً بك في لوحة التحكم. المحتوى قادم قريباً..."
+    "welcome": "مرحباً بك في لوحة التحكم. المحتوى قادم قريباً...",
+    "applications": {
+      "title": "طلبات التوظيف",
+      "subtitle": "تتبع طلبات التوظيف وحالتها",
+      "status": {
+        "underReview": "قيد المراجعة",
+        "interviewScheduled": "مقابلة مجدولة",
+        "accepted": "مقبول",
+        "rejected": "مرفوض", 
+        "waitingHR": "في انتظار رد الموارد البشرية",
+        "videoInterview": "مقابلة عبر الفيديو في 20 يناير"
+      },
+      "mockData": {
+        "job1": {
+          "title": "مطور واجهات أمامية أول",
+          "company": "شركة التقنيات المحدودة",
+          "location": "نيويورك، الولايات المتحدة"
+        },
+        "job2": {
+          "title": "مطور ويب متكامل",
+          "company": "شركة الابتكار التقني",
+          "location": "سان فرانسيسكو، الولايات المتحدة"
+        }
+      },
+      "timeAgo": {
+        "days": "منذ {{count}} يوم"
+      }
+    }
   },
   "notFound": {
     "title": "الصفحة غير موجودة",
@@ -115,6 +157,7 @@
     "noJobsMessage": "جرب تعديل معايير البحث الخاصة بك",
     "apply": "قدم",
     "applyNow": "قدم الآن",
+    "viewDetails": "عرض التفاصيل",
     "remote": "عن بُعد",
     "loading": "جاري تحميل الوظائف...",
     "allTypes": "جميع الأنواع",
@@ -125,7 +168,61 @@
     "entryLevel": "مبتدئ",
     "midLevel": "متوسط",
     "seniorLevel": "خبير",
-    "anySalary": "أي راتب"
+    "anySalary": "أي راتب",
+    "filterResults": "تصفية النتائج",
+    "jobType": "نوع الوظيفة",
+    "location": "الموقع",
+    "salaryRange": "نطاق الراتب",
+    "experienceLevel": "مستوى الخبرة",
+    "selectJobType": "اختر نوع الوظيفة",
+    "selectLocation": "اختر الموقع",
+    "selectSalary": "اختر نطاق الراتب",
+    "selectExperience": "اختر مستوى الخبرة",
+    "all": "الكل",
+    "sortBy": "ترتيب حسب",
+    "newest": "الأحدث",
+    "oldest": "الأقدم",
+    "highestSalary": "الراتب الأعلى",
+    "lowestSalary": "الراتب الأقل",
+    "searchResults": "نتائج البحث",
+    "job": "وظيفة",
+    "jobs": "وظائف",
+    "clearSearch": "مسح البحث",
+    "showingResults": "عرض {count} من أصل {total} وظيفة مطابقة لـ \"{query}\"",
+    "featured": "مميز",
+    "urgent": "عاجل",
+    "posted": "نشرت",
+    "applicants": "متقدمين",
+    "experience": "الخبرة",
+    "skills": "المهارات",
+    "description": "الوصف",
+    "showLess": "عرض أقل",
+    "showMore": "عرض المزيد",
+    "salaryRanges": {
+      "0-5000": "5,000 - 0 درهم",
+      "5000-10000": "10,000 - 5,000 درهم",
+      "10000-15000": "15,000 - 10,000 درهم",
+      "15000+": "15,000+ درهم"
+    },
+    "locations": {
+      "uae": "الإمارات العربية المتحدة",
+      "saudi": "المملكة العربية السعودية",
+      "qatar": "قطر",
+      "kuwait": "الكويت",
+      "remote": "عن بعد"
+    },
+    "experienceLevels": {
+      "entry": "مبتدئ",
+      "mid": "متوسط الخبرة",
+      "senior": "خبير",
+      "lead": "قائد/مدير"
+    },
+    "jobTypes": {
+      "fullTime": "دوام كامل",
+      "partTime": "دوام جزئي",
+      "contract": "عقد",
+      "remote": "عن بعد"
+    }
   },
   "jobSearch": {
     "title": "اعثر على وظيفتك المثالية",
@@ -461,6 +558,47 @@
         }
       }
     
+  },
+  "business": {
+    "settings": {
+      "title": "الإعدادات",
+      "subtitle": "إدارة اشتراكاتك ومفاتيح API ودعوات الفريق",
+      "tabs": {
+        "subscriptions": "الاشتراكات",
+        "apiKeys": "مفاتيح API",
+        "invitations": "الدعوات"
+      }
+    },
+    "talents": {
+      "title": "إدارة المواهب",
+      "subtitle": "اكتشف وأدر المواهب المؤهلة لمنصتك",
+      "addNew": "إضافة موهبة جديدة",
+      "search": {
+        "placeholder": "البحث عن المواهب...",
+        "filter": "تصفية"
+      },
+      "comingSoon": {
+        "title": "صفحة المواهب قيد التطوير",
+        "description": "نعمل على تطوير صفحة إدارة المواهب المتقدمة. ستكون متاحة قريباً مع جميع الميزات المطلوبة."
+      },
+      "features": {
+        "advancedSearch": {
+          "title": "البحث المتقدم",
+          "description": "البحث عن المواهب بالمهارات والخبرة"
+        },
+        "profileManagement": {
+          "title": "إدارة الملفات",
+          "description": "إدارة ملفات المواهب الشخصية"
+        },
+        "smartFiltering": {
+          "title": "التصفية الذكية",
+          "description": "تصفية المواهب حسب المعايير"
+        }
+      },
+      "status": {
+        "inDevelopment": "قيد التطوير"
+      }
+    }
   },
   "employers": {
     "navbar": {

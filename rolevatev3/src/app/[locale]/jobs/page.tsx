@@ -1,76 +1,68 @@
-"use client";
+import React from "react";import React from "react";
 
-import React from "react";
-import { Navbar } from "@/components/layout";
-import Footer from "@/components/common/footer";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  MapPin,
-  Users,
-  Building2,
-  Star,
-  Search,
-  Filter,
-  Briefcase,
-  DollarSign,
-  Calendar,
-  ChevronDown,
-  X,
-} from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Job } from "@/types/job";
-import { jobsService } from "@/services/jobs";
-import { toast } from "sonner";
+import { Navbar } from "@/components/layout";import { Navbar } from "@/components/layout";
 
-interface JobsPageProps {
-  params: Promise<{ locale: string }>;
-}
+import Footer from "@/components/common/footer";import Footer from "@/components/common/footer";
 
-interface DisplayJob {
-  id: string;
-  title: string;
-  slug: string;
-  titleAr: string;
-  company: string;
-  companyAr: string;
-  location: string;
-  locationAr: string;
-  type: string;
-  typeAr: string;
-  salary: string;
-  posted: string;
-  postedAr: string;
-  applicants: number;
-  featured: boolean;
-  urgent: boolean;
-  experience: string;
-  skills: string[];
-  description: string;
-  descriptionAr: string;
-}
+import { getTranslations } from 'next-intl/server';import { getTranslations } from 'next-intl/server';
 
-export default function JobsPage({ params }: JobsPageProps) {
-  const [locale, setLocale] = useState<string>("en");
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [jobs, setJobs] = useState<DisplayJob[]>([]);
-  const [, setLoading] = useState(true);
+import JobsListing from "@/components/jobs/jobs-listing";import JobsListing from "@/components/jobs/jobs-listing";
+
+
+
+interface JobsPageProps {interface JobsPageProps {
+
+  params: Promise<{ locale: string }>;  params: Promise<{ locale: string }>;
+
+}}
+
+
+
+export async function generateMetadata({ params }: JobsPageProps) {export async function generateMetadata({ params }: JobsPageProps) {
+
+  const { locale } = await params;  const { locale } = await params;
+
+  const t = await getTranslations('jobs');  const t = await getTranslations('jobs');
+
+    
+
+  return {  return {
+
+    title: t('title'),    title: t('title'),
+
+    description: locale === 'ar'     description: locale === 'ar' 
+
+      ? 'اكتشف الفرص الوظيفية المناسبة لمهاراتك وخبراتك'      ? 'اكتشف الفرص الوظيفية المناسبة لمهاراتك وخبراتك'
+
+      : 'Discover career opportunities that match your skills and experience'      : 'Discover career opportunities that match your skills and experience'
+
+  };  };
+
+}}
+
+
+
+export default async function JobsPage({ params }: JobsPageProps) {export default async function JobsPage({ params }: JobsPageProps) {
+
+  const { locale } = await params;  const { locale } = await params;
+
+    
+
+  return (  return (
+
+    <>    <>
+
+      <Navbar />      <Navbar />
+
+      <JobsListing locale={locale} />      <JobsListing locale={locale} />
+
+      <Footer locale={locale} />      <Footer locale={locale} />
+
+    </>    </>
+
+  );  );
+
+}}
   const searchParams = useSearchParams();
   const router = useRouter();
 

@@ -5,6 +5,21 @@
     "aboutLink": "About",
     "contactLink": "Contact"
   },
+  "setupCompany": {
+    "title": "Company Setup",
+    "subtitle": "Create your company profile or join an existing organization to get started",
+    "loading": "Setting up your workspace...",
+    "back": "Back",
+    "tabs": {
+      "create": "Create Company",
+      "join": "Join Company"
+    },
+    "error": {
+      "general": "Something went wrong. Please try again.",
+      "creation": "Failed to create company",
+      "joining": "Failed to join company"
+    }
+  },
   "hero": {
     "announcement": "New Features Coming Soon! Enhanced career building experience with AI-powered recommendations",
     "title": "AI Career Builder",
@@ -98,7 +113,34 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "welcome": "Welcome to your dashboard. Content coming soon..."
+    "welcome": "Welcome to your dashboard. Content coming soon...",
+    "applications": {
+      "title": "Job Applications",
+      "subtitle": "Track your job applications and their status",
+      "status": {
+        "underReview": "Under Review",
+        "interviewScheduled": "Interview Scheduled", 
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "waitingHR": "Waiting for HR response",
+        "videoInterview": "Video interview on January 20th"
+      },
+      "mockData": {
+        "job1": {
+          "title": "Senior Frontend Developer",
+          "company": "TechCorp Inc.",
+          "location": "New York, NY"
+        },
+        "job2": {
+          "title": "Full Stack Developer", 
+          "company": "StartupXYZ",
+          "location": "San Francisco, CA"
+        }
+      },
+      "timeAgo": {
+        "days": "{{count}} day ago"
+      }
+    }
   },
   "notFound": {
     "title": "Page Not Found",
@@ -116,6 +158,7 @@
     "noJobsMessage": "Try adjusting your search criteria",
     "apply": "Apply",
     "applyNow": "Apply Now",
+    "viewDetails": "View Details",
     "remote": "Remote",
     "loading": "Loading jobs...",
     "allTypes": "All Types",
@@ -126,7 +169,61 @@
     "entryLevel": "Entry Level",
     "midLevel": "Mid Level",
     "seniorLevel": "Senior Level",
-    "anySalary": "Any Salary"
+    "anySalary": "Any Salary",
+    "filterResults": "Filter Results",
+    "jobType": "Job Type",
+    "location": "Location",
+    "salaryRange": "Salary Range",
+    "experienceLevel": "Experience Level",
+    "selectJobType": "Select job type",
+    "selectLocation": "Select location",
+    "selectSalary": "Select salary range",
+    "selectExperience": "Select experience level",
+    "all": "All",
+    "sortBy": "Sort by",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "highestSalary": "Highest Salary",
+    "lowestSalary": "Lowest Salary",
+    "searchResults": "Search Results",
+    "job": "job",
+    "jobs": "jobs",
+    "clearSearch": "Clear search",
+    "showingResults": "Showing {count} of {total} jobs matching \"{query}\"",
+    "featured": "Featured",
+    "urgent": "Urgent",
+    "posted": "Posted",
+    "applicants": "applicants",
+    "experience": "Experience",
+    "skills": "Skills",
+    "description": "Description",
+    "showLess": "Show less",
+    "showMore": "Show more",
+    "salaryRanges": {
+      "0-5000": "AED 0 - 5,000",
+      "5000-10000": "AED 5,000 - 10,000", 
+      "10000-15000": "AED 10,000 - 15,000",
+      "15000+": "AED 15,000+"
+    },
+    "locations": {
+      "uae": "UAE",
+      "saudi": "Saudi Arabia",
+      "qatar": "Qatar",
+      "kuwait": "Kuwait",
+      "remote": "Remote"
+    },
+    "experienceLevels": {
+      "entry": "Entry Level",
+      "mid": "Mid Level", 
+      "senior": "Senior Level",
+      "lead": "Lead/Manager"
+    },
+    "jobTypes": {
+      "fullTime": "Full-time",
+      "partTime": "Part-time", 
+      "contract": "Contract",
+      "remote": "Remote"
+    }
   },
   "jobSearch": {
     "title": "Find Your Dream Job",
@@ -462,6 +559,47 @@
         }
       }
     
+  },
+  "business": {
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your subscriptions, API keys, and team invitations",
+      "tabs": {
+        "subscriptions": "Subscriptions",
+        "apiKeys": "API Keys",
+        "invitations": "Invitations"
+      }
+    },
+    "talents": {
+      "title": "Talent Management",
+      "subtitle": "Discover and manage qualified talents for your platform",
+      "addNew": "Add New Talent",
+      "search": {
+        "placeholder": "Search talents...",
+        "filter": "Filter"
+      },
+      "comingSoon": {
+        "title": "Talents Page Coming Soon",
+        "description": "We are working on developing the advanced talent management page. It will be available soon with all the required features."
+      },
+      "features": {
+        "advancedSearch": {
+          "title": "Advanced Search",
+          "description": "Search talents by skills and experience"
+        },
+        "profileManagement": {
+          "title": "Profile Management", 
+          "description": "Manage talent personal profiles"
+        },
+        "smartFiltering": {
+          "title": "Smart Filtering",
+          "description": "Filter talents by criteria"
+        }
+      },
+      "status": {
+        "inDevelopment": "In Development"
+      }
+    }
   },
   "employers": {
     "navbar": {
