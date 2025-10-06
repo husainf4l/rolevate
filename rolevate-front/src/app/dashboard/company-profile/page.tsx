@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Header from "@/components/dashboard/Header";
 import { Button } from "@/components/common/Button";
 import { CameraIcon } from "@heroicons/react/24/outline";
 import { API_CONFIG } from "@/lib/config";
+import toast from "react-hot-toast";
 
 interface CompanyUser {
   id: number;
@@ -79,11 +80,13 @@ export default function CompanyProfilePage() {
       weeklyReports: false,
     });
 
+
+
   useEffect(() => {
     fetchCompanyProfile();
   }, []);
 
-  const fetchCompanyProfile = async () => {
+  const fetchCompanyProfile = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
@@ -106,14 +109,16 @@ export default function CompanyProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const generateInvitationCode = async () => {
+  const generateInvitationCode = useCallback(async () => {
+    if (!companyProfile?.id) return;
+    
     try {
       setGeneratingInvite(true);
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${API_CONFIG.API_BASE_URL}/company/${companyProfile?.id}/invitation`,
+        `${API_CONFIG.API_BASE_URL}/company/${companyProfile.id}/invitation`,
         {
           method: "POST",
           credentials: "include",
@@ -127,23 +132,30 @@ export default function CompanyProfilePage() {
         const data = await response.json();
         setInvitationCode(data.code);
       } else {
-        alert("Failed to generate invitation code");
+        toast.error("Failed to generate invitation code");
       }
     } catch (error) {
       console.error("Error generating invitation code:", error);
-      alert("Error generating invitation code");
+      toast.error("Error generating invitation code");
     } finally {
       setGeneratingInvite(false);
     }
-  };
+  }, [companyProfile?.id]);
 
-  const copyInvitationLink = () => {
-    const inviteLink = `${window.location.origin}/join?code=${invitationCode}`;
-    navigator.clipboard.writeText(inviteLink);
-    alert("Invitation link copied to clipboard!");
-  };
+  const copyInvitationLink = useCallback(async () => {
+    if (!invitationCode) return;
+    
+    try {
+      const inviteLink = `${window.location.origin}/join?code=${invitationCode}`;
+      await navigator.clipboard.writeText(inviteLink);
+      toast.success("Invitation link copied to clipboard!");
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      toast.error("Failed to copy link. Please try again.");
+    }
+  }, [invitationCode]);
 
-  const saveNotificationSettings = async () => {
+  const saveNotificationSettings = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
@@ -160,17 +172,17 @@ export default function CompanyProfilePage() {
       );
 
       if (response.ok) {
-        alert("Notification settings saved successfully!");
+        toast.success("Notification settings saved successfully!");
       } else {
         throw new Error("Failed to save notification settings");
       }
     } catch (error) {
       console.error("Error saving notification settings:", error);
-      alert("Failed to save notification settings");
+      toast.error("Failed to save notification settings");
     }
-  };
+  }, [notificationSettings]);
 
-  const handleLogoUpload = async (
+  const handleLogoUpload = useCallback(async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
@@ -178,13 +190,13 @@ export default function CompanyProfilePage() {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
+      toast.error("Please select an image file");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("File size must be less than 5MB");
+      toast.error("File size must be less than 5MB");
       return;
     }
 
@@ -208,17 +220,17 @@ export default function CompanyProfilePage() {
         setCompanyProfile((prev) =>
           prev ? { ...prev, logo: data.logoUrl } : null
         );
-        alert("Company logo updated successfully!");
+        toast.success("Company logo updated successfully!");
       } else {
         throw new Error("Failed to upload logo");
       }
     } catch (error) {
       console.error("Error uploading logo:", error);
-      alert("Failed to upload logo");
+      toast.error("Failed to upload logo");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -1007,14 +1019,14 @@ export default function CompanyProfilePage() {
                         passwordData.newPassword !==
                         passwordData.confirmPassword
                       ) {
-                        alert("New passwords do not match");
+                        toast.error("New passwords do not match");
                         return;
                       }
                       if (passwordData.newPassword.length < 8) {
-                        alert("Password must be at least 8 characters long");
+                        toast.error("Password must be at least 8 characters long");
                         return;
                       }
-                      alert("Password changed successfully!");
+                      toast.success("Password changed successfully!");
                       setPasswordData({
                         currentPassword: "",
                         newPassword: "",

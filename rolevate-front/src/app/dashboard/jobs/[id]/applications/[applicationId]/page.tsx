@@ -350,7 +350,10 @@ export default function JobCandidateProfile() {
         try {
           const applicationNotes = await getApplicationNotes(applicationId);
           setNotes(applicationNotes);
-        } catch {}
+        } catch (err) {
+          console.error('Failed to fetch application notes:', err);
+          // Notes are optional, don't show error to user
+        }
         
         // Fetch interviews
         try {

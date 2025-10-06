@@ -6,7 +6,8 @@ import { CacheService } from './cache.service';
   imports: [
     CacheModule.register({
       ttl: 300, // 5 minutes default TTL
-      max: 1000, // Maximum number of items in cache
+      max: 10000, // Increased maximum number of items in cache
+      isGlobal: true, // Make cache available globally
     }),
   ],
   providers: [CacheService],

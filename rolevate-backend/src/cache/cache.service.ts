@@ -99,9 +99,6 @@ export class CacheService {
       
       // For stores that don't support reset, we'll clear manually
       // This is a more aggressive approach
-      const patterns = [
-        'job:', 'company:', 'public:', 'candidate_profile:', 'user:', 'auth:'
-      ];
       
       let clearedCount = 0;
       
@@ -151,56 +148,196 @@ export class CacheService {
     return `public:count${searchPart}`;
   }
 
-  // Invalidate related cache keys
+  // Enhanced cache invalidation with comprehensive patterns
   async invalidateJobCache(jobId: string, companyId: string): Promise<void> {
-    const keysToDelete = [
-      this.generateJobKey(jobId),
-      `company:${companyId}:jobs:*`, // Pattern matching (will need custom implementation)
-      `public:jobs:*`,
+    const patterns = [
+      `job:${jobId}`,
+      `company:${companyId}:jobs:*`,
       `company:${companyId}:count*`,
+      `public:jobs:*`,
       `public:count*`,
+      `featured_jobs:*`,
+      `job:featured`,
     ];
 
-    // For pattern matching, we'll need to implement a more sophisticated approach
-    // For now, we'll just delete specific keys
+    // Delete specific keys and patterns
     await Promise.all([
-      this.del(this.generateJobKey(jobId)),
-      // We can add more specific cache invalidation based on usage patterns
+      ...patterns.map(pattern => this.invalidatePattern(pattern)),
+      this.del(`job:${jobId}`),
     ]);
   }
 
   async invalidateCompanyJobsCache(companyId: string): Promise<void> {
-    // In a real implementation, you'd want to use Redis SCAN to find matching keys
-    // For now, we'll implement a basic invalidation
-    const commonKeys = [
-      this.generateCompanyJobsKey(companyId, 10, 0),
-      this.generateCompanyJobsKey(companyId, 20, 0),
-      this.generateCompanyJobsKey(companyId, 50, 0),
-      this.generateJobCountKey(companyId),
+    const patterns = [
+      `company:${companyId}:jobs:*`,
+      `company:${companyId}:count*`,
+      `public:jobs:*`,
+      `public:count*`,
     ];
 
-    await Promise.all(commonKeys.map(key => this.del(key)));
+    await Promise.all(patterns.map(pattern => this.invalidatePattern(pattern)));
   }
 
   async invalidatePublicJobsCache(): Promise<void> {
-    const commonKeys = [
-      this.generatePublicJobsKey(10, 0),
-      this.generatePublicJobsKey(20, 0),
-      this.generatePublicJobsKey(50, 0),
-      this.generatePublicJobCountKey(),
+    const patterns = [
+      `public:jobs:*`,
+      `public:count*`,
+      `public_jobs_simple:*`,
+      `featured_jobs:*`,
+      `job:featured`,
     ];
 
-    await Promise.all(commonKeys.map(key => this.del(key)));
+    await Promise.all(patterns.map(pattern => this.invalidatePattern(pattern)));
   }
 
   async invalidateUserProfile(userId: string): Promise<void> {
-    // Invalidate user profile related cache keys
-    const keysToDelete = [
-      `user:${userId}:profile`,
-      `candidate:${userId}:profile`,
-      `candidate:${userId}:cvs`,
+    const patterns = [
+      `user:${userId}:*`,
+      `candidate:${userId}:*`,
+      `candidate_profile:${userId}`,
     ];
 
-    await Promise.all(keysToDelete.map(key => this.del(key)));
+    await Promise.all([
+      ...patterns.map(pattern => this.invalidatePattern(pattern)),
+      this.del(`user:${userId}:profile`),
+      this.del(`candidate:${userId}:profile`),
+      this.del(`candidate:${userId}:cvs`),
+    ]);
+  }
+
+  async invalidateApplicationCache(applicationId: string, jobId: string, candidateId: string): Promise<void> {
+    const patterns = [
+      `application:${applicationId}`,
+      `job:${jobId}:applications`,
+      `candidate:${candidateId}:applications`,
+      `applications:job:${jobId}:*`,
+      `applications:candidate:${candidateId}:*`,
+    ];
+
+    await Promise.all(patterns.map(pattern => this.invalidatePattern(pattern)));
+  }
+
+  async invalidateCompanyCache(companyId: string): Promise<void> {
+    const patterns = [
+      `company:${companyId}:*`,
+      `companies:*`,
+    ];
+
+    await Promise.all(patterns.map(pattern => this.invalidatePattern(pattern)));
+  }
+
+  // Strategic caching for expensive operations
+  async getOrSet<T>(
+    key: string, 
+    fetcher: () => Promise<T>, 
+    ttl?: number
+  ): Promise<T> {
+    // Try to get from cache first
+    const cached = await this.get<T>(key);
+    if (cached !== null) {
+      return cached;
+    }
+
+    // Fetch fresh data
+    const data = await fetcher();
+    
+    // Cache the result
+    await this.set(key, data, ttl);
+    
+    return data;
+  }
+
+  // Cache with automatic refresh for frequently changing data
+  async getWithFallback<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    ttl: number = 300,
+    staleWhileRevalidate: boolean = false
+  ): Promise<T> {
+    const cached = await this.get<T>(key);
+    
+    if (cached !== null) {
+      // If stale-while-revalidate is enabled, refresh in background
+      if (staleWhileRevalidate) {
+        fetcher().then(data => this.set(key, data, ttl)).catch(console.error);
+      }
+      return cached;
+    }
+
+    // Fetch fresh data
+    const data = await fetcher();
+    await this.set(key, data, ttl);
+    return data;
+  }
+
+  // Multi-level caching for hierarchical data
+  async getHierarchical<T>(
+    keys: string[],
+    fetcher: () => Promise<T>,
+    ttl: number = 300
+  ): Promise<T> {
+    // Try each cache level
+    for (const key of keys) {
+      const cached = await this.get<T>(key);
+      if (cached !== null) {
+        return cached;
+      }
+    }
+
+    // Fetch fresh data
+    const data = await fetcher();
+    
+    // Cache in all levels
+    await Promise.all(keys.map(key => this.set(key, data, ttl)));
+    
+    return data;
+  }
+
+  // Cache invalidation with patterns (for Redis-like stores)
+  async invalidatePattern(pattern: string): Promise<void> {
+    try {
+      // For stores that support pattern deletion (like Redis)
+      const cacheStore = this.cacheManager as any;
+      if (typeof cacheStore.delByPattern === 'function') {
+        await cacheStore.delByPattern(pattern);
+        return;
+      }
+
+      // Fallback: try to delete common variations
+      const variations = [
+        pattern,
+        pattern.replace('*', ''),
+        pattern.replace('*:*', ''),
+      ];
+
+      await Promise.all(variations.map(key => this.del(key)));
+    } catch (error) {
+      console.error('Pattern invalidation error:', error);
+    }
+  }
+
+  // Smart TTL based on data volatility
+  getSmartTTL(dataType: 'static' | 'dynamic' | 'volatile'): number {
+    switch (dataType) {
+      case 'static': return 3600; // 1 hour for rarely changing data
+      case 'dynamic': return 600; // 10 minutes for moderately changing data
+      case 'volatile': return 60; // 1 minute for frequently changing data
+      default: return 300; // 5 minutes default
+    }
+  }
+
+  // Cache warming for critical data
+  async warmCache<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    ttl?: number
+  ): Promise<void> {
+    try {
+      const data = await fetcher();
+      await this.set(key, data, ttl);
+      console.log(`✅ Cache warmed for key: ${key}`);
+    } catch (error) {
+      console.error(`❌ Failed to warm cache for key: ${key}`, error);
+    }
   }
 }

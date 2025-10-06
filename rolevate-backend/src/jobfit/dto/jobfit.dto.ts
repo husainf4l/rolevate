@@ -1,9 +1,26 @@
+import { IsString, IsEmail, IsOptional, IsUrl } from 'class-validator';
+
 export class JobFitUploadDto {
+  @IsString()
   firstName: string;
+
+  @IsString()
   lastName: string;
+
+  @IsEmail()
+  @IsOptional()
   email?: string;
+
+  @IsString()
+  @IsOptional()
   phone?: string;
+
+  @IsString()
+  @IsOptional()
   expectedSalary?: string;
+
+  @IsString()
+  @IsOptional()
   location?: string;
 }
 

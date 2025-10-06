@@ -16,12 +16,15 @@ import {
   SetMetadata,
   ParseIntPipe
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { JobService } from './job.service';
 import { CreateJobDto, JobResponseDto } from './dto/create-job.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JobStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+@ApiTags('jobs')
+@ApiBearerAuth()
 @Controller('jobs')
 @UseGuards(JwtAuthGuard)
 export class JobController {
@@ -32,6 +35,24 @@ export class JobController {
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ 
+    summary: 'Create a new job posting',
+    description: 'Creates a new job posting for the authenticated user\'s company. Requires company association.'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Job created successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not found or not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiBody({ type: CreateJobDto })
   async create(
     @Body() createJobDto: CreateJobDto,
     @Request() req: any,
@@ -56,6 +77,24 @@ export class JobController {
   }
 
   @Get()
+  @ApiOperation({ 
+    summary: 'Get all jobs for user\'s company',
+    description: 'Retrieves all jobs for the authenticated user\'s company, or for a specific company if companyId is provided.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Jobs retrieved successfully',
+    type: [JobResponseDto]
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiQuery({ name: 'companyId', required: false, description: 'Optional company ID to filter jobs' })
   async findAll(
     @Request() req: any,
     @Query('companyId') companyId?: string,
@@ -82,6 +121,46 @@ export class JobController {
   }
 
   @Get('company/all')
+  @ApiOperation({ 
+    summary: 'Get paginated jobs for user\'s company',
+    description: 'Retrieves paginated jobs for the authenticated user\'s company with optional search functionality.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Jobs retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        jobs: { type: 'array', items: { $ref: '#/components/schemas/JobResponseDto' } },
+        total: { type: 'number' },
+        pagination: {
+          type: 'object',
+          properties: {
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            offset: { type: 'number' },
+            totalPages: { type: 'number' },
+            hasNextPage: { type: 'boolean' },
+            hasPrevPage: { type: 'boolean' },
+            nextPage: { type: 'number', nullable: true },
+            prevPage: { type: 'number', nullable: true }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid pagination parameters or user not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiQuery({ name: 'limit', required: false, description: 'Number of jobs per page (1-100, default: 10)' })
+  @ApiQuery({ name: 'offset', required: false, description: 'Number of jobs to skip (default: 0)' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'search', required: false, description: 'Search term to filter jobs' })
   async findAllCompanyJobs(
     @Request() req: any,
     @Query('limit') limit?: string,
@@ -145,6 +224,28 @@ export class JobController {
   }
 
   @Get(':id')
+  @ApiOperation({ 
+    summary: 'Get a specific job by ID',
+    description: 'Retrieves a specific job by ID for the authenticated user\'s company.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job retrieved successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
   async findOne(
     @Param('id') id: string,
     @Request() req: any,
@@ -165,6 +266,29 @@ export class JobController {
   }
 
   @Patch(':id')
+  @ApiOperation({ 
+    summary: 'Update a job posting',
+    description: 'Updates an existing job posting for the authenticated user\'s company.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job updated successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
+  @ApiBody({ type: CreateJobDto, description: 'Partial job data to update' })
   async update(
     @Param('id') id: string,
     @Body() updateJobDto: Partial<CreateJobDto>,
@@ -187,6 +311,27 @@ export class JobController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ 
+    summary: 'Soft delete a job posting',
+    description: 'Soft deletes a job posting for the authenticated user\'s company. The job can be restored later.'
+  })
+  @ApiResponse({ 
+    status: 204, 
+    description: 'Job deleted successfully'
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
   async remove(
     @Param('id') id: string,
     @Request() req: any,
@@ -207,6 +352,40 @@ export class JobController {
   }
 
   @Patch(':id/status')
+  @ApiOperation({ 
+    summary: 'Update job status',
+    description: 'Updates the status of a job posting for the authenticated user\'s company.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job status updated successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company or invalid status'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
+  @ApiBody({ 
+    schema: { 
+      type: 'object', 
+      properties: { 
+        status: { 
+          type: 'string', 
+          enum: ['ACTIVE', 'INACTIVE', 'DRAFT', 'CLOSED', 'DELETED'],
+          example: 'ACTIVE'
+        } 
+      } 
+    } 
+  })
   async updateStatus(
     @Param('id') id: string,
     @Body() body: { status: JobStatus },
@@ -228,6 +407,39 @@ export class JobController {
   }
 
   @Patch(':id/featured')
+  @ApiOperation({ 
+    summary: 'Toggle job featured status',
+    description: 'Toggles the featured status of a job posting for the authenticated user\'s company.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job featured status updated successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
+  @ApiBody({ 
+    schema: { 
+      type: 'object', 
+      properties: { 
+        featured: { 
+          type: 'boolean', 
+          example: true 
+        } 
+      } 
+    } 
+  })
   async toggleFeatured(
     @Param('id') id: string,
     @Body() body: { featured: boolean },
@@ -250,6 +462,16 @@ export class JobController {
 
   @Get('public/featured')
   @SetMetadata('skipAuth', true)
+  @ApiOperation({ 
+    summary: 'Get featured jobs (public)',
+    description: 'Retrieves featured job postings publicly without authentication.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Featured jobs retrieved successfully',
+    type: [JobResponseDto]
+  })
+  @ApiQuery({ name: 'limit', required: false, description: 'Number of jobs to return (1-50, default: 10)' })
   async findFeaturedJobs(
     @Query('limit') limit?: string,
   ): Promise<JobResponseDto[]> {
@@ -265,6 +487,42 @@ export class JobController {
 
   @Get('public/all')
   @SetMetadata('skipAuth', true)
+  @ApiOperation({ 
+    summary: 'Get all public jobs with pagination',
+    description: 'Retrieves all public job postings with pagination and optional search functionality.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Public jobs retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        jobs: { type: 'array', items: { $ref: '#/components/schemas/JobResponseDto' } },
+        total: { type: 'number' },
+        pagination: {
+          type: 'object',
+          properties: {
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            offset: { type: 'number' },
+            totalPages: { type: 'number' },
+            hasNextPage: { type: 'boolean' },
+            hasPrevPage: { type: 'boolean' },
+            nextPage: { type: 'number', nullable: true },
+            prevPage: { type: 'number', nullable: true }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid pagination parameters'
+  })
+  @ApiQuery({ name: 'limit', required: false, description: 'Number of jobs per page (1-100, default: 10)' })
+  @ApiQuery({ name: 'offset', required: false, description: 'Number of jobs to skip (default: 0)' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'search', required: false, description: 'Search term to filter jobs' })
   async findAllPublicJobs(
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
@@ -316,6 +574,40 @@ export class JobController {
 
   @Get('public/simple')
   @SetMetadata('skipAuth', true)
+  @ApiOperation({ 
+    summary: 'Get public jobs (simplified)',
+    description: 'Retrieves public job postings with simplified data for better performance.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Public jobs retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        jobs: { type: 'array', items: { type: 'object' } },
+        total: { type: 'number' },
+        pagination: {
+          type: 'object',
+          properties: {
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            offset: { type: 'number' },
+            totalPages: { type: 'number' },
+            hasNextPage: { type: 'boolean' },
+            hasPrevPage: { type: 'boolean' },
+            nextPage: { type: 'number', nullable: true },
+            prevPage: { type: 'number', nullable: true }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid pagination parameters'
+  })
+  @ApiQuery({ name: 'limit', required: false, description: 'Number of jobs per page (1-50, default: 20)' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)' })
   async findAllPublicJobsSimple(
     @Query('limit') limit?: string,
     @Query('page') page?: string,
@@ -362,6 +654,20 @@ export class JobController {
 
   @Get('public/:id')
   @SetMetadata('skipAuth', true)
+  @ApiOperation({ 
+    summary: 'Get a specific public job by ID',
+    description: 'Retrieves a specific public job posting by ID without authentication. Tracks view count.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job retrieved successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
   async findOnePublicJob(
     @Param('id') id: string,
     @Request() req: any,
@@ -378,6 +684,28 @@ export class JobController {
   }
 
   @Get('candidate/:id')
+  @ApiOperation({ 
+    summary: 'Get job details for candidate',
+    description: 'Retrieves job details for authenticated candidates who have applied to the job.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job details retrieved successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User is not a candidate or has not applied to this job'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
   async findOneJobForCandidate(
     @Param('id') id: string,
     @Request() req: any,
@@ -422,6 +750,41 @@ export class JobController {
   }
 
   @Get('my-application/:jobId')
+  @ApiOperation({ 
+    summary: 'Get job application details for candidate',
+    description: 'Retrieves job details along with application status and CV analysis results for authenticated candidates.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job application details retrieved successfully',
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/JobResponseDto' },
+        {
+          type: 'object',
+          properties: {
+            applicationStatus: { type: 'string' },
+            appliedAt: { type: 'string', format: 'date-time' },
+            cvAnalysisResults: { type: 'object' },
+            cvAnalysisScore: { type: 'number' }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User is not a candidate or has not applied to this job'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job or application not found'
+  })
+  @ApiParam({ name: 'jobId', description: 'Job ID' })
   async findJobApplicationDetails(
     @Param('jobId') jobId: string,
     @Request() req: any,
@@ -476,6 +839,28 @@ export class JobController {
   }
 
   @Patch(':id/restore')
+  @ApiOperation({ 
+    summary: 'Restore a soft-deleted job',
+    description: 'Restores a previously soft-deleted job posting for the authenticated user\'s company.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job restored successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
   async restore(
     @Param('id') id: string,
     @Request() req: any,
@@ -497,6 +882,27 @@ export class JobController {
 
   @Delete(':id/permanent')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ 
+    summary: 'Permanently delete a job',
+    description: 'Permanently deletes a job posting for the authenticated user\'s company. This action cannot be undone.'
+  })
+  @ApiResponse({ 
+    status: 204, 
+    description: 'Job permanently deleted successfully'
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
   async permanentlyDelete(
     @Param('id') id: string,
     @Request() req: any,
@@ -517,6 +923,23 @@ export class JobController {
   }
 
   @Get('deleted/all')
+  @ApiOperation({ 
+    summary: 'Get all soft-deleted jobs',
+    description: 'Retrieves all soft-deleted jobs for the authenticated user\'s company.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Deleted jobs retrieved successfully',
+    type: [JobResponseDto]
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
   async findAllDeleted(
     @Request() req: any,
   ): Promise<JobResponseDto[]> {
@@ -536,6 +959,24 @@ export class JobController {
   }
 
   @Put(':id/toggle-featured')
+  @ApiOperation({ 
+    summary: 'Toggle job featured status (PUT)',
+    description: 'Toggles the featured status of a job posting for the authenticated user\'s company using PUT method.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Job featured status toggled successfully',
+    type: JobResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - User not associated with company or job not found'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token'
+  })
+  @ApiParam({ name: 'id', description: 'Job ID' })
   async toggleFeaturedStatus(
     @Param('id') id: string,
     @Request() req: any,

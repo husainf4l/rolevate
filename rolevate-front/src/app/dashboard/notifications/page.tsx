@@ -1,6 +1,9 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from "react";
+import { API_CONFIG } from "@/lib/config";
 import Header from "@/components/dashboard/Header";
 import {
   BellIcon,
@@ -99,7 +102,7 @@ export default function NotificationsPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("https://rolevate.com/api/notifications", {
+        const res = await fetch(`${API_CONFIG.API_BASE_URL}/notifications`, {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Failed to fetch notifications");

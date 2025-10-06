@@ -53,11 +53,7 @@ const industries = [
 ];
 
 export default function JobsPage() {
-  console.log("🏠 JobsPage component rendered!");
-  console.log("🧪 Console logging test - this should always show!");
-
   const [searchTerm, setSearchTerm] = useState("");
-  console.log("🔍 Current searchTerm:", searchTerm);
   const [selectedType, setSelectedType] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("All");
   const [selectedExperience, setSelectedExperience] = useState("All");
@@ -83,11 +79,7 @@ export default function JobsPage() {
 
   // Helper function to convert JobPost to JobData format
   const convertJobPostToJobData = (jobPost: JobPost): JobData => {
-    console.log("=== convertJobPostToJobData Debug ===");
-    console.log("Raw jobPost from API:", JSON.stringify(jobPost, null, 2));
-
     const logoResult = getJobLogo(jobPost);
-    console.log("Final logo result:", logoResult);
 
     const jobData: JobData = {
       id: jobPost.id, // Use string ID directly (UUID from backend)
@@ -117,7 +109,7 @@ export default function JobsPage() {
       jobData.logo = logoResult;
     }
 
-    console.log("Final JobData:", JSON.stringify(jobData, null, 2));
+
 
     // Only add experience field if it exists
     if (jobPost.experience) {
@@ -129,45 +121,33 @@ export default function JobsPage() {
 
   // Helper function to get job logo from API response (no emoji fallback)
   const getJobLogo = (jobPost: JobPost): string | undefined => {
-    console.log("=== getJobLogo Debug ===");
-    console.log("jobPost.companyLogo:", jobPost.companyLogo);
-    console.log("jobPost.company?.logo:", jobPost.company?.logo);
-    console.log("Company name:", jobPost.company?.name);
 
     // Priority order: companyLogo -> company.logo -> undefined (no fallback)
     if (jobPost.companyLogo) {
-      console.log("✓ Using companyLogo:", jobPost.companyLogo);
       return jobPost.companyLogo;
     }
 
     if (jobPost.company?.logo) {
-      console.log("✓ Using company.logo:", jobPost.company.logo);
       return jobPost.company.logo;
     }
 
     // No fallback - return undefined if no logo is available
-    console.log("⚠️ No logo available - returning undefined");
     return undefined;
   };
 
   // Fetch jobs from API
   const fetchJobs = useCallback(async (page: number = 1, search?: string) => {
-    console.log("🚀 fetchJobs called!", { page, search, searchTerm });
     try {
       setLoading(true);
       setApiError(null);
 
-      console.log("📡 Calling JobService.getAllPublicJobs...");
       const response = await JobService.getAllPublicJobs(
         page,
         jobsPerPage,
         search || searchTerm || undefined
       );
 
-      console.log("✅ API Response received:", response);
-
       const convertedJobs = response.jobs.map(convertJobPostToJobData);
-      console.log("🔄 Converted jobs:", convertedJobs);
 
       setJobs(convertedJobs);
       setTotalJobs(response.total);
@@ -187,10 +167,7 @@ export default function JobsPage() {
 
   // Initial fetch and search effect
   useEffect(() => {
-    console.log("🎯 useEffect triggered!", { searchTerm });
-    console.log("🎯 About to call fetchJobs(1, searchTerm)");
     fetchJobs(1, searchTerm);
-    console.log("🎯 fetchJobs call completed (but async)");
   }, [searchTerm, fetchJobs]);
 
   // Filter jobs locally (since API doesn't support all filter types yet)

@@ -9,6 +9,7 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 // Remove the local JobPost interface since we're importing it from the service
 
@@ -198,7 +199,7 @@ function JobsContent() {
       await JobService.activateJob(jobId);
       
       // Show success message
-      alert('Job published successfully!');
+      toast.success('Job published successfully!');
     } catch (err) {
       // Rollback on error
       setJobPosts(prev => 
@@ -210,7 +211,7 @@ function JobsContent() {
       );
       
       console.error('Failed to activate job:', err);
-      alert('Failed to publish job. Please try again.');
+      toast.error('Failed to publish job. Please try again.');
     }
   };
 
@@ -241,7 +242,7 @@ function JobsContent() {
       await JobService.pauseJob(jobId);
       
       // Show success message
-      alert('Job paused successfully!');
+      toast.success('Job paused successfully!');
     } catch (err) {
       // Rollback on error
       setJobPosts(prev => 
@@ -253,7 +254,7 @@ function JobsContent() {
       );
       
       console.error('Failed to pause job:', err);
-      alert('Failed to pause job. Please try again.');
+      toast.error('Failed to pause job. Please try again.');
     }
   };
 
@@ -284,7 +285,7 @@ function JobsContent() {
       await JobService.deleteJob(jobId);
       
       // Show success message
-      alert('Job deleted successfully!');
+      toast.success('Job deleted successfully!');
     } catch (err) {
       // Rollback on error
       setJobPosts(prev => 
@@ -296,7 +297,7 @@ function JobsContent() {
       );
       
       console.error('Failed to delete job:', err);
-      alert('Failed to delete job. Please try again.');
+      toast.error('Failed to delete job. Please try again.');
     }
   };
 
@@ -331,7 +332,7 @@ function JobsContent() {
       }
     } catch (err) {
       console.error('Failed to perform action:', err);
-      alert(`Failed to ${action.toLowerCase()} job. Please try again.`);
+      toast.error(`Failed to ${action.toLowerCase()} job. Please try again.`);
     }
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import "@livekit/components-styles";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Room, RoomEvent, RemoteParticipant } from "livekit-client";
 import {
   RoomContext,
@@ -99,12 +99,11 @@ export default function InterviewRoom({
     screenShare: false,
   });
 
-  // Force audio initialization
-  useEffect(() => {
-    // Unlock audio context on first user interaction
-    const unlockAudio = () => {
-      console.log("🔓 Attempting to unlock audio context...");
+  // Memoized audio unlock handler for better performance
+  const unlockAudioHandler = useCallback(() => {
+    // Attempting to unlock audio context
 
+    try {
       // Create a temporary audio context
       const audioContext = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
@@ -119,29 +118,31 @@ export default function InterviewRoom({
       source.start(0);
       source.stop(0.001);
 
-      console.log("✅ Audio context unlocked:", audioContext.state);
+      // Audio context unlocked successfully
+    } catch (error) {
+      console.warn("⚠️ Failed to unlock audio context:", error);
+    }
+  }, []);
 
-      // Clean up event listeners
-      document.removeEventListener("click", unlockAudio);
-      document.removeEventListener("touchstart", unlockAudio);
-      document.removeEventListener("keydown", unlockAudio);
-    };
+  // Force audio initialization
+  useEffect(() => {
+    const events = ['click', 'touchstart', 'keydown'];
+    
+    // Add event listeners
+    events.forEach(eventType => {
+      document.addEventListener(eventType, unlockAudioHandler, { once: true });
+    });
 
-    // Attach the unlock function to user interaction events
-    document.addEventListener("click", unlockAudio);
-    document.addEventListener("touchstart", unlockAudio);
-    document.addEventListener("keydown", unlockAudio);
-
-    // Try to unlock audio context right away (might work in some browsers)
-    unlockAudio();
+    // Try to unlock audio context right away
+    unlockAudioHandler();
 
     return () => {
       // Clean up event listeners
-      document.removeEventListener("click", unlockAudio);
-      document.removeEventListener("touchstart", unlockAudio);
-      document.removeEventListener("keydown", unlockAudio);
+      events.forEach(eventType => {
+        document.removeEventListener(eventType, unlockAudioHandler);
+      });
     };
-  }, []);
+  }, [unlockAudioHandler]);
 
   // Effect to ensure RoomAudioRenderer is set up correctly after connection
   useEffect(() => {
@@ -221,44 +222,45 @@ export default function InterviewRoom({
     return () => clearInterval(timer);
   }, [isConnected]);
 
-  // Periodic state synchronization to ensure UI reflects actual LiveKit state
-  useEffect(() => {
-    const stateChecker = setInterval(() => {
-      const actualState = room.state;
-      const shouldBeConnected = actualState === "connected";
-      const shouldBeConnecting =
-        actualState === "connecting" || actualState === "reconnecting";
+  // Memoized state synchronization handler for better performance
+  const syncRoomState = useCallback(() => {
+    const actualState = room.state;
+    const shouldBeConnected = actualState === "connected";
+    const shouldBeConnecting = actualState === "connecting" || actualState === "reconnecting";
 
-      // Only update if there's a mismatch
-      if (shouldBeConnected && !isConnected) {
-        console.log("🔄 STATE SYNC: Updating to connected (was disconnected)");
-        setIsConnected(true);
-        setIsConnecting(false);
-      } else if (!shouldBeConnected && !shouldBeConnecting && isConnected) {
-        console.log("🔄 STATE SYNC: Updating to disconnected (was connected)");
-        setIsConnected(false);
-        setIsConnecting(false);
-      } else if (shouldBeConnecting && !isConnecting) {
-        console.log("🔄 STATE SYNC: Updating to connecting");
-        setIsConnecting(true);
-        setIsConnected(false);
-      }
+    // Only update if there's a mismatch
+    if (shouldBeConnected && !isConnected) {
+      console.log("🔄 STATE SYNC: Updating to connected (was disconnected)");
+      setIsConnected(true);
+      setIsConnecting(false);
+    } else if (!shouldBeConnected && !shouldBeConnecting && isConnected) {
+      console.log("🔄 STATE SYNC: Updating to disconnected (was connected)");
+      setIsConnected(false);
+      setIsConnecting(false);
+    } else if (shouldBeConnecting && !isConnecting) {
+      console.log("🔄 STATE SYNC: Updating to connecting");
+      setIsConnecting(true);
+      setIsConnected(false);
+    }
 
-      // Log current state for debugging
-      if (actualState !== "disconnected") {
-        console.log("🔍 STATE CHECK:", {
-          roomState: actualState,
-          uiConnected: isConnected,
-          uiConnecting: isConnecting,
-          participantCount: room.numParticipants,
-        });
-      }
-    }, 2000); // Check every 2 seconds
-
-    return () => clearInterval(stateChecker);
+    // Log current state for debugging (only when needed)
+    if (actualState !== "disconnected" && process.env.NODE_ENV === 'development') {
+      console.log("🔍 STATE CHECK:", {
+        roomState: actualState,
+        uiConnected: isConnected,
+        uiConnecting: isConnecting,
+        participantCount: room.numParticipants,
+      });
+    }
   }, [room, isConnected, isConnecting]);
 
-  // Format duration to MM:SS
+  // Optimized periodic state synchronization (reduced frequency for better performance)
+  useEffect(() => {
+    const stateChecker = setInterval(syncRoomState, 3000); // Reduced from 2s to 3s
+    return () => clearInterval(stateChecker);
+  }, [syncRoomState]);
+
+  // Format duration to MM:SS (memoized)
   const formatDuration = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -266,6 +268,67 @@ export default function InterviewRoom({
       .toString()
       .padStart(2, "0")}`;
   }, []);
+
+  // Memoized formatted duration to prevent unnecessary recalculations
+  const formattedDuration = useMemo(() => formatDuration(callDuration), [formatDuration, callDuration]);
+
+
+
+  // Memoized room event handlers for better performance
+  const handleRoomConnected = useCallback(() => {
+    console.log("✅ SUCCESSFULLY CONNECTED TO LIVEKIT ROOM");
+    console.log("🏠 Room State:", room.state);
+    console.log("👥 Local Participant:", room.localParticipant.identity);
+    setIsConnected(true);
+    setIsConnecting(false);
+  }, [room]);
+
+  const handleRoomDisconnected = useCallback((reason?: any) => {
+    console.log("❌ DISCONNECTED FROM LIVEKIT ROOM");
+    console.log("🔍 Disconnect Reason:", reason);
+    setIsConnected(false);
+    setIsConnecting(false);
+  }, []);
+
+  const handleRoomReconnecting = useCallback(() => {
+    console.log("🔄 LIVEKIT RECONNECTING...");
+    setIsConnecting(true);
+  }, []);
+
+  const handleRoomReconnected = useCallback(() => {
+    console.log("✅ LIVEKIT RECONNECTED");
+    setIsConnected(true);
+    setIsConnecting(false);
+  }, []);
+
+  const handleParticipantConnected = useCallback((participant: RemoteParticipant) => {
+    console.log("👤 NEW PARTICIPANT JOINED:", {
+      identity: participant.identity,
+      sid: participant.sid,
+      isAgent: participant.isAgent,
+      metadata: participant.metadata
+    });
+
+    // Check if this is an AI agent
+    if (participant.isAgent || 
+        participant.identity.includes("agent") || 
+        participant.identity.includes("ai")) {
+      console.log("🤖 AI AGENT DETECTED AND CONNECTED!");
+      setAiAgent(participant);
+    }
+  }, []);
+
+  const handleParticipantDisconnected = useCallback((participant: RemoteParticipant) => {
+    console.log("👤 PARTICIPANT LEFT:", {
+      identity: participant.identity,
+      sid: participant.sid
+    });
+
+    if (participant === aiAgent) {
+      console.log("🤖 AI Agent disconnected");
+      setAiAgent(null);
+    }
+  }, [aiAgent]);
 
   // Connect to LiveKit room
   const connectToRoom = useCallback(async () => {
@@ -293,70 +356,15 @@ export default function InterviewRoom({
       // Clear any existing event listeners to prevent duplicates
       room.removeAllListeners();
 
-      // Set up room event listeners BEFORE connecting
-      room.on(RoomEvent.Connected, () => {
-        console.log("✅ SUCCESSFULLY CONNECTED TO LIVEKIT ROOM");
-        console.log("🏠 Room State:", room.state);
-        console.log("👥 Local Participant:", room.localParticipant.identity);
-        console.log("🔗 Server URL:", serverUrl);
-        console.log("📱 Room Name:", room.name);
-        setIsConnected(true);
-        setIsConnecting(false);
-      });
+      // Set up optimized event listeners
+      room.on(RoomEvent.Connected, handleRoomConnected);
+      room.on(RoomEvent.Disconnected, handleRoomDisconnected);
+      room.on(RoomEvent.Reconnecting, handleRoomReconnecting);
+      room.on(RoomEvent.Reconnected, handleRoomReconnected);
+      room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
+      room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
 
-      room.on(RoomEvent.Disconnected, (reason) => {
-        console.log("❌ DISCONNECTED FROM LIVEKIT ROOM");
-        console.log("🔍 Disconnect Reason:", reason);
-        console.log("🏠 Room State:", room.state);
-        setIsConnected(false);
-        setIsConnecting(false);
-      });
 
-      room.on(RoomEvent.Reconnecting, () => {
-        console.log("🔄 LIVEKIT RECONNECTING...");
-        setIsConnecting(true);
-      });
-
-      room.on(RoomEvent.Reconnected, () => {
-        console.log("✅ LIVEKIT RECONNECTED");
-        setIsConnected(true);
-        setIsConnecting(false);
-      });
-
-      room.on(
-        RoomEvent.ParticipantConnected,
-        (participant: RemoteParticipant) => {
-          console.log("👤 NEW PARTICIPANT JOINED:");
-          console.log("  - Identity:", participant.identity);
-          console.log("  - SID:", participant.sid);
-          console.log("  - Is Agent:", participant.isAgent);
-          console.log("  - Metadata:", participant.metadata);
-
-          // Check if this is an AI agent
-          if (
-            participant.isAgent ||
-            participant.identity.includes("agent") ||
-            participant.identity.includes("ai")
-          ) {
-            console.log("🤖 AI AGENT DETECTED AND CONNECTED!");
-            setAiAgent(participant);
-          }
-        }
-      );
-
-      room.on(
-        RoomEvent.ParticipantDisconnected,
-        (participant: RemoteParticipant) => {
-          console.log("👤 PARTICIPANT LEFT:");
-          console.log("  - Identity:", participant.identity);
-          console.log("  - SID:", participant.sid);
-
-          if (participant === aiAgent) {
-            console.log("🤖 AI Agent disconnected");
-            setAiAgent(null);
-          }
-        }
-      );
 
       // Handle track subscriptions (CRITICAL for audio playback)
       room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
@@ -519,7 +527,19 @@ export default function InterviewRoom({
       );
       setIsConnecting(false);
     }
-  }, [room, roomName, serverUrl, token, mediaDevices.microphone, aiAgent]);
+  }, [
+    room, 
+    roomName, 
+    serverUrl, 
+    token, 
+    mediaDevices.microphone,
+    handleRoomConnected,
+    handleRoomDisconnected,
+    handleRoomReconnecting,
+    handleRoomReconnected,
+    handleParticipantConnected,
+    handleParticipantDisconnected
+  ]);
 
   // Media control functions
   const toggleMicrophone = useCallback(async () => {
@@ -734,7 +754,7 @@ export default function InterviewRoom({
                   <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-50 to-white rounded-full border border-gray-200/50 shadow-sm">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                     <span className="text-sm font-bold text-gray-800 font-mono tracking-wider">
-                      {formatDuration(callDuration)}
+                      {formattedDuration}
                     </span>
                   </div>
                 )}

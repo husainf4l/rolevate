@@ -6,6 +6,12 @@ import { Request } from 'express';
 import { UserService } from '../user/user.service';
 import { CandidateService } from '../candidate/candidate.service';
 
+// Validate JWT secret is provided
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET environment variable is required but not provided');
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -21,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ExtractJwt.fromAuthHeaderAsBearerToken(), // Fallback to Bearer token
       ]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'defaultSecret',
+      secretOrKey: jwtSecret!,
     });
     // JWT Strategy initialized
   }
@@ -39,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (profile) {
           candidateProfileId = profile.id;
         }
-      } catch (e) {
+      } catch (_e) {
         // Error fetching candidate profile
       }
     } else if (payload.userType === 'COMPANY') {
@@ -48,7 +54,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (user && user.companyId) {
           companyId = user.companyId;
         }
-      } catch (e) {
+      } catch (_e) {
         // Error fetching company info
       }
     }

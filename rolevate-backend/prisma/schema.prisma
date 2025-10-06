@@ -160,7 +160,6 @@ model User {
   isActive         Boolean           @default(true)
   companyId        String?
   company          Company?          @relation(fields: [companyId], references: [id])
-  phone            String?
   refreshTokens    RefreshToken[]
   candidateProfile CandidateProfile? // One-to-one relationship with candidate profile
   applicationNotes ApplicationNote[]
@@ -213,6 +212,8 @@ model Notification {
   @@index([companyId, read])
   @@index([category, timestamp])
   @@index([type, timestamp])
+  @@index([userId, timestamp]) // Index for user notification history
+  @@index([companyId, timestamp]) // Index for company notification history
   @@map("notifications")
 }
 
@@ -367,6 +368,11 @@ model Job {
   @@index([status, deadline]) // Composite index for public job queries
   @@index([featured, status, deadline]) // Composite index for featured jobs
   @@index([createdAt]) // Index for ordering
+  @@index([title]) // Index for job title searches
+  @@index([description]) // Index for job description searches
+  @@index([location]) // Index for location-based searches
+  @@index([department]) // Index for department searches
+  @@index([skills]) // Index for skills array searches
   @@map("jobs")
 }
 
@@ -467,6 +473,11 @@ model CandidateProfile {
   @@index([experienceLevel])
   @@index([isOpenToWork])
   @@index([currentLocation])
+  @@index([skills]) // Index for skills array searches
+  @@index([preferredIndustries]) // Index for industry preferences
+  @@index([preferredLocations]) // Index for location preferences
+  @@index([isOpenToWork, experienceLevel]) // Composite index for candidate search
+  @@index([currentLocation, isOpenToWork]) // Composite index for location-based search
   @@map("candidate_profiles")
 }
 
@@ -614,6 +625,9 @@ model Application {
   @@index([jobId])
   @@index([candidateId])
   @@index([status])
+  @@index([jobId, status]) // Composite index for job applications by status
+  @@index([candidateId, status]) // Composite index for candidate applications by status
+  @@index([appliedAt]) // Index for chronological ordering
   @@map("applications")
 }
 
@@ -783,6 +797,9 @@ model Interview {
   @@index([status])
   @@index([scheduledAt])
   @@index([type])
+  @@index([jobId, status]) // Composite index for job interviews by status
+  @@index([candidateId, scheduledAt]) // Index for candidate interview schedule
+  @@index([companyId, scheduledAt]) // Index for company interview schedule
   @@map("interviews")
 }
 
@@ -877,5 +894,7 @@ model Communication {
   @@index([companyId, candidateId])
   @@index([companyId, type])
   @@index([sentAt])
+  @@index([candidateId, sentAt]) // Index for candidate communication history
+  @@index([companyId, sentAt]) // Index for company communication history
   @@map("communications")
 }

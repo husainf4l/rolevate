@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { API_CONFIG } from "@/lib/config";
 import Link from "next/link";
 import Logo from "@/components/common/logo";
 import {
@@ -73,7 +74,7 @@ export default function UserSidebar() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await fetch("https://rolevate.com/api/users/me", {
+        const response = await fetch(`${API_CONFIG.API_BASE_URL}/users/me`, {
           credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -162,7 +163,7 @@ export default function UserSidebar() {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/userdashboard" &&
-                    pathname.startsWith(item.href));
+                    pathname?.startsWith(item.href));
                 return (
                   <Link
                     key={item.label}

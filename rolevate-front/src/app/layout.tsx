@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PerformanceMonitor from "@/components/common/PerformanceMonitor";
+import ToastProvider from "@/components/common/ToastProvider";
+import AuthProvider from "@/components/common/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,8 +47,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-[#23272a] bg-white`}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-6 focus:left-6 z-50 bg-[#0fc4b5] text-white px-4 py-2 rounded-md font-medium"
+        >
+          Skip to main content
+        </a>
         <PerformanceMonitor />
-        {children}
+        <ToastProvider />
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

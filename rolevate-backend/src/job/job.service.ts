@@ -430,86 +430,78 @@ export class JobService {
   }
 
   async findAllPaginated(companyId: string, limit: number, offset: number, search?: string): Promise<JobResponseDto[]> {
-    // Try to get from cache first
+    // Use strategic caching for expensive search operations
     const cacheKey = this.cacheService.generateCompanyJobsKey(companyId, limit, offset, search);
-    const cachedJobs = await this.cacheService.get<JobResponseDto[]>(cacheKey);
     
-    if (cachedJobs) {
-      return cachedJobs;
-    }
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const searchCondition = search ? {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' as any } },
+            { description: { contains: search, mode: 'insensitive' as any } },
+            { department: { contains: search, mode: 'insensitive' as any } },
+            { location: { contains: search, mode: 'insensitive' as any } },
+            { industry: { contains: search, mode: 'insensitive' as any } },
+            { skills: { hasSome: [search] } }, // Search in skills array
+          ]
+        } : {};
 
-    const searchCondition = search ? {
-      OR: [
-        { title: { contains: search, mode: 'insensitive' as any } },
-        { description: { contains: search, mode: 'insensitive' as any } },
-        { department: { contains: search, mode: 'insensitive' as any } },
-        { location: { contains: search, mode: 'insensitive' as any } },
-        { industry: { contains: search, mode: 'insensitive' as any } },
-        { skills: { hasSome: [search] } }, // Search in skills array
-      ]
-    } : {};
+        const jobs = await this.prisma.job.findMany({
+          where: {
+            companyId,
+            status: { not: JobStatus.DELETED }, // Exclude deleted jobs
+            ...searchCondition,
+          },
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+              }
+            }
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: limit,
+          skip: offset,
+        });
 
-    const jobs = await this.prisma.job.findMany({
-      where: {
-        companyId,
-        status: { not: JobStatus.DELETED }, // Exclude deleted jobs
-        ...searchCondition,
+        return jobs.map(job => this.mapToJobResponse(job));
       },
-      include: {
-        company: {
-          select: {
-            id: true,
-            name: true,
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: limit,
-      skip: offset,
-    });
-
-    const jobResponses = jobs.map(job => this.mapToJobResponse(job));
-    
-    // Cache for 5 minutes
-    await this.cacheService.set(cacheKey, jobResponses, 300);
-
-    return jobResponses;
+      this.cacheService.getSmartTTL(search ? 'dynamic' : 'static') // Longer TTL for non-search queries
+    );
   }
 
   async countJobs(companyId: string, search?: string): Promise<number> {
-    // Try to get from cache first
+    // Use strategic caching for count operations
     const cacheKey = this.cacheService.generateJobCountKey(companyId, search);
-    const cachedCount = await this.cacheService.get<number>(cacheKey);
     
-    if (cachedCount !== null) {
-      return cachedCount;
-    }
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const searchCondition = search ? {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' as any } },
+            { description: { contains: search, mode: 'insensitive' as any } },
+            { department: { contains: search, mode: 'insensitive' as any } },
+            { location: { contains: search, mode: 'insensitive' as any } },
+            { industry: { contains: search, mode: 'insensitive' as any } },
+            { skills: { hasSome: [search] } }, // Search in skills array
+          ]
+        } : {};
 
-    const searchCondition = search ? {
-      OR: [
-        { title: { contains: search, mode: 'insensitive' as any } },
-        { description: { contains: search, mode: 'insensitive' as any } },
-        { department: { contains: search, mode: 'insensitive' as any } },
-        { location: { contains: search, mode: 'insensitive' as any } },
-        { industry: { contains: search, mode: 'insensitive' as any } },
-        { skills: { hasSome: [search] } }, // Search in skills array
-      ]
-    } : {};
-
-    const count = await this.prisma.job.count({
-      where: {
-        companyId,
-        status: { not: JobStatus.DELETED }, // Exclude deleted jobs
-        ...searchCondition,
+        return this.prisma.job.count({
+          where: {
+            companyId,
+            status: { not: JobStatus.DELETED }, // Exclude deleted jobs
+            ...searchCondition,
+          },
+        });
       },
-    });
-
-    // Cache for 5 minutes
-    await this.cacheService.set(cacheKey, count, 300);
-
-    return count;
+      this.cacheService.getSmartTTL(search ? 'dynamic' : 'static')
+    );
   }
 
   async findAllPublicPaginated(limit: number, offset: number, search?: string): Promise<JobResponseDto[]> {
@@ -596,93 +588,88 @@ export class JobService {
   }
 
   async findAllPublicSimple(limit: number, offset: number): Promise<any[]> {
-    // Try to get from cache first
+    // Use strategic caching for public job listings
     const cacheKey = `public_jobs_simple:${limit}:${offset}`;
-    const cachedJobs = await this.cacheService.get<any[]>(cacheKey);
     
-    if (cachedJobs) {
-      return cachedJobs;
-    }
-
-    // Ultra-lightweight query - only essential fields
-    const jobs = await this.prisma.job.findMany({
-      where: {
-        status: JobStatus.ACTIVE,
-        deadline: {
-          gt: new Date(),
-        },
-      },
-      select: {
-        id: true,
-        title: true,
-        location: true,
-        salary: true,
-        type: true,
-        jobLevel: true,
-        workType: true,
-        featured: true,
-        createdAt: true,
-        company: {
+    return this.cacheService.getWithFallback(
+      cacheKey,
+      async () => {
+        // Ultra-lightweight query - only essential fields
+        const jobs = await this.prisma.job.findMany({
+          where: {
+            status: JobStatus.ACTIVE,
+            deadline: {
+              gt: new Date(),
+            },
+          },
           select: {
-            name: true,
-            logo: true,
-            address: {
+            id: true,
+            title: true,
+            location: true,
+            salary: true,
+            type: true,
+            jobLevel: true,
+            workType: true,
+            featured: true,
+            createdAt: true,
+            company: {
               select: {
-                city: true,
-                country: true,
+                name: true,
+                logo: true,
+                address: {
+                  select: {
+                    city: true,
+                    country: true,
+                  },
+                },
               },
             },
           },
-        },
+          orderBy: [
+            { featured: 'desc' },
+            { createdAt: 'desc' },
+          ],
+          take: limit,
+          skip: offset,
+        });
+
+        return jobs;
       },
-      orderBy: [
-        { featured: 'desc' },
-        { createdAt: 'desc' },
-      ],
-      take: limit,
-      skip: offset,
-    });
-
-    // Cache for 15 minutes (longer since it's simpler data)
-    await this.cacheService.set(cacheKey, jobs, 900);
-
-    return jobs;
+      this.cacheService.getSmartTTL('dynamic'), // 10 minutes for dynamic public data
+      true // Enable stale-while-revalidate for better performance
+    );
   }
 
   async countPublicJobs(search?: string): Promise<number> {
-    // Try to get from cache first
+    // Use strategic caching for public job counts
     const cacheKey = this.cacheService.generatePublicJobCountKey(search);
-    const cachedCount = await this.cacheService.get<number>(cacheKey);
     
-    if (cachedCount !== null) {
-      return cachedCount;
-    }
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const searchCondition = search ? {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' as any } },
+            { description: { contains: search, mode: 'insensitive' as any } },
+            { department: { contains: search, mode: 'insensitive' as any } },
+            { location: { contains: search, mode: 'insensitive' as any } },
+            { industry: { contains: search, mode: 'insensitive' as any } },
+            { skills: { hasSome: [search] } }, // Search in skills array
+          ]
+        } : {};
 
-    const searchCondition = search ? {
-      OR: [
-        { title: { contains: search, mode: 'insensitive' as any } },
-        { description: { contains: search, mode: 'insensitive' as any } },
-        { department: { contains: search, mode: 'insensitive' as any } },
-        { location: { contains: search, mode: 'insensitive' as any } },
-        { industry: { contains: search, mode: 'insensitive' as any } },
-        { skills: { hasSome: [search] } }, // Search in skills array
-      ]
-    } : {};
-
-    const count = await this.prisma.job.count({
-      where: {
-        status: JobStatus.ACTIVE,
-        deadline: {
-          gt: new Date(), // Only count jobs with future deadlines
-        },
-        ...searchCondition,
+        return this.prisma.job.count({
+          where: {
+            status: JobStatus.ACTIVE,
+            deadline: {
+              gt: new Date(), // Only count jobs with future deadlines
+            },
+            ...searchCondition,
+          },
+        });
       },
-    });
-
-    // Cache for 10 minutes (increased from 5 for better performance)
-    await this.cacheService.set(cacheKey, count, 600);
-
-    return count;
+      this.cacheService.getSmartTTL(search ? 'volatile' : 'dynamic')
+    );
   }
 
   async findFeaturedJobs(limit: number = 6): Promise<JobResponseDto[]> {

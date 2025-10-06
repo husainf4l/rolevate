@@ -86,9 +86,7 @@ export async function uploadCV(file: File): Promise<string> {
 }
 
 export async function applyToJob(data: ApplicationData): Promise<{ message: string; applicationId?: string }> {
-  console.log('applyToJob called with data:', data);
-  console.log('Making request to:', `${API_CONFIG.API_BASE_URL}/applications`);
-  console.log('Document cookies:', document.cookie);
+  // Submitting job application
   
   const response = await fetch(`${API_CONFIG.API_BASE_URL}/applications`, {
     method: "POST",
@@ -99,8 +97,7 @@ export async function applyToJob(data: ApplicationData): Promise<{ message: stri
     body: JSON.stringify(data),
   });
   
-  console.log('Response status:', response.status);
-  console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+  // Application submission response received
   
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Failed to apply to job" }));
@@ -108,7 +105,7 @@ export async function applyToJob(data: ApplicationData): Promise<{ message: stri
     throw new Error(error.message || "Failed to apply to job");
   }
   const resJson = await response.json();
-  console.log('Application submitted successfully:', resJson);
+  // Application submitted successfully
   return {
     message: resJson.message || "Application submitted successfully",
     applicationId: resJson.id || resJson.applicationId,
@@ -202,7 +199,7 @@ export async function getApplicationById(applicationId: string): Promise<Applica
   }
   
   const data = await response.json();
-  console.log('Raw response data:', data);
+  // Application data retrieved successfully
   
   // Handle both array and single object responses
   let application: Application;

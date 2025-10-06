@@ -13,6 +13,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import { SkeletonJobCard } from "@/components/common/Skeleton";
 
 interface JobListProps {
   jobs: JobPost[];
@@ -169,14 +170,10 @@ const JobList: React.FC<JobListProps> = ({
       {/* Jobs List */}
       <div className="p-4 space-y-4">
         {loading ? (
-          <div className="p-12 text-center">
-            <div className="flex items-center justify-center gap-4">
-              <div className="w-8 h-8 border-3 border-[#0fc4b5] border-t-transparent rounded-full animate-spin"></div>
-              <div>
-                <div className="text-lg font-semibold text-gray-900">Loading jobs...</div>
-                <div className="text-sm text-gray-600">Please wait while we fetch your job postings</div>
-              </div>
-            </div>
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <SkeletonJobCard key={i} />
+            ))}
           </div>
         ) : filteredJobs.length === 0 ? (
           <div className="p-12 text-center">

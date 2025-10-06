@@ -71,7 +71,7 @@ export interface CreateJobRequest {
 export interface CreateJobResponse {
   id: string;
   message: string;
-  jobData: any;
+  jobData: JobPost;
 }
 
 export interface JobPost {
@@ -492,8 +492,7 @@ export class JobService {
    * Create a new job posting
    */
   static async createJob(request: CreateJobRequest): Promise<CreateJobResponse> {
-    console.log('JobService.createJob - Sending request to:', `${this.baseUrl}/jobs/create`);
-    console.log('JobService.createJob - Request payload:', request);
+    // Creating job with validated data
 
     const response = await fetch(`${this.baseUrl}/jobs/create`, {
       method: 'POST',
@@ -505,8 +504,7 @@ export class JobService {
       body: JSON.stringify(request),
     });
 
-    console.log('JobService.createJob - Response status:', response.status);
-    console.log('JobService.createJob - Response headers:', Object.fromEntries(response.headers.entries()));
+    // Job creation request sent successfully
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Failed to create job' }));
@@ -515,7 +513,7 @@ export class JobService {
     }
 
     const data = await response.json();
-    console.log('JobService.createJob - Success response:', data);
+    // Job created successfully
 
     return {
       id: data.id || data.jobId || '',

@@ -1,67 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
+
 import CVManager from "@/components/dashboard/CVManager";
 import JobRecommendations from "@/components/dashboard/JobRecommendations";
 import InterviewSchedule from "@/components/dashboard/InterviewSchedule";
 import CVUploadPrompt from "@/components/dashboard/CVUploadPrompt";
 import { useCVStatus } from "@/hooks/useCVStatus";
-import { getCurrentUser } from "@/services/auth";
+import { useAuth } from "@/hooks/useAuth";
 
-interface CV {
-  id: string;
-  fileName: string;
-  originalFileName: string;
-  fileUrl: string;
-  fileSize: number;
-  status: string;
-  isActive: boolean;
-  uploadedAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-interface Application {
-  id: string;
-  status?: string;
-  appliedDate?: string;
-  // Add other application fields as needed
-}
-
-interface WorkExperience {
-  id: string;
-  // Add work experience fields as needed
-}
-
-interface EducationHistory {
-  id: string;
-  // Add education fields as needed
-}
-
-interface CandidateProfile {
-  firstName?: string;
-  lastName?: string;
-  email: string;
-  phone?: string;
-  cvs: CV[];
-  applications: Application[];
-  workExperiences: WorkExperience[];
-  educationHistory: EducationHistory[];
-  resumeUrl?: string;
-  // Add other profile fields as needed
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  userType: string;
-  candidateProfile?: CandidateProfile;
-}
+// CandidateProfile type now comes from useAuth hook
 
 export default function UserDashboardPage() {
-  const router = useRouter();
+  const { user, isLoading: userLoading } = useAuth();
   const {
     showUploadPrompt,
     handleCVUpload,
@@ -69,26 +20,7 @@ export default function UserDashboardPage() {
     handleDismissPrompt,
   } = useCVStatus();
 
-  const [user, setUser] = useState<User | null>(null);
-  const [userLoading, setUserLoading] = useState(true);
-
-  // Fetch current user data
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getCurrentUser();
-        setUser(userData);
-        // No redirect needed; profile creation is now automatic
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-      } finally {
-        setUserLoading(false);
-      }
-    };
-
-    fetchUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // User data is now provided by AuthProvider context - no need to fetch separately
 
   // Get CV data from user's candidate profile
   const getCVData = (): {

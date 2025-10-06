@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeftIcon,
@@ -28,11 +28,13 @@ import {
   AIConfigRequest,
   CreateJobRequest,
 } from "@/services/job";
-import { getCurrentUser } from "@/services/auth";
+import { useAuth } from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 function CreateJobContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [regeneratingDescription, setRegeneratingDescription] = useState(false);
@@ -44,31 +46,54 @@ function CreateJobContent() {
     useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [currentStep, setCurrentStep] = useState<FormStep>("basic");
-    const [jobData, setJobData] = useState<JobFormData>({
-      title: "",
-      department: "",
-      location: "",
-      salary: "",
-      type: "FULL_TIME",
-      deadline: "",
-      description: "",
-      shortDescription: "",
-      responsibilities: "",
-      requirements: "",
-      benefits: "",
-      skills: [],
-      experience: "",
-      education: "",
-      interviewQuestions: "",
-      jobLevel: "ENTRY",
-      workType: "ONSITE",
-      industry: "",
-      interviewLanguage: "english",
-      aiCvAnalysisPrompt: "",
-      aiFirstInterviewPrompt: "",
-      aiSecondInterviewPrompt: "",
-    });  // Helper function to map industry from API to form values
-  const mapIndustryToFormValue = (apiIndustry: string): string => {
+  const [jobData, setJobData] = useState<JobFormData>({
+    title: "",
+    department: "",
+    location: "",
+    salary: "",
+    type: "FULL_TIME",
+    deadline: "",
+    description: "",
+    shortDescription: "",
+    responsibilities: "",
+    requirements: "",
+    benefits: "",
+    skills: [],
+    experience: "",
+    education: "",
+    interviewQuestions: "",
+    jobLevel: "ENTRY",
+    workType: "ONSITE",
+    industry: "",
+    interviewLanguage: "english",
+    aiCvAnalysisPrompt: "",
+    aiFirstInterviewPrompt: "",
+    aiSecondInterviewPrompt: "",
+  });
+
+  // Memoized form validation and computed values
+  const isBasicStepValid = useMemo(() => {
+    return jobData.title.trim() !== '' && 
+           jobData.department.trim() !== '' && 
+           jobData.location.trim() !== '';
+  }, [jobData.title, jobData.department, jobData.location]);
+
+  const isJobDetailsValid = useMemo(() => {
+    return jobData.description.trim() !== '' && 
+           jobData.requirements.trim() !== '' &&
+           jobData.skills.length > 0;
+  }, [jobData.description, jobData.requirements, jobData.skills]);
+
+  const canProceedToNextStep = useMemo(() => {
+    switch (currentStep) {
+      case 'basic': return isBasicStepValid;
+      case 'details': return isJobDetailsValid;
+      case 'ai-config': return true; // AI step is optional
+      case 'preview': return true;
+      default: return false;
+    }
+  }, [currentStep, isBasicStepValid, isJobDetailsValid]);  // Memoized helper functions for better performance
+  const mapIndustryToFormValue = useCallback((apiIndustry: string): string => {
     const industryMap: { [key: string]: string } = {
       HEALTHCARE: "healthcare",
       TECHNOLOGY: "technology",
@@ -79,10 +104,9 @@ function CreateJobContent() {
       CONSULTING: "consulting",
     };
     return industryMap[apiIndustry] || "other";
-  };
+  }, []);
 
-  // Helper function to map location from API to form values
-  const mapLocationToFormValue = (address: any): string => {
+  const mapLocationToFormValue = useCallback((address: any): string => {
     if (!address) return "";
 
     const { city, country } = address;
@@ -117,14 +141,14 @@ function CreateJobContent() {
 
     const fullLocation = `${city}, ${countryName}`;
     return locationMap[fullLocation] || fullLocation;
-  };
+  }, []);
 
   // Helper function to update URL with current step
-  const updateUrlStep = (step: FormStep) => {
+  const updateUrlStep = useCallback((step: FormStep) => {
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.set("step", step);
     router.replace(`?${params.toString()}`, { scroll: false });
-  };
+  }, [searchParams, router]);
 
   // Initialize step from URL on component mount
   useEffect(() => {
@@ -139,26 +163,16 @@ function CreateJobContent() {
     }
   }, [searchParams]);
 
-  // Fetch user data on component mount to set default values
+  // Set default values from user data when available
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = await getCurrentUser();
-        if (userData?.company) {
-          setJobData((prev) => ({
-            ...prev,
-            industry: mapIndustryToFormValue(userData.company.industry),
-            location: mapLocationToFormValue(userData.company.address),
-          }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-        // Continue with empty defaults if user fetch fails
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    if (user?.company) {
+      setJobData((prev) => ({
+        ...prev,
+        industry: user.company?.industry ? mapIndustryToFormValue(user.company.industry) : prev.industry,
+        location: user.company?.address ? mapLocationToFormValue(user.company.address) : prev.location,
+      }));
+    }
+  }, [user, mapIndustryToFormValue, mapLocationToFormValue]);
 
   const steps: StepConfig[] = [
     {
@@ -271,11 +285,11 @@ function CreateJobContent() {
     );
   };
 
-  const handleNext = async () => {
+  const handleNext = useCallback(async () => {
     const isValid = validateStep(currentStep);
 
-    // Temporary debug logging to help identify validation issues
-    if (!isValid) {
+    // Use memoized validation for better performance
+    if (!canProceedToNextStep) {
       console.log("Validation failed for step:", currentStep);
       console.log("Current errors:", errors);
       console.log("Current form data:", {
@@ -286,6 +300,7 @@ function CreateJobContent() {
         salary: jobData.salary,
         skills: jobData.skills,
       });
+      return;
     }
 
     if (isValid) {
@@ -306,7 +321,7 @@ function CreateJobContent() {
         }
       }
     }
-  };
+  }, [currentStep, canProceedToNextStep, validateStep, errors, jobData]);
 
   const generateJobAnalysis = async () => {
     setAiGenerating(true);
@@ -510,7 +525,7 @@ function CreateJobContent() {
     await generateAIConfiguration();
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     const currentIndex = getCurrentStepIndex();
     if (currentIndex > 0) {
       const previousStep = steps[currentIndex - 1];
@@ -519,11 +534,11 @@ function CreateJobContent() {
         updateUrlStep(previousStep.key);
       }
     }
-  };
+  }, [getCurrentStepIndex, steps, updateUrlStep]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!validateForm()) {
-      console.log("Form validation failed");
+      // Form validation failed
       return;
     }
 
@@ -555,12 +570,12 @@ function CreateJobContent() {
         aiSecondInterviewPrompt: jobData.aiSecondInterviewPrompt.trim(),
       };
 
-      console.log("Creating job with data:", createJobRequest);
+      // Creating job with validated data
 
       // Call the backend API
-      const response = await JobService.createJob(createJobRequest);
+      await JobService.createJob(createJobRequest);
 
-      console.log("Job created successfully:", response);
+      // Job creation completed successfully
 
       // Navigate back to jobs page with success message
       router.push("/dashboard/jobs?created=true");
@@ -574,13 +589,13 @@ function CreateJobContent() {
       }
 
       // Show user-friendly error message
-      alert(`Failed to create job: ${errorMessage}`);
+      toast.error(`Failed to create job: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
-  };
+  }, [validateForm, jobData, router]);
 
-  const handleInputChange = (
+  const handleInputChange = useCallback((
     field: keyof JobFormData,
     value: string | string[]
   ) => {
@@ -589,7 +604,7 @@ function CreateJobContent() {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
-  };
+  }, [errors]);
 
   const addSkill = (skill: string) => {
     if (skill.trim() && !jobData.skills.includes(skill.trim())) {

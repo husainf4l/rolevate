@@ -14,12 +14,18 @@ import { UploadsModule } from '../uploads/uploads.module';
 import { JwtStrategy } from './jwt.strategy';
 import { TokenCleanupService } from './token-cleanup.service';
 
+// Validate JWT secret is provided
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET environment variable is required but not provided');
+}
+
 @Module({
   imports: [
     PassportModule,
     ScheduleModule.forRoot(),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'defaultSecret',
+      secret: jwtSecret,
       signOptions: { expiresIn: '15m' },
     }),
     UserModule,

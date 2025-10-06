@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import * as dotenv from 'dotenv';
+import { GlobalExceptionFilter } from './common/global-exception.filter';
 
 // Load environment variables
 dotenv.config();
@@ -14,6 +16,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'], // Reduced logging for security
   });
+
+  // Global exception filter
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Security headers
   app.use(helmet({
@@ -41,16 +46,25 @@ async function bootstrap() {
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.set('trust proxy', true);
 
-  // Rate limiting
-  app.use(
-    rateLimit({
-      windowMs: 60 * 60 * 1000, // 1 hour (60 minutes)
-      max: process.env.NODE_ENV === 'development' ? 10000 : 10000, // Higher limit in development
-      message: 'Too many requests from this IP, please try again later.',
-      standardHeaders: true,
-      legacyHeaders: false,
-    }),
-  );
+  // Rate limiting - Environment specific
+  const isProduction = process.env.NODE_ENV === 'production';
+  const rateLimitConfig = {
+    windowMs: 60 * 60 * 1000, // 1 hour (60 minutes)
+    max: isProduction ? 1000 : 10000, // Stricter limit in production (1000 vs 10000)
+    message: {
+      error: 'Too many requests from this IP, please try again later.',
+      retryAfter: 'Rate limit exceeded. Try again in 1 hour.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    // Skip rate limiting for health checks and static assets
+    skip: (req: any) => {
+      const skipPaths = ['/api/health', '/api/admin/health', '/favicon.ico'];
+      return skipPaths.some(path => req.path.includes(path));
+    }
+  };
+
+  app.use(rateLimit(rateLimitConfig));
 
   app.use(cookieParser());
 
@@ -102,6 +116,54 @@ async function bootstrap() {
   }));
 
   app.setGlobalPrefix('api');
+
+  // Swagger/OpenAPI Documentation Setup
+  const config = new DocumentBuilder()
+    .setTitle('RoleVate API')
+    .setDescription('RoleVate Backend API for Job Matching and Recruitment Platform')
+    .setVersion('1.0')
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('users', 'User management')
+    .addTag('companies', 'Company management')
+    .addTag('jobs', 'Job postings and management')
+    .addTag('applications', 'Job applications')
+    .addTag('candidates', 'Candidate profiles')
+    .addTag('interviews', 'Interview management')
+    .addTag('communication', 'Communication and messaging')
+    .addTag('uploads', 'File upload handling')
+    .addTag('admin', 'Administrative functions')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addServer('http://localhost:4005', 'Development server')
+    .addServer('https://api.rolevate.com', 'Production server')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      docExpansion: 'none',
+      filter: true,
+      showExtensions: true,
+    },
+    customSiteTitle: 'RoleVate API Documentation',
+    customCss: `
+      .swagger-ui .topbar { display: none }
+      .swagger-ui .info .title { color: #3b4151 }
+    `,
+    customfavIcon: '/favicon.ico',
+  });
+
   await app.listen(process.env.PORT ?? 4005);
 
   console.log(`Application is running on: ${await app.getUrl()}`);

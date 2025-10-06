@@ -29,6 +29,7 @@ import {
   createApplicationNote,
   CreateNoteData,
 } from "@/services/application";
+import { API_CONFIG } from "@/lib/config";
 
 // Interview type
 interface Interview {
@@ -377,11 +378,14 @@ export default function CandidateProfile() {
         try {
           const applicationNotes = await getApplicationNotes(applicationId);
           setNotes(applicationNotes);
-        } catch {}
+        } catch (err) {
+          console.error('Failed to fetch application notes:', err);
+          // Notes are optional, don't show error to user
+        }
         // Fetch interviews
         try {
           const res = await fetch(
-            `https://rolevate.com/api/interviews/candidate/${application.candidate.id}/job/${application.job.id}`
+            `${API_CONFIG.API_BASE_URL}/interviews/candidate/${application.candidate.id}/job/${application.job.id}`
           );
           if (res.ok) {
             const data = await res.json();

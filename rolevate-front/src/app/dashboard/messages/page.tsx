@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { API_CONFIG } from "@/lib/config";
 import Header from "@/components/dashboard/Header";
 import Link from "next/link";
 import {
@@ -128,7 +129,7 @@ export default function CommunicationPage() {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `https://rolevate.com/api/communications?${params}`,
+        `${API_CONFIG.API_BASE_URL}/communications?${params}`,
         {
           credentials: "include",
           headers: {
@@ -156,7 +157,7 @@ export default function CommunicationPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://rolevate.com/api/communications/stats",
+        `${API_CONFIG.API_BASE_URL}/communications/stats`,
         {
           credentials: "include",
           headers: {

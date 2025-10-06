@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/common/Button";
+import { API_CONFIG } from "@/lib/config";
 import { useSavedJobsStandalone } from "@/hooks/useSavedJobsStandalone";
 
 // Get the base URL without the /api suffix for static files
 const getBaseStaticUrl = () => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://rolevate.com/api";
+  const apiUrl = API_CONFIG.API_BASE_URL;
   return apiUrl.replace("/api", "");
 };
 

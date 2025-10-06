@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/common/Button";
+import { API_CONFIG } from "@/lib/config";
 
 export default function CVUploadSection() {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -48,7 +49,7 @@ export default function CVUploadSection() {
         formData.append("cv", file);
 
         const response = await fetch(
-          "https://rolevate.com/api/jobfit/upload-cv",
+          `${API_CONFIG.API_BASE_URL}/jobfit/upload-cv`,
           {
             method: "POST",
             body: formData,

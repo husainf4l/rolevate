@@ -1,4 +1,18 @@
-// "use client";
+"use client";
+
+// Temporary placeholder - this page is under development
+export default function ZainPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Zain Corporate Page</h1>
+        <p className="text-gray-600">This page is under development.</p>
+      </div>
+    </div>
+  );
+}
+
+// Original commented code below for future reference:
 
 // import React, { useState } from "react";
 // import JobCard, { JobData } from "@/components/common/JobCard";

@@ -1,16 +1,15 @@
 import { Controller, Post, Body, UnauthorizedException, Res, Req, Get, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { AwsS3Service } from '../services/aws-s3.service';
 
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -18,6 +17,36 @@ export class AuthController {
   ) { }
 
   @Post('login')
+  @ApiOperation({ summary: 'User login', description: 'Authenticate user with email and password, returns JWT tokens via HTTP-only cookies' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', format: 'email', example: 'user@example.com' },
+        password: { type: 'string', minLength: 6, example: 'password123' },
+      },
+      required: ['email', 'password'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Login successful' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: 'user-123' },
+            email: { type: 'string', example: 'user@example.com' },
+            userType: { type: 'string', enum: ['CANDIDATE', 'COMPANY'], example: 'CANDIDATE' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Body() body: { email: string; password: string },
     @Res({ passthrough: true }) res: Response,
@@ -47,6 +76,27 @@ export class AuthController {
   }
 
   @Post('signup')
+  @ApiOperation({ summary: 'User registration', description: 'Create a new user account and return JWT tokens via HTTP-only cookies' })
+  @ApiResponse({
+    status: 201,
+    description: 'Signup successful',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Signup successful' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: 'user-123' },
+            email: { type: 'string', example: 'user@example.com' },
+            userType: { type: 'string', enum: ['CANDIDATE', 'COMPANY'], example: 'CANDIDATE' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @ApiResponse({ status: 409, description: 'User already exists' })
   async signup(
     @Body() createUserDto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
@@ -72,6 +122,8 @@ export class AuthController {
   }
 
   @Post('logout')
+  @ApiOperation({ summary: 'User logout', description: 'Clear authentication cookies and revoke refresh token' })
+  @ApiResponse({ status: 200, description: 'Logout successful' })
   async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
     const refreshToken = req.cookies?.refresh_token;
     if (refreshToken) {
@@ -83,6 +135,9 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token', description: 'Generate new access token using refresh token from HTTP-only cookie' })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Refresh token not found or invalid' })
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     console.log('=== /refresh endpoint called ===');
     console.log('Cookies:', req.cookies);

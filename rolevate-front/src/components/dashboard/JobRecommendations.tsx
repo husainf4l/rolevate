@@ -7,6 +7,7 @@ import {
   ClockIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
+import { SkeletonJobCard } from "@/components/common/Skeleton";
 
 interface JobRecommendation {
   id: string;
@@ -28,7 +29,11 @@ const getMatchScoreColor = (score: number) => {
   return "bg-red-100 text-red-800";
 };
 
-export default function JobRecommendations() {
+interface JobRecommendationsProps {
+  loading?: boolean;
+}
+
+export default function JobRecommendations({ loading = false }: JobRecommendationsProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
@@ -43,7 +48,13 @@ export default function JobRecommendations() {
         </a>
       </div>
 
-      {mockRecommendations.length === 0 ? (
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <SkeletonJobCard key={i} className="!p-4 !shadow-none" />
+          ))}
+        </div>
+      ) : mockRecommendations.length === 0 ? (
         <div className="text-center py-8">
           <div className="w-12 h-12 text-gray-400 mx-auto mb-4">
             <svg

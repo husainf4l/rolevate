@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { JobService, UpdateJobRequest } from "@/services/job";
 import Header from "@/components/dashboard/Header";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 export default function EditJobPage() {
   const router = useRouter();
@@ -107,7 +108,7 @@ export default function EditJobPage() {
 
     try {
       await JobService.updateJob(jobId, job);
-      alert("Job updated successfully!");
+      toast.success("Job updated successfully!");
       router.push("/dashboard/jobs");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update job.");

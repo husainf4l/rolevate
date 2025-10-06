@@ -26,6 +26,7 @@ const mockPrismaService = {
 
 const mockWhatsAppService = {
   sendTemplateMessage: jest.fn(),
+  sendTextMessage: jest.fn(),
 };
 
 describe('CommunicationService', () => {
@@ -57,7 +58,12 @@ describe('CommunicationService', () => {
 
   describe('create', () => {
     it('should create a communication record', async () => {
-      const mockCandidate = { id: 'candidate-1', firstName: 'John', lastName: 'Doe' };
+      const mockCandidate = { 
+        id: 'candidate-1', 
+        firstName: 'John', 
+        lastName: 'Doe',
+        phone: '+1234567890'
+      };
       const mockCompany = { id: 'company-1', name: 'Test Company' };
       const mockCommunication = {
         id: 'comm-1',
@@ -67,11 +73,14 @@ describe('CommunicationService', () => {
         direction: CommunicationDirection.OUTBOUND,
         content: 'Hello from WhatsApp!',
         status: 'SENT',
+        phoneNumber: '+1234567890',
+        whatsappId: 'msg-123',
       };
 
       mockPrismaService.candidateProfile.findUnique.mockResolvedValue(mockCandidate);
       mockPrismaService.company.findUnique.mockResolvedValue(mockCompany);
       mockPrismaService.communication.create.mockResolvedValue(mockCommunication);
+      mockWhatsAppService.sendTextMessage.mockResolvedValue({ messages: [{ id: 'msg-123' }] });
 
       const result = await service.create({
         candidateId: 'candidate-1',
@@ -90,6 +99,8 @@ describe('CommunicationService', () => {
           direction: CommunicationDirection.OUTBOUND,
           content: 'Hello from WhatsApp!',
           status: 'SENT',
+          phoneNumber: '+1234567890',
+          whatsappId: 'msg-123',
         }),
         include: expect.any(Object),
       });

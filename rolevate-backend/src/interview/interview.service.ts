@@ -706,7 +706,7 @@ export class InterviewService {
     console.log('📝 Adding transcript to room:', roomId);
 
     // Find or create interview for this room
-    let interview = await this.prisma.interview.findFirst({
+    const interview = await this.prisma.interview.findFirst({
       where: { roomId },
     });
 

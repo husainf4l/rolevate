@@ -191,7 +191,7 @@ export class ApplicationService {
     }
 
     // Check if user already exists with this email
-    let existingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findUnique({
       where: { email: candidateInfo.email },
       include: { candidateProfile: true }
     });
@@ -637,7 +637,7 @@ Format as strategic advice for a final interview round.`;
 
       // Generate interview link (you should replace with your actual frontend URL)
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const interviewLink = `${frontendUrl}/interview/${room.name}?token=${token}`;
+      // const interviewLink = `${frontendUrl}/interview/${room.name}?token=${token}`;
 
       // Send WhatsApp template message to candidate
       if (candidate.phone) {
@@ -650,7 +650,7 @@ Format as strategic advice for a final interview round.`;
         const candidateName = `${candidate.firstName} ${candidate.lastName}`;
         
         // Clean phone number (remove + and any spaces/special chars)
-        const cleanPhone = candidate.phone.replace(/[\+\s\-\(\)]/g, '');
+        const cleanPhone = candidate.phone.replace(/[+\s\-()]/g, '');
         
         // Create query parameters for the interview room
         const queryParams = `?phone=${cleanPhone}&jobId=${encodeURIComponent(job.id)}&roomName=${encodeURIComponent(room.name)}`;

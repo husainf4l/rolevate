@@ -21,7 +21,7 @@ export default function ApplicationDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const jobId = params.jobId as string;
+  const jobId = params?.jobId as string;
 
   useEffect(() => {
     const fetchApplicationDetails = async () => {

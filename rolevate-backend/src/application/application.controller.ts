@@ -1,16 +1,41 @@
 import { Body, Controller, Post, Get, Patch, Param, Query, Req, UseGuards, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException, SetMetadata } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiQuery, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto, CreateAnonymousApplicationDto, ApplicationResponseDto, UpdateApplicationStatusDto } from './dto/application.dto';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@ApiTags('applications')
+@ApiBearerAuth()
 @Controller('applications')
 export class ApplicationController {
   constructor(private readonly applicationService: ApplicationService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Create a job application (authenticated candidates)',
+    description: 'Allows authenticated candidates to apply for jobs. Requires a complete candidate profile.'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Application created successfully',
+    type: ApplicationResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Missing candidate profile or invalid data'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or not a candidate'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiBody({ type: CreateApplicationDto })
   async createApplication(
     @Body() createApplicationDto: CreateApplicationDto,
     @Req() req: Request & { user?: { id: string; candidateProfileId?: string; userType?: string } }
@@ -54,6 +79,61 @@ export class ApplicationController {
       fileSize: 5 * 1024 * 1024, // 5MB limit
     },
   }))
+  @ApiOperation({ 
+    summary: 'Create anonymous job application with CV upload',
+    description: 'Allows anonymous users to apply for jobs by uploading their CV. Creates a temporary candidate account.'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Anonymous application created successfully',
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/ApplicationResponseDto' },
+        {
+          type: 'object',
+          properties: {
+            candidateCredentials: {
+              type: 'object',
+              properties: {
+                email: { type: 'string', example: 'temp@example.com' },
+                password: { type: 'string', example: 'tempPass123' }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid file type, missing CV, or invalid application data'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        cv: {
+          type: 'string',
+          format: 'binary',
+          description: 'CV file (PDF or DOC/DOCX, max 5MB)'
+        },
+        jobId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        coverLetter: { type: 'string', example: 'I am very interested in this position...' },
+        expectedSalary: { type: 'string', example: '$75,000' },
+        noticePeriod: { type: 'string', example: '2 weeks' },
+        firstName: { type: 'string', example: 'John' },
+        lastName: { type: 'string', example: 'Doe' },
+        email: { type: 'string', example: 'john.doe@example.com' },
+        phone: { type: 'string', example: '+1-555-0123' },
+        portfolioUrl: { type: 'string', example: 'https://johndoe.dev' }
+      }
+    }
+  })
   async createAnonymousApplication(
     @UploadedFile() file: Express.Multer.File,
     @Body() createAnonymousApplicationDto: CreateAnonymousApplicationDto
@@ -96,6 +176,61 @@ export class ApplicationController {
       fileSize: 5 * 1024 * 1024, // 5MB limit
     },
   }))
+  @ApiOperation({ 
+    summary: 'Apply for job with CV upload (anonymous)',
+    description: 'Alternative endpoint for anonymous job applications with CV upload. Creates a temporary candidate account.'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Application created successfully',
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/ApplicationResponseDto' },
+        {
+          type: 'object',
+          properties: {
+            candidateCredentials: {
+              type: 'object',
+              properties: {
+                email: { type: 'string', example: 'temp@example.com' },
+                password: { type: 'string', example: 'tempPass123' }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid file type, missing CV, or invalid application data'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        cv: {
+          type: 'string',
+          format: 'binary',
+          description: 'CV file (PDF or DOC/DOCX, max 5MB)'
+        },
+        jobId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        coverLetter: { type: 'string', example: 'I am very interested in this position...' },
+        expectedSalary: { type: 'string', example: '$75,000' },
+        noticePeriod: { type: 'string', example: '2 weeks' },
+        firstName: { type: 'string', example: 'John' },
+        lastName: { type: 'string', example: 'Doe' },
+        email: { type: 'string', example: 'john.doe@example.com' },
+        phone: { type: 'string', example: '+1-555-0123' },
+        portfolioUrl: { type: 'string', example: 'https://johndoe.dev' }
+      }
+    }
+  })
   async applyWithCV(
     @UploadedFile() file: Express.Multer.File,
     @Body() applicationData: CreateAnonymousApplicationDto
@@ -119,6 +254,57 @@ export class ApplicationController {
 
   @SetMetadata('skipAuth', true)
   @Post('anonymous/s3')
+  @ApiOperation({ 
+    summary: 'Create anonymous application with S3 CV URL',
+    description: 'Allows anonymous users to apply for jobs using a pre-uploaded CV from S3. Creates a temporary candidate account.'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Anonymous application created successfully',
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/ApplicationResponseDto' },
+        {
+          type: 'object',
+          properties: {
+            candidateCredentials: {
+              type: 'object',
+              properties: {
+                email: { type: 'string', example: 'temp@example.com' },
+                password: { type: 'string', example: 'tempPass123' }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid S3 URL or missing application data'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        jobId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        resumeUrl: { type: 'string', example: 'https://bucket.s3.amazonaws.com/cv.pdf' },
+        coverLetter: { type: 'string', example: 'I am very interested in this position...' },
+        expectedSalary: { type: 'string', example: '$75,000' },
+        noticePeriod: { type: 'string', example: '2 weeks' },
+        firstName: { type: 'string', example: 'John' },
+        lastName: { type: 'string', example: 'Doe' },
+        email: { type: 'string', example: 'john.doe@example.com' },
+        phone: { type: 'string', example: '+1-555-0123' },
+        portfolioUrl: { type: 'string', example: 'https://johndoe.dev' }
+      },
+      required: ['jobId', 'resumeUrl', 'firstName', 'lastName', 'email']
+    }
+  })
   async createAnonymousApplicationWithS3URL(
     @Body() createAnonymousApplicationDto: CreateAnonymousApplicationDto & { resumeUrl: string }
   ): Promise<ApplicationResponseDto & { candidateCredentials?: { email: string; password: string } }> {
@@ -142,6 +328,28 @@ export class ApplicationController {
 
   @Get('job/:jobId')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Get applications for a specific job',
+    description: 'Retrieves all applications for a specific job. Only accessible by company users who own the job.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Applications retrieved successfully',
+    type: [ApplicationResponseDto]
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or not a company user'
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - User does not own this job'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'jobId', description: 'Job ID' })
   async getApplicationsByJob(
     @Param('jobId') jobId: string,
     @Req() req: Request & { user?: { id: string; companyId?: string; userType?: string } }
@@ -155,6 +363,26 @@ export class ApplicationController {
 
   @Get('company')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Get company applications',
+    description: 'Retrieves applications for a company. Can filter by status, job, or get a specific application by ID.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Applications retrieved successfully',
+    type: [ApplicationResponseDto]
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or not a company user'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Application or job not found'
+  })
+  @ApiQuery({ name: 'status', required: false, description: 'Filter by application status' })
+  @ApiQuery({ name: 'jobId', required: false, description: 'Filter by specific job ID' })
+  @ApiQuery({ name: 'applicationId', required: false, description: 'Get specific application by ID' })
   async getCompanyApplications(
     @Req() req: Request & { user?: { id: string; companyId?: string; userType?: string } },
     @Query('status') status?: string,
@@ -181,6 +409,19 @@ export class ApplicationController {
 
   @Get('my-applications')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Get candidate\'s applications',
+    description: 'Retrieves all applications submitted by the authenticated candidate.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Applications retrieved successfully',
+    type: [ApplicationResponseDto]
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or not a candidate'
+  })
   async getCandidateApplications(
     @Req() req: Request & { user?: { id: string; candidateProfileId?: string; userType?: string } }
   ): Promise<ApplicationResponseDto[]> {
@@ -193,6 +434,28 @@ export class ApplicationController {
 
   @Get('my-application/:jobId')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Get candidate\'s application for specific job',
+    description: 'Retrieves the candidate\'s application for a specific job they have applied to.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Application retrieved successfully',
+    type: ApplicationResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Candidate has not applied to this job'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or not a candidate'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Job not found'
+  })
+  @ApiParam({ name: 'jobId', description: 'Job ID' })
   async getCandidateApplicationForJob(
     @Param('jobId') jobId: string,
     @Req() req: Request & { user?: { id: string; candidateProfileId?: string; userType?: string } }
@@ -214,6 +477,33 @@ export class ApplicationController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id/status')
+  @ApiOperation({ 
+    summary: 'Update application status',
+    description: 'Updates the status of a job application. Only accessible by company users who own the job.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Application status updated successfully',
+    type: ApplicationResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid status'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or not a company user'
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - User does not own this application'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Application not found'
+  })
+  @ApiParam({ name: 'id', description: 'Application ID' })
+  @ApiBody({ type: UpdateApplicationStatusDto })
   async updateApplicationStatus(
     @Param('id') applicationId: string,
     @Body() updateDto: UpdateApplicationStatusDto,
@@ -228,6 +518,32 @@ export class ApplicationController {
 
   @UseGuards(JwtAuthGuard)
   @Post(':applicationId/notes')
+  @ApiOperation({ 
+    summary: 'Create application note',
+    description: 'Creates a note for a job application. Accessible by authenticated users.'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Note created successfully'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Application not found'
+  })
+  @ApiParam({ name: 'applicationId', description: 'Application ID' })
+  @ApiBody({ 
+    schema: { 
+      type: 'object', 
+      properties: { 
+        content: { type: 'string', example: 'This candidate has excellent experience...' },
+        type: { type: 'string', example: 'GENERAL', enum: ['GENERAL', 'INTERVIEW', 'REJECTION', 'ACCEPTANCE'] }
+      } 
+    } 
+  })
   async createApplicationNote(
     @Param('applicationId') applicationId: string,
     @Body() dto: any,
@@ -240,6 +556,19 @@ export class ApplicationController {
   }
 
   @Get(':applicationId/notes')
+  @ApiOperation({ 
+    summary: 'Get application notes',
+    description: 'Retrieves all notes for a job application. No authentication required.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Notes retrieved successfully'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Application not found'
+  })
+  @ApiParam({ name: 'applicationId', description: 'Application ID' })
   async getApplicationNotes(
     @Param('applicationId') applicationId: string
   ) {
@@ -248,6 +577,33 @@ export class ApplicationController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':applicationId/notes/:noteId')
+  @ApiOperation({ 
+    summary: 'Update application note',
+    description: 'Updates an existing note for a job application. Accessible by authenticated users.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Note updated successfully'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Note or application not found'
+  })
+  @ApiParam({ name: 'applicationId', description: 'Application ID' })
+  @ApiParam({ name: 'noteId', description: 'Note ID' })
+  @ApiBody({ 
+    schema: { 
+      type: 'object', 
+      properties: { 
+        content: { type: 'string', example: 'Updated note content...' },
+        type: { type: 'string', example: 'INTERVIEW', enum: ['GENERAL', 'INTERVIEW', 'REJECTION', 'ACCEPTANCE'] }
+      } 
+    } 
+  })
   async updateApplicationNote(
     @Param('noteId') noteId: string,
     @Body() dto: any,

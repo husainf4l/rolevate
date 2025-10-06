@@ -8,7 +8,7 @@ import { SecurityService } from '../security/security.service';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class AuthService {
   async validateUser(email: string, pass: string, ip?: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
 
-    if (user && user.password && await bcrypt.compare(pass, user.password)) {
+    if (user && user.isActive && user.password && await bcrypt.compare(pass, user.password)) {
       // Log successful authentication
       await this.securityService.logSecurityEvent({
         type: 'AUTH_SUCCESS',
@@ -37,7 +37,7 @@ export class AuthService {
         severity: 'LOW',
       });
 
-      const { password, ...result } = user;
+      const { password: _password, ...result } = user;
       return result;
     }
 
@@ -135,8 +135,7 @@ export class AuthService {
   async getUserById(id: string) {
     // Getting user by ID
 
-    try {
-      const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
         where: { id },
         include: {
           company: {
@@ -153,7 +152,7 @@ export class AuthService {
         throw new UnauthorizedException('User not found');
       }
 
-      const { password, ...result } = user;
+      const { password: _password, ...result } = user;
 
       // Add subscription status check
       const response: any = {
@@ -178,9 +177,6 @@ export class AuthService {
 
       // Returning user data (password excluded)
       return response;
-    } catch (error) {
-      throw error;
-    }
   }
 
   async checkUserSubscription(userId: string) {
@@ -333,7 +329,6 @@ export class AuthService {
         userType: true,
         isActive: true,
         companyId: true,
-        phone: true,
         createdAt: true,
         updatedAt: true,
       }

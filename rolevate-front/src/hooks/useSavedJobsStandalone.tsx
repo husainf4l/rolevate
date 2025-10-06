@@ -3,42 +3,40 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSavedJobs, saveJob, unsaveJob } from "@/services/savedJobs";
-import { getCurrentUser } from "@/services/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export function useSavedJobsStandalone() {
   const router = useRouter();
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const { user, isLoading: authLoading } = useAuth();
 
-  // Load user and saved jobs on mount
+  // Load saved jobs when user changes
   useEffect(() => {
-    loadUserAndSavedJobs();
-  }, []);
+    if (!authLoading) {
+      loadSavedJobs();
+    }
+  }, [user, authLoading]);
 
-  const loadUserAndSavedJobs = async () => {
+  const loadSavedJobs = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Get current user
-      const userData = await getCurrentUser();
-      setUser(userData);
-
       // If no user or not a candidate, don't load saved jobs
-      if (!userData || userData.userType !== "CANDIDATE") {
+      if (!user || user.userType !== "CANDIDATE") {
         setSavedJobIds(new Set());
         return;
       }
 
       // Load saved jobs from user profile if available, otherwise from API
       if (
-        userData.candidateProfile?.savedJobs &&
-        Array.isArray(userData.candidateProfile.savedJobs)
+        user.candidateProfile?.savedJobs &&
+        Array.isArray(user.candidateProfile.savedJobs)
       ) {
         const jobIds = new Set<string>(
-          userData.candidateProfile.savedJobs.map((savedJob: any) =>
+          user.candidateProfile.savedJobs.map((savedJob: any) =>
             String(savedJob.jobId)
           )
         );
@@ -50,9 +48,8 @@ export function useSavedJobsStandalone() {
         setSavedJobIds(jobIds);
       }
     } catch (err) {
-      // User might not be authenticated, which is fine
-      console.log("User not authenticated or error loading saved jobs:", err);
-      setUser(null);
+      console.error("Error loading saved jobs:", err);
+      setError("Failed to load saved jobs");
       setSavedJobIds(new Set());
     } finally {
       setIsLoading(false);
@@ -117,7 +114,7 @@ export function useSavedJobsStandalone() {
     isJobSaved,
     canSaveJobs,
     toggleSaveJob,
-    refreshSavedJobs: loadUserAndSavedJobs,
+    refreshSavedJobs: loadSavedJobs,
     user,
   };
 }

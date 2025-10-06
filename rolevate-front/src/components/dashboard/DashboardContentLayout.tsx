@@ -12,7 +12,7 @@ export default function DashboardContentLayout({
   const pathname = usePathname();
   
   // Don't show sidebar for setup-company page
-  if (pathname.includes('/setup-company')) {
+  if (pathname?.includes('/setup-company')) {
     return <>{children}</>;
   }
 

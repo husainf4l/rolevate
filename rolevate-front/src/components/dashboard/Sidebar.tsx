@@ -112,7 +112,7 @@ export default function Sidebar() {
                 const itemPath = item.href.split("?")[0] || item.href;
                 const isActive =
                   pathname === itemPath ||
-                  (itemPath !== "/dashboard" && pathname.startsWith(itemPath));
+                  (itemPath !== "/dashboard" && pathname?.startsWith(itemPath));
 
                 return (
                   <Link

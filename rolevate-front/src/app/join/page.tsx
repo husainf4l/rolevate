@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/common/Button";
 import { API_CONFIG } from "@/lib/config";
+import toast from "react-hot-toast";
 
 function JoinCompanyContent() {
   const searchParams = useSearchParams();
@@ -11,7 +12,14 @@ function JoinCompanyContent() {
   const [invitationCode, setInvitationCode] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [signing, setSigning] = useState(false);
-  const [companyInfo, setCompanyInfo] = useState<any>(null);
+  const [companyInfo, setCompanyInfo] = useState<{
+    id: string;
+    name: string;
+    logo?: string;
+    description?: string;
+    industry?: string;
+    headquarters?: string;
+  } | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -37,6 +45,7 @@ function JoinCompanyContent() {
       // In a real scenario, you'd call an API to get company details by invitation code
       console.log("Validating invitation code:", code);
       setCompanyInfo({
+        id: "temp-id",
         name: "Company",
         logo: "C",
         industry: "Technology",
@@ -52,12 +61,12 @@ function JoinCompanyContent() {
 
   const signUpAndJoin = async () => {
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
     if (formData.password.length < 8) {
-      alert("Password must be at least 8 characters long");
+      toast.error("Password must be at least 8 characters long");
       return;
     }
 
@@ -107,21 +116,21 @@ function JoinCompanyContent() {
         );
 
         if (joinResponse.ok) {
-          alert("Successfully signed up and joined the company!");
+          toast.success("Successfully signed up and joined the company!");
           router.push("/dashboard");
         } else {
           const joinError = await joinResponse.json();
-          alert(
+          toast.error(
             `Failed to join company: ${joinError.message || "Unknown error"}`
           );
         }
       } else {
         const signupError = await signupResponse.json();
-        alert(`Failed to sign up: ${signupError.message || "Unknown error"}`);
+        toast.error(`Failed to sign up: ${signupError.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error signing up and joining company:", error);
-      alert("Error during signup process");
+      toast.error("Error during signup process");
     } finally {
       setSigning(false);
     }

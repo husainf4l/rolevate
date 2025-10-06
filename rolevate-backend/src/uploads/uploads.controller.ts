@@ -6,45 +6,33 @@ import { existsSync } from 'fs';
 import { extname } from 'path';
 import { Public } from '../auth/public.decorator';
 import { AwsS3Service } from '../services/aws-s3.service';
+import { FileValidationService } from '../services/file-validation.service';
 
 @Controller('uploads')
 export class UploadsController {
   private readonly logger = new Logger(UploadsController.name);
 
-  constructor(private readonly awsS3Service: AwsS3Service) {}
+  constructor(
+    private readonly awsS3Service: AwsS3Service,
+    private readonly fileValidationService: FileValidationService,
+  ) {}
 
   @Post('cvs')
   @UseInterceptors(FileInterceptor('cv', {
-    fileFilter: (req, file, cb) => {
-      // Accept only PDF and DOC files
-      const allowedMimes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      ];
-      
-      if (allowedMimes.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new BadRequestException('Only PDF and DOC/DOCX files are allowed'), false);
-      }
-    },
-    limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB limit
-    },
+    storage: require('multer').memoryStorage(),
   }))
   async uploadAnonymousCV(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<{ cvUrl: string; message: string }> {
-    if (!file) {
-      throw new BadRequestException('No CV file uploaded');
-    }
+    // Validate file using our enhanced validation service
+    const validationOptions = this.fileValidationService.getCVValidationOptions();
+    const validatedFile = this.fileValidationService.validateFile(file, validationOptions);
 
     try {
-      // Upload to S3 directly
+      // Upload to S3 directly using validated file
       const s3Url = await this.awsS3Service.uploadCV(
-        file.buffer, 
-        file.originalname, 
+        validatedFile.buffer,
+        validatedFile.sanitizedFilename || validatedFile.originalname,
         'anonymous'
       );
       

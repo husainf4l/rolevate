@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { logout } from "@/services/auth";
@@ -96,7 +96,7 @@ export default function Header({
   };
 
   // Fetch notifications from API
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     setNotificationsLoading(true);
     try {
       const res = await fetch(`${API_CONFIG.API_BASE_URL}/notifications`, {
@@ -111,10 +111,18 @@ export default function Header({
     } finally {
       setNotificationsLoading(false);
     }
-  };
+  }, []);
 
-  const unreadNotifications = notifications.filter((n) => !n.read);
-  const unreadCount = unreadNotifications.length;
+  // Memoize unread notifications calculation
+  const unreadNotifications = useMemo(() => 
+    notifications.filter((n) => !n.read), 
+    [notifications]
+  );
+  
+  const unreadCount = useMemo(() => 
+    unreadNotifications.length, 
+    [unreadNotifications]
+  );
 
   // Fetch notifications on component mount
   useEffect(() => {
@@ -142,7 +150,7 @@ export default function Header({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen, notificationOpen]);
 
-  const markNotificationAsRead = async (notificationId: string) => {
+  const markNotificationAsRead = useCallback(async (notificationId: string) => {
     try {
       // Update local state optimistically
       setNotifications((prev) =>
@@ -171,17 +179,17 @@ export default function Header({
         prev.map((n) => (n.id === notificationId ? { ...n, read: false } : n))
       );
     }
-  };
+  }, []);
 
   // Logout handler
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await logout();
       router.replace("/");
     } catch (err) {
       // Optionally show error
     }
-  };
+  }, [router]);
 
   return (
     <div className="fixed top-0 left-0 right-0 lg:left-64 bg-white z-32 ">

@@ -86,8 +86,7 @@ export async function login({ email, password }: { email: string; password: stri
   }
 
   const data = await res.json();
-  console.log('Login successful, user data:', data.user);
-  console.log('Document cookies after login:', document.cookie);
+  // Login successful, user authenticated
   return data.user;
 }
 
@@ -123,6 +122,9 @@ export async function isAuthenticated(): Promise<boolean> {
 
 // Get current authenticated user
 export async function getCurrentUser() {
+  const callStack = new Error().stack;
+  console.log("[getCurrentUser] Called from:", callStack?.split('\n')[2]?.trim());
+  
   try {
     const res = await fetch(`${BASE_API}/auth/me`, {
       method: "GET",
@@ -139,7 +141,7 @@ export async function getCurrentUser() {
     const data = await res.json();
     return data;
   } catch (error) {
-    console.log('Auth check failed:', error);
+    // Auth check failed - user may not be authenticated
     return null;
   }
 }
@@ -158,7 +160,7 @@ export async function getProfile() {
     
     return await res.json();
   } catch (error) {
-    console.log('Profile fetch failed:', error);
+    // Profile fetch failed - user may not be authenticated
     throw error;
   }
 }

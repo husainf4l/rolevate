@@ -1,12 +1,7 @@
 import { 
   Controller, 
   Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Patch,
   Param, 
-  Body, 
   Query, 
   Req, 
   UseGuards,

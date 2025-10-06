@@ -26,10 +26,14 @@ import {
 } from './dto/candidate.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
+import { FileValidationService } from '../services/file-validation.service';
 
 @Controller('candidate')
 export class CandidateController {
-  constructor(private readonly candidateService: CandidateService) {}
+  constructor(
+    private readonly candidateService: CandidateService,
+    private readonly fileValidationService: FileValidationService,
+  ) {}
 
   @Post('profile')
   @UseGuards(JwtAuthGuard)
@@ -67,24 +71,26 @@ export class CandidateController {
 
   @Post('upload-cv')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('cv', multerConfig))
+  @UseInterceptors(FileInterceptor('cv', {
+    storage: require('multer').memoryStorage(),
+  }))
   async uploadCV(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
   ): Promise<CVResponseDto> {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
+    // Validate file using our enhanced validation service
+    const validationOptions = this.fileValidationService.getCVValidationOptions();
+    const validatedFile = this.fileValidationService.validateFile(file, validationOptions);
 
     const user = req.user as any;
     const userId = user.userId;
 
     return this.candidateService.uploadCV(
       userId,
-      file.buffer,
-      file.originalname,
-      file.size,
-      file.mimetype,
+      validatedFile.buffer,
+      validatedFile.sanitizedFilename || validatedFile.originalname,
+      validatedFile.size,
+      validatedFile.mimetype,
     );
   }
 

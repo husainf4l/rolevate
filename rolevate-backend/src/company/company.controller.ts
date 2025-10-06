@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Post, Body, UseGuards, Req, UnauthorizedException, UseInterceptors, UploadedFile, BadRequestException, Put, Patch } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { CompanyService } from './company.service';
 import { InvitationService } from './invitation.service';
@@ -11,6 +12,8 @@ import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { AwsS3Service } from '../services/aws-s3.service';
 
+@ApiTags('companies')
+@ApiBearerAuth()
 @Controller('company')
 export class CompanyController {
   constructor(
@@ -20,6 +23,14 @@ export class CompanyController {
   ) { }
 
   @Get()
+  @ApiOperation({ 
+    summary: 'Get all companies',
+    description: 'Retrieves a list of all companies in the system.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Companies retrieved successfully'
+  })
   async findAll() {
     return this.companyService.findAll();
   }
@@ -27,17 +38,59 @@ export class CompanyController {
   // Specific routes must come BEFORE parameterized routes
   @Get('profile')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Get my company profile',
+    description: 'Retrieves the company profile for the authenticated user.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Company profile retrieved successfully'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Company not found'
+  })
   async getMyCompanyProfile(@Req() req: Request) {
     const user = req.user as any;
     return this.companyService.getUserCompany(user.userId);
   }
 
   @Get('stats')
+  @ApiOperation({ 
+    summary: 'Get company statistics',
+    description: 'Retrieves overall statistics about companies in the system.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Company statistics retrieved successfully'
+  })
   async getCompanyStats() {
     return this.companyService.getCompanyStats();
   }
 
   @Get('countries')
+  @ApiOperation({ 
+    summary: 'Get available countries',
+    description: 'Retrieves a list of available countries for company registration.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Countries retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          code: { type: 'string', example: 'AE' },
+          name: { type: 'string', example: 'United Arab Emirates' }
+        }
+      }
+    }
+  })
   async getCountries() {
     return [
       { code: 'AE', name: 'United Arab Emirates' },
@@ -64,6 +117,24 @@ export class CompanyController {
   }
 
   @Get('industries')
+  @ApiOperation({ 
+    summary: 'Get available industries',
+    description: 'Retrieves a list of available industries for company registration.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Industries retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          code: { type: 'string', example: 'TECHNOLOGY' },
+          name: { type: 'string', example: 'Technology' }
+        }
+      }
+    }
+  })
   async getIndustries() {
     return [
       { code: 'TECHNOLOGY', name: 'Technology' },
@@ -89,12 +160,41 @@ export class CompanyController {
 
   @Get('me/company')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Get my company details',
+    description: 'Retrieves detailed information about the authenticated user\'s company.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Company details retrieved successfully'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Company not found'
+  })
   async getMyCompany(@Req() req: Request) {
     const user = req.user as any;
     return this.companyService.getUserCompany(user.userId);
   }
 
   @Get('invitation/:code')
+  @ApiOperation({ 
+    summary: 'Get invitation details',
+    description: 'Retrieves details about a company invitation using the invitation code.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Invitation details retrieved successfully'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Invalid invitation code'
+  })
+  @ApiParam({ name: 'code', description: 'Invitation code' })
   async getInvitationDetails(@Param('code') code: string) {
     const invitation = await this.invitationService.getInvitationDetails(code);
     if (!invitation) {
@@ -105,12 +205,42 @@ export class CompanyController {
 
   // Parameterized routes come LAST
   @Get(':id')
+  @ApiOperation({ 
+    summary: 'Get company by ID',
+    description: 'Retrieves a specific company by its ID.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Company retrieved successfully'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Company not found'
+  })
+  @ApiParam({ name: 'id', description: 'Company ID' })
   async findById(@Param('id') id: string) {
     return this.companyService.findById(id);
   }
 
   @Get(':id/invitations')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Get company invitations',
+    description: 'Retrieves all invitations for a specific company. Only accessible by company members.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Company invitations retrieved successfully'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or not a company member'
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - User does not belong to this company'
+  })
+  @ApiParam({ name: 'id', description: 'Company ID' })
   async getCompanyInvitations(
     @Param('id') companyId: string,
     @Req() req: Request,
@@ -129,6 +259,23 @@ export class CompanyController {
 
   @Post('register')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Register a new company',
+    description: 'Creates a new company and associates it with the authenticated user.'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Company registered successfully'
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid company data'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiBody({ type: CreateCompanyDto })
   async registerCompany(
     @Body() createCompanyDto: CreateCompanyDto,
     @Req() req: Request,
@@ -139,6 +286,23 @@ export class CompanyController {
 
   @Post('join')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Join a company',
+    description: 'Allows a user to join a company using an invitation code.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Successfully joined company'
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid invitation code'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiBody({ type: JoinCompanyDto })
   async joinCompany(
     @Body() joinCompanyDto: JoinCompanyDto,
     @Req() req: Request,
@@ -149,6 +313,32 @@ export class CompanyController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Update company (PUT)',
+    description: 'Updates a company\'s information. Only accessible by company members.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Company updated successfully'
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid company data'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - User does not belong to this company'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Company not found'
+  })
+  @ApiParam({ name: 'id', description: 'Company ID' })
+  @ApiBody({ type: UpdateCompanyDto })
   async updateCompany(
     @Param('id') companyId: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
@@ -160,6 +350,32 @@ export class CompanyController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Update company (PATCH)',
+    description: 'Partially updates a company\'s information. Only accessible by company members.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Company updated successfully'
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid company data'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - User does not belong to this company'
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Company not found'
+  })
+  @ApiParam({ name: 'id', description: 'Company ID' })
+  @ApiBody({ type: UpdateCompanyDto })
   async patchCompany(
     @Param('id') companyId: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
@@ -171,6 +387,23 @@ export class CompanyController {
 
   @Post(':id/invitation')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ 
+    summary: 'Generate company invitation',
+    description: 'Generates a new invitation code for the company. Only accessible by company members.'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Invitation generated successfully'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token'
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - User does not belong to this company'
+  })
+  @ApiParam({ name: 'id', description: 'Company ID' })
   async generateInvitation(
     @Param('id') companyId: string,
     @Req() req: Request,
@@ -209,6 +442,44 @@ export class CompanyController {
       fileSize: 5 * 1024 * 1024, // 5MB limit
     },
   }))
+  @ApiOperation({ 
+    summary: 'Upload company logo',
+    description: 'Uploads a logo image for the authenticated user\'s company and stores it in S3.'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Logo uploaded successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Logo uploaded successfully' },
+        logoUrl: { type: 'string', example: 'https://s3.amazonaws.com/bucket/logos/logo.jpg' },
+        logoPath: { type: 'string', example: 'https://s3.amazonaws.com/bucket/logos/logo.jpg' },
+        company: { type: 'object' }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid file type, no file uploaded, or upload failed'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or user not in company'
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        logo: {
+          type: 'string',
+          format: 'binary',
+          description: 'Logo image file (JPEG, PNG, GIF, WebP, max 5MB)'
+        }
+      }
+    }
+  })
   async uploadLogo(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
@@ -270,6 +541,43 @@ export class CompanyController {
       fileSize: 5 * 1024 * 1024, // 5MB limit
     },
   }))
+  @ApiOperation({ 
+    summary: 'Upload company logo to S3',
+    description: 'Uploads a logo image for the authenticated user\'s company to S3 storage.'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Logo uploaded to S3 successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Logo uploaded to S3 successfully' },
+        logoUrl: { type: 'string', example: 'https://s3.amazonaws.com/bucket/logos/logo.jpg' },
+        company: { type: 'object' }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid file type, no file uploaded, or upload failed'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid JWT token or user not in company'
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        logo: {
+          type: 'string',
+          format: 'binary',
+          description: 'Logo image file (JPEG, PNG, GIF, WebP, max 5MB)'
+        }
+      }
+    }
+  })
   async uploadLogoToS3(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,

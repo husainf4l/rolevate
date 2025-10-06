@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { JobService, JobPost } from "@/services/job";
 import { getApplicationsByJob } from "@/services/application";
+import { SkeletonJobCard } from "@/components/common/Skeleton";
 
 interface JobWithStats extends JobPost {
   applicants: number;
@@ -153,13 +154,7 @@ export default function RecentJobs() {
         </div>
         <div className="space-y-4">
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="p-4 border border-gray-300 rounded-lg animate-pulse"
-            >
-              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-            </div>
+            <SkeletonJobCard key={i} className="!shadow-none !border-gray-300" />
           ))}
         </div>
       </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { API_CONFIG } from "@/lib/config";
 import Header from "@/components/dashboard/Header";
 import Link from "next/link";
 import {
@@ -9,18 +10,16 @@ import {
   ChatBubbleLeftRightIcon,
   PhoneIcon,
   EnvelopeIcon,
-  VideoCameraIcon,
   PaperAirplaneIcon,
   UserIcon,
   ClockIcon,
   CheckIcon,
   XMarkIcon,
-  DocumentTextIcon,
-  CalendarDaysIcon,
   CheckCircleIcon,
   PencilIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 interface CommunicationRecord {
   id: string;
@@ -96,9 +95,8 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function MessageDetailsPage() {
-  const router = useRouter();
   const params = useParams();
-  const messageId = params.id as string;
+  const messageId = params?.id as string;
 
   const [message, setMessage] = useState<CommunicationRecord | null>(null);
   const [loading, setLoading] = useState(true);
@@ -115,7 +113,7 @@ export default function MessageDetailsPage() {
       setError(null);
       
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://rolevate.com/api/communications/${messageId}`, {
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}/communications/${messageId}`, {
         credentials: 'include',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -207,7 +205,7 @@ export default function MessageDetailsPage() {
   const handleSendReply = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://rolevate.com/api/communications', {
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}/communications`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -234,10 +232,10 @@ export default function MessageDetailsPage() {
       setShowReplyForm(false);
 
       // Show success message
-      alert("Reply sent successfully!");
+      toast.success("Reply sent successfully!");
     } catch (error) {
       console.error('Error sending reply:', error);
-      alert("Failed to send reply. Please try again.");
+      toast.error("Failed to send reply. Please try again.");
     }
   };
 

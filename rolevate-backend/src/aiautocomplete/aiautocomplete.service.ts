@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CompanyDescriptionRequestDto, CompanyDescriptionResponseDto } from './dto/company-description.dto';
-import { SalaryRecommendationRequestDto, SalaryRecommendationResponseDto, SalaryRange, SalarySource, JobRequirements } from './dto/salary-recommendation.dto';
+import { SalaryRecommendationRequestDto, SalaryRecommendationResponseDto } from './dto/salary-recommendation.dto';
 import { RequirementsPolishRequestDto, RequirementsPolishResponseDto } from './dto/requirements-polish.dto';
 import { JobTitleRewriteRequestDto, JobTitleRewriteResponseDto } from './dto/job-title-rewrite.dto';
 import { BenefitsPolishRequestDto, BenefitsPolishResponseDto } from './dto/benefits-polish.dto';
@@ -236,8 +236,8 @@ Format your response as JSON with this exact structure:
         }
         
         parsedResponse = JSON.parse(jsonStr);
-      } catch (parseError) {
-        console.error('Failed to parse AI response:', parseError);
+      } catch (_parseError) {
+        console.error('Failed to parse AI response:', _parseError);
         console.error('AI Response (first 2000 chars):', aiResponse.substring(0, 2000));
         
         // Try to fix common JSON issues
@@ -373,12 +373,12 @@ Provide only the JSON response with both the rewritten full description and the 
           rewrittenDescription: parsedResponse.jobDescription || '',
           rewrittenShortDescription: parsedResponse.shortDescription || ''
         };
-      } catch (parseError) {
+      } catch (_parseError) {
         // Fallback if JSON parsing fails - generate short description from the rewritten content
         console.warn('Failed to parse JSON response, using fallback');
         
         // Clean up the response content
-        let rewrittenDescription = responseContent
+        const rewrittenDescription = responseContent
           .replace(/^(Revised Job Description:|Job Description:|Description:)\s*/i, '')
           .replace(/^(Here is the|Here's the|The following is|Below is).*?:\s*/i, '')
           .trim();
@@ -529,8 +529,8 @@ Example response:
         }
         
         parsedResponse = JSON.parse(jsonStr);
-      } catch (parseError) {
-        console.error('Failed to parse job title rewrite response:', parseError);
+      } catch (_parseError) {
+        console.error('Failed to parse job title rewrite response:', _parseError);
         console.error('AI Response:', aiResponse);
         
         // Fallback: try to extract information manually
@@ -703,7 +703,7 @@ Return ONLY the polished Key Responsibilities section without any additional com
   }
 
   async rewriteAboutCompany(requestDto: AboutCompanyPolishRequestDto): Promise<AboutCompanyPolishResponseDto> {
-    const { aboutCompany, industry, companyName, companySize, location } = requestDto;
+    const { aboutCompany, industry, companyName, location } = requestDto;
     
     const contextParts: string[] = [];
     if (industry) contextParts.push(`Industry: ${industry}`);

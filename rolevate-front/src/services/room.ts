@@ -40,6 +40,38 @@ export interface RoomInfo {
   scheduledAt?: string;
 }
 
+export interface RoomStatus {
+  exists: boolean;
+  status?: string;
+  participantCount?: number;
+  liveKitStatus?: string;
+}
+
+export interface LiveKitRoomStatus {
+  name: string;
+  numParticipants: number;
+  creationTime: string;
+}
+
+export interface ServerStatus {
+  status: string;
+  uptime: number;
+  version: string;
+  roomCount?: number;
+}
+
+export interface TokenRefreshResponse {
+  token: string;
+  success: boolean;
+}
+
+export interface AgentStatus {
+  status: string;
+  uptime: number;
+  version: string;
+  roomCount?: number;
+}
+
 export class RoomService {
   /**
    * Join a room with phone number, job ID, and room name
@@ -102,7 +134,7 @@ export class RoomService {
    * Get room status from database
    * Backend: POST /api/room/status
    */
-  static async getRoomStatus(roomName: string): Promise<any> {
+  static async getRoomStatus(roomName: string): Promise<RoomStatus> {
     try {
       const response = await fetch(`${API_CONFIG.API_BASE_URL}/room/status`, {
         method: 'POST',
@@ -130,7 +162,7 @@ export class RoomService {
    * Get LiveKit server status for a specific room
    * Backend: GET /api/room/livekit-status?roomName=X
    */
-  static async getLiveKitRoomStatus(roomName: string): Promise<any> {
+  static async getLiveKitRoomStatus(roomName: string): Promise<LiveKitRoomStatus> {
     try {
       const response = await fetch(`${API_CONFIG.API_BASE_URL}/room/livekit-status?roomName=${encodeURIComponent(roomName)}`, {
         method: 'GET',
@@ -157,7 +189,7 @@ export class RoomService {
    * Get comprehensive server and database status
    * Backend: POST /api/room/server-status
    */
-  static async getServerStatus(roomName?: string): Promise<any> {
+  static async getServerStatus(roomName?: string): Promise<ServerStatus> {
     try {
       const response = await fetch(`${API_CONFIG.API_BASE_URL}/room/server-status`, {
         method: 'POST',
@@ -185,7 +217,7 @@ export class RoomService {
    * Refresh room token (2 hour duration)
    * Backend: POST /api/room/refresh-token
    */
-  static async refreshRoomToken(roomName: string, candidateId: string): Promise<any> {
+  static async refreshRoomToken(roomName: string, candidateId: string): Promise<TokenRefreshResponse> {
     try {
       const response = await fetch(`${API_CONFIG.API_BASE_URL}/room/refresh-token`, {
         method: 'POST',
@@ -216,7 +248,7 @@ export class RoomService {
    * Backward compatibility - using server-status instead of agent-status
    * Since there's no separate agent-status endpoint, we'll use server-status
    */
-  static async getAgentStatus(roomName: string): Promise<any> {
+  static async getAgentStatus(roomName: string): Promise<AgentStatus> {
     return this.getServerStatus(roomName);
   }
 

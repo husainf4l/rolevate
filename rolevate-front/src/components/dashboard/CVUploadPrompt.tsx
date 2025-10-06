@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { DocumentArrowUpIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 interface CVUploadPromptProps {
   onUpload: (file: File) => void;
@@ -26,7 +27,7 @@ export default function CVUploadPrompt({
         setUploading(false);
       }, 1500);
     } else {
-      alert("Please select a PDF file");
+      toast.error("Please select a PDF file");
     }
   };
 

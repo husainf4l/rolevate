@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "@/components/dashboard/Header";
 import { Button } from "@/components/common/Button";
-import { useAuth } from "@/hooks/useAuth";
+
 import { API_CONFIG } from "@/lib/config";
 import {
   UserIcon,
