@@ -36,34 +36,56 @@ export class CvParsingService {
         throw new Error('Could not extract text from CV');
       }
 
-      // Build prompt for candidate information extraction
-      const prompt = `You are an expert CV parser. Extract the following candidate information from the CV text provided below.
+      // Build enhanced prompt for candidate information extraction
+      const prompt = `You are a world-class AI CV parser with expertise in extracting structured data from resumes and CVs. Your task is to analyze the CV text below and extract key candidate information with high accuracy.
 
-CV Text:
+CV Text to Analyze:
 ${cvText}
 
-Extract the following information and return it as JSON:
+EXTRACTION REQUIREMENTS:
 
-1. First Name (required)
-2. Last Name (required) 
-3. Email Address (required)
-4. Phone Number (optional)
-5. Current Job Title (optional)
-6. Current Company (optional)
-7. Total Years of Experience (estimate as number, optional)
-8. Top Skills (array of strings, max 10, optional)
-9. Highest Education (string, optional)
-10. Professional Summary (2-3 sentences, optional)
+Extract the following information and return it as a valid JSON object:
 
-CRITICAL INSTRUCTIONS:
-- Return ONLY valid JSON without any markdown formatting or additional text
-- firstName and lastName are required - if not found, use "Unknown" and "Candidate"
-- email is required - if not found, generate a placeholder like "unknown.candidate@placeholder.com"
-- For totalExperience, estimate based on work history or experience mentioned
-- For skills, extract both technical and soft skills mentioned
-- Be accurate and only extract information that is clearly stated in the CV
+1. PERSONAL INFORMATION:
+   - firstName (string, required): Extract the candidate's first/given name
+   - lastName (string, required): Extract the candidate's last/family name  
+   - email (string, required): Find email address or create placeholder
+   - phone (string, optional): Extract phone/mobile number with country code if available
 
-Return the JSON in this exact format:
+2. PROFESSIONAL INFORMATION:
+   - currentJobTitle (string, optional): Most recent job title or position
+   - currentCompany (string, optional): Current or most recent employer
+   - totalExperience (number, optional): Total years of professional experience (estimate based on work history dates)
+
+3. SKILLS AND QUALIFICATIONS:
+   - skills (array of strings, optional): Extract 5-15 relevant skills including:
+     * Technical skills (programming languages, tools, software)
+     * Professional skills (project management, leadership, etc.)
+     * Industry-specific skills
+     * Certifications and qualifications
+   - education (string, optional): Highest degree, institution, and field of study
+
+4. SUMMARY:
+   - summary (string, optional): Create a 2-3 sentence professional summary based on the CV content
+
+QUALITY GUIDELINES:
+- Be precise and extract only information that is clearly stated
+- For names: Look for patterns like "Name:", headers, or signature areas
+- For experience: Calculate years between job start/end dates when available
+- For skills: Include both explicitly listed skills and those implied by job descriptions
+- For education: Format as "Degree in Field from Institution (Year)"
+- Use proper title case for names and job titles
+- If information is unclear or missing, use null instead of guessing
+
+FALLBACK RULES:
+- If no name found: use "Unknown" for firstName, "Candidate" for lastName
+- If no email found: generate "unknown.candidate.${Date.now()}@placeholder.com"
+- If no clear experience: estimate based on job descriptions and career progression
+- If no skills found: extract keywords from job descriptions
+
+OUTPUT FORMAT:
+Return ONLY a valid JSON object with no additional text, markdown, or formatting:
+
 {
   "firstName": "string",
   "lastName": "string", 
@@ -72,27 +94,28 @@ Return the JSON in this exact format:
   "currentJobTitle": "string or null",
   "currentCompany": "string or null",
   "totalExperience": number or null,
-  "skills": ["skill1", "skill2"] or null,
+  "skills": ["skill1", "skill2", "skill3"] or null,
   "education": "string or null",
   "summary": "string or null"
 }`;
 
-      console.log('🤖 Sending CV parsing request to OpenAI...');
+      console.log('🤖 Sending enhanced CV parsing request to OpenAI...');
       
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'You are a professional CV parser. Extract candidate information accurately from CV text. Return only valid JSON without any formatting.'
+            content: 'You are an expert AI CV parser specializing in accurate information extraction. You have processed thousands of resumes and understand various CV formats, layouts, and languages. Extract structured data with high precision and return only valid JSON.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        max_tokens: 1000,
-        temperature: 0.1, // Low temperature for consistent extraction
+        max_tokens: 1500, // Increased for more detailed extraction
+        temperature: 0.05, // Very low temperature for maximum consistency
+        top_p: 0.1, // Focused sampling for better accuracy
       });
 
       const aiResponse = completion.choices[0]?.message?.content?.trim() || '';
@@ -116,19 +139,8 @@ Return the JSON in this exact format:
         
         const parsed = JSON.parse(jsonStr);
         
-        // Validate required fields and provide fallbacks
-        candidateInfo = {
-          firstName: parsed.firstName || 'Unknown',
-          lastName: parsed.lastName || 'Candidate',
-          email: parsed.email || `unknown.candidate.${Date.now()}@placeholder.com`,
-          phone: parsed.phone || undefined,
-          currentJobTitle: parsed.currentJobTitle || undefined,
-          currentCompany: parsed.currentCompany || undefined,
-          totalExperience: parsed.totalExperience || undefined,
-          skills: Array.isArray(parsed.skills) ? parsed.skills : undefined,
-          education: parsed.education || undefined,
-          summary: parsed.summary || undefined
-        };
+        // Validate and clean the parsed data
+        candidateInfo = this.validateAndCleanCandidateInfo(parsed, cvText);
 
         console.log('✅ Candidate info extracted:', {
           name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
@@ -175,5 +187,158 @@ Return the JSON in this exact format:
         summary: `CV parsing failed: ${error.message}`
       };
     }
+  }
+
+  /**
+   * Validate and clean extracted candidate information
+   */
+  private validateAndCleanCandidateInfo(parsed: any, originalCvText: string): CandidateInfoFromCV {
+    // Validate and sanitize names
+    const firstName = this.sanitizeName(parsed.firstName) || 'Unknown';
+    const lastName = this.sanitizeName(parsed.lastName) || 'Candidate';
+    
+    // Validate email format
+    let email = parsed.email;
+    if (!email || !this.isValidEmail(email)) {
+      email = `unknown.candidate.${Date.now()}@placeholder.com`;
+    }
+    
+    // Validate and format phone number
+    let phone = parsed.phone;
+    if (phone) {
+      phone = this.cleanPhoneNumber(phone);
+      if (!phone || phone.length < 7) {
+        phone = undefined;
+      }
+    }
+    
+    // Validate experience (should be reasonable number)
+    let totalExperience = parsed.totalExperience;
+    if (totalExperience !== null && totalExperience !== undefined) {
+      totalExperience = Math.max(0, Math.min(60, Number(totalExperience))); // 0-60 years range
+      if (isNaN(totalExperience)) {
+        totalExperience = undefined;
+      }
+    }
+    
+    // Validate and clean skills array
+    let skills = parsed.skills;
+    if (Array.isArray(skills)) {
+      skills = skills
+        .filter(skill => typeof skill === 'string' && skill.trim().length > 1)
+        .map(skill => skill.trim())
+        .slice(0, 20); // Limit to 20 skills max
+      
+      if (skills.length === 0) {
+        skills = undefined;
+      }
+    } else {
+      skills = undefined;
+    }
+    
+    // Clean job title and company
+    const currentJobTitle = parsed.currentJobTitle ? parsed.currentJobTitle.trim() : undefined;
+    const currentCompany = parsed.currentCompany ? parsed.currentCompany.trim() : undefined;
+    
+    // Clean education
+    const education = parsed.education ? parsed.education.trim() : undefined;
+    
+    // Clean and validate summary
+    let summary = parsed.summary ? parsed.summary.trim() : undefined;
+    if (summary && summary.length > 500) {
+      summary = summary.substring(0, 500) + '...';
+    }
+    
+    // Data quality scoring
+    const qualityScore = this.calculateExtractionQuality({
+      firstName, lastName, email, phone, currentJobTitle, 
+      currentCompany, totalExperience, skills, education, summary
+    }, originalCvText);
+    
+    console.log('📊 CV extraction quality score:', qualityScore);
+    
+    return {
+      firstName,
+      lastName,
+      email,
+      phone,
+      currentJobTitle,
+      currentCompany,
+      totalExperience,
+      skills,
+      education,
+      summary
+    };
+  }
+
+  /**
+   * Sanitize name fields
+   */
+  private sanitizeName(name: string): string {
+    if (!name || typeof name !== 'string') return '';
+    
+    return name
+      .trim()
+      .replace(/[^a-zA-Z\s'-]/g, '') // Only allow letters, spaces, hyphens, apostrophes
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .slice(0, 50); // Reasonable length limit
+  }
+
+  /**
+   * Validate email format
+   */
+  private isValidEmail(email: string): boolean {
+    if (!email || typeof email !== 'string') return false;
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && email.length <= 254; // RFC 5321 limit
+  }
+
+  /**
+   * Clean and format phone number
+   */
+  private cleanPhoneNumber(phone: string): string {
+    if (!phone || typeof phone !== 'string') return '';
+    
+    // Remove all non-digit characters except + at the beginning
+    let cleaned = phone.replace(/[^\d+]/g, '');
+    
+    // Ensure + only appears at the beginning
+    if (cleaned.includes('+')) {
+      const parts = cleaned.split('+');
+      cleaned = '+' + parts.join('');
+    }
+    
+    return cleaned.slice(0, 20); // Reasonable length limit
+  }
+
+  /**
+   * Calculate extraction quality score (0-100)
+   */
+  private calculateExtractionQuality(info: CandidateInfoFromCV, originalText: string): number {
+    let score = 0;
+    const maxScore = 100;
+    
+    // Name quality (20 points)
+    if (info.firstName && info.firstName !== 'Unknown') score += 10;
+    if (info.lastName && info.lastName !== 'Candidate') score += 10;
+    
+    // Contact quality (20 points)
+    if (info.email && !info.email.includes('placeholder.com')) score += 10;
+    if (info.phone) score += 10;
+    
+    // Professional info quality (30 points)
+    if (info.currentJobTitle) score += 10;
+    if (info.currentCompany) score += 10;
+    if (info.totalExperience !== null && info.totalExperience !== undefined) score += 10;
+    
+    // Skills and education quality (20 points)
+    if (info.skills && info.skills.length > 0) score += 10;
+    if (info.education) score += 10;
+    
+    // Summary quality (10 points)
+    if (info.summary && info.summary.length > 20) score += 10;
+    
+    return Math.min(score, maxScore);
   }
 }

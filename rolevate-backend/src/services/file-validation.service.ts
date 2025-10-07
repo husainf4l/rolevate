@@ -127,17 +127,34 @@ export class FileValidationService {
   }
 
   /**
-   * Creates validation options for CV uploads
+   * Creates validation options for CV uploads with comprehensive format support
    */
   getCVValidationOptions(): FileValidationOptions {
     return {
       allowedMimeTypes: [
+        // Document formats
         'application/pdf',
         'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/rtf',
+        'text/plain',
+        'application/vnd.oasis.opendocument.text',
+        // Image formats (for scanned CVs)
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/bmp',
+        'image/tiff',
+        'image/webp'
       ],
-      allowedExtensions: ['.pdf', '.doc', '.docx'],
-      maxSize: 10 * 1024 * 1024, // 10MB
+      allowedExtensions: [
+        // Document extensions
+        '.pdf', '.doc', '.docx', '.rtf', '.txt', '.odt',
+        // Image extensions
+        '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.tif', '.webp'
+      ],
+      maxSize: 25 * 1024 * 1024, // Increased to 25MB to accommodate high-resolution scanned documents
       sanitizeFilename: true
     };
   }

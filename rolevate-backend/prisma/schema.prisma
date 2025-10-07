@@ -164,6 +164,12 @@ model User {
   candidateProfile CandidateProfile? // One-to-one relationship with candidate profile
   applicationNotes ApplicationNote[]
   notifications    Notification[]
+  
+  // Reporting System Relations
+  reports          Report[]          @relation("ReportUser")
+  createdTemplates ReportTemplate[]  @relation("TemplateCreator") 
+  sharedReports    ReportShare[]     @relation("ReportSharer")
+  
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -252,6 +258,11 @@ model Company {
   invitations       Invitation[]
   notifications     Notification[]
   communications    Communication[]
+  
+  // Reporting System Relations
+  reports           Report[]         @relation("CompanyReport")
+  reportTemplates   ReportTemplate[] @relation("CompanyTemplate")
+  
   subscription      SubscriptionType @default(FREE)
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
@@ -897,4 +908,491 @@ model Communication {
   @@index([candidateId, sentAt]) // Index for candidate communication history
   @@index([companyId, sentAt]) // Index for company communication history
   @@map("communications")
+}
+
+// =======================================
+// COMPREHENSIVE REPORTING SYSTEM
+// =======================================
+
+// Report Types and Categories
+enum ReportType {
+  ANALYTICS      // Data analytics and insights
+  PERFORMANCE    // Performance metrics and KPIs
+  COMPLIANCE     // Compliance and audit reports
+  OPERATIONAL    // Operational reports
+  FINANCIAL      // Financial and billing reports
+  SUMMARY        // Executive summaries
+  DETAILED       // Detailed transactional reports
+  CUSTOM         // Custom user-defined reports
+}
+
+enum ReportCategory {
+  // HR & Recruitment
+  RECRUITMENT_METRICS
+  CANDIDATE_PIPELINE
+  INTERVIEW_ANALYTICS
+  HIRING_FUNNEL
+  TIME_TO_HIRE
+  COST_PER_HIRE
+  SOURCE_EFFECTIVENESS
+  
+  // Company Management
+  COMPANY_OVERVIEW
+  DEPARTMENT_ANALYTICS
+  EMPLOYEE_METRICS
+  SUBSCRIPTION_USAGE
+  
+  // Job Management
+  JOB_PERFORMANCE
+  APPLICATION_TRENDS
+  JOB_ANALYTICS
+  MARKET_ANALYSIS
+  
+  // Communication
+  COMMUNICATION_METRICS
+  ENGAGEMENT_ANALYTICS
+  RESPONSE_RATES
+  
+  // System & Security
+  USER_ACTIVITY
+  SYSTEM_PERFORMANCE
+  SECURITY_AUDIT
+  ERROR_ANALYTICS
+  
+  // Financial
+  BILLING_SUMMARY
+  REVENUE_ANALYTICS
+  COST_ANALYSIS
+  
+  // Custom
+  CUSTOM_ANALYTICS
+}
+
+enum ReportFormat {
+  PDF
+  EXCEL
+  CSV
+  JSON
+  HTML
+  DASHBOARD // Interactive web dashboard
+}
+
+enum ReportStatus {
+  DRAFT
+  GENERATING
+  COMPLETED
+  FAILED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum ReportScope {
+  GLOBAL      // System-wide reports (admin only)
+  COMPANY     // Company-specific reports
+  DEPARTMENT  // Department-specific reports
+  USER        // User-specific reports
+}
+
+enum ReportPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum SharePermission {
+  VIEW_ONLY
+  DOWNLOAD
+  EDIT
+  FULL_ACCESS
+}
+
+enum ScheduleFrequency {
+  ONCE
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  CUSTOM // Uses cron expression
+}
+
+enum ReportDataSource {
+  APPLICATIONS     // From applications table
+  CANDIDATES      // From candidate_profiles table
+  JOBS           // From jobs table
+  INTERVIEWS     // From interviews table
+  USERS          // From users table
+  COMPANIES      // From companies table
+  COMMUNICATIONS // From communications table
+  SECURITY_LOGS  // From security_logs table
+  CUSTOM_QUERY   // Custom SQL query
+  MIXED          // Multiple data sources
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+  TIMEOUT
+}
+
+// Main Report Model
+model Report {
+  id          String       @id @default(cuid())
+  name        String       @db.VarChar(255) // Enforce length limit
+  description String?      @db.Text
+  type        ReportType
+  category    ReportCategory
+  format      ReportFormat @default(PDF)
+  status      ReportStatus @default(DRAFT)
+  scope       ReportScope  @default(COMPANY)
+  priority    ReportPriority @default(MEDIUM)
+  
+  // Content and Configuration
+  query       String?      @db.Text // SQL query or configuration
+  dataSource  ReportDataSource @default(MIXED) // Source of report data
+  filters     Json?        // Report filters configuration
+  parameters  Json?        // Report parameters
+  config      Json?        // Additional configuration
+  
+  // Execution Control
+  executionStatus ExecutionStatus @default(PENDING)
+  maxExecutionTime Int?     @default(600) // Max execution time in seconds
+  timeoutAt    DateTime?   // When execution will timeout
+  
+  // Results and Output
+  data        Json?        // Generated report data
+  fileUrl     String?      // URL to generated report file
+  fileName    String?      @db.VarChar(255) // Generated file name
+  fileSize    Int?         // File size in bytes
+  fileMimeType String?     @db.VarChar(100) // MIME type of generated file
+  
+  // Metrics and Performance
+  metrics     ReportMetrics[]
+  
+  // Relationships
+  templateId  String?
+  template    ReportTemplate? @relation(fields: [templateId], references: [id])
+  
+  companyId   String?
+  company     Company?        @relation("CompanyReport", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  userId      String?
+  user        User?           @relation("ReportUser", fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Scheduling
+  schedule    ReportSchedule?
+  
+  // Sharing
+  shares      ReportShare[]
+  
+  // Audit Trail
+  generatedBy String?      // User ID who generated the report
+  generatedAt DateTime?    // When the report was generated
+  
+  // Performance Tracking
+  executionTime Int?       // Execution time in milliseconds
+  recordCount   Int?       // Number of records in the report
+  
+  // Data Retention and Cleanup
+  expiresAt    DateTime?   // When the report data expires
+  autoDelete   Boolean     @default(false) // Auto-delete after expiration
+  
+  // Access Control and Security
+  isPublic     Boolean     @default(false)
+  isArchived   Boolean     @default(false)
+  archivedAt   DateTime?   // When the report was archived
+  
+  // Metadata
+  tags         String[]    // Tags for categorization
+  version      String      @default("1.0") @db.VarChar(10)
+  checksum     String?     @db.VarChar(64) // File integrity checksum
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  
+  // Business Rule Constraints
+  @@unique([name, companyId]) // Unique report names per company
+  
+  @@index([companyId])
+  @@index([userId])
+  @@index([type, category])
+  @@index([status])
+  @@index([executionStatus])
+  @@index([dataSource])
+  @@index([createdAt])
+  @@index([templateId])
+  @@index([expiresAt]) // For cleanup jobs
+  @@index([isArchived, archivedAt]) // For archive management
+  @@index([companyId, category, status]) // Composite index for company reports
+  @@index([companyId, isPublic, isArchived]) // For public report queries
+  @@index([generatedAt]) // Index for report generation history
+  @@index([tags]) // Index for tag-based searches
+  @@index([timeoutAt]) // For timeout monitoring
+  @@map("reports")
+}
+
+// Report Templates for Reusable Configurations
+model ReportTemplate {
+  id          String       @id @default(cuid())
+  name        String       @db.VarChar(255)
+  description String?      @db.Text
+  type        ReportType
+  category    ReportCategory
+  format      ReportFormat @default(PDF)
+  scope       ReportScope  @default(COMPANY)
+  dataSource  ReportDataSource @default(MIXED)
+  
+  // Template Configuration
+  queryTemplate    String    @db.Text // Template query with placeholders
+  defaultFilters   Json?     // Default filter configuration
+  defaultParameters Json?    // Default parameters
+  config           Json?     // Template configuration
+  
+  // Template Validation
+  isValidated      Boolean   @default(false) // Whether template query is validated
+  validatedAt      DateTime? // When template was last validated
+  validationError  String?   @db.Text // Last validation error if any
+  
+  // Template Metadata
+  version     String       @default("1.0") @db.VarChar(10)
+  isSystem    Boolean      @default(false) // System-provided templates
+  isActive    Boolean      @default(true)
+  
+  // Usage Tracking
+  usageCount  Int          @default(0)
+  lastUsed    DateTime?
+  
+  // Access Control
+  isPublic    Boolean      @default(false) // Can be used by other companies
+  
+  // Relationships
+  reports     Report[]
+  
+  companyId   String?
+  company     Company?     @relation("CompanyTemplate", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  createdBy   String?
+  creator     User?        @relation("TemplateCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Business Rule Constraints
+  @@unique([name, companyId]) // Unique template names per company
+  @@unique([name, isSystem]) // System templates must have unique names globally
+  
+  @@index([companyId])
+  @@index([type, category])
+  @@index([dataSource])
+  @@index([isSystem, isActive])
+  @@index([isValidated])
+  @@index([isPublic, isActive])
+  @@index([createdBy])
+  @@index([usageCount]) // For popular templates
+  @@index([lastUsed]) // For recently used templates
+  @@map("report_templates")
+}
+
+// Report Metrics for Performance Analysis
+model ReportMetrics {
+  id        String @id @default(cuid())
+  
+  reportId  String
+  report    Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  
+  // Metric Details
+  metricName  String
+  metricValue Float  @db.DoublePrecision
+  metricType  String // COUNT, SUM, AVERAGE, PERCENTAGE, etc.
+  
+  // Dimensions
+  dimension   String? // Category, department, time period, etc.
+  period      String? // Time period for the metric
+  
+  // Metadata
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([reportId])
+  @@index([metricName])
+  @@index([reportId, metricName]) // Composite index for report metrics
+  @@map("report_metrics")
+}
+
+// Report Scheduling for Automated Generation
+model ReportSchedule {
+  id        String            @id @default(cuid())
+  
+  reportId  String            @unique
+  report    Report            @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  
+  // Schedule Configuration
+  frequency    ScheduleFrequency
+  cronExpression String?        @db.VarChar(100) // For custom schedules
+  
+  // Schedule Timing
+  startDate    DateTime
+  endDate      DateTime?
+  nextRun      DateTime?
+  lastRun      DateTime?
+  
+  // Schedule Settings
+  isActive     Boolean         @default(true)
+  isPaused     Boolean         @default(false) // Temporary pause
+  timezone     String          @default("UTC") @db.VarChar(50)
+  
+  // Recipients and Delivery
+  recipients   String[]        // Email addresses or user IDs
+  deliveryFormat ReportFormat  @default(PDF) // Format for scheduled delivery
+  
+  // Delivery Settings
+  emailSubject String?         @db.VarChar(255)
+  emailBody    String?         @db.Text
+  includeAttachment Boolean    @default(true)
+  
+  // Execution Control
+  maxExecutionTime Int?        @default(1800) // 30 minutes max for scheduled reports
+  
+  // Error Handling and Monitoring
+  retryCount   Int             @default(0) // Current retry count
+  maxRetries   Int             @default(3) // Maximum retry attempts
+  consecutiveFailures Int      @default(0) // Track consecutive failures
+  lastError    String?         @db.Text
+  lastSuccessfulRun DateTime?  // Track last successful execution
+  
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  
+  // Business Rule Validation
+  // Ensure cronExpression is provided when frequency is CUSTOM
+  // This would be enforced at application level
+  
+  @@index([nextRun])
+  @@index([isActive, isPaused])
+  @@index([frequency])
+  @@index([lastRun])
+  @@index([consecutiveFailures])
+  @@index([isActive, nextRun]) // For scheduler queries
+  @@index([timezone]) // For timezone-based queries
+  @@map("report_schedules")
+}
+
+// Report Sharing and Permissions
+model ReportShare {
+  id         String          @id @default(cuid())
+  
+  reportId   String
+  report     Report          @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  
+  // Sharing Details
+  sharedWith String?         @db.VarChar(255) // User ID or email
+  permission SharePermission @default(VIEW_ONLY)
+  
+  // Access Control
+  accessToken String?        @unique @db.VarChar(64) // For public sharing
+  expiresAt   DateTime?      // Access expiration
+  isRevoked   Boolean        @default(false) // Allow revoking access
+  revokedAt   DateTime?      // When access was revoked
+  
+  // Usage Tracking and Limits
+  accessCount    Int         @default(0)
+  maxAccessCount Int?        // Limit number of accesses
+  lastAccessed   DateTime?
+  ipRestrictions String[]    // Allowed IP addresses/ranges
+  
+  // Sharing Settings
+  isPublic     Boolean       @default(false)
+  requireLogin Boolean       @default(true)
+  allowDownload Boolean      @default(true) // Control download permission
+  watermark    String?       @db.VarChar(255) // Add watermark to shared reports
+  
+  // Metadata
+  sharedBy     String
+  sharer       User          @relation("ReportSharer", fields: [sharedBy], references: [id], onDelete: Cascade)
+  shareNote    String?       @db.Text // Note from sharer
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  // Business Rules
+  @@unique([reportId, sharedWith]) // Prevent duplicate shares to same user
+  
+  @@index([reportId])
+  @@index([sharedWith])
+  @@index([accessToken])
+  @@index([sharedBy])
+  @@index([expiresAt])
+  @@index([isRevoked])
+  @@index([isPublic, isRevoked]) // For public share queries
+  @@index([reportId, isRevoked]) // For active shares per report
+  @@map("report_shares")
+}
+
+// Enhanced Audit Actions Enum
+enum AuditAction {
+  CREATED
+  UPDATED  
+  DELETED
+  GENERATED
+  ACCESSED
+  SHARED
+  DOWNLOADED
+  SCHEDULED
+  UNSCHEDULED
+  ARCHIVED
+  RESTORED
+  PERMISSIONS_CHANGED
+  TEMPLATE_APPLIED
+  EXECUTION_STARTED
+  EXECUTION_COMPLETED
+  EXECUTION_FAILED
+  SHARE_REVOKED
+}
+
+// Report Audit Log for Tracking Access and Changes
+model ReportAuditLog {
+  id        String      @id @default(cuid())
+  
+  reportId  String
+  
+  // Action Details
+  action    AuditAction // Structured action types
+  details   Json?       // Additional action details
+  success   Boolean     @default(true) // Whether action was successful
+  
+  // User and Session Information  
+  userId    String?     @db.VarChar(30)
+  sessionId String?     @db.VarChar(50) // Track user session
+  ipAddress String?     @db.VarChar(45) // Support IPv6
+  userAgent String?     @db.VarChar(500)
+  
+  // Request Context
+  requestId String?     @db.VarChar(50) // For request tracing
+  duration  Int?        // Action duration in milliseconds
+  
+  // Change Tracking
+  oldValues Json?       // Previous values (for updates)
+  newValues Json?       // New values (for updates)
+  
+  // Security and Compliance
+  riskLevel String?     @default("LOW") @db.VarChar(10) // LOW, MEDIUM, HIGH
+  
+  createdAt DateTime    @default(now())
+  
+  @@index([reportId])
+  @@index([userId])
+  @@index([action])
+  @@index([success])
+  @@index([createdAt])
+  @@index([riskLevel])
+  @@index([sessionId])
+  @@index([reportId, action]) // Composite index for report actions
+  @@index([userId, createdAt]) // For user activity history
+  @@index([action, createdAt]) // For action-based reporting
+  @@map("report_audit_logs")
 }

@@ -31,97 +31,127 @@ export class OpenaiCvAnalysisService {
         throw new Error('Could not extract text from CV');
       }
 
-      // Build comprehensive prompt for GPT-4o
-      const fullPrompt = `You are an expert HR recruiter analyzing a candidate's CV for a specific job position. 
+      // Build enhanced comprehensive prompt for GPT-4o
+      const fullPrompt = `You are a world-class AI recruiter with 20+ years of experience in talent acquisition and CV analysis. You have reviewed thousands of CVs across industries and have exceptional ability to match candidates to roles.
 
-IMPORTANT: Base your analysis ONLY on the actual CV content provided below. Do NOT use generic responses.
+CRITICAL ANALYSIS REQUIREMENTS:
+- Analyze ONLY the actual CV content provided - no assumptions or generic responses
+- Provide specific evidence from the CV to support every assessment
+- Be thorough, objective, and detailed in your evaluation
+- Consider both explicit skills and transferable experience
+- Evaluate cultural fit potential based on career progression and achievements
 
-${analysisPrompt}
+ANALYSIS CONTEXT:
+${analysisPrompt || 'Provide comprehensive CV analysis for job matching'}
 
-=== JOB DETAILS ===
-- Title: ${job.title}
-- Department: ${job.department}
-- Company: ${job.company?.name || 'Unknown'}
-- Location: ${job.location}
-- Required Skills: ${job.skills?.join(', ') || 'Not specified'}
-- Experience Level: ${job.experience || 'Not specified'}
-- Education: ${job.education || 'Not specified'}
-- Job Level: ${job.jobLevel || 'Not specified'}
-- Work Type: ${job.workType || 'Not specified'}
+=== TARGET JOB PROFILE ===
+Position: ${job.title}
+Department: ${job.department || 'Not specified'}
+Company: ${job.company?.name || 'Not specified'}
+Location: ${job.location || 'Not specified'}
+Experience Level: ${job.experience || 'Not specified'}
+Job Level: ${job.jobLevel || 'Not specified'}
+Work Type: ${job.workType || 'Not specified'}
 
-=== JOB DESCRIPTION ===
+Required Technical Skills: ${job.skills?.join(', ') || 'Not specified'}
+Education Requirements: ${job.education || 'Not specified'}
+
+Job Description:
 ${job.description || 'Not provided'}
 
-=== JOB REQUIREMENTS ===
+Key Requirements:
 ${job.requirements || 'Not provided'}
 
-=== KEY RESPONSIBILITIES ===
+Primary Responsibilities:
 ${job.responsibilities || 'Not provided'}
 
-=== CANDIDATE CV CONTENT ===
+=== CANDIDATE CV ANALYSIS ===
+CV Text Content:
 ${cvText}
 
-CRITICAL INSTRUCTIONS:
-1. Analyze the CV content thoroughly and extract specific details about the candidate
-2. Compare the candidate's actual experience, skills, and education with the job requirements
-3. Provide specific examples from the CV in your analysis
-4. Be objective and detailed in your assessment
-5. Return ONLY the JSON response without any additional text
+ANALYSIS INSTRUCTIONS:
+1. **Skills Assessment**: Match candidate's technical and soft skills against job requirements
+2. **Experience Evaluation**: Analyze relevance, depth, and progression of work experience
+3. **Education Analysis**: Compare educational background with job requirements
+4. **Achievement Recognition**: Identify notable accomplishments and their relevance
+5. **Growth Potential**: Assess candidate's learning ability and career trajectory
+6. **Cultural Fit Indicators**: Evaluate based on career choices and achievements
+7. **Risk Assessment**: Identify potential concerns or gaps
 
-Return your analysis in this exact JSON format:
+SCORING METHODOLOGY:
+- 90-100: Exceptional fit - rare find, immediate hire consideration
+- 80-89: Excellent fit - strong candidate, likely success
+- 70-79: Good fit - solid candidate with minor gaps
+- 60-69: Moderate fit - potential with development needed  
+- 50-59: Fair fit - significant gaps or concerns
+- 0-49: Poor fit - not suitable for this role
+
+Return your analysis as a valid JSON object ONLY (no markdown, no additional text):
 
 {
-  "score": number (0-100),
-  "summary": "Brief overall assessment of the candidate's fit for this position",
+  "score": number (0-100, based on methodology above),
+  "summary": "2-3 sentence executive summary of candidate's overall fit and key differentiators",
   "strengths": [
-    "List of candidate's key strengths relevant to this role",
-    "Include specific examples from their CV"
+    "Specific strength with evidence from CV",
+    "Another strength with quantified achievement", 
+    "Technical competency with examples"
   ],
   "weaknesses": [
-    "Areas where the candidate may not fully meet requirements",
-    "Missing skills or experience gaps"
+    "Specific gap or concern with context",
+    "Missing requirement with impact assessment",
+    "Development area with recommendation"
   ],
   "recommendations": [
-    "Specific recommendations for next steps",
-    "Areas to explore in interviews"
+    "Immediate next step or interview focus area",
+    "Specific question to ask in interview",
+    "Skill assessment or test recommendation"
   ],
   "skillsMatch": {
-    "matched": ["Skills found in CV that match job requirements"],
-    "missing": ["Required skills not evident in CV"],
-    "percentage": number (0-100)
+    "matched": ["Explicitly mentioned skill from CV", "Inferred skill with evidence"],
+    "missing": ["Required skill not found in CV", "Another gap"],
+    "percentage": number (0-100, based on matched vs required skills)
   },
   "experienceMatch": {
-    "relevant": boolean,
-    "years": number,
-    "details": "Detailed analysis of experience relevance"
+    "relevant": boolean (true if experience directly applies to role),
+    "years": number (total relevant professional experience),
+    "details": "Detailed analysis of how experience aligns with role requirements, including specific examples"
   },
   "educationMatch": {
-    "relevant": boolean,
-    "details": "Analysis of educational background alignment"
+    "relevant": boolean (true if education meets or exceeds requirements),
+    "details": "Analysis of educational qualifications, certifications, and continuous learning evidence"
   },
   "overallFit": "Poor|Fair|Good|Excellent"
-}
-
-Focus on being objective and providing specific examples from the CV to support your assessment.`;
+}`;
 
       console.log('🤖 Sending request to OpenAI GPT-4o...');
       console.log('📋 Prompt length:', fullPrompt.length);
       
-      // Call OpenAI GPT-4o
+      // Call OpenAI GPT-4o with optimized parameters
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert HR recruiter and CV analyst. Analyze the ACTUAL CV content provided and give specific, detailed feedback based on what you find in the CV. Do not provide generic responses. Base everything on the real CV text.'
+            content: `You are an elite AI recruiter with exceptional analytical capabilities. You specialize in:
+- Precise CV analysis with evidence-based assessments
+- Accurate skill matching and gap identification  
+- Professional experience evaluation and relevance scoring
+- Educational qualification analysis
+- Cultural and role fit prediction
+- Risk assessment and hiring recommendations
+
+Your analyses are renowned for accuracy, specificity, and actionable insights. You ALWAYS provide concrete evidence from the CV to support your evaluations and never make assumptions beyond what is explicitly or reasonably implied in the document.`
           },
           {
             role: 'user',
             content: fullPrompt
           }
         ],
-        max_tokens: 2500,
-        temperature: 0.2,
+        max_tokens: 3000, // Increased for more detailed analysis
+        temperature: 0.1, // Very low for consistent, analytical responses
+        top_p: 0.1, // Focused sampling for precision
+        presence_penalty: 0.1, // Slight penalty to avoid repetition
+        frequency_penalty: 0.1, // Encourage varied vocabulary
       });
 
       const aiResponse = completion.choices[0]?.message?.content?.trim() || '';
