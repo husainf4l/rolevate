@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Res, NotFoundException, Logger, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer';
 import { Response } from 'express';
 import { join } from 'path';
 import { existsSync } from 'fs';
@@ -19,7 +20,7 @@ export class UploadsController {
 
   @Post('cvs')
   @UseInterceptors(FileInterceptor('cv', {
-    storage: require('multer').memoryStorage(),
+    storage: multer.memoryStorage(),
   }))
   async uploadAnonymousCV(
     @UploadedFile() file: Express.Multer.File,
@@ -65,7 +66,7 @@ export class UploadsController {
       
       this.logger.log(`Redirecting to S3 presigned URL for: ${filename}`);
       return res.redirect(presignedUrl);
-    } catch (error) {
+    } catch {
       this.logger.error(`CV not found in S3: ${filename}`);
       throw new NotFoundException(`CV file not found: ${filename}`);
     }
@@ -85,7 +86,7 @@ export class UploadsController {
       
       this.logger.log(`Redirecting to S3 presigned URL for anonymous CV: ${filename}`);
       return res.redirect(presignedUrl);
-    } catch (error) {
+    } catch {
       this.logger.error(`Anonymous CV not found in S3: ${filename}`);
       throw new NotFoundException(`CV file not found: ${filename}`);
     }

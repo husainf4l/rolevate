@@ -251,7 +251,70 @@ This report outlines critical issues and recommended improvements for the RoleVa
 4. Database schema normalization
 5. Dependency cleanup
 
+## 11. Logic and Code Logic Improvements
+
+### 11.1 Remove Dead Code and Unused Elements
+- **Issue**: 87 ESLint errors indicating unused imports, variables, parameters, and destructured properties across multiple files (e.g., auth.service.ts, candidate.controller.ts, job.service.ts).
+- **Impact**: Codebase bloat, reduced readability, maintenance overhead, and potential for confusion or bugs from outdated code.
+- **Severity**: Medium
+- **Status**: ❌ **PENDING** - Requires systematic cleanup
+- **Recommendation**: 
+  - Audit all files for unused imports and remove them (e.g., remove `BadRequestException` from candidate.controller.ts if unused).
+  - Eliminate unused variables and parameters (e.g., prefix with `_` if intentionally unused, or remove entirely).
+  - Clean up destructuring assignments that discard values unnecessarily.
+
+### 11.2 Improve Error Handling Logic
+- **Issue**: Inconsistent error handling with unused error variables in catch blocks (e.g., `error` in auth.service.ts signup method).
+- **Impact**: Missed logging opportunities, potential silent failures, and debugging difficulties.
+- **Severity**: Medium
+- **Status**: ❌ **PENDING**
+- **Recommendation**: 
+  - Either log errors appropriately or remove unused error variables.
+  - Implement consistent error logging across services.
+  - Use proper error types and avoid generic catches where possible.
+
+### 11.3 Refactor Complex Business Logic
+- **Issue**: Some service methods have lengthy functions with multiple responsibilities (e.g., auth.service.ts validateUser and signup methods).
+- **Impact**: Hard to read, test, and maintain; higher risk of bugs.
+- **Severity**: Medium
+- **Status**: ❌ **PENDING**
+- **Recommendation**: 
+  - Break down large methods into smaller, focused functions.
+  - Use early returns to reduce nesting.
+  - Extract common logic into utility functions.
+  - Improve conditional logic for clarity (e.g., use guard clauses).
+
+### 11.4 Optimize Data Flow and Validation
+- **Issue**: Some DTOs and services have redundant validation or inefficient data processing.
+- **Impact**: Performance overhead and potential data inconsistencies.
+- **Severity**: Low-Medium
+- **Status**: ❌ **PENDING**
+- **Recommendation**: 
+  - Centralize validation logic where possible.
+  - Avoid unnecessary data transformations.
+  - Ensure consistent data types and formats across the application.
+
+### 11.5 Enhance Algorithm Efficiency
+- **Issue**: Potential inefficiencies in loops, queries, or computations (e.g., regex patterns in room.service.ts with unnecessary escapes).
+- **Impact**: Slower performance, especially under load.
+- **Severity**: Low
+- **Status**: ❌ **PENDING**
+- **Recommendation**: 
+  - Review and optimize regex patterns (remove useless escapes).
+  - Use efficient data structures and algorithms.
+  - Profile critical paths for bottlenecks.
+
+### 11.6 Improve Code Readability and Structure
+- **Issue**: Inconsistent naming, mixed coding styles, and lack of comments in complex logic.
+- **Impact**: Harder for team members to understand and contribute.
+- **Severity**: Low
+- **Status**: ❌ **PENDING**
+- **Recommendation**: 
+  - Adopt consistent naming conventions.
+  - Add meaningful comments for complex logic.
+  - Use TypeScript features effectively (e.g., proper typing).
+
 ## Conclusion
 
-The RoleVate backend has a solid foundation with modern technologies and comprehensive features. Several critical issues have been resolved including ESLint configuration, dependency cleanup, security improvements, and database seeding. All dependencies have been updated to their latest versions. However, significant work remains in test coverage (currently 9.71%) and code quality (115 ESLint errors). Implementing the remaining recommendations will significantly enhance code reliability, security, and maintainability.</content>
+The RoleVate backend has a solid foundation with modern technologies and comprehensive features. Several critical issues have been resolved including ESLint configuration, dependency cleanup, security improvements, and database seeding. All dependencies have been updated to their latest versions. However, significant work remains in test coverage (currently 9.71%), code quality (115 ESLint errors), and now highlighted logic improvements. Implementing the remaining recommendations, particularly the logic-focused enhancements, will significantly enhance code reliability, maintainability, and performance.</content>
 <parameter name="filePath">c:\Users\Al-hu\OneDrive\Desktop\rolevate\rolevate-backend\IMPROVEMENT_REPORT.md

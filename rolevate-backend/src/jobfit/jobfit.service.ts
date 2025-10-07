@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AwsS3Service } from '../services/aws-s3.service';
 import { CvParsingService } from '../services/cv-parsing.service';
@@ -197,7 +197,7 @@ export class JobFitService {
     });
   }
 
-  private async generateJobFitAnalysis(candidateInfo: any, cvAnalysis: any): Promise<{
+  private async generateJobFitAnalysis(candidateInfo: any, _cvAnalysis: any): Promise<{
     keyStrengths: string[];
     industryExperience: string[];
   }> {
@@ -232,7 +232,7 @@ export class JobFitService {
     
     // Based on current company and job title, infer industries
     const title = candidateInfo.currentJobTitle?.toLowerCase() || '';
-    const company = candidateInfo.currentCompany?.toLowerCase() || '';
+    const _company = candidateInfo.currentCompany?.toLowerCase() || '';
     
     if (title.includes('software') || title.includes('developer') || title.includes('engineer')) {
       industryExperience.push('Technology');

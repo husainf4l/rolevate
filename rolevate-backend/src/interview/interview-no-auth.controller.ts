@@ -5,9 +5,6 @@ import {
   Put,
   Param,
   Body,
-  Query,
-  ParseIntPipe,
-  DefaultValuePipe,
 } from '@nestjs/common';
 import { InterviewService } from './interview.service';
 import {

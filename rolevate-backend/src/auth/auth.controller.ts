@@ -183,7 +183,7 @@ export class AuthController {
     console.log('user.userId:', user?.userId);
 
     try {
-      const result = await this.authService.getUserById(user.userId);
+      const result = await this.authService.findById(user.userId);
       console.log('getUserById result:', result);
       return result;
     } catch (error) {
@@ -203,7 +203,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req: Request) {
     const user = req.user as any;
-    return this.authService.getUserById(user.userId);
+    return this.authService.findById(user.userId);
   }
 
   @Post('revoke-all')

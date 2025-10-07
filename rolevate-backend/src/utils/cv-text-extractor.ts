@@ -1,4 +1,5 @@
 import axios from 'axios';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const pdfParse = require('pdf-parse');
 import mammoth from 'mammoth';
 

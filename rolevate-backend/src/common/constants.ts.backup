@@ -1,0 +1,110 @@
+/**
+ * Application-wide constants and configuration values
+ * Centralizes magic numbers, strings, and configuration to improve maintainability
+ */
+
+export const AUTH_CONSTANTS = {
+  // Password hashing
+  BCRYPT_ROUNDS: 12,
+
+  // JWT token expiration times
+  JWT_ACCESS_TOKEN_EXPIRATION: '15m',
+  JWT_REFRESH_TOKEN_EXPIRATION: '7d',
+
+  // Security
+  MAX_LOGIN_ATTEMPTS: 5,
+  LOCKOUT_DURATION_MINUTES: 15,
+} as const;
+
+export const PAGINATION_CONSTANTS = {
+  // Query limits
+  MAX_LIMIT: 100,
+  DEFAULT_LIMIT: 20,
+  MAX_OFFSET: 10000,
+
+  // Featured jobs
+  DEFAULT_FEATURED_LIMIT: 6,
+} as const;
+
+export const CACHE_CONSTANTS = {
+  // TTL values in seconds
+  TTL_STATIC: 3600,    // 1 hour for rarely changing data
+  TTL_DYNAMIC: 600,    // 10 minutes for moderately changing data
+  TTL_VOLATILE: 60,    // 1 minute for frequently changing data
+
+  // Cache key prefixes
+  KEY_PREFIX_COMPANY: 'company',
+  KEY_PREFIX_PUBLIC: 'public',
+  KEY_PREFIX_FEATURED: 'featured_jobs',
+} as const;
+
+export const TIME_CONSTANTS = {
+  // Time conversions in milliseconds
+  SECOND: 1000,
+  MINUTE: 60 * 1000,
+  HOUR: 60 * 60 * 1000,
+  DAY: 24 * 60 * 60 * 1000,
+  WEEK: 7 * 24 * 60 * 60 * 1000,
+
+  // Common durations
+  WHATSAPP_TOKEN_DURATION: 24 * 60 * 60 * 1000, // 24 hours
+  SECURITY_LOG_RETENTION: 90 * 24 * 60 * 60 * 1000, // 90 days
+} as const;
+
+export const VALIDATION_CONSTANTS = {
+  // String lengths
+  MAX_JOB_TITLE_LENGTH: 200,
+  MAX_JOB_DESCRIPTION_LENGTH: 5000,
+  MAX_COMPANY_NAME_LENGTH: 100,
+
+  // File sizes
+  MAX_FILE_SIZE_MB: 10,
+  MAX_CV_SIZE_MB: 5,
+
+  // Phone number patterns
+  PHONE_CLEANUP_REGEX: /[+ \-\(\)]/g,
+} as const;
+
+export const BUSINESS_RULES = {
+  // Job posting
+  MAX_ACTIVE_JOBS_PER_COMPANY: 50,
+  FEATURED_JOB_DURATION_DAYS: 30,
+
+  // Application limits
+  MAX_APPLICATIONS_PER_JOB: 1000,
+  MAX_APPLICATIONS_PER_USER_PER_DAY: 10,
+
+  // Interview settings
+  DEFAULT_INTERVIEW_DURATION_MINUTES: 60,
+  MAX_INTERVIEW_DURATION_MINUTES: 180,
+} as const;
+
+export const EXTERNAL_API_CONSTANTS = {
+  // OpenAI
+  OPENAI_MAX_TOKENS: 2000,
+  OPENAI_TEMPERATURE: 0.7,
+
+  // AWS S3
+  S3_PRESIGNED_URL_EXPIRATION: 3600, // 1 hour
+
+  // LiveKit
+  LIVEKIT_ROOM_DURATION_SECONDS: 2 * 60 * 60, // 2 hours
+} as const;
+
+export const ERROR_MESSAGES = {
+  // Authentication
+  INVALID_CREDENTIALS: 'Invalid email or password',
+  ACCOUNT_DISABLED: 'Account is disabled',
+  EMAIL_ALREADY_EXISTS: 'User with this email already exists',
+  INVALID_INVITATION_CODE: 'Invalid or expired invitation code',
+
+  // Authorization
+  INSUFFICIENT_PERMISSIONS: 'Insufficient permissions',
+  ADMIN_CREATION_NOT_ALLOWED: 'Admin users cannot be created through signup',
+
+  // Validation
+  REQUIRED_FIELD: (field: string) => `${field} is required`,
+  INVALID_FORMAT: (field: string) => `Invalid ${field} format`,
+  VALUE_TOO_LONG: (field: string, max: number) => `${field} must be less than ${max} characters`,
+  VALUE_TOO_SHORT: (field: string, min: number) => `${field} must be at least ${min} characters`,
+} as const;

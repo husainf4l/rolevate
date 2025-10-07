@@ -1,5 +1,5 @@
-import { IsString, IsEnum, IsOptional, IsArray, IsDateString, IsBoolean, ValidateNested } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { IsString, IsEnum, IsOptional, IsArray, IsDateString } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum InterviewLanguage {

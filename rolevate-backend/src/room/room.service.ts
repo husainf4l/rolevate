@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { LiveKitService } from '../livekit/livekit.service';
+import { TIME_CONSTANTS, EXTERNAL_API_CONSTANTS, VALIDATION_CONSTANTS } from '../common/constants';
 
 interface LeaveRoomDto {
   candidateId: string;
@@ -134,7 +135,7 @@ export class RoomService {
       const createdAt = liveKitRoom.createdAt;
       const now = new Date();
       const durationMs = now.getTime() - createdAt.getTime();
-      const durationMinutes = Math.floor(durationMs / (1000 * 60));
+      const durationMinutes = Math.floor(durationMs / TIME_CONSTANTS.MINUTE);
 
       return {
         success: true,
@@ -213,7 +214,7 @@ export class RoomService {
         roomName,
         participantName,
         candidateId,
-        2 * 60 * 60 // 2 hours in seconds
+        EXTERNAL_API_CONSTANTS.LIVEKIT_ROOM_DURATION_SECONDS
       );
 
       console.log(`✅ New token generated for ${participantName} (2 hour duration)`);
@@ -297,7 +298,7 @@ export class RoomService {
 
       // Step 1: Find the application/candidate
       // Clean phone number (remove + and any spaces/special chars) to match format used elsewhere
-      const cleanPhone = phone.replace(/[\+\s\-\(\)]/g, '');
+      const cleanPhone = phone.replace(VALIDATION_CONSTANTS.PHONE_CLEANUP_REGEX, '');
       console.log(`🔍 Looking for application with jobId: ${jobId}, original phone: ${phone}, cleanPhone: ${cleanPhone}`);
 
       const application = await this.prisma.application.findFirst({
@@ -376,7 +377,7 @@ export class RoomService {
         console.log(`❌ No application found for jobId: ${jobId}, original phone: ${phone}, cleanPhone: ${cleanPhone}`);
         console.log(`📋 Found ${jobApplications.length} applications for this job:`);
         jobApplications.forEach(app => {
-          const candidateCleanPhone = app.candidate.phone?.replace(/[\+\s\-\(\)]/g, '') || '';
+          const candidateCleanPhone = app.candidate.phone?.replace(VALIDATION_CONSTANTS.PHONE_CLEANUP_REGEX, '') || '';
           console.log(`  - Candidate: ${app.candidate.firstName} ${app.candidate.lastName}, Phone: ${app.candidate.phone}, Clean: ${candidateCleanPhone}`);
         });
 

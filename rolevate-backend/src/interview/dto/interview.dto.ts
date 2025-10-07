@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsDateString, IsNumber, IsArray, IsObject, IsBoolean, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsDateString, IsNumber, IsArray, IsObject, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { InterviewStatus, InterviewType, SpeakerType } from '@prisma/client';
 

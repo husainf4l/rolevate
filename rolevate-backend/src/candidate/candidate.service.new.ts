@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
+import * as fs from 'fs-extra';
 import {
   CreateBasicCandidateProfileDto,
   CandidateProfileResponseDto,
@@ -180,7 +181,6 @@ export class CandidateService {
     }
 
     // Delete the file from filesystem
-    const fs = require('fs-extra');
     try {
       const filePath = `./uploads/cvs/${userId}/${cv.fileName}`;
       await fs.remove(filePath);

@@ -19,6 +19,7 @@ import { RoomModule } from './room/room.module';
 import { JobFitModule } from './jobfit/jobfit.module';
 import { InterviewModule } from './interview/interview.module';
 import { AdminModule } from './admin/admin.module';
+import { MonitoringModule } from './common/monitoring.module';
 
 @Module({
   // Removed duplicate imports property
@@ -41,6 +42,7 @@ import { AdminModule } from './admin/admin.module';
     JobFitModule,
     InterviewModule,
     AdminModule,
+    MonitoringModule,
   ],
   controllers: [AppController],
   providers: [AppService],

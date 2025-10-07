@@ -13,8 +13,7 @@ import {
   HttpStatus,
   HttpCode,
   BadRequestException,
-  SetMetadata,
-  ParseIntPipe
+  SetMetadata
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { JobService } from './job.service';

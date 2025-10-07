@@ -6,9 +6,6 @@ import { CompanyService } from './company.service';
 import { InvitationService } from './invitation.service';
 import { CreateCompanyDto, JoinCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { AwsS3Service } from '../services/aws-s3.service';
 
@@ -513,7 +510,7 @@ export class CompanyController {
         logoPath: s3Url, // Keep for backward compatibility
         company: updatedCompany
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Failed to upload logo to S3');
     }
   }
@@ -610,7 +607,7 @@ export class CompanyController {
         logoUrl: s3Url,
         company: updatedCompany
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Failed to upload logo to S3');
     }
   }

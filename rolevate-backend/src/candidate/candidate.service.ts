@@ -4,14 +4,12 @@ import { CacheService } from '../cache/cache.service';
 import { NotificationService } from '../notification/notification.service';
 import { AwsS3Service } from '../services/aws-s3.service';
 import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
+import * as fs from 'fs-extra';
 import {
   CreateBasicCandidateProfileDto,
   CandidateProfileResponseDto,
   CVResponseDto,
-  CVStatus,
-  UpdateCVStatusDto,
-  SaveJobDto,
-  UnsaveJobDto
+  CVStatus
 } from './dto/candidate.dto';
 
 @Injectable()
@@ -219,7 +217,6 @@ export class CandidateService {
     }
 
     // Delete the file from filesystem
-    const fs = require('fs-extra');
     try {
       const filePath = `./uploads/cvs/${userId}/${cv.fileName}`;
       await fs.remove(filePath);

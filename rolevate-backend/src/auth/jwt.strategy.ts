@@ -45,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (profile) {
           candidateProfileId = profile.id;
         }
-      } catch (_e) {
+      } catch {
         // Error fetching candidate profile
       }
     } else if (payload.userType === 'COMPANY') {
@@ -54,7 +54,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (user && user.companyId) {
           companyId = user.companyId;
         }
-      } catch (_e) {
+      } catch {
         // Error fetching company info
       }
     }

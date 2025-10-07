@@ -373,7 +373,7 @@ Provide only the JSON response with both the rewritten full description and the 
           rewrittenDescription: parsedResponse.jobDescription || '',
           rewrittenShortDescription: parsedResponse.shortDescription || ''
         };
-      } catch (_parseError) {
+      } catch {
         // Fallback if JSON parsing fails - generate short description from the rewritten content
         console.warn('Failed to parse JSON response, using fallback');
         

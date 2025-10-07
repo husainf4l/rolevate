@@ -1,5 +1,5 @@
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import util from 'util';
 import { ConfigService } from '@nestjs/config';
 import { TokenManagerService } from './token-manager.service';
@@ -24,11 +24,11 @@ export class WhatsAppService {
             headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (!res.ok) {
-            const error = await res.text();
+            const _error = await res.text();
             // DEBUG: Log the full error response
             const errorResponse = await res.json();
             console.error('DEBUG: Error response data:', util.inspect(errorResponse, { depth: 5 }));
-            throw new Error(`Failed to list templates: ${JSON.stringify(errorResponse)}`);
+            throw new BadRequestException(`Failed to list templates: ${JSON.stringify(errorResponse)}`);
         }
         return await res.json();
     }
@@ -93,7 +93,7 @@ export class WhatsAppService {
         const result = await res.json();
         if (!res.ok) {
             this.logger.error('Error sending template message:', result);
-            throw new Error(`WhatsApp API error: ${result.error?.message || 'Unknown error'}`);
+            throw new BadRequestException(`WhatsApp API error: ${result.error?.message || 'Unknown error'}`);
         }
         this.logger.log('Template message sent:', result);
         return result;
@@ -126,7 +126,7 @@ export class WhatsAppService {
         const result = await res.json();
         if (!res.ok) {
             this.logger.error('Error sending text message:', result);
-            throw new Error(`WhatsApp API error: ${result.error?.message || 'Unknown error'}`);
+            throw new BadRequestException(`WhatsApp API error: ${result.error?.message || 'Unknown error'}`);
         }
 
         this.logger.log('Text message sent:', result);

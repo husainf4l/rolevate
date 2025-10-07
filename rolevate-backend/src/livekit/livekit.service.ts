@@ -77,7 +77,7 @@ export class LiveKitService {
   async generateToken(
     roomName: string,
     participantName: string,
-    userId: string
+    _userId: string
   ): Promise<string> {
     const apiKey = this.configService.get<string>('LIVEKIT_API_KEY');
     const apiSecret = this.configService.get<string>('LIVEKIT_API_SECRET');

@@ -31,7 +31,7 @@ const mockWhatsAppService = {
 
 describe('CommunicationService', () => {
   let service: CommunicationService;
-  let prisma: PrismaService;
+  let _prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -49,7 +49,7 @@ describe('CommunicationService', () => {
     }).compile();
 
     service = module.get<CommunicationService>(CommunicationService);
-    prisma = module.get<PrismaService>(PrismaService);
+    _prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {

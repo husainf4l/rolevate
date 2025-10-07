@@ -141,7 +141,7 @@ export class SecurityService {
     });
   }
 
-  async validateDataIntegrity(tableName: string, recordId: string): Promise<boolean> {
+  async validateDataIntegrity(_tableName: string, _recordId: string): Promise<boolean> {
     // Implement data integrity checks
     // This is a placeholder for checksum validation
     return true;
@@ -166,7 +166,7 @@ export class SecurityService {
     if (!/\d/.test(password)) {
       issues.push('Password must contain at least one number');
     }
-    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) {
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
       issues.push('Password must contain at least one special character');
     }
 

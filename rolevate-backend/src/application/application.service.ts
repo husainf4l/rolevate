@@ -636,7 +636,7 @@ Format as strategic advice for a final interview round.`;
       });
 
       // Generate interview link (you should replace with your actual frontend URL)
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const _frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       // const interviewLink = `${frontendUrl}/interview/${room.name}?token=${token}`;
 
       // Send WhatsApp template message to candidate

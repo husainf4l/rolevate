@@ -2,7 +2,7 @@ import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from
 
 @Injectable()
 export class SanitizationPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
+  transform(value: any, _metadata: ArgumentMetadata) {
     if (typeof value === 'string') {
       // Basic XSS protection
       if (this.containsXSS(value)) {
@@ -101,7 +101,7 @@ export class SanitizationPipe implements PipeTransform {
   private sanitizeObject(obj: any): any {
     const sanitized = {};
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const sanitizedKey = typeof key === 'string' ? this.transform(key, {} as ArgumentMetadata) : key;
         const sanitizedValue = this.transform(obj[key], {} as ArgumentMetadata);
         sanitized[sanitizedKey] = sanitizedValue;

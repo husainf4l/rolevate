@@ -2,24 +2,6 @@ import { Body, Controller, Post, Get, Query } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { LiveKitService } from '../livekit/livekit.service';
 
-interface LeaveRoomDto {
-  candidateId: string;
-  roomName: string;
-}
-
-interface RoomStatusDto {
-  roomName: string;
-}
-
-interface RefreshTokenDto {
-  roomName: string;
-  candidateId: string;
-}
-
-interface LiveKitServerStatusDto {
-  roomName: string;
-}
-
 interface CreateRoomDto {
   jobId: string;
   phone: string;

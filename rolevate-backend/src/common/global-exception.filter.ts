@@ -5,9 +5,12 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { ErrorMonitoringService } from './error-monitoring.service';
 
 export interface ErrorResponse {
   success: false;
@@ -23,6 +26,11 @@ export interface ErrorResponse {
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name);
+
+  constructor(
+    @Optional() @Inject(ErrorMonitoringService)
+    private readonly errorMonitoringService?: ErrorMonitoringService,
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -56,6 +64,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Log the error with appropriate level
     this.logError(exception, statusCode, request);
+
+    // Send to error monitoring service if available
+    if (this.errorMonitoringService) {
+      this.errorMonitoringService.captureHttpError(
+        exception,
+        request,
+        statusCode,
+        (request as any)?.user?.id,
+        (request as any)?.user?.companyId
+      ).catch(err => {
+        this.logger.error('Failed to send error to monitoring service', err);
+      });
+    }
 
     // Create standardized error response
     const errorResponse: ErrorResponse = {

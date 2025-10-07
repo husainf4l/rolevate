@@ -2,22 +2,13 @@ import {
   Controller,
   Post,
   Get,
-  Put,
   Param,
   Body,
-  Query,
-  ParseIntPipe,
-  DefaultValuePipe,
 } from '@nestjs/common';
 import { InterviewService } from './interview.service';
 import {
-  CreateInterviewDto,
-  UpdateInterviewDto,
-  CreateTranscriptDto,
-  BulkCreateTranscriptDto,
   InterviewResponseDto,
   TranscriptResponseDto,
-  InterviewListResponseDto,
 } from './dto/interview.dto';
 @Controller('interviews')
 export class InterviewController {

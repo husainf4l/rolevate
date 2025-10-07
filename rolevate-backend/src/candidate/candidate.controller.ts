@@ -11,10 +11,9 @@ import {
   UseInterceptors,
   UploadedFile,
   Delete,
-  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerConfig } from './upload.config';
+import * as multer from 'multer';
 import { CandidateService } from './candidate.service';
 import {
   CreateBasicCandidateProfileDto,
@@ -22,7 +21,6 @@ import {
   CVResponseDto,
   UpdateCVStatusDto,
   SaveJobDto,
-  UnsaveJobDto,
 } from './dto/candidate.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
@@ -72,7 +70,7 @@ export class CandidateController {
   @Post('upload-cv')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('cv', {
-    storage: require('multer').memoryStorage(),
+    storage: multer.memoryStorage(),
   }))
   async uploadCV(
     @UploadedFile() file: Express.Multer.File,

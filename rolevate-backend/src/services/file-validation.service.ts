@@ -79,7 +79,7 @@ export class FileValidationService {
   private sanitizeFilename(filename: string): string {
     // Remove path separators and dangerous characters
     let sanitized = filename
-      .replace(/[\/\\:*?"<>|]/g, '') // Remove path separators and dangerous chars
+      .replace(/[/\\:*?"<>|]/g, '') // Remove path separators and dangerous chars
       .replace(/\.\./g, '') // Remove directory traversal attempts
       .replace(/^\.+/, '') // Remove leading dots
       .replace(/\.+$/, '') // Remove trailing dots

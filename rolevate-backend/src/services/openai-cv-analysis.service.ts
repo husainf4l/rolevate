@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { extractTextFromCV } from '../utils/cv-text-extractor';
 import { CVAnalysisResultDto } from '../application/dto/application.dto';

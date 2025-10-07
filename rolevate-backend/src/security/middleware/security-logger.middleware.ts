@@ -91,7 +91,7 @@ export class SecurityLoggerMiddleware implements NestMiddleware {
 
   private isSuspiciousRequest(req: Request, statusCode: number): boolean {
     const url = req.url.toLowerCase();
-    const method = req.method;
+    const _method = req.method;
     
     // SQL injection patterns
     if (url.includes('union') || url.includes('select') || url.includes('drop')) {

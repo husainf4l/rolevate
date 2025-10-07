@@ -7,7 +7,6 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
-  Body,
   ParseIntPipe,
   DefaultValuePipe,
   BadRequestException,
