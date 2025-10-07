@@ -42,47 +42,12 @@ export default function AvailableJobs() {
       return company.logo;
     }
 
-    // Fallback to emoji based on company name if no logo
-    if (!company?.name) return "🏢";
+    // Return company initial as fallback (no emojis)
+    if (company?.name) {
+      return company.name.charAt(0).toUpperCase();
+    }
 
-    const name = company.name.toLowerCase();
-
-    // Map company names to appropriate emojis
-    if (name.includes("tech") || name.includes("software")) return "💻";
-    if (
-      name.includes("health") ||
-      name.includes("medical") ||
-      name.includes("pharma")
-    )
-      return "🏥";
-    if (name.includes("finance") || name.includes("bank")) return "🏦";
-    if (
-      name.includes("education") ||
-      name.includes("school") ||
-      name.includes("university")
-    )
-      return "🎓";
-    if (name.includes("food") || name.includes("restaurant")) return "🍽️";
-    if (
-      name.includes("travel") ||
-      name.includes("airline") ||
-      name.includes("tourism")
-    )
-      return "✈️";
-    if (
-      name.includes("retail") ||
-      name.includes("shop") ||
-      name.includes("store")
-    )
-      return "🛍️";
-    if (name.includes("energy") || name.includes("oil") || name.includes("gas"))
-      return "⚡";
-    if (name.includes("construction") || name.includes("building")) return "🏗️";
-    if (name.includes("telecom") || name.includes("communication")) return "📱";
-    if (name.includes("automotive") || name.includes("car")) return "🚗";
-    if (name.includes("media") || name.includes("entertainment")) return "🎬";
-
-    return "🏢"; // Default logo
+    return "C"; // Default initial for Company
   };
 
   useEffect(() => {
