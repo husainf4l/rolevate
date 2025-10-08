@@ -98,3 +98,4 @@ export default function ProtectedRoute({ children, allowedUserTypes }: Protected
 
   return <>{children}</>;
 }
+

@@ -1,5 +1,15 @@
 import React from 'react';
-import SelectInput from './SelectInput';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export interface CompanyData {
   name: string;
@@ -64,127 +74,161 @@ export default function CreateCompanyForm({
     <form className="space-y-5" onSubmit={onSubmit}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-3">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <Label htmlFor="name" className="text-sm font-medium text-gray-700 mb-1.5">
             Company Name *
-          </label>
-          <input
+          </Label>
+          <Input
             id="name"
             required
             value={companyData.name}
             onChange={e => setCompanyData((d: CompanyData) => ({ ...d, name: e.target.value }))}
-            className="block w-full rounded-lg border border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] text-sm"
             placeholder="Enter your company name"
           />
         </div>
-        
-        <SelectInput
-          id="industry"
-          label="Industry *"
-          options={industryNames}
-          required
-          value={companyData.industry}
-          onChange={e => setCompanyData((d: CompanyData) => ({ ...d, industry: e.target.value }))}
-        />
-        
-        <SelectInput
-          id="size"
-          label="Company Size *"
-          options={sizeOptions}
-          required
-          value={companyData.size}
-          onChange={e => setCompanyData((d: CompanyData) => ({ ...d, size: e.target.value }))}
-        />
-        
-        <SelectInput
-          id="country"
-          label="Country *"
-          options={countryNames}
-          required
-          value={companyData.country}
-          onChange={e => setCompanyData((d: CompanyData) => ({ ...d, country: e.target.value }))}
-        />
-        
+
         <div>
-          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <Label htmlFor="industry" className="text-sm font-medium text-gray-700 mb-1.5">
+            Industry *
+          </Label>
+          <Select
+            value={companyData.industry}
+            onValueChange={(value) => setCompanyData((d: CompanyData) => ({ ...d, industry: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select industry" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(industryNames).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="size" className="text-sm font-medium text-gray-700 mb-1.5">
+            Company Size *
+          </Label>
+          <Select
+            value={companyData.size}
+            onValueChange={(value) => setCompanyData((d: CompanyData) => ({ ...d, size: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select company size" />
+            </SelectTrigger>
+            <SelectContent>
+              {sizeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="country" className="text-sm font-medium text-gray-700 mb-1.5">
+            Country *
+          </Label>
+          <Select
+            value={companyData.country}
+            onValueChange={(value) => setCompanyData((d: CompanyData) => ({ ...d, country: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select country" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(countryNames).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="city" className="text-sm font-medium text-gray-700 mb-1.5">
             City *
-          </label>
-          <input
+          </Label>
+          <Input
             id="city"
             required
             value={companyData.city}
             onChange={e => setCompanyData((d: CompanyData) => ({ ...d, city: e.target.value }))}
-            className="block w-full rounded-lg border border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] text-sm"
             placeholder="City"
           />
         </div>
         
         <div className="md:col-span-2">
-          <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <Label htmlFor="street" className="text-sm font-medium text-gray-700 mb-1.5">
             Street Address *
-          </label>
-          <input
+          </Label>
+          <Input
             id="street"
             required
             value={companyData.street}
             onChange={e => setCompanyData((d: CompanyData) => ({ ...d, street: e.target.value }))}
-            className="block w-full rounded-lg border border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] text-sm"
             placeholder="Street address"
           />
         </div>
-        
+
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <Label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-1.5">
             Phone Number *
-          </label>
+          </Label>
           <div className="flex">
-            <select
+            <Select
               value={companyData.country}
-              onChange={e => setCompanyData((d: CompanyData) => ({ ...d, country: e.target.value }))}
-              className="flex-shrink-0 rounded-l-lg border border-r-0 border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] text-sm w-20"
+              onValueChange={(value) => setCompanyData((d: CompanyData) => ({ ...d, country: value }))}
             >
-              <option value="">+</option>
-              {Object.entries(countryCodes).map(([code, phoneCode]) => (
-                <option key={code} value={code}>
-                  {phoneCode}
-                </option>
-              ))}
-            </select>
-            <input
+              <SelectTrigger className="w-20 rounded-r-none border-r-0">
+                <SelectValue placeholder="+" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(countryCodes).map(([code, phoneCode]) => (
+                  <SelectItem key={code} value={code}>
+                    {phoneCode}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
               id="phone"
               required
               value={companyData.phone}
               onChange={e => setCompanyData((d: CompanyData) => ({ ...d, phone: e.target.value }))}
-              className="flex-1 rounded-r-lg border border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] text-sm"
               placeholder="Phone number"
+              className="rounded-l-none"
             />
           </div>
         </div>
-        
+
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-1.5">
             Company Email *
-          </label>
-          <input
+          </Label>
+          <Input
             id="email"
             type="email"
             required
             value={companyData.email}
             onChange={e => setCompanyData((d: CompanyData) => ({ ...d, email: e.target.value }))}
-            className="block w-full rounded-lg border border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] text-sm"
             placeholder="contact@yourcompany.com"
           />
         </div>
-        
+
         <div>
-          <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <Label htmlFor="website" className="text-sm font-medium text-gray-700 mb-1.5">
             Website
-          </label>
-          <input
+          </Label>
+          <Input
             id="website"
             type="url"
             value={companyData.website}
             onChange={e => setCompanyData((d: CompanyData) => ({ ...d, website: e.target.value }))}
-            className="block w-full rounded-lg border border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] text-sm"
             placeholder="https://www.yourcompany.com"
           />
         </div>
@@ -192,44 +236,46 @@ export default function CreateCompanyForm({
         {/* Description w/ AI */}
         <div className="md:col-span-3">
           <div className="flex items-center justify-between mb-1.5">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            <Label htmlFor="description" className="text-sm font-medium text-gray-700">
               Company Description
-            </label>
-            <button
+            </Label>
+            <Button
               type="button"
               onClick={generateDescription}
               disabled={isGeneratingDescription || !companyData.industry}
-              className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-lg disabled:opacity-50"
+              variant="outline"
+              size="sm"
             >
               {isGeneratingDescription ? 'Generating...' : 'AI Generate'}
-            </button>
+            </Button>
           </div>
           {descriptionError && (
             <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-600 text-xs font-medium">{descriptionError}</p>
             </div>
           )}
-          <textarea
+          <Textarea
             id="description"
             rows={3}
             value={companyData.description}
             onChange={e => setCompanyData((d: CompanyData) => ({ ...d, description: e.target.value }))}
-            className="block w-full rounded-lg border border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] resize-none text-sm"
             placeholder="Brief description of your company and what you do..."
             maxLength={400}
+            className="resize-none"
           />
           <div className="text-xs text-gray-400 font-medium text-right">
             {companyData.description.length}/400
           </div>
         </div>
       </div>
-      <button
+      <Button
         type="submit"
         disabled={loading}
-        className="w-full rounded-xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] py-3 px-6 text-white font-semibold hover:scale-[1.01] transition-all text-sm disabled:opacity-60"
+        className="w-full"
       >
         {loading ? 'Creating Company...' : 'Create Company'}
-      </button>
+      </Button>
     </form>
   );
 }
+

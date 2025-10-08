@@ -8,6 +8,16 @@ import { signup, UserType } from "@/services/auth";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 // Zod validation schema
 const signupSchema = z.object({
@@ -43,17 +53,12 @@ export default function EnhancedSignupForm({ accountType }: EnhancedSignupFormPr
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting, touchedFields },
-    watch,
-  } = useForm<SignupFormData>({
+  const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     mode: "onChange", // Validate on change for real-time feedback
   });
 
-  const passwordValue = watch("password");
+  const passwordValue = form.watch("password");
 
   const onSubmit = async (data: SignupFormData) => {
     try {
@@ -85,208 +90,197 @@ export default function EnhancedSignupForm({ accountType }: EnhancedSignupFormPr
     }
   };
 
-  // Helper function to get field validation state
-  const getFieldState = (fieldName: keyof SignupFormData) => {
-    const hasError = errors[fieldName];
-    const isTouched = touchedFields[fieldName];
-    
-    if (hasError) return "error";
-    if (isTouched && !hasError) return "success";
-    return "default";
-  };
-
-  // Helper function to get input classes based on validation state
-  const getInputClasses = (fieldName: keyof SignupFormData) => {
-    const state = getFieldState(fieldName);
-    const baseClasses = "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200";
-    
-    switch (state) {
-      case "error":
-        return `${baseClasses} border-red-300 focus:border-red-500 focus:ring-red-200 bg-red-50`;
-      case "success":
-        return `${baseClasses} border-green-300 focus:border-green-500 focus:ring-green-200 bg-green-50`;
-      default:
-        return `${baseClasses} border-gray-200 focus:border-[#0891b2] focus:ring-[#0891b2]/20`;
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Name Field */}
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-          Full Name *
-        </label>
-        <input
-          id="name"
-          type="text"
-          {...register("name")}
-          className={getInputClasses("name")}
-          placeholder="Enter your full name"
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600 flex items-center">
-            <span className="mr-1">⚠</span>
-            {errors.name.message}
-          </p>
-        )}
-      </div>
-
-      {/* Email Field */}
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-          Email Address *
-        </label>
-        <input
-          id="email"
-          type="email"
-          {...register("email")}
-          className={getInputClasses("email")}
-          placeholder="Enter your email address"
-        />
-        {errors.email && (
-          <p className="mt-1 text-sm text-red-600 flex items-center">
-            <span className="mr-1">⚠</span>
-            {errors.email.message}
-          </p>
-        )}
-      </div>
-
-      {/* Phone Field */}
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-          Phone Number *
-        </label>
-        <input
-          id="phone"
-          type="tel"
-          {...register("phone")}
-          className={getInputClasses("phone")}
-          placeholder="Enter your phone number"
-        />
-        {errors.phone && (
-          <p className="mt-1 text-sm text-red-600 flex items-center">
-            <span className="mr-1">⚠</span>
-            {errors.phone.message}
-          </p>
-        )}
-      </div>
-
-      {/* Password Field */}
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-          Password *
-        </label>
-        <div className="relative">
-          <input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            {...register("password")}
-            className={`${getInputClasses("password")} pr-12`}
-            placeholder="Create a strong password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showPassword ? (
-              <EyeSlashIcon className="h-5 w-5" />
-            ) : (
-              <EyeIcon className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-        {errors.password && (
-          <p className="mt-1 text-sm text-red-600 flex items-center">
-            <span className="mr-1">⚠</span>
-            {errors.password.message}
-          </p>
-        )}
-        {/* Password strength indicator */}
-        {passwordValue && (
-          <div className="mt-2">
-            <div className="text-xs text-gray-600 mb-1">Password strength:</div>
-            <div className="flex space-x-1">
-              <div className={`h-1 w-1/4 rounded ${passwordValue.length >= 8 ? 'bg-green-400' : 'bg-gray-200'}`} />
-              <div className={`h-1 w-1/4 rounded ${/[A-Z]/.test(passwordValue) ? 'bg-green-400' : 'bg-gray-200'}`} />
-              <div className={`h-1 w-1/4 rounded ${/[a-z]/.test(passwordValue) ? 'bg-green-400' : 'bg-gray-200'}`} />
-              <div className={`h-1 w-1/4 rounded ${/\d/.test(passwordValue) ? 'bg-green-400' : 'bg-gray-200'}`} />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Confirm Password Field */}
-      <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-          Confirm Password *
-        </label>
-        <div className="relative">
-          <input
-            id="confirmPassword"
-            type={showConfirmPassword ? "text" : "password"}
-            {...register("confirmPassword")}
-            className={`${getInputClasses("confirmPassword")} pr-12`}
-            placeholder="Confirm your password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showConfirmPassword ? (
-              <EyeSlashIcon className="h-5 w-5" />
-            ) : (
-              <EyeIcon className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-        {errors.confirmPassword && (
-          <p className="mt-1 text-sm text-red-600 flex items-center">
-            <span className="mr-1">⚠</span>
-            {errors.confirmPassword.message}
-          </p>
-        )}
-      </div>
-
-      {/* Invitation Code Field (Corporate only) */}
-      {accountType === 'corporate' && (
-        <div>
-          <label htmlFor="invitationCode" className="block text-sm font-medium text-gray-700 mb-2">
-            Invitation Code (Optional)
-          </label>
-          <input
-            id="invitationCode"
-            type="text"
-            {...register("invitationCode")}
-            className={getInputClasses("invitationCode")}
-            placeholder="Enter invitation code if you have one"
-          />
-          {errors.invitationCode && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <span className="mr-1">⚠</span>
-              {errors.invitationCode.message}
-            </p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Name Field */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700">
+                Full Name <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter your full name"
+                  {...field}
+                  className="h-9"
+                />
+              </FormControl>
+              <FormMessage className="text-xs" />
+            </FormItem>
           )}
-        </div>
-      )}
+        />
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={loading || isSubmitting}
-        className="w-full bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white py-3 px-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-      >
-        {loading || isSubmitting ? (
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-            Creating Account...
-          </div>
-        ) : (
-          "Create Account"
+        {/* Email Field */}
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700">
+                Email Address <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  {...field}
+                  className="h-9"
+                />
+              </FormControl>
+              <FormMessage className="text-xs" />
+            </FormItem>
+          )}
+        />
+
+        {/* Phone Field */}
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700">
+                Phone Number <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  {...field}
+                  className="h-9"
+                />
+              </FormControl>
+              <FormMessage className="text-xs" />
+            </FormItem>
+          )}
+        />
+
+        {/* Password Field */}
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700">
+                Password <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Create a strong password"
+                    {...field}
+                    className="h-9 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </FormControl>
+              <FormMessage className="text-xs" />
+              {/* Password strength indicator */}
+              {passwordValue && (
+                <div className="mt-1.5">
+                  <div className="text-xs text-gray-600 mb-1">Password strength:</div>
+                  <div className="flex space-x-1">
+                    <div className={`h-1 w-1/4 rounded ${passwordValue.length >= 8 ? 'bg-primary-500' : 'bg-gray-200'}`} />
+                    <div className={`h-1 w-1/4 rounded ${/[A-Z]/.test(passwordValue) ? 'bg-primary-500' : 'bg-gray-200'}`} />
+                    <div className={`h-1 w-1/4 rounded ${/[a-z]/.test(passwordValue) ? 'bg-primary-500' : 'bg-gray-200'}`} />
+                    <div className={`h-1 w-1/4 rounded ${/\d/.test(passwordValue) ? 'bg-primary-500' : 'bg-gray-200'}`} />
+                  </div>
+                </div>
+              )}
+            </FormItem>
+          )}
+        />
+
+        {/* Confirm Password Field */}
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700">
+                Confirm Password <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    {...field}
+                    className="h-9 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeSlashIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </FormControl>
+              <FormMessage className="text-xs" />
+            </FormItem>
+          )}
+        />
+
+        {/* Invitation Code Field (Corporate only) */}
+        {accountType === 'corporate' && (
+          <FormField
+            control={form.control}
+            name="invitationCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium text-gray-700">
+                  Invitation Code (Optional)
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter invitation code if you have one"
+                    {...field}
+                    className="h-9"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
         )}
-      </button>
-    </form>
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          disabled={loading || form.formState.isSubmitting}
+          className="w-full"
+          size="default"
+        >
+          {loading || form.formState.isSubmitting ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Creating Account...
+            </div>
+          ) : (
+            "Create Account"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }
+

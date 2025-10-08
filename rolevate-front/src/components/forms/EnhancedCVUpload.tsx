@@ -91,7 +91,7 @@ export default function EnhancedCVUpload({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative">
+      <div className="bg-white rounded-sm shadow-2xl max-w-lg w-full p-8 relative">
         {/* Close Button */}
         <button
           onClick={onDismiss}
@@ -233,3 +233,5 @@ export default function EnhancedCVUpload({
     </div>
   );
 }
+
+

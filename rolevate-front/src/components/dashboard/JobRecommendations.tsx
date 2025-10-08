@@ -7,7 +7,7 @@ import {
   ClockIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
-import { SkeletonJobCard } from "@/components/common/Skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface JobRecommendation {
   id: string;
@@ -51,7 +51,20 @@ export default function JobRecommendations({ loading = false }: JobRecommendatio
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <SkeletonJobCard key={i} className="!p-4 !shadow-none" />
+            <div key={i} className="p-4 bg-white rounded-lg shadow-none border border-gray-300">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <Skeleton className="w-3/4 h-5 mb-2" />
+                  <Skeleton className="w-1/2 h-4" />
+                </div>
+                <Skeleton className="w-16 h-6 rounded-full" />
+              </div>
+              <Skeleton className="w-full h-10 mb-3" />
+              <div className="flex items-center space-x-4">
+                <Skeleton className="w-24 h-4" />
+                <Skeleton className="w-28 h-4" />
+              </div>
+            </div>
           ))}
         </div>
       ) : mockRecommendations.length === 0 ? (
@@ -136,3 +149,4 @@ export default function JobRecommendations({ loading = false }: JobRecommendatio
     </div>
   );
 }
+

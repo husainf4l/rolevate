@@ -59,3 +59,4 @@ export default function ProgressIndicator({ steps, currentStep }: ProgressIndica
     </div>
   );
 }
+

@@ -39,3 +39,4 @@ describe('AuthProvider', () => {
     expect(screen.getByTestId('auth-test')).toBeInTheDocument()
   })
 })
+

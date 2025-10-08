@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   MapPinIcon,
@@ -14,7 +15,7 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/react/24/solid";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 import { JobService } from "@/services/job";
 
@@ -188,14 +189,15 @@ export default function JobDetailPage() {
               {error ||
                 "The job you're looking for doesn't exist or has been removed."}
             </p>
-            <Button
-              href="/jobs"
-              variant="primary"
-              size="lg"
-              className="shadow-lg"
-            >
-              ← Back to Jobs
-            </Button>
+            <Link href="/jobs">
+              <Button
+                variant="default"
+                size="lg"
+                className="shadow-lg"
+              >
+                ← Back to Jobs
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -319,10 +321,9 @@ export default function JobDetailPage() {
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 shadow-lg border border-gray-200/50 min-w-[280px]">
                 <div className="flex flex-col space-y-4">
                   <Button
-                    variant="primary"
+                    variant="default"
                     size="lg"
                     className="w-full shadow-lg"
-                    ripple={true}
                     disabled={isLoading || !job}
                     onClick={() => {
                       // Only navigate if job is loaded and valid

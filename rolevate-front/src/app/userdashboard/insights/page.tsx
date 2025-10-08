@@ -11,6 +11,7 @@ import {
   LightBulbIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface CareerMetric {
   title: string;
@@ -167,10 +168,8 @@ export default function InsightsPage() {
         {/* Career Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {careerMetrics.map((metric) => (
-            <div
-              key={metric.title}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-            >
+            <Card key={metric.title}>
+              <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className={`p-3 rounded-lg ${metric.color} bg-opacity-10`}>
                   <metric.icon
@@ -205,13 +204,15 @@ export default function InsightsPage() {
                   {metric.change}
                 </span>
               </div>
-            </div>
+            </CardContent>
+            </Card>
           ))}
         </div>
 
         {/* Market Trends */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
                 Skills in Demand
@@ -245,9 +246,11 @@ export default function InsightsPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
                 Job Market by Location
@@ -285,11 +288,13 @@ export default function InsightsPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </CardContent>
+          </Card>
         </div>
 
         {/* Career Recommendations */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <Card className="mb-8">
+          <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Career Recommendations
@@ -371,10 +376,12 @@ export default function InsightsPage() {
               </ul>
             </div>
           </div>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Progress Tracking */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <Card>
+          <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Your Progress This Month
@@ -475,8 +482,10 @@ export default function InsightsPage() {
               <p className="text-sm text-gray-600">1 of 5 skills</p>
             </div>
           </div>
-        </div>
+        </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
+

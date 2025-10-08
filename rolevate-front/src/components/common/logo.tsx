@@ -49,7 +49,7 @@ export default function Logo({
   // Default: show "rolevate" text logo
   return (
     <span
-      className="tracking-tight select-none font-brand bg-gradient-to-r from-[#0891b2] to-[#13ead9] bg-clip-text text-transparent"
+      className="tracking-tight select-none font-brand text-[#0891b2]"
       style={{
         fontWeight: 600,
         letterSpacing: "-0.04em",
@@ -63,3 +63,4 @@ export default function Logo({
     </span>
   );
 }
+

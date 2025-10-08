@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 
 interface JobApplyModalProps {
   open: boolean;
@@ -54,7 +54,7 @@ export default function JobApplyModal({ open, onClose, onSubmit, loading }: JobA
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 px-2 py-8 sm:py-12">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative p-0 sm:p-10">
+      <div className="bg-white rounded-sm shadow-xl w-full max-w-lg relative p-0 sm:p-10">
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-3xl sm:top-5 sm:right-5"
           onClick={onClose}
@@ -112,10 +112,10 @@ export default function JobApplyModal({ open, onClose, onSubmit, loading }: JobA
             {error && <div className="text-red-500 text-base text-center">{error}</div>}
             <Button
               type="submit"
-              variant="primary"
+              variant="default"
               size="lg"
               className="w-full mt-4"
-              loading={loading}
+              disabled={loading}
             >
               Submit Application
             </Button>
@@ -125,3 +125,4 @@ export default function JobApplyModal({ open, onClose, onSubmit, loading }: JobA
     </div>
   );
 }
+

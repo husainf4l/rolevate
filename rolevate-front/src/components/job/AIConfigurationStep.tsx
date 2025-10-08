@@ -3,6 +3,7 @@
 import React from "react";
 import { CpuChipIcon } from "@heroicons/react/24/outline";
 import { JobFormData, FormErrors } from "./types";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AIConfigurationStepProps {
   jobData: JobFormData;
@@ -116,7 +117,7 @@ export default function AIConfigurationStep({
                 )}
               </div>
               <div className="relative">
-                <textarea
+                <Textarea
                   id="aiCvAnalysisPrompt"
                   rows={5}
                   value={jobData.aiCvAnalysisPrompt}
@@ -164,7 +165,7 @@ export default function AIConfigurationStep({
                 )}
               </div>
               <div className="relative">
-                <textarea
+                <Textarea
                   id="aiFirstInterviewPrompt"
                   rows={5}
                   value={jobData.aiFirstInterviewPrompt}
@@ -212,7 +213,7 @@ export default function AIConfigurationStep({
                 )}
               </div>
               <div className="relative">
-                <textarea
+                <Textarea
                   id="aiSecondInterviewPrompt"
                   rows={5}
                   value={jobData.aiSecondInterviewPrompt}
@@ -295,3 +296,4 @@ export default function AIConfigurationStep({
     </div>
   );
 }
+

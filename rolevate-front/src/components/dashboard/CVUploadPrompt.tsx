@@ -48,9 +48,9 @@ export default function CVUploadPrompt({
   };
 
   return (
-    <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl p-8 mb-8 shadow-xl border border-white/20 overflow-hidden group">
+    <div className="relative bg-white/90 backdrop-blur-xl rounded-sm p-8 mb-8 shadow-xl border border-white/20 overflow-hidden group">
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#13ead9]/5 via-white/10 to-[#0891b2]/5 rounded-3xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-[#13ead9]/5 via-white/10 to-[#0891b2]/5 rounded-sm"></div>
 
       {/* Decorative elements */}
       <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-[#13ead9]/10 to-[#0891b2]/10 rounded-full blur-xl"></div>
@@ -64,7 +64,7 @@ export default function CVUploadPrompt({
       </button>
 
       <div className="relative z-10 flex items-start space-x-6">
-        <div className="w-16 h-16 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg backdrop-blur-sm border border-white/30">
+        <div className="w-16 h-16 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-sm flex items-center justify-center flex-shrink-0 shadow-lg backdrop-blur-sm border border-white/30">
           <DocumentArrowUpIcon className="w-8 h-8 text-[#0891b2]" />
         </div>
 
@@ -89,7 +89,7 @@ export default function CVUploadPrompt({
           ) : (
             <>
               <div
-                className={`relative border-2 border-dashed rounded-2xl p-8 transition-all duration-300 mb-6 ${
+                className={`relative border-2 border-dashed rounded-sm p-8 transition-all duration-300 mb-6 ${
                   dragOver
                     ? "border-[#0891b2] bg-gradient-to-br from-[#13ead9]/5 to-[#0891b2]/5 scale-[1.01]"
                     : "border-gray-300 hover:border-[#13ead9]/50 hover:bg-gradient-to-br hover:from-[#13ead9]/3 hover:to-[#0891b2]/3"
@@ -102,7 +102,7 @@ export default function CVUploadPrompt({
                 onDrop={handleDrop}
               >
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-2xl flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-sm flex items-center justify-center">
                     <DocumentArrowUpIcon className="w-8 h-8 text-[#0891b2]" />
                   </div>
                   <p className="text-lg font-semibold text-gray-900 mb-2 font-display">
@@ -149,3 +149,4 @@ export default function CVUploadPrompt({
     </div>
   );
 }
+

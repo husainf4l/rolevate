@@ -13,7 +13,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { SkeletonJobCard } from "@/components/common/Skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface JobListProps {
   jobs: JobPost[];
@@ -172,7 +172,38 @@ const JobList: React.FC<JobListProps> = ({
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <SkeletonJobCard key={i} />
+              <div key={i} className="p-6 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <Skeleton className="w-12 h-12 rounded-full" />
+                    <div>
+                      <Skeleton className="w-48 h-5 mb-2" />
+                      <Skeleton className="w-32 h-4" />
+                    </div>
+                  </div>
+                  <Skeleton className="w-20 h-6 rounded-full" />
+                </div>
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center space-x-4">
+                    <Skeleton className="w-24 h-4" />
+                    <Skeleton className="w-32 h-4" />
+                    <Skeleton className="w-28 h-4" />
+                  </div>
+                  <Skeleton className="w-full h-12" />
+                </div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {[1, 2, 3, 4].map((j) => (
+                    <Skeleton key={j} className="w-20 h-6 rounded-full" />
+                  ))}
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <Skeleton className="w-32 h-4" />
+                  <div className="flex space-x-2">
+                    <Skeleton className="w-16 h-8" />
+                    <Skeleton className="w-24 h-8" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : filteredJobs.length === 0 ? (
@@ -372,3 +403,4 @@ const JobListItem: React.FC<JobListItemProps> = ({
 };
 
 export default JobList;
+

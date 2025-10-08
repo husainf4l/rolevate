@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Header from "@/components/dashboard/Header";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 
 import { API_CONFIG } from "@/lib/config";
 import {
@@ -364,7 +364,7 @@ export default function UserProfilePage() {
         )}
 
         {/* Profile Header */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 mb-8 border border-white/20">
+        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-2xl p-8 mb-8 border border-white/20">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-tr from-[#13ead9] to-[#0891b2] flex items-center justify-center">
@@ -410,7 +410,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 mb-8">
+        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-xl border border-white/20 mb-8">
           <div className="flex gap-1 p-2">
             {tabs.map((tab) => (
               <button
@@ -430,7 +430,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/20">
+        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-xl p-8 border border-white/20">
           {/* Personal Info Tab */}
           {activeTab === "profile" && (
             <div className="space-y-8">
@@ -621,8 +621,8 @@ export default function UserProfilePage() {
 
               <div className="flex gap-4 pt-4">
                 <Button
-                  variant="primary"
-                  size="md"
+                  variant="default"
+                  size="default"
                   onClick={saveUserProfile}
                   disabled={loading}
                 >
@@ -630,7 +630,7 @@ export default function UserProfilePage() {
                 </Button>
                 <Button
                   variant="secondary"
-                  size="md"
+                  size="default"
                   onClick={fetchUserProfile}
                 >
                   Reset
@@ -819,8 +819,8 @@ export default function UserProfilePage() {
 
               <div className="flex gap-4 pt-4">
                 <Button
-                  variant="primary"
-                  size="md"
+                  variant="default"
+                  size="default"
                   onClick={saveNotificationSettings}
                   disabled={loading}
                 >
@@ -969,8 +969,8 @@ export default function UserProfilePage() {
 
                   <div className="flex gap-4 pt-4">
                     <Button
-                      variant="primary"
-                      size="md"
+                      variant="default"
+                      size="default"
                       onClick={changePassword}
                       disabled={
                         loading ||
@@ -984,7 +984,7 @@ export default function UserProfilePage() {
                     </Button>
                     <Button
                       variant="secondary"
-                      size="md"
+                      size="default"
                       onClick={() =>
                         setPasswordData({
                           currentPassword: "",
@@ -1059,3 +1059,4 @@ export default function UserProfilePage() {
     </div>
   );
 }
+

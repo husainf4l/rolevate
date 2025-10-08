@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signin } from "@/services/auth";
+import { Button } from "@/components/ui/button";
 
 function LoginContent() {
   const router = useRouter();
@@ -129,13 +130,15 @@ function LoginContent() {
             {error && (
               <div className="text-red-500 text-sm text-left">{error}</div>
             )}
-            <button
+            <Button
               type="submit"
-              className="w-full rounded-2xl bg-gradient-to-r from-[#13ead9] to-[#0891b2] py-3 px-6 text-white font-semibold shadow-corporate hover:shadow-xl transition-all duration-200 text-base font-display disabled:opacity-60 disabled:cursor-not-allowed"
+              variant="default"
+              className="w-full"
+              size="lg"
               disabled={loading}
             >
               {loading ? "Signing In..." : "Sign In"}
-            </button>
+            </Button>
           </form>
           <p className="mt-8 text-sm text-gray-500 text-left">
             Don&apos;t have an account?{" "}
@@ -150,13 +153,13 @@ function LoginContent() {
         {/* Illustration (hidden on mobile) */}
         <div className="hidden lg:flex items-center justify-center order-1 lg:order-2 mb-10 lg:mb-0 w-full lg:w-auto">
           <div className="relative w-full max-w-xs h-60 sm:max-w-md sm:h-80 lg:w-[36rem] lg:h-[28rem]">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#13ead9]/8 via-white/15 to-[#0891b2]/8 rounded-[2.5rem] shadow-corporate backdrop-blur-sm border border-white/20"></div>
-            <div className="absolute inset-4 rounded-[2rem] overflow-hidden shadow-inner">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#13ead9]/8 via-white/15 to-[#0891b2]/8 rounded-sm shadow-corporate backdrop-blur-sm border border-white/20"></div>
+            <div className="absolute inset-4 rounded-sm overflow-hidden shadow-inner">
               <Image
                 src="/images/hero.png"
                 alt="Login Illustration"
                 fill
-                className="object-cover rounded-[2rem]"
+                className="object-cover rounded-sm"
                 priority
               />
             </div>
@@ -176,3 +179,5 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+
+

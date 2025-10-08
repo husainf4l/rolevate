@@ -10,6 +10,7 @@ import {
   PlusIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Interview {
   id: string;
@@ -174,7 +175,8 @@ export default function InterviewsPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
@@ -188,8 +190,10 @@ export default function InterviewsPage() {
                 <CalendarDaysIcon className="w-6 h-6 text-blue-600" />
               </div>
             </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Upcoming</p>
@@ -201,8 +205,10 @@ export default function InterviewsPage() {
                 <ClockIcon className="w-6 h-6 text-yellow-600" />
               </div>
             </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
@@ -214,8 +220,10 @@ export default function InterviewsPage() {
                 <CheckCircleIcon className="w-6 h-6 text-green-600" />
               </div>
             </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Cancelled</p>
@@ -227,7 +235,8 @@ export default function InterviewsPage() {
                 <XCircleIcon className="w-6 h-6 text-red-600" />
               </div>
             </div>
-          </div>
+          </CardContent>
+          </Card>
         </div>
 
         {/* Quick Actions */}
@@ -248,17 +257,17 @@ export default function InterviewsPage() {
             Upcoming Interviews ({upcomingInterviews.length})
           </h2>
           {upcomingInterviews.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-              <CalendarDaysIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No upcoming interviews</p>
-            </div>
+            <Card>
+              <CardContent className="p-8 text-center">
+                <CalendarDaysIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No upcoming interviews</p>
+              </CardContent>
+            </Card>
           ) : (
             <div className="space-y-4">
               {upcomingInterviews.map((interview) => (
-                <div
-                  key={interview.id}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                >
+                <Card key={interview.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
@@ -341,7 +350,8 @@ export default function InterviewsPage() {
                       </button>
                     </div>
                   </div>
-                </div>
+                </CardContent>
+                </Card>
               ))}
             </div>
           )}
@@ -352,7 +362,7 @@ export default function InterviewsPage() {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             All Interviews
           </h2>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <Card className="overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -412,13 +422,14 @@ export default function InterviewsPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Interview Tips */}
         <div className="mt-8 bg-blue-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3">
-            🎯 Interview Preparation Tips
+          <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
+            <CheckCircleIcon className="w-5 h-5" />
+            Interview Preparation Tips
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
             <div>
@@ -448,3 +459,4 @@ export default function InterviewsPage() {
     </div>
   );
 }
+

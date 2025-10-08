@@ -21,25 +21,25 @@ export default function CorporateFeatures() {
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-24">
           <div className="text-center group">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-white/80 backdrop-blur-sm rounded-sm p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="text-4xl font-bold text-primary-600 mb-2">100x</div>
               <div className="text-sm font-semibold text-gray-700">Faster Screening</div>
             </div>
           </div>
           <div className="text-center group">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-white/80 backdrop-blur-sm rounded-sm p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="text-4xl font-bold text-primary-600 mb-2">90%</div>
               <div className="text-sm font-semibold text-gray-700">Time Reduction</div>
             </div>
           </div>
           <div className="text-center group">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-white/80 backdrop-blur-sm rounded-sm p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="text-4xl font-bold text-primary-600 mb-2">24/7</div>
               <div className="text-sm font-semibold text-gray-700">Availability</div>
             </div>
           </div>
           <div className="text-center group">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-white/80 backdrop-blur-sm rounded-sm p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="text-4xl font-bold text-primary-600 mb-2">100%</div>
               <div className="text-sm font-semibold text-gray-700">Consistency</div>
             </div>
@@ -142,7 +142,7 @@ export default function CorporateFeatures() {
         </div>
 
         {/* Problem vs Solution */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-12 shadow-xl border border-gray-200/50">
+        <div className="bg-white/60 backdrop-blur-sm rounded-sm p-12 shadow-xl border border-gray-200/50">
           <div className="text-center mb-16">
             <h3 className="font-display text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               The Enterprise Challenge
@@ -227,11 +227,11 @@ function ProcessStep({ number, icon, title, description }: {
 }) {
   return (
     <div className="relative group">
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 text-center">
+      <div className="bg-white/80 backdrop-blur-sm rounded-sm p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 text-center">
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
           {number}
         </div>
-        <div className="w-16 h-16 bg-primary-600/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600/20 transition-colors duration-300">
+        <div className="w-16 h-16 bg-primary-600/10 rounded-sm flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600/20 transition-colors duration-300">
           {icon}
         </div>
         <h4 className="font-semibold text-gray-900 mb-3 text-lg">{title}</h4>
@@ -249,9 +249,9 @@ function FeatureCard({ icon, title, description, gradient }: {
 }) {
   return (
     <div className="group relative">
-      <div className="absolute inset-0 bg-gradient-to-r rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
-      <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <div className={`w-14 h-14 bg-gradient-to-r ${gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+      <div className="absolute inset-0 bg-gradient-to-r rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
+      <div className="relative bg-white/80 backdrop-blur-sm rounded-sm p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div className={`w-14 h-14 bg-gradient-to-r ${gradient} rounded-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
           {icon}
         </div>
         <h4 className="font-semibold text-gray-900 mb-3 text-lg">{title}</h4>
@@ -341,3 +341,4 @@ function SupportIcon() {
     </svg>
   );
 }
+

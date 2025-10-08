@@ -670,7 +670,7 @@ function CreateJobContent() {
         <ProgressIndicator steps={steps} currentStep={currentStep} />
 
         {/* Job Creation Form */}
-        <div className="glass-strong rounded-2xl shadow-[var(--shadow-strong)] overflow-hidden">
+        <div className="glass-strong rounded-sm shadow-[var(--shadow-strong)] overflow-hidden">
           <div className="divide-y divide-white/10">
             {/* Render Current Step */}
             {currentStep === "basic" && (
@@ -786,3 +786,4 @@ export default function CreateJobPage() {
     </Suspense>
   );
 }
+

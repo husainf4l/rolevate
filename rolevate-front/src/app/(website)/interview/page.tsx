@@ -60,7 +60,7 @@ export default function InterviewPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-6">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 max-w-md w-full text-center">
+        <div className="bg-white/70 backdrop-blur-xl rounded-sm shadow-xl border border-white/20 p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
               className="w-8 h-8 text-red-500"
@@ -94,7 +94,7 @@ export default function InterviewPage() {
   if (isGeneratingToken || !roomToken) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-6">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 max-w-md w-full text-center">
+        <div className="bg-white/70 backdrop-blur-xl rounded-sm shadow-xl border border-white/20 p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <div className="w-8 h-8 border-2 border-[#0891b2] border-t-transparent rounded-full animate-spin"></div>
           </div>
@@ -120,3 +120,4 @@ export default function InterviewPage() {
     />
   );
 }
+

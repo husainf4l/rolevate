@@ -9,12 +9,12 @@ import React from "react";
 
 export default function DashboardPage() {
   return (
-    <div className="p-8 pt-24">
+    <div className="p-8 pt-20">
       <div className="max-w-7xl mx-auto">
         <Header />
         <StatsCards />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           <Calendar />
           <RecentApplications />
         </div>
@@ -24,3 +24,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

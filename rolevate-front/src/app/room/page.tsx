@@ -102,7 +102,7 @@ function Room4Content() {
 
   return (
     <RoomContext.Provider value={room}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 relative overflow-hidden">
+      <div className="min-h-screen bg-slate-50 relative overflow-hidden">
         <ParticleBackground />
 
         <InterviewLayout
@@ -156,3 +156,4 @@ export default function Room4Page() {
     </Suspense>
   );
 }
+

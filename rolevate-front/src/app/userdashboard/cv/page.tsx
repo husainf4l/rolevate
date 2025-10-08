@@ -14,6 +14,7 @@ import {
   StarIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   CVData,
   uploadCV,
@@ -260,10 +261,8 @@ export default function CVPage() {
 
         {/* Upload Area */}
         <div className="mb-8">
-          <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-white cursor-pointer hover:border-[#0fc4b5] transition-colors"
-            onClick={() => fileInputRef.current?.click()}
-          >
+          <Card className="border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#0fc4b5] transition-colors" onClick={() => fileInputRef.current?.click()}>
+            <CardContent className="p-8 text-center">
             <DocumentArrowUpIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Upload a new CV
@@ -284,11 +283,12 @@ export default function CVPage() {
             <p className="text-sm text-gray-500 mt-2">
               Supported formats: PDF, DOC, DOCX (Max 5MB)
             </p>
-          </div>
+          </CardContent>
+          </Card>
         </div>
 
         {/* CVs List */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <Card className="overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
               Your CVs ({cvs.length})
@@ -402,37 +402,51 @@ export default function CVPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* CV Tips */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-6">
+        <Card className="mt-8 bg-blue-50">
+          <CardContent className="p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-3">
             CV Tips & Best Practices
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
             <div>
-              <h4 className="font-medium mb-2">✓ Keep it concise</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <CheckCircleIcon className="w-4 h-4 text-green-600" />
+                Keep it concise
+              </h4>
               <p>Limit your CV to 2 pages maximum for most positions.</p>
             </div>
             <div>
-              <h4 className="font-medium mb-2">✓ Tailor for each job</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <CheckCircleIcon className="w-4 h-4 text-green-600" />
+                Tailor for each job
+              </h4>
               <p>
                 Customize your CV for each application to match job
                 requirements.
               </p>
             </div>
             <div>
-              <h4 className="font-medium mb-2">✓ Use keywords</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <CheckCircleIcon className="w-4 h-4 text-green-600" />
+                Use keywords
+              </h4>
               <p>Include relevant keywords from the job description.</p>
             </div>
             <div>
-              <h4 className="font-medium mb-2">✓ Update regularly</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <CheckCircleIcon className="w-4 h-4 text-green-600" />
+                Update regularly
+              </h4>
               <p>
                 Keep your CV current with your latest skills and experiences.
               </p>
             </div>
           </div>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Activation Modal */}
         {showActivationModal && pendingActivationCV && (
@@ -515,3 +529,4 @@ export default function CVPage() {
     </div>
   );
 }
+

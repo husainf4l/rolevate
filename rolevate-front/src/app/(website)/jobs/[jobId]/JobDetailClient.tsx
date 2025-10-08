@@ -13,8 +13,7 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/react/24/solid";
-import { Button } from "@/components/common/Button";
-import ShareButton from "@/components/common/ShareButton";
+import { Button } from "@/components/ui/button";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 
 interface JobDetail {
@@ -214,10 +213,9 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 shadow-lg border border-gray-200/50 min-w-[280px]">
                 <div className="flex flex-col space-y-4">
                   <Button
-                    variant="primary"
+                    variant="default"
                     size="lg"
                     className="w-full shadow-lg"
-                    ripple={true}
                     disabled={false}
                     onClick={() => {
                       if (typeof window !== "undefined") {
@@ -251,17 +249,24 @@ export default function JobDetailClient({ job, jobId }: JobDetailClientProps) {
 
                   {/* Share Button */}
                   <div className="flex items-center justify-center">
-                    <ShareButton
-                      url={getShareUrl()}
-                      title={`${job.title} at ${
-                        job.company?.name || "Company"
-                      }`}
-                      description={`${
-                        job.shortDescription || job.description || ""
-                      } - ${job.location} - ${job.salary}`.slice(0, 150)}
-                      variant="button"
+                    <Button
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: `${job.title} at ${job.company?.name || "Company"}`,
+                            text: `${job.shortDescription || job.description || ""} - ${job.location} - ${job.salary}`.slice(0, 150),
+                            url: getShareUrl(),
+                          });
+                        } else {
+                          navigator.clipboard.writeText(getShareUrl());
+                          // You could add a toast notification here
+                        }
+                      }}
+                      variant="outline"
                       className="w-full px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-2xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:border-[#0891b2] hover:text-[#0891b2] hover:shadow-md transform hover:scale-[1.02] transition-all duration-300 font-semibold text-base"
-                    />
+                    >
+                      Share Job
+                    </Button>
                   </div>
 
                   <div className="pt-4 border-t border-gray-200 space-y-3">

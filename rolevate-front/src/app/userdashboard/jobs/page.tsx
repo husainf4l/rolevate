@@ -9,6 +9,7 @@ import {
   AdjustmentsHorizontalIcon,
   BriefcaseIcon,
 } from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Job {
   id: string;
@@ -146,7 +147,8 @@ export default function JobsPage() {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <Card className="mb-8">
+          <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
               <div className="relative">
@@ -195,7 +197,8 @@ export default function JobsPage() {
               </label>
             </div>
           </div>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Results Summary */}
         <div className="flex items-center justify-between mb-6">
@@ -215,10 +218,8 @@ export default function JobsPage() {
         {/* Jobs List */}
         <div className="space-y-6">
           {mockJobs.map((job) => (
-            <div
-              key={job.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-            >
+            <Card key={job.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
@@ -300,7 +301,8 @@ export default function JobsPage() {
                   </button>
                 </div>
               </div>
-            </div>
+            </CardContent>
+            </Card>
           ))}
         </div>
 
@@ -314,3 +316,4 @@ export default function JobsPage() {
     </div>
   );
 }
+

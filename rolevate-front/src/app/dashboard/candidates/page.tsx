@@ -805,3 +805,4 @@ export default function CandidatesPage() {
     </div>
   );
 }
+

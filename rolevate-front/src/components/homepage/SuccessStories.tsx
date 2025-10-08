@@ -6,9 +6,7 @@ export default function SuccessStories() {
       <div className="container mx-auto max-w-5xl text-center">
         <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
           Success{" "}
-          <span 
-            className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent"
-            style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <span className="text-[#0891b2]">
             Stories
           </span>
         </h2>
@@ -18,7 +16,7 @@ export default function SuccessStories() {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#13ead9] to-[#0891b2] flex items-center justify-center text-white text-2xl font-bold mb-4">
+            <div className="w-16 h-16 rounded-full bg-[#0891b2] flex items-center justify-center text-white text-2xl font-bold mb-4">
               A
             </div>
             <p className="text-gray-700 mb-3">
@@ -31,7 +29,7 @@ export default function SuccessStories() {
             </span>
           </div>
           <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#13ead9] to-[#0891b2] flex items-center justify-center text-white text-2xl font-bold mb-4">
+            <div className="w-16 h-16 rounded-full bg-[#0891b2] flex items-center justify-center text-white text-2xl font-bold mb-4">
               M
             </div>
             <p className="text-gray-700 mb-3">
@@ -44,7 +42,7 @@ export default function SuccessStories() {
             </span>
           </div>
           <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#13ead9] to-[#0891b2] flex items-center justify-center text-white text-2xl font-bold mb-4">
+            <div className="w-16 h-16 rounded-full bg-[#0891b2] flex items-center justify-center text-white text-2xl font-bold mb-4">
               L
             </div>
             <p className="text-gray-700 mb-3">
@@ -61,3 +59,4 @@ export default function SuccessStories() {
     </section>
   );
 }
+

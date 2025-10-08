@@ -88,14 +88,14 @@ export default function UserDashboardPage() {
   };
 
   return (
-    <div className="flex-1 min-h-screen bg-gradient-to-br from-[#f8fafc] to-[#e0e7ef] py-12 px-4 md:px-12">
+    <div className="flex-1 min-h-screen bg-gray-50 py-12 px-4 md:px-12">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-2">
               Welcome back,{" "}
-              <span className="bg-gradient-to-r from-[#0fc4b5] to-[#3b82f6] bg-clip-text text-transparent">
+              <span className="text-[#0891b2]">
                 {getUserFirstName()}!
               </span>
             </h1>
@@ -103,7 +103,7 @@ export default function UserDashboardPage() {
               Here’s your personalized job search and activity overview.
             </p>
           </div>
-          <div className="hidden md:block h-2 w-32 rounded-full bg-gradient-to-r from-[#0fc4b5]/60 to-[#3b82f6]/60 blur-sm" />
+          <div className="hidden md:block h-2 w-32 rounded-full bg-[#0891b2]/30 blur-sm" />
         </div>
 
         {/* CV Upload Prompt */}
@@ -121,8 +121,8 @@ export default function UserDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2">
-            <div className="rounded-3xl bg-white/80 shadow-xl border border-gray-200 p-8 mb-10">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6 tracking-tight">
+            <div className="rounded-sm bg-white/80 shadow-xl border border-gray-200 p-8 mb-10">
+              <h2 className="text-2xl font-medium text-gray-900 mb-6 tracking-tight">
                 Recommended Jobs
               </h2>
               <div className="border-t border-gray-100 mb-6" />
@@ -132,14 +132,14 @@ export default function UserDashboardPage() {
 
           {/* Right Column - Sidebar Content */}
           <div className="space-y-10">
-            <div className="rounded-3xl bg-white/60 backdrop-blur-md shadow-lg border border-gray-100 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 tracking-tight">
+            <div className="rounded-sm bg-white/60 backdrop-blur-md shadow-lg border border-gray-100 p-6">
+              <h2 className="text-xl font-medium text-gray-900 mb-4 tracking-tight">
                 Your CV
               </h2>
               <CVManager cvData={cvData} />
             </div>
-            <div className="rounded-3xl bg-white/60 backdrop-blur-md shadow-lg border border-gray-100 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 tracking-tight">
+            <div className="rounded-sm bg-white/60 backdrop-blur-md shadow-lg border border-gray-100 p-6">
+              <h2 className="text-xl font-medium text-gray-900 mb-4 tracking-tight">
                 Upcoming Interviews
               </h2>
               <InterviewSchedule />
@@ -150,3 +150,4 @@ export default function UserDashboardPage() {
     </div>
   );
 }
+

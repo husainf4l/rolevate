@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import JobCard, { JobData } from "@/components/common/JobCard";
-import { Button } from "@/components/common/Button";
 import { JobService, JobPost } from "@/services/job";
 
 export default function AvailableJobs() {
@@ -84,13 +84,7 @@ export default function AvailableJobs() {
         <div className="text-center mb-16 md:mb-20">
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
             Featured{" "}
-            <span
-              className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent"
-              style={{
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
+            <span className="text-primary-600">
               Opportunities
             </span>
           </h2>
@@ -131,12 +125,12 @@ export default function AvailableJobs() {
                 Failed to load featured jobs
               </div>
               <p className="text-gray-600 mb-4">{error}</p>
-              <Button
-                variant="secondary"
+              <button
                 onClick={() => window.location.reload()}
+                className="px-5 py-2 rounded-sm shadow-lg text-sm font-semibold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all duration-300"
               >
                 Try Again
-              </Button>
+              </button>
             </div>
           ) : jobs.length === 0 ? (
             // Empty state
@@ -164,31 +158,14 @@ export default function AvailableJobs() {
 
         {/* View All Jobs Button */}
         <div className="text-center">
-          <Button
-            variant="secondary"
-            size="xl"
-            href="/jobs"
-            icon={
-              <svg
-                className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            }
-            iconPosition="right"
-          >
-            View All Jobs
-          </Button>
+          <Link href="/jobs">
+            <button className="px-6 py-3 rounded-sm shadow-lg text-base font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 hover:shadow-xl hover:scale-105">
+              View All Jobs
+            </button>
+          </Link>
         </div>
       </div>
     </section>
   );
 }
+

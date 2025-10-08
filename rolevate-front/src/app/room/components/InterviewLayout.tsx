@@ -127,7 +127,7 @@ export function InterviewLayout({
       {/* Exit Interview Modal */}
       {showExitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 mx-4 max-w-sm w-full shadow-2xl">
+          <div className="bg-white rounded-sm p-6 mx-4 max-w-sm w-full shadow-2xl">
             <div className="text-center">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <XMarkIcon className="w-6 h-6 text-red-600" />
@@ -159,3 +159,4 @@ export function InterviewLayout({
     </div>
   );
 }
+

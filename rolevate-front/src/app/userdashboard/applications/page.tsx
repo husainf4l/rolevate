@@ -8,7 +8,9 @@ import {
   XCircleIcon,
   EyeIcon,
   FunnelIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
 import { getCandidateApplications, Application } from "@/services/application";
 
 interface ApplicationDisplay {
@@ -217,8 +219,9 @@ export default function ApplicationsPage() {
 
         {/* Applications List */}
         {filteredApplications.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-            <div className="text-gray-400 text-6xl mb-4">📄</div>
+          <Card>
+            <CardContent className="p-8 text-center">
+            <DocumentTextIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               No applications found
             </h3>
@@ -235,9 +238,10 @@ export default function ApplicationsPage() {
                 Clear Filter
               </button>
             )}
-          </div>
+          </CardContent>
+          </Card>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <Card className="overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">
                 All Applications
@@ -303,9 +307,10 @@ export default function ApplicationsPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         )}
       </div>
     </div>
   );
 }
+

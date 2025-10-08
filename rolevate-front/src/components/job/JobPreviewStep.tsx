@@ -1,7 +1,18 @@
 "use client";
 
 import React from "react";
-import { EyeIcon } from "@heroicons/react/24/outline";
+import {
+  EyeIcon,
+  MapPinIcon,
+  BriefcaseIcon,
+  BuildingOfficeIcon,
+  CurrencyDollarIcon,
+  LanguageIcon,
+  ChartBarIcon,
+  CalendarDaysIcon,
+  BuildingOffice2Icon,
+  ChatBubbleLeftRightIcon,
+} from "@heroicons/react/24/outline";
 import { JobFormData } from "./types";
 
 interface JobPreviewStepProps {
@@ -88,14 +99,30 @@ export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
             {jobData.title}
           </h3>
           <div className="flex flex-wrap gap-4 text-sm text-[#6e6e73] mb-3">
-            <span>📍 {jobData.location}</span>
-            <span>💼 {getTypeDisplayText(jobData.type)}</span>
-            <span>📈 {getJobLevelDisplayText(jobData.jobLevel)}</span>
-            <span>🏢 {getWorkTypeDisplayText(jobData.workType)}</span>
-            <span>
-              �️ {getInterviewLanguageDisplayText(jobData.interviewLanguage)}
+            <span className="flex items-center gap-1">
+              <MapPinIcon className="w-4 h-4" />
+              {jobData.location}
             </span>
-            <span>�💰 {jobData.salary}</span>
+            <span className="flex items-center gap-1">
+              <BriefcaseIcon className="w-4 h-4" />
+              {getTypeDisplayText(jobData.type)}
+            </span>
+            <span className="flex items-center gap-1">
+              <ChartBarIcon className="w-4 h-4" />
+              {getJobLevelDisplayText(jobData.jobLevel)}
+            </span>
+            <span className="flex items-center gap-1">
+              <BuildingOfficeIcon className="w-4 h-4" />
+              {getWorkTypeDisplayText(jobData.workType)}
+            </span>
+            <span className="flex items-center gap-1">
+              <LanguageIcon className="w-4 h-4" />
+              {getInterviewLanguageDisplayText(jobData.interviewLanguage)}
+            </span>
+            <span className="flex items-center gap-1">
+              <CurrencyDollarIcon className="w-4 h-4" />
+              {jobData.salary}
+            </span>
           </div>
           {jobData.shortDescription && (
             <p className="text-[#6e6e73] bg-gray-50 p-3 rounded-lg text-sm">
@@ -224,17 +251,25 @@ export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
         )}
 
         <div className="flex items-center gap-4 text-sm text-[#6e6e73] pt-4 border-t border-[#d2d2d7]">
-          <span>
-            📅 Apply by: {new Date(jobData.deadline).toLocaleDateString()}
+          <span className="flex items-center gap-1">
+            <CalendarDaysIcon className="w-4 h-4" />
+            Apply by: {new Date(jobData.deadline).toLocaleDateString()}
           </span>
-          <span>🏢 {jobData.department}</span>
-          <span>🏭 {jobData.industry}</span>
-          <span>
-            🗣️ Interview:{" "}
-            {getInterviewLanguageDisplayText(jobData.interviewLanguage)}
+          <span className="flex items-center gap-1">
+            <BuildingOfficeIcon className="w-4 h-4" />
+            {jobData.department}
+          </span>
+          <span className="flex items-center gap-1">
+            <BuildingOffice2Icon className="w-4 h-4" />
+            {jobData.industry}
+          </span>
+          <span className="flex items-center gap-1">
+            <ChatBubbleLeftRightIcon className="w-4 h-4" />
+            Interview: {getInterviewLanguageDisplayText(jobData.interviewLanguage)}
           </span>
         </div>
       </div>
     </div>
   );
 }
+

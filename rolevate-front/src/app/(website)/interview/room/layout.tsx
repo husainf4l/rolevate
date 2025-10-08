@@ -13,3 +13,4 @@ export default function RoomLayout({
   // This is a minimal layout with no header and no footer
   return <div className={`${inter.className}`}>{children}</div>;
 }
+

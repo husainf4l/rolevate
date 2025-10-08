@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import JobCard, { JobData } from "@/components/common/JobCard";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import { JobService, JobPost } from "@/services/job";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 
@@ -860,7 +860,7 @@ export default function JobsPage() {
                             opportunities
                           </p>
                           <Button
-                            variant="primary"
+                            variant="default"
                             onClick={() => {
                               setSearchTerm("");
                               setSelectedType("All");
@@ -956,3 +956,4 @@ export default function JobsPage() {
     </div>
   );
 }
+

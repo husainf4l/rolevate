@@ -1,5 +1,6 @@
 import React from "react";
-import { Button } from "@/components/common/Button";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const featuredCompanies = [
   {
@@ -107,7 +108,7 @@ export default function CorporatePage() {
           {featuredOnly.map((company) => (
             <div
               key={company.id}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 group hover:-translate-y-1"
+              className="bg-white rounded-sm shadow-lg hover:shadow-xl transition-all duration-300 p-6 group hover:-translate-y-1"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center text-2xl border border-gray-100">
@@ -169,21 +170,29 @@ export default function CorporatePage() {
                 </div>
               </div>
 
-              <Button
-                variant="primary"
-                href={
-                  company.slug === "zain" ? `/corporate/${company.slug}` : "#"
-                }
-                className="w-full"
-              >
-                View Jobs
-              </Button>
+              {company.slug === "zain" ? (
+                <Link href={`/corporate/${company.slug}`}>
+                  <Button
+                    variant="default"
+                    className="w-full"
+                  >
+                    View Jobs
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  variant="default"
+                  className="w-full"
+                >
+                  View Jobs
+                </Button>
+              )}
             </div>
           ))}
         </div>
 
         {/* All Companies Grid */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 lg:p-10">
+        <div className="bg-white rounded-sm shadow-lg p-8 lg:p-10">
           <div className="text-center mb-8">
             <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
               All Partner Companies
@@ -222,16 +231,25 @@ export default function CorporatePage() {
                   </div>
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  href={
-                    company.slug === "zain" ? `/corporate/${company.slug}` : "#"
-                  }
-                  className="flex-shrink-0"
-                >
-                  View
-                </Button>
+                {company.slug === "zain" ? (
+                  <Link href={`/corporate/${company.slug}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-shrink-0"
+                    >
+                      View
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-shrink-0"
+                  >
+                    View
+                  </Button>
+                )}
               </div>
             ))}
           </div>
@@ -240,3 +258,4 @@ export default function CorporatePage() {
     </main>
   );
 }
+

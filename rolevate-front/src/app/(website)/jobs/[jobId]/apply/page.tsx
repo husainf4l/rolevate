@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import { JobData } from "@/components/common/JobCard";
 
 import { JobService, JobPost } from "@/services/job";
@@ -473,7 +473,7 @@ export default function JobApplyPage() {
             >
               Try Again
             </Button>
-            <Button variant="primary" onClick={() => router.push("/jobs")}>
+            <Button variant="default" onClick={() => router.push("/jobs")}>
               Browse All Jobs
             </Button>
           </div>
@@ -516,7 +516,7 @@ export default function JobApplyPage() {
           </p>
           <div className="space-y-3">
             <Button
-              variant="primary"
+              variant="default"
               onClick={() => router.push(`/jobs/${job.id}`)}
               className="w-full"
             >
@@ -807,7 +807,7 @@ export default function JobApplyPage() {
                       </div>
                       <Button
                         type="button"
-                        variant="primary"
+                        variant="default"
                         onClick={() => {
                           // Create login URL with current page as redirect
                           const redirectUrl = encodeURIComponent(
@@ -1042,8 +1042,8 @@ export default function JobApplyPage() {
                 <div className="pt-4 lg:pt-6 border-t border-gray-200">
                   <Button
                     type="submit"
-                    variant="primary"
-                    loading={submitting}
+                    variant="default"
+                    disabled={submitting}
                     className="w-full py-3 lg:py-4 text-base lg:text-lg font-semibold rounded-xl lg:rounded-2xl"
                   >
                     {submitting

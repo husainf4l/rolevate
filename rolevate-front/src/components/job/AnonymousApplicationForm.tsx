@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import AnonymousApplicationService, {
   AnonymousApplicationResponse,
 } from "@/services/anonymousApplication";
@@ -162,7 +162,7 @@ export default function AnonymousApplicationForm({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl mx-auto">
+    <div className="bg-white rounded-sm shadow-xl p-8 max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -413,7 +413,7 @@ export default function AnonymousApplicationForm({
         <div className="flex gap-4 pt-4">
           <Button
             type="submit"
-            variant="primary"
+            variant="default"
             size="lg"
             disabled={isSubmitting || !selectedFile}
             className="flex-1"
@@ -445,3 +445,4 @@ export default function AnonymousApplicationForm({
     </div>
   );
 }
+

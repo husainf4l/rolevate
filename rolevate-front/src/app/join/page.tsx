@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import { API_CONFIG } from "@/lib/config";
 import toast from "react-hot-toast";
 
@@ -149,9 +149,9 @@ function JoinCompanyContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 flex items-center justify-center p-4">
-      <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 max-w-md w-full border border-white/20">
+      <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-2xl p-8 max-w-md w-full border border-white/20">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg mx-auto mb-4">
+          <div className="w-16 h-16 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-sm flex items-center justify-center text-2xl font-bold text-white shadow-lg mx-auto mb-4">
             {companyInfo?.logo || companyInfo?.name?.charAt(0) || "C"}
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -325,7 +325,7 @@ function JoinCompanyContent() {
         <div className="space-y-4">
           {invitationCode && (
             <Button
-              variant="primary"
+              variant="default"
               size="lg"
               className="w-full"
               onClick={signUpAndJoin}
@@ -387,3 +387,4 @@ export default function JoinCompanyPage() {
     </Suspense>
   );
 }
+

@@ -50,7 +50,7 @@ export function AIAssistantPanel({ sessionDuration }: AIAssistantPanelProps) {
     <div className="space-y-6">
       
       {/* AI Avatar Section */}
-      <div className="bg-gradient-to-br from-white to-slate-50/50 rounded-2xl p-6 border border-slate-200/50 shadow-lg text-center">
+      <div className="bg-gradient-to-br from-white to-slate-50/50 rounded-sm p-6 border border-slate-200/50 shadow-lg text-center">
         
         {/* AI Avatar */}
         <div className="relative w-28 h-28 mx-auto mb-6 animate-pulse">
@@ -91,7 +91,7 @@ export function AIAssistantPanel({ sessionDuration }: AIAssistantPanelProps) {
       </div>
 
       {/* Session Information Panel */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200/50 shadow-lg">
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-sm p-6 border border-blue-200/50 shadow-lg">
         <h4 className="text-lg font-semibold text-slate-800 mb-4">Session Information</h4>
         
         <div className="space-y-3">
@@ -146,7 +146,7 @@ export function AIAssistantPanel({ sessionDuration }: AIAssistantPanelProps) {
       </div>
 
       {/* Quick Tips */}
-      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-200/50 shadow-lg">
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-sm p-4 border border-green-200/50 shadow-lg">
         <h4 className="text-sm font-semibold text-green-800 mb-2">Interview Tips</h4>
         <ul className="text-xs text-green-700 space-y-1">
           <li>• Speak clearly and at a moderate pace</li>
@@ -158,3 +158,4 @@ export function AIAssistantPanel({ sessionDuration }: AIAssistantPanelProps) {
     </div>
   );
 }
+

@@ -4,10 +4,11 @@ import React, { useState, useEffect } from "react";
 import Logo from "./logo";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/common/Button";
 import { logout } from "@/services/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { API_CONFIG } from "@/lib/config";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faTachometerAlt, faUser, faBuilding, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -79,12 +80,12 @@ export default function Navbar() {
             href="/"
             className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200"
           >
-            <Logo size={42} />
+            <Logo size={46} />
           </Link>
           <nav className="hidden items-center gap-10 text-sm font-medium md:flex">
             <Link
               href="/"
-              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+              className={`font-text transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/")
                   ? "text-primary-600 after:w-full"
                   : "text-gray-700 hover:text-primary-600"
@@ -95,7 +96,7 @@ export default function Navbar() {
 
             <Link
               href="/jobs"
-              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+              className={`font-text transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/jobs")
                   ? "text-primary-600 after:w-full"
                   : "text-gray-700 hover:text-primary-600"
@@ -106,7 +107,7 @@ export default function Navbar() {
 
             <Link
               href="/employers"
-              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+              className={`font-text transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/employers")
                   ? "text-primary-600 after:w-full"
                   : "text-gray-700 hover:text-primary-600"
@@ -116,7 +117,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/about"
-              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+              className={`font-text transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/about")
                   ? "text-primary-600 after:w-full"
                   : "text-gray-700 hover:text-primary-600"
@@ -126,7 +127,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/contact"
-              className={`font-text transition-all duration-300 hover:scale-105 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+              className={`font-text transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/contact")
                   ? "text-primary-600 after:w-full"
                   : "text-gray-700 hover:text-primary-600"
@@ -144,9 +145,9 @@ export default function Navbar() {
                     e.stopPropagation();
                     toggleUserMenu();
                   }}
-                  className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full bg-gray-100/60 hover:bg-gray-200/80 transition-all duration-200 border border-gray-200/50 backdrop-blur-sm"
+                  className="hidden md:flex items-center gap-3 px-4 py-2 rounded-sm bg-gray-100/60 hover:bg-gray-200/80 transition-all duration-200 border border-gray-200/50 backdrop-blur-sm"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                  <div className="w-8 h-8 bg-[#0891b2] rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
                     {user.avatar ? (
                       <img
                         src={
@@ -173,19 +174,10 @@ export default function Navbar() {
                         : "Employer"}
                     </span>
                   </div>
-                  <svg
+                  <FontAwesomeIcon
+                    icon={faChevronDown}
                     className="w-4 h-4 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  />
                 </button>
 
                 {/* User dropdown menu */}
@@ -196,7 +188,7 @@ export default function Navbar() {
                       onClick={closeUserMenu}
                     />
                     <div
-                      className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 z-50 py-2"
+                      className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-sm shadow-xl border border-gray-200/50 z-50 py-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="px-4 py-3 border-b border-gray-200/60">
@@ -213,19 +205,10 @@ export default function Navbar() {
                           onClick={closeUserMenu}
                           className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50/80 transition-colors font-text"
                         >
-                          <svg
+                          <FontAwesomeIcon
+                            icon={faTachometerAlt}
                             className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                            />
-                          </svg>
+                          />
                           Dashboard
                         </Link>
                         {user.userType === "CANDIDATE" && (
@@ -234,19 +217,10 @@ export default function Navbar() {
                             onClick={closeUserMenu}
                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50/80 transition-colors font-text"
                           >
-                            <svg
+                            <FontAwesomeIcon
+                              icon={faUser}
                               className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                              />
-                            </svg>
+                            />
                             Profile
                           </Link>
                         )}
@@ -256,19 +230,10 @@ export default function Navbar() {
                             onClick={closeUserMenu}
                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50/80 transition-colors font-text"
                           >
-                            <svg
+                            <FontAwesomeIcon
+                              icon={faBuilding}
                               className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                              />
-                            </svg>
+                            />
                             Company Profile
                           </Link>
                         )}
@@ -277,19 +242,10 @@ export default function Navbar() {
                             onClick={handleLogout}
                             className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50/80 transition-colors w-full text-left font-text"
                           >
-                            <svg
+                            <FontAwesomeIcon
+                              icon={faSignOutAlt}
                               className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                              />
-                            </svg>
+                            />
                             Sign Out
                           </button>
                         </div>
@@ -300,19 +256,16 @@ export default function Navbar() {
               </div>
             ) : (
               // Not authenticated - show sign in button
-              <Button
-                variant="primary"
-                size="sm"
-                href="/login"
-                className="hidden md:inline-flex rounded-full shadow-sm px-6 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 transform hover:scale-105 transition-all duration-200"
-              >
-                Sign In
-              </Button>
+              <Link href="/login">
+                <button className="hidden md:inline-flex items-center gap-2 rounded-sm shadow-lg px-5 py-2 text-sm font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 hover:shadow-xl hover:scale-105">
+                  Sign In
+                </button>
+              </Link>
             )}
 
             <button
               onClick={toggleMenu}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-100/60 text-gray-700 hover:bg-gray-200/80 hover:text-primary-600 transition-all duration-300 md:hidden border border-gray-200/50 backdrop-blur-sm hover:scale-110"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-sm bg-gray-100/60 text-gray-700 hover:bg-gray-200/80 hover:text-primary-600 transition-all duration-300 md:hidden border border-gray-200/50 backdrop-blur-sm"
               aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isMenuOpen}
             >
@@ -429,7 +382,7 @@ export default function Navbar() {
                     // Authenticated user mobile menu
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/80 rounded-xl">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-full flex items-center justify-center text-white font-semibold">
+                        <div className="w-10 h-10 bg-[#0891b2] rounded-full flex items-center justify-center text-white font-semibold">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex flex-col">
@@ -444,16 +397,14 @@ export default function Navbar() {
                         </div>
                       </div>
 
-                      <Button
-                        variant="primary"
-                        size="md"
-                        href={getDashboardLink()}
-                        fullWidth
-                        onClick={closeMenu}
-                        className="rounded-full py-3 text-base font-medium bg-primary-600 hover:bg-primary-700 transform hover:scale-105 transition-all duration-200 shadow-sm"
-                      >
-                        Go to Dashboard
-                      </Button>
+                      <Link href={getDashboardLink()}>
+                        <button
+                          onClick={closeMenu}
+                          className="w-full rounded-sm py-2.5 text-base font-medium bg-primary-600 hover:bg-primary-700 text-white transition-all duration-200 shadow-sm"
+                        >
+                          Go to Dashboard
+                        </button>
+                      </Link>
 
                       <button
                         onClick={() => {
@@ -467,16 +418,14 @@ export default function Navbar() {
                     </div>
                   ) : (
                     // Not authenticated mobile menu
-                    <Button
-                      variant="primary"
-                      size="md"
-                      href="/login"
-                      fullWidth
-                      onClick={closeMenu}
-                      className="rounded-full py-3 text-base font-medium bg-primary-600 hover:bg-primary-700 transform hover:scale-105 transition-all duration-200 shadow-sm"
-                    >
-                      Sign In
-                    </Button>
+                    <Link href="/login">
+                      <button
+                        onClick={closeMenu}
+                        className="w-full rounded-sm py-3 text-base font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+                      >
+                        Sign In
+                      </button>
+                    </Link>
                   )}
                 </div>
               </div>
@@ -487,3 +436,4 @@ export default function Navbar() {
     </>
   );
 }
+

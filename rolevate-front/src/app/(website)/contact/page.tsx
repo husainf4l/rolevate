@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -147,7 +147,7 @@ export default function Contact() {
               </div>
 
               {/* Contact Form */}
-              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-gray-200/50 shadow-sm">
+              <div className="bg-white/60 backdrop-blur-sm rounded-sm p-8 border border-gray-200/50 shadow-sm">
                 <h2 className="font-display text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
                 
                 {submitStatus === 'success' && (
@@ -260,8 +260,8 @@ export default function Contact() {
 
                   <Button
                     type="submit"
-                    variant="hero-primary"
-                    size="md"
+                    variant="default"
+                    size="default"
                     disabled={isSubmitting}
                     className="w-full"
                   >
@@ -276,3 +276,4 @@ export default function Contact() {
     </main>
   );
 }
+

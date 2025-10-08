@@ -195,7 +195,7 @@ export default function ApplicationDetailsPage() {
               style={{ boxShadow: "var(--shadow-medium)" }}
             >
               {/* Header with gradient */}
-              <div className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] p-6 text-white">
+              <div className="bg-[#0891b2] p-6 text-white">
                 <div className="flex items-center space-x-3 mb-2">
                   <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
                     <span className="text-xl">📋</span>

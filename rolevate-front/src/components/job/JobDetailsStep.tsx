@@ -7,6 +7,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { JobFormData, FormErrors } from "./types";
 import SkillsManager from "./SkillsManager";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface JobDetailsStepProps {
   jobData: JobFormData;
@@ -168,7 +172,7 @@ export default function JobDetailsStep({
             )}
           </div>
           <div className="relative">
-            <textarea
+            <Textarea
               id="description"
               rows={8}
               value={jobData.description}
@@ -189,14 +193,14 @@ export default function JobDetailsStep({
         </div>
 
         <div>
-          <label
+          <Label
             htmlFor="shortDescription"
             className="block text-sm font-semibold text-[#1d1d1f] mb-3"
           >
             Short Description *
-          </label>
+          </Label>
           <div className="relative">
-            <textarea
+            <Textarea
               id="shortDescription"
               rows={3}
               value={jobData.shortDescription}
@@ -263,7 +267,7 @@ export default function JobDetailsStep({
               )}
           </div>
           <div className="relative">
-            <textarea
+            <Textarea
               id="responsibilities"
               rows={6}
               value={jobData.responsibilities}
@@ -329,7 +333,7 @@ export default function JobDetailsStep({
             )}
           </div>
           <div className="relative">
-            <textarea
+            <Textarea
               id="requirements"
               rows={6}
               value={jobData.requirements}
@@ -350,16 +354,15 @@ export default function JobDetailsStep({
         </div>
 
         <div>
-          <label
+          <Label
             htmlFor="experience"
             className="block text-sm font-semibold text-[#1d1d1f] mb-3"
           >
             Experience Level *
-          </label>
+          </Label>
 
           <div className="space-y-4">
-            <select
-              id="experience"
+            <Select
               value={
                 showCustomExperience
                   ? "custom"
@@ -367,19 +370,23 @@ export default function JobDetailsStep({
                   ? jobData.experience
                   : ""
               }
-              onChange={(e) => handleExperienceChange(e.target.value)}
-              className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none ${
-                errors.experience ? "border-red-400" : "border-[#d2d2d7]"
-              }`}
+              onValueChange={(value) => handleExperienceChange(value)}
             >
-              <option value="">Select experience level</option>
-              {experienceOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-              <option value="custom">Custom Range</option>
-            </select>
+              <SelectTrigger className={`w-full px-4 py-4 bg-white/80 border rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none ${
+                errors.experience ? "border-red-400" : "border-[#d2d2d7]"
+              }`}>
+                <SelectValue placeholder="Select experience level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Select experience level</SelectItem>
+                {experienceOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+                <SelectItem value="custom">Custom Range</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Custom Range Inputs */}
             {showCustomExperience && (
@@ -403,13 +410,13 @@ export default function JobDetailsStep({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label
+                    <Label
                       htmlFor="min-years"
                       className="block text-xs font-medium text-[#6e6e73] mb-2"
                     >
                       Minimum Years
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="number"
                       id="min-years"
                       min="0"
@@ -422,7 +429,7 @@ export default function JobDetailsStep({
                   </div>
 
                   <div>
-                    <label
+                    <Label
                       htmlFor="max-years"
                       className="block text-xs font-medium text-[#6e6e73] mb-2"
                     >
@@ -430,8 +437,8 @@ export default function JobDetailsStep({
                       <span className="text-[#86868b]">
                         (Leave empty for "X+ years")
                       </span>
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="number"
                       id="max-years"
                       min="0"
@@ -496,39 +503,42 @@ export default function JobDetailsStep({
         </div>
 
         <div>
-          <label
+          <Label
             htmlFor="education"
             className="block text-sm font-semibold text-[#1d1d1f] mb-3"
           >
             Education Requirements
-          </label>
-          <select
-            id="education"
+          </Label>
+          <Select
             value={jobData.education}
-            onChange={(e) => onInputChange("education", e.target.value)}
-            className="w-full px-4 py-4 bg-white/80 border border-[#d2d2d7] rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none"
+            onValueChange={(value) => onInputChange("education", value)}
           >
-            <option value="">Select education level</option>
-            <option value="High School">High School</option>
-            <option value="Bachelor's Degree">Bachelor's Degree</option>
-            <option value="Master's Degree">Master's Degree</option>
-            <option value="PhD">PhD</option>
-            <option value="Professional Certification">
-              Professional Certification
-            </option>
-            <option value="Not Required">Not Required</option>
-          </select>
+            <SelectTrigger className="w-full px-4 py-4 bg-white/80 border border-[#d2d2d7] rounded-xl focus:ring-2 focus:ring-[#13ead9] focus:border-transparent transition-all duration-200 text-[#1d1d1f] backdrop-blur-sm appearance-none">
+              <SelectValue placeholder="Select education level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Select education level</SelectItem>
+              <SelectItem value="High School">High School</SelectItem>
+              <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
+              <SelectItem value="Master's Degree">Master's Degree</SelectItem>
+              <SelectItem value="PhD">PhD</SelectItem>
+              <SelectItem value="Professional Certification">
+                Professional Certification
+              </SelectItem>
+              <SelectItem value="Not Required">Not Required</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <label
+          <Label
             htmlFor="salary"
             className="text-sm font-semibold text-[#1d1d1f] mb-3 flex items-center gap-2"
           >
             <CurrencyDollarIcon className="w-4 h-4 text-[#6e6e73]" />
             Salary Range *
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             id="salary"
             value={jobData.salary}
@@ -596,7 +606,7 @@ export default function JobDetailsStep({
             )}
           </div>
           <div className="relative">
-            <textarea
+            <Textarea
               id="benefits"
               rows={5}
               value={jobData.benefits}
@@ -614,3 +624,4 @@ export default function JobDetailsStep({
     </div>
   );
 }
+

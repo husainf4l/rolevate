@@ -301,7 +301,7 @@ export default function ZainPage() {
 //           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10">
 //             {/* About Section */}
 //             <div className="lg:col-span-2">
-//               <div className="bg-white rounded-2xl shadow-lg p-8 lg:p-10 h-full">
+//               <div className="bg-white rounded-sm shadow-lg p-8 lg:p-10 h-full">
 //                 <h3 className="text-2xl font-bold text-gray-900 mb-6">
 //                   Company Overview
 //                 </h3>
@@ -347,7 +347,7 @@ export default function ZainPage() {
 
 //             {/* Benefits Section */}
 //             <div>
-//               <div className="bg-white rounded-2xl shadow-lg p-8 lg:p-10 h-full">
+//               <div className="bg-white rounded-sm shadow-lg p-8 lg:p-10 h-full">
 //                 <h3 className="text-2xl font-bold text-gray-900 mb-6">
 //                   Employee Benefits
 //                 </h3>
@@ -449,7 +449,7 @@ export default function ZainPage() {
 
 //           {/* Call to Action */}
 //           <div className="text-center">
-//             <div className="bg-gradient-to-r from-[#13ead9]/5 to-[#0891b2]/5 rounded-3xl p-8 md:p-12 border border-[#13ead9]/10">
+//             <div className="bg-gradient-to-r from-[#13ead9]/5 to-[#0891b2]/5 rounded-sm p-8 md:p-12 border border-[#13ead9]/10">
 //               <h3 className="font-display text-2xl md:text-3xl font-bold text-gray-900 mb-4">
 //                 Don't see the perfect role?
 //               </h3>
@@ -468,3 +468,4 @@ export default function ZainPage() {
 //     </div>
 //   );
 // }
+

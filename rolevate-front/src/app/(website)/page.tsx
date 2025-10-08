@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main>
+    <main id="main-content">
       <Hero />
       <AvailableJobs />
       <CVUploadSection />
@@ -20,3 +20,4 @@ export default function Home() {
     </main>
   );
 }
+

@@ -130,7 +130,7 @@ export default function SetupCompanyPage() {
                 get started.
               </p>
             </div>
-            <div className="relative bg-gradient-to-r from-gray-50 to-gray-100/80 rounded-2xl p-1.5 mb-8 w-1/2 max-w-5xl mx-auto shadow-sm border border-gray-200/50 backdrop-blur-sm">
+            <div className="relative bg-gradient-to-r from-gray-50 to-gray-100/80 rounded-sm p-1.5 mb-8 w-1/2 max-w-5xl mx-auto shadow-sm border border-gray-200/50 backdrop-blur-sm">
               <div className="flex relative">
                 {/* Sliding Background */}
                 <div
@@ -226,3 +226,4 @@ export default function SetupCompanyPage() {
     </section>
   );
 }
+

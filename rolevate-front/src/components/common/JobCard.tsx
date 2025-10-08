@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { API_CONFIG } from "@/lib/config";
 import { useSavedJobsStandalone } from "@/hooks/useSavedJobsStandalone";
 
@@ -72,14 +74,14 @@ export default function JobCard({
   };
 
   return (
-    <div
-      className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-gray-200 group relative hover:-translate-y-1 ${
+    <Card
+      className={`hover:shadow-md transition-all duration-300 border-gray-100 hover:border-gray-200 group relative ${
         compact ? "p-4" : "p-6"
       }`}
     >
       {/* Urgent Badge */}
       {job.urgent && (
-        <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold z-10">
+        <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold z-10">
           Urgent
         </div>
       )}
@@ -136,8 +138,7 @@ export default function JobCard({
         </button>
       )}
 
-      {/* Content */}
-      <div className="relative">
+      <CardContent className="p-0">
         {/* Company Info */}
         <div className="flex items-start gap-3 mb-4">
           <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-xl border border-gray-200 flex-shrink-0 overflow-hidden relative">
@@ -245,10 +246,10 @@ export default function JobCard({
 
         {/* Job Details */}
         <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
-          <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg font-medium">
+          <span className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg font-medium">
             {job.type}
           </span>
-          <span className="font-semibold text-gray-900 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+          <span className="font-medium text-gray-900 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
             {job.salary}
           </span>
         </div>
@@ -269,38 +270,39 @@ export default function JobCard({
             </span>
           )}
         </div>
+      </CardContent>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex items-center gap-1.5 text-xs text-gray-600">
-            <svg
-              className="w-3.5 h-3.5 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>{job.posted}</span>
-          </div>
+      <CardFooter className="flex items-center justify-between pt-4 border-t border-gray-100 px-0 pb-0">
+        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+          <svg
+            className="w-3.5 h-3.5 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{job.posted}</span>
+        </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link href={`/jobs/${job.id}`}>
             <Button
-              variant="primary"
+              variant="default"
               size="sm"
-              href={`/jobs/${job.id}`}
               className="text-xs px-3 py-1.5 sm:px-4 sm:py-2"
             >
               Apply Now
             </Button>
-          </div>
+          </Link>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
+

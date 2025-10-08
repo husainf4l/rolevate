@@ -712,7 +712,7 @@ export default function InterviewRoom({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-5">
                 <div className="relative">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center shadow-lg">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-sm flex items-center justify-center shadow-lg">
                     <VideoCameraIcon className="w-6 h-6 text-white" />
                   </div>
                   {isConnected && (
@@ -768,7 +768,7 @@ export default function InterviewRoom({
           <div className="w-full max-w-5xl">
             {/* Error Display */}
             {error && (
-              <div className="mb-8 p-5 bg-red-50/90 backdrop-blur-xl border border-red-200/50 rounded-3xl flex items-center gap-4 shadow-lg animate-in slide-in-from-top duration-500">
+              <div className="mb-8 p-5 bg-red-50/90 backdrop-blur-xl border border-red-200/50 rounded-sm flex items-center gap-4 shadow-lg animate-in slide-in-from-top duration-500">
                 <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
                 </div>
@@ -782,10 +782,10 @@ export default function InterviewRoom({
             )}
 
             {/* Interview Interface */}
-            <div className="relative bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-white/30 overflow-hidden">
+            <div className="relative bg-white/80 backdrop-blur-2xl rounded-sm shadow-2xl border border-white/30 overflow-hidden">
               {/* Gradient Border Effect */}
-              <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-[#13ead9]/20 via-transparent to-[#0891b2]/20 p-[1px]">
-                <div className="w-full h-full bg-white/80 backdrop-blur-2xl rounded-[2rem]"></div>
+              <div className="absolute inset-0 rounded-sm bg-gradient-to-br from-[#13ead9]/20 via-transparent to-[#0891b2]/20 p-[1px]">
+                <div className="w-full h-full bg-white/80 backdrop-blur-2xl rounded-sm"></div>
               </div>
 
               {/* AI Interviewer Section */}
@@ -838,7 +838,7 @@ export default function InterviewRoom({
                 {isConnected && aiAgent && (
                   <div className="mb-10">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 rounded-2xl"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 rounded-sm"></div>
                       <AudioVisualizer />
                     </div>
                   </div>
@@ -846,7 +846,7 @@ export default function InterviewRoom({
 
                 {/* Enhanced Status Messages */}
                 {isConnecting && (
-                  <div className="mb-8 p-6 bg-blue-50/90 backdrop-blur-xl rounded-2xl border border-blue-200/50 animate-pulse">
+                  <div className="mb-8 p-6 bg-blue-50/90 backdrop-blur-xl rounded-sm border border-blue-200/50 animate-pulse">
                     <div className="flex items-center justify-center gap-4">
                       <div className="relative">
                         <div className="w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -865,7 +865,7 @@ export default function InterviewRoom({
                 )}
 
                 {isConnected && !aiAgent && (
-                  <div className="mb-8 p-6 bg-amber-50/90 backdrop-blur-xl rounded-2xl border border-amber-200/50">
+                  <div className="mb-8 p-6 bg-amber-50/90 backdrop-blur-xl rounded-sm border border-amber-200/50">
                     <div className="flex items-center justify-center gap-4">
                       <div className="relative">
                         <div className="w-6 h-6 border-3 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
@@ -884,7 +884,7 @@ export default function InterviewRoom({
                 )}
 
                 {isConnected && aiAgent && (
-                  <div className="mb-8 p-6 bg-green-50/90 backdrop-blur-xl rounded-2xl border border-green-200/50">
+                  <div className="mb-8 p-6 bg-green-50/90 backdrop-blur-xl rounded-sm border border-green-200/50">
                     <div className="flex items-center justify-center gap-4">
                       <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <svg
@@ -915,7 +915,7 @@ export default function InterviewRoom({
 
                 {/* Screen Share Status */}
                 {mediaDevices.screenShare && (
-                  <div className="mb-8 p-6 bg-blue-50/90 backdrop-blur-xl rounded-2xl border border-blue-200/50">
+                  <div className="mb-8 p-6 bg-blue-50/90 backdrop-blur-xl rounded-sm border border-blue-200/50">
                     <div className="flex items-center justify-center gap-4">
                       <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center animate-pulse">
                         <ComputerDesktopIcon className="w-3 h-3 text-white" />
@@ -938,15 +938,15 @@ export default function InterviewRoom({
             <div className="mt-10 flex justify-center">
               <div className="relative">
                 {/* Background Glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#13ead9]/20 via-white/40 to-[#0891b2]/20 rounded-3xl blur-xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-[#13ead9]/20 via-white/40 to-[#0891b2]/20 rounded-sm blur-xl"></div>
 
                 {/* Controls Container */}
-                <div className="relative flex items-center gap-6 p-6 bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/40">
+                <div className="relative flex items-center gap-6 p-6 bg-white/90 backdrop-blur-2xl rounded-sm shadow-2xl border border-white/40">
                   {/* Microphone Control */}
                   <div className="relative group">
                     <button
                       onClick={toggleMicrophone}
-                      className={`relative w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-95 ${
+                      className={`relative w-16 h-16 rounded-sm flex items-center justify-center transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-95 ${
                         mediaDevices.microphone
                           ? "bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-700 border border-gray-200"
                           : "bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-red-200"
@@ -963,7 +963,7 @@ export default function InterviewRoom({
                         }`}
                       />
                       {!mediaDevices.microphone && (
-                        <div className="absolute inset-0 rounded-2xl border-2 border-red-300 animate-pulse"></div>
+                        <div className="absolute inset-0 rounded-sm border-2 border-red-300 animate-pulse"></div>
                       )}
                     </button>
 
@@ -979,7 +979,7 @@ export default function InterviewRoom({
                   <div className="relative group">
                     <button
                       onClick={toggleCamera}
-                      className={`relative w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-95 ${
+                      className={`relative w-16 h-16 rounded-sm flex items-center justify-center transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-95 ${
                         mediaDevices.camera
                           ? "bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-700 border border-gray-200"
                           : "bg-gradient-to-br from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-600"
@@ -1011,7 +1011,7 @@ export default function InterviewRoom({
                   <div className="relative group">
                     <button
                       onClick={toggleScreenShare}
-                      className={`relative w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-95 ${
+                      className={`relative w-16 h-16 rounded-sm flex items-center justify-center transition-all duration-300 shadow-lg transform hover:scale-105 active:scale-95 ${
                         mediaDevices.screenShare
                           ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-blue-200"
                           : "bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-700 border border-gray-200"
@@ -1028,7 +1028,7 @@ export default function InterviewRoom({
                         }`}
                       />
                       {mediaDevices.screenShare && (
-                        <div className="absolute inset-0 rounded-2xl border-2 border-blue-300 animate-pulse"></div>
+                        <div className="absolute inset-0 rounded-sm border-2 border-blue-300 animate-pulse"></div>
                       )}
                     </button>
 
@@ -1049,11 +1049,11 @@ export default function InterviewRoom({
                   <div className="relative group">
                     <button
                       onClick={leaveRoom}
-                      className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-red-200 transform hover:scale-105 active:scale-95"
+                      className="relative w-16 h-16 rounded-sm bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-red-200 transform hover:scale-105 active:scale-95"
                       title="Leave interview"
                     >
                       <PhoneXMarkIcon className="w-7 h-7" />
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
+                      <div className="absolute inset-0 rounded-sm bg-gradient-to-br from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
                     </button>
 
                     {/* Tooltip */}
@@ -1113,7 +1113,7 @@ function AudioVisualizer() {
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto h-20 flex items-center justify-center p-4 bg-gradient-to-r from-[#13ead9]/5 via-transparent to-[#0891b2]/5 rounded-2xl">
+    <div className="w-full max-w-lg mx-auto h-20 flex items-center justify-center p-4 bg-gradient-to-r from-[#13ead9]/5 via-transparent to-[#0891b2]/5 rounded-sm">
       <div className="relative w-full h-full">
         <BarVisualizer
           state={agentState}
@@ -1131,3 +1131,7 @@ function AudioVisualizer() {
     </div>
   );
 }
+
+
+
+

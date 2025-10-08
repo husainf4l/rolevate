@@ -3,7 +3,7 @@ import React from "react";
 export default function DataDeletionPage() {
   return (
     <section className="w-full min-h-[70vh] bg-gradient-to-br from-[#13ead9]/10 to-[#0891b2]/5 flex items-center justify-center py-12">
-      <div className="backdrop-blur-xl bg-white/80 border border-gray-200/40 shadow-2xl rounded-3xl max-w-2xl w-full mx-4 px-8 py-12">
+      <div className="backdrop-blur-xl bg-white/80 border border-gray-200/40 shadow-2xl rounded-sm max-w-2xl w-full mx-4 px-8 py-12">
         <h1 className="font-display text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent tracking-tight">
           Data Deletion Request
         </h1>
@@ -142,3 +142,4 @@ export default function DataDeletionPage() {
     </section>
   );
 }
+

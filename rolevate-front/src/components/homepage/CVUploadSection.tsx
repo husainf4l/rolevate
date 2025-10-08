@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import { API_CONFIG } from "@/lib/config";
 
 export default function CVUploadSection() {
@@ -83,20 +83,14 @@ export default function CVUploadSection() {
   };
 
   return (
-    <section className="w-full  bg-gradient-to-b from-white to-gray-50/50">
+    <section className="w-full bg-white">
       <div className="container mx-auto px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-16 md:mb-20">
+          <div className="text-center mb-16 md:mb-24">
             <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
               Not Sure What{" "}
-              <span
-                className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent"
-                style={{
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
+              <span className="text-[#0891b2]">
                 Fits You?
               </span>
             </h2>
@@ -108,15 +102,15 @@ export default function CVUploadSection() {
           </div>
 
           {/* Upload Area - Full Width */}
-          <div className="mb-20">
+          <div className="mb-24">
             <div
-              className={`relative border-2 border-dashed rounded-3xl p-12 md:p-16 text-center transition-all duration-300 backdrop-blur-sm max-w-4xl mx-auto ${
+              className={`relative border-2 border-dashed rounded-sm p-12 md:p-16 text-center transition-all duration-300 backdrop-blur-sm max-w-4xl mx-auto ${
                 isDragOver
-                  ? "border-[#0891b2] bg-gradient-to-br from-[#13ead9]/10 to-[#0891b2]/10"
+                  ? "border-[#0891b2] bg-[#13ead9]/5"
                   : uploadedFile
-                  ? "border-green-400 bg-gradient-to-br from-green-50 to-green-100/50"
+                  ? "border-green-400 bg-green-50"
                   : uploadError
-                  ? "border-red-400 bg-gradient-to-br from-red-50 to-red-100/50"
+                  ? "border-red-400 bg-red-50"
                   : "border-gray-300 hover:border-[#0891b2]/50 bg-white/50"
               }`}
               onDragOver={handleDragOver}
@@ -143,7 +137,7 @@ export default function CVUploadSection() {
                 </div>
               ) : uploadError ? (
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mb-6 shadow-corporate">
+                  <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6 shadow-corporate">
                     <svg
                       className="w-10 h-10 text-red-600"
                       fill="none"
@@ -169,14 +163,14 @@ export default function CVUploadSection() {
                       setUploadError(null);
                       setUploadedFile(null);
                     }}
-                    className="text-[#0891b2] hover:text-[#0c7594] font-text font-semibold transition-colors duration-200"
+                    className="text-[#0891b2] hover:text-[#0c7594] font-text font-medium transition-colors duration-200"
                   >
                     Try Again
                   </button>
                 </div>
               ) : uploadedFile && analysisResult ? (
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-6 shadow-corporate">
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-corporate">
                     <svg
                       className="w-10 h-10 text-green-600"
                       fill="none"
@@ -206,8 +200,8 @@ export default function CVUploadSection() {
                       ` or via email at ${analysisResult.email}`}
                     .
                   </p>
-                  <div className="bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 rounded-2xl p-6 mb-6 max-w-md">
-                    <h4 className="font-display text-lg font-semibold text-gray-900 mb-3">
+                  <div className="bg-[#13ead9]/5 rounded-sm p-6 mb-6 max-w-md">
+                    <h4 className="font-display text-lg font-medium text-gray-900 mb-3">
                       Your Profile Summary
                     </h4>
                     <div className="space-y-2 text-sm text-gray-700">
@@ -238,14 +232,14 @@ export default function CVUploadSection() {
                       setUploadError(null);
                       setAnalysisResult(null);
                     }}
-                    className="text-[#0891b2] hover:text-[#0c7594] font-text font-semibold transition-colors duration-200"
+                    className="text-[#0891b2] hover:text-[#0c7594] font-text font-medium transition-colors duration-200"
                   >
                     Upload Different CV
                   </button>
                 </div>
               ) : uploadedFile ? (
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-6 shadow-corporate">
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-corporate">
                     <svg
                       className="w-10 h-10 text-green-600"
                       fill="none"
@@ -272,14 +266,14 @@ export default function CVUploadSection() {
                       setUploadError(null);
                       setAnalysisResult(null);
                     }}
-                    className="text-[#0891b2] hover:text-[#0c7594] font-text font-semibold transition-colors duration-200"
+                    className="text-[#0891b2] hover:text-[#0c7594] font-text font-medium transition-colors duration-200"
                   >
                     Upload Different CV
                   </button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-[#13ead9]/10 to-[#0891b2]/10 rounded-full flex items-center justify-center mb-6 shadow-corporate">
+                  <div className="w-20 h-20 bg-[#13ead9]/5 rounded-full flex items-center justify-center mb-6 shadow-corporate">
                     <svg
                       className="w-10 h-10 text-[#0891b2]"
                       fill="none"
@@ -300,7 +294,7 @@ export default function CVUploadSection() {
                   <p className="font-text text-gray-600 text-lg mb-8">
                     Drag and drop your CV here or click to browse
                   </p>
-                  <Button onClick={openFileDialog} variant="primary" size="lg">
+                  <Button onClick={openFileDialog} variant="default" size="lg">
                     Choose File
                   </Button>
                   <p className="font-text text-sm text-gray-500 mt-6">
@@ -313,10 +307,9 @@ export default function CVUploadSection() {
             {uploadedFile && !isAnalyzing && !analysisResult && (
               <div className="mt-8 max-w-md mx-auto">
                 <Button
-                  variant="primary"
-                  size="xl"
-                  fullWidth
-                  className="font-bold"
+                  variant="default"
+                  size="lg"
+                  className="w-full font-bold"
                 >
                   Get AI Analysis & Job Matches
                 </Button>
@@ -327,7 +320,7 @@ export default function CVUploadSection() {
           {/* Features - 3 Column Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#13ead9]/10 to-[#0891b2]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-corporate">
+              <div className="w-20 h-20 bg-[#13ead9]/5 rounded-sm flex items-center justify-center mx-auto mb-6 shadow-corporate">
                 <svg
                   className="w-10 h-10 text-[#0891b2]"
                   fill="none"
@@ -353,7 +346,7 @@ export default function CVUploadSection() {
             </div>
 
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#13ead9]/10 to-[#0891b2]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-corporate">
+              <div className="w-20 h-20 bg-[#13ead9]/5 rounded-sm flex items-center justify-center mx-auto mb-6 shadow-corporate">
                 <svg
                   className="w-10 h-10 text-[#0891b2]"
                   fill="none"
@@ -378,7 +371,7 @@ export default function CVUploadSection() {
             </div>
 
             <div className="text-center md:col-span-2 lg:col-span-1">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#13ead9]/10 to-[#0891b2]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-corporate">
+              <div className="w-20 h-20 bg-[#13ead9]/5 rounded-sm flex items-center justify-center mx-auto mb-6 shadow-corporate">
                 <svg
                   className="w-10 h-10 text-[#0891b2]"
                   fill="none"
@@ -408,3 +401,6 @@ export default function CVUploadSection() {
     </section>
   );
 }
+
+
+

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Header from "@/components/dashboard/Header";
-import { Button } from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import { CameraIcon } from "@heroicons/react/24/outline";
 import { API_CONFIG } from "@/lib/config";
 import toast from "react-hot-toast";
@@ -261,18 +261,18 @@ export default function CompanyProfilePage() {
       />
       <main className="pt-20 px-4 lg:px-8 max-w-7xl mx-auto">
         {/* Hero Section */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 mb-6 border border-white/20">
+        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-2xl p-8 mb-6 border border-white/20">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="flex-shrink-0">
               <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden">
+                <div className="w-24 h-24 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-sm flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden">
                   {companyProfile.logo ? (
                     <Image
                       src={companyProfile.logo}
                       alt="Company Logo"
                       width={96}
                       height={96}
-                      className="w-full h-full object-cover rounded-2xl"
+                      className="w-full h-full object-cover rounded-sm"
                       onError={() => {
                         console.error(
                           "Image failed to load:",
@@ -334,7 +334,7 @@ export default function CompanyProfilePage() {
             {companyProfile.stats.map((stat, i) => (
               <div
                 key={i}
-                className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20 text-center"
+                className="bg-white/80 backdrop-blur-xl rounded-sm p-6 shadow-xl border border-white/20 text-center"
               >
                 <div className="text-3xl font-bold text-gray-900 mb-2">
                   {stat.value}
@@ -348,7 +348,7 @@ export default function CompanyProfilePage() {
         )}
 
         {/* Navigation Tabs */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 mb-6">
+        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-xl border border-white/20 mb-6">
           <div className="flex gap-1 p-2">
             <button
               className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
@@ -404,25 +404,25 @@ export default function CompanyProfilePage() {
         </div>
 
         {/* Content Area */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/20">
+        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-xl p-8 border border-white/20">
           {/* Tab Content */}
           {tab === "company" && (
             <div className="space-y-8">
               {/* Company Logo Section */}
-              <div className="bg-gray-50 rounded-2xl p-6">
+              <div className="bg-gray-50 rounded-sm p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Company Logo
                 </h3>
                 <div className="flex items-center gap-6">
                   <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg overflow-hidden">
+                    <div className="w-20 h-20 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-sm flex items-center justify-center text-2xl font-bold text-white shadow-lg overflow-hidden">
                       {companyProfile.logo ? (
                         <Image
                           src={companyProfile.logo}
                           alt="Company Logo"
                           width={80}
                           height={80}
-                          className="w-full h-full object-cover rounded-2xl"
+                          className="w-full h-full object-cover rounded-sm"
                           onError={() => {
                             console.error(
                               "Logo section image failed to load:",
@@ -610,8 +610,8 @@ export default function CompanyProfilePage() {
                   Team Members
                 </h3>
                 <Button
-                  variant="primary"
-                  size="md"
+                  variant="default"
+                  size="default"
                   onClick={generateInvitationCode}
                   disabled={generatingInvite}
                 >
@@ -620,7 +620,7 @@ export default function CompanyProfilePage() {
               </div>
 
               {invitationCode && (
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 mb-6">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-sm p-6 mb-6">
                   <h4 className="text-lg font-bold text-green-800 mb-3">
                     Invitation Link Generated!
                   </h4>
@@ -646,7 +646,7 @@ export default function CompanyProfilePage() {
                   {companyProfile.users.map((user) => (
                     <div
                       key={user.id}
-                      className="bg-white/60 rounded-2xl p-6 shadow-lg border border-white/20"
+                      className="bg-white/60 rounded-sm p-6 shadow-lg border border-white/20"
                     >
                       <div className="flex items-center gap-4 mb-4">
                         {user.avatar ? (
@@ -714,7 +714,7 @@ export default function CompanyProfilePage() {
 
               <div className="max-w-2xl mx-auto">
                 {companyProfile.subscription ? (
-                  <div className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-2xl p-8 text-white text-center shadow-2xl">
+                  <div className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-sm p-8 text-white text-center shadow-2xl">
                     <div className="text-3xl font-bold mb-2">
                       {companyProfile.subscription.plan} Plan
                     </div>
@@ -726,7 +726,7 @@ export default function CompanyProfilePage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-gray-100 rounded-2xl p-8 text-center">
+                  <div className="bg-gray-100 rounded-sm p-8 text-center">
                     <p className="text-gray-600">
                       No subscription information available
                     </p>
@@ -773,7 +773,7 @@ export default function CompanyProfilePage() {
               </div>
 
               <div className="text-center">
-                <Button variant="primary" size="lg">
+                <Button variant="default" size="lg">
                   Upgrade Plan
                 </Button>
               </div>
@@ -792,7 +792,7 @@ export default function CompanyProfilePage() {
               </div>
 
               <div className="max-w-3xl mx-auto space-y-6">
-                <div className="bg-white/60 rounded-2xl p-8 shadow-lg border border-white/20">
+                <div className="bg-white/60 rounded-sm p-8 shadow-lg border border-white/20">
                   <h4 className="text-xl font-bold text-gray-900 mb-6">
                     General Notifications
                   </h4>
@@ -874,7 +874,7 @@ export default function CompanyProfilePage() {
                   </div>
                 </div>
 
-                <div className="bg-white/60 rounded-2xl p-8 shadow-lg border border-white/20">
+                <div className="bg-white/60 rounded-sm p-8 shadow-lg border border-white/20">
                   <h4 className="text-xl font-bold text-gray-900 mb-6">
                     Activity Notifications
                   </h4>
@@ -983,7 +983,7 @@ export default function CompanyProfilePage() {
 
                 <div className="text-center">
                   <Button
-                    variant="primary"
+                    variant="default"
                     size="lg"
                     onClick={saveNotificationSettings}
                   >
@@ -1006,7 +1006,7 @@ export default function CompanyProfilePage() {
               </div>
 
               <div className="max-w-2xl mx-auto">
-                <div className="bg-white/60 rounded-2xl p-8 shadow-lg border border-white/20">
+                <div className="bg-white/60 rounded-sm p-8 shadow-lg border border-white/20">
                   <h4 className="text-xl font-bold text-gray-900 mb-6">
                     Change Password
                   </h4>
@@ -1249,8 +1249,8 @@ export default function CompanyProfilePage() {
                     <div className="flex gap-4 pt-4">
                       <Button
                         type="submit"
-                        variant="primary"
-                        size="md"
+                        variant="default"
+                        size="default"
                         className="flex-1"
                       >
                         Update Password
@@ -1258,7 +1258,7 @@ export default function CompanyProfilePage() {
                       <Button
                         type="button"
                         variant="secondary"
-                        size="md"
+                        size="default"
                         className="flex-1"
                         onClick={() => {
                           setPasswordData({
@@ -1281,3 +1281,4 @@ export default function CompanyProfilePage() {
     </div>
   );
 }
+

@@ -27,7 +27,7 @@ const PageWrapper = ({
   <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center p-2 sm:p-4 relative overflow-hidden">
     <ParticleBackground />
     <div className="relative z-10 w-full max-w-5xl text-center">
-      <div className="bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/30 p-4 sm:p-8 lg:p-12 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-white/95 backdrop-blur-2xl rounded-sm sm:rounded-sm shadow-2xl border border-white/30 p-4 sm:p-8 lg:p-12 animate-in slide-in-from-bottom-4 duration-500">
         {children}
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 mt-6 sm:mt-8 font-display tracking-tight">
           {title}
@@ -49,7 +49,7 @@ const PrimaryButton = ({
 }) => (
   <button
     onClick={onClick}
-    className="w-full bg-gradient-to-r from-[#13ead9] to-[#0891b2] hover:from-[#0891b2] hover:to-[#13ead9] text-white px-4 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold text-base sm:text-lg transition-all duration-300 transform active:scale-95 sm:hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:ring-offset-2"
+    className="w-full bg-gradient-to-r from-[#13ead9] to-[#0891b2] hover:from-[#0891b2] hover:to-[#13ead9] text-white px-4 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-sm font-semibold text-base sm:text-lg transition-all duration-300 transform active:scale-95 sm:hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:ring-offset-2"
   >
     {children}
   </button>
@@ -196,7 +196,7 @@ export function ConnectionManager({
       >
         <div className="space-y-6">
           {/* Device Test Section - Top Priority */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+          <div className="bg-white rounded-sm border border-gray-100 p-4 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
                 Device Check
@@ -325,7 +325,7 @@ export function ConnectionManager({
           </div>
 
           {/* Simple Privacy Consent */}
-          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+          <div className="bg-gray-50 rounded-sm p-4 border border-gray-100">
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
@@ -414,7 +414,7 @@ export function ConnectionManager({
         title="Connection Error"
         description={error || "An unexpected error occurred while connecting."}
       >
-        <div className="w-20 h-20 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <div className="w-20 h-20 bg-red-100 rounded-sm flex items-center justify-center mx-auto mb-6 shadow-lg">
           <ExclamationTriangleIcon className="w-10 h-10 text-red-500" />
         </div>
         <div className="text-sm text-gray-500 mb-6 p-4 bg-gray-50/80 rounded-xl text-left">
@@ -450,7 +450,7 @@ export function ConnectionManager({
         title="Waiting for Connection"
         description="Establishing connection to the interview room. Please wait."
       >
-        <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <div className="w-20 h-20 bg-slate-100 rounded-sm flex items-center justify-center mx-auto mb-6 shadow-lg">
           <VideoCameraSlashIcon className="w-10 h-10 text-slate-500" />
         </div>
       </PageWrapper>
@@ -459,3 +459,4 @@ export function ConnectionManager({
 
   return null;
 }
+

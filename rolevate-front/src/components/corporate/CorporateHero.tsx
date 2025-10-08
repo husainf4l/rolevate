@@ -7,13 +7,13 @@ export default function CorporateHero() {
       {/* Image Section - First on Mobile */}
       <div className="flex-1 flex items-center justify-center order-1 lg:order-2 mb-8 lg:mb-0 lg:ml-12">
         <div className="relative w-80 h-64 sm:w-96 sm:h-72 lg:w-[32rem] lg:h-96">
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#13ead9]/8 via-white/15 to-[#0891b2]/8 rounded-[2rem] shadow-lg backdrop-blur-sm border border-white/20"></div>
-          <div className="absolute inset-3 rounded-[1.5rem] overflow-hidden shadow-inner">
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#13ead9]/8 via-white/15 to-[#0891b2]/8 rounded-sm shadow-lg backdrop-blur-sm border border-white/20"></div>
+          <div className="absolute inset-3 rounded-sm overflow-hidden shadow-inner">
             <Image
               src="/images/hero.png"
               alt="Enterprise AI Recruitment Platform"
               fill
-              className="object-cover rounded-[1.5rem]"
+              className="object-cover rounded-sm"
               priority
             />
           </div>
@@ -65,3 +65,5 @@ export default function CorporateHero() {
     </section>
   );
 }
+
+

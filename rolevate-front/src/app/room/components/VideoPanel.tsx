@@ -59,7 +59,7 @@ export function VideoPanel({ mediaControls }: VideoPanelProps) {
   }, [room, localParticipant]);
 
   return (
-    <div className={`video-container relative aspect-video sm:aspect-video bg-gradient-to-br from-slate-50 to-slate-100 rounded-none sm:rounded-2xl overflow-hidden shadow-none sm:shadow-xl border-0 sm:border border-slate-200/50 group min-h-[70vh] sm:min-h-0 w-full ${
+    <div className={`video-container relative aspect-video sm:aspect-video bg-gradient-to-br from-slate-50 to-slate-100 rounded-none sm:rounded-sm overflow-hidden shadow-none sm:shadow-xl border-0 sm:border border-slate-200/50 group min-h-[70vh] sm:min-h-0 w-full ${
       isVideoFullscreen ? 'fullscreen-container' : ''
     }`}>
       
@@ -152,7 +152,7 @@ export function VideoPanel({ mediaControls }: VideoPanelProps) {
 function CameraPrompt({ onEnableCamera }: { onEnableCamera: () => void }) {
   return (
     <div className="space-y-4 lg:space-y-6">
-      <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg animate-pulse">
+      <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl lg:rounded-sm flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg animate-pulse">
         <VideoCameraIcon className="w-8 h-8 lg:w-10 lg:h-10 text-slate-500" />
       </div>
       
@@ -175,7 +175,7 @@ function CameraPrompt({ onEnableCamera }: { onEnableCamera: () => void }) {
       
       <button
         onClick={onEnableCamera}
-        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 lg:px-6 py-3 lg:py-4 rounded-xl lg:rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2 lg:gap-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 lg:px-6 py-3 lg:py-4 rounded-xl lg:rounded-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2 lg:gap-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
         <VideoCameraIcon className="w-4 h-4 lg:w-5 lg:h-5" />
         Enable Camera
@@ -188,7 +188,7 @@ function CameraPrompt({ onEnableCamera }: { onEnableCamera: () => void }) {
 function ScreenSharePrompt() {
   return (
     <div className="space-y-3 lg:space-y-4">
-      <div className="w-16 h-16 lg:w-20 lg:h-20 bg-white rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 shadow-lg animate-pulse">
+      <div className="w-16 h-16 lg:w-20 lg:h-20 bg-white rounded-xl lg:rounded-sm flex items-center justify-center mx-auto mb-3 lg:mb-4 shadow-lg animate-pulse">
         <ComputerDesktopIcon className="w-8 h-8 lg:w-10 lg:h-10 text-slate-400" />
       </div>
       <h3 className="text-base lg:text-lg font-semibold text-slate-600 mb-2">Screen Share Disabled</h3>
@@ -198,3 +198,4 @@ function ScreenSharePrompt() {
     </div>
   );
 }
+

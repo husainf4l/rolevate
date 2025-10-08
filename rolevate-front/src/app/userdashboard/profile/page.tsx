@@ -9,6 +9,7 @@ import {
   CheckCircleIcon,
   StarIcon,
 } from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function ProfilePage() {
@@ -66,7 +67,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <Card className="mb-8">
+          <CardContent className="p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Personal Information
@@ -110,10 +112,12 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Professional Summary */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <Card className="mb-8">
+          <CardContent className="p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Professional Summary
@@ -123,10 +127,12 @@ export default function ProfilePage() {
             {profile.profileSummary ||
               `Welcome to ${fullName}'s profile. Professional summary not yet provided.`}
           </p>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Skills */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <Card className="mb-8">
+          <CardContent className="p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Skills</h2>
           </div>
@@ -192,10 +198,12 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Experience */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <Card className="mb-8">
+          <CardContent className="p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Experience</h2>
           </div>
@@ -243,10 +251,12 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Documents & Resume */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <Card className="mb-8">
+          <CardContent className="p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Documents & Resume
@@ -370,10 +380,12 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Education */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <Card className="mb-8">
+          <CardContent className="p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Education</h2>
           </div>
@@ -428,10 +440,12 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Profile Completeness */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <Card>
+          <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Profile Completeness
@@ -514,8 +528,10 @@ export default function ProfilePage() {
               <span className="text-gray-600">Upload profile photo</span>
             </div>
           </div>
-        </div>
+        </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
+

@@ -22,7 +22,7 @@ export function AudioVisualization({ isMicEnabled, sessionDuration }: AudioVisua
   const currentStatus = statusInfo[state as keyof typeof statusInfo] || statusInfo.idle;
 
   return (
-    <div className="bg-gradient-to-br from-white to-slate-50/50 rounded-2xl p-6 border border-slate-200/50 shadow-lg">
+    <div className="bg-gradient-to-br from-white to-slate-50/50 rounded-sm p-6 border border-slate-200/50 shadow-lg">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -124,3 +124,4 @@ export function AudioVisualization({ isMicEnabled, sessionDuration }: AudioVisua
     </div>
   );
 }
+

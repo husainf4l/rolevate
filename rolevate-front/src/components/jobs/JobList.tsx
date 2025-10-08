@@ -57,3 +57,4 @@ export default function JobList({ jobs, onApply }: JobListProps) {
     </div>
   );
 }
+
