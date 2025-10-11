@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import Navbar from "@/components/common/navbar";
 import Footer from "@/components/common/Footer";
+import AuthProvider from "@/components/common/AuthProvider";
 
 export const metadata: Metadata = {
   title: "Rolevate - Elevate Your Career | AI-Powered Job Matching Platform",
@@ -43,11 +44,11 @@ export default function WebsiteLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <AuthProvider>
       <Navbar />
       <main className="pt-16">{children}</main>
       <Footer />
-    </>
+    </AuthProvider>
   );
 }
 
