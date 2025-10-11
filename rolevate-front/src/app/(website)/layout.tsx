@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "../globals.css";
 import Navbar from "@/components/common/navbar";
 import Footer from "@/components/common/Footer";
-import GDPRPopup from "@/components/common/GDPRPopup";
 
 export const metadata: Metadata = {
   title: "Rolevate - Elevate Your Career | AI-Powered Job Matching Platform",
@@ -48,7 +47,6 @@ export default function WebsiteLayout({
       <Navbar />
       <main className="pt-16">{children}</main>
       <Footer />
-      <GDPRPopup />
     </>
   );
 }

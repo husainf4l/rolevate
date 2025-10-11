@@ -79,44 +79,62 @@ export default function JobsPage() {
 
   // Helper function to convert JobPost to JobData format
   const convertJobPostToJobData = (jobPost: JobPost): JobData => {
-    const logoResult = getJobLogo(jobPost);
+    try {
+      const logoResult = getJobLogo(jobPost);
 
-    const jobData: JobData = {
-      id: jobPost.id, // Use string ID directly (UUID from backend)
-      title: jobPost.title,
-      company: jobPost.company?.name || "Company", // Use actual company name from API
-      location: jobPost.location,
-      type:
-        jobPost.type === "FULL_TIME"
-          ? "Full-time"
-          : jobPost.type === "PART_TIME"
-          ? "Part-time"
-          : jobPost.type === "CONTRACT"
-          ? "Contract"
-          : jobPost.type === "REMOTE"
-          ? "Remote"
-          : "Other",
-      salary: jobPost.salary,
-      skills: jobPost.skills || [],
-      posted: new Date(jobPost.postedAt).toLocaleDateString(),
-      applicants: jobPost.applicants || 0,
-      description: jobPost.shortDescription || jobPost.description,
-      urgent: false, // Default to false for now
-    };
+      const jobData: JobData = {
+        id: jobPost.id || '', // Use string ID directly (UUID from backend)
+        title: jobPost.title || 'Untitled Position',
+        company: jobPost.company?.name || "Company", // Use actual company name from API
+        location: jobPost.location || 'Location TBD',
+        type:
+          jobPost.type === "FULL_TIME"
+            ? "Full-time"
+            : jobPost.type === "PART_TIME"
+            ? "Part-time"
+            : jobPost.type === "CONTRACT"
+            ? "Contract"
+            : jobPost.type === "REMOTE"
+            ? "Remote"
+            : "Other",
+        salary: jobPost.salary || 'Competitive',
+        skills: jobPost.skills || [],
+        posted: jobPost.postedAt ? new Date(jobPost.postedAt).toLocaleDateString() : 'Recently',
+        applicants: jobPost.applicants || 0,
+        description: jobPost.shortDescription || jobPost.description || '',
+        urgent: false, // Default to false for now
+      };
 
-    // Only add logo field if it exists (handles exactOptionalPropertyTypes)
-    if (logoResult !== undefined) {
-      jobData.logo = logoResult;
+      // Only add logo field if it exists (handles exactOptionalPropertyTypes)
+      if (logoResult !== undefined) {
+        jobData.logo = logoResult;
+      }
+
+
+
+      // Only add experience field if it exists
+      if (jobPost.experience) {
+        jobData.experience = jobPost.experience;
+      }
+
+      return jobData;
+    } catch (error) {
+      console.error("Error converting job post:", jobPost, error);
+      // Return a minimal valid job data object
+      return {
+        id: jobPost.id || 'unknown',
+        title: 'Error Loading Job',
+        company: 'Unknown',
+        location: 'Unknown',
+        type: 'Full-time',
+        salary: 'N/A',
+        skills: [],
+        posted: 'Unknown',
+        applicants: 0,
+        description: 'Error loading job details',
+        urgent: false,
+      };
     }
-
-
-
-    // Only add experience field if it exists
-    if (jobPost.experience) {
-      jobData.experience = jobPost.experience;
-    }
-
-    return jobData;
   };
 
   // Helper function to get job logo from API response (no emoji fallback)
@@ -147,6 +165,13 @@ export default function JobsPage() {
         search || searchTerm || undefined
       );
 
+      console.log("API Response:", response); // Debug log
+
+      // Check if response has the expected structure
+      if (!response || !Array.isArray(response.jobs)) {
+        throw new Error("Invalid response structure from API");
+      }
+
       const convertedJobs = response.jobs.map(convertJobPostToJobData);
 
       setJobs(convertedJobs);
@@ -155,6 +180,7 @@ export default function JobsPage() {
       setCurrentPage(page);
     } catch (error) {
       console.error("Error fetching jobs:", error);
+      console.error("Error details:", error instanceof Error ? error.message : "Unknown error");
       setApiError("Failed to load jobs from server");
       // Set empty state instead of fallback data
       setJobs([]);
@@ -836,8 +862,6 @@ export default function JobsPage() {
                                 onApply={handleApply}
                                 onSave={handleSaveJob}
                                 isSaved={isJobSaved(job.id)}
-                                showDescription={true}
-                                compact={false}
                               />
                             </div>
                           </div>

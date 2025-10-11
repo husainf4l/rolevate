@@ -42,10 +42,20 @@ function LoginContent() {
         signinParams.redirectUrl = decodeURIComponent(redirect);
       }
 
-      await signin(signinParams);
+      const user = await signin(signinParams);
+      
+      // Additional fallback: if signin doesn't redirect, do it manually
+      if (!redirect && user) {
+        if (user.userType === 'COMPANY' && !user.companyId) {
+          window.location.href = '/dashboard/setup-company';
+        } else if (user.userType === 'COMPANY') {
+          window.location.href = '/dashboard';
+        } else if (user.userType === 'CANDIDATE') {
+          window.location.href = '/userdashboard';
+        }
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
       setLoading(false);
     }
   };
@@ -56,8 +66,8 @@ function LoginContent() {
         {/* Login Form */}
         <div className="flex-1 flex flex-col items-center lg:items-start text-left max-w-md w-full order-2 lg:order-1 lg:mr-16">
           <div className="mb-8 w-full flex flex-col items-center lg:items-start">
-            <span className="inline-flex items-center px-4 py-2 bg-[#13ead9]/10 text-[#0891b2] text-sm font-semibold rounded-full border border-[#13ead9]/20">
-              <span className="w-2 h-2 bg-[#13ead9] rounded-full mr-2 animate-pulse"></span>
+            <span className="inline-flex items-center px-4 py-2 bg-primary-50 text-primary-700 text-sm font-semibold rounded-full border border-primary-200/60">
+              <span className="w-2 h-2 bg-primary-500 rounded-full mr-2"></span>
               Welcome Back
             </span>
           </div>
@@ -82,7 +92,7 @@ function LoginContent() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
+                className="block w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-none transition"
                 disabled={loading}
               />
             </div>
@@ -100,7 +110,7 @@ function LoginContent() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] focus:outline-none transition"
+                className="block w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-none transition"
                 disabled={loading}
               />
             </div>
@@ -110,7 +120,7 @@ function LoginContent() {
                   id="remember"
                   name="remember"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-[#13ead9] focus:ring-[#13ead9]"
+                  className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                   disabled={loading}
                 />
                 <label
@@ -122,7 +132,7 @@ function LoginContent() {
               </div>
               <a
                 href="#"
-                className="text-sm text-[#0891b2] hover:underline w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0"
+                className="text-sm text-primary-600 hover:text-primary-700 hover:underline w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0 font-medium transition-colors"
               >
                 Forgot password?
               </a>
@@ -133,18 +143,18 @@ function LoginContent() {
             <Button
               type="submit"
               variant="default"
-              className="w-full"
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
               size="lg"
               disabled={loading}
             >
               {loading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
-          <p className="mt-8 text-sm text-gray-500 text-left">
+          <p className="mt-8 text-sm text-gray-600 text-left">
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="text-[#0891b2] hover:underline font-medium"
+              className="text-primary-600 hover:text-primary-700 font-semibold hover:underline transition-colors underline-offset-2"
             >
               Sign up
             </Link>
@@ -153,7 +163,7 @@ function LoginContent() {
         {/* Illustration (hidden on mobile) */}
         <div className="hidden lg:flex items-center justify-center order-1 lg:order-2 mb-10 lg:mb-0 w-full lg:w-auto">
           <div className="relative w-full max-w-xs h-60 sm:max-w-md sm:h-80 lg:w-[36rem] lg:h-[28rem]">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#13ead9]/8 via-white/15 to-[#0891b2]/8 rounded-sm shadow-corporate backdrop-blur-sm border border-white/20"></div>
+            <div className="absolute inset-0 bg-white/10 rounded-sm shadow-md backdrop-blur-sm border border-white/20"></div>
             <div className="absolute inset-4 rounded-sm overflow-hidden shadow-inner">
               <Image
                 src="/images/hero.png"
@@ -163,8 +173,8 @@ function LoginContent() {
                 priority
               />
             </div>
-            <div className="absolute -top-4 -right-4 w-8 h-8 bg-[#13ead9] rounded-full shadow-corporate animate-pulse"></div>
-            <div className="absolute -bottom-6 -left-6 w-6 h-6 bg-[#0891b2] rounded-full shadow-corporate animate-pulse delay-1000"></div>
+            <div className="absolute -top-4 -right-4 w-8 h-8 bg-primary-400 rounded-full shadow-md"></div>
+            <div className="absolute -bottom-6 -left-6 w-6 h-6 bg-primary-600 rounded-full shadow-md"></div>
           </div>
         </div>
       </div>

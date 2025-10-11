@@ -20,9 +20,56 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rolevate - AI-Powered Recruitment Platform",
-  description: "Revolutionary recruitment platform powered by AI",
+  title: {
+    default: "Rolevate - AI-Powered Recruitment Platform",
+    template: "%s | Rolevate"
+  },
+  description: "Revolutionary recruitment platform powered by AI. Transform your job search with intelligent matching, automated interviews, and career acceleration tools.",
+  keywords: ["recruitment", "AI", "job search", "interviews", "career", "hiring", "Middle East"],
+  authors: [{ name: "Rolevate Team" }],
+  creator: "Rolevate",
+  publisher: "Rolevate",
   metadataBase: new URL('https://rolevate.com'),
+  alternates: {
+    canonical: "https://rolevate.com",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://rolevate.com",
+    title: "Rolevate - AI-Powered Recruitment Platform",
+    description: "Transform your job search with AI-powered interviews and intelligent career matching.",
+    siteName: "Rolevate",
+    images: [
+      {
+        url: "/images/hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Rolevate - AI-Powered Recruitment Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rolevate - AI-Powered Recruitment Platform",
+    description: "Transform your job search with AI-powered interviews and intelligent career matching.",
+    images: ["/images/hero.png"],
+    creator: "@rolevate",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "your-google-verification-code",
+  },
 };
 
 export default function RootLayout({

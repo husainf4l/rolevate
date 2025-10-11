@@ -76,15 +76,15 @@ const getPriorityColor = (priority: "high" | "medium" | "low") => {
 const getSourceIcon = (source: CandidateDisplay["source"]) => {
   switch (source) {
     case "linkedin":
-      return "💼";
+      return "LinkedIn";
     case "website":
-      return "🌐";
+      return "Website";
     case "referral":
-      return "👥";
+      return "Referral";
     case "recruiter":
-      return "🎯";
+      return "Recruiter";
     default:
-      return "📧";
+      return "Email";
   }
 };
 

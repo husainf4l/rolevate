@@ -116,7 +116,7 @@ export default function JobApplyPage() {
   const convertJobPostToJobData = (jobPost: JobPost): JobData => {
     // Get a dynamic logo based on company name or industry
     const getCompanyLogo = (companyName?: string, industry?: string) => {
-      if (!companyName && !industry) return "🏢";
+      if (!companyName && !industry) return "C";
 
       const searchText = `${companyName || ""} ${industry || ""}`.toLowerCase();
 
@@ -125,42 +125,42 @@ export default function JobApplyPage() {
         searchText.includes("health") ||
         searchText.includes("medical")
       )
-        return "🏥";
+        return "H";
       if (searchText.includes("tech") || searchText.includes("software"))
-        return "💻";
+        return "T";
       if (searchText.includes("bank") || searchText.includes("finance"))
-        return "🏦";
+        return "B";
       if (searchText.includes("education") || searchText.includes("school"))
-        return "🎓";
+        return "E";
       if (searchText.includes("retail") || searchText.includes("shop"))
-        return "🛍️";
+        return "R";
       if (searchText.includes("food") || searchText.includes("restaurant"))
-        return "🍽️";
+        return "F";
       if (searchText.includes("travel") || searchText.includes("airline"))
-        return "✈️";
+        return "A";
       if (
         searchText.includes("energy") ||
         searchText.includes("oil") ||
         searchText.includes("gas")
       )
-        return "⚡";
+        return "E";
       if (
         searchText.includes("construction") ||
         searchText.includes("building")
       )
-        return "🏗️";
+        return "C";
       if (
         searchText.includes("telecom") ||
         searchText.includes("communication")
       )
-        return "📱";
+        return "T";
       if (searchText.includes("automotive") || searchText.includes("car"))
-        return "🚗";
+        return "A";
       if (searchText.includes("media") || searchText.includes("entertainment"))
-        return "🎬";
+        return "M";
       if (searchText.includes("sales") || searchText.includes("trading"))
-        return "💼";
-      return "🏢";
+        return "S";
+      return companyName?.charAt(0).toUpperCase() || "C";
     };
 
     // Calculate time since posting

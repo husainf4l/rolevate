@@ -185,54 +185,6 @@ export default function AIConfigurationStep({
                 assessment.
               </p>
             </div>
-
-            {/* AI Second Interview Questions Prompt */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label
-                  htmlFor="aiSecondInterviewPrompt"
-                  className="block text-sm font-semibold text-gray-900"
-                >
-                  AI Second Interview Questions Prompt
-                </label>
-                {jobData.aiSecondInterviewPrompt && (
-                  <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md flex items-center gap-1">
-                    <svg
-                      className="w-3 h-3"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    AI Generated
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <Textarea
-                  id="aiSecondInterviewPrompt"
-                  rows={5}
-                  value={jobData.aiSecondInterviewPrompt}
-                  onChange={(e) =>
-                    onInputChange("aiSecondInterviewPrompt", e.target.value)
-                  }
-                  className="w-full px-4 py-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none transition-all duration-200 placeholder-gray-500 text-gray-900"
-                  placeholder="Define advanced questions and evaluation criteria for the second AI interview. Example: Assess advanced technical skills, system design thinking, leadership potential, and cultural fit. Include scenario-based questions, problem-solving challenges, and deeper technical discussions relevant to the role..."
-                  maxLength={1000}
-                />
-                <div className="absolute bottom-3 right-3 text-xs text-gray-500">
-                  {jobData.aiSecondInterviewPrompt.length}/1000
-                </div>
-              </div>
-              <p className="text-xs text-gray-600 mt-2">
-                Second interview dives deeper into technical skills and advanced
-                competencies.
-              </p>
-            </div>
           </div>
 
           {/* Regenerate Button */}

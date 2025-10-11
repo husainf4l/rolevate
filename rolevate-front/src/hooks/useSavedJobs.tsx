@@ -11,99 +11,133 @@ export function useSavedJobs() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Safely get auth context - handle case where AuthProvider is not available
-  let user = null;
-  let authLoading = false;
-
-  try {
-    const authContext = useAuth();
-    user = authContext.user;
-    authLoading = authContext.isLoading;
-  } catch (err) {
-    // This should no longer happen since we added AuthProvider to website layout
-    console.warn(
-      "Auth context not available, saved jobs will work in limited mode"
-    );
-    // Continue without auth context - saved jobs will be disabled
-  }
+  // Always call useAuth at the top level - hooks must be called unconditionally
+  const { user, isLoading: authLoading } = useAuth();
 
   // Load saved jobs on mount or when user changes
   useEffect(() => {
+    const loadSavedJobs = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        console.log("loadSavedJobs: Starting to load saved jobs", {
+          user: user?.userType,
+          hasProfile: !!user?.candidateProfile,
+        });
+
+        // If no user, don't load saved jobs
+        if (!user) {
+          console.log("loadSavedJobs: No user, setting empty saved jobs");
+          setSavedJobIds(new Set());
+          return;
+        }
+
+        // Only candidates can have saved jobs
+        if (user.userType !== "CANDIDATE") {
+          console.log(
+            "loadSavedJobs: User is not candidate, setting empty saved jobs"
+          );
+          setSavedJobIds(new Set());
+          return;
+        }
+
+        // Load saved jobs from user profile if available, otherwise from API
+        if (user.candidateProfile?.savedJobs) {
+          console.log(
+            "loadSavedJobs: Found saved jobs in profile",
+            user.candidateProfile.savedJobs
+          );
+          // Check if savedJobs is array of strings (job IDs) or objects
+          const savedJobsData = user.candidateProfile.savedJobs;
+
+          let jobIds: Set<string>;
+          if (savedJobsData.length > 0) {
+            // If first item is a string, treat as array of job IDs
+            if (typeof savedJobsData[0] === "string") {
+              jobIds = new Set(savedJobsData as string[]);
+              console.log("loadSavedJobs: Treating as string array", jobIds);
+            } else {
+              // If objects, extract jobId property
+              jobIds = new Set(
+                savedJobsData.map((savedJob: any) => savedJob.jobId)
+              );
+              console.log("loadSavedJobs: Treating as object array", jobIds);
+            }
+          } else {
+            jobIds = new Set();
+            console.log("loadSavedJobs: Empty saved jobs array");
+          }
+
+          setSavedJobIds(jobIds);
+          console.log("Loaded saved jobs from profile:", Array.from(jobIds));
+        } else {
+          console.log(
+            "loadSavedJobs: No saved jobs in profile, fetching from API"
+          );
+          // Fallback to API call
+          const savedJobs = await getSavedJobs();
+          const jobIds = new Set(savedJobs.map((job) => job.jobId));
+          setSavedJobIds(jobIds);
+          console.log("Loaded saved jobs from API:", Array.from(jobIds));
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load saved jobs"
+        );
+        console.error("Failed to load saved jobs:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     if (!authLoading) {
       loadSavedJobs();
     }
   }, [user, authLoading]);
 
-  const loadSavedJobs = async () => {
+  const refreshSavedJobs = async () => {
+    if (authLoading) return;
+    
     try {
       setIsLoading(true);
       setError(null);
 
-      console.log("loadSavedJobs: Starting to load saved jobs", {
-        user: user?.userType,
-        hasProfile: !!user?.candidateProfile,
-      });
-
-      // If no user, don't load saved jobs
       if (!user) {
-        console.log("loadSavedJobs: No user, setting empty saved jobs");
         setSavedJobIds(new Set());
         return;
       }
 
-      // Only candidates can have saved jobs
       if (user.userType !== "CANDIDATE") {
-        console.log(
-          "loadSavedJobs: User is not candidate, setting empty saved jobs"
-        );
         setSavedJobIds(new Set());
         return;
       }
 
-      // Load saved jobs from user profile if available, otherwise from API
       if (user.candidateProfile?.savedJobs) {
-        console.log(
-          "loadSavedJobs: Found saved jobs in profile",
-          user.candidateProfile.savedJobs
-        );
-        // Check if savedJobs is array of strings (job IDs) or objects
         const savedJobsData = user.candidateProfile.savedJobs;
-
         let jobIds: Set<string>;
         if (savedJobsData.length > 0) {
-          // If first item is a string, treat as array of job IDs
           if (typeof savedJobsData[0] === "string") {
             jobIds = new Set(savedJobsData as string[]);
-            console.log("loadSavedJobs: Treating as string array", jobIds);
           } else {
-            // If objects, extract jobId property
             jobIds = new Set(
               savedJobsData.map((savedJob: any) => savedJob.jobId)
             );
-            console.log("loadSavedJobs: Treating as object array", jobIds);
           }
         } else {
           jobIds = new Set();
-          console.log("loadSavedJobs: Empty saved jobs array");
         }
-
         setSavedJobIds(jobIds);
-        console.log("Loaded saved jobs from profile:", Array.from(jobIds));
       } else {
-        console.log(
-          "loadSavedJobs: No saved jobs in profile, fetching from API"
-        );
-        // Fallback to API call
         const savedJobs = await getSavedJobs();
         const jobIds = new Set(savedJobs.map((job) => job.jobId));
         setSavedJobIds(jobIds);
-        console.log("Loaded saved jobs from API:", Array.from(jobIds));
       }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load saved jobs"
       );
-      console.error("Failed to load saved jobs:", err);
+      console.error("Failed to refresh saved jobs:", err);
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +218,7 @@ export function useSavedJobs() {
     isJobSaved,
     canSaveJobs,
     toggleSaveJob,
-    refreshSavedJobs: loadSavedJobs,
+    refreshSavedJobs,
     user,
   };
 }

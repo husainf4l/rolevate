@@ -31,7 +31,7 @@ export default function TestJobCard() {
         Test Job Card with Auth Integration
       </h2>
 
-      <JobCard job={sampleJob} onApply={handleApply} showDescription={true} />
+      <JobCard job={sampleJob} onApply={handleApply} />
 
       <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm">
         <h3 className="font-semibold mb-2">Behavior:</h3>

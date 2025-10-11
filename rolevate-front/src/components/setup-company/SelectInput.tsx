@@ -32,7 +32,7 @@ export default function SelectInput<T extends string>({
         required={required}
         value={value}
         onChange={onChange}
-        className="block w-full rounded-lg border border-gray-200 bg-white/90 px-3 py-2.5 text-gray-900 shadow-sm focus:border-[#13ead9] focus:ring-[#13ead9] text-sm"
+        className="block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-gray-900 shadow-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 focus:outline-none transition text-sm"
       >
         <option value="">Select {label.toLowerCase()}</option>
         {opts.map(opt => (

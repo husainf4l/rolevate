@@ -56,6 +56,14 @@ export default function EnhancedSignupForm({ accountType }: EnhancedSignupFormPr
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     mode: "onChange", // Validate on change for real-time feedback
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phone: "",
+      invitationCode: "",
+    },
   });
 
   const passwordValue = form.watch("password");
@@ -80,8 +88,15 @@ export default function EnhancedSignupForm({ accountType }: EnhancedSignupFormPr
       
       await signup(signupData);
       
-      toast.success("Account created successfully! Please check your email to verify your account.");
-      router.push("/login");
+      toast.success("Account created successfully!");
+      
+      // Navigate based on user type from the signup data we sent
+      if (userType === 'COMPANY') {
+        router.push("/dashboard/setup-company");
+      } else {
+        // CANDIDATE
+        router.push("/userdashboard/create-profile");
+      }
       
     } catch (error: any) {
       toast.error(error.message || "Failed to create account. Please try again.");
@@ -267,7 +282,7 @@ export default function EnhancedSignupForm({ accountType }: EnhancedSignupFormPr
         <Button
           type="submit"
           disabled={loading || form.formState.isSubmitting}
-          className="w-full"
+          className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
           size="default"
         >
           {loading || form.formState.isSubmitting ? (

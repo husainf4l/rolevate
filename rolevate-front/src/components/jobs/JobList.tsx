@@ -51,7 +51,6 @@ export default function JobList({ jobs, onApply }: JobListProps) {
           {...(onApply && { onApply })}
           onSave={handleSaveJob}
           isSaved={isJobSaved(job.id)}
-          showDescription={true}
         />
       ))}
     </div>

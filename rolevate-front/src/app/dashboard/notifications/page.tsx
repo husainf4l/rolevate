@@ -2,8 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect } from "react";
-import { API_CONFIG } from "@/lib/config";
+import React, { useState, useEffect, useCallback } from "react";
 import Header from "@/components/dashboard/Header";
 import {
   BellIcon,
@@ -15,31 +14,16 @@ import {
   TrashIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
+  CheckCircleIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/outline";
-
-interface Notification {
-  id: string;
-  type: "SUCCESS" | "WARNING" | "INFO" | "ERROR";
-  category: "APPLICATION" | "INTERVIEW" | "SYSTEM" | "CANDIDATE" | "OFFER";
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  actionUrl?: string;
-  metadata?: {
-    candidateName?: string;
-    jobTitle?: string;
-    interviewDate?: string;
-    applicationId?: string;
-    [key: string]: any;
-  };
-  userId?: string;
-  companyId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-// Notifications state will be loaded from backend
+import {
+  fetchNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification as deleteNotificationService,
+  type Notification,
+} from "@/services/notification";
 
 const getNotificationIcon = (
   type: Notification["type"],
@@ -96,26 +80,46 @@ export default function NotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      setLoading(true);
+  // Fetch notifications from backend
+  const loadNotifications = useCallback(async () => {
+    try {
       setError(null);
-      try {
-        const res = await fetch(`${API_CONFIG.API_BASE_URL}/notifications`, {
-          credentials: "include",
-        });
-        if (!res.ok) throw new Error("Failed to fetch notifications");
-        const data = await res.json();
-        setNotifications(Array.isArray(data) ? data : data.notifications || []);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch notifications");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchNotifications();
+      const data = await fetchNotifications();
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unreadCount || 0);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch notifications");
+      showToast("Failed to load notifications", "error");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial load
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+
+  // Periodic polling every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadNotifications();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [loadNotifications]);
+
+  // Show toast notification
+  const showToast = (message: string, type: "success" | "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const filteredNotifications = notifications.filter(
     (notification: Notification) => {
@@ -136,24 +140,46 @@ export default function NotificationsPage() {
     }
   );
 
-  const markAsRead = (notificationId: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const deleteNotification = (notificationId: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
-    if (selectedNotification?.id === notificationId) {
-      setSelectedNotification(null);
+  // Mark notification as read
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      await markNotificationAsRead(notificationId);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+      // Removed toast to reduce noise when user clicks notifications
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+      showToast("Failed to mark notification as read", "error");
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  // Mark all notifications as read
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+      showToast("All notifications marked as read", "success");
+    } catch (err) {
+      showToast("Failed to mark all as read", "error");
+    }
+  };
+
+  // Delete notification
+  const handleDeleteNotification = async (notificationId: string) => {
+    try {
+      await deleteNotificationService(notificationId);
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+      if (selectedNotification?.id === notificationId) {
+        setSelectedNotification(null);
+      }
+      showToast("Notification deleted", "success");
+    } catch (err) {
+      showToast("Failed to delete notification", "error");
+    }
+  };
 
   if (loading) {
     return (
@@ -203,7 +229,7 @@ export default function NotificationsPage() {
                     </h2>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={markAllAsRead}
+                        onClick={handleMarkAllAsRead}
                         className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
                       >
                         Mark All Read
@@ -247,11 +273,11 @@ export default function NotificationsPage() {
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
                       >
                         <option value="all">All Categories</option>
-                        <option value="application">Applications</option>
-                        <option value="interview">Interviews</option>
-                        <option value="candidate">Candidates</option>
-                        <option value="offer">Offers</option>
-                        <option value="system">System</option>
+                        <option value="APPLICATION">Applications</option>
+                        <option value="INTERVIEW">Interviews</option>
+                        <option value="CANDIDATE">Candidates</option>
+                        <option value="OFFER">Offers</option>
+                        <option value="SYSTEM">System</option>
                       </select>
                     </div>
 
@@ -274,17 +300,17 @@ export default function NotificationsPage() {
                     filteredNotifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                          !notification.read ? "bg-blue-50" : ""
+                        className={`p-4 hover:bg-gray-50 cursor-pointer transition-all duration-200 ${
+                          !notification.read ? "bg-blue-50 border-l-4 border-blue-500" : "border-l-4 border-transparent"
                         } ${
                           selectedNotification?.id === notification.id
-                            ? "bg-blue-100"
+                            ? "bg-blue-100 ring-2 ring-blue-500 ring-inset"
                             : ""
                         }`}
                         onClick={() => {
                           setSelectedNotification(notification);
                           if (!notification.read) {
-                            markAsRead(notification.id);
+                            handleMarkAsRead(notification.id);
                           }
                         }}
                       >
@@ -310,7 +336,7 @@ export default function NotificationsPage() {
                                   {formatTimestamp(notification.timestamp)}
                                 </span>
                                 {!notification.read && (
-                                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
                                 )}
                               </div>
                             </div>
@@ -321,12 +347,12 @@ export default function NotificationsPage() {
                               <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                                 {notification.metadata.candidateName && (
                                   <span>
-                                    👤 {notification.metadata.candidateName}
+                                    {notification.metadata.candidateName}
                                   </span>
                                 )}
                                 {notification.metadata.jobTitle && (
                                   <span>
-                                    💼 {notification.metadata.jobTitle}
+                                    {notification.metadata.jobTitle}
                                   </span>
                                 )}
                               </div>
@@ -351,7 +377,7 @@ export default function NotificationsPage() {
                       </h3>
                       <button
                         onClick={() =>
-                          deleteNotification(selectedNotification.id)
+                          handleDeleteNotification(selectedNotification.id)
                         }
                         className="text-gray-400 hover:text-red-600 transition-colors"
                       >
@@ -484,7 +510,26 @@ export default function NotificationsPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 animate-slide-up">
+          <div
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${
+              toast.type === "success"
+                ? "bg-green-600 text-white"
+                : "bg-red-600 text-white"
+            }`}
+          >
+            {toast.type === "success" ? (
+              <CheckCircleIcon className="w-5 h-5" />
+            ) : (
+              <XCircleIcon className="w-5 h-5" />
+            )}
+            <span className="font-medium">{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

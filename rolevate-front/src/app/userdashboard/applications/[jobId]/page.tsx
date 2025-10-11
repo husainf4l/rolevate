@@ -309,7 +309,9 @@ export default function ApplicationDetailsPage() {
                     <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                       <div className="flex items-center space-x-3 mb-4">
                         <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <span className="text-blue-600 text-lg">📝</span>
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
                         </div>
                         <p className="text-sm font-semibold text-gray-700">
                           Your Cover Letter
@@ -380,7 +382,9 @@ export default function ApplicationDetailsPage() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-2xl flex items-center justify-center">
-                    <span className="text-[#0891b2] text-xl">📊</span>
+                    <svg className="w-6 h-6 text-[#0891b2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
                   </div>
                   <h2 className="text-2xl font-bold text-[#1d1d1f]">
                     Your Application Analysis
@@ -458,7 +462,9 @@ export default function ApplicationDetailsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="bg-gradient-to-br from-primary-50 to-primary-100 p-6 rounded-xl border border-primary-200">
                         <h4 className="text-sm font-semibold text-primary-800 mb-4 flex items-center">
-                          <span className="mr-3">🎯</span>
+                          <svg className="w-5 h-5 mr-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
                           CV Match Score
                         </h4>
                         <div className="flex items-center space-x-4">
@@ -497,7 +503,9 @@ export default function ApplicationDetailsPage() {
 
                       <div className="bg-gradient-to-br from-purple-50 to-pink-100 p-6 rounded-xl border border-purple-200">
                         <h4 className="text-sm font-semibold text-purple-800 mb-4 flex items-center">
-                          <span className="mr-3">🌟</span>
+                          <svg className="w-5 h-5 mr-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
                           Overall Assessment
                         </h4>
                         <div className="flex items-center space-x-4">
@@ -536,7 +544,9 @@ export default function ApplicationDetailsPage() {
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-300">
                       <div className="flex items-center space-x-4 mb-8">
                         <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                          <span className="text-primary-600 text-xl">🎯</span>
+                          <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900">
                           Skills Match Analysis
@@ -868,7 +878,7 @@ export default function ApplicationDetailsPage() {
                               );
                             }
 
-                            return null;
+                        return null;
                           })}
                       </div>
                     </div>
@@ -881,7 +891,9 @@ export default function ApplicationDetailsPage() {
                     >
                       <div className="flex items-center space-x-4 mb-6">
                         <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white">
-                          <span className="text-sm">🚀</span>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
                         </div>
                         <div>
                           <h4 className="text-lg font-medium text-[#1d1d1f] mb-1">

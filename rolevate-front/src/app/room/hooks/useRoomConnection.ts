@@ -98,17 +98,17 @@ export function useRoomConnection({
 
           const participantData = createData.participantName || createData.room?.metadata?.candidateName || createData.interviewContext?.candidateName;
 
-          console.log("📊 Extracted data:", { jobData, companyData, participantData });
+          console.log("Extracted data:", { jobData, companyData, participantData });
           onJobDataUpdate(jobData, companyData, participantData);
         }
       }
 
       if (!token || !roomName) {
-        console.error("❌ Missing required parameters:", { token: !!token, roomName });
+        console.error("Missing required parameters:", { token: !!token, roomName });
         throw new Error(`Missing required parameters - token: ${!!token}, roomName: ${!!roomName}`);
       }
 
-      console.log("🚀 Connecting to LiveKit room:", { roomName, serverUrl });
+      console.log("Connecting to LiveKit room:", { roomName, serverUrl });
 
       // Setup room event listeners
       room.removeAllListeners();

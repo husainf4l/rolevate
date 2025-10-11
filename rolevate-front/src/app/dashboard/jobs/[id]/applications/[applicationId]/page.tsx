@@ -280,15 +280,15 @@ const getStatusColor = (status: Application["status"]) => {
 const getSourceIcon = (source: CandidateDetail["source"]) => {
   switch (source) {
     case "linkedin":
-      return "💼";
+      return "LinkedIn";
     case "website":
-      return "🌐";
+      return "Website";
     case "referral":
-      return "👥";
+      return "Referral";
     case "recruiter":
-      return "🎯";
+      return "Recruiter";
     default:
-      return "📧";
+      return "Email";
   }
 };
 

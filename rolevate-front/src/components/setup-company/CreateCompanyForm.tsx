@@ -271,7 +271,7 @@ export default function CreateCompanyForm({
       <Button
         type="submit"
         disabled={loading}
-        className="w-full"
+        className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
       >
         {loading ? 'Creating Company...' : 'Create Company'}
       </Button>

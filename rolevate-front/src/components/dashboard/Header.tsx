@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { logout } from "@/services/auth";
+import { markNotificationAsRead } from "@/services/notification";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { API_CONFIG } from "@/lib/config";
@@ -150,28 +151,15 @@ export default function Header({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen, notificationOpen]);
 
-  const markNotificationAsRead = useCallback(async (notificationId: string) => {
+  const handleMarkNotificationAsRead = useCallback(async (notificationId: string) => {
     try {
       // Update local state optimistically
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
       );
 
-      // Make API call to mark as read
-      const res = await fetch(
-        `${API_CONFIG.API_BASE_URL}/notifications/${notificationId}/read`,
-        {
-          method: "PUT",
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) {
-        // Revert on error
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === notificationId ? { ...n, read: false } : n))
-        );
-      }
+      // Make API call to mark as read using the service
+      await markNotificationAsRead(notificationId);
     } catch (err) {
       console.error("Error marking notification as read:", err);
       // Revert on error
@@ -260,7 +248,7 @@ export default function Header({
                                 key={notification.id}
                                 className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                                 onClick={() => {
-                                  markNotificationAsRead(notification.id);
+                                  handleMarkNotificationAsRead(notification.id);
                                   setNotificationOpen(false);
                                   if (notification.actionUrl) {
                                     router.push(notification.actionUrl);
@@ -417,7 +405,7 @@ export default function Header({
                             key={notification.id}
                             className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                             onClick={() => {
-                              markNotificationAsRead(notification.id);
+                              handleMarkNotificationAsRead(notification.id);
                               setNotificationOpen(false);
                               if (notification.actionUrl) {
                                 router.push(notification.actionUrl);

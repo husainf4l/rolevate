@@ -20,7 +20,7 @@ const featuredCompanies = [
   {
     id: 2,
     name: "Aramco Digital",
-    logo: "🏢",
+    logo: "A",
     industry: "Technology & Energy",
     employees: "10,000+",
     location: "Riyadh, Saudi Arabia",
@@ -33,7 +33,7 @@ const featuredCompanies = [
   {
     id: 3,
     name: "Qatar Airways",
-    logo: "✈️",
+    logo: "Q",
     industry: "Aviation",
     employees: "50,000+",
     location: "Doha, Qatar",
@@ -47,7 +47,7 @@ const featuredCompanies = [
   {
     id: 4,
     name: "NEOM Tech",
-    logo: "🌟",
+    logo: "N",
     industry: "Smart Cities & AI",
     employees: "5,000+",
     location: "NEOM, Saudi Arabia",

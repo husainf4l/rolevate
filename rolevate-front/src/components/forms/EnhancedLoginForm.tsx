@@ -38,6 +38,10 @@ export default function EnhancedLoginForm() {
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: "onChange", // Validate on change for real-time feedback
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -142,7 +146,7 @@ export default function EnhancedLoginForm() {
         <Button
           type="submit"
           disabled={loading || form.formState.isSubmitting}
-          className="w-full bg-gradient-to-r from-[#13ead9] to-[#0891b2] hover:from-[#13ead9]/90 hover:to-[#0891b2]/90"
+          className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
         >
           {loading || form.formState.isSubmitting ? (
             <div className="flex items-center justify-center">

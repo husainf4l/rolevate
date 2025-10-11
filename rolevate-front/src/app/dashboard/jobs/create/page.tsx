@@ -88,6 +88,7 @@ function CreateJobContent() {
     switch (currentStep) {
       case 'basic': return isBasicStepValid;
       case 'details': return isJobDetailsValid;
+      case 'interview-questions': return true; // Interview questions are optional
       case 'ai-config': return true; // AI step is optional
       case 'preview': return true;
       default: return false;

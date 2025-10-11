@@ -97,23 +97,23 @@ export default function SetupCompanyPage() {
 
   if (pageLoading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13ead9] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600 text-sm">Setting up your workspace...</p>
         </div>
       </div>
     );
 
   return (
-    <section className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
+    <section className="w-full min-h-screen bg-white">
       <div className="container mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-screen relative">
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20 bg-white/95 backdrop-blur-lg border-b border-gray-100">
+        <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20 bg-white border-b border-gray-200">
           <Logo size={32} />
           <button
             onClick={() => router.push("/login")}
-            className="flex items-center text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100/80 text-sm"
+            className="flex items-center text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100 text-sm transition-colors"
           >
             <span className="font-medium">Back</span>
           </button>
@@ -130,18 +130,18 @@ export default function SetupCompanyPage() {
                 get started.
               </p>
             </div>
-            <div className="relative bg-gradient-to-r from-gray-50 to-gray-100/80 rounded-sm p-1.5 mb-8 w-1/2 max-w-5xl mx-auto shadow-sm border border-gray-200/50 backdrop-blur-sm">
+            <div className="relative bg-gray-100 rounded-lg p-1 mb-8 w-1/2 max-w-5xl mx-auto border border-gray-200">
               <div className="flex relative">
                 {/* Sliding Background */}
                 <div
-                  className={`absolute top-0 bottom-0 w-1/2 bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-xl shadow-lg transition-all duration-300 ease-out ${
+                  className={`absolute top-0 bottom-0 w-1/2 bg-primary-600 rounded-md shadow-sm transition-all duration-300 ease-out ${
                     activeTab === "create" ? "left-0" : "left-1/2"
                   }`}
                 />
 
                 <button
                   onClick={() => setActiveTab("create")}
-                  className={`relative flex-1 py-3.5 px-4 rounded-xl font-semibold text-sm transition-all duration-300 ease-out ${
+                  className={`relative flex-1 py-3.5 px-4 rounded-md font-semibold text-sm transition-all duration-300 ease-out ${
                     activeTab === "create"
                       ? "text-white scale-[1.02] shadow-sm"
                       : "text-gray-700 hover:text-gray-900 hover:scale-[1.01]"
@@ -169,7 +169,7 @@ export default function SetupCompanyPage() {
 
                 <button
                   onClick={() => setActiveTab("join")}
-                  className={`relative flex-1 py-3.5 px-4 rounded-xl font-semibold text-sm transition-all duration-300 ease-out ${
+                  className={`relative flex-1 py-3.5 px-4 rounded-md font-semibold text-sm transition-all duration-300 ease-out ${
                     activeTab === "join"
                       ? "text-white scale-[1.02] shadow-sm"
                       : "text-gray-700 hover:text-gray-900 hover:scale-[1.01]"

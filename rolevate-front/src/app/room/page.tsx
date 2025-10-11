@@ -82,7 +82,7 @@ function Room4Content() {
       !error &&
       !connectionAttemptedRef.current
     ) {
-      console.log("🚀 Triggering room connection...");
+      console.log("Triggering room connection...");
       connectionAttemptedRef.current = true;
       connectToRoom();
     }

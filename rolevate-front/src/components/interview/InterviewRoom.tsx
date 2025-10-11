@@ -302,7 +302,7 @@ export default function InterviewRoom({
   }, []);
 
   const handleParticipantConnected = useCallback((participant: RemoteParticipant) => {
-    console.log("👤 NEW PARTICIPANT JOINED:", {
+    console.log("NEW PARTICIPANT JOINED:", {
       identity: participant.identity,
       sid: participant.sid,
       isAgent: participant.isAgent,
@@ -313,19 +313,19 @@ export default function InterviewRoom({
     if (participant.isAgent || 
         participant.identity.includes("agent") || 
         participant.identity.includes("ai")) {
-      console.log("🤖 AI AGENT DETECTED AND CONNECTED!");
+      console.log("AI AGENT DETECTED AND CONNECTED!");
       setAiAgent(participant);
     }
   }, []);
 
   const handleParticipantDisconnected = useCallback((participant: RemoteParticipant) => {
-    console.log("👤 PARTICIPANT LEFT:", {
+    console.log("PARTICIPANT LEFT:", {
       identity: participant.identity,
       sid: participant.sid
     });
 
     if (participant === aiAgent) {
-      console.log("🤖 AI Agent disconnected");
+      console.log("AI Agent disconnected");
       setAiAgent(null);
     }
   }, [aiAgent]);
@@ -336,8 +336,8 @@ export default function InterviewRoom({
       setIsConnecting(true);
       setError(null);
 
-      console.log("🚀 STARTING LIVEKIT CONNECTION PROCESS");
-      console.log("📊 Connection Details:", {
+      console.log("STARTING LIVEKIT CONNECTION PROCESS");
+      console.log("Connection Details:", {
         roomName,
         serverUrl,
         tokenLength: token?.length,
@@ -347,7 +347,7 @@ export default function InterviewRoom({
 
       // Check if already connected
       if (room.state === "connected") {
-        console.log("✅ ALREADY CONNECTED TO LIVEKIT ROOM");
+        console.log("ALREADY CONNECTED TO LIVEKIT ROOM");
         setIsConnected(true);
         setIsConnecting(false);
         return;
@@ -463,7 +463,7 @@ export default function InterviewRoom({
       });
 
       room.on(RoomEvent.ConnectionQualityChanged, (quality, participant) => {
-        console.log("📊 Connection Quality Changed:", {
+        console.log("Connection Quality Changed:", {
           quality,
           participant: participant?.identity || "local",
         });
@@ -471,12 +471,12 @@ export default function InterviewRoom({
 
       // Add error event listener
       room.on(RoomEvent.RoomMetadataChanged, (metadata) => {
-        console.log("📝 Room Metadata Changed:", metadata);
+        console.log("Room Metadata Changed:", metadata);
       });
 
-      console.log("🔌 ATTEMPTING TO CONNECT TO LIVEKIT...");
-      console.log("🌐 Server URL:", serverUrl);
-      console.log("🎫 Token (first 50 chars):", token.substring(0, 50) + "...");
+      console.log("ATTEMPTING TO CONNECT TO LIVEKIT...");
+      console.log("Server URL:", serverUrl);
+      console.log("Token (first 50 chars):", token.substring(0, 50) + "...");
 
       // Connect to the room with proper options for audio handling
       await room.connect(serverUrl, token, {
@@ -496,17 +496,17 @@ export default function InterviewRoom({
         },
       });
 
-      console.log("🎯 CONNECTION COMMAND COMPLETED");
-      console.log("🏠 Final Room State:", room.state);
-      console.log("👥 Participants Count:", room.numParticipants);
-      console.log("🔗 Connected to Room:", room.name);
+      console.log("CONNECTION COMMAND COMPLETED");
+      console.log("Final Room State:", room.state);
+      console.log("Participants Count:", room.numParticipants);
+      console.log("Connected to Room:", room.name);
 
       // Enable microphone by default
-      console.log("🎤 Enabling microphone...");
+      console.log("Enabling microphone...");
       await room.localParticipant.setMicrophoneEnabled(mediaDevices.microphone);
-      console.log("✅ Microphone enabled:", mediaDevices.microphone);
+      console.log("Microphone enabled:", mediaDevices.microphone);
     } catch (err) {
-      console.error("💥 LIVEKIT CONNECTION FAILED:");
+      console.error("LIVEKIT CONNECTION FAILED:");
       console.error(
         "  - Error Type:",
         err instanceof Error ? err.constructor.name : typeof err
@@ -616,7 +616,7 @@ export default function InterviewRoom({
       const actualConnecting =
         actualState === "connecting" || actualState === "reconnecting";
 
-      console.log("📊 FORCE STATE SYNC:", {
+      console.log("FORCE STATE SYNC:", {
         roomState: actualState,
         participantCount: room.numParticipants,
         currentUIConnected: isConnected,

@@ -39,6 +39,9 @@ export default function EnhancedCVUpload({
     setValue,
   } = useForm<CVUploadFormData>({
     resolver: zodResolver(cvUploadSchema),
+    defaultValues: {
+      file: undefined,
+    },
   });
 
   const handleFileSelect = (file: File) => {

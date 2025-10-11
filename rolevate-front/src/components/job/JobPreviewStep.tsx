@@ -223,16 +223,6 @@ export default function JobPreviewStep({ jobData }: JobPreviewStepProps) {
                   </p>
                 </div>
               )}
-              {jobData.aiSecondInterviewPrompt && (
-                <div>
-                  <p className="text-sm font-medium text-blue-800 mb-1">
-                    Second Interview Prompt:
-                  </p>
-                  <p className="text-sm text-blue-700 bg-white/50 p-2 rounded">
-                    {jobData.aiSecondInterviewPrompt}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         )}

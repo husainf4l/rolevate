@@ -378,7 +378,6 @@ export default function JobDetailsStep({
                 <SelectValue placeholder="Select experience level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Select experience level</SelectItem>
                 {experienceOptions.map((option) => (
                   <SelectItem key={option} value={option}>
                     {option}
@@ -517,7 +516,6 @@ export default function JobDetailsStep({
               <SelectValue placeholder="Select education level" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Select education level</SelectItem>
               <SelectItem value="High School">High School</SelectItem>
               <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
               <SelectItem value="Master's Degree">Master's Degree</SelectItem>

@@ -149,8 +149,6 @@ export default function AvailableJobs() {
                 key={job.id}
                 job={job}
                 onApply={handleApply}
-                showDescription={true}
-                compact={false}
               />
             ))
           )}
