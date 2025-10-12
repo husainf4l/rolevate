@@ -723,7 +723,7 @@ function CreateJobContent() {
                       value={jobData.interviewQuestions}
                       onChange={(e) => handleInputChange("interviewQuestions", e.target.value)}
                       placeholder="Add your questions ..."
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0fc4b5] focus:border-transparent bg-white text-[#1d1d1f] placeholder-[#6e6e73] resize-vertical"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-transparent bg-white text-[#1d1d1f] placeholder-[#6e6e73] resize-vertical"
                       rows={8}
                     />
                   </div>

@@ -236,7 +236,7 @@ export default function CompanyProfilePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13ead9] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading company profile...</p>
         </div>
       </div>
@@ -265,7 +265,7 @@ export default function CompanyProfilePage() {
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="flex-shrink-0">
               <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-sm flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden">
+                <div className="w-24 h-24 bg-primary-600 rounded-sm flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden">
                   {companyProfile.logo ? (
                     <Image
                       src={companyProfile.logo}
@@ -309,17 +309,17 @@ export default function CompanyProfilePage() {
               </p>
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
                 {companyProfile.industry && (
-                  <span className="px-4 py-2 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 text-[#0891b2] rounded-full text-sm font-semibold border border-[#13ead9]/20">
+                  <span className="px-4 py-2 bg-primary-600/10 text-primary-600 rounded-full text-sm font-semibold border border-primary-600/20">
                     {companyProfile.industry}
                   </span>
                 )}
                 {companyProfile.headquarters && (
-                  <span className="px-4 py-2 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 text-[#0891b2] rounded-full text-sm font-semibold border border-[#13ead9]/20">
+                  <span className="px-4 py-2 bg-primary-600/10 text-primary-600 rounded-full text-sm font-semibold border border-primary-600/20">
                     {companyProfile.headquarters}
                   </span>
                 )}
                 {companyProfile.employees && (
-                  <span className="px-4 py-2 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 text-[#0891b2] rounded-full text-sm font-semibold border border-[#13ead9]/20">
+                  <span className="px-4 py-2 bg-primary-600/10 text-primary-600 rounded-full text-sm font-semibold border border-primary-600/20">
                     {companyProfile.employees} employees
                   </span>
                 )}
@@ -353,7 +353,7 @@ export default function CompanyProfilePage() {
             <button
               className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                 tab === "company"
-                  ? "bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white shadow-lg"
+                  ? "bg-primary-600 text-white shadow-lg"
                   : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
               }`}
               onClick={() => setTab("company")}
@@ -363,7 +363,7 @@ export default function CompanyProfilePage() {
             <button
               className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                 tab === "users"
-                  ? "bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white shadow-lg"
+                  ? "bg-primary-600 text-white shadow-lg"
                   : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
               }`}
               onClick={() => setTab("users")}
@@ -373,7 +373,7 @@ export default function CompanyProfilePage() {
             <button
               className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                 tab === "subscription"
-                  ? "bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white shadow-lg"
+                  ? "bg-primary-600 text-white shadow-lg"
                   : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
               }`}
               onClick={() => setTab("subscription")}
@@ -383,7 +383,7 @@ export default function CompanyProfilePage() {
             <button
               className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                 tab === "notifications"
-                  ? "bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white shadow-lg"
+                  ? "bg-primary-600 text-white shadow-lg"
                   : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
               }`}
               onClick={() => setTab("notifications")}
@@ -393,7 +393,7 @@ export default function CompanyProfilePage() {
             <button
               className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                 tab === "security"
-                  ? "bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white shadow-lg"
+                  ? "bg-primary-600 text-white shadow-lg"
                   : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
               }`}
               onClick={() => setTab("security")}
@@ -415,7 +415,7 @@ export default function CompanyProfilePage() {
                 </h3>
                 <div className="flex items-center gap-6">
                   <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-tr from-[#13ead9] to-[#0891b2] rounded-sm flex items-center justify-center text-2xl font-bold text-white shadow-lg overflow-hidden">
+                    <div className="w-20 h-20 bg-primary-600 rounded-sm flex items-center justify-center text-2xl font-bold text-white shadow-lg overflow-hidden">
                       {companyProfile.logo ? (
                         <Image
                           src={companyProfile.logo}
@@ -569,7 +569,7 @@ export default function CompanyProfilePage() {
                     {companyProfile.values.map((value, i) => (
                       <span
                         key={i}
-                        className="px-4 py-2 bg-gradient-to-r from-[#13ead9]/10 to-[#0891b2]/10 text-[#0891b2] rounded-full text-sm font-semibold border border-[#13ead9]/20"
+                        className="px-4 py-2 bg-primary-600/10 text-primary-600 rounded-full text-sm font-semibold border border-primary-600/20"
                       >
                         {value}
                       </span>
@@ -591,7 +591,7 @@ export default function CompanyProfilePage() {
                           key={i}
                           className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-gray-100"
                         >
-                          <div className="w-2 h-2 bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-full"></div>
+                          <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
                           <span className="text-gray-800 font-medium">
                             {benefit}
                           </span>
@@ -656,7 +656,7 @@ export default function CompanyProfilePage() {
                             className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md"
                           />
                         ) : (
-                          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#13ead9] to-[#0891b2] flex items-center justify-center text-white font-bold text-xl border-2 border-white shadow-md">
+                          <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold text-xl border-2 border-white shadow-md">
                             {user.name.charAt(0)}
                           </div>
                         )}
@@ -668,7 +668,7 @@ export default function CompanyProfilePage() {
                         </div>
                       </div>
                       <div className="text-center">
-                        <span className="inline-block px-4 py-2 bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white rounded-full text-sm font-semibold shadow-md">
+                        <span className="inline-block px-4 py-2 bg-primary-600 text-white rounded-full text-sm font-semibold shadow-md">
                           {user.role}
                         </span>
                       </div>
@@ -714,7 +714,7 @@ export default function CompanyProfilePage() {
 
               <div className="max-w-2xl mx-auto">
                 {companyProfile.subscription ? (
-                  <div className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-sm p-8 text-white text-center shadow-2xl">
+                  <div className="bg-primary-600 rounded-sm p-8 text-white text-center shadow-2xl">
                     <div className="text-3xl font-bold mb-2">
                       {companyProfile.subscription.plan} Plan
                     </div>
@@ -746,7 +746,7 @@ export default function CompanyProfilePage() {
                         key={i}
                         className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-gray-100"
                       >
-                        <div className="w-5 h-5 bg-gradient-to-r from-[#13ead9] to-[#0891b2] rounded-full flex items-center justify-center">
+                        <div className="w-5 h-5 bg-primary-600 rounded-full flex items-center justify-center">
                           <svg
                             className="w-3 h-3 text-white"
                             fill="currentColor"
@@ -818,7 +818,7 @@ export default function CompanyProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -843,7 +843,7 @@ export default function CompanyProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -868,7 +868,7 @@ export default function CompanyProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
                   </div>
@@ -900,7 +900,7 @@ export default function CompanyProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -925,7 +925,7 @@ export default function CompanyProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -950,7 +950,7 @@ export default function CompanyProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -975,7 +975,7 @@ export default function CompanyProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
                   </div>
@@ -1048,7 +1048,7 @@ export default function CompanyProfilePage() {
                               currentPassword: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                          className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                           placeholder="Enter your current password"
                           required
                         />
@@ -1115,7 +1115,7 @@ export default function CompanyProfilePage() {
                               newPassword: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                          className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                           placeholder="Enter new password"
                           minLength={8}
                           required
@@ -1186,7 +1186,7 @@ export default function CompanyProfilePage() {
                               confirmPassword: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                          className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                           placeholder="Confirm new password"
                           required
                         />

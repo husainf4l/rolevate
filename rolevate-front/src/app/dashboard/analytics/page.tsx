@@ -58,7 +58,7 @@ const analyticsData: AnalyticsData = {
       stage: "AI Resume Analysis",
       count: 189,
       percentage: 77,
-      color: "#0fc4b5",
+      color: "#0ea5e9",
       dropOffRate: 23,
     },
     {
@@ -482,8 +482,8 @@ const StatCard = ({
           <span className="text-xs text-gray-500 ml-1">vs last month</span>
         </div>
       </div>
-      <div className={`p-3 rounded-lg bg-[#0891b2]/10`}>
-        <Icon className={`w-6 h-6 text-[#0891b2]`} />
+      <div className={`p-3 rounded-lg bg-primary-600/10`}>
+        <Icon className={`w-6 h-6 text-primary-600`} />
       </div>
     </div>
   </div>
@@ -539,7 +539,7 @@ const PipelineChart = ({ data }: { data: PipelineStage[] }) => (
       <div className="text-sm text-gray-600">
         <p>
           • Overall conversion rate:{" "}
-          <span className="font-semibold text-[#0891b2]">11.3%</span> (28/247
+          <span className="font-semibold text-primary-600">11.3%</span> (28/247
           candidates hired)
         </p>
         <p>
@@ -570,11 +570,11 @@ const TimelineChart = ({ data }: { data: TimelineData[] }) => {
       {/* Chart Legend */}
       <div className="flex items-center gap-6 mb-6">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-[#0891b2] rounded-full" />
+          <div className="w-3 h-3 bg-primary-600 rounded-full" />
           <span className="text-sm text-gray-600">Applications</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-[#0fc4b5] rounded-full" />
+          <div className="w-3 h-3 bg-primary-600 rounded-full" />
           <span className="text-sm text-gray-600">Interviews</span>
         </div>
         <div className="flex items-center gap-2">
@@ -614,7 +614,7 @@ const TimelineChart = ({ data }: { data: TimelineData[] }) => {
               {/* Bars */}
               <div className="flex items-end gap-1 mb-4">
                 <div
-                  className="w-4 bg-[#0891b2] rounded-t hover:bg-[#0891b2]/80 transition-colors cursor-pointer group relative"
+                  className="w-4 bg-primary-600 rounded-t hover:bg-primary-600/80 transition-colors cursor-pointer group relative"
                   style={{
                     height: `${(item.applications / maxValue) * chartHeight}px`,
                   }}
@@ -624,7 +624,7 @@ const TimelineChart = ({ data }: { data: TimelineData[] }) => {
                   </div>
                 </div>
                 <div
-                  className="w-4 bg-[#0fc4b5] rounded-t hover:bg-[#0fc4b5]/80 transition-colors cursor-pointer group relative"
+                  className="w-4 bg-primary-600 rounded-t hover:bg-primary-600/80 transition-colors cursor-pointer group relative"
                   style={{
                     height: `${(item.interviews / maxValue) * chartHeight}px`,
                   }}
@@ -704,13 +704,13 @@ const TimelineChart = ({ data }: { data: TimelineData[] }) => {
       {/* Summary Stats */}
       <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
         <div className="text-center">
-          <div className="text-2xl font-bold text-[#0891b2]">
+          <div className="text-2xl font-bold text-primary-600">
             {data.reduce((sum, item) => sum + item.applications, 0)}
           </div>
           <div className="text-xs text-gray-500">Total Applications</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-[#0fc4b5]">
+          <div className="text-2xl font-bold text-primary-600">
             {data.reduce((sum, item) => sum + item.interviews, 0)}
           </div>
           <div className="text-xs text-gray-500">Total Interviews</div>
@@ -790,14 +790,14 @@ const SourcePieChart = ({ data }: { data: SourceData[] }) => (
 const AIPerformanceCard = ({ data }: { data: AiPerformanceData }) => (
   <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
     <div className="flex items-center gap-2 mb-6">
-      <CpuChipIcon className="w-5 h-5 text-[#0891b2]" />
+      <CpuChipIcon className="w-5 h-5 text-primary-600" />
       <h3 className="text-lg font-semibold text-gray-900">
         AI Performance Metrics
       </h3>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
       <div className="text-center">
-        <div className="text-2xl font-bold text-[#0891b2]">
+        <div className="text-2xl font-bold text-primary-600">
           {data.avgAiScore}%
         </div>
         <div className="text-sm text-gray-600">Avg AI Score</div>
@@ -809,7 +809,7 @@ const AIPerformanceCard = ({ data }: { data: AiPerformanceData }) => (
         </div>
       </div>
       <div className="text-center">
-        <div className="text-2xl font-bold text-[#0891b2]">
+        <div className="text-2xl font-bold text-primary-600">
           {data.aiAccuracy}%
         </div>
         <div className="text-sm text-gray-600">AI Accuracy</div>
@@ -821,7 +821,7 @@ const AIPerformanceCard = ({ data }: { data: AiPerformanceData }) => (
         </div>
       </div>
       <div className="text-center">
-        <div className="text-2xl font-bold text-[#0891b2]">
+        <div className="text-2xl font-bold text-primary-600">
           {data.avgProcessingTime}s
         </div>
         <div className="text-sm text-gray-600">Processing Time</div>
@@ -833,7 +833,7 @@ const AIPerformanceCard = ({ data }: { data: AiPerformanceData }) => (
         </div>
       </div>
       <div className="text-center">
-        <div className="text-2xl font-bold text-[#0891b2]">
+        <div className="text-2xl font-bold text-primary-600">
           {data.predictiveAccuracy}%
         </div>
         <div className="text-sm text-gray-600">Predictive Accuracy</div>
@@ -845,7 +845,7 @@ const AIPerformanceCard = ({ data }: { data: AiPerformanceData }) => (
         </div>
       </div>
       <div className="text-center">
-        <div className="text-2xl font-bold text-[#0891b2]">
+        <div className="text-2xl font-bold text-primary-600">
           {data.falsePositiveRate}%
         </div>
         <div className="text-sm text-gray-600">False Positive Rate</div>
@@ -881,16 +881,16 @@ const InsightsCard = ({ insights }: { insights: Insight[] }) => (
         >
           <div className="flex items-center gap-2 mb-2">
             {insight.icon === "cpu" && (
-              <CpuChipIcon className="w-5 h-5 text-[#0891b2]" />
+              <CpuChipIcon className="w-5 h-5 text-primary-600" />
             )}
             {insight.icon === "funnel" && (
-              <FunnelIcon className="w-5 h-5 text-[#0891b2]" />
+              <FunnelIcon className="w-5 h-5 text-primary-600" />
             )}
             {insight.icon === "users" && (
-              <UsersIcon className="w-5 h-5 text-[#0891b2]" />
+              <UsersIcon className="w-5 h-5 text-primary-600" />
             )}
             {insight.icon === "currency" && (
-              <CurrencyDollarIcon className="w-5 h-5 text-[#0891b2]" />
+              <CurrencyDollarIcon className="w-5 h-5 text-primary-600" />
             )}
             <h4 className="font-semibold text-gray-900">{insight.title}</h4>
           </div>
@@ -999,7 +999,7 @@ const LocationAnalytics = ({ data }: { data: LocationData[] }) => (
           <div className="flex items-center gap-3">
             <div className="w-24 bg-gray-200 rounded-full h-2">
               <div
-                className="h-2 bg-[#0891b2] rounded-full"
+                className="h-2 bg-primary-600 rounded-full"
                 style={{ width: `${item.percentage}%` }}
               />
             </div>
@@ -1038,14 +1038,14 @@ const SkillsAnalytics = ({ data }: { data: SkillData[] }) => (
                 )}
               </div>
             </div>
-            <span className="text-sm font-bold text-[#0891b2]">
+            <span className="text-sm font-bold text-primary-600">
               {item.count} candidates
             </span>
           </div>
           <div className="flex items-center justify-between text-xs text-gray-600">
             <span>
               Demand Score:{" "}
-              <span className="font-semibold text-[#0891b2]">
+              <span className="font-semibold text-primary-600">
                 {item.demandScore}/100
               </span>
             </span>
@@ -1087,7 +1087,7 @@ export default function AnalyticsPage() {
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
             >
               <option value="1month">Last Month</option>
               <option value="3months">Last 3 Months</option>

@@ -42,7 +42,7 @@ export default function JobRecommendations({ loading = false }: JobRecommendatio
         </h2>
         <a
           href="/userdashboard/jobs"
-          className="text-[#0fc4b5] hover:text-[#0ba399] font-medium text-sm transition-colors"
+          className="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"
         >
           View all jobs
         </a>
@@ -113,7 +113,7 @@ export default function JobRecommendations({ loading = false }: JobRecommendatio
                     {job.description}
                   </p>
                 </div>
-                <button className="p-2 text-gray-400 hover:text-[#0fc4b5] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
+                <button className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-600/10 rounded-md transition-colors">
                   <BookmarkIcon className="w-5 h-5" />
                 </button>
               </div>
@@ -137,7 +137,7 @@ export default function JobRecommendations({ loading = false }: JobRecommendatio
                   <span className="text-xs">
                     {new Date(job.postedDate).toLocaleDateString()}
                   </span>
-                  <button className="px-3 py-1 bg-[#0fc4b5] text-white text-xs rounded-md hover:bg-[#0ba399] transition-colors">
+                  <button className="px-3 py-1 bg-primary-600 text-white text-xs rounded-md hover:bg-primary-700 transition-colors">
                     Apply
                   </button>
                 </div>

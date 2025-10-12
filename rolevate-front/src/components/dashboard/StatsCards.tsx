@@ -136,8 +136,8 @@ export default function StatsCards() {
           className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70 hover:shadow-lg transition-shadow duration-200"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-[#0fc4b5]/15 rounded-lg">
-              <card.icon className="w-6 h-6 text-[#0fc4b5]" />
+            <div className="p-3 bg-primary-600/15 rounded-lg">
+              <card.icon className="w-6 h-6 text-primary-600" />
             </div>
             {card.change && (
               <div

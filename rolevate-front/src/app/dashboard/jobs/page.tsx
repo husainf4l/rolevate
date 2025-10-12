@@ -348,7 +348,7 @@ function JobsContent() {
           <div className="flex items-center justify-center h-64">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
               <div className="flex items-center gap-4">
-                <div className="w-8 h-8 border-3 border-[#0fc4b5] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-3 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
                 <div>
                   <div className="text-lg font-semibold text-gray-900">Loading jobs...</div>
                   <div className="text-sm text-gray-600">Please wait while we fetch your job postings</div>
@@ -381,7 +381,7 @@ function JobsContent() {
               <p className="text-gray-600 text-sm mb-6">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-gradient-to-r from-[#0fc4b5] to-[#0891b2] text-white rounded-lg hover:from-[#0891b2] hover:to-[#0369a1] transition-all duration-200 shadow-lg hover:shadow-xl font-semibold"
+                className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold"
               >
                 Try Again
               </button>
@@ -408,7 +408,7 @@ function JobsContent() {
                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 {loading && debouncedSearchTerm && (
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                    <div className="w-4 h-4 border-2 border-[#0fc4b5] border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 )}
                 <input
@@ -416,7 +416,7 @@ function JobsContent() {
                   placeholder="Search by job title, department, or location..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0fc4b5] focus:border-[#0fc4b5] transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all duration-200 bg-gray-50 focus:bg-white"
                 />
               </div>
             </div>
@@ -427,7 +427,7 @@ function JobsContent() {
                 <select
                   value={filterStatus}
                   onChange={(e) => handleStatusFilterChange(e.target.value)}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5] focus:border-[#0fc4b5] bg-white text-sm font-medium"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 bg-white text-sm font-medium"
                 >
                   <option value="all">All Status</option>
                   <option value="DRAFT">Draft</option>
@@ -444,7 +444,7 @@ function JobsContent() {
                 <select
                   value={filterType}
                   onChange={(e) => handleTypeFilterChange(e.target.value)}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5] focus:border-[#0fc4b5] bg-white text-sm font-medium"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 bg-white text-sm font-medium"
                 >
                   <option value="all">All Types</option>
                   <option value="FULL_TIME">Full-time</option>
@@ -468,7 +468,7 @@ function JobsContent() {
 
                 <button 
                   onClick={() => router.push('/dashboard/jobs/create')}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#0fc4b5] to-[#0891b2] text-white rounded-lg hover:from-[#0891b2] hover:to-[#0369a1] transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-semibold"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-semibold"
                 >
                   <PlusIcon className="w-4 h-4" />
                   Create Job

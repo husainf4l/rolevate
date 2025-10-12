@@ -3,11 +3,11 @@ import Image from "next/image";
 
 export default function CorporateHero() {
   return (
-    <section className="w-full min-h-[70vh] container mx-auto flex flex-col lg:flex-row items-center justify-between  py-6 md:py-12 px-4 md:px-6 mt-8 md:mt-12">
+    <section className="w-full min-h-[70vh] container mx-auto flex flex-col lg:flex-row items-center justify-between  py-6 md:py-12 px-4 md:px-6 mt-4 md:mt-6">
       {/* Image Section - First on Mobile */}
       <div className="flex-1 flex items-center justify-center order-1 lg:order-2 mb-8 lg:mb-0 lg:ml-12">
         <div className="relative w-80 h-64 sm:w-96 sm:h-72 lg:w-[32rem] lg:h-96">
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#13ead9]/8 via-white/15 to-[#0891b2]/8 rounded-sm shadow-lg backdrop-blur-sm border border-white/20"></div>
+          <div className="absolute inset-0 bg-primary-600/10 rounded-sm shadow-lg backdrop-blur-sm border border-white/20"></div>
           <div className="absolute inset-3 rounded-sm overflow-hidden shadow-inner">
             <Image
               src="/images/hero.png"
@@ -33,9 +33,7 @@ export default function CorporateHero() {
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6 tracking-tight leading-tight px-2 sm:px-0" 
             style={{ fontFamily: "'SF Pro Display', Inter, 'Segoe UI', Roboto, Arial, sans-serif" }}>
           Interview Candidates{" "}
-          <span 
-            className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent font-bold"
-            style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <span className="text-primary-600 font-bold">
             100x Faster
           </span>
         </h1>

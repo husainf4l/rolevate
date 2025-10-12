@@ -367,7 +367,7 @@ export default function UserProfilePage() {
         <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-2xl p-8 mb-8 border border-white/20">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-tr from-[#13ead9] to-[#0891b2] flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-primary-600 flex items-center justify-center">
                 {userProfile.avatar ? (
                   <img
                     src={
@@ -417,7 +417,7 @@ export default function UserProfilePage() {
                 key={tab.id}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
                   activeTab === tab.id
-                    ? "bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white shadow-lg"
+                    ? "bg-primary-600 text-white shadow-lg"
                     : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
                 }`}
                 onClick={() => setActiveTab(tab.id)}
@@ -458,7 +458,7 @@ export default function UserProfilePage() {
                           firstName: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="Enter your first name"
                     />
                   </div>
@@ -476,7 +476,7 @@ export default function UserProfilePage() {
                           lastName: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="Enter your last name"
                     />
                   </div>
@@ -494,7 +494,7 @@ export default function UserProfilePage() {
                           email: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="your.email@company.com"
                     />
                   </div>
@@ -512,7 +512,7 @@ export default function UserProfilePage() {
                           phone: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="+1 (555) 123-4567"
                     />
                   </div>
@@ -532,7 +532,7 @@ export default function UserProfilePage() {
                           position: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="HR Manager, Recruiter, etc."
                     />
                   </div>
@@ -550,7 +550,7 @@ export default function UserProfilePage() {
                           department: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="Human Resources, Talent Acquisition, etc."
                     />
                   </div>
@@ -567,7 +567,7 @@ export default function UserProfilePage() {
                           timezone: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                     >
                       <option value="UTC">UTC</option>
                       <option value="America/New_York">Eastern Time</option>
@@ -592,7 +592,7 @@ export default function UserProfilePage() {
                           language: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                     >
                       <option value="en">English</option>
                       <option value="ar">Arabic</option>
@@ -614,7 +614,7 @@ export default function UserProfilePage() {
                     setUserProfile({ ...userProfile, bio: e.target.value })
                   }
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none"
                   placeholder="Tell us about yourself..."
                 />
               </div>
@@ -678,7 +678,7 @@ export default function UserProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -703,7 +703,7 @@ export default function UserProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -728,7 +728,7 @@ export default function UserProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -753,7 +753,7 @@ export default function UserProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
                   </div>
@@ -785,7 +785,7 @@ export default function UserProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
 
@@ -810,7 +810,7 @@ export default function UserProfilePage() {
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                       </label>
                     </div>
                   </div>
@@ -862,7 +862,7 @@ export default function UserProfilePage() {
                             currentPassword: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                        className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                         placeholder="Enter your current password"
                       />
                       <button
@@ -898,7 +898,7 @@ export default function UserProfilePage() {
                             newPassword: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                        className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                         placeholder="Enter new password"
                         minLength={8}
                       />
@@ -938,7 +938,7 @@ export default function UserProfilePage() {
                             confirmPassword: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                        className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                         placeholder="Confirm new password"
                       />
                       <button
@@ -1025,7 +1025,7 @@ export default function UserProfilePage() {
                         }
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#13ead9]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13ead9]"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                     </label>
                   </div>
 
@@ -1041,7 +1041,7 @@ export default function UserProfilePage() {
                           sessionTimeout: parseInt(e.target.value),
                         })
                       }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#13ead9] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                     >
                       <option value={15}>15 minutes</option>
                       <option value={30}>30 minutes</option>

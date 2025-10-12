@@ -2,7 +2,8 @@ module.exports = {
     apps: [
         {
             name: 'rolevate-frontend',
-            script: './start-with-memory.js',
+            script: 'npm',
+            args: 'start',
             cwd: '/home/husain/rolevate/rolevate-front',
             instances: 1,
             exec_mode: 'fork',

@@ -80,7 +80,7 @@ export default function Navbar() {
             href="/"
             className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200"
           >
-            <Logo size={46} />
+                        <Logo size={120} />
           </Link>
           <nav className="hidden items-center gap-10 text-sm font-medium md:flex">
             <Link
@@ -114,26 +114,6 @@ export default function Navbar() {
               }`}
             >
               For Employers
-            </Link>
-            <Link
-              href="/about"
-              className={`font-text transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
-                isActivePage("/about")
-                  ? "text-primary-600 after:w-full"
-                  : "text-gray-700 hover:text-primary-600"
-              }`}
-            >
-              About
-            </Link>
-            <Link
-              href="/contact"
-              className={`font-text transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
-                isActivePage("/contact")
-                  ? "text-primary-600 after:w-full"
-                  : "text-gray-700 hover:text-primary-600"
-              }`}
-            >
-              Contact
             </Link>
           </nav>
           <div className="flex items-center gap-4">
@@ -354,28 +334,6 @@ export default function Navbar() {
                   onClick={closeMenu}
                 >
                   For Employers
-                </Link>
-                <Link
-                  href="/about"
-                  className={`font-text hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95 ${
-                    isActivePage("/about")
-                      ? "text-primary-600 bg-primary-50/80"
-                      : "text-gray-700 hover:text-primary-600"
-                  }`}
-                  onClick={closeMenu}
-                >
-                  About
-                </Link>
-                <Link
-                  href="/contact"
-                  className={`font-text hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl active:scale-95 ${
-                    isActivePage("/contact")
-                      ? "text-primary-600 bg-primary-50/80"
-                      : "text-gray-700 hover:text-primary-600"
-                  }`}
-                  onClick={closeMenu}
-                >
-                  Contact
                 </Link>
                 <div className="pt-6 border-t border-gray-200/60 mt-4">
                   {user ? (

@@ -21,27 +21,27 @@ import { logout } from "@/services/auth";
 const navigationItems = [
   {
     icon: HomeIcon,
-    label: "Dashboard",
+    label: "Home",
     href: "/userdashboard",
   },
   {
     icon: BriefcaseIcon,
-    label: "Browse Jobs",
+    label: "Jobs",
     href: "/jobs",
   },
   {
     icon: ClipboardDocumentListIcon,
-    label: "My Applications",
+    label: "Applications",
     href: "/userdashboard/applications",
   },
   {
     icon: BookmarkIcon,
-    label: "Saved Jobs",
+    label: "Saved",
     href: "/userdashboard/saved-jobs",
   },
   {
     icon: DocumentTextIcon,
-    label: "My CV",
+    label: "CV",
     href: "/userdashboard/cv",
   },
   {
@@ -126,7 +126,7 @@ export default function UserSidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleMobileMenu}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-white text-gray-700 p-2 rounded-lg shadow-lg hover:bg-gray-50 border border-gray-200 transition-colors"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-white text-gray-700 p-2 rounded-lg border border-gray-200 transition-colors hover:bg-gray-50"
         aria-label="Toggle mobile menu"
       >
         {isMobileMenuOpen ? (
@@ -146,19 +146,19 @@ export default function UserSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-300/70 shadow-md z-40 transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed left-0 top-0 h-full w-24 bg-white border-r border-gray-200 z-40 transition-all duration-300 ease-out lg:translate-x-0 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } lg:block`}
       >
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
-          <div className="flex justify-center items-center px-6 py-6">
+          <div className="flex justify-center items-center px-4 py-6 border-b border-gray-100">
             <Logo size={48} />
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4">
-            <div className="space-y-1">
+          <nav className="flex-1 px-2 py-6">
+            <div className="space-y-4">
               {navigationItems.map((item) => {
                 const isActive =
                   pathname === item.href ||
@@ -169,20 +169,21 @@ export default function UserSidebar() {
                     key={item.label}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    className={`group flex flex-col items-center justify-center px-2 py-3 text-xs font-medium rounded-lg transition-all duration-200 ${
                       isActive
-                        ? "bg-[#0fc4b5] text-white shadow-md"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                        ? "bg-primary-600 text-white"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     }`}
+                    title={item.label}
                   >
                     <item.icon
-                      className={`mr-3 h-5 w-5 transition-colors duration-200 ${
+                      className={`h-6 w-6 mb-1 transition-colors duration-200 ${
                         isActive
                           ? "text-white"
-                          : "text-gray-500 group-hover:text-gray-700"
+                          : "text-gray-400 group-hover:text-primary-600"
                       }`}
                     />
-                    {item.label}
+                    <span className="text-center leading-tight">{item.label}</span>
                   </Link>
                 );
               })}
@@ -190,42 +191,41 @@ export default function UserSidebar() {
           </nav>
 
           {/* User Profile & Logout */}
-          <div className="border-t border-gray-200 p-3">
-            <div className="flex items-center px-3 py-2 text-sm mb-2">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="w-8 h-8 bg-[#0fc4b5] rounded-full flex items-center justify-center">
-                  {userData.avatar ? (
-                    <img
-                      src={userData.avatar}
-                      alt="Profile"
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-sm font-medium">
-                      {userData.name
-                        ? userData.name.charAt(0).toUpperCase()
-                        : "U"}
-                    </span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {userData.name || "User"}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {userData.email || "user@example.com"}
-                  </p>
-                </div>
+          <div className="border-t border-gray-200 p-2">
+            <div className="flex flex-col items-center px-2 py-3 text-xs mb-3">
+              <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center mb-2">
+                {userData.avatar ? (
+                  <img
+                    src={userData.avatar}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white text-sm font-medium">
+                    {userData.name
+                      ? userData.name.charAt(0).toUpperCase()
+                      : "U"}
+                  </span>
+                )}
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-medium text-gray-900 truncate max-w-full">
+                  {userData.name || "User"}
+                </p>
+                <p className="text-xs text-gray-500 truncate max-w-full">
+                  {userData.email || "user@example.com"}
+                </p>
               </div>
             </div>
 
             {/* Logout Button */}
             <button
-              className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+              className="w-full flex flex-col items-center px-2 py-3 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
               onClick={handleLogout}
+              title="Logout"
             >
-              <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
-              Logout
+              <ArrowRightOnRectangleIcon className="h-5 w-5 mb-1" />
+              <span>Logout</span>
             </button>
           </div>
         </div>

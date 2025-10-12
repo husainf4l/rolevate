@@ -237,7 +237,7 @@ export default function JobApplicationsPage() {
         <div className="pt-20 px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0891b2] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading job applications...</p>
             </div>
           </div>
@@ -309,7 +309,7 @@ export default function JobApplicationsPage() {
           <div className="mb-6">
             <Link
               href="/dashboard/jobs"
-              className="inline-flex items-center gap-2 text-[#0891b2] hover:text-[#0fc4b5] font-medium mb-4"
+              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium mb-4"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               Back to Jobs
@@ -320,7 +320,7 @@ export default function JobApplicationsPage() {
           {job && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
               <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#0891b2] to-[#0fc4b5] rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-16 h-16 bg-primary-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
                   <BriefcaseIcon className="w-8 h-8" />
                 </div>
                 <div className="flex-1">
@@ -341,7 +341,7 @@ export default function JobApplicationsPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-[#0891b2]">
+                      <div className="text-2xl font-bold text-primary-600">
                         {candidates.length}
                       </div>
                       <div className="text-sm text-gray-600">
@@ -396,12 +396,12 @@ export default function JobApplicationsPage() {
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
               <div className="p-4 text-center">
-                <div className="text-2xl font-bold text-[#0891b2] mb-1">
+                <div className="text-2xl font-bold text-primary-600 mb-1">
                   {statusCounts.hr_interview}
                 </div>
                 <div className="text-sm text-gray-600 mb-2">Interviewed</div>
                 <div className="w-8 h-8 mx-auto bg-blue-100 rounded-lg flex items-center justify-center">
-                  <UserIcon className="w-5 h-5 text-[#0891b2]" />
+                  <UserIcon className="w-5 h-5 text-primary-600" />
                 </div>
               </div>
             </div>
@@ -460,7 +460,7 @@ export default function JobApplicationsPage() {
                       placeholder="Search candidates by name, email, or skills..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                     />
                   </div>
                 </div>
@@ -469,7 +469,7 @@ export default function JobApplicationsPage() {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                   >
                     <option value="all">All Status</option>
                     <option value="SUBMITTED">Submitted</option>
@@ -488,7 +488,7 @@ export default function JobApplicationsPage() {
                   <select
                     value={filterPriority}
                     onChange={(e) => setFilterPriority(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                   >
                     <option value="all">All Priority</option>
                     <option value="high">High Priority</option>
@@ -522,7 +522,7 @@ export default function JobApplicationsPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleBulkStatusUpdate("REVIEWING")}
-                        className="px-3 py-1.5 text-sm bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium"
+                        className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                       >
                         Move to Review
                       </button>
@@ -570,7 +570,7 @@ export default function JobApplicationsPage() {
                         filteredCandidates.length > 0
                       }
                       onChange={handleSelectAll}
-                      className="rounded border-gray-300 text-[#0891b2] focus:ring-[#0891b2]"
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                     />
                     <span className="text-sm text-gray-600">Select All</span>
                   </div>
@@ -581,7 +581,7 @@ export default function JobApplicationsPage() {
                   </button>
                   <Link
                     href={`/dashboard/jobs/${jobId}`}
-                    className="px-3 py-1.5 text-sm bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium"
+                    className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                   >
                     View Job Details
                   </Link>
@@ -602,7 +602,7 @@ export default function JobApplicationsPage() {
                           filteredCandidates.length > 0
                         }
                         onChange={handleSelectAll}
-                        className="rounded border-gray-300 text-[#0891b2] focus:ring-[#0891b2]"
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                       />
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -646,14 +646,14 @@ export default function JobApplicationsPage() {
                           type="checkbox"
                           checked={selectedCandidates.includes(candidate.id)}
                           onChange={() => handleSelectCandidate(candidate.id)}
-                          className="rounded border-gray-300 text-[#0891b2] focus:ring-[#0891b2]"
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                         />
                       </td>
 
                       {/* Candidate Info */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 bg-gradient-to-br from-[#0891b2] to-[#0fc4b5] rounded-full flex items-center justify-center text-white font-medium text-sm">
+                          <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
                             {candidate.name
                               .split(" ")
                               .map((n) => n[0])
@@ -757,7 +757,7 @@ export default function JobApplicationsPage() {
                         <div className="flex items-center justify-center gap-2">
                           <Link
                             href={`/dashboard/jobs/${jobId}/applications/${candidate.id}`}
-                            className="text-[#0891b2] hover:text-[#0fc4b5] font-medium text-sm"
+                            className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                           >
                             View
                           </Link>

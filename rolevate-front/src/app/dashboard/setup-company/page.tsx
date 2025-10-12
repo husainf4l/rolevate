@@ -122,7 +122,7 @@ export default function SetupCompanyPage() {
         <div className="flex flex-col justify-center lg:col-span-8 px-4 sm:px-8 pt-20 pb-8 min-h-screen">
           <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col justify-center">
             <div className="text-center mb-6">
-              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
+              <h1 className="text-2xl lg:text-3xl font-bold text-primary-600 mb-2">
                 Company Setup
               </h1>
               <p className="text-base lg:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">

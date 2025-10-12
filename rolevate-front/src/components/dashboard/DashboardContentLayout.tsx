@@ -19,7 +19,13 @@ export default function DashboardContentLayout({
   return (
     <div className="flex h-screen">
       <Sidebar />
-      <main className="flex-1 lg:ml-64 overflow-auto">{children}</main>
+      <main className="flex-1 lg:ml-24 overflow-auto">
+        <div className="flex justify-center min-h-full">
+          <div className="w-full max-w-7xl px-6 py-6">
+            {children}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

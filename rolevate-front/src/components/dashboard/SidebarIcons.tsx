@@ -17,10 +17,10 @@ export default function SidebarIcons() {
         {icons.map(({ icon: Icon, label }) => (
           <button
             key={label}
-            className="group flex flex-col items-center justify-center w-12 h-12 rounded-xl hover:bg-[#13ead9]/10 transition-colors duration-200 focus:outline-none"
+            className="group flex flex-col items-center justify-center w-12 h-12 rounded-xl hover:bg-primary-600/10 transition-colors duration-200 focus:outline-none"
             aria-label={label}
           >
-            <Icon className="w-6 h-6 text-gray-400 group-hover:text-[#13ead9] transition-colors duration-200" />
+            <Icon className="w-6 h-6 text-gray-400 group-hover:text-primary-600 transition-colors duration-200" />
           </button>
         ))}
       </nav>

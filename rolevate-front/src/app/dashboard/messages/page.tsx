@@ -236,8 +236,8 @@ export default function CommunicationPage() {
                     {stats?.total || 0}
                   </p>
                 </div>
-                <div className="p-3 rounded-lg bg-[#0891b2]/10">
-                  <ChatBubbleLeftRightIcon className="w-6 h-6 text-[#0891b2]" />
+                <div className="p-3 rounded-lg bg-primary-600/10">
+                  <ChatBubbleLeftRightIcon className="w-6 h-6 text-primary-600" />
                 </div>
               </div>
             </div>
@@ -298,8 +298,8 @@ export default function CommunicationPage() {
                     {stats?.byStatus?.DELIVERED || 0}
                   </p>
                 </div>
-                <div className="p-3 rounded-lg bg-[#0fc4b5]/10">
-                  <CheckCircleIcon className="w-6 h-6 text-[#0fc4b5]" />
+                <div className="p-3 rounded-lg bg-primary-600/10">
+                  <CheckCircleIcon className="w-6 h-6 text-primary-600" />
                 </div>
               </div>
             </div>
@@ -322,7 +322,7 @@ export default function CommunicationPage() {
                       placeholder="Search communications by candidate, content, or subject..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                     />
                   </div>
                 </div>
@@ -331,7 +331,7 @@ export default function CommunicationPage() {
                   <select
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                   >
                     <option value="all">All Types</option>
                     <option value="email">Email</option>
@@ -345,7 +345,7 @@ export default function CommunicationPage() {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                   >
                     <option value="all">All Status</option>
                     <option value="sent">Sent</option>
@@ -385,7 +385,7 @@ export default function CommunicationPage() {
             <div className="divide-y divide-gray-200">
               {loading ? (
                 <div className="p-12 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13ead9] mx-auto mb-4"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
                   <p className="text-gray-600">Loading communications...</p>
                 </div>
               ) : error ? (
@@ -393,7 +393,7 @@ export default function CommunicationPage() {
                   <p className="text-red-600 mb-4">{error}</p>
                   <button
                     onClick={() => fetchCommunications()}
-                    className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors"
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                   >
                     Retry
                   </button>
@@ -483,7 +483,7 @@ export default function CommunicationPage() {
                           <div className="flex items-center gap-2">
                             <Link
                               href={`/dashboard/candidates/${comm.candidateId}`}
-                              className="text-[#0891b2] hover:text-[#0fc4b5] font-medium text-sm"
+                              className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                               onClick={(e) => e.stopPropagation()}
                             >
                               View Profile

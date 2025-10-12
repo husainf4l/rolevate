@@ -65,12 +65,6 @@ function LoginContent() {
       <div className="container mx-auto flex flex-col-reverse lg:flex-row items-center justify-center h-full px-4 sm:px-6 lg:px-12 py-8 gap-10 lg:gap-0">
         {/* Login Form */}
         <div className="flex-1 flex flex-col items-center lg:items-start text-left max-w-md w-full order-2 lg:order-1 lg:mr-16">
-          <div className="mb-8 w-full flex flex-col items-center lg:items-start">
-            <span className="inline-flex items-center px-4 py-2 bg-primary-50 text-primary-700 text-sm font-semibold rounded-full border border-primary-200/60">
-              <span className="w-2 h-2 bg-primary-500 rounded-full mr-2"></span>
-              Welcome Back
-            </span>
-          </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1] px-2 sm:px-0 w-full text-left">
             Sign in to your account
           </h1>

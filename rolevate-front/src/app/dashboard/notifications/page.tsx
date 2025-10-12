@@ -185,7 +185,7 @@ export default function NotificationsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0891b2] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading notifications...</p>
         </div>
       </div>
@@ -199,7 +199,7 @@ export default function NotificationsPage() {
           <p className="text-red-600 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors"
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
             Retry
           </button>
@@ -247,7 +247,7 @@ export default function NotificationsPage() {
                           placeholder="Search notifications..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                         />
                       </div>
                     </div>
@@ -258,7 +258,7 @@ export default function NotificationsPage() {
                         onChange={(e) =>
                           setFilter(e.target.value as "all" | "unread" | "read")
                         }
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                       >
                         <option value="all">All Notifications</option>
                         <option value="unread">Unread</option>
@@ -270,7 +270,7 @@ export default function NotificationsPage() {
                       <select
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                       >
                         <option value="all">All Categories</option>
                         <option value="APPLICATION">Applications</option>
@@ -489,7 +489,7 @@ export default function NotificationsPage() {
                               (window.location.href =
                                 selectedNotification.actionUrl!)
                             }
-                            className="w-full px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium text-sm"
+                            className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
                           >
                             View Details
                           </button>

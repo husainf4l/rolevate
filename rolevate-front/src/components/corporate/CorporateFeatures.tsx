@@ -8,10 +8,10 @@ export default function CorporateFeatures() {
         <div className="text-center mb-12 sm:mb-16 lg:mb-20 max-w-4xl mx-auto">
         
           <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight px-2 sm:px-0">
-            Transform Your Recruitment with 
-            <span 
-              className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent"
-              style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}> AI-Powered Intelligence</span>
+            Transform Your Recruitment with{" "}
+            <span className="text-primary-600">
+               AI-Powered Intelligence
+            </span>
           </h2>
           <p className="font-text text-lg sm:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto px-4 sm:px-2 lg:px-0">
             From CV screening to final interviews, Rolevate ensures your HR team focuses only on top, qualified talent through intelligent automation designed for enterprise-scale recruitment.
@@ -59,7 +59,7 @@ export default function CorporateFeatures() {
           
           <div className="relative">
             {/* Connection Line */}
-            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-gradient-to-r from-transparent via-primary-600/30 to-transparent hidden lg:block"></div>
+            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-primary-600/30 hidden lg:block"></div>
             
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               <ProcessStep 
@@ -106,37 +106,31 @@ export default function CorporateFeatures() {
               icon={<IntegrationIcon />}
               title="Seamless Integration"
               description="Connect with your existing ATS, HRIS, and job boards without disruption"
-              gradient="from-blue-500 to-primary-600"
             />
             <FeatureCard 
               icon={<SecurityIcon />}
               title="Bank-Grade Security"
               description="SOC 2 compliant with end-to-end encryption and audit trails"
-              gradient="from-primary-600 to-teal-500"
             />
             <FeatureCard 
               icon={<ScaleIcon />}
               title="Enterprise Scale"
               description="Handle thousands of applications simultaneously across multiple regions"
-              gradient="from-teal-500 to-green-500"
             />
             <FeatureCard 
               icon={<AnalyticsIcon />}
               title="Advanced Analytics"
               description="Real-time insights and predictive analytics for better hiring decisions"
-              gradient="from-purple-500 to-primary-600"
             />
             <FeatureCard 
               icon={<ComplianceIcon />}
               title="Compliance Ready"
               description="Built-in compliance features for regulated industries and audit requirements"
-              gradient="from-primary-600 to-slate-600"
             />
             <FeatureCard 
               icon={<SupportIcon />}
               title="24/7 Support"
               description="Dedicated enterprise support with guaranteed response times"
-              gradient="from-orange-500 to-red-500"
             />
           </div>
         </div>
@@ -241,17 +235,16 @@ function ProcessStep({ number, icon, title, description }: {
   );
 }
 
-function FeatureCard({ icon, title, description, gradient }: {
+function FeatureCard({ icon, title, description }: {
   icon: React.ReactNode;
   title: string;
   description: string;
-  gradient: string;
 }) {
   return (
     <div className="group relative">
-      <div className="absolute inset-0 bg-gradient-to-r rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
+      <div className="absolute inset-0 bg-primary-600/10 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
       <div className="relative bg-white/80 backdrop-blur-sm rounded-sm p-8 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <div className={`w-14 h-14 bg-gradient-to-r ${gradient} rounded-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+        <div className="w-14 h-14 bg-primary-600 rounded-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
           {icon}
         </div>
         <h4 className="font-semibold text-gray-900 mb-3 text-lg">{title}</h4>

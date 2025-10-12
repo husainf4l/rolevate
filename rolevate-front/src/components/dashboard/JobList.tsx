@@ -222,7 +222,7 @@ const JobList: React.FC<JobListProps> = ({
             {jobs.length === 0 && (
               <button
                 onClick={() => router.push('/dashboard/jobs/create')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#0fc4b5] to-[#0891b2] text-white rounded-lg hover:from-[#0891b2] hover:to-[#0369a1] transition-all duration-200 shadow-lg hover:shadow-xl font-semibold transform hover:scale-105"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold transform hover:scale-105"
               >
                 <PlusIcon className="w-5 h-5" />
                 Create Your First Job
@@ -276,7 +276,7 @@ const JobListItem: React.FC<JobListItemProps> = ({
 
   const getActionButtonStyle = (status: JobPost["status"]) => {
     return status === "DRAFT" 
-      ? "bg-gradient-to-r from-[#0fc4b5] to-[#0891b2] text-white hover:from-[#0891b2] hover:to-[#0369a1] shadow-md hover:shadow-lg transform hover:scale-105" 
+      ? "bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg transform hover:scale-105" 
       : "text-gray-700 hover:bg-gray-100 border border-gray-200 hover:border-gray-300";
   };
 
@@ -286,7 +286,7 @@ const JobListItem: React.FC<JobListItemProps> = ({
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-3">
-              <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-[#0fc4b5] transition-colors duration-200">
+              <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-primary-600 transition-colors duration-200">
                 {job.title}
               </h3>
               <span
@@ -346,7 +346,7 @@ const JobListItem: React.FC<JobListItemProps> = ({
           <div className="flex items-center gap-2 ml-6">
             <button 
               title="View Details"
-              className="p-2 text-gray-400 hover:text-[#0fc4b5] hover:bg-[#0fc4b5]/10 rounded-lg transition-all duration-200 transform hover:scale-110"
+              className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-600/10 rounded-lg transition-all duration-200 transform hover:scale-110"
             >
               <EyeIcon className="w-5 h-5" />
             </button>
@@ -382,7 +382,7 @@ const JobListItem: React.FC<JobListItemProps> = ({
           <div className="flex items-center gap-3">
             <button 
               onClick={() => router.push(`/dashboard/jobs/${job.id}/applications`)}
-              className="px-4 py-2 text-[#0fc4b5] hover:bg-[#0fc4b5]/10 rounded-lg transition-all duration-200 font-medium text-sm border border-[#0fc4b5]/20 hover:border-[#0fc4b5]/40"
+              className="px-4 py-2 text-primary-600 hover:bg-primary-600/10 rounded-lg transition-all duration-200 font-medium text-sm border border-primary-600/20 hover:border-primary-600/40"
             >
               View Applications
             </button>

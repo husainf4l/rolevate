@@ -148,7 +148,7 @@ export default function MessageDetailsPage() {
         <div className="pt-20 px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13ead9] mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Loading message details...</p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export default function MessageDetailsPage() {
                 {error && (
                   <button
                     onClick={fetchMessage}
-                    className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors"
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                   >
                     Retry
                   </button>
@@ -338,7 +338,7 @@ export default function MessageDetailsPage() {
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <Link
                   href={`/dashboard/candidates/${message.candidateId}`}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-[#0891b2] hover:text-[#0fc4b5] border border-[#0891b2] hover:border-[#0fc4b5] rounded-lg font-medium transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-primary-600 hover:text-primary-700 border border-primary-600 hover:border-primary-700 rounded-lg font-medium transition-colors"
                 >
                   <UserIcon className="w-4 h-4" />
                   View Full Candidate Profile
@@ -424,7 +424,7 @@ export default function MessageDetailsPage() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setShowReplyForm(!showReplyForm)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                   >
                     <PencilIcon className="w-4 h-4" />
                     {showReplyForm ? "Cancel Reply" : "Reply"}
@@ -448,7 +448,7 @@ export default function MessageDetailsPage() {
                         <select
                           value={replyType}
                           onChange={(e) => setReplyType(e.target.value as any)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                         >
                           <option value="EMAIL">Email</option>
                           <option value="WHATSAPP">WhatsApp</option>
@@ -468,7 +468,7 @@ export default function MessageDetailsPage() {
                           value={replySubject}
                           onChange={(e) => setReplySubject(e.target.value)}
                           placeholder="Enter email subject"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                         />
                       </div>
                     )}
@@ -488,7 +488,7 @@ export default function MessageDetailsPage() {
                             : "message"
                         }`}
                         rows={6}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent resize-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none"
                       />
                     </div>
 
@@ -502,7 +502,7 @@ export default function MessageDetailsPage() {
                       <button
                         onClick={handleSendReply}
                         disabled={!replyContent.trim()}
-                        className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Send{" "}
                         {replyType === "PHONE"

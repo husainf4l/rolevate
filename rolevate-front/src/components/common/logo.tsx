@@ -46,21 +46,21 @@ export default function Logo({
     );
   }
 
-  // Default: show "rolevate" text logo
+  // Default: show rolevate logo image
   return (
-    <span
-      className="tracking-tight select-none font-brand text-[#0891b2]"
-      style={{
-        fontWeight: 600,
-        letterSpacing: "-0.04em",
-        fontSize: size ? size * 0.5 : 24,
-        textTransform: "lowercase",
-        lineHeight: 1,
-        userSelect: "none",
-      }}
-    >
-      rolevate
-    </span>
+    <div className="flex items-center">
+      <img
+        src="/logo/Rolevate.webp"
+        alt="Rolevate Logo"
+        className="object-contain"
+        style={{
+          width: size,
+          height: size,
+          maxWidth: size,
+          maxHeight: size,
+        }}
+      />
+    </div>
   );
 }
 

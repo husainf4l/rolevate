@@ -3,11 +3,10 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Logo from "@/components/common/logo";
+import LogoIcon from "@/components/common/logo-icon";
 import {
   HomeIcon,
   BriefcaseIcon,
-  ChatBubbleLeftRightIcon,
   Bars3Icon,
   XMarkIcon,
   UsersIcon,
@@ -24,34 +23,29 @@ interface NavigationItem {
 const navigationItems: NavigationItem[] = [
   {
     icon: HomeIcon,
-    label: "Dashboard",
+    label: "Home",
     href: "/dashboard",
   },
   {
     icon: BriefcaseIcon,
-    label: "Job Management",
+    label: "Jobs",
     href: "/dashboard/jobs?search=&status=all&type=all",
   },
   {
     icon: UsersIcon,
-    label: "Recruitment Pipeline",
+    label: "Candidates",
     href: "/dashboard/candidates",
   },
   {
     icon: BellIcon,
-    label: "Notifications",
+    label: "Alerts",
     href: "/dashboard/notifications",
   },
 
   {
     icon: BuildingOfficeIcon,
-    label: "Company Profile",
+    label: "Profile",
     href: "/dashboard/company-profile",
-  },
-  {
-    icon: ChatBubbleLeftRightIcon,
-    label: "Communication",
-    href: "/dashboard/messages",
   },
 ];
 
@@ -68,7 +62,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleMobileMenu}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-white text-gray-700 p-2 rounded-lg shadow-lg hover:bg-gray-50 border border-gray-200 transition-colors"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-white text-gray-700 p-2 rounded-sm border border-gray-200 transition-colors hover:bg-gray-50"
         aria-label="Toggle mobile menu"
       >
         {isMobileMenuOpen ? (
@@ -88,25 +82,25 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-300/70 shadow-md z-40 transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed left-0 top-0 h-full w-24 bg-white border-r border-gray-200 z-40 transition-all duration-300 ease-out lg:translate-x-0 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } lg:block`}
       >
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
-          <div className="flex justify-center items-center px-6 py-6">
+          <div className="flex justify-center items-center px-4 py-6 border-b border-gray-100">
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
               className="transition-transform duration-200 hover:scale-105"
             >
-              <Logo size={48} />
+              <LogoIcon size={48} />
             </Link>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4">
-            <div className="space-y-1">
+          <nav className="flex-1 px-2 py-6">
+            <div className="space-y-4">
               {navigationItems.map((item) => {
                 // Extract just the pathname part for comparison
                 const itemPath = item.href.split("?")[0] || item.href;
@@ -119,20 +113,21 @@ export default function Sidebar() {
                     key={item.label}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    className={`group flex flex-col items-center justify-center px-2 py-3 text-xs font-medium rounded-sm transition-all duration-200 ${
                       isActive
-                        ? "bg-[#0fc4b5] text-white shadow-md"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                        ? "bg-primary-600 text-white"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     }`}
+                    title={item.label}
                   >
                     <item.icon
-                      className={`mr-3 h-5 w-5 transition-colors duration-200 ${
+                      className={`h-6 w-6 mb-1 transition-colors duration-200 ${
                         isActive
                           ? "text-white"
-                          : "text-gray-500 group-hover:text-gray-700"
+                          : "text-gray-400 group-hover:text-primary-600"
                       }`}
                     />
-                    {item.label}
+                    <span className="text-center leading-tight">{item.label}</span>
                   </Link>
                 );
               })}

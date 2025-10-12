@@ -33,12 +33,6 @@ export default function Hero() {
 
         {/* Text Section - Second on Mobile */}
         <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left max-w-2xl order-2 lg:order-1">
-          <div className="mb-6">
-            <span className="inline-flex items-center px-4 py-2 bg-[#13ead9]/10 text-[#0891b2] text-sm font-semibold rounded-full border border-[#13ead9]/20">
-              <span className="w-2 h-2 bg-[#13ead9] rounded-full mr-2"></span>
-              AI-Powered Platform
-            </span>
-          </div>
 
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1] px-2 sm:px-0">
             Land Your Dream Job{" "}

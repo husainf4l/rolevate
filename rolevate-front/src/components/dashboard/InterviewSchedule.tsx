@@ -61,7 +61,7 @@ export default function InterviewSchedule() {
         </h2>
         <a
           href="/userdashboard/interviews"
-          className="text-[#0fc4b5] hover:text-[#0ba399] font-medium text-sm transition-colors"
+          className="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"
         >
           View all
         </a>
@@ -122,7 +122,7 @@ export default function InterviewSchedule() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button className="px-3 py-1 bg-[#0fc4b5] text-white text-xs rounded-md hover:bg-[#0ba399] transition-colors">
+                  <button className="px-3 py-1 bg-primary-600 text-white text-xs rounded-md hover:bg-primary-700 transition-colors">
                     Join
                   </button>
                   <button className="px-3 py-1 border border-gray-300 text-gray-700 text-xs rounded-md hover:bg-gray-50 transition-colors">

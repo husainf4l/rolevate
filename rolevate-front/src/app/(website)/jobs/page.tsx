@@ -446,13 +446,7 @@ export default function JobsPage() {
           <div className="text-center mb-8 lg:mb-10">
             <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 tracking-tight">
               Find Your Next{" "}
-              <span
-                className="bg-gradient-to-r from-[#13ead9] to-[#0891b2] bg-clip-text text-transparent"
-                style={{
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
+              <span className="text-primary-600">
                 Opportunity
               </span>
             </h1>

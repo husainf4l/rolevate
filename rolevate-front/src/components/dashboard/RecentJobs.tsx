@@ -148,7 +148,7 @@ export default function RecentJobs() {
       <div className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <BriefcaseIcon className="w-5 h-5 text-[#0fc4b5]" />
+            <BriefcaseIcon className="w-5 h-5 text-primary-600" />
             Your Job Postings
           </h2>
         </div>
@@ -184,7 +184,7 @@ export default function RecentJobs() {
       <div className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <BriefcaseIcon className="w-5 h-5 text-[#0fc4b5]" />
+            <BriefcaseIcon className="w-5 h-5 text-primary-600" />
             Your Job Postings
           </h2>
         </div>
@@ -208,10 +208,10 @@ export default function RecentJobs() {
     <div className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <BriefcaseIcon className="w-5 h-5 text-[#0fc4b5]" />
+          <BriefcaseIcon className="w-5 h-5 text-primary-600" />
           Your Job Postings
         </h2>
-        <button className="text-sm text-[#0fc4b5] hover:text-[#0891b2] font-medium">
+        <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
           View All
         </button>
       </div>
@@ -229,7 +229,7 @@ export default function RecentJobs() {
           recentJobs.map((job) => (
             <div
               key={job.id}
-              className="p-4 border border-gray-300 rounded-lg hover:border-[#0fc4b5]/50 hover:shadow-sm transition-all duration-200"
+              className="p-4 border border-gray-300 rounded-lg hover:border-primary-600/50 hover:shadow-sm transition-all duration-200"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">

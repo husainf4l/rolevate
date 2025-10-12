@@ -222,7 +222,7 @@ export default function Header({
                           </h3>
                           <Link
                             href="/dashboard/notifications"
-                            className="text-xs text-[#0891b2] hover:text-[#0fc4b5] font-medium"
+                            className="text-xs text-primary-600 hover:text-primary-700 font-medium"
                             onClick={() => setNotificationOpen(false)}
                           >
                             View All
@@ -233,7 +233,7 @@ export default function Header({
                       <div className="max-h-64 overflow-y-auto">
                         {notificationsLoading ? (
                           <div className="px-4 py-6 text-center text-gray-500 text-sm">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#13ead9] mx-auto mb-2"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 mx-auto mb-2"></div>
                             Loading notifications...
                           </div>
                         ) : unreadNotifications.length === 0 ? (
@@ -278,7 +278,7 @@ export default function Header({
                         <div className="px-4 py-2 border-t border-gray-200 text-center">
                           <Link
                             href="/dashboard/notifications"
-                            className="text-xs text-[#0891b2] hover:text-[#0fc4b5] font-medium"
+                            className="text-xs text-primary-600 hover:text-primary-700 font-medium"
                             onClick={() => setNotificationOpen(false)}
                           >
                             View {unreadNotifications.length - 5} more
@@ -354,7 +354,7 @@ export default function Header({
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5] focus:border-transparent text-sm"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -381,7 +381,7 @@ export default function Header({
                         </h3>
                         <Link
                           href="/dashboard/notifications"
-                          className="text-xs text-[#0891b2] hover:text-[#0fc4b5] font-medium"
+                          className="text-xs text-primary-600 hover:text-primary-700 font-medium"
                           onClick={() => setNotificationOpen(false)}
                         >
                           View All
@@ -392,7 +392,7 @@ export default function Header({
                     <div className="max-h-64 overflow-y-auto">
                       {notificationsLoading ? (
                         <div className="px-4 py-6 text-center text-gray-500 text-sm">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#13ead9] mx-auto mb-2"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-400 mx-auto mb-2"></div>
                           Loading notifications...
                         </div>
                       ) : unreadNotifications.length === 0 ? (
@@ -435,7 +435,7 @@ export default function Header({
                       <div className="px-4 py-2 border-t border-gray-200 text-center">
                         <Link
                           href="/dashboard/notifications"
-                          className="text-xs text-[#0891b2] hover:text-[#0fc4b5] font-medium"
+                          className="text-xs text-primary-600 hover:text-primary-700 font-medium"
                           onClick={() => setNotificationOpen(false)}
                         >
                           View {unreadNotifications.length - 5} more

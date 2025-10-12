@@ -497,7 +497,7 @@ export default function JobCandidateProfile() {
               </p>
               <Link
                 href={`/dashboard/jobs/${jobId}/applications`}
-                className="inline-flex items-center px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <ArrowLeftIcon className="w-4 h-4 mr-2" />
                 Back to Applications
@@ -523,7 +523,7 @@ export default function JobCandidateProfile() {
           <div className="mb-6">
             <Link
               href={`/dashboard/jobs/${jobId}/applications`}
-              className="inline-flex items-center gap-2 text-[#0891b2] hover:text-[#0fc4b5] font-medium mb-4"
+              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium mb-4"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               Back to {job?.title} Applications
@@ -532,7 +532,7 @@ export default function JobCandidateProfile() {
 
           {/* Job Context Card */}
           {job && (
-            <div className="bg-gradient-to-r from-[#0891b2] to-[#0fc4b5] rounded-xl p-6 mb-8 text-white">
+            <div className="bg-primary-600 rounded-xl p-6 mb-8 text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                   <BriefcaseIcon className="w-6 h-6" />
@@ -552,7 +552,7 @@ export default function JobCandidateProfile() {
               {/* Basic Info Card */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <div className="flex items-start gap-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-[#0891b2] to-[#0fc4b5] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  <div className="w-20 h-20 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                     {candidate.name
                       .split(" ")
                       .map((n) => n[0])
@@ -586,7 +586,7 @@ export default function JobCandidateProfile() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1">
-                        <span className="text-sm font-bold text-[#0891b2] bg-[#0fc4b5]/10 px-2 py-1 rounded">
+                        <span className="text-sm font-bold text-primary-600 bg-primary-600/10 px-2 py-1 rounded">
                           AI Score: {candidate.aiScore}%
                         </span>
                       </div>
@@ -657,7 +657,7 @@ export default function JobCandidateProfile() {
                           </span>
                           <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
                             <div
-                              className="bg-[#0891b2] h-2 rounded-full"
+                              className="bg-primary-600 h-2 rounded-full"
                               style={{
                                 width: `${
                                   candidate.cvAnalysisResults.skillsMatch
@@ -758,7 +758,7 @@ export default function JobCandidateProfile() {
                       {candidate.skills.map((skill, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-[#0891b2]/15 text-[#0891b2] rounded-full text-sm font-semibold border border-[#0fc4b5]/20"
+                          className="px-3 py-1 bg-primary-600/15 text-primary-600 rounded-full text-sm font-semibold border border-primary-600/20"
                         >
                           {skill}
                         </span>
@@ -834,7 +834,7 @@ export default function JobCandidateProfile() {
               {interviews.length > 0 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   {/* Header */}
-                  <div className="bg-gradient-to-r from-[#0891b2] to-[#0fc4b5] px-6 py-4">
+                  <div className="bg-primary-600 px-6 py-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
@@ -1069,7 +1069,7 @@ export default function JobCandidateProfile() {
                               href={interview.videoLink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                             >
                               <EyeIcon className="w-4 h-4" />
                               Watch Recording
@@ -1105,7 +1105,7 @@ export default function JobCandidateProfile() {
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <StatusIcon className="w-6 h-6 text-[#0891b2]" />
+                    <StatusIcon className="w-6 h-6 text-primary-600" />
                     <div>
                       <p className="font-medium text-gray-900">
                         {candidate.status === "SUBMITTED"
@@ -1129,7 +1129,7 @@ export default function JobCandidateProfile() {
                   <button
                     onClick={() => handleStatusUpdate("REVIEWING")}
                     disabled={updating || candidate.status === "REVIEWING"}
-                    className="w-full px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {updating ? "Updating..." : "Move to Review"}
                   </button>
@@ -1200,13 +1200,13 @@ export default function JobCandidateProfile() {
                     onChange={(e) => setNewNote(e.target.value)}
                     placeholder="Add a note about this candidate..."
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none"
                   />
                   <div className="flex justify-end mt-2">
                     <button
                       onClick={handleAddNote}
                       disabled={!newNote.trim() || addingNote}
-                      className="px-4 py-2 bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {addingNote ? "Adding..." : "Add Note"}
                     </button>
@@ -1264,7 +1264,7 @@ export default function JobCandidateProfile() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-[#0891b2] rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">
                         Application Submitted

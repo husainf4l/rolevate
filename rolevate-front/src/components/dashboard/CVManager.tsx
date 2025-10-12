@@ -38,7 +38,7 @@ export default function CVManager({ cvData }: CVManagerProps) {
         <h2 className="text-xl font-semibold text-gray-900">My CV</h2>
         <a
           href="/userdashboard/cv"
-          className="text-[#0fc4b5] hover:text-[#0ba399] font-medium text-sm transition-colors"
+          className="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"
         >
           Manage CV
         </a>
@@ -50,8 +50,8 @@ export default function CVManager({ cvData }: CVManagerProps) {
             <div className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-[#0fc4b5] bg-opacity-10 rounded-lg flex items-center justify-center">
-                    <DocumentArrowUpIcon className="w-5 h-5 text-[#0fc4b5]" />
+                  <div className="w-10 h-10 bg-primary-600/10 rounded-lg flex items-center justify-center">
+                    <DocumentArrowUpIcon className="w-5 h-5 text-primary-600" />
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">{cvData.fileName}</h3>
@@ -71,15 +71,15 @@ export default function CVManager({ cvData }: CVManagerProps) {
               </div>
 
               <div className="flex items-center space-x-2">
-                <button className="flex items-center space-x-1 px-3 py-1.5 text-sm text-[#0fc4b5] hover:text-[#0ba399] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
+                <button className="flex items-center space-x-1 px-3 py-1.5 text-sm text-primary-600 hover:text-primary-700 hover:bg-primary-600/10 rounded-md transition-colors">
                   <EyeIcon className="w-4 h-4" />
                   <span>View</span>
                 </button>
-                <button className="flex items-center space-x-1 px-3 py-1.5 text-sm text-[#0fc4b5] hover:text-[#0ba399] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
+                <button className="flex items-center space-x-1 px-3 py-1.5 text-sm text-primary-600 hover:text-primary-700 hover:bg-primary-600/10 rounded-md transition-colors">
                   <PencilIcon className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
-                <button className="flex items-center space-x-1 px-3 py-1.5 text-sm text-[#0fc4b5] hover:text-[#0ba399] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-md transition-colors">
+                <button className="flex items-center space-x-1 px-3 py-1.5 text-sm text-primary-600 hover:text-primary-700 hover:bg-primary-600/10 rounded-md transition-colors">
                   <DocumentArrowUpIcon className="w-4 h-4" />
                   <span>Download</span>
                 </button>
@@ -91,7 +91,7 @@ export default function CVManager({ cvData }: CVManagerProps) {
               <p className="text-sm text-gray-600 mb-2">
                 Want to upload a new version?
               </p>
-              <button className="inline-flex items-center space-x-2 px-4 py-2 bg-[#0fc4b5] text-white rounded-md hover:bg-[#0ba399] transition-colors">
+              <button className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors">
                 <DocumentArrowUpIcon className="w-4 h-4" />
                 <span>Upload New CV</span>
               </button>
@@ -106,7 +106,7 @@ export default function CVManager({ cvData }: CVManagerProps) {
             <p className="text-sm text-gray-600 mb-4">
               Upload your CV to get better job recommendations and improve your profile visibility.
             </p>
-            <button className="inline-flex items-center space-x-2 px-6 py-3 bg-[#0fc4b5] text-white rounded-md hover:bg-[#0ba399] transition-colors">
+            <button className="inline-flex items-center space-x-2 px-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors">
               <DocumentArrowUpIcon className="w-5 h-5" />
               <span>Upload Your CV</span>
             </button>

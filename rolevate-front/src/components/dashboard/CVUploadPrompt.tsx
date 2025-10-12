@@ -50,11 +50,11 @@ export default function CVUploadPrompt({
   return (
     <div className="relative bg-white/90 backdrop-blur-xl rounded-sm p-8 mb-8 shadow-xl border border-white/20 overflow-hidden group">
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#13ead9]/5 via-white/10 to-[#0891b2]/5 rounded-sm"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-600/5 via-white/10 to-primary-600/5 rounded-sm"></div>
 
       {/* Decorative elements */}
-      <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-[#13ead9]/10 to-[#0891b2]/10 rounded-full blur-xl"></div>
-      <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-[#0891b2]/10 to-[#13ead9]/10 rounded-full blur-lg"></div>
+      <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-primary-600/10 to-primary-600/10 rounded-full blur-xl"></div>
+      <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-primary-600/10 to-primary-600/10 rounded-full blur-lg"></div>
 
       <button
         onClick={onDismiss}
@@ -64,8 +64,8 @@ export default function CVUploadPrompt({
       </button>
 
       <div className="relative z-10 flex items-start space-x-6">
-        <div className="w-16 h-16 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-sm flex items-center justify-center flex-shrink-0 shadow-lg backdrop-blur-sm border border-white/30">
-          <DocumentArrowUpIcon className="w-8 h-8 text-[#0891b2]" />
+        <div className="w-16 h-16 bg-gradient-to-br from-primary-600/20 to-primary-600/20 rounded-sm flex items-center justify-center flex-shrink-0 shadow-lg backdrop-blur-sm border border-white/30">
+          <DocumentArrowUpIcon className="w-8 h-8 text-primary-600" />
         </div>
 
         <div className="flex-1">
@@ -80,7 +80,7 @@ export default function CVUploadPrompt({
           {uploading ? (
             <div className="flex items-center py-6">
               <div className="relative">
-                <div className="w-6 h-6 border-3 border-[#13ead9]/30 border-t-[#0891b2] rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-3 border-primary-600/30 border-t-primary-600 rounded-full animate-spin"></div>
               </div>
               <span className="ml-4 text-gray-700 font-medium">
                 Uploading your CV...
@@ -91,8 +91,8 @@ export default function CVUploadPrompt({
               <div
                 className={`relative border-2 border-dashed rounded-sm p-8 transition-all duration-300 mb-6 ${
                   dragOver
-                    ? "border-[#0891b2] bg-gradient-to-br from-[#13ead9]/5 to-[#0891b2]/5 scale-[1.01]"
-                    : "border-gray-300 hover:border-[#13ead9]/50 hover:bg-gradient-to-br hover:from-[#13ead9]/3 hover:to-[#0891b2]/3"
+                    ? "border-primary-600 bg-gradient-to-br from-primary-600/5 to-primary-600/5 scale-[1.01]"
+                    : "border-gray-300 hover:border-primary-600/50 hover:bg-gradient-to-br hover:from-primary-600/3 hover:to-primary-600/3"
                 }`}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -102,8 +102,8 @@ export default function CVUploadPrompt({
                 onDrop={handleDrop}
               >
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-sm flex items-center justify-center">
-                    <DocumentArrowUpIcon className="w-8 h-8 text-[#0891b2]" />
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary-600/20 to-primary-600/20 rounded-sm flex items-center justify-center">
+                    <DocumentArrowUpIcon className="w-8 h-8 text-primary-600" />
                   </div>
                   <p className="text-lg font-semibold text-gray-900 mb-2 font-display">
                     Drag and drop your CV here
@@ -112,7 +112,7 @@ export default function CVUploadPrompt({
                     or click to browse your files
                   </p>
 
-                  <label className="group inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#13ead9] to-[#0891b2] text-white rounded-xl hover:from-[#0891b2] hover:to-[#13ead9] transition-all duration-300 cursor-pointer font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:scale-95">
+                  <label className="group inline-flex items-center px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-300 cursor-pointer font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:scale-95">
                     <input
                       type="file"
                       accept=".pdf"

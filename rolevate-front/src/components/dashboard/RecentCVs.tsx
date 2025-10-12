@@ -102,7 +102,7 @@ export default function RecentApplications() {
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200/60">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <DocumentTextIcon className="w-5 h-5 text-[#0fc4b5]" />
+            <DocumentTextIcon className="w-5 h-5 text-primary-600" />
             Recent Applications
           </h2>
         </div>
@@ -122,10 +122,10 @@ export default function RecentApplications() {
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200/60">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <DocumentTextIcon className="w-5 h-5 text-[#0fc4b5]" />
+          <DocumentTextIcon className="w-5 h-5 text-primary-600" />
           Recent Applications
         </h2>
-        <button className="text-sm text-[#0fc4b5] hover:text-[#0891b2] font-medium">
+        <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
           View All
         </button>
       </div>
@@ -141,11 +141,11 @@ export default function RecentApplications() {
           recentApplications.map((application) => (
             <div
               key={application.id}
-              className="p-4 border border-gray-200 rounded-lg hover:border-[#0fc4b5]/30 hover:shadow-sm transition-all duration-200"
+              className="p-4 border border-gray-200 rounded-lg hover:border-primary-600/30 hover:shadow-sm transition-all duration-200"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <DocumentTextIcon className="w-5 h-5 text-[#0fc4b5]" />
+                  <DocumentTextIcon className="w-5 h-5 text-primary-600" />
                   <div>
                     <h3 className="font-medium text-gray-900 mb-1">
                       {application.candidate.firstName} {application.candidate.lastName}
@@ -158,7 +158,7 @@ export default function RecentApplications() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
-                    className="p-2 text-gray-400 hover:text-[#0fc4b5] transition-colors duration-200"
+                    className="p-2 text-gray-400 hover:text-primary-600 transition-colors duration-200"
                     title="View Application"
                   >
                     <EyeIcon className="w-4 h-4" />
@@ -168,7 +168,7 @@ export default function RecentApplications() {
                       href={application.resumeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 text-gray-400 hover:text-[#0fc4b5] transition-colors duration-200"
+                      className="p-2 text-gray-400 hover:text-primary-600 transition-colors duration-200"
                       title="Download CV"
                     >
                       <ArrowDownTrayIcon className="w-4 h-4" />

@@ -123,7 +123,7 @@ export default function EditJobPage() {
       <div className="min-h-screen bg-gray-50 p-8 pt-24">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-20">
-            <div className="w-8 h-8 border-3 border-[#0fc4b5] border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-8 h-8 border-3 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-lg font-semibold text-gray-700">
               Loading Job Details...
             </p>
@@ -197,7 +197,7 @@ export default function EditJobPage() {
                   id="title"
                   value={job.title}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                   required
                 />
               </div>
@@ -214,7 +214,7 @@ export default function EditJobPage() {
                   id="department"
                   value={job.department}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                   required
                 />
               </div>
@@ -231,7 +231,7 @@ export default function EditJobPage() {
                   id="location"
                   value={job.location}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                   required
                 />
               </div>
@@ -248,7 +248,7 @@ export default function EditJobPage() {
                   id="salary"
                   value={job.salary}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                   required
                 />
               </div>
@@ -264,7 +264,7 @@ export default function EditJobPage() {
                   id="type"
                   value={job.type}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                   required
                 >
                   <option value="FULL_TIME">Full-time</option>
@@ -286,7 +286,7 @@ export default function EditJobPage() {
                   id="deadline"
                   value={job.deadline || ""}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 />
               </div>
               <div>
@@ -302,7 +302,7 @@ export default function EditJobPage() {
                   id="jobLevel"
                   value={job.jobLevel}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 />
               </div>
               <div>
@@ -318,7 +318,7 @@ export default function EditJobPage() {
                   id="workType"
                   value={job.workType}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 />
               </div>
               <div>
@@ -334,7 +334,7 @@ export default function EditJobPage() {
                   id="industry"
                   value={job.industry}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 />
               </div>
               <div>
@@ -349,7 +349,7 @@ export default function EditJobPage() {
                   id="interviewLanguage"
                   value={job.interviewLanguage || "english"}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                   required
                 >
                   <option value="english">English</option>
@@ -378,7 +378,7 @@ export default function EditJobPage() {
                   value={job.shortDescription}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                   required
                 ></textarea>
               </div>
@@ -395,7 +395,7 @@ export default function EditJobPage() {
                   value={job.description}
                   onChange={handleChange}
                   rows={8}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                   required
                 ></textarea>
               </div>
@@ -412,7 +412,7 @@ export default function EditJobPage() {
                   value={job.responsibilities}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 ></textarea>
               </div>
               <div>
@@ -428,7 +428,7 @@ export default function EditJobPage() {
                   value={job.requirements}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 ></textarea>
               </div>
               <div>
@@ -444,7 +444,7 @@ export default function EditJobPage() {
                   value={job.benefits}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 ></textarea>
               </div>
               <div>
@@ -460,7 +460,7 @@ export default function EditJobPage() {
                   id="skills"
                   value={job.skills?.join(", ")}
                   onChange={handleSkillsChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 />
               </div>
               <div>
@@ -476,7 +476,7 @@ export default function EditJobPage() {
                   id="experience"
                   value={job.experience}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 />
               </div>
               <div>
@@ -492,7 +492,7 @@ export default function EditJobPage() {
                   id="education"
                   value={job.education}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 />
               </div>
             </div>
@@ -517,7 +517,7 @@ export default function EditJobPage() {
                   value={job.aiCvAnalysisPrompt}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 ></textarea>
               </div>
               <div>
@@ -533,7 +533,7 @@ export default function EditJobPage() {
                   value={job.aiFirstInterviewPrompt}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 ></textarea>
               </div>
               <div>
@@ -549,7 +549,7 @@ export default function EditJobPage() {
                   value={job.aiSecondInterviewPrompt}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5]"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
                 ></textarea>
               </div>
             </div>
@@ -567,7 +567,7 @@ export default function EditJobPage() {
               onClick={() =>
                 router.push(`/dashboard/jobs/${jobId}/applications`)
               }
-              className="px-6 py-3 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0891b2] transition-colors font-semibold"
+              className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold"
             >
               View Applications
             </button>
@@ -583,7 +583,7 @@ export default function EditJobPage() {
               <button
                 type="submit"
                 disabled={isUpdating}
-                className="px-6 py-3 bg-gradient-to-r from-[#0fc4b5] to-[#0891b2] text-white rounded-lg hover:from-[#0891b2] hover:to-[#0369a1] transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isUpdating ? "Updating..." : "Save Changes"}
               </button>

@@ -41,7 +41,7 @@ export default function Calendar() {
       <div className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <CalendarDaysIcon className="w-5 h-5 text-[#0fc4b5]" />
+            <CalendarDaysIcon className="w-5 h-5 text-primary-600" />
             Upcoming Schedule
           </h2>
         </div>
@@ -61,10 +61,10 @@ export default function Calendar() {
     <div className="bg-white rounded-xl p-6 shadow-md border border-gray-300/70">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <CalendarDaysIcon className="w-5 h-5 text-[#0fc4b5]" />
+          <CalendarDaysIcon className="w-5 h-5 text-primary-600" />
           Upcoming Schedule
         </h2>
-        <button className="text-sm text-[#0fc4b5] hover:text-[#0891b2] font-medium">
+        <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
           View All
         </button>
       </div>

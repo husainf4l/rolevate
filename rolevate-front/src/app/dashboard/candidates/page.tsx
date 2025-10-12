@@ -229,6 +229,116 @@ export default function CandidatesPage() {
     }
   };
 
+  const handleExport = () => {
+    if (filteredCandidates.length === 0) {
+      alert('No candidates to export');
+      return;
+    }
+
+    const headers = ['Name', 'Email', 'Position', 'Status', 'CV Score', 'Interview 1', 'Interview 2', 'HR Interview', 'Overall Score', 'Applied Date', 'Experience', 'Location', 'Priority', 'Source'];
+    
+    const csvData = filteredCandidates.map(candidate => [
+      candidate.name,
+      candidate.email,
+      candidate.position,
+      candidate.status,
+      `${candidate.cvRating}%`,
+      candidate.interview1Rating > 0 ? `${candidate.interview1Rating}%` : '-',
+      candidate.interview2Rating > 0 ? `${candidate.interview2Rating}%` : '-',
+      candidate.hrRating > 0 ? `${candidate.hrRating}%` : '-',
+      `${candidate.overallRating}%`,
+      candidate.appliedDate,
+      candidate.experience,
+      candidate.location,
+      candidate.priority,
+      getSourceIcon(candidate.source)
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(value => `"${value}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `candidates-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrint = () => {
+    if (filteredCandidates.length === 0) {
+      alert('No candidates to print');
+      return;
+    }
+
+    const printContent = `
+      <html>
+        <head>
+          <title>Candidates Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; font-weight: bold; }
+            h1 { color: #333; }
+            .header { margin-bottom: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Candidates Report</h1>
+            <p>Generated on: ${new Date().toLocaleDateString()}</p>
+            <p>Total Candidates: ${filteredCandidates.length}</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th>CV Score</th>
+                <th>Overall Score</th>
+                <th>Applied Date</th>
+                <th>Experience</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredCandidates.map(candidate => `
+                <tr>
+                  <td>${candidate.name}</td>
+                  <td>${candidate.email}</td>
+                  <td>${candidate.position}</td>
+                  <td>${candidate.status}</td>
+                  <td>${candidate.cvRating}%</td>
+                  <td>${candidate.overallRating}%</td>
+                  <td>${candidate.appliedDate}</td>
+                  <td>${candidate.experience}</td>
+                  <td>${candidate.priority}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+  };
+
   // Map API statuses to display statuses
   const statusCounts = {
     ai_analysis: candidates.filter((c) => c.status === "SUBMITTED").length,
@@ -255,7 +365,7 @@ export default function CandidatesPage() {
           {/* Loading State */}
           {loading && (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0891b2] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading candidates...</p>
             </div>
           )}
@@ -351,14 +461,14 @@ export default function CandidatesPage() {
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200">
                   <div className="p-4 text-center">
-                    <div className="text-2xl font-bold text-[#0891b2] mb-1">
+                    <div className="text-2xl font-bold text-primary-600 mb-1">
                       {statusCounts.hr_interview}
                     </div>
                     <div className="text-sm text-gray-600 mb-2">
                       Interviewed
                     </div>
-                    <div className="w-8 h-8 mx-auto bg-blue-100 rounded-lg flex items-center justify-center">
-                      <UserIcon className="w-5 h-5 text-[#0891b2]" />
+                    <div className="w-8 h-8 mx-auto bg-primary-600/10 rounded-lg flex items-center justify-center">
+                      <UserIcon className="w-5 h-5 text-primary-600" />
                     </div>
                   </div>
                 </div>
@@ -417,7 +527,7 @@ export default function CandidatesPage() {
                           placeholder="Search candidates by name, email, position, or skills..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                         />
                       </div>
                     </div>
@@ -426,7 +536,7 @@ export default function CandidatesPage() {
                       <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                       >
                         <option value="all">All Status</option>
                         <option value="SUBMITTED">Submitted</option>
@@ -445,7 +555,7 @@ export default function CandidatesPage() {
                       <select
                         value={filterPosition}
                         onChange={(e) => setFilterPosition(e.target.value)}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                       >
                         <option value="all">All Positions</option>
                         <option value="Senior Frontend Developer">
@@ -469,7 +579,7 @@ export default function CandidatesPage() {
                       <select
                         value={filterPriority}
                         onChange={(e) => setFilterPriority(e.target.value)}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891b2] focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                       >
                         <option value="all">All Priority</option>
                         <option value="high">High Priority</option>
@@ -504,7 +614,7 @@ export default function CandidatesPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleBulkStatusUpdate("REVIEWING")}
-                            className="px-3 py-1.5 text-sm bg-[#0891b2] text-white rounded-lg hover:bg-[#0fc4b5] transition-colors font-medium"
+                            className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                           >
                             Move to Review
                           </button>
@@ -552,7 +662,7 @@ export default function CandidatesPage() {
                             filteredCandidates.length > 0
                           }
                           onChange={handleSelectAll}
-                          className="rounded border-gray-300 text-[#0891b2] focus:ring-[#0891b2]"
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                         />
                         <span className="text-sm text-gray-600">
                           Select All
@@ -560,10 +670,16 @@ export default function CandidatesPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                      <button 
+                        onClick={handleExport}
+                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
                         Export
                       </button>
-                      <button className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                      <button 
+                        onClick={handlePrint}
+                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
                         Print
                       </button>
                     </div>
@@ -583,7 +699,7 @@ export default function CandidatesPage() {
                               filteredCandidates.length > 0
                             }
                             onChange={handleSelectAll}
-                            className="rounded border-gray-300 text-[#0891b2] focus:ring-[#0891b2]"
+                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                           />
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -634,14 +750,14 @@ export default function CandidatesPage() {
                               onChange={() =>
                                 handleSelectCandidate(candidate.id)
                               }
-                              className="rounded border-gray-300 text-[#0891b2] focus:ring-[#0891b2]"
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                             />
                           </td>
 
                           {/* Candidate Info */}
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <div className="w-10 h-10 bg-gradient-to-br from-[#0891b2] to-[#0fc4b5] rounded-full flex items-center justify-center text-white font-medium text-sm">
+                              <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
                                 {candidate.name
                                   .split(" ")
                                   .map((n) => n[0])
@@ -764,7 +880,7 @@ export default function CandidatesPage() {
                             <div className="flex items-center justify-center gap-2">
                               <Link
                                 href={`/dashboard/candidates/${candidate.id}`}
-                                className="text-[#0891b2] hover:text-[#0fc4b5] font-medium text-sm"
+                                className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                               >
                                 View
                               </Link>
