@@ -8,6 +8,7 @@ import { CreateCompanyDto, JoinCompanyDto, UpdateCompanyDto } from './dto/compan
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { v4 as uuidv4 } from 'uuid';
 import { AwsS3Service } from '../services/aws-s3.service';
+import * as sharp from 'sharp';
 
 @ApiTags('companies')
 @ApiBearerAuth()
@@ -493,10 +494,16 @@ export class CompanyController {
     }
 
     try {
+      // Resize the image to 90% of original size
+      const metadata = await sharp(file.buffer).metadata();
+      const resizedBuffer = await sharp(file.buffer)
+        .resize(Math.round(metadata.width * 0.9), Math.round(metadata.height * 0.9))
+        .toBuffer();
+
       // Upload to S3 instead of local storage
       const fileName = `logo_${uuidv4()}.${file.originalname.split('.').pop()}`;
       const s3Url = await this.awsS3Service.uploadFile(
-        file.buffer,
+        resizedBuffer,
         fileName,
         `logos/${userCompany.id}`
       );
@@ -591,10 +598,16 @@ export class CompanyController {
     }
 
     try {
+      // Resize the image to 90% of original size
+      const metadata = await sharp(file.buffer).metadata();
+      const resizedBuffer = await sharp(file.buffer)
+        .resize(Math.round(metadata.width * 0.9), Math.round(metadata.height * 0.9))
+        .toBuffer();
+
       // Upload to S3
       const fileName = `${uuidv4()}.${file.originalname.split('.').pop()}`;
       const s3Url = await this.awsS3Service.uploadFile(
-        file.buffer,
+        resizedBuffer,
         fileName,
         `logos/${userCompany.id}`
       );
