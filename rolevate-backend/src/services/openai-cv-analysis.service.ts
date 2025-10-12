@@ -20,14 +20,24 @@ export class OpenaiCvAnalysisService {
   ): Promise<CVAnalysisResultDto> {
     try {
       console.log('🔍 Starting CV analysis for URL:', resumeUrl);
+      console.log('🔍 Analysis prompt length:', analysisPrompt?.length || 0);
+      console.log('🔍 Job details:', { title: job?.title, company: job?.company?.name });
       
       // Extract text from CV (PDF/DOC)
-      const cvText = await extractTextFromCV(resumeUrl);
+      console.log('📄 Starting text extraction...');
+      
+      // Generate presigned URL for S3 access
+      const awsS3Service = new (await import('../services/aws-s3.service')).AwsS3Service();
+      const presignedUrl = await awsS3Service.generatePresignedUrl(resumeUrl, 300); // 5 minutes
+      console.log('🔗 Generated presigned URL for CV access');
+      
+      const cvText = await extractTextFromCV(presignedUrl);
       
       console.log('📄 CV text extracted, length:', cvText?.length || 0);
       console.log('📄 CV text preview (first 200 chars):', cvText?.substring(0, 200) || 'No text');
       
       if (!cvText || cvText.trim().length === 0) {
+        console.error('❌ CV text extraction returned empty text');
         throw new Error('Could not extract text from CV');
       }
 
@@ -233,7 +243,9 @@ Your analyses are renowned for accuracy, specificity, and actionable insights. Y
       return analysisResult;
 
     } catch (error) {
-      console.error('OpenAI CV analysis error:', error);
+      console.error('❌ OpenAI CV analysis error:', error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
       
       // Return error analysis instead of throwing
       return {
@@ -250,11 +262,11 @@ Your analyses are renowned for accuracy, specificity, and actionable insights. Y
         experienceMatch: {
           relevant: false,
           years: 0,
-          details: 'Analysis failed due to technical error'
+          details: 'Could not analyze experience due to parsing error'
         },
         educationMatch: {
           relevant: false,
-          details: 'Analysis failed due to technical error'
+          details: 'Could not analyze education due to parsing error'
         },
         overallFit: 'Poor'
       };

@@ -63,6 +63,7 @@ export async function extractTextFromCV(fileUrl: string): Promise<string> {
   
   // Validate input
   if (!fileUrl || typeof fileUrl !== 'string') {
+    console.error('❌ Invalid file URL provided');
     throw new Error('Invalid file URL provided');
   }
 
@@ -75,12 +76,14 @@ export async function extractTextFromCV(fileUrl: string): Promise<string> {
   const supportedExtensions = Object.values(SUPPORTED_CV_FORMATS).flat();
   if (!supportedExtensions.includes(ext)) {
     const supportedList = supportedExtensions.join(', ');
+    console.error('❌ Unsupported file type:', ext, 'Supported types:', supportedList);
     throw new Error(`Unsupported file type: ${ext}. Supported types: ${supportedList}`);
   }
 
   // Download file
   const isS3File = fileUrl.startsWith('http') || fileUrl.includes('amazonaws.com');
   if (!isS3File) {
+    console.error('❌ Only S3 URLs are supported');
     throw new Error('Only S3 URLs are supported. All CV files must be stored in AWS S3.');
   }
 
@@ -89,10 +92,12 @@ export async function extractTextFromCV(fileUrl: string): Promise<string> {
   
   // Validate file content
   if (fileBuffer.length === 0) {
+    console.error('❌ Downloaded file is empty');
     throw new Error('File is empty');
   }
   
   if (fileBuffer.length > 50 * 1024 * 1024) { // 50MB limit
+    console.error('❌ File too large:', fileBuffer.length, 'bytes');
     throw new Error('File too large. Maximum size is 50MB.');
   }
 
