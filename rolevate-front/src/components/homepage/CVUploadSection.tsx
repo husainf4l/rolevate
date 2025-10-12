@@ -294,7 +294,7 @@ export default function CVUploadSection() {
                   <p className="font-text text-gray-600 text-lg mb-8">
                     Drag and drop your CV here or click to browse
                   </p>
-                  <Button onClick={openFileDialog} variant="default" size="lg">
+                  <Button onClick={openFileDialog} className="bg-[#0891b2] hover:bg-[#067a94] text-white" size="lg">
                     Choose File
                   </Button>
                   <p className="font-text text-sm text-gray-500 mt-6">
@@ -307,9 +307,8 @@ export default function CVUploadSection() {
             {uploadedFile && !isAnalyzing && !analysisResult && (
               <div className="mt-8 max-w-md mx-auto">
                 <Button
-                  variant="default"
+                  className="w-full font-bold bg-[#0891b2] hover:bg-[#067a94] text-white"
                   size="lg"
-                  className="w-full font-bold"
                 >
                   Get AI Analysis & Job Matches
                 </Button>

@@ -257,7 +257,7 @@ export default function Navbar() {
             ) : (
               // Not authenticated - show sign in button
               <Link href="/login">
-                <button className="hidden md:inline-flex items-center gap-2 rounded-sm shadow-lg px-5 py-2 text-sm font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 hover:shadow-xl hover:scale-105">
+                <button className="hidden md:inline-flex items-center gap-2 rounded-sm shadow-lg px-5 py-2 text-sm font-semibold bg-[#0891b2] hover:bg-[#067a94] text-white transition-all duration-300 hover:shadow-xl hover:scale-105">
                   Sign In
                 </button>
               </Link>
@@ -265,7 +265,7 @@ export default function Navbar() {
 
             <button
               onClick={toggleMenu}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-sm bg-gray-100/60 text-gray-700 hover:bg-gray-200/80 hover:text-primary-600 transition-all duration-300 md:hidden border border-gray-200/50 backdrop-blur-sm"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-sm bg-gray-100/60 text-gray-700 hover:bg-gray-200/80 hover:text-[#0891b2] transition-all duration-300 md:hidden border border-gray-200/50 backdrop-blur-sm"
               aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isMenuOpen}
             >
@@ -400,7 +400,7 @@ export default function Navbar() {
                       <Link href={getDashboardLink()}>
                         <button
                           onClick={closeMenu}
-                          className="w-full rounded-sm py-2.5 text-base font-medium bg-primary-600 hover:bg-primary-700 text-white transition-all duration-200 shadow-sm"
+                          className="w-full rounded-sm py-2.5 text-base font-medium bg-[#0891b2] hover:bg-[#067a94] text-white transition-all duration-200 shadow-sm"
                         >
                           Go to Dashboard
                         </button>
@@ -421,7 +421,7 @@ export default function Navbar() {
                     <Link href="/login">
                       <button
                         onClick={closeMenu}
-                        className="w-full rounded-sm py-3 text-base font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+                        className="w-full rounded-sm py-3 text-base font-semibold bg-[#0891b2] hover:bg-[#067a94] text-white transition-all duration-300 shadow-lg hover:shadow-xl"
                       >
                         Sign In
                       </button>
