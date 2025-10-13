@@ -1,0 +1,129 @@
+{
+  "full_name": "John Doe",
+  "job_title": "Senior Full-Stack Developer",
+  "contact": {
+    "email": "john.doe@example.com",
+    "phone": "+1 (555) 123-4567",
+    "location": "San Francisco, CA",
+    "linkedin": "https://linkedin.com/in/johndoe",
+    "github": "https://github.com/johndoe"
+  },
+  "summary": "Highly skilled Full-Stack Developer with 8+ years of experience building scalable web applications. Expertise in React, Node.js, Python, and cloud technologies. Proven track record of leading teams and delivering high-impact projects. Passionate about clean code, user experience, and continuous learning.",
+  "experience": [
+    {
+      "job_title": "Senior Full-Stack Developer",
+      "company": "TechCorp Inc",
+      "location": "San Francisco, CA",
+      "start_date": "2020-03",
+      "end_date": "Present",
+      "is_current": true,
+      "description": "Leading development of enterprise SaaS platform serving 10,000+ users.",
+      "achievements": [
+        "Architected and implemented microservices architecture, improving system scalability by 300%",
+        "Led team of 5 developers in agile environment, delivering features 40% faster",
+        "Reduced application load time by 60% through performance optimization",
+        "Implemented CI/CD pipeline reducing deployment time from hours to minutes"
+      ],
+      "technologies": ["React", "Node.js", "TypeScript", "PostgreSQL", "AWS", "Docker", "Kubernetes"]
+    },
+    {
+      "job_title": "Full-Stack Developer",
+      "company": "StartupXYZ",
+      "location": "Remote",
+      "start_date": "2018-06",
+      "end_date": "2020-02",
+      "is_current": false,
+      "achievements": [
+        "Built MVP from scratch, securing $2M in Series A funding",
+        "Developed RESTful APIs handling 1M+ daily requests",
+        "Integrated third-party payment systems (Stripe, PayPal)",
+        "Implemented real-time features using WebSockets"
+      ],
+      "technologies": ["Vue.js", "Python", "Django", "MongoDB", "Redis"]
+    },
+    {
+      "job_title": "Junior Software Developer",
+      "company": "Digital Solutions Ltd",
+      "location": "San Francisco, CA",
+      "start_date": "2016-07",
+      "end_date": "2018-05",
+      "is_current": false,
+      "achievements": [
+        "Developed responsive web applications for 20+ clients",
+        "Collaborated with design team to improve UI/UX",
+        "Maintained legacy codebases and fixed critical bugs"
+      ],
+      "technologies": ["JavaScript", "PHP", "MySQL", "jQuery"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Science in Computer Science",
+      "institution": "University of California, Berkeley",
+      "location": "Berkeley, CA",
+      "start_date": "2012",
+      "end_date": "2016",
+      "gpa": "3.8",
+      "honors": "Magna Cum Laude"
+    }
+  ],
+  "skill_categories": [
+    {
+      "category": "Frontend",
+      "skills": ["React", "Vue.js", "TypeScript", "Next.js", "Tailwind CSS", "HTML5", "CSS3"]
+    },
+    {
+      "category": "Backend",
+      "skills": ["Node.js", "Python", "Django", "FastAPI", "Express.js", "RESTful APIs", "GraphQL"]
+    },
+    {
+      "category": "Database",
+      "skills": ["PostgreSQL", "MongoDB", "Redis", "MySQL", "DynamoDB"]
+    },
+    {
+      "category": "DevOps & Cloud",
+      "skills": ["AWS", "Docker", "Kubernetes", "CI/CD", "GitHub Actions", "Terraform"]
+    },
+    {
+      "category": "Tools & Others",
+      "skills": ["Git", "Jest", "Pytest", "Agile/Scrum", "Linux", "Nginx"]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect - Associate",
+      "issuer": "Amazon Web Services",
+      "issue_date": "2022-05",
+      "credential_id": "AWS-12345"
+    },
+    {
+      "name": "Professional Scrum Master I (PSM I)",
+      "issuer": "Scrum.org",
+      "issue_date": "2021-08"
+    }
+  ],
+  "projects": [
+    {
+      "name": "E-Commerce Platform",
+      "description": "Built a full-featured e-commerce platform with payment integration, inventory management, and admin dashboard.",
+      "technologies": ["Next.js", "Node.js", "PostgreSQL", "Stripe", "AWS S3"],
+      "date": "2023"
+    },
+    {
+      "name": "Real-Time Chat Application",
+      "description": "Developed a scalable chat application supporting 10,000+ concurrent users with WebSocket technology.",
+      "technologies": ["React", "Socket.io", "Redis", "Node.js"],
+      "date": "2022"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "Native"
+    },
+    {
+      "language": "Spanish",
+      "proficiency": "Professional"
+    }
+  ]
+}
