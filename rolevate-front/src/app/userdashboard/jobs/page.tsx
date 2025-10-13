@@ -1,317 +1,361 @@
-import React from "react";
-import {
-  MagnifyingGlassIcon,
-  MapPinIcon,
-  CurrencyDollarIcon,
-  ClockIcon,
-  BookmarkIcon,
-  FunnelIcon,
-  AdjustmentsHorizontalIcon,
-  BriefcaseIcon,
-} from "@heroicons/react/24/outline";
-import { Card, CardContent } from "@/components/ui/card";
+"use client";
 
-interface Job {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  salary: string;
-  type: string;
-  postedDate: string;
-  description: string;
-  requirements: string[];
-  benefits: string[];
-  isRemote: boolean;
-  experienceLevel: string;
-  matchScore?: number;
-}
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import JobListCard, { JobData } from "@/components/common/JobListCard";
+import { Button } from "@/components/ui/button";
+import { JobService, JobPost } from "@/services/job";
+import { useSavedJobs } from "@/hooks/useSavedJobs";
 
-const mockJobs: Job[] = [
-  {
-    id: "1",
-    title: "Senior React Developer",
-    company: "TechFlow Solutions",
-    location: "San Francisco, CA",
-    salary: "$120k - $150k",
-    type: "Full-time",
-    postedDate: "2025-01-07",
-    description:
-      "We're looking for a senior React developer to join our growing team and help build next-generation web applications.",
-    requirements: [
-      "5+ years React experience",
-      "TypeScript proficiency",
-      "Modern JavaScript",
-    ],
-    benefits: ["Health insurance", "401k matching", "Flexible hours"],
-    isRemote: false,
-    experienceLevel: "Senior",
-    matchScore: 95,
-  },
-  {
-    id: "2",
-    title: "Frontend Engineer",
-    company: "Innovation Labs",
-    location: "Remote",
-    salary: "$100k - $130k",
-    type: "Full-time",
-    postedDate: "2025-01-06",
-    description:
-      "Join our remote team to create amazing user experiences using cutting-edge technologies.",
-    requirements: [
-      "3+ years frontend experience",
-      "React or Vue.js",
-      "CSS frameworks",
-    ],
-    benefits: [
-      "Remote work",
-      "Equipment allowance",
-      "Professional development",
-    ],
-    isRemote: true,
-    experienceLevel: "Mid-level",
-    matchScore: 88,
-  },
-  {
-    id: "3",
-    title: "UI/UX Developer",
-    company: "CreativeDesign Co.",
-    location: "New York, NY",
-    salary: "$90k - $120k",
-    type: "Contract",
-    postedDate: "2025-01-05",
-    description:
-      "Design and develop beautiful, intuitive interfaces for our client projects.",
-    requirements: [
-      "UI/UX design skills",
-      "Frontend development",
-      "Design tools proficiency",
-    ],
-    benefits: ["Flexible schedule", "Creative freedom", "Portfolio building"],
-    isRemote: false,
-    experienceLevel: "Mid-level",
-    matchScore: 82,
-  },
-  {
-    id: "4",
-    title: "Full Stack Developer",
-    company: "StartupXYZ",
-    location: "Austin, TX",
-    salary: "$110k - $140k",
-    type: "Full-time",
-    postedDate: "2025-01-04",
-    description:
-      "Build end-to-end solutions in a fast-paced startup environment.",
-    requirements: ["Full-stack experience", "Node.js", "Database knowledge"],
-    benefits: ["Equity options", "Startup environment", "Growth opportunities"],
-    isRemote: false,
-    experienceLevel: "Mid-level",
-  },
-  {
-    id: "5",
-    title: "Junior Frontend Developer",
-    company: "WebCorp",
-    location: "Boston, MA",
-    salary: "$70k - $85k",
-    type: "Full-time",
-    postedDate: "2025-01-03",
-    description:
-      "Perfect opportunity for a junior developer to grow their skills in a supportive environment.",
-    requirements: [
-      "1+ year experience",
-      "HTML/CSS/JavaScript",
-      "Learning mindset",
-    ],
-    benefits: ["Mentorship program", "Training budget", "Career development"],
-    isRemote: false,
-    experienceLevel: "Junior",
-  },
-];
+export default function UserDashboardJobsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("latest");
+  const [loading, setLoading] = useState(false);
 
-const getMatchScoreColor = (score: number) => {
-  if (score >= 90) return "bg-green-100 text-green-800";
-  if (score >= 80) return "bg-yellow-100 text-yellow-800";
-  return "bg-red-100 text-red-800";
-};
+  // Initialize search term from URL params
+  useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      setSearchTerm(searchQuery);
+    }
+  }, [searchParams]);
 
-export default function JobsPage() {
+  // Update URL when search term changes
+  const updateSearchTerm = useCallback((value: string) => {
+    setSearchTerm(value);
+    
+    // Update URL with search query
+    const params = new URLSearchParams(searchParams.toString());
+    if (value.trim()) {
+      params.set('search', value);
+    } else {
+      params.delete('search');
+    }
+    
+    const newUrl = params.toString() ? `?${params.toString()}` : '';
+    router.replace(`/userdashboard/jobs${newUrl}`, { scroll: false });
+  }, [searchParams, router]);
+
+  // Clear search function
+  const clearSearch = useCallback(() => {
+    updateSearchTerm("");
+  }, [updateSearchTerm]);
+
+  // Use the useSavedJobs hook for canonical saved jobs state
+  const { isJobSaved, toggleSaveJob } = useSavedJobs();
+
+  // API state
+  const [jobs, setJobs] = useState<JobData[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [pagination, setPagination] = useState<any>(null);
+
+  const jobsPerPage = 10;
+
+  // Helper function to convert JobPost to JobData format
+  const convertJobPostToJobData = (jobPost: JobPost): JobData => {
+    try {
+      const logoResult = getJobLogo(jobPost);
+
+      const jobData: JobData = {
+        id: jobPost.id || '', // Use string ID directly (UUID from backend)
+        title: jobPost.title || 'Untitled Position',
+        company: jobPost.company?.name || "Company", // Use actual company name from API
+        location: jobPost.location || 'Location TBD',
+        type:
+          jobPost.type === "FULL_TIME"
+            ? "Full-time"
+            : jobPost.type === "PART_TIME"
+            ? "Part-time"
+            : jobPost.type === "CONTRACT"
+            ? "Contract"
+            : jobPost.type === "REMOTE"
+            ? "Remote"
+            : "Other",
+        salary: jobPost.salary || 'Competitive',
+        skills: jobPost.skills || [],
+        posted: jobPost.postedAt ? new Date(jobPost.postedAt).toLocaleDateString() : 'Recently',
+        applicants: jobPost.applicants || 0,
+        description: jobPost.shortDescription || jobPost.description || '',
+        urgent: false, // Default to false for now
+      };
+
+      // Only add logo field if it exists (handles exactOptionalPropertyTypes)
+      if (logoResult !== undefined) {
+        jobData.logo = logoResult;
+      }
+
+      // Only add experience field if it exists
+      if (jobPost.experience) {
+        jobData.experience = jobPost.experience;
+      }
+
+      return jobData;
+    } catch (error) {
+      console.error("Error converting job post:", jobPost, error);
+      // Return a minimal valid job data object
+      return {
+        id: jobPost.id || 'unknown',
+        title: 'Error Loading Job',
+        company: 'Unknown',
+        location: 'Unknown',
+        type: 'Full-time',
+        salary: 'N/A',
+        skills: [],
+        posted: 'Unknown',
+        applicants: 0,
+        description: 'Error loading job details',
+        urgent: false,
+      };
+    }
+  };
+
+  // Helper function to get job logo from API response (no emoji fallback)
+  const getJobLogo = (jobPost: JobPost): string | undefined => {
+    // Priority order: companyLogo -> company.logo -> undefined (no fallback)
+    if (jobPost.companyLogo) {
+      return jobPost.companyLogo;
+    }
+
+    if (jobPost.company?.logo) {
+      return jobPost.company.logo;
+    }
+
+    // No fallback - return undefined if no logo is available
+    return undefined;
+  };
+
+  // Fetch jobs from API
+  const fetchJobs = useCallback(async (page: number = 1, search?: string) => {
+    try {
+      setLoading(true);
+
+      const response = await JobService.getAllPublicJobs(
+        page,
+        jobsPerPage,
+        search || searchTerm || undefined
+      );
+
+      console.log("API Response:", response); // Debug log
+
+      // Check if response has the expected structure
+      if (!response || !Array.isArray(response.jobs)) {
+        throw new Error("Invalid response structure from API");
+      }
+
+      const convertedJobs = response.jobs.map(convertJobPostToJobData);
+
+      setJobs(convertedJobs);
+      setPagination(response.pagination);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      console.error("Error details:", error instanceof Error ? error.message : "Unknown error");
+      // Set empty state instead of fallback data
+      setJobs([]);
+      setPagination(undefined);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm]); // Only depend on searchTerm
+
+  // Initial fetch and search effect
+  useEffect(() => {
+    fetchJobs(1, searchTerm);
+  }, [searchTerm, fetchJobs]);
+
+  // Sort the jobs
+  const sortedJobs = [...jobs].sort((a, b) => {
+    switch (sortBy) {
+      case "latest":
+        return new Date(b.posted).getTime() - new Date(a.posted).getTime();
+      case "salary":
+        // Extract numeric values from salary strings for comparison
+        const getSalaryValue = (salary: string) => {
+          const numbers = salary.match(/\d+/g);
+          return numbers ? parseInt(numbers[0]) : 0;
+        };
+        return getSalaryValue(b.salary) - getSalaryValue(a.salary);
+      case "applicants":
+        return b.applicants - a.applicants;
+      default:
+        return 0;
+    }
+  });
+
+  const handleApply = (jobId: string) => {
+    router.push(`/jobs/${jobId}`);
+  };
+
+  const handleSaveJob = async (jobId: string) => {
+    try {
+      await toggleSaveJob(jobId);
+    } catch (error) {
+      console.error("Failed to toggle save job:", error);
+      // Error handling is already done in the hook
+    }
+  };
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    fetchJobs(page);
+  };
+
   return (
-    <div className="flex-1 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Browse Jobs</h1>
-          <p className="text-gray-600">
-            Discover opportunities that match your skills and career goals.
-          </p>
-        </div>
+    <div className="min-h-screen">
+      {/* Header */}
+      <div >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center mb-4">
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+              Explore{" "}
+              <span className="text-primary-600">
+                Opportunities
+              </span>
+            </h1>
+            <p className="font-text text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+              Find your next career opportunity
+            </p>
+          </div>
 
-        {/* Search and Filters */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+          {/* Search and Sort Bar */}
+          <div className="max-w-4xl mx-auto mb-2">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center">
+              <div className="flex-1 relative w-full">
+                <svg
+                  className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
                 <input
                   type="text"
-                  placeholder="Search for jobs, companies, or keywords..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5] focus:border-transparent"
+                  placeholder="Job title, company, or skills..."
+                  className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2 border border-gray-200 rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500 text-sm sm:text-base shadow-sm transition-all duration-200"
+                  value={searchTerm}
+                  onChange={(e) => updateSearchTerm(e.target.value)}
                 />
+                {searchTerm && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-1.5 sm:gap-2 flex-wrap justify-center sm:justify-start">
+                <button
+                  onClick={() => setSortBy("latest")}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-sm transition-all duration-200 ${
+                    sortBy === "latest"
+                      ? "bg-primary-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Latest
+                </button>
+                <button
+                  onClick={() => setSortBy("salary")}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-sm transition-all duration-200 ${
+                    sortBy === "salary"
+                      ? "bg-primary-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Salary
+                </button>
+                <button
+                  onClick={() => setSortBy("applicants")}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-sm transition-all duration-200 ${
+                    sortBy === "applicants"
+                      ? "bg-primary-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Popular
+                </button>
               </div>
             </div>
-            <div>
-              <div className="relative">
-                <MapPinIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Location"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0fc4b5] focus:border-transparent"
+          </div>
+        </div>
+      </div>
+
+      {/* Jobs Content */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-lg font-semibold text-gray-900">
+            {sortedJobs.length} {sortedJobs.length === 1 ? "Job" : "Jobs"} Found
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {sortedJobs.map((job) => (
+                <JobListCard
+                  key={job.id}
+                  job={job}
+                  onApply={handleApply}
+                  onSave={handleSaveJob}
+                  isSaved={isJobSaved(job.id)}
                 />
-              </div>
+              ))}
             </div>
-            <div>
-              <button className="w-full px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0ba399] transition-colors">
-                Search Jobs
-              </button>
-            </div>
-          </div>
 
-          <div className="flex items-center space-x-4 mt-4">
-            <button className="inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-              <FunnelIcon className="w-4 h-4" />
-              <span>Filters</span>
-            </button>
-            <button className="inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-              <AdjustmentsHorizontalIcon className="w-4 h-4" />
-              <span>Sort</span>
-            </button>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="remote"
-                className="rounded text-[#0fc4b5]"
-              />
-              <label htmlFor="remote" className="text-sm text-gray-700">
-                Remote only
-              </label>
-            </div>
-          </div>
-        </CardContent>
-        </Card>
-
-        {/* Results Summary */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="text-sm text-gray-600">
-            Showing {mockJobs.length} jobs matching your criteria
-          </div>
-          <div className="flex items-center space-x-4">
-            <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-              <option>Most Recent</option>
-              <option>Best Match</option>
-              <option>Salary: High to Low</option>
-              <option>Salary: Low to High</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Jobs List */}
-        <div className="space-y-6">
-          {mockJobs.map((job) => (
-            <Card key={job.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {job.title}
-                    </h3>
-                    {job.matchScore && (
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getMatchScoreColor(
-                          job.matchScore
-                        )}`}
-                      >
-                        {job.matchScore}% match
-                      </span>
-                    )}
-                    {job.isRemote && (
-                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                        Remote
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-lg text-[#0fc4b5] font-medium mb-2">
-                    {job.company}
-                  </p>
-                  <p className="text-gray-600 mb-4 line-clamp-2">
-                    {job.description}
-                  </p>
-                  <div className="flex items-center space-x-6 text-sm text-gray-500">
-                    <div className="flex items-center space-x-1">
-                      <MapPinIcon className="w-4 h-4" />
-                      <span>{job.location}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <CurrencyDollarIcon className="w-4 h-4" />
-                      <span>{job.salary}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <BriefcaseIcon className="w-4 h-4" />
-                      <span>{job.type}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <ClockIcon className="w-4 h-4" />
-                      <span>{job.experienceLevel}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <button className="p-2 text-gray-400 hover:text-[#0fc4b5] hover:bg-[#0fc4b5] hover:bg-opacity-10 rounded-lg transition-colors">
-                    <BookmarkIcon className="w-5 h-5" />
-                  </button>
-                </div>
+            {sortedJobs.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No jobs found matching your criteria.</p>
+                <Button
+                  variant="outline"
+                  onClick={clearSearch}
+                  className="mt-4"
+                >
+                  Clear Search
+                </Button>
               </div>
+            )}
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div className="flex flex-wrap gap-2">
-                  {job.requirements.slice(0, 3).map((req, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-md"
-                    >
-                      {req}
-                    </span>
-                  ))}
-                  {job.requirements.length > 3 && (
-                    <span className="inline-flex px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">
-                      +{job.requirements.length - 3} more
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">
-                    {new Date(job.postedDate).toLocaleDateString()}
-                  </span>
-                  <button className="px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0ba399] transition-colors">
-                    Apply Now
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    View Details
-                  </button>
-                </div>
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex justify-center mt-8 space-x-2">
+                <Button
+                  variant="secondary"
+                  disabled={!pagination.hasPrevPage || loading}
+                  onClick={() => handlePageChange(pagination.prevPage)}
+                >
+                  Previous
+                </Button>
+                <span className="px-4 py-2">
+                  Page {currentPage} of {pagination.totalPages}
+                </span>
+                <Button
+                  variant="secondary"
+                  disabled={!pagination.hasNextPage || loading}
+                  onClick={() => handlePageChange(pagination.nextPage)}
+                >
+                  Next
+                </Button>
               </div>
-            </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Load More */}
-        <div className="text-center mt-8">
-          <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-            Load More Jobs
-          </button>
-        </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

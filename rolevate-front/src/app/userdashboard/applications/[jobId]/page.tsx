@@ -8,6 +8,7 @@ import {
   XCircleIcon,
   EyeIcon,
   ArrowLeftIcon,
+  StarIcon,
 } from "@heroicons/react/24/outline";
 import {
   getCandidateApplicationDetails,
@@ -101,20 +102,10 @@ export default function ApplicationDetailsPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 min-h-screen bg-[#fafbfc]">
-        <div className="container-corporate py-12">
-          <div className="flex items-center justify-center py-24">
-            <div className="text-center">
-              <div className="w-16 h-16 glass rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#13ead9] border-t-transparent"></div>
-              </div>
-              <h3 className="text-xl font-semibold text-[#1d1d1f] mb-2">
-                Loading Application Details
-              </h3>
-              <p className="text-[#6b7280]">
-                Please wait while we fetch your application information...
-              </p>
-            </div>
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
           </div>
         </div>
       </div>
@@ -123,38 +114,26 @@ export default function ApplicationDetailsPage() {
 
   if (error || !application) {
     return (
-      <div className="flex-1 min-h-screen bg-[#fafbfc]">
-        <div className="container-corporate py-12">
-          <div className="flex items-center justify-center py-24">
-            <div
-              className="glass-strong rounded-3xl p-8 max-w-md w-full"
-              style={{ boxShadow: "var(--shadow-medium)" }}
-            >
-              <div className="text-center">
-                <div className="w-16 h-16 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                  <XCircleIcon className="w-8 h-8 text-red-600" />
-                </div>
-                <h3 className="text-xl font-bold text-red-600 mb-3">
-                  Error Loading Application
-                </h3>
-                <p className="text-red-500 text-sm mb-6">
-                  {error || "Application not found"}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={() => router.back()}
-                    className="flex-1 px-4 py-3 bg-[#6b7280] text-white rounded-2xl hover:bg-[#4b5563] transition-all duration-200 text-sm font-medium"
-                  >
-                    Go Back
-                  </button>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="flex-1 px-4 py-3 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all duration-200 text-sm font-medium"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              </div>
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="bg-red-50 border border-red-200 rounded-sm p-4">
+            <div className="text-red-600 font-medium mb-2">
+              Error loading application details
+            </div>
+            <div className="text-red-500 text-sm">{error || "Application not found"}</div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => router.back()}
+                className="px-4 py-2 bg-gray-600 text-white rounded-sm hover:bg-gray-700 transition-colors"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-red-600 text-white rounded-sm hover:bg-red-700 transition-colors"
+              >
+                Try Again
+              </button>
             </div>
           </div>
         </div>
@@ -163,68 +142,61 @@ export default function ApplicationDetailsPage() {
   }
 
   return (
-    <div className="flex-1 min-h-screen bg-[#fafbfc]">
-      <div className="container-corporate py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center space-x-2 text-[#6b7280] hover:text-[#0891b2] transition-all duration-200 mb-6 group"
-          >
-            <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Applications</span>
-          </button>
-          <div
-            className="glass-strong rounded-3xl p-8"
-            style={{ boxShadow: "var(--shadow-soft)" }}
-          >
-            <h1 className="text-4xl font-bold text-[#1d1d1f] mb-3">
-              Application Details
+    <div className="min-h-screen">
+      {/* Header */}
+      <div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center mb-4">
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+              Application{" "}
+              <span className="text-primary-600">
+                Details
+              </span>
             </h1>
-            <p className="text-[#6b7280] text-lg">
+            <p className="font-text text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
               Detailed view of your job application and CV analysis.
             </p>
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Job Information */}
+      {/* Application Content */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
+        {/* Back Button */}
+        <div className="max-w-6xl mx-auto mb-6">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center space-x-2 text-gray-600 hover:text-primary-600 transition-colors font-medium"
+          >
+            <ArrowLeftIcon className="w-5 h-5" />
+            <span>Back to Applications</span>
+          </button>
+        </div>
+
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Application Summary */}
           <div className="lg:col-span-1">
-            <div
-              className="glass-strong rounded-3xl overflow-hidden sticky top-8"
-              style={{ boxShadow: "var(--shadow-medium)" }}
-            >
-              {/* Header with gradient */}
-              <div className="bg-[#0891b2] p-6 text-white">
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
-                    <span className="text-xl">📋</span>
-                  </div>
-                  <h2 className="text-xl font-bold">Application Summary</h2>
-                </div>
-                <p className="text-white/80 text-sm">
-                  Track your progress and status
-                </p>
+            <div className="bg-white rounded-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Application Summary
+                </h2>
               </div>
-
               <div className="p-6 space-y-6">
                 {/* Job Details */}
-                <div
-                  className="bg-[#f0fdfa] rounded-2xl p-5 border border-[#13ead9]/20"
-                  style={{ boxShadow: "var(--shadow-soft)" }}
-                >
+                <div className="bg-gray-50 rounded-sm p-4">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-2xl flex items-center justify-center flex-shrink-0 text-white font-bold text-xl">
+                    <div className="w-12 h-12 bg-primary-100 rounded-sm flex items-center justify-center flex-shrink-0 text-primary-600 font-bold text-lg">
                       {application.job.company.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-[#1d1d1f] text-lg mb-1 truncate">
+                      <h3 className="font-semibold text-gray-900 text-lg mb-1 truncate">
                         {application.job.title}
                       </h3>
-                      <p className="text-[#0891b2] font-semibold mb-3">
+                      <p className="text-primary-600 font-medium mb-3">
                         {application.job.company.name}
                       </p>
-                      <div className="flex items-center space-x-2 text-sm text-[#6b7280]">
+                      <div className="flex items-center space-x-2 text-sm text-gray-500">
                         <ClockIcon className="w-4 h-4" />
                         <span>
                           Applied{" "}
@@ -243,32 +215,24 @@ export default function ApplicationDetailsPage() {
                 </div>
 
                 {/* Status Card */}
-                <div
-                  className="glass rounded-2xl p-5"
-                  style={{ boxShadow: "var(--shadow-soft)" }}
-                >
-                  <h4 className="text-sm font-semibold text-[#4b5563] mb-4 flex items-center">
-                    <span className="w-2 h-2 bg-[#0891b2] rounded-full mr-3"></span>
+                <div className="bg-white border border-gray-200 rounded-sm p-4">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-4">
                     Current Status
                   </h4>
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="flex-shrink-0">
-                      {getStatusIcon(application.status)}
-                    </div>
-                    <div className="flex-1">
-                      <span
-                        className={`inline-flex px-4 py-2 text-sm font-semibold rounded-full ${getStatusColor(
-                          application.status
-                        )}`}
-                      >
-                        {application.status.replace("_", " ")}
-                      </span>
-                    </div>
+                  <div className="flex items-center space-x-3 mb-4">
+                    {getStatusIcon(application.status)}
+                    <span
+                      className={`inline-flex px-3 py-1 text-sm font-medium rounded-sm ${getStatusColor(
+                        application.status
+                      )}`}
+                    >
+                      {application.status.replace("_", " ")}
+                    </span>
                   </div>
 
                   {/* Status description */}
-                  <div className="bg-[#f0fdfa] rounded-2xl p-4 border border-[#13ead9]/20">
-                    <p className="text-sm text-[#4b5563] leading-relaxed">
+                  <div className="bg-gray-50 rounded-sm p-3">
+                    <p className="text-sm text-gray-600 leading-relaxed">
                       {application.status === "SUBMITTED" &&
                         "Your application has been received and is awaiting review."}
                       {application.status === "REVIEWING" &&
@@ -278,7 +242,7 @@ export default function ApplicationDetailsPage() {
                       {application.status === "INTERVIEWED" &&
                         "Your interview has been completed. We're making our decision."}
                       {application.status === "OFFERED" &&
-                        "🎉 Congratulations! You've received an offer."}
+                        "Congratulations! You've received an offer."}
                       {application.status === "REJECTED" &&
                         "Unfortunately, we've decided to move forward with other candidates."}
                       {application.status === "WITHDRAWN" &&
@@ -290,26 +254,28 @@ export default function ApplicationDetailsPage() {
                 {/* Application Details */}
                 <div className="space-y-4">
                   {application.expectedSalary && (
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
+                    <div className="bg-primary-50 rounded-sm p-4 border border-primary-200">
                       <div className="flex items-center space-x-3 mb-2">
-                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                          <span className="text-green-600 text-lg">💰</span>
+                        <div className="w-5 h-5 bg-primary-100 rounded-sm flex items-center justify-center">
+                          <svg className="w-3 h-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                          </svg>
                         </div>
-                        <p className="text-sm font-semibold text-green-800">
+                        <p className="text-sm font-semibold text-primary-800">
                           Expected Salary
                         </p>
                       </div>
-                      <p className="font-bold text-green-900 text-xl ml-11">
+                      <p className="font-bold text-primary-900 text-xl">
                         {application.expectedSalary}
                       </p>
                     </div>
                   )}
 
                   {application.coverLetter && (
-                    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                    <div className="bg-white border border-gray-200 rounded-sm p-4">
                       <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-5 h-5 bg-blue-100 rounded-sm flex items-center justify-center">
+                          <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
@@ -317,57 +283,12 @@ export default function ApplicationDetailsPage() {
                           Your Cover Letter
                         </p>
                       </div>
-                      <div className="text-sm text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100 max-h-32 overflow-y-auto leading-relaxed">
+                      <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-sm border border-gray-100 max-h-32 overflow-y-auto leading-relaxed">
                         {application.coverLetter}
                       </div>
                     </div>
                   )}
                 </div>
-
-                {/* Next Steps */}
-                {application.status === "SUBMITTED" && (
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
-                    <h4 className="text-sm font-bold text-blue-900 mb-3 flex items-center">
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                        <span className="text-blue-600">⏭️</span>
-                      </div>
-                      What's Next?
-                    </h4>
-                    <ul className="text-sm text-blue-800 space-y-2 ml-11">
-                      <li className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Our team will review your application</span>
-                      </li>
-                      <li className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>
-                          You'll receive an update within 3-5 business days
-                        </span>
-                      </li>
-                      <li className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>
-                          If selected, we'll contact you for an interview
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-
-                {application.status === "REVIEWING" && (
-                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-5 border border-yellow-200">
-                    <h4 className="text-sm font-bold text-yellow-900 mb-3 flex items-center">
-                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
-                        <span className="text-yellow-600">👀</span>
-                      </div>
-                      Under Review
-                    </h4>
-                    <p className="text-sm text-yellow-800 leading-relaxed ml-11">
-                      Great news! Your application caught our attention and is
-                      being carefully reviewed by our hiring team.
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -375,32 +296,28 @@ export default function ApplicationDetailsPage() {
           {/* CV Analysis */}
           <div className="lg:col-span-2 space-y-6">
             {/* Analysis Status Header */}
-            <div
-              className="glass-strong rounded-3xl p-8 hover:shadow-lg transition-all duration-300"
-              style={{ boxShadow: "var(--shadow-medium)" }}
-            >
+            <div className="bg-white rounded-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-2xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-[#0891b2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-primary-100 rounded-sm flex items-center justify-center">
+                    <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-[#1d1d1f]">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     Your Application Analysis
                   </h2>
                 </div>
                 {application.cvAnalysisResults?.summary?.includes("failed") ? (
-                  <div className="flex items-center space-x-3 bg-amber-50 px-4 py-3 rounded-2xl border border-amber-200">
-                    <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
+                  <div className="flex items-center space-x-3 bg-amber-50 px-4 py-2 rounded-sm border border-amber-200">
                     <span className="text-sm font-semibold text-amber-700">
                       Manual Review
                     </span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-3 bg-[#f0fdfa] px-4 py-3 rounded-2xl border border-[#13ead9]/20">
-                    <CheckCircleIcon className="w-5 h-5 text-[#0891b2]" />
-                    <span className="text-sm font-semibold text-[#0891b2]">
+                  <div className="flex items-center space-x-3 bg-primary-50 px-4 py-2 rounded-sm border border-primary-200">
+                    <CheckCircleIcon className="w-5 h-5 text-primary-600" />
+                    <span className="text-sm font-semibold text-primary-700">
                       Analysis Complete
                     </span>
                   </div>
@@ -408,10 +325,12 @@ export default function ApplicationDetailsPage() {
               </div>
 
               {application.cvAnalysisResults?.summary?.includes("failed") ? (
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-sm p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span className="text-blue-600 text-2xl">👥</span>
+                    <div className="w-8 h-8 bg-blue-100 rounded-sm flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-blue-900 mb-3 text-lg">
@@ -427,14 +346,14 @@ export default function ApplicationDetailsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
+                <div className="bg-primary-50 border border-primary-200 rounded-sm p-6">
                   <div className="flex items-start space-x-4">
-                    <CheckCircleIcon className="w-8 h-8 text-green-600 flex-shrink-0" />
+                    <CheckCircleIcon className="w-8 h-8 text-primary-600 flex-shrink-0" />
                     <div className="flex-1">
-                      <h3 className="font-bold text-green-900 mb-3 text-lg">
+                      <h3 className="font-bold text-primary-900 mb-3 text-lg">
                         Analysis completed successfully
                       </h3>
-                      <p className="text-green-700 text-sm leading-relaxed">
+                      <p className="text-primary-700 text-sm leading-relaxed">
                         {application.cvAnalysisResults?.summary ||
                           "Your CV has been analyzed against the job requirements."}
                       </p>
@@ -449,10 +368,12 @@ export default function ApplicationDetailsPage() {
               !application.cvAnalysisResults.summary?.includes("failed") && (
                 <>
                   {/* Match Score Section */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-300">
+                  <div className="bg-white rounded-sm border border-gray-200 p-6 sm:p-8">
                     <div className="flex items-center space-x-4 mb-8">
-                      <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                        <span className="text-primary-600 text-xl">📈</span>
+                      <div className="w-12 h-12 bg-primary-100 rounded-sm flex items-center justify-center">
+                        <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900">
                         Your Match Score
@@ -460,8 +381,8 @@ export default function ApplicationDetailsPage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-gradient-to-br from-primary-50 to-primary-100 p-6 rounded-xl border border-primary-200">
-                        <h4 className="text-sm font-semibold text-primary-800 mb-4 flex items-center">
+                      <div className="bg-white p-6 rounded-sm border border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
                           <svg className="w-5 h-5 mr-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
@@ -469,9 +390,9 @@ export default function ApplicationDetailsPage() {
                         </h4>
                         <div className="flex items-center space-x-4">
                           <div className="flex-1">
-                            <div className="w-full bg-primary-200 rounded-full h-3">
+                            <div className="w-full bg-primary-200 rounded-sm h-3">
                               <div
-                                className={`h-3 rounded-full transition-all duration-1000 ${getScoreBarColor(
+                                className={`h-3 rounded-sm transition-all duration-1000 ${getScoreBarColor(
                                   application.cvAnalysisScore
                                 )}`}
                                 style={{
@@ -501,11 +422,9 @@ export default function ApplicationDetailsPage() {
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-purple-50 to-pink-100 p-6 rounded-xl border border-purple-200">
-                        <h4 className="text-sm font-semibold text-purple-800 mb-4 flex items-center">
-                          <svg className="w-5 h-5 mr-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                          </svg>
+                      <div className="bg-white p-6 rounded-sm border border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+                          <StarIcon className="w-5 h-5 mr-3 text-primary-600" />
                           Overall Assessment
                         </h4>
                         <div className="flex items-center space-x-4">
@@ -513,7 +432,7 @@ export default function ApplicationDetailsPage() {
                             className={`w-5 h-5 rounded-full ${
                               application.cvAnalysisResults.overallFit ===
                               "Excellent"
-                                ? "bg-green-500"
+                                ? "bg-primary-500"
                                 : application.cvAnalysisResults.overallFit ===
                                   "Good"
                                 ? "bg-yellow-500"
@@ -541,9 +460,9 @@ export default function ApplicationDetailsPage() {
                     0 ||
                     application.cvAnalysisResults.skillsMatch?.missing?.length >
                       0) && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 hover:shadow-md transition-all duration-300">
+                    <div className="bg-white rounded-sm border border-gray-200 p-6 sm:p-8">
                       <div className="flex items-center space-x-4 mb-8">
-                        <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+                        <div className="w-12 h-12 bg-primary-100 rounded-sm flex items-center justify-center">
                           <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
@@ -555,9 +474,9 @@ export default function ApplicationDetailsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {application.cvAnalysisResults.skillsMatch?.matched
                           ?.length > 0 && (
-                          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-                            <h4 className="text-sm font-bold text-green-800 mb-4 flex items-center">
-                              <CheckCircleIcon className="w-5 h-5 mr-3" />
+                          <div className="bg-white p-6 rounded-sm border border-gray-200">
+                            <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center">
+                              <CheckCircleIcon className="w-5 h-5 mr-3 text-primary-600" />
                               Your Matching Skills (
                               {
                                 application.cvAnalysisResults.skillsMatch
@@ -570,9 +489,11 @@ export default function ApplicationDetailsPage() {
                                 (skill: string, index: number) => (
                                   <span
                                     key={index}
-                                    className="px-3 py-2 bg-green-100 text-green-800 text-sm rounded-full border border-green-300 font-medium flex items-center space-x-1"
+                                    className="px-3 py-2 bg-primary-100 text-primary-800 text-sm rounded-sm border border-primary-300 font-medium flex items-center space-x-1"
                                   >
-                                    <span className="text-green-600">✓</span>
+                                    <span className="text-primary-600">
+                                      <CheckCircleIcon className="w-3 h-3" />
+                                    </span>
                                     <span>{skill}</span>
                                   </span>
                                 )
@@ -583,10 +504,12 @@ export default function ApplicationDetailsPage() {
 
                         {application.cvAnalysisResults.skillsMatch?.missing
                           ?.length > 0 && (
-                          <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-200">
-                            <h4 className="text-sm font-bold text-orange-800 mb-4 flex items-center">
-                              <span className="w-5 h-5 mr-3 text-orange-600 flex items-center justify-center bg-orange-100 rounded-full text-xs">
-                                ⚡
+                          <div className="bg-white p-6 rounded-sm border border-gray-200">
+                            <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center">
+                              <span className="w-5 h-5 mr-3 text-orange-600 flex items-center justify-center bg-orange-100 rounded-sm text-xs">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
                               </span>
                               Skills to Develop (
                               {
@@ -600,17 +523,24 @@ export default function ApplicationDetailsPage() {
                                 (skill: string, index: number) => (
                                   <span
                                     key={index}
-                                    className="px-3 py-2 bg-orange-100 text-orange-800 text-sm rounded-full border border-orange-300 font-medium flex items-center space-x-1"
+                                    className="px-3 py-2 bg-orange-100 text-orange-800 text-sm rounded-sm border border-orange-300 font-medium flex items-center space-x-1"
                                   >
-                                    <span className="text-orange-600">📚</span>
+                                    <span className="text-orange-600">
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                      </svg>
+                                    </span>
                                     <span>{skill}</span>
                                   </span>
                                 )
                               )}
                             </div>
-                            <div className="bg-orange-100 rounded-lg p-3 border border-orange-200">
+                            <div className="bg-orange-100 rounded-sm p-3 border border-orange-200">
                               <p className="text-xs text-orange-700 italic">
-                                💡 Consider highlighting these skills in future
+                                <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                                Consider highlighting these skills in future
                                 applications or developing them through
                                 training.
                               </p>
@@ -626,34 +556,32 @@ export default function ApplicationDetailsPage() {
             {/* AI Recommendations - Show regardless of CV analysis status */}
             {(application.aiCvRecommendations ||
               application.aiInterviewRecommendations) && (
-              <div
-                className="glass-strong rounded-3xl p-8 hover:shadow-lg transition-all duration-300"
-                style={{ boxShadow: "var(--shadow-medium)" }}
-              >
+              <div className="bg-white rounded-sm border border-gray-200 p-6 sm:p-8">
                 <div className="flex items-center space-x-4 mb-8">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center">
-                    <span className="text-purple-600 text-xl">🤖</span>
+                  <div className="w-12 h-12 bg-primary-100 rounded-sm flex items-center justify-center">
+                    <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-[#1d1d1f]">
+                  <h3 className="text-2xl font-bold text-gray-900">
                     AI Career Recommendations
                   </h3>
                 </div>
 
                 <div className="space-y-6">
                   {application.aiCvRecommendations && (
-                    <div
-                      className="bg-[#f0fdfa] rounded-3xl p-8 border border-[#13ead9]/20"
-                      style={{ boxShadow: "var(--shadow-soft)" }}
-                    >
+                    <div className="bg-white p-8 rounded-sm border border-gray-200">
                       <div className="flex items-center space-x-4 mb-6">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-xl flex items-center justify-center text-white">
-                          <span className="text-sm">📄</span>
+                        <div className="w-10 h-10 bg-primary-100 rounded-sm flex items-center justify-center">
+                          <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
                         </div>
                         <div>
-                          <h4 className="text-lg font-medium text-[#1d1d1f] mb-1">
+                          <h4 className="text-lg font-medium text-gray-900 mb-1">
                             CV Enhancement Tips
                           </h4>
-                          <p className="text-[#6b7280] text-xs">
+                          <p className="text-gray-600 text-xs">
                             Personalized recommendations to improve your CV
                           </p>
                         </div>
@@ -676,7 +604,7 @@ export default function ApplicationDetailsPage() {
                                   return (
                                     <span
                                       key={index}
-                                      className="font-medium text-[#1d1d1f]"
+                                      className="font-medium text-gray-900"
                                     >
                                       {part.slice(2, -2)}
                                     </span>
@@ -692,12 +620,11 @@ export default function ApplicationDetailsPage() {
                               return (
                                 <div
                                   key={sectionIndex}
-                                  className="glass rounded-xl p-4 border border-[#0891b2]/20"
-                                  style={{ boxShadow: "var(--shadow-soft)" }}
+                                  className="bg-gray-50 p-4 rounded-sm border border-gray-200"
                                 >
-                                  <h5 className="font-medium text-[#1d1d1f] text-base flex items-center">
-                                    <div className="w-5 h-5 bg-gradient-to-br from-[#13ead9] to-[#0891b2] rounded-lg flex items-center justify-center mr-3">
-                                      <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                  <h5 className="font-medium text-gray-900 text-base flex items-center">
+                                    <div className="w-5 h-5 bg-primary-100 rounded-sm flex items-center justify-center mr-3">
+                                      <span className="w-1.5 h-1.5 bg-primary-600 rounded-full"></span>
                                     </div>
                                     {title}
                                   </h5>
@@ -720,17 +647,14 @@ export default function ApplicationDetailsPage() {
                                     (item: string, itemIndex: number) => (
                                       <div
                                         key={itemIndex}
-                                        className="glass rounded-xl p-3 hover:shadow-md transition-all duration-200"
-                                        style={{
-                                          boxShadow: "var(--shadow-soft)",
-                                        }}
+                                        className="bg-white p-3 rounded-sm border border-gray-200 hover:shadow-sm transition-all duration-200"
                                       >
                                         <div className="flex items-start space-x-3">
-                                          <div className="w-5 h-5 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                            <div className="w-1.5 h-1.5 bg-[#0891b2] rounded-full"></div>
+                                          <div className="w-5 h-5 bg-primary-100 rounded-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <div className="w-1.5 h-1.5 bg-primary-600 rounded-full"></div>
                                           </div>
                                           <div className="flex-1">
-                                            <p className="text-[#4b5563] text-xs leading-relaxed">
+                                            <p className="text-gray-700 text-xs leading-relaxed">
                                               {parseContent(item)}
                                             </p>
                                           </div>
@@ -747,9 +671,9 @@ export default function ApplicationDetailsPage() {
                               return (
                                 <div
                                   key={sectionIndex}
-                                  className="bg-white/60 rounded-xl p-3 border border-[#13ead9]/20"
+                                  className="bg-gray-50 p-3 rounded-sm border border-gray-200"
                                 >
-                                  <div className="text-[#4b5563] text-xs leading-relaxed">
+                                  <div className="text-gray-700 text-xs leading-relaxed">
                                     {parseContent(section.trim())}
                                   </div>
                                 </div>
@@ -763,19 +687,18 @@ export default function ApplicationDetailsPage() {
                   )}
 
                   {application.aiInterviewRecommendations && (
-                    <div
-                      className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-3xl p-8 border border-purple-200/50"
-                      style={{ boxShadow: "var(--shadow-soft)" }}
-                    >
+                    <div className="bg-white p-8 rounded-sm border border-gray-200">
                       <div className="flex items-center space-x-4 mb-6">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-white">
-                          <span className="text-sm">🎤</span>
+                        <div className="w-10 h-10 bg-primary-100 rounded-sm flex items-center justify-center">
+                          <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                          </svg>
                         </div>
                         <div>
-                          <h4 className="text-lg font-medium text-[#1d1d1f] mb-1">
+                          <h4 className="text-lg font-medium text-gray-900 mb-1">
                             Interview Preparation Guide
                           </h4>
-                          <p className="text-[#6b7280] text-xs">
+                          <p className="text-gray-600 text-xs">
                             Strategic advice to ace your interview
                           </p>
                         </div>
@@ -798,7 +721,7 @@ export default function ApplicationDetailsPage() {
                                   return (
                                     <span
                                       key={index}
-                                      className="font-medium text-[#1d1d1f]"
+                                      className="font-medium text-gray-900"
                                     >
                                       {part.slice(2, -2)}
                                     </span>
@@ -814,12 +737,11 @@ export default function ApplicationDetailsPage() {
                               return (
                                 <div
                                   key={sectionIndex}
-                                  className="glass rounded-xl p-4 border border-purple-300/30"
-                                  style={{ boxShadow: "var(--shadow-soft)" }}
+                                  className="bg-gray-50 p-4 rounded-sm border border-gray-200"
                                 >
-                                  <h5 className="font-medium text-[#1d1d1f] text-base flex items-center">
-                                    <div className="w-5 h-5 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                                      <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                  <h5 className="font-medium text-gray-900 text-base flex items-center">
+                                    <div className="w-5 h-5 bg-primary-100 rounded-sm flex items-center justify-center mr-3">
+                                      <span className="w-1.5 h-1.5 bg-primary-600 rounded-full"></span>
                                     </div>
                                     {title}
                                   </h5>
@@ -842,17 +764,14 @@ export default function ApplicationDetailsPage() {
                                     (item: string, itemIndex: number) => (
                                       <div
                                         key={itemIndex}
-                                        className="glass rounded-xl p-3 hover:shadow-md transition-all duration-200"
-                                        style={{
-                                          boxShadow: "var(--shadow-soft)",
-                                        }}
+                                        className="bg-white p-3 rounded-sm border border-gray-200 hover:shadow-sm transition-all duration-200"
                                       >
                                         <div className="flex items-start space-x-3">
-                                          <div className="w-5 h-5 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                            <div className="w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
+                                          <div className="w-5 h-5 bg-primary-100 rounded-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <div className="w-1.5 h-1.5 bg-primary-600 rounded-full"></div>
                                           </div>
                                           <div className="flex-1">
-                                            <p className="text-[#4b5563] text-xs leading-relaxed">
+                                            <p className="text-gray-700 text-xs leading-relaxed">
                                               {parseContent(item)}
                                             </p>
                                           </div>
@@ -869,9 +788,9 @@ export default function ApplicationDetailsPage() {
                               return (
                                 <div
                                   key={sectionIndex}
-                                  className="bg-white/60 rounded-xl p-3 border border-purple-200/30"
+                                  className="bg-gray-50 p-3 rounded-sm border border-gray-200"
                                 >
-                                  <div className="text-[#4b5563] text-xs leading-relaxed">
+                                  <div className="text-gray-700 text-xs leading-relaxed">
                                     {parseContent(section.trim())}
                                   </div>
                                 </div>
@@ -885,21 +804,18 @@ export default function ApplicationDetailsPage() {
                   )}
 
                   {application.aiSecondInterviewRecommendations && (
-                    <div
-                      className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-8 border border-emerald-200/50"
-                      style={{ boxShadow: "var(--shadow-soft)" }}
-                    >
+                    <div className="bg-white p-8 rounded-sm border border-gray-200">
                       <div className="flex items-center space-x-4 mb-6">
-                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-10 h-10 bg-primary-100 rounded-sm flex items-center justify-center">
+                          <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
                         </div>
                         <div>
-                          <h4 className="text-lg font-medium text-[#1d1d1f] mb-1">
+                          <h4 className="text-lg font-medium text-gray-900 mb-1">
                             Advanced Interview Strategy
                           </h4>
-                          <p className="text-[#6b7280] text-xs">
+                          <p className="text-gray-600 text-xs">
                             Expert-level preparation for senior interviews
                           </p>
                         </div>
@@ -922,7 +838,7 @@ export default function ApplicationDetailsPage() {
                                   return (
                                     <span
                                       key={index}
-                                      className="font-medium text-[#1d1d1f]"
+                                      className="font-medium text-gray-900"
                                     >
                                       {part.slice(2, -2)}
                                     </span>
@@ -938,12 +854,11 @@ export default function ApplicationDetailsPage() {
                               return (
                                 <div
                                   key={sectionIndex}
-                                  className="glass rounded-xl p-4 border border-emerald-300/30"
-                                  style={{ boxShadow: "var(--shadow-soft)" }}
+                                  className="bg-gray-50 p-4 rounded-sm border border-gray-200"
                                 >
-                                  <h5 className="font-medium text-[#1d1d1f] text-base flex items-center">
-                                    <div className="w-5 h-5 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center mr-3">
-                                      <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                  <h5 className="font-medium text-gray-900 text-base flex items-center">
+                                    <div className="w-5 h-5 bg-primary-100 rounded-sm flex items-center justify-center mr-3">
+                                      <span className="w-1.5 h-1.5 bg-primary-600 rounded-full"></span>
                                     </div>
                                     {title}
                                   </h5>
@@ -966,17 +881,14 @@ export default function ApplicationDetailsPage() {
                                     (item: string, itemIndex: number) => (
                                       <div
                                         key={itemIndex}
-                                        className="glass rounded-xl p-3 hover:shadow-md transition-all duration-200"
-                                        style={{
-                                          boxShadow: "var(--shadow-soft)",
-                                        }}
+                                        className="bg-white p-3 rounded-sm border border-gray-200 hover:shadow-sm transition-all duration-200"
                                       >
                                         <div className="flex items-start space-x-3">
-                                          <div className="w-5 h-5 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                            <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></div>
+                                          <div className="w-5 h-5 bg-primary-100 rounded-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <div className="w-1.5 h-1.5 bg-primary-600 rounded-full"></div>
                                           </div>
                                           <div className="flex-1">
-                                            <p className="text-[#4b5563] text-xs leading-relaxed">
+                                            <p className="text-gray-700 text-xs leading-relaxed">
                                               {parseContent(item)}
                                             </p>
                                           </div>
@@ -993,9 +905,9 @@ export default function ApplicationDetailsPage() {
                               return (
                                 <div
                                   key={sectionIndex}
-                                  className="bg-white/60 rounded-xl p-3 border border-emerald-200/30"
+                                  className="bg-gray-50 p-3 rounded-sm border border-gray-200"
                                 >
-                                  <div className="text-[#4b5563] text-xs leading-relaxed">
+                                  <div className="text-gray-700 text-xs leading-relaxed">
                                     {parseContent(section.trim())}
                                   </div>
                                 </div>
@@ -1013,24 +925,23 @@ export default function ApplicationDetailsPage() {
 
             {/* Loading state for when no CV analysis results exist */}
             {!application.cvAnalysisResults && (
-              <div
-                className="glass-strong rounded-3xl p-12 hover:shadow-lg transition-all duration-300"
-                style={{ boxShadow: "var(--shadow-medium)" }}
-              >
+              <div className="bg-white rounded-sm border border-gray-200 p-12">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-[#13ead9]/20 to-[#0891b2]/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                    <div className="text-4xl animate-pulse">⏳</div>
+                  <div className="w-20 h-20 bg-primary-100 rounded-sm flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-10 h-10 text-primary-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-[#1d1d1f] mb-4">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
                     Analysis In Progress
                   </h3>
-                  <p className="text-[#6b7280] mb-8 max-w-md mx-auto text-lg leading-relaxed">
+                  <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg leading-relaxed">
                     Our AI is carefully reviewing your CV against the job
                     requirements. This usually takes just a few minutes!
                   </p>
-                  <div className="inline-flex items-center space-x-3 bg-[#f0fdfa] px-6 py-4 rounded-2xl border border-[#13ead9]/20">
-                    <div className="w-3 h-3 bg-[#0891b2] rounded-full animate-pulse"></div>
-                    <span className="text-sm font-semibold text-[#0891b2]">
+                  <div className="inline-flex items-center space-x-3 bg-primary-50 px-6 py-4 rounded-sm border border-primary-200">
+                    <div className="w-3 h-3 bg-primary-600 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-semibold text-primary-700">
                       Processing your application...
                     </span>
                   </div>

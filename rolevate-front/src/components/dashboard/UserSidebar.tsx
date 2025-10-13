@@ -4,19 +4,17 @@ import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { API_CONFIG } from "@/lib/config";
 import Link from "next/link";
-import Logo from "@/components/common/logo";
 import {
   HomeIcon,
   BriefcaseIcon,
-  DocumentTextIcon,
   UserIcon,
   Bars3Icon,
   XMarkIcon,
   ClipboardDocumentListIcon,
   BookmarkIcon,
-  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { logout } from "@/services/auth";
+import UserProfileSection from "./UserProfileSection";
 
 const navigationItems = [
   {
@@ -27,7 +25,7 @@ const navigationItems = [
   {
     icon: BriefcaseIcon,
     label: "Jobs",
-    href: "/jobs",
+    href: "/userdashboard/jobs",
   },
   {
     icon: ClipboardDocumentListIcon,
@@ -38,11 +36,6 @@ const navigationItems = [
     icon: BookmarkIcon,
     label: "Saved",
     href: "/userdashboard/saved-jobs",
-  },
-  {
-    icon: DocumentTextIcon,
-    label: "CV",
-    href: "/userdashboard/cv",
   },
   {
     icon: UserIcon,
@@ -153,7 +146,12 @@ export default function UserSidebar() {
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex justify-center items-center px-4 py-6 border-b border-gray-100">
-            <Logo size={48} />
+            <img
+              src="/logo/Rolevate-icon.webp"
+              alt="Rolevate Icon"
+              className="object-contain"
+              style={{ width: 48, height: 48 }}
+            />
           </div>
 
           {/* Navigation */}
@@ -191,43 +189,7 @@ export default function UserSidebar() {
           </nav>
 
           {/* User Profile & Logout */}
-          <div className="border-t border-gray-200 p-2">
-            <div className="flex flex-col items-center px-2 py-3 text-xs mb-3">
-              <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center mb-2">
-                {userData.avatar ? (
-                  <img
-                    src={userData.avatar}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-white text-sm font-medium">
-                    {userData.name
-                      ? userData.name.charAt(0).toUpperCase()
-                      : "U"}
-                  </span>
-                )}
-              </div>
-              <div className="text-center">
-                <p className="text-xs font-medium text-gray-900 truncate max-w-full">
-                  {userData.name || "User"}
-                </p>
-                <p className="text-xs text-gray-500 truncate max-w-full">
-                  {userData.email || "user@example.com"}
-                </p>
-              </div>
-            </div>
-
-            {/* Logout Button */}
-            <button
-              className="w-full flex flex-col items-center px-2 py-3 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-              onClick={handleLogout}
-              title="Logout"
-            >
-              <ArrowRightOnRectangleIcon className="h-5 w-5 mb-1" />
-              <span>Logout</span>
-            </button>
-          </div>
+          <UserProfileSection userData={userData} onLogout={handleLogout} />
         </div>
       </aside>
     </>
