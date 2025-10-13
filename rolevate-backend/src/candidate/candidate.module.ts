@@ -6,6 +6,7 @@ import { AppCacheModule } from '../cache/cache.module';
 import { NotificationModule } from '../notification/notification.module';
 import { AwsS3Service } from '../services/aws-s3.service';
 import { FileValidationService } from '../services/file-validation.service';
+import { CvParsingService } from '../services/cv-parsing.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { FileValidationService } from '../services/file-validation.service';
     NotificationModule,
   ],
   controllers: [CandidateController],
-  providers: [CandidateService, AwsS3Service, FileValidationService],
+  providers: [CandidateService, AwsS3Service, FileValidationService, CvParsingService],
   exports: [CandidateService],
 })
 export class CandidateModule {}

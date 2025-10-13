@@ -55,7 +55,7 @@ export class ValidationUtils {
   }
 
   /**
-   * Validates phone number format (removes common separators)
+   * Validates phone number format (accepts international or local formats)
    * @param phone - Phone number string to validate
    * @throws BadRequestException if phone format is invalid
    */
@@ -63,10 +63,17 @@ export class ValidationUtils {
     // Remove all non-digit characters except +
     const cleanPhone = phone.replace(/[^\d+]/g, '');
 
-    // Basic validation: should start with + and have at least 10 digits
-    if (!cleanPhone.startsWith('+') || cleanPhone.length < 11) {
-      throw new BadRequestException(ERROR_MESSAGES.INVALID_FORMAT('phone number'));
+    // Check for international format: starts with + and at least 10 digits after +
+    if (cleanPhone.startsWith('+') && cleanPhone.length >= 11) {
+      return;
     }
+
+    // Check for local format: starts with 0 and has exactly 10 digits
+    if (cleanPhone.startsWith('0') && cleanPhone.length === 10 && /^\d+$/.test(cleanPhone)) {
+      return;
+    }
+
+    throw new BadRequestException(ERROR_MESSAGES.INVALID_FORMAT('phone number'));
   }
 
   /**
@@ -151,7 +158,7 @@ export class ValidationUtils {
     }
 
     // Validate salary format (basic check)
-    if (jobData.salary && !/^[$\d\s\-+,]+$/.test(jobData.salary)) {
+    if (jobData.salary && !/^[$\d\s\-+,()A-Za-z]+$/.test(jobData.salary)) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_FORMAT('salary'));
     }
 

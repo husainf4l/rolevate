@@ -43,8 +43,9 @@ async function bootstrap() {
   app.use(compression());
 
   // Trust proxy (needed when behind reverse proxy/load balancer)
+  // Set to 1 to trust the immediate proxy (e.g., nginx, load balancer, or CDN)
   const expressApp = app.getHttpAdapter().getInstance();
-  expressApp.set('trust proxy', true);
+  expressApp.set('trust proxy', 1);
 
   // Rate limiting - Environment specific
   const isProduction = process.env.NODE_ENV === 'production';

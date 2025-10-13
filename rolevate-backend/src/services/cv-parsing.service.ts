@@ -29,8 +29,13 @@ export class CvParsingService {
     try {
       console.log('🔍 Extracting candidate information from CV:', cvUrl);
       
-      // Extract text from CV
-      const cvText = await extractTextFromCV(cvUrl);
+      // Download file buffer using direct HTTP request (files are publicly accessible)
+      console.log('📥 Downloading CV file buffer via HTTP...');
+      const fileBuffer = await this.downloadFileViaHttp(cvUrl);
+      console.log('✅ CV file buffer downloaded, size:', fileBuffer.length, 'bytes');
+      
+      // Extract text from the buffer directly
+      const cvText = await this.extractTextFromBuffer(fileBuffer, cvUrl);
       
       if (!cvText || cvText.trim().length === 0) {
         throw new Error('Could not extract text from CV');
@@ -340,5 +345,333 @@ Return ONLY a valid JSON object with no additional text, markdown, or formatting
     if (info.summary && info.summary.length > 20) score += 10;
     
     return Math.min(score, maxScore);
+  }
+
+  /**
+   * Download file via HTTP (for publicly accessible S3 files)
+   */
+  private async downloadFileViaHttp(url: string): Promise<Buffer> {
+    try {
+      const axios = (await import('axios')).default;
+      
+      console.log('🌐 Attempting to download file from:', url);
+      
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer',
+        timeout: 30000, // 30 second timeout
+        headers: {
+          // Don't send any authentication headers
+          'Accept': '*/*',
+        },
+        // Ensure no credentials are sent
+        withCredentials: false,
+        maxRedirects: 5,
+      });
+      
+      console.log('✅ File downloaded successfully, status:', response.status, 'size:', response.data.byteLength, 'bytes');
+      
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error('❌ Failed to download file via HTTP:', error.message);
+      
+      // If we get a 403, it means the file is not publicly accessible
+      if (error.response?.status === 403) {
+        console.error('❌ 403 Forbidden - File is not publicly accessible');
+        console.error('❌ URL:', url);
+        console.error('❌ This usually means the S3 bucket policy does not allow public reads');
+        throw new Error('CV file is not publicly accessible. Please check S3 bucket permissions.');
+      }
+      
+      throw new Error(`Failed to download CV file: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract text from file buffer based on file extension
+   */
+  private async extractTextFromBuffer(buffer: Buffer, fileUrl: string): Promise<string> {
+    // Extract file extension from URL
+    const urlParts = fileUrl.split('.');
+    const ext = urlParts.length > 1 ? '.' + urlParts[urlParts.length - 1].toLowerCase().split('?')[0] : '.pdf';
+    
+    console.log('📎 Processing file with extension:', ext);
+    
+    // Determine file type and extract text accordingly
+    if (ext === '.pdf') {
+      return await this.extractFromPDF(buffer);
+    } else if (['.doc', '.docx'].includes(ext)) {
+      return await this.extractFromWord(buffer);
+    } else if (ext === '.rtf') {
+      return await this.extractFromRTF(buffer);
+    } else if (ext === '.txt') {
+      return await this.extractFromText(buffer);
+    } else if (ext === '.odt') {
+      return await this.extractFromODT(buffer);
+    } else if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.tif', '.webp'].includes(ext)) {
+      return await this.extractFromImage(buffer);
+    } else {
+      throw new Error(`Unsupported file type: ${ext}`);
+    }
+  }
+
+  /**
+   * Extract text from PDF buffer
+   */
+  private async extractFromPDF(buffer: Buffer): Promise<string> {
+    console.log('📄 Processing PDF document...');
+    
+    try {
+      // pdf-parse v2 exports PDFParse class and requires Uint8Array
+      const { PDFParse } = require('pdf-parse');
+      
+      // Convert Buffer to Uint8Array
+      const uint8Array = new Uint8Array(buffer);
+      const parser = new PDFParse(uint8Array);
+      
+      // Load the PDF first
+      await parser.load();
+      
+      // Extract text using getText method - returns object with .text property
+      const result = await parser.getText();
+      const cleanText = (result?.text || '').trim();
+      
+      console.log('📄 PDF text extraction result:', cleanText.length, 'characters');
+      
+      // If text was extracted successfully, return it
+      if (cleanText.length >= 50) {
+        return cleanText;
+      }
+      
+      // If very little text was extracted, the PDF might be scanned (images)
+      console.log('📄 Low text content detected, PDF might be scanned. Returning what we have.');
+      return cleanText || 'Could not extract text from PDF';
+    } catch (error) {
+      console.error('❌ PDF extraction error:', error.message);
+      return 'Could not extract text from PDF';
+    }
+  }
+
+  /**
+   * Extract text from scanned PDF using OCR
+   */
+  private async extractFromScannedPDF(buffer: Buffer): Promise<string> {
+    console.log('📄 Converting PDF pages to images for OCR...');
+    
+    const tempDir = require('os').tmpdir();
+    const tempPdfPath = require('path').join(tempDir, `cv-${Date.now()}.pdf`);
+    
+    try {
+      // Write PDF to temporary file
+      require('fs').writeFileSync(tempPdfPath, buffer);
+      
+      // Convert PDF pages to images
+      const pdf2pic = (await import('pdf2pic')).default;
+      const convert = pdf2pic.fromPath(tempPdfPath, {
+        density: 300, // High DPI for better OCR
+        saveFilename: 'cv-page',
+        savePath: tempDir,
+        format: 'png',
+        width: 2480, // A4 width at 300 DPI
+        height: 3508 // A4 height at 300 DPI
+      });
+      
+      const pages = await convert.bulk(-1); // Convert all pages
+      console.log('📄 Converted', pages.length, 'PDF pages to images');
+      
+      let combinedText = '';
+      
+      // Process each page with OCR
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        if (page.path) {
+          console.log(`📄 Processing page ${i + 1} with OCR...`);
+          const pageText = await this.performOCR(page.path);
+          combinedText += pageText + '\n\n';
+          
+          // Clean up temporary image file
+          try {
+            require('fs').unlinkSync(page.path);
+          } catch (e) {
+            console.warn('Could not delete temp image:', e.message);
+          }
+        }
+      }
+      
+      return combinedText.trim();
+      
+    } finally {
+      // Clean up temporary PDF file
+      try {
+        if (require('fs').existsSync(tempPdfPath)) {
+          require('fs').unlinkSync(tempPdfPath);
+        }
+      } catch (e) {
+        console.warn('Could not delete temp PDF:', e.message);
+      }
+    }
+  }
+
+  /**
+   * Extract text from Word documents (.doc, .docx)
+   */
+  private async extractFromWord(buffer: Buffer): Promise<string> {
+    console.log('📄 Processing Word document...');
+    
+    try {
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ buffer });
+      const text = result.value?.trim() || '';
+      
+      if (result.messages && result.messages.length > 0) {
+        console.warn('Word extraction warnings:', result.messages);
+      }
+      
+      console.log('📄 Word text extracted, length:', text.length);
+      return text;
+    } catch (error) {
+      console.error('❌ Word extraction error:', error.message);
+      throw new Error(`Failed to extract text from Word document: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract text from RTF documents
+   */
+  private async extractFromRTF(buffer: Buffer): Promise<string> {
+    console.log('📄 Processing RTF document...');
+    
+    try {
+      // Simple RTF text extraction (removing RTF commands)
+      let text = buffer.toString('utf-8');
+      
+      // Remove RTF control sequences
+      text = text.replace(/\{\*?\\[^{}]+}/g, '') // Remove control groups
+                 .replace(/\\[a-z]+\d*\s?/gi, '') // Remove control words
+                 .replace(/[{}]/g, '') // Remove braces
+                 .replace(/\s+/g, ' ') // Normalize whitespace
+                 .trim();
+      
+      console.log('📄 RTF text extracted, length:', text.length);
+      return text;
+    } catch (error) {
+      console.error('❌ RTF extraction error:', error.message);
+      throw new Error(`Failed to extract text from RTF document: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract text from plain text files
+   */
+  private async extractFromText(buffer: Buffer): Promise<string> {
+    console.log('📄 Processing text file...');
+    
+    try {
+      const text = buffer.toString('utf-8').trim();
+      console.log('📄 Text file read, length:', text.length);
+      return text;
+    } catch (error) {
+      console.error('❌ Text extraction error:', error.message);
+      throw new Error(`Failed to extract text from text file: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract text from ODT documents (OpenDocument Text)
+   */
+  private async extractFromODT(buffer: Buffer): Promise<string> {
+    console.log('📄 Processing ODT document...');
+    
+    try {
+      // For now, treat as potential compressed file and extract what we can
+      // This is a simplified approach - a full ODT parser would be more complex
+      const text = buffer.toString('utf-8');
+      
+      // Basic text extraction from ODT (removing XML tags)
+      const cleanText = text.replace(/<[^>]*>/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+      
+      console.log('📄 ODT text extracted (basic), length:', cleanText.length);
+      return cleanText;
+    } catch (error) {
+      console.error('❌ ODT extraction error:', error.message);
+      throw new Error(`Failed to extract text from ODT document: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract text from image files using OCR
+   */
+  private async extractFromImage(buffer: Buffer): Promise<string> {
+    console.log('📄 Processing image with OCR...');
+    
+    try {
+      // Optimize image for OCR
+      const processedBuffer = await this.optimizeImageForOCR(buffer);
+      
+      // Perform OCR on the processed image
+      const text = await this.performOCROnBuffer(processedBuffer);
+      
+      console.log('📄 Image OCR completed, text length:', text.length);
+      return text;
+    } catch (error) {
+      console.error('❌ Image OCR error:', error.message);
+      throw new Error(`Failed to extract text from image: ${error.message}`);
+    }
+  }
+
+  /**
+   * Optimize image for better OCR results
+   */
+  private async optimizeImageForOCR(buffer: Buffer): Promise<Buffer> {
+    try {
+      // Use sharp for image processing
+      const sharp = await import('sharp');
+      const processedBuffer = await sharp.default(buffer)
+        .greyscale()
+        .normalize()
+        .resize(null, null, { 
+          fit: 'inside',
+          withoutEnlargement: false 
+        })
+        .png()
+        .toBuffer();
+      
+      console.log('📄 Image optimized for OCR');
+      return processedBuffer;
+    } catch (error) {
+      console.warn('Image optimization failed, using original:', error.message);
+      return buffer;
+    }
+  }
+
+  /**
+   * Perform OCR on image file path
+   */
+  private async performOCR(imagePath: string): Promise<string> {
+    const { createWorker } = await import('tesseract.js');
+    const worker = await createWorker('eng');
+    
+    try {
+      const { data: { text } } = await worker.recognize(imagePath);
+      return text?.trim() || '';
+    } finally {
+      await worker.terminate();
+    }
+  }
+
+  /**
+   * Perform OCR on image buffer
+   */
+  private async performOCROnBuffer(buffer: Buffer): Promise<string> {
+    const { createWorker } = await import('tesseract.js');
+    const worker = await createWorker('eng');
+    
+    try {
+      const { data: { text } } = await worker.recognize(buffer);
+      return text?.trim() || '';
+    } finally {
+      await worker.terminate();
+    }
   }
 }
