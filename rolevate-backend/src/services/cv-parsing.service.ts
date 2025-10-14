@@ -29,9 +29,11 @@ export class CvParsingService {
     try {
       console.log('🔍 Extracting candidate information from CV:', cvUrl);
       
-      // Download file buffer using direct HTTP request (files are publicly accessible)
-      console.log('📥 Downloading CV file buffer via HTTP...');
-      const fileBuffer = await this.downloadFileViaHttp(cvUrl);
+      // Use S3 service to get file buffer directly (more reliable than presigned URLs)
+      const awsS3Service = new (await import('./aws-s3.service')).AwsS3Service();
+      console.log('📥 Downloading CV file buffer directly from S3...');
+      
+      const fileBuffer = await awsS3Service.getFileBuffer(cvUrl);
       console.log('✅ CV file buffer downloaded, size:', fileBuffer.length, 'bytes');
       
       // Extract text from the buffer directly
@@ -348,45 +350,6 @@ Return ONLY a valid JSON object with no additional text, markdown, or formatting
   }
 
   /**
-   * Download file via HTTP (for publicly accessible S3 files)
-   */
-  private async downloadFileViaHttp(url: string): Promise<Buffer> {
-    try {
-      const axios = (await import('axios')).default;
-      
-      console.log('🌐 Attempting to download file from:', url);
-      
-      const response = await axios.get(url, {
-        responseType: 'arraybuffer',
-        timeout: 30000, // 30 second timeout
-        headers: {
-          // Don't send any authentication headers
-          'Accept': '*/*',
-        },
-        // Ensure no credentials are sent
-        withCredentials: false,
-        maxRedirects: 5,
-      });
-      
-      console.log('✅ File downloaded successfully, status:', response.status, 'size:', response.data.byteLength, 'bytes');
-      
-      return Buffer.from(response.data);
-    } catch (error) {
-      console.error('❌ Failed to download file via HTTP:', error.message);
-      
-      // If we get a 403, it means the file is not publicly accessible
-      if (error.response?.status === 403) {
-        console.error('❌ 403 Forbidden - File is not publicly accessible');
-        console.error('❌ URL:', url);
-        console.error('❌ This usually means the S3 bucket policy does not allow public reads');
-        throw new Error('CV file is not publicly accessible. Please check S3 bucket permissions.');
-      }
-      
-      throw new Error(`Failed to download CV file: ${error.message}`);
-    }
-  }
-
-  /**
    * Extract text from file buffer based on file extension
    */
   private async extractTextFromBuffer(buffer: Buffer, fileUrl: string): Promise<string> {
@@ -421,33 +384,25 @@ Return ONLY a valid JSON object with no additional text, markdown, or formatting
     console.log('📄 Processing PDF document...');
     
     try {
-      // pdf-parse v2 exports PDFParse class and requires Uint8Array
-      const { PDFParse } = require('pdf-parse');
+      // First, try standard PDF text extraction
+      const pdfParse = require('pdf-parse');
+      const data = await pdfParse(buffer);
+      let text = data.text?.trim() || '';
       
-      // Convert Buffer to Uint8Array
-      const uint8Array = new Uint8Array(buffer);
-      const parser = new PDFParse(uint8Array);
-      
-      // Load the PDF first
-      await parser.load();
-      
-      // Extract text using getText method - returns object with .text property
-      const result = await parser.getText();
-      const cleanText = (result?.text || '').trim();
-      
-      console.log('📄 PDF text extraction result:', cleanText.length, 'characters');
-      
-      // If text was extracted successfully, return it
-      if (cleanText.length >= 50) {
-        return cleanText;
-      }
+      console.log('📄 PDF text extraction result:', text.length, 'characters');
       
       // If very little text was extracted, the PDF might be scanned (images)
-      console.log('📄 Low text content detected, PDF might be scanned. Returning what we have.');
-      return cleanText || 'Could not extract text from PDF';
+      if (text.length < 50) {
+        console.log('📄 Low text content detected, trying OCR on PDF pages...');
+        text = await this.extractFromScannedPDF(buffer);
+      }
+      
+      return text;
     } catch (error) {
       console.error('❌ PDF extraction error:', error.message);
-      return 'Could not extract text from PDF';
+      // Fallback to OCR if regular PDF parsing fails
+      console.log('📄 Falling back to OCR for PDF...');
+      return await this.extractFromScannedPDF(buffer);
     }
   }
 

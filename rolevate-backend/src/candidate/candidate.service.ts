@@ -613,9 +613,6 @@ export class CandidateService {
           totalExperience: true,
           skills: true,
           highestEducation: true,
-          fieldOfStudy: true,
-          university: true,
-          graduationYear: true,
           profileSummary: true,
         },
       });
@@ -650,21 +647,8 @@ export class CandidateService {
         }
       }
       
-      // Handle education - parse into enum and details
       if (extractedData.education && !existingProfile.highestEducation) {
-        const educationData = this.parseEducation(extractedData.education);
-        if (educationData.level) {
-          updateData.highestEducation = educationData.level;
-        }
-        if (educationData.fieldOfStudy && !existingProfile.fieldOfStudy) {
-          updateData.fieldOfStudy = educationData.fieldOfStudy;
-        }
-        if (educationData.university && !existingProfile.university) {
-          updateData.university = educationData.university;
-        }
-        if (educationData.graduationYear && !existingProfile.graduationYear) {
-          updateData.graduationYear = educationData.graduationYear;
-        }
+        updateData.highestEducation = extractedData.education;
       }
       
       if (extractedData.summary && !existingProfile.profileSummary) {
@@ -687,65 +671,6 @@ export class CandidateService {
       console.error('❌ Failed to update candidate profile with extracted data:', error);
       throw error;
     }
-  }
-
-  /**
-   * Parse education string into structured data with enum level
-   */
-  private parseEducation(educationString: string): {
-    level?: 'HIGH_SCHOOL' | 'DIPLOMA' | 'BACHELOR' | 'MASTER' | 'PHD' | 'PROFESSIONAL_CERTIFICATION';
-    fieldOfStudy?: string;
-    university?: string;
-    graduationYear?: number;
-  } {
-    const result: any = {};
-    
-    if (!educationString || typeof educationString !== 'string') {
-      return result;
-    }
-    
-    const text = educationString.toLowerCase();
-    
-    // Determine education level
-    if (text.includes('phd') || text.includes('ph.d') || text.includes('doctorate')) {
-      result.level = 'PHD';
-    } else if (text.includes('master') || text.includes('mba') || text.includes('msc') || text.includes('m.s') || text.includes('ma')) {
-      result.level = 'MASTER';
-    } else if (text.includes('bachelor') || text.includes('bba') || text.includes('bsc') || text.includes('b.s') || text.includes('ba') || text.includes('degree')) {
-      result.level = 'BACHELOR';
-    } else if (text.includes('diploma') || text.includes('associate')) {
-      result.level = 'DIPLOMA';
-    } else if (text.includes('high school') || text.includes('secondary')) {
-      result.level = 'HIGH_SCHOOL';
-    } else if (text.includes('certificate') || text.includes('certification')) {
-      result.level = 'PROFESSIONAL_CERTIFICATION';
-    } else {
-      // Default to BACHELOR if it mentions a degree
-      result.level = 'BACHELOR';
-    }
-    
-    // Extract field of study (text between "in" and "from" or university name)
-    const fieldMatch = educationString.match(/in ([^(from)]+?)(?:from|at|\(|\d{4}|$)/i);
-    if (fieldMatch && fieldMatch[1]) {
-      result.fieldOfStudy = fieldMatch[1].trim();
-    }
-    
-    // Extract university name (text after "from" or "at")
-    const uniMatch = educationString.match(/(?:from|at) ([^(]+?)(?:\(|\d{4}|$)/i);
-    if (uniMatch && uniMatch[1]) {
-      result.university = uniMatch[1].trim();
-    }
-    
-    // Extract graduation year (4-digit number)
-    const yearMatch = educationString.match(/\b(19|20)\d{2}\b/);
-    if (yearMatch) {
-      const year = parseInt(yearMatch[0]);
-      if (year >= 1950 && year <= 2030) {
-        result.graduationYear = year;
-      }
-    }
-    
-    return result;
   }
 
   private mapToBasicProfileResponse(profile: any): CandidateProfileResponseDto {
