@@ -7,7 +7,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langgraph.graph import StateGraph, END
 from loguru import logger
 
-from app.schema import CVData
+from app.models.schemas import CVData
 from app.agent.nodes.extraction_node import extraction_node
 from app.agent.nodes.enhancement_node import enhancement_node
 from app.agent.nodes.export_node import export_node

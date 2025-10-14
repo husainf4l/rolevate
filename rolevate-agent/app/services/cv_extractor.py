@@ -19,10 +19,11 @@ class CVExtractor:
     
     def __init__(self):
         """Initialize the CV extractor with OpenAI."""
+        import os
+        os.environ["OPENAI_API_KEY"] = settings.openai_api_key
         self.llm = ChatOpenAI(
             model=settings.openai_model,
-            temperature=0,
-            api_key=settings.openai_api_key
+            temperature=0
         )
         self.parser = PydanticOutputParser(pydantic_object=CVData)
         self.file_parser = FileParser()

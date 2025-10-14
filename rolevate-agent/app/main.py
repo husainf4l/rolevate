@@ -15,6 +15,7 @@ from app.models.schemas import CVData
 from app.config import settings
 from app.database import init_db
 from app.api.auth_routes import router as auth_router, get_current_user_or_redirect
+# from app.api.chat_routes import router as chat_router
 from app.models.user import User
 
 # Initialize FastAPI app
@@ -35,12 +36,21 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router)
+# Temporarily disabled while fixing imports
+# app.include_router(chat_router, prefix="/api/v1")
 
 # Initialize database
 init_db()
 
-# Initialize agent
-agent = CVFillerAgent()
+# Initialize agent (lazy loading)
+agent = None
+
+def get_agent():
+    """Get or initialize the CV agent."""
+    global agent
+    if agent is None:
+        agent = CVFillerAgent()
+    return agent
 
 # Ensure directories exist
 settings.ensure_directories()
