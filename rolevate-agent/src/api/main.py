@@ -12,6 +12,7 @@ from ..services.cv_agent import CVFillerAgent
 from ..models.cv_schema import CVData, CVProcessRequest, CVProcessResponse
 from ..core.config import settings
 from ..utils.file_parser import FileParser
+from .routes_cv import router as cv_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -28,6 +29,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include CV router
+app.include_router(cv_router, prefix="/cv", tags=["CV Filler"])
 
 # Initialize agent
 agent = CVFillerAgent()
