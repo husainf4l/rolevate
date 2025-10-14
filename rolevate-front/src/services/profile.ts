@@ -173,6 +173,8 @@ export class ProfileService {
    * Returns the candidate profile directly (not wrapped in user object)
    */
   static async getUserProfile(): Promise<CandidateProfile> {
+    console.log('📡 Fetching profile from:', `${this.baseUrl}/user/profile`);
+    
     const response = await fetch(`${this.baseUrl}/user/profile`, {
       method: 'GET',
       headers: {
@@ -182,12 +184,17 @@ export class ProfileService {
       mode: 'cors',
     });
 
+    console.log('📡 Response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Failed to fetch user profile' }));
-      throw new Error(error.message || 'Failed to fetch user profile');
+      console.error('❌ Profile fetch error:', error);
+      throw new Error(error.message || `Failed to fetch user profile (${response.status})`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('✅ Profile data fetched successfully');
+    return data;
   }
 
   /**

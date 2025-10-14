@@ -53,13 +53,17 @@ export default function ProfilePage() {
       try {
         setLoadingUser(true);
         setUserError(null);
+        console.log('🔄 Fetching user profile...');
         // ProfileService.getUserProfile() returns CandidateProfile directly
         const profileData = await ProfileService.getUserProfile();
+        console.log('✅ Profile data received:', profileData);
         setUser(profileData);
       } catch (err) {
+        console.error('❌ Error fetching profile:', err);
         setUserError(err instanceof Error ? err.message : 'Failed to load user profile');
       } finally {
         setLoadingUser(false);
+        console.log('🏁 Loading complete');
       }
     };
 
@@ -217,17 +221,48 @@ export default function ProfilePage() {
     }
   };
 
-  if (loadingUser || !user) {
+  if (loadingUser) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+          <div className="text-center py-20">
+            <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             </div>
-            <p className="text-gray-600">
-              {userError ? `Error: ${userError}` : 'Loading profile...'}
+            <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+              Loading your profile...
+            </h3>
+            <p className="text-lg text-gray-600">
+              Please wait while we fetch your information
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (userError || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+              Failed to load profile
+            </h3>
+            <p className="text-lg text-gray-600 mb-8">
+              {userError || 'Unable to load your profile data'}
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors font-medium"
+            >
+              Retry
+            </button>
           </div>
         </div>
       </div>
@@ -271,12 +306,12 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="mb-16">
+        <div className="mb-8">
           <div className="text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Professional Profile
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-sm text-gray-600 max-w-2xl mx-auto">
               Manage your professional identity and career documents in one centralized location
             </p>
           </div>
@@ -286,42 +321,42 @@ export default function ProfilePage() {
         <div className="space-y-12">
           {/* Profile Information */}
           <Card className="bg-white border-0 shadow-sm">
-            <CardContent className="p-12">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1">
-                  <div className="w-32 h-32 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto lg:mx-0">
-                    <span className="text-white text-4xl font-bold">{initials}</span>
+                  <div className="w-20 h-20 bg-primary-600 rounded-xl flex items-center justify-center mx-auto lg:mx-0">
+                    <span className="text-white text-2xl font-bold">{initials}</span>
                   </div>
                 </div>
                 <div className="lg:col-span-2">
-                  <h3 className="text-4xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1">
                     {fullName}
                   </h3>
-                  <p className="text-2xl text-gray-600 mb-8">
+                  <p className="text-base text-gray-600 mb-6">
                     {profile.currentJobTitle || "Job Title Not Specified"}
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Email</p>
-                      <p className="text-lg font-medium text-gray-900">{profile.email}</p>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Email</p>
+                      <p className="text-sm font-medium text-gray-900">{profile.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Phone</p>
-                      <p className="text-lg font-medium text-gray-900">
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Phone</p>
+                      <p className="text-sm font-medium text-gray-900">
                         {profile.phone && profile.phone !== "a"
                           ? profile.phone
                           : "Phone not provided"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Location</p>
-                      <p className="text-lg font-medium text-gray-900">
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Location</p>
+                      <p className="text-sm font-medium text-gray-900">
                         {profile.currentLocation || "Location not specified"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Member Since</p>
-                      <p className="text-lg font-medium text-gray-900">{joinDate}</p>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Member Since</p>
+                      <p className="text-sm font-medium text-gray-900">{joinDate}</p>
                     </div>
                   </div>
                 </div>
@@ -331,12 +366,12 @@ export default function ProfilePage() {
 
           {/* Professional Summary */}
           <Card className="bg-white border-0 shadow-sm">
-            <CardContent className="p-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">
                 Professional Summary
               </h2>
-              <div className="bg-gray-50 rounded-2xl p-8">
-                <p className="text-gray-700 leading-relaxed text-xl">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-gray-700 leading-relaxed text-sm">
                   {profile.profileSummary && !profile.profileSummary.includes("CV parsing failed")
                     ? profile.profileSummary
                     : `Welcome to ${fullName}'s profile. Professional summary not yet provided.`}
@@ -346,88 +381,88 @@ export default function ProfilePage() {
           </Card>
 
           {/* Skills & Preferences */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="bg-white border-0 shadow-sm">
-              <CardContent className="p-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Skills</h2>
+              <CardContent className="p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Skills</h2>
                 {profile.skills && profile.skills.length > 0 ? (
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-wrap gap-2">
                     {profile.skills.map((skill: string, index: number) => (
                       <span
                         key={index}
-                        className="inline-flex items-center px-6 py-3 rounded-2xl text-base font-medium bg-primary-100 text-primary-800 border border-primary-200"
+                        className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-100 text-primary-800 border border-primary-200"
                       >
                         {skill}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <p className="text-xl text-gray-500">No skills added yet.</p>
+                  <div className="text-center py-8">
+                    <p className="text-sm text-gray-500">No skills added yet.</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
             <Card className="bg-white border-0 shadow-sm">
-              <CardContent className="p-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Preferences</h2>
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="text-lg text-gray-600">Work Type</span>
-                    <span className="text-lg font-medium text-gray-900">
+              <CardContent className="p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Preferences</h2>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Work Type</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.preferredWorkType || "Not specified"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="text-lg text-gray-600">Job Types</span>
-                    <span className="text-lg font-medium text-gray-900">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Job Types</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.preferredJobTypes && profile.preferredJobTypes.length > 0
                         ? profile.preferredJobTypes.join(", ")
                         : "Not specified"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="text-lg text-gray-600">Industries</span>
-                    <span className="text-lg font-medium text-gray-900">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Industries</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.preferredIndustries && profile.preferredIndustries.length > 0
                         ? profile.preferredIndustries.join(", ")
                         : "Not specified"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="text-lg text-gray-600">Expected Salary</span>
-                    <span className="text-lg font-medium text-gray-900">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Expected Salary</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.expectedSalary || "Not specified"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="text-lg text-gray-600">Experience Level</span>
-                    <span className="text-lg font-medium text-gray-900">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Experience Level</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.experienceLevel || "Not specified"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="text-lg text-gray-600">Total Experience</span>
-                    <span className="text-lg font-medium text-gray-900">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Total Experience</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.totalExperience ? `${profile.totalExperience} years` : "Not specified"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="text-lg text-gray-600">Notice Period</span>
-                    <span className="text-lg font-medium text-gray-900">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Notice Period</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.noticePeriod || "Not specified"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-4 border-b border-gray-100">
-                    <span className="text-lg text-gray-600">Highest Education</span>
-                    <span className="text-lg font-medium text-gray-900">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-600">Highest Education</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.highestEducation || "Not specified"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-4">
-                    <span className="text-lg text-gray-600">University</span>
-                    <span className="text-lg font-medium text-gray-900">
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-sm text-gray-600">University</span>
+                    <span className="text-sm font-medium text-gray-900">
                       {profile.university || "Not specified"}
                     </span>
                   </div>
@@ -438,42 +473,65 @@ export default function ProfilePage() {
 
           {/* Experience */}
           <Card className="bg-white border-0 shadow-sm">
-            <CardContent className="p-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Experience</h2>
-              <div className="space-y-8">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Experience</h2>
+              <div className="space-y-4">
                 {profile.workExperiences && profile.workExperiences.length > 0 ? (
                   profile.workExperiences.map((job: any, index: number) => (
-                    <div key={index} className="border-l-4 border-primary-600 pl-8">
-                      <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                        {job.title}
+                    <div key={index} className="border-l-2 border-primary-600 pl-4">
+                      <h3 className="text-base font-semibold text-gray-900 mb-1">
+                        {job.jobTitle}
                       </h3>
-                      <p className="text-primary-600 font-medium text-xl mb-3">{job.company}</p>
-                      <p className="text-gray-500 mb-4 text-lg">
+                      <p className="text-primary-600 font-medium text-sm mb-2">{job.company}</p>
+                      <p className="text-gray-500 mb-2 text-xs">
                         {job.startDate} - {job.endDate || "Present"}
                       </p>
-                      <p className="text-gray-700 leading-relaxed text-lg">{job.description}</p>
+                      <p className="text-gray-700 leading-relaxed text-sm">{job.description}</p>
                     </div>
                   ))
+                ) : profile.currentJobTitle && profile.currentCompany ? (
+                  // Show current position if workExperiences is empty but current job exists
+                  <div className="border-l-2 border-primary-600 pl-4">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1">
+                      {profile.currentJobTitle}
+                    </h3>
+                    <p className="text-primary-600 font-medium text-sm mb-2">{profile.currentCompany}</p>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                        Current Position
+                      </span>
+                      {profile.totalExperience && (
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                          {profile.totalExperience} {profile.totalExperience === 1 ? 'year' : 'years'} experience
+                        </span>
+                      )}
+                      {profile.experienceLevel && (
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                          {profile.experienceLevel}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-600 leading-relaxed text-sm">
+                      Currently working as {profile.currentJobTitle} at {profile.currentCompany}
+                      {profile.currentLocation ? ` in ${profile.currentLocation}` : ''}.
+                    </p>
+                  </div>
                 ) : (
-                  <div className="text-center py-16">
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-base font-semibold text-gray-900 mb-2">
                       No work experience added yet
                     </h3>
-                    <p className="text-xl text-gray-600 mb-8 max-w-md mx-auto">
+                    <p className="text-sm text-gray-600 mb-4 max-w-md mx-auto">
                       Add your professional experience to showcase your career journey and expertise.
                     </p>
-                    {profile.currentJobTitle && profile.currentCompany && (
-                      <div className="bg-gray-50 rounded-2xl p-8 max-w-md mx-auto">
-                        <h4 className="text-xl font-semibold text-gray-900 mb-3">
-                          {profile.currentJobTitle}
-                        </h4>
-                        <p className="text-primary-600 mb-3 text-lg">{profile.currentCompany}</p>
-                        <p className="text-base text-gray-500">
-                          Current Position • {profile.experienceLevel || "Experience Level Not Specified"}
-                          {profile.totalExperience && ` • ${profile.totalExperience} Experience`}
-                        </p>
-                      </div>
-                    )}
+                    <button className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium">
+                      Add Work Experience
+                    </button>
                   </div>
                 )}
               </div>
@@ -482,49 +540,67 @@ export default function ProfilePage() {
 
           {/* Education */}
           <Card className="bg-white border-0 shadow-sm">
-            <CardContent className="p-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Education</h2>
-              <div className="space-y-8">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Education</h2>
+              <div className="space-y-4">
                 {profile.educationHistory && profile.educationHistory.length > 0 ? (
                   profile.educationHistory.map((education: any, index: number) => (
-                    <div key={index} className="border-l-4 border-orange-600 pl-8">
-                      <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                    <div key={index} className="border-l-2 border-orange-600 pl-4">
+                      <h3 className="text-base font-semibold text-gray-900 mb-1">
                         {education.degree}{" "}
                         {education.fieldOfStudy && `in ${education.fieldOfStudy}`}
                       </h3>
-                      <p className="text-orange-600 font-medium text-xl mb-3">{education.institution}</p>
-                      <p className="text-gray-500 mb-4 text-lg">
-                        {education.startYear} - {education.endYear || "Present"}
+                      <p className="text-orange-600 font-medium text-sm mb-2">{education.university}</p>
+                      <p className="text-gray-500 mb-2 text-xs">
+                        {education.startDate || education.startYear} - {education.endDate || education.endYear || "Present"}
                       </p>
                       {education.description && (
-                        <p className="text-gray-700 leading-relaxed text-lg">{education.description}</p>
+                        <p className="text-gray-700 leading-relaxed text-sm">{education.description}</p>
+                      )}
+                      {education.grade && (
+                        <p className="text-gray-600 mt-1 text-xs">Grade: {education.grade}</p>
                       )}
                     </div>
                   ))
+                ) : profile.highestEducation || profile.university ? (
+                  // Show education summary if educationHistory is empty but education data exists
+                  <div className="border-l-2 border-orange-600 pl-4">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1">
+                      {profile.highestEducation || "Education"}
+                      {profile.fieldOfStudy && ` in ${profile.fieldOfStudy}`}
+                    </h3>
+                    {profile.university && (
+                      <p className="text-orange-600 font-medium text-sm mb-2">{profile.university}</p>
+                    )}
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {profile.graduationYear && (
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                          Graduated {profile.graduationYear}
+                        </span>
+                      )}
+                      {profile.highestEducation && (
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                          {profile.highestEducation}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 ) : (
-                  <div className="text-center py-16">
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                    <h3 className="text-base font-semibold text-gray-900 mb-2">
                       No education history added yet
                     </h3>
-                    <p className="text-xl text-gray-600 mb-8 max-w-md mx-auto">
+                    <p className="text-sm text-gray-600 mb-4 max-w-md mx-auto">
                       Add your educational background to complete your professional profile.
                     </p>
-                    {(profile.highestEducation || profile.fieldOfStudy || profile.university || profile.graduationYear) && (
-                      <div className="bg-gray-50 rounded-2xl p-8 max-w-md mx-auto">
-                        <h4 className="text-xl font-semibold text-gray-900 mb-3">
-                          {profile.highestEducation || "Education"}
-                          {profile.fieldOfStudy && ` in ${profile.fieldOfStudy}`}
-                        </h4>
-                        {profile.university && (
-                          <p className="text-orange-600 mb-3 text-lg">{profile.university}</p>
-                        )}
-                        {profile.graduationYear && (
-                          <p className="text-base text-gray-500">
-                            Graduated: {profile.graduationYear}
-                          </p>
-                        )}
-                      </div>
-                    )}
+                    <button className="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium">
+                      Add Education
+                    </button>
                   </div>
                 )}
               </div>
@@ -578,7 +654,7 @@ export default function ProfilePage() {
               ? 'border-primary-400 bg-primary-50 shadow-lg'
               : 'border-gray-300 hover:border-primary-300 hover:bg-gray-50'
           }`}>
-            <CardContent className="p-12">
+            <CardContent className="p-6">
               <div
                 className="text-center cursor-pointer"
                 onDragEnter={handleDrag}
@@ -587,34 +663,34 @@ export default function ProfilePage() {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className={`w-20 h-20 mx-auto mb-8 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                <div className={`w-12 h-12 mx-auto mb-4 rounded-lg flex items-center justify-center transition-all duration-300 ${
                   dragActive
                     ? 'bg-primary-100 scale-110'
                     : 'bg-gray-100'
                 }`}>
                 </div>
 
-                <h3 className="text-3xl font-semibold text-gray-900 mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {dragActive ? 'Drop your CV here' : 'Upload a new CV'}
                 </h3>
 
-                <p className="text-xl text-gray-600 mb-8 max-w-md mx-auto">
+                <p className="text-sm text-gray-600 mb-4 max-w-md mx-auto">
                   {dragActive
                     ? 'Release to upload your CV file'
                     : 'Drag and drop your PDF CV file here, or click to browse your files'
                   }
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
                   <button
-                    className={`inline-flex items-center space-x-3 px-8 py-4 rounded-2xl font-medium transition-all duration-200 ${
+                    className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
                       dragActive
                         ? 'bg-primary-600 text-white shadow-lg scale-105'
                         : 'bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg'
                     } disabled:opacity-50`}
                     disabled={uploading}
                   >
-                    <span className="text-lg">{uploading ? "Uploading..." : "Choose File"}</span>
+                    <span>{uploading ? "Uploading..." : "Choose File"}</span>
                   </button>
 
                   {!dragActive && (
@@ -623,7 +699,7 @@ export default function ProfilePage() {
                         e.stopPropagation();
                         fileInputRef.current?.click();
                       }}
-                      className="inline-flex items-center space-x-2 px-6 py-3 text-primary-600 hover:text-primary-700 font-medium transition-colors text-lg"
+                      className="inline-flex items-center space-x-2 px-4 py-2 text-primary-600 hover:text-primary-700 font-medium transition-colors text-sm"
                       disabled={uploading}
                     >
                       <span>Quick Upload</span>
@@ -631,17 +707,11 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-gray-200">
-                  <div className="flex items-center justify-center space-x-8 text-base text-gray-500">
-                    <div className="flex items-center space-x-2">
-                      <span>PDF format</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span>Max 10MB</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span>Secure upload</span>
-                    </div>
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-center space-x-6 text-xs text-gray-500">
+                    <span>PDF format</span>
+                    <span>Max 10MB</span>
+                    <span>Secure upload</span>
                   </div>
                 </div>
               </div>
@@ -659,19 +729,19 @@ export default function ProfilePage() {
 
           {/* Modern CVs List */}
           <Card className="bg-white border-0 shadow-sm overflow-hidden">
-            <div className="px-8 py-6 border-b border-gray-100">
+            <div className="px-6 py-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <h2 className="text-3xl font-bold text-gray-900">
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-lg font-bold text-gray-900">
                     Your CV Library
                   </h2>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                     {cvs.length} CV{cvs.length !== 1 ? 's' : ''}
                   </span>
                 </div>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center space-x-3 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-md font-medium text-lg"
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm font-medium text-sm"
                   disabled={uploading}
                 >
                   <span>Add New CV</span>
@@ -680,29 +750,29 @@ export default function ProfilePage() {
             </div>
 
             {loadingCVs ? (
-              <div className="px-8 py-16 text-center">
-                <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+              <div className="px-6 py-12 text-center">
+                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-base font-semibold text-gray-900 mb-2">
                   Loading your CVs...
                 </h3>
-                <p className="text-xl text-gray-600">
+                <p className="text-sm text-gray-600">
                   Please wait while we fetch your documents
                 </p>
               </div>
             ) : cvs.length === 0 ? (
-              <div className="px-8 py-16 text-center">
-                <h3 className="text-3xl font-semibold text-gray-900 mb-4">
+              <div className="px-6 py-12 text-center">
+                <h3 className="text-base font-semibold text-gray-900 mb-2">
                   No CVs uploaded yet
                 </h3>
-                <p className="text-xl text-gray-600 mb-10 max-w-md mx-auto">
+                <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
                   Start building your professional profile by uploading your first CV.
                   We'll help you optimize it for better job matches.
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center space-x-3 px-8 py-4 bg-primary-600 text-white rounded-2xl hover:bg-primary-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-lg"
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm"
                 >
                   <span>Upload Your First CV</span>
                 </button>
@@ -712,55 +782,51 @@ export default function ProfilePage() {
                 {cvs.map((cv) => (
                   <div
                     key={cv.id}
-                    className="px-8 py-8 hover:bg-gray-50 transition-colors duration-200"
+                    className="px-6 py-4 hover:bg-gray-50 transition-colors duration-200"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-6">
-                        <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center">
-                          <span className="text-primary-600 font-bold text-xl">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                          <span className="text-primary-600 font-bold text-sm">
                             {cv.originalFileName.charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-4 mb-3">
-                            <h3 className="text-2xl font-semibold text-gray-900 truncate">
+                          <div className="flex items-center space-x-3 mb-1">
+                            <h3 className="text-sm font-semibold text-gray-900 truncate">
                               {cv.originalFileName}
                             </h3>
                             {cv.isActive && (
-                              <span className="inline-flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold bg-primary-100 text-primary-800">
+                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-100 text-primary-800">
                                 <span>Active CV</span>
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center space-x-6 text-lg text-gray-600">
-                            <div className="flex items-center space-x-2">
-                              <span>Updated {new Date(cv.lastUpdated).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span>{cv.fileSize}</span>
-                            </div>
+                          <div className="flex items-center space-x-4 text-xs text-gray-600">
+                            <span>Updated {new Date(cv.lastUpdated).toLocaleDateString()}</span>
+                            <span>{cv.fileSize}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-3">
                         {/* Status Badge */}
-                        <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold text-white ${getStatusColor(cv.status)}`}>
+                        <div className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold text-white ${getStatusColor(cv.status)}`}>
                           <span className="capitalize">{cv.status.replace('_', ' ')}</span>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleDownload(cv)}
-                            className="inline-flex items-center px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 text-gray-700 bg-white border border-gray-300 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
                             title="Download CV"
                           >
                             Download
                           </button>
                           <button
                             onClick={() => handleDeleteCV(cv.id)}
-                            className="inline-flex items-center px-6 py-3 text-red-600 bg-white border border-red-300 rounded-xl font-medium hover:bg-red-50 transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 text-red-600 bg-white border border-red-300 rounded-lg text-xs font-medium hover:bg-red-50 transition-colors"
                             title="Delete CV"
                           >
                             Delete
@@ -768,7 +834,7 @@ export default function ProfilePage() {
                           {!cv.isActive && (
                             <button
                               onClick={() => handleActivateCV(cv.id)}
-                              className="inline-flex items-center space-x-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-md font-medium"
+                              className="inline-flex items-center space-x-1 px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm text-xs font-medium"
                             >
                               <span>Set as Active</span>
                             </button>
@@ -783,71 +849,53 @@ export default function ProfilePage() {
           </Card>
 
           {/* Modern CV Tips Section */}
-          <div className="mt-16">
+          <div className="mt-8">
             <Card className="bg-gradient-to-br from-primary-50 to-blue-50 border-0 shadow-sm">
-              <CardContent className="p-12">
-                <div className="flex items-center space-x-6 mb-10">
-                  <div>
-                    <h3 className="text-3xl font-bold text-gray-900">
-                      CV Optimization Tips
-                    </h3>
-                    <p className="text-xl text-gray-600 mt-2">
-                      Maximize your chances of landing interviews with these expert recommendations
-                    </p>
-                  </div>
+              <CardContent className="p-6">
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    CV Optimization Tips
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Maximize your chances of landing interviews with these expert recommendations
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="bg-white rounded-2xl p-8 shadow-sm border border-white">
-                    <div className="flex items-start space-x-6">
-                      <div>
-                        <h4 className="text-2xl font-semibold text-gray-900 mb-4">
-                          Keep it Concise
-                        </h4>
-                        <p className="text-lg text-gray-600 leading-relaxed">
-                          Limit your CV to 2 pages maximum for most positions. Focus on quality over quantity and highlight your most relevant achievements.
-                        </p>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-white">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                      Keep it Concise
+                    </h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Limit your CV to 2 pages maximum for most positions. Focus on quality over quantity and highlight your most relevant achievements.
+                    </p>
                   </div>
 
-                  <div className="bg-white rounded-2xl p-8 shadow-sm border border-white">
-                    <div className="flex items-start space-x-6">
-                      <div>
-                        <h4 className="text-2xl font-semibold text-gray-900 mb-4">
-                          Tailor for Each Job
-                        </h4>
-                        <p className="text-lg text-gray-600 leading-relaxed">
-                          Customize your CV for each application to match job requirements. Use keywords from the job description to pass ATS filters.
-                        </p>
-                      </div>
-                    </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-white">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                      Tailor for Each Job
+                    </h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Customize your CV for each application to match job requirements. Use keywords from the job description to pass ATS filters.
+                    </p>
                   </div>
 
-                  <div className="bg-white rounded-2xl p-8 shadow-sm border border-white">
-                    <div className="flex items-start space-x-6">
-                      <div>
-                        <h4 className="text-2xl font-semibold text-gray-900 mb-4">
-                          Use Keywords Strategically
-                        </h4>
-                        <p className="text-lg text-gray-600 leading-relaxed">
-                          Include relevant keywords from the job description naturally throughout your CV. This helps with both ATS and human reviewers.
-                        </p>
-                      </div>
-                    </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-white">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                      Use Keywords Strategically
+                    </h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Include relevant keywords from the job description naturally throughout your CV. This helps with both ATS and human reviewers.
+                    </p>
                   </div>
 
-                  <div className="bg-white rounded-2xl p-8 shadow-sm border border-white">
-                    <div className="flex items-start space-x-6">
-                      <div>
-                        <h4 className="text-2xl font-semibold text-gray-900 mb-4">
-                          Update Regularly
-                        </h4>
-                        <p className="text-lg text-gray-600 leading-relaxed">
-                          Keep your CV current with your latest skills, experiences, and achievements. Regular updates show attention to detail.
-                        </p>
-                      </div>
-                    </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-white">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                      Update Regularly
+                    </h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Keep your CV current with your latest skills, experiences, and achievements. Regular updates show attention to detail.
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -856,27 +904,25 @@ export default function ProfilePage() {
 
           {/* Profile Completeness */}
           <Card className="bg-gradient-to-br from-primary-50 to-blue-50 border-0 shadow-sm">
-            <CardContent className="p-12">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-4">
-                  <h2 className="text-3xl font-bold text-gray-900">
-                    Profile Completeness
-                  </h2>
-                </div>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-900">
+                  Profile Completeness
+                </h2>
                 <div className="text-right">
-                  <div className="text-5xl font-bold text-primary-600 mb-2">
+                  <div className="text-3xl font-bold text-primary-600">
                     {completeness}%
                   </div>
-                  <div className="text-lg text-gray-600">Complete</div>
+                  <div className="text-xs text-gray-600">Complete</div>
                 </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-6 mb-10">
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
                 <div
-                  className="bg-primary-600 h-6 rounded-full transition-all duration-1000"
+                  className="bg-primary-600 h-3 rounded-full transition-all duration-1000"
                   style={{ width: `${completeness}%` }}
                 ></div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {[
                   { label: "First name provided", completed: !!profile.firstName },
                   { label: "Email provided", completed: !!profile.email },
@@ -894,13 +940,13 @@ export default function ProfilePage() {
                   { label: "University specified", completed: !!profile.university },
                   { label: "Graduation year provided", completed: !!profile.graduationYear },
                 ].map((item, index) => (
-                  <div key={index} className="flex items-center space-x-4">
+                  <div key={index} className="flex items-center space-x-2">
                     {item.completed ? (
-                      <div className="w-6 h-6 bg-green-500 rounded-full flex-shrink-0"></div>
+                      <div className="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
                     ) : (
-                      <div className="w-6 h-6 border-2 border-gray-300 rounded-full flex-shrink-0"></div>
+                      <div className="w-4 h-4 border-2 border-gray-300 rounded-full flex-shrink-0"></div>
                     )}
-                    <span className={`text-lg ${item.completed ? 'text-gray-900' : 'text-gray-600'}`}>
+                    <span className={`text-xs ${item.completed ? 'text-gray-900' : 'text-gray-600'}`}>
                       {item.label}
                     </span>
                   </div>
