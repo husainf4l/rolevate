@@ -156,6 +156,7 @@ model User {
   password         String?
   email            String?           @unique
   name             String?
+  phone            String? // User phone number
   avatar           String? // Path to user avatar image
   isActive         Boolean           @default(true)
   companyId        String?

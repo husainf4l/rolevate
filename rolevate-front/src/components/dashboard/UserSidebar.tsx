@@ -1,22 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { API_CONFIG } from "@/lib/config";
 import Link from "next/link";
-import Logo from "@/components/common/logo";
 import {
   HomeIcon,
   BriefcaseIcon,
-  DocumentTextIcon,
   UserIcon,
   Bars3Icon,
   XMarkIcon,
   ClipboardDocumentListIcon,
   BookmarkIcon,
-  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { logout } from "@/services/auth";
+import UserProfileSection from "./UserProfileSection";
+import { useAuth } from "@/hooks/useAuth";
 
 const navigationItems = [
   {
@@ -27,7 +25,7 @@ const navigationItems = [
   {
     icon: BriefcaseIcon,
     label: "Jobs",
-    href: "/jobs",
+    href: "/userdashboard/jobs",
   },
   {
     icon: ClipboardDocumentListIcon,
@@ -40,76 +38,21 @@ const navigationItems = [
     href: "/userdashboard/saved-jobs",
   },
   {
-    icon: DocumentTextIcon,
-    label: "CV",
-    href: "/userdashboard/cv",
-  },
-  {
     icon: UserIcon,
     label: "Profile",
     href: "/userdashboard/profile",
   },
 ];
 
-interface UserData {
-  name?: string;
-  email?: string;
-  avatar?: string;
-}
-
 export default function UserSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<UserData>({});
+  const { user } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
-  // Fetch user data for profile display
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const response = await fetch(`${API_CONFIG.API_BASE_URL}/users/me`, {
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          // Check if response has content and is JSON
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const text = await response.text();
-            if (text) {
-              try {
-                const data = JSON.parse(text);
-                setUserData({
-                  name: data.name || data.firstName + " " + data.lastName,
-                  email: data.email,
-                  avatar: data.avatar,
-                });
-              } catch (parseError) {
-                console.error("Error parsing JSON:", parseError);
-              }
-            }
-          }
-        } else {
-          console.error("API request failed with status:", response.status);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   // Logout handler
   const handleLogout = async () => {
@@ -153,7 +96,12 @@ export default function UserSidebar() {
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex justify-center items-center px-4 py-6 border-b border-gray-100">
-            <Logo size={48} />
+            <img
+              src="/logo/Rolevate-icon.webp"
+              alt="Rolevate Icon"
+              className="object-contain"
+              style={{ width: 48, height: 48 }}
+            />
           </div>
 
           {/* Navigation */}
@@ -191,43 +139,13 @@ export default function UserSidebar() {
           </nav>
 
           {/* User Profile & Logout */}
-          <div className="border-t border-gray-200 p-2">
-            <div className="flex flex-col items-center px-2 py-3 text-xs mb-3">
-              <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center mb-2">
-                {userData.avatar ? (
-                  <img
-                    src={userData.avatar}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-white text-sm font-medium">
-                    {userData.name
-                      ? userData.name.charAt(0).toUpperCase()
-                      : "U"}
-                  </span>
-                )}
-              </div>
-              <div className="text-center">
-                <p className="text-xs font-medium text-gray-900 truncate max-w-full">
-                  {userData.name || "User"}
-                </p>
-                <p className="text-xs text-gray-500 truncate max-w-full">
-                  {userData.email || "user@example.com"}
-                </p>
-              </div>
-            </div>
-
-            {/* Logout Button */}
-            <button
-              className="w-full flex flex-col items-center px-2 py-3 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-              onClick={handleLogout}
-              title="Logout"
-            >
-              <ArrowRightOnRectangleIcon className="h-5 w-5 mb-1" />
-              <span>Logout</span>
-            </button>
-          </div>
+          <UserProfileSection 
+            userData={{ 
+              name: user?.name || "Loading...", 
+              avatar: user?.avatar 
+            }} 
+            onLogout={handleLogout} 
+          />
         </div>
       </aside>
     </>

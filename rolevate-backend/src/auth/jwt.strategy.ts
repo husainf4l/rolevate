@@ -35,9 +35,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Validating JWT payload
 
-    // Fetch user and candidate profile if userType is CANDIDATE
+    // Fetch user details
+    let userName: string | undefined = undefined;
     let candidateProfileId: string | undefined = undefined;
     let companyId: string | undefined = undefined;
+    
+    try {
+      const user = await this.userService.findById(payload.sub);
+      if (user) {
+        userName = user.name || undefined;
+        companyId = user.companyId || undefined;
+      }
+    } catch {
+      // Error fetching user
+    }
     
     if (payload.userType === 'CANDIDATE') {
       try {
@@ -48,21 +59,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       } catch {
         // Error fetching candidate profile
       }
-    } else if (payload.userType === 'COMPANY') {
-      try {
-        const user = await this.userService.findById(payload.sub);
-        if (user && user.companyId) {
-          companyId = user.companyId;
-        }
-      } catch {
-        // Error fetching company info
-      }
     }
 
     const result = {
       id: payload.sub,
       userId: payload.sub,
       email: payload.email,
+      name: userName,
       userType: payload.userType,
       candidateProfileId,
       companyId,

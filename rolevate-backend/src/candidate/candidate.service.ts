@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
 import { NotificationService } from '../notification/notification.service';
 import { AwsS3Service } from '../services/aws-s3.service';
+import { CvParsingService } from '../services/cv-parsing.service';
 import { NotificationType, NotificationCategory } from '../notification/dto/notification.dto';
 import * as fs from 'fs-extra';
 import {
@@ -19,6 +20,7 @@ export class CandidateService {
     private cacheService: CacheService,
     private notificationService: NotificationService,
     private awsS3Service: AwsS3Service,
+    private cvParsingService: CvParsingService,
   ) {}
 
   async createBasicProfile(createBasicDto: CreateBasicCandidateProfileDto, userId?: string): Promise<CandidateProfileResponseDto> {
@@ -177,6 +179,9 @@ export class CandidateService {
 
     // Clear cache for this user's profile
     await this.cacheService.invalidateUserProfile(userId);
+
+    // Trigger CV parsing in the background
+    this.processCVInBackground(cv.id, cv.fileUrl, profile.id);
 
     return {
       id: cv.id,
@@ -532,6 +537,140 @@ export class CandidateService {
       .filter(job => job !== undefined); // Filter out any jobs that weren't found (deleted, etc.)
 
     return orderedJobs;
+  }
+
+  private async processCVInBackground(cvId: string, cvUrl: string, candidateId: string): Promise<void> {
+    try {
+      console.log('🔄 Starting background CV processing for CV:', cvId);
+      
+      // Update CV status to PROCESSING
+      await this.prisma.cV.update({
+        where: { id: cvId },
+        data: { status: 'PROCESSING' },
+      });
+
+      // Process CV immediately (remove setTimeout for more reliable processing)
+      try {
+        console.log('📄 Extracting candidate information from CV...');
+        const extractedData = await this.cvParsingService.extractCandidateInfoFromCV(cvUrl);
+        
+        console.log('✅ CV processing completed, updating records...');
+        
+        // Update CV record with extracted data
+        await this.prisma.cV.update({
+          where: { id: cvId },
+          data: {
+            status: 'PROCESSED',
+            extractedData: extractedData as any,
+            processedAt: new Date(),
+          },
+        });
+
+        // Update candidate profile with extracted information
+        await this.updateCandidateProfileWithExtractedData(candidateId, extractedData);
+        
+        console.log('✅ CV processing and profile update completed for CV:', cvId);
+        
+        // Clear cache after processing
+        const profile = await this.prisma.candidateProfile.findUnique({
+          where: { id: candidateId },
+          select: { userId: true },
+        });
+        if (profile?.userId) {
+          await this.cacheService.invalidateUserProfile(profile.userId);
+        }
+
+      } catch (processingError) {
+        console.error('❌ CV processing failed:', processingError);
+        
+        // Update CV status to ERROR
+        await this.prisma.cV.update({
+          where: { id: cvId },
+          data: { 
+            status: 'ERROR',
+            extractedData: {
+              error: processingError.message,
+              processedAt: new Date().toISOString()
+            } as any
+          },
+        });
+      }
+    } catch (error) {
+      console.error('❌ Failed to start background CV processing:', error);
+    }
+  }
+
+  private async updateCandidateProfileWithExtractedData(candidateId: string, extractedData: any): Promise<void> {
+    try {
+      console.log('🔄 Updating candidate profile with extracted data...');
+      
+      // Get current profile data
+      const existingProfile = await this.prisma.candidateProfile.findUnique({
+        where: { id: candidateId },
+        select: {
+          currentJobTitle: true,
+          currentCompany: true,
+          totalExperience: true,
+          skills: true,
+          highestEducation: true,
+          profileSummary: true,
+        },
+      });
+      
+      if (!existingProfile) {
+        console.error('❌ Candidate profile not found for update');
+        return;
+      }
+      
+      const updateData: any = {};
+      
+      // Update fields if they are not already set or if extracted data is more complete
+      if (extractedData.currentJobTitle && !existingProfile.currentJobTitle) {
+        updateData.currentJobTitle = extractedData.currentJobTitle;
+      }
+      
+      if (extractedData.currentCompany && !existingProfile.currentCompany) {
+        updateData.currentCompany = extractedData.currentCompany;
+      }
+      
+      if (extractedData.totalExperience !== null && extractedData.totalExperience !== undefined && existingProfile.totalExperience === null) {
+        updateData.totalExperience = extractedData.totalExperience;
+      }
+      
+      if (extractedData.skills && extractedData.skills.length > 0) {
+        // Merge with existing skills if any
+        const existingSkills = existingProfile.skills || [];
+        const newSkills = [...new Set([...existingSkills, ...extractedData.skills])];
+        // Only update if we have new skills
+        if (newSkills.length > existingSkills.length) {
+          updateData.skills = newSkills;
+        }
+      }
+      
+      if (extractedData.education && !existingProfile.highestEducation) {
+        updateData.highestEducation = extractedData.education;
+      }
+      
+      if (extractedData.summary && !existingProfile.profileSummary) {
+        updateData.profileSummary = extractedData.summary;
+      }
+      
+      // Only update if there are fields to update
+      if (Object.keys(updateData).length > 0) {
+        await this.prisma.candidateProfile.update({
+          where: { id: candidateId },
+          data: updateData,
+        });
+        
+        console.log('✅ Candidate profile updated with extracted data:', updateData);
+      } else {
+        console.log('ℹ️ No profile updates needed - all fields already populated');
+      }
+      
+    } catch (error) {
+      console.error('❌ Failed to update candidate profile with extracted data:', error);
+      throw error;
+    }
   }
 
   private mapToBasicProfileResponse(profile: any): CandidateProfileResponseDto {

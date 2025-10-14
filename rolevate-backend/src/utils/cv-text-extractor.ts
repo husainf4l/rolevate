@@ -12,6 +12,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { CVErrorHandlingService } from '../services/cv-error-handling.service';
+import { AwsS3Service } from '../services/aws-s3.service';
 
 // Global error handler instance
 const errorHandler = new CVErrorHandlingService();
@@ -35,9 +36,36 @@ export const SUPPORTED_CV_FORMATS = {
   'image/webp': ['.webp']
 };
 
-export async function downloadFileBuffer(url: string): Promise<Buffer> {
+export async function downloadFileBuffer(url: string, s3Service?: AwsS3Service): Promise<Buffer> {
   console.log('📥 Downloading file buffer from URL:', url);
   try {
+    // Check if it's a presigned URL (contains AWS signature parameters)
+    const isPresignedUrl = url.includes('X-Amz-Algorithm') && url.includes('X-Amz-Signature');
+
+    if (isPresignedUrl) {
+      // For presigned URLs, use axios directly
+      console.log('🔗 Using axios to download presigned URL');
+      const response = await axios({
+        url,
+        method: 'GET',
+        responseType: 'arraybuffer',
+        timeout: 30000, // 30 second timeout
+        maxContentLength: 50 * 1024 * 1024, // 50MB max
+      });
+
+      const buffer = Buffer.from(response.data);
+      console.log('✅ Downloaded file buffer via presigned URL, size:', buffer.length, 'bytes');
+      return buffer;
+    }
+
+    // Check if it's an S3 URL and we have S3 service (for direct S3 access)
+    if (s3Service && s3Service.isS3Url(url)) {
+      console.log('☁️ Using S3 service to download file');
+      return await s3Service.getFileBuffer(url);
+    }
+
+    // Fallback to axios for other URLs
+    console.log('🌐 Using axios to download file');
     const response = await axios({
       url,
       method: 'GET',
@@ -45,7 +73,7 @@ export async function downloadFileBuffer(url: string): Promise<Buffer> {
       timeout: 30000, // 30 second timeout
       maxContentLength: 50 * 1024 * 1024, // 50MB max
     });
-    
+
     const buffer = Buffer.from(response.data);
     console.log('✅ Downloaded file buffer, size:', buffer.length, 'bytes');
     return buffer;
@@ -58,7 +86,7 @@ export async function downloadFileBuffer(url: string): Promise<Buffer> {
 /**
  * Enhanced CV text extraction with support for multiple formats and OCR
  */
-export async function extractTextFromCV(fileUrl: string): Promise<string> {
+export async function extractTextFromCV(fileUrl: string, s3Service?: AwsS3Service): Promise<string> {
   console.log('📥 Starting enhanced CV text extraction from URL:', fileUrl);
   
   // Validate input
@@ -88,7 +116,7 @@ export async function extractTextFromCV(fileUrl: string): Promise<string> {
   }
 
   console.log('☁️ Downloading file from S3...');
-  const fileBuffer = await downloadFileBuffer(fileUrl);
+  const fileBuffer = await downloadFileBuffer(fileUrl, s3Service);
   
   // Validate file content
   if (fileBuffer.length === 0) {
