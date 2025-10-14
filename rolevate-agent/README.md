@@ -1,165 +1,174 @@
-# 🚀 Rolevate CV Filler Agent
+# Rolevate CV Agent
 
-An intelligent AI-powered agent that automatically extracts structured data from CVs and fills professional templates.
-
-## 📋 Features
-
-- **AI-Powered Extraction**: Uses GPT-4 and LangChain to parse CV data intelligently
-- **Multiple Input Formats**: Accepts PDF, TXT, JSON, and DOCX files
-- **Template System**: Pre-designed professional CV templates
-- **Multiple Output Formats**: Generate PDF and DOCX documents
-- **REST API**: Easy integration with web applications
-- **CLI Tool**: Command-line interface for batch processing
-- **Flexible Storage**: Local filesystem or S3-compatible storage
-
-## 🏗️ Architecture
-
-```
-rolevate-agent/
-├── src/
-│   ├── api/              # FastAPI endpoints
-│   ├── core/             # Core business logic
-│   ├── models/           # Pydantic schemas
-│   ├── services/         # AI extraction & template filling
-│   ├── templates/        # CV templates (HTML/DOCX)
-│   └── utils/            # Helper functions
-├── tests/                # Test suite
-├── uploads/              # Temporary upload directory
-├── outputs/              # Generated CVs
-└── cli.py               # Command-line interface
-```
+AI-powered CV builder with chat interface and professional templates.
 
 ## 🚀 Quick Start
 
-### 1. Installation
+1. **Install dependencies:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-```bash
-cd rolevate-agent
-pip install -r requirements.txt
+2. **Configure environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env and add your OpenAI API key
+   ```
+
+3. **Run the server:**
+   ```bash
+   PORT=8003 DEBUG=true venv/bin/python -m app.main
+   ```
+
+4. **Access the application:**
+   - Homepage: http://localhost:8003/
+   - CV Builder: http://localhost:8003/chat
+   - API Docs: http://localhost:8003/docs
+   - Health Check: http://localhost:8003/health
+
+## 📁 Project Structure
+
+```
+rolevate-agent/
+├── app/
+│   ├── main.py                 # FastAPI application entry point
+│   ├── config.py              # Configuration settings
+│   ├── models/
+│   │   └── schemas.py         # Pydantic data models
+│   ├── services/
+│   │   ├── cv_agent.py        # Main CV processing orchestrator
+│   │   ├── cv_extractor.py    # LLM-based CV extraction
+│   │   ├── cv_exporter.py     # PDF/DOCX export
+│   │   └── template_filler.py # Template rendering
+│   ├── agent/
+│   │   ├── agent.py           # LangGraph workflow orchestration
+│   │   ├── nodes/             # Processing nodes (extract, enhance, export)
+│   │   └── tools/             # Agent tools (validation, etc.)
+│   ├── utils/
+│   │   └── file_parser.py     # File parsing utilities
+│   └── templates/
+│       ├── components/        # Reusable UI components
+│       │   ├── base.html     # Base layout template
+│       │   ├── navbar.html   # Navigation bar
+│       │   └── footer.html   # Footer
+│       ├── pages/            # Application pages
+│       │   ├── home.html     # Homepage (landing page)
+│       │   └── chat.html     # CV Builder interface
+│       └── cv_templates/     # CV document templates
+│           ├── classic_cv.html
+│           ├── modern_cv.html
+│           └── executive_cv.html
+├── requirements.txt           # Python dependencies
+├── .env                       # Environment variables (not in git)
+└── .env.example              # Example environment config
+
 ```
 
-### 2. Configuration
+## 🔧 API Endpoints
 
-```bash
-cp .env.example .env
-# Edit .env and add your OpenAI API key
+### Pages
+- `GET /` - Homepage (marketing landing page)
+- `GET /chat` - Chat-based CV builder interface
+- `GET /health` - Health check endpoint
+
+### CV Processing
+- `POST /api/v1/cv/extract` - Extract structured data from uploaded CV
+- `POST /api/v1/cv/fill` - Fill template with CV data and generate PDF/DOCX
+- `GET /api/v1/cv/download/{filename}` - Download generated CV file
+
+### Templates
+- `GET /api/v1/templates` - List available CV templates
+
+## 🎨 Templates
+
+Three professional CV templates are available:
+
+1. **Classic** - Traditional layout with clean design
+2. **Modern** - Contemporary styling with visual appeal
+3. **Executive** - Professional layout for senior positions
+
+All templates are:
+- ATS-friendly (Applicant Tracking System compatible)
+- Mobile-responsive
+- Exportable as PDF or DOCX
+
+## 🤖 Features
+
+- **AI Chat Interface** - Conversational CV building experience
+- **Smart Extraction** - Upload existing CV and extract data automatically
+- **Real-time Preview** - See changes as you build your CV
+- **Multiple Formats** - Export as PDF or DOCX
+- **Professional Templates** - Choose from 3 carefully designed templates
+- **No Signup Required** - Start building immediately
+- **RESTful API** - Integrate into your own applications
+
+## 🛠️ Technology Stack
+
+- **Backend:** FastAPI, Python 3.12
+- **AI/LLM:** OpenAI GPT-4, LangChain, LangGraph
+- **Export:** WeasyPrint (PDF), python-docx (DOCX)
+- **Frontend:** Tailwind CSS, Vanilla JavaScript
+- **Templating:** Jinja2
+
+## 📝 Environment Variables
+
+Required environment variables in `.env`:
+
+```env
+# OpenAI Configuration
+OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-4
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=8003
+DEBUG=true
+
+# Storage
+UPLOAD_DIR=uploads
+OUTPUT_DIR=outputs
 ```
 
-### 3. Run API Server
+## 🔒 Security Notes
 
-```bash
-python main.py
-```
-
-API will be available at: `http://localhost:8000`
-
-### 4. Use CLI
-
-```bash
-# Parse and fill CV in one command
-python cli.py process --input cv.pdf --template modern --output filled_cv.pdf
-```
-
-## 📡 API Endpoints
-
-### Upload & Parse CV
-```bash
-POST /api/v1/cv/upload
-Content-Type: multipart/form-data
-
-# Returns structured JSON with extracted data
-```
-
-### Fill Template
-```bash
-POST /api/v1/cv/fill
-Content-Type: application/json
-
-{
-  "cv_data": {...},
-  "template": "modern",
-  "output_format": "pdf"
-}
-```
-
-### Complete Pipeline
-```bash
-POST /api/v1/cv/process
-Content-Type: multipart/form-data
-
-# Upload CV, extract, fill template, and return download link
-```
-
-## 🎨 Available Templates
-
-1. **Modern** - Clean, minimalist design
-2. **Professional** - Traditional corporate style
-3. **Creative** - Colorful and dynamic layout
-
-## 🧪 Testing
-
-```bash
-pytest tests/ -v
-```
-
-## 📝 Usage Examples
-
-### Python SDK
-
-```python
-from src.services.cv_agent import CVFillerAgent
-
-agent = CVFillerAgent()
-
-# Extract data from CV
-cv_data = await agent.extract_from_file("path/to/cv.pdf")
-
-# Fill template and generate PDF
-pdf_path = await agent.fill_and_export(
-    cv_data=cv_data,
-    template_name="modern",
-    output_format="pdf"
-)
-```
-
-### CLI Examples
-
-```bash
-# Extract only
-python cli.py extract --input cv.pdf --output data.json
-
-# Fill template with JSON data
-python cli.py fill --data data.json --template professional --output cv.pdf
-
-# Full pipeline
-python cli.py process --input cv.pdf --template modern --output result.pdf
-```
-
-## 🔧 Configuration
-
-Edit `.env` file to configure:
-- OpenAI API key and model
-- Storage location (local/S3)
-- Upload limits
-- Default templates
+- Never commit `.env` file to version control
+- Keep your OpenAI API key secure
+- Configure CORS appropriately for production
+- Validate all file uploads
+- Implement rate limiting for production use
 
 ## 📦 Dependencies
 
-- **FastAPI** - Modern web framework
-- **LangChain** - LLM orchestration
-- **OpenAI** - GPT-4 for intelligent parsing
-- **WeasyPrint** - HTML to PDF conversion
-- **python-docx** - Word document generation
-- **Jinja2** - Template engine
+Key dependencies:
+- `fastapi` - Web framework
+- `uvicorn` - ASGI server
+- `openai` - OpenAI API client
+- `langchain` - LLM framework
+- `langgraph` - Workflow orchestration
+- `weasyprint` - PDF generation
+- `python-docx` - DOCX generation
+- `pydantic` - Data validation
+- `loguru` - Logging
 
-## 🤝 Contributing
+See `requirements.txt` for complete list.
 
-This is part of the Rolevate platform. For contribution guidelines, see the main repository.
+## 🤝 Development
+
+The project follows standard Python best practices:
+
+- **Package structure:** All code in `app/` package
+- **Type hints:** Full type annotations
+- **Error handling:** Comprehensive exception handling
+- **Logging:** Structured logging with loguru
+- **Configuration:** Environment-based settings
+- **API documentation:** Auto-generated OpenAPI docs
 
 ## 📄 License
 
-Proprietary - Rolevate Platform
+MIT License - feel free to use this project for your own purposes.
 
-## 🆘 Support
+---
 
-For issues and questions, contact the Rolevate development team.
+Built with ❤️ by the Rolevate team

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Rolevate CV Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .fade-in-delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .fade-in-delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .fade-in-delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .fade-in-delay-4 { animation-delay: 0.4s; opacity: 0; }
+    </style>
+    <script>
+        // Client-side authentication check and user loading
+        (function() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = '/auth/signin?next=/dashboard';
+                return;
+            }
+            
+            // Verify token with server
+            fetch('/auth/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/auth/signin?next=/dashboard';
+                }
+                return response.json();
+            })
+            .then(user => {
+                if (user) {
+                    // Update all user name elements
+                    document.querySelectorAll('.user-name').forEach(el => {
+                        el.textContent = user.full_name || user.username || 'User';
+                    });
+                    
+                    // Update user initials
+                    document.querySelectorAll('.user-initial').forEach(el => {
+                        const name = user.full_name || user.username || 'U';
+                        el.textContent = name.charAt(0).toUpperCase();
+                    });
+                    
+                    // Update user email
+                    const emailEl = document.getElementById('userEmail');
+                    if (emailEl) emailEl.textContent = user.email;
+                    
+                    localStorage.setItem('user', JSON.stringify(user));
+                }
+            })
+            .catch(error => {
+                console.error('Error verifying authentication:', error);
+                window.location.href = '/auth/signin?next=/dashboard';
+            });
+        })();
+        
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'apple-blue': '#007AFF',
+                        'apple-gray': '#F5F5F7',
+                        'apple-dark': '#1D1D1F',
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-apple-gray flex">
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full">
+            <!-- Logo -->
+            <div class="flex items-center justify-center h-16 px-4 border-b border-gray-200">
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-semibold text-gray-900">Rolevate</span>
+                </a>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="/dashboard" class="flex items-center px-4 py-3 text-sm font-medium text-white bg-black rounded-xl transition-colors duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="/cvbuilder" class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    CV Builder
+                </a>
+            </nav>
+            
+            <!-- User Info -->
+            <div class="px-4 py-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white text-sm font-semibold">
+                        <span class="user-initial">U</span>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-900 user-name">Loading...</div>
+                        <div id="userEmail" class="text-xs text-gray-500">user@example.com</div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors duration-200">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden hidden" onclick="toggleSidebar()"></div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 md:ml-64">
+        <!-- Top Bar for Mobile -->
+        <div class="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+            <button onclick="toggleSidebar()" class="p-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <span class="text-lg font-semibold text-gray-900">Dashboard</span>
+            <div class="w-8"></div>
+        </div>
+        
+        <main class="p-6 md:p-12">
+            
+            <!-- Hero Section -->
+            <div class="text-center mb-16 fade-in">
+                <h1 class="text-5xl md:text-6xl font-semibold text-gray-900 mb-3 tracking-tight">
+                    Welcome back
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-500 font-light">
+                    Ready to build your next CV?
+                </p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <!-- CVs Created -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 fade-in fade-in-delay-1 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <span class="text-3xl font-semibold text-gray-900">0</span>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-600">CVs Created</h3>
+                </div>
+
+                <!-- Templates Available -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 fade-in fade-in-delay-2 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                            </svg>
+                        </div>
+                        <span class="text-3xl font-semibold text-gray-900">5</span>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-600">Templates Available</h3>
+                </div>
+
+                <!-- Last Activity -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 fade-in fade-in-delay-3 hover:shadow-md transition-shadow duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <span class="text-3xl font-semibold text-gray-900">-</span>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-600">Last Activity</h3>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+                <!-- Create New CV Card -->
+                <a href="/cvbuilder" class="group bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl shadow-lg p-10 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-start justify-between mb-8">
+                        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <svg class="w-6 h-6 text-white opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-3xl font-semibold text-white mb-3">
+                        Create New CV
+                    </h3>
+                    <p class="text-blue-100 text-lg font-light">
+                        Start fresh with our AI-powered builder
+                    </p>
+                </a>
+
+                <!-- Upload & Enhance Card -->
+                <a href="/enhance" class="group bg-gradient-to-br from-gray-900 to-black rounded-3xl shadow-lg p-10 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">                <!-- Upload & Enhance Card -->
+                <a href="/enhance" class="group bg-gradient-to-br from-gray-900 to-black rounded-3xl shadow-lg p-10 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-start justify-between mb-8">
+                        <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                        </div>
+                        <svg class="w-6 h-6 text-white opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-3xl font-semibold text-white mb-3">
+                        Upload & Enhance
+                    </h3>
+                    <p class="text-gray-400 text-lg font-light">
+                        Improve your existing resume with AI
+                    </p>
+                </a>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="fade-in fade-in-delay-4">
+                <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 mb-12 text-center">What makes Rolevate special</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Feature 1 -->
+                    <div class="bg-white rounded-3xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300">
+                        <div class="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">AI-Powered</h3>
+                        <p class="text-base text-gray-600 leading-relaxed">Smart suggestions and intelligent content generation</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="bg-white rounded-3xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300">
+                        <div class="w-14 h-14 bg-purple-500 rounded-2xl flex items-center justify-center mb-6">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Professional Templates</h3>
+                        <p class="text-base text-gray-600 leading-relaxed">Beautiful, ATS-friendly designs</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="bg-white rounded-3xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300">
+                        <div class="w-14 h-14 bg-pink-500 rounded-2xl flex items-center justify-center mb-6">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Lightning Fast</h3>
+                        <p class="text-base text-gray-600 leading-relaxed">Create professional CVs in minutes</p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="bg-white rounded-3xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300">
+                        <div class="w-14 h-14 bg-indigo-500 rounded-2xl flex items-center justify-center mb-6">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Fully Customizable</h3>
+                        <p class="text-base text-gray-600 leading-relaxed">Tailor every detail to your needs</p>
+                    </div>
+
+                    <!-- Feature 5 -->
+                    <div class="bg-white rounded-3xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300">
+                        <div class="w-14 h-14 bg-green-500 rounded-2xl flex items-center justify-center mb-6">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Secure & Private</h3>
+                        <p class="text-base text-gray-600 leading-relaxed">Your data is always protected</p>
+                    </div>
+
+                    <!-- Feature 6 -->
+                    <div class="bg-white rounded-3xl shadow-sm p-8 hover:shadow-md transition-shadow duration-300">
+                        <div class="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center mb-6">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Export Anywhere</h3>
+                        <p class="text-base text-gray-600 leading-relaxed">Download in PDF, DOCX, and more</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Logout function
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            window.location.href = '/auth/signin';
+        }
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+        
+        // Update mobile email as well
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userEmailMobile = document.getElementById('userEmailMobile');
+        if (userEmailMobile && user.email) {
+            userEmailMobile.textContent = user.email;
+        }
+    </script>
+</body>
+</html>
