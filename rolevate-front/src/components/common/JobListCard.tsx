@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useSavedJobsStandalone } from "@/hooks/useSavedJobsStandalone";
 import { MapPin } from "lucide-react";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
 
@@ -35,23 +34,18 @@ export default function JobListCard({
   job,
   onApply,
   onSave,
-  isSaved,
+  isSaved = false,
 }: JobListCardProps) {
-  const { isJobSaved, canSaveJobs, toggleSaveJob } = useSavedJobsStandalone();
   const [isSaving, setIsSaving] = useState(false);
 
-  const jobIsSaved = isSaved !== undefined ? isSaved : isJobSaved(job.id);
-  const showSaveButton = canSaveJobs();
+  const jobIsSaved = isSaved;
+  const showSaveButton = onSave !== undefined;
 
   const handleSave = async () => {
-    if (isSaving) return;
+    if (isSaving || !onSave) return;
     setIsSaving(true);
     try {
-      if (onSave) {
-        onSave(job.id);
-      } else {
-        await toggleSaveJob(job.id);
-      }
+      onSave(job.id);
     } catch (error) {
       console.error("Failed to save/unsave job:", error);
     } finally {

@@ -122,11 +122,8 @@ export async function isAuthenticated(): Promise<boolean> {
 
 // Get current authenticated user
 export async function getCurrentUser() {
-  const callStack = new Error().stack;
-  console.log("[getCurrentUser] Called from:", callStack?.split('\n')[2]?.trim());
-  
   try {
-    const res = await fetch(`${BASE_API}/auth/me`, {
+    const res = await fetch(`${BASE_API}/user/me`, {
       method: "GET",
       credentials: "include", // Send HTTP-only cookies
       headers: {
@@ -146,16 +143,63 @@ export async function getCurrentUser() {
   }
 }
 
-// Get user profile
+// Get user profile with full details (for candidate or company)
 export async function getProfile() {
   try {
-    const res = await fetch(`${BASE_API}/auth/profile`, {
+    const res = await fetch(`${BASE_API}/user/profile`, {
       method: "GET",
       credentials: "include", // Send HTTP-only cookies
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
     
     if (!res.ok) {
       throw new Error('Failed to get profile');
+    }
+    
+    return await res.json();
+  } catch (error) {
+    // Profile fetch failed - user may not be authenticated
+    throw error;
+  }
+}
+
+// Get user info from /api/user/me endpoint (for auth/basic user data)
+export async function getUserMe() {
+  try {
+    const res = await fetch(`${BASE_API}/api/user/me`, {
+      method: "GET",
+      credentials: "include", // Send HTTP-only cookies
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!res.ok) {
+      throw new Error('Failed to get user info');
+    }
+    
+    return await res.json();
+  } catch (error) {
+    // Auth check failed - user may not be authenticated
+    throw error;
+  }
+}
+
+// Get user profile from /api/user/profile endpoint (for profile page)
+export async function getUserProfile() {
+  try {
+    const res = await fetch(`${BASE_API}/api/user/profile`, {
+      method: "GET",
+      credentials: "include", // Send HTTP-only cookies
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!res.ok) {
+      throw new Error('Failed to get user profile');
     }
     
     return await res.json();

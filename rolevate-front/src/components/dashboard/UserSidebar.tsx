@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { API_CONFIG } from "@/lib/config";
 import Link from "next/link";
 import {
   HomeIcon,
@@ -15,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { logout } from "@/services/auth";
 import UserProfileSection from "./UserProfileSection";
+import { useAuth } from "@/hooks/useAuth";
 
 const navigationItems = [
   {
@@ -44,65 +44,15 @@ const navigationItems = [
   },
 ];
 
-interface UserData {
-  name?: string;
-  email?: string;
-  avatar?: string;
-}
-
 export default function UserSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<UserData>({});
+  const { user } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
-  // Fetch user data for profile display
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const response = await fetch(`${API_CONFIG.API_BASE_URL}/users/me`, {
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          // Check if response has content and is JSON
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const text = await response.text();
-            if (text) {
-              try {
-                const data = JSON.parse(text);
-                setUserData({
-                  name: data.name || data.firstName + " " + data.lastName,
-                  email: data.email,
-                  avatar: data.avatar,
-                });
-              } catch (parseError) {
-                console.error("Error parsing JSON:", parseError);
-              }
-            }
-          }
-        } else {
-          console.error("API request failed with status:", response.status);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   // Logout handler
   const handleLogout = async () => {
@@ -189,7 +139,13 @@ export default function UserSidebar() {
           </nav>
 
           {/* User Profile & Logout */}
-          <UserProfileSection userData={userData} onLogout={handleLogout} />
+          <UserProfileSection 
+            userData={{ 
+              name: user?.name || "Loading...", 
+              avatar: user?.avatar 
+            }} 
+            onLogout={handleLogout} 
+          />
         </div>
       </aside>
     </>

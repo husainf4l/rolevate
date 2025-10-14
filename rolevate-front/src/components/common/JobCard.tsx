@@ -116,11 +116,11 @@ export default function JobCard({
           </Badge>
         </div>
 
-        {/* Apply button */}
+        {/* Details button */}
         <div className="mt-4">
           <Link href={`/jobs/${job.id}`}>
             <Button className="w-full bg-[#0891b2] hover:bg-[#0891b2]/90 text-white font-medium">
-              Apply Now
+              Details
             </Button>
           </Link>
         </div>

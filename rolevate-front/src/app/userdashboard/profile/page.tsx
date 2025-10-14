@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/hooks/useAuth";
+import { ProfileService } from "@/services/profile";
 import {
   CVData,
   uploadCV,
@@ -28,7 +28,10 @@ const getStatusColor = (status: string) => {
 };
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  // User state - now storing CandidateProfile directly
+  const [user, setUser] = useState<any>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [userError, setUserError] = useState<string | null>(null);
 
   // CV Management State
   const [cvs, setCvs] = useState<CVData[]>([]);
@@ -43,6 +46,25 @@ export default function ProfilePage() {
   } | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load user profile on component mount
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setLoadingUser(true);
+        setUserError(null);
+        // ProfileService.getUserProfile() returns CandidateProfile directly
+        const profileData = await ProfileService.getUserProfile();
+        setUser(profileData);
+      } catch (err) {
+        setUserError(err instanceof Error ? err.message : 'Failed to load user profile');
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   // Load CVs on component mount
   useEffect(() => {
@@ -195,7 +217,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (!user || !user.candidateProfile) {
+  if (loadingUser || !user) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -203,20 +225,23 @@ export default function ProfilePage() {
             <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
             </div>
-            <p className="text-gray-600">Loading profile...</p>
+            <p className="text-gray-600">
+              {userError ? `Error: ${userError}` : 'Loading profile...'}
+            </p>
           </div>
         </div>
       </div>
     );
   }
 
-  const profile = user.candidateProfile;
-  const fullName = user.name || `${profile.firstName} ${profile.lastName}`.trim();
-  const initials = fullName.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+  // user is now the CandidateProfile directly
+  const profile = user;
+  const fullName = `${profile.firstName} ${profile.lastName}`.trim() || profile.email;
+  const initials = fullName.split(' ').map((n: string) => n.charAt(0)).join('').toUpperCase();
 
   // Calculate profile completeness
   const completedFields = [
-    !!user.name,
+    !!profile.firstName,
     profile.email,
     profile.phone && profile.phone !== "a", // Exclude placeholder phone
     profile.profileSummary && !profile.profileSummary.includes("CV parsing failed"),
@@ -237,7 +262,7 @@ export default function ProfilePage() {
   const completeness = Math.round((completedFields / totalFields) * 100);
 
   // Format join date
-  const joinDate = new Date(user.createdAt || "").toLocaleDateString("en-US", {
+  const joinDate = new Date(profile.createdAt || "").toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
   });
@@ -853,7 +878,7 @@ export default function ProfilePage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                  { label: "Name provided", completed: !!user.name },
+                  { label: "First name provided", completed: !!profile.firstName },
                   { label: "Email provided", completed: !!profile.email },
                   { label: "Phone number added", completed: profile.phone && profile.phone !== "a" },
                   { label: "Professional summary added", completed: profile.profileSummary && !profile.profileSummary.includes("CV parsing failed") },

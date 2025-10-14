@@ -5,7 +5,7 @@ import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 interface UserData {
   name?: string;
-  avatar?: string;
+  avatar?: string | undefined;
 }
 
 interface UserProfileSectionProps {
@@ -33,7 +33,7 @@ export default function UserProfileSection({ userData, onLogout }: UserProfileSe
         </div>
         <div className="text-center">
           <p className="text-xs font-medium text-gray-900 truncate max-w-full">
-            {userData.name || "User"}
+            {userData.name || "Loading..."}
           </p>
         </div>
       </div>

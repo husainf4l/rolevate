@@ -125,11 +125,10 @@ export default function SavedJobsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0fc4b5] mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your saved jobs...</p>
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
           </div>
         </div>
       </div>
@@ -138,8 +137,8 @@ export default function SavedJobsPage() {
 
   if (error) {
     return (
-      <div className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h3 className="text-lg font-medium text-red-800 mb-2">
               Error Loading Saved Jobs
@@ -151,18 +150,28 @@ export default function SavedJobsPage() {
     );
   }
   return (
-    <div className="flex-1 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Saved Jobs</h1>
-          <p className="text-gray-600">
-            Keep track of interesting opportunities you want to apply to later.
-          </p>
+    <div className="min-h-screen">
+      {/* Header */}
+      <div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center mb-4">
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+              Saved{" "}
+              <span className="text-primary-600">
+                Jobs
+              </span>
+            </h1>
+            <p className="font-text text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+              Keep track of interesting opportunities you want to apply to later
+            </p>
+          </div>
         </div>
+      </div>
 
+      {/* Jobs Content */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -396,4 +405,3 @@ export default function SavedJobsPage() {
     </div>
   );
 }
-

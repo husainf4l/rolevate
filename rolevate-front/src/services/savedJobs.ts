@@ -70,14 +70,27 @@ export async function getSavedJobs(): Promise<SavedJobResponse[]> {
     });
 
     if (!res.ok) {
+      // If 404, treat as no saved jobs
+      if (res.status === 404) {
+        return [];
+      }
       const error = await res.json().catch(() => ({}));
       throw new Error(error?.message || error?.error || "Failed to get saved jobs");
     }
 
-    return await res.json();
+    const data = await res.json();
+    
+    // Ensure we always return an array
+    if (!Array.isArray(data)) {
+      console.warn("getSavedJobs API returned non-array:", data);
+      return [];
+    }
+    
+    return data;
   } catch (error) {
     console.error("Get saved jobs failed:", error);
-    throw error;
+    // Return empty array instead of throwing to prevent crashes
+    return [];
   }
 }
 
