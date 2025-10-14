@@ -296,7 +296,7 @@ export default function Header({
                     className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors"
                     onClick={() => setMenuOpen((v) => !v)}
                   >
-                    <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center overflow-hidden">
+                    <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center overflow-hidden">
                       {user?.avatar ? (
                         <img
                           src={
@@ -453,7 +453,7 @@ export default function Header({
                   className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                   onClick={() => setMenuOpen((v) => !v)}
                 >
-                  <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center overflow-hidden">
                     {user?.avatar ? (
                       <img
                         src={

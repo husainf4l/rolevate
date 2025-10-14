@@ -52,12 +52,7 @@ const config: Config = {
         '6xl': ['3.75rem', { lineHeight: '1', letterSpacing: '-0.04em' }],
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(90deg, #0891b2 0%, #334155 100%)',
-        'brand-gradient-reverse': 'linear-gradient(90deg, #334155 0%, #0891b2 100%)',
-        'brand-gradient-subtle': 'linear-gradient(90deg, #0891b2 0%, #13ead9 100%)',
-        'teal-gradient': 'linear-gradient(90deg, #13ead9 0%, #0891b2 100%)',
-        'teal-gradient-light': 'linear-gradient(90deg, #13ead9 0%, #14b8a6 100%)',
-        'teal-gradient-radial': 'radial-gradient(circle, #13ead9 0%, #0891b2 100%)',
+        // Removed gradient backgrounds, using solid colors instead
       },
       spacing: {
         '18': '4.5rem',

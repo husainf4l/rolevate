@@ -168,10 +168,4 @@ a:focus-visible,
   }
 }
 
-/* Text gradient utility */
-.text-gradient-teal {
-  background: linear-gradient(90deg, #13ead9, #0891b2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* Removed text gradient utility, using solid colors instead */

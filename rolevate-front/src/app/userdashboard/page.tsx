@@ -8,6 +8,7 @@ import UserUpcomingInterviews, { Interview } from "@/components/dashboard/UserUp
 import UserQuickActions from "@/components/dashboard/UserQuickActions";
 import UserProfileCompletionWidget from "@/components/dashboard/UserProfileCompletionWidget";
 import { getCandidateApplications, Application } from "@/services/application";
+import { ProfileService, CandidateProfile } from "@/services/profile";
 import { motion } from "framer-motion";
 
 export default function UserDashboardPage() {
@@ -15,6 +16,7 @@ export default function UserDashboardPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [upcomingInterviews, setUpcomingInterviews] = useState<Interview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<CandidateProfile | null>(null);
 
   // Calculate stats from applications
   const stats = {
@@ -33,25 +35,26 @@ export default function UserDashboardPage() {
   };
 
   // Profile completion sections
+  const currentProfile = profile || user?.candidateProfile;
   const profileSections = [
     {
       label: "Add Resume/CV",
-      completed: !!user?.candidateProfile?.resumeUrl,
+      completed: !!currentProfile?.resumeUrl,
       href: "/userdashboard/profile?tab=resume",
     },
     {
       label: "Complete Work Experience",
-      completed: (user?.candidateProfile?.workExperiences?.length || 0) > 0,
+      completed: (currentProfile?.workExperiences?.length || 0) > 0,
       href: "/userdashboard/profile?tab=experience",
     },
     {
       label: "Add Skills",
-      completed: (user?.candidateProfile?.skills?.length || 0) > 0,
+      completed: (currentProfile?.skills?.length || 0) > 0,
       href: "/userdashboard/profile?tab=skills",
     },
     {
       label: "Add Education",
-      completed: (user?.candidateProfile?.educationHistory?.length || 0) > 0,
+      completed: (currentProfile?.educationHistory?.length || 0) > 0,
       href: "/userdashboard/profile?tab=education",
     },
     {
@@ -73,6 +76,10 @@ export default function UserDashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+
+      // Fetch profile
+      const profileData = await ProfileService.getUserProfile();
+      setProfile(profileData);
 
       // Fetch applications
       const applicationsData = await getCandidateApplications();
@@ -110,14 +117,36 @@ export default function UserDashboardPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
+          className="bg-white rounded-sm p-6 border border-gray-200 shadow-sm"
         >
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.candidateProfile?.firstName || user?.name || "Candidate"}! 👋
+            Welcome back, {user?.candidateProfile?.firstName || user?.name || "Candidate"}! 
           </h1>
           <p className="text-gray-600">
             Here's what's happening with your job search today.
           </p>
+        </motion.div>
+
+        {/* Modern Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="bg-[url('/images/cv.jpg')] bg-cover bg-center rounded-xl p-6 text-white shadow-lg relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-xl"></div>
+          <div className="text-center relative z-10">
+            <h2 className="text-2xl font-bold mb-3 drop-shadow-lg">Need a new CV?</h2>
+            <p className="text-lg text-gray-100 mb-6 drop-shadow-md">Try our partners at rolegrow.com</p>
+            <a
+              href="https://rolegrow.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-primary-600 text-white px-8 py-3 rounded-sm font-semibold hover:bg-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              Visit rolegrow.com
+            </a>
+          </div>
         </motion.div>
 
         {/* Stats Cards */}
