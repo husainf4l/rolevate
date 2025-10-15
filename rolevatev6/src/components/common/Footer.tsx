@@ -1,0 +1,100 @@
+import React from "react";
+import Logo from "./Logo";
+
+const footerLinks = [
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms of Service", href: "/terms-of-service" },
+      { label: "Data Deletion", href: "/data-deletion" },
+      { label: "Security", href: "/security" },
+    ],
+  },
+];
+
+export default function Footer() {
+  return (
+    <footer className="w-full border-t border-gray-200/60 bg-white/80 backdrop-blur-sm pt-8 pb-6 mt-12">
+      <div className="container mx-auto px-6 md:px-12">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 md:gap-6">
+          {/* Logo and Description */}
+          <div className="flex-1 min-w-[200px] mb-6 md:mb-0">
+            <Logo size={70} />
+            <p className="text-gray-500 text-sm max-w-xs mb-4 mt-3 leading-relaxed">
+              AI-powered recruitment platform for the Middle East. Elevate your
+              hiring and career with intelligent automation.
+            </p>
+            <div className="flex gap-4 mt-4">
+              <a
+                href="#"
+                aria-label="LinkedIn"
+                className="text-cyan-600 hover:text-cyan-700 transition-colors duration-200"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0H5a5 5 0 00-5 5v14a5 5 0 005 5h14a5 5 0 005-5V5a5 5 0 00-5-5zM8 19H5V8h3v11zM6.5 6.732c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zM20 19h-3v-5.604c0-3.368-4-3.113-4 0V19h-3V8h3v1.765c1.396-2.586 7-2.777 7 2.476V19z"/>
+                </svg>
+              </a>
+              <a
+                href="#"
+                aria-label="X (Twitter)"
+                className="text-cyan-600 hover:text-cyan-700 transition-colors duration-200"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="text-cyan-600 hover:text-cyan-700 transition-colors duration-200"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+          
+          {/* Link Sections */}
+          <div className="flex flex-1 flex-wrap gap-8 md:gap-12 justify-start md:justify-end">
+            {footerLinks.map((section) => (
+              <div key={section.title} className="min-w-[120px]">
+                <div className="text-xs font-semibold text-gray-900 mb-4 uppercase tracking-wider">
+                  {section.title}
+                </div>
+                <ul className="space-y-2">
+                  {section.links.map((link) => (
+                    <li key={link.label}>
+                      <a
+                        href={link.href}
+                        className="text-gray-600 hover:text-cyan-600 transition-colors duration-200 text-sm font-medium"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="mt-8 pt-4 border-t border-gray-200/50">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 font-medium">
+              &copy; {new Date().getFullYear()} Rolevate. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

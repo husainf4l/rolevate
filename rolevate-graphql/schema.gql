@@ -1,0 +1,61 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  isActive: Boolean!
+  phoneNumber: String
+  profilePicture: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""User role type - candidate or business"""
+enum UserRole {
+  CANDIDATE
+  BUSINESS
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type AuthResponse {
+  accessToken: String!
+  user: User!
+}
+
+type RegisterResponse {
+  message: String!
+  user: User!
+}
+
+type Query {
+  hello: String!
+  user(id: String!): User
+}
+
+type Mutation {
+  register(input: RegisterInput!): RegisterResponse!
+  login(input: LoginInput!): AuthResponse!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  phoneNumber: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}

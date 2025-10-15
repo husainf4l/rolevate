@@ -1,0 +1,48 @@
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { InterviewService } from './interview.service';
+import { Interview } from './interview.entity';
+import { CreateInterviewInput } from './create-interview.input';
+import { UpdateInterviewInput } from './update-interview.input';
+
+@Resolver(() => Interview)
+export class InterviewResolver {
+  constructor(private readonly interviewService: InterviewService) {}
+
+  @Mutation(() => Interview)
+  async createInterview(@Args('input') createInterviewInput: CreateInterviewInput): Promise<Interview> {
+    return this.interviewService.create(createInterviewInput);
+  }
+
+  @Query(() => [Interview], { name: 'interviews' })
+  async findAll(): Promise<Interview[]> {
+    return this.interviewService.findAll();
+  }
+
+  @Query(() => Interview, { name: 'interview', nullable: true })
+  async findOne(@Args('id', { type: () => ID }) id: string): Promise<Interview | null> {
+    return this.interviewService.findOne(id);
+  }
+
+  @Query(() => [Interview], { name: 'interviewsByApplication' })
+  async findByApplicationId(@Args('applicationId', { type: () => ID }) applicationId: string): Promise<Interview[]> {
+    return this.interviewService.findByApplicationId(applicationId);
+  }
+
+  @Query(() => [Interview], { name: 'interviewsByInterviewer' })
+  async findByInterviewerId(@Args('interviewerId', { type: () => ID }) interviewerId: string): Promise<Interview[]> {
+    return this.interviewService.findByInterviewerId(interviewerId);
+  }
+
+  @Mutation(() => Interview, { nullable: true })
+  async updateInterview(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('input') updateInterviewInput: UpdateInterviewInput,
+  ): Promise<Interview | null> {
+    return this.interviewService.update(id, updateInterviewInput);
+  }
+
+  @Mutation(() => Boolean)
+  async removeInterview(@Args('id', { type: () => ID }) id: string): Promise<boolean> {
+    return this.interviewService.remove(id);
+  }
+}
