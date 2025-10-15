@@ -11,6 +11,9 @@ from app.config import settings
 import datetime
 import os
 
+# Import utility tools
+from app.agent.tools.formatting_tools import DateFormattingTool, PhoneFormattingTool
+
 
 class TemplateRenderer:
     """Render CV templates with structured data"""
@@ -36,42 +39,12 @@ class TemplateRenderer:
         self.jinja_env.filters['split_skills'] = self.split_skills_by_category
     
     def format_date(self, date_str: str) -> str:
-        """Format date string for display"""
-        if not date_str:
-            return ""
-        
-        try:
-            # Handle various date formats
-            if len(date_str) == 4:  # Year only
-                return date_str
-            elif "-" in date_str:
-                return date_str.replace("-", "/")
-            else:
-                return date_str
-        except:
-            return date_str
+        """Format date string for display using utility tool"""
+        return DateFormattingTool.format_date(date_str)
     
     def format_duration(self, start_date: str, end_date: str) -> str:
-        """Calculate and format duration between dates"""
-        if not start_date:
-            return ""
-        
-        if not end_date or end_date.lower() in ["current", "present", "now"]:
-            end_date = str(datetime.datetime.now().year)
-        
-        try:
-            start_year = int(start_date[:4]) if start_date else 0
-            end_year = int(end_date[:4]) if end_date else datetime.datetime.now().year
-            
-            duration = end_year - start_year
-            if duration <= 0:
-                return ""
-            elif duration == 1:
-                return "1 year"
-            else:
-                return f"{duration} years"
-        except:
-            return ""
+        """Calculate and format duration between dates using utility tool"""
+        return DateFormattingTool.format_duration(start_date, end_date)
     
     def split_skills_by_category(self, skills: list) -> Dict[str, list]:
         """Group skills by category"""

@@ -1,0 +1,25 @@
+============================================================
+CV BUILDER AI - TEST REPORT SUMMARY
+============================================================
+Generated: 2025-10-15 09:51:45
+
+NODE TESTS:
+  input_node: ✅ PASS
+  data_cleaner_node: ✅ PASS
+  content_writer_node: ✅ PASS
+  section_ranker_node: ✅ PASS
+  template_selector_node: ✅ PASS
+  pdf_renderer_node: ✅ PASS
+  optimizer_node: ✅ PASS
+  storage_node: ✅ PASS
+
+WORKFLOW TESTS:
+  Complete Workflow: ✅ PASS (17.91s)
+  Chat Interface: ✅ PASS
+
+PERFORMANCE:
+  Average Execution Time: 14.32s
+  Memory Usage: 270.2 MB
+
+📊 Full report saved to: /home/dev/Desktop/rolevate/rolevate-agent/test_report.json
+============================================================
