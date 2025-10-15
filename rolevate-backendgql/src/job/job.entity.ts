@@ -33,6 +33,22 @@ export enum JobStatus {
   DELETED = 'DELETED',
 }
 
+registerEnumType(JobType, {
+  name: 'JobType',
+});
+
+registerEnumType(JobLevel, {
+  name: 'JobLevel',
+});
+
+registerEnumType(WorkType, {
+  name: 'WorkType',
+});
+
+registerEnumType(JobStatus, {
+  name: 'JobStatus',
+});
+
 @Entity()
 @ObjectType()
 export class Job {

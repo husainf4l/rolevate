@@ -3,10 +3,18 @@ import { User } from '../user/user.entity';
 import { createId } from '@paralleldrive/cuid2';
 
 export enum NotificationType {
-  JOB_APPLICATION = 'JOB_APPLICATION',
-  JOB_UPDATE = 'JOB_UPDATE',
+  SUCCESS = 'SUCCESS',
+  WARNING = 'WARNING',
+  INFO = 'INFO',
+  ERROR = 'ERROR',
+}
+
+export enum NotificationCategory {
+  APPLICATION = 'APPLICATION',
+  INTERVIEW = 'INTERVIEW',
   SYSTEM = 'SYSTEM',
-  MARKETING = 'MARKETING',
+  CANDIDATE = 'CANDIDATE',
+  OFFER = 'OFFER',
 }
 
 @Entity()
@@ -23,12 +31,18 @@ export class Notification {
   @Column({
     type: 'enum',
     enum: NotificationType,
-    default: NotificationType.SYSTEM,
+    default: NotificationType.INFO,
   })
   type: NotificationType;
 
+  @Column({
+    type: 'enum',
+    enum: NotificationCategory,
+  })
+  category: NotificationCategory;
+
   @Column({ default: false })
-  isRead: boolean;
+  read: boolean;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

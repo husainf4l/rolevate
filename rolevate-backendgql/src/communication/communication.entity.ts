@@ -10,8 +10,28 @@ export enum CommunicationType {
   IN_APP = 'IN_APP',
 }
 
+export enum CommunicationDirection {
+  INBOUND = 'INBOUND',
+  OUTBOUND = 'OUTBOUND',
+}
+
+export enum CommunicationStatus {
+  SENT = 'SENT',
+  DELIVERED = 'DELIVERED',
+  READ = 'READ',
+  FAILED = 'FAILED',
+}
+
 registerEnumType(CommunicationType, {
   name: 'CommunicationType',
+});
+
+registerEnumType(CommunicationDirection, {
+  name: 'CommunicationDirection',
+});
+
+registerEnumType(CommunicationStatus, {
+  name: 'CommunicationStatus',
 });
 
 @Entity()
@@ -21,29 +41,26 @@ export class Communication {
   @Field(() => ID)
   id: string;
 
-  @Column()
-  applicationId: string;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  candidateId?: string;
 
-  @ManyToOne(() => Application)
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  companyId?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  jobId?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  applicationId?: string;
+
+  @ManyToOne(() => Application, { nullable: true })
   @JoinColumn({ name: 'applicationId' })
-  @Field(() => Application)
-  application: Application;
-
-  @Column()
-  senderId: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'senderId' })
-  @Field(() => User)
-  sender: User;
-
-  @Column()
-  recipientId: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'recipientId' })
-  @Field(() => User)
-  recipient: User;
+  @Field(() => Application, { nullable: true })
+  application?: Application;
 
   @Column({
     type: 'enum',
@@ -52,17 +69,40 @@ export class Communication {
   @Field(() => CommunicationType)
   type: CommunicationType;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  subject?: string;
+  @Column({
+    type: 'enum',
+    enum: CommunicationDirection,
+  })
+  @Field(() => CommunicationDirection)
+  direction: CommunicationDirection;
 
   @Column('text')
   @Field()
-  message: string;
+  content: string;
 
-  @Column({ default: false })
-  @Field()
-  isRead: boolean;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  phoneNumber?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  whatsappId?: string;
+
+  @Column({
+    type: 'enum',
+    enum: CommunicationStatus,
+    default: CommunicationStatus.SENT,
+  })
+  @Field(() => CommunicationStatus)
+  status: CommunicationStatus;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  templateName?: string;
+
+  @Column('json', { nullable: true })
+  @Field(() => [String], { nullable: true })
+  templateParams?: string[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   @Field()

@@ -1,39 +1,86 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Communication } from './communication.entity';
+import { Communication, CommunicationType, CommunicationDirection, CommunicationStatus } from './communication.entity';
 import { CreateCommunicationInput } from './create-communication.input';
 import { UpdateCommunicationInput } from './update-communication.input';
+import { WhatsAppService } from '../whatsapp/whatsapp.service';
 
 @Injectable()
 export class CommunicationService {
   constructor(
     @InjectRepository(Communication)
     private communicationRepository: Repository<Communication>,
+    private readonly whatsappService: WhatsAppService,
   ) {}
 
   async create(createCommunicationInput: CreateCommunicationInput): Promise<Communication> {
-    const communication = this.communicationRepository.create(createCommunicationInput);
+    let whatsappId: string | undefined;
+    let communicationStatus: CommunicationStatus = CommunicationStatus.SENT;
+
+    // If it's a WhatsApp message and direction is OUTBOUND, actually send it
+    if (createCommunicationInput.type === CommunicationType.WHATSAPP && createCommunicationInput.direction === CommunicationDirection.OUTBOUND) {
+      try {
+        if (!createCommunicationInput.phoneNumber) {
+          throw new Error('Phone number is required for WhatsApp messages');
+        }
+
+        console.log(`Sending WhatsApp message to ${createCommunicationInput.phoneNumber}: ${createCommunicationInput.content}`);
+
+        let whatsappResult;
+
+        if (createCommunicationInput.templateName) {
+          // Send template message with parameters
+          console.log(`Using template: ${createCommunicationInput.templateName} with params:`, createCommunicationInput.templateParams);
+          whatsappResult = await this.whatsappService.sendTemplateMessage(
+            createCommunicationInput.phoneNumber,
+            createCommunicationInput.templateName,
+            undefined, // Auto-detect language
+            createCommunicationInput.templateParams
+          );
+        } else {
+          // Send regular text message
+          whatsappResult = await this.whatsappService.sendTextMessage(
+            createCommunicationInput.phoneNumber,
+            createCommunicationInput.content
+          );
+        }
+
+        whatsappId = whatsappResult.messages?.[0]?.id;
+        console.log(`WhatsApp message sent successfully. Message ID: ${whatsappId}`);
+
+      } catch (error) {
+        console.error('Failed to send WhatsApp message:', error.message);
+        communicationStatus = CommunicationStatus.FAILED;
+        // Continue to create the record but mark as failed
+      }
+    }
+
+    const communication = this.communicationRepository.create({
+      ...createCommunicationInput,
+      status: communicationStatus,
+      whatsappId,
+    });
     return this.communicationRepository.save(communication);
   }
 
   async findAll(): Promise<Communication[]> {
     return this.communicationRepository.find({
-      relations: ['application', 'sender', 'recipient'],
+      relations: ['application'],
     });
   }
 
   async findOne(id: string): Promise<Communication | null> {
     return this.communicationRepository.findOne({
       where: { id },
-      relations: ['application', 'sender', 'recipient'],
+      relations: ['application'],
     });
   }
 
   async findByApplicationId(applicationId: string): Promise<Communication[]> {
     return this.communicationRepository.find({
       where: { applicationId },
-      relations: ['application', 'sender', 'recipient'],
+      relations: ['application'],
     });
   }
 
@@ -41,9 +88,7 @@ export class CommunicationService {
     return this.communicationRepository
       .createQueryBuilder('communication')
       .leftJoinAndSelect('communication.application', 'application')
-      .leftJoinAndSelect('communication.sender', 'sender')
-      .leftJoinAndSelect('communication.recipient', 'recipient')
-      .where('communication.senderId = :userId OR communication.recipientId = :userId', { userId })
+      .where('communication.candidateId = :userId OR communication.companyId = :userId', { userId })
       .getMany();
   }
 
@@ -58,7 +103,7 @@ export class CommunicationService {
   }
 
   async markAsRead(id: string): Promise<Communication | null> {
-    await this.communicationRepository.update(id, { isRead: true });
+    await this.communicationRepository.update(id, { status: CommunicationStatus.READ });
     return this.findOne(id);
   }
 }

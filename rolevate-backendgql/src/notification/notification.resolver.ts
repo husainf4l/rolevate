@@ -2,7 +2,6 @@ import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { NotificationDto } from './notification.dto';
-import { NotificationListDto } from './notification-list.dto';
 import { CreateNotificationInput } from './create-notification.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
@@ -21,20 +20,17 @@ export class NotificationResolver {
     return this.notificationService.createNotification(input);
   }
 
-  @Query(() => NotificationListDto)
+  @Query(() => [NotificationDto])
   @UseGuards(JwtAuthGuard)
   async myNotifications(
     @Context() context: any,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('offset', { type: () => Int, nullable: true }) offset?: number,
     @Args('unreadOnly', { nullable: true }) unreadOnly?: boolean,
-  ): Promise<NotificationListDto> {
+  ): Promise<NotificationDto[]> {
     const userId = context.req.user.id;
     const result = await this.notificationService.findAllByUser(userId, { limit, offset, unreadOnly });
-    return {
-      notifications: result.notifications,
-      total: result.total,
-    };
+    return result.notifications;
   }
 
   @Query(() => Int)

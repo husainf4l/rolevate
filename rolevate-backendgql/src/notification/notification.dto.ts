@@ -1,9 +1,13 @@
 import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
-import { NotificationType } from './notification.entity';
+import { NotificationType, NotificationCategory } from './notification.entity';
 
 registerEnumType(NotificationType, {
   name: 'NotificationType',
+});
+
+registerEnumType(NotificationCategory, {
+  name: 'NotificationCategory',
 });
 
 @ObjectType()
@@ -20,8 +24,11 @@ export class NotificationDto {
   @Field(() => NotificationType)
   type: NotificationType;
 
+  @Field(() => NotificationCategory)
+  category: NotificationCategory;
+
   @Field()
-  isRead: boolean;
+  read: boolean;
 
   @Field()
   createdAt: Date;

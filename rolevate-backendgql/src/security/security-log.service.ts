@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SecurityLog, SecurityAction } from './security-log.entity';
+import { SecurityLog } from './security-log.entity';
 import { CreateSecurityLogInput } from './create-security-log.input';
 
 @Injectable()
@@ -17,36 +17,30 @@ export class SecurityLogService {
   }
 
   async findAll(): Promise<SecurityLog[]> {
-    return this.securityLogRepository.find({
-      relations: ['user'],
-    });
+    return this.securityLogRepository.find();
   }
 
   async findOne(id: string): Promise<SecurityLog | null> {
     return this.securityLogRepository.findOne({
       where: { id },
-      relations: ['user'],
     });
   }
 
   async findByUserId(userId: string): Promise<SecurityLog[]> {
     return this.securityLogRepository.find({
       where: { userId },
-      relations: ['user'],
     });
   }
 
-  async findByAction(action: SecurityAction): Promise<SecurityLog[]> {
+  async findByType(type: string): Promise<SecurityLog[]> {
     return this.securityLogRepository.find({
-      where: { action },
-      relations: ['user'],
+      where: { type },
     });
   }
 
-  async findByResource(resource: string): Promise<SecurityLog[]> {
+  async findBySeverity(severity: string): Promise<SecurityLog[]> {
     return this.securityLogRepository.find({
-      where: { resource },
-      relations: ['user'],
+      where: { severity },
     });
   }
 

@@ -1,26 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, BeforeInsert } from 'typeorm';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { GraphQLJSONObject } from 'graphql-type-json';
 import { Report } from './report.entity';
 import { User } from '../user/user.entity';
-
-export enum ReportAction {
-  CREATED = 'CREATED',
-  UPDATED = 'UPDATED',
-  DELETED = 'DELETED',
-  VIEWED = 'VIEWED',
-  SHARED = 'SHARED',
-  DOWNLOADED = 'DOWNLOADED',
-  EXPORTED = 'EXPORTED',
-}
-
-registerEnumType(ReportAction, {
-  name: 'ReportAction',
-});
+import { AuditAction } from './report.enums';
+import { createId } from '@paralleldrive/cuid2';
 
 @Entity()
 @ObjectType()
 export class ReportAuditLog {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   @Field(() => ID)
   id: string;
 
@@ -32,34 +21,63 @@ export class ReportAuditLog {
   @Field(() => Report)
   report: Report;
 
-  @Column()
-  userId: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  @Field(() => User)
-  user: User;
-
   @Column({
     type: 'enum',
-    enum: ReportAction,
+    enum: AuditAction,
   })
-  @Field(() => ReportAction)
-  action: ReportAction;
+  @Field(() => AuditAction)
+  action: AuditAction;
 
-  @Column('text', { nullable: true })
+  @Column('json', { nullable: true })
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  details?: Record<string, any>;
+
+  @Column({ default: true })
+  @Field()
+  success: boolean;
+
+  @Column({ length: 30, nullable: true })
   @Field({ nullable: true })
-  details?: string;
+  userId?: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
+  @Field({ nullable: true })
+  sessionId?: string;
+
+  @Column({ length: 45, nullable: true })
   @Field({ nullable: true })
   ipAddress?: string;
 
-  @Column('text', { nullable: true })
+  @Column({ length: 500, nullable: true })
   @Field({ nullable: true })
   userAgent?: string;
+
+  @Column({ length: 50, nullable: true })
+  @Field({ nullable: true })
+  requestId?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  duration?: number;
+
+  @Column('json', { nullable: true })
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  oldValues?: Record<string, any>;
+
+  @Column('json', { nullable: true })
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  newValues?: Record<string, any>;
+
+  @Column({ length: 10, default: 'LOW' })
+  @Field()
+  riskLevel: string;
 
   @CreateDateColumn()
   @Field()
   createdAt: Date;
+
+  @BeforeInsert()
+  generateId() {
+    this.id = createId();
+  }
 }

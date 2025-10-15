@@ -15,6 +15,9 @@ import { InterviewModule } from './interview/interview.module';
 import { CommunicationModule } from './communication/communication.module';
 import { ReportModule } from './report/report.module';
 import { SecurityModule } from './security/security.module';
+import { WhatsAppModule } from './whatsapp/whatsapp.module';
+import { ServicesModule } from './services/services.module';
+import { LiveKitModule } from './livekit/livekit.module';
 import { AuditService } from './audit.service';
 
 @Module({
@@ -61,6 +64,9 @@ import { AuditService } from './audit.service';
     CommunicationModule,
     ReportModule,
     SecurityModule,
+    WhatsAppModule,
+    ServicesModule,
+    LiveKitModule,
   ],
   providers: [AuditService],
 })

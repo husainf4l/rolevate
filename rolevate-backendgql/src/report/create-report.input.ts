@@ -1,6 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { GraphQLJSONObject } from 'graphql-type-json';
-import { ReportType, ReportStatus } from './report.entity';
+import { ReportType, ReportCategory, ReportFormat, ReportScope, ReportPriority, ReportDataSource } from './report.enums';
 
 @InputType()
 export class CreateReportInput {
@@ -13,24 +12,54 @@ export class CreateReportInput {
   @Field(() => ReportType)
   type: ReportType;
 
-  @Field()
-  userId: string;
+  @Field(() => ReportCategory)
+  category: ReportCategory;
+
+  @Field(() => ReportFormat, { nullable: true })
+  format?: ReportFormat;
+
+  @Field(() => ReportScope, { nullable: true })
+  scope?: ReportScope;
+
+  @Field(() => ReportPriority, { nullable: true })
+  priority?: ReportPriority;
+
+  @Field({ nullable: true })
+  query?: string;
+
+  @Field(() => ReportDataSource, { nullable: true })
+  dataSource?: ReportDataSource;
+
+  @Field({ nullable: true })
+  filters?: string; // JSON string
+
+  @Field({ nullable: true })
+  parameters?: string; // JSON string
+
+  @Field({ nullable: true })
+  config?: string; // JSON string
+
+  @Field({ nullable: true })
+  maxExecutionTime?: number;
+
+  @Field({ nullable: true })
+  templateId?: string;
 
   @Field({ nullable: true })
   companyId?: string;
 
-  @Field(() => GraphQLJSONObject)
-  config: any;
-
-  @Field(() => GraphQLJSONObject, { nullable: true })
-  data?: any;
-
   @Field({ nullable: true })
-  generatedAt?: Date;
+  userId?: string;
 
   @Field({ nullable: true })
   expiresAt?: Date;
 
-  @Field(() => ReportStatus, { nullable: true })
-  status?: ReportStatus;
+  @Field({ nullable: true })
+  autoDelete?: boolean;
+
+  @Field({ nullable: true })
+  isPublic?: boolean;
+
+  @Field(() => [String], { nullable: true })
+  tags?: string[];
 }

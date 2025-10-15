@@ -1,11 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, BeforeInsert } from 'typeorm';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { GraphQLJSONObject } from 'graphql-type-json';
 import { Report } from './report.entity';
+import { ReportMetricType } from './report.enums';
+import { ReportTemplate } from './report-template.entity';
+import { createId } from '@paralleldrive/cuid2';
 
 @Entity()
 @ObjectType()
 export class ReportMetrics {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   @Field(() => ID)
   id: string;
 
@@ -25,19 +29,31 @@ export class ReportMetrics {
   @Field()
   metricValue: number;
 
+  @Column({
+    type: 'enum',
+    enum: ReportMetricType,
+  })
+  @Field(() => ReportMetricType)
+  metricType: ReportMetricType;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
-  metricUnit?: string;
+  dimension?: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
   period?: string;
 
+  @Column('json', { nullable: true })
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  metadata?: Record<string, any>;
+
   @CreateDateColumn()
   @Field()
   createdAt: Date;
 
-  @UpdateDateColumn()
-  @Field()
-  updatedAt: Date;
+  @BeforeInsert()
+  generateId() {
+    this.id = createId();
+  }
 }

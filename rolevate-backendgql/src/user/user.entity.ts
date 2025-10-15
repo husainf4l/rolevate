@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryColumn, BeforeInsert, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryColumn, BeforeInsert, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import { createId } from '@paralleldrive/cuid2';
 import { Company } from '../company/company.entity';
+import { CandidateProfile } from '../candidate/candidate-profile.entity';
 
 export enum UserType {
   SYSTEM = 'SYSTEM',
@@ -58,6 +59,10 @@ export class User {
   @JoinColumn({ name: 'companyId' })
   @Field(() => Company, { nullable: true })
   company?: Company;
+
+  @OneToOne(() => CandidateProfile, { nullable: true })
+  @Field(() => CandidateProfile, { nullable: true })
+  candidateProfile?: CandidateProfile;
 
   // Note: Relations will be added when related entities are created
   // refreshTokens, candidateProfile, applicationNotes, notifications, reports, etc.

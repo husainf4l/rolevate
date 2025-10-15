@@ -3,6 +3,7 @@ import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { Job } from '../job/job.entity';
 import { User } from '../user/user.entity';
+import { CandidateProfile } from '../candidate/candidate-profile.entity';
 import { ApplicationNote } from './application-note.entity';
 
 export enum ApplicationStatus {
@@ -42,6 +43,11 @@ export class Application {
   @JoinColumn({ name: 'candidateId' })
   @Field(() => User)
   candidate: User;
+
+  @ManyToOne(() => CandidateProfile)
+  @JoinColumn({ name: 'candidateId' })
+  @Field(() => CandidateProfile)
+  candidateProfile: CandidateProfile;
 
   @Column({
     type: 'enum',

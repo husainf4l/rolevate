@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { SecurityLogService } from './security-log.service';
-import { SecurityLog, SecurityAction } from './security-log.entity';
+import { SecurityLog } from './security-log.entity';
 import { CreateSecurityLogInput } from './create-security-log.input';
 
 @Resolver(() => SecurityLog)
@@ -27,14 +27,14 @@ export class SecurityLogResolver {
     return this.securityLogService.findByUserId(userId);
   }
 
-  @Query(() => [SecurityLog], { name: 'securityLogsByAction' })
-  async findByAction(@Args('action', { type: () => SecurityAction }) action: SecurityAction): Promise<SecurityLog[]> {
-    return this.securityLogService.findByAction(action);
+  @Query(() => [SecurityLog], { name: 'securityLogsByType' })
+  async findByType(@Args('type') type: string): Promise<SecurityLog[]> {
+    return this.securityLogService.findByType(type);
   }
 
-  @Query(() => [SecurityLog], { name: 'securityLogsByResource' })
-  async findByResource(@Args('resource') resource: string): Promise<SecurityLog[]> {
-    return this.securityLogService.findByResource(resource);
+  @Query(() => [SecurityLog], { name: 'securityLogsBySeverity' })
+  async findBySeverity(@Args('severity') severity: string): Promise<SecurityLog[]> {
+    return this.securityLogService.findBySeverity(severity);
   }
 
   @Mutation(() => Boolean)

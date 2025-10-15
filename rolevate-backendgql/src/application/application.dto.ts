@@ -88,3 +88,44 @@ export class ApplicationDto {
   @Field()
   updatedAt: Date;
 }
+
+@ObjectType()
+export class CVAnalysisResultDto {
+  @Field()
+  score: number;
+
+  @Field()
+  summary: string;
+
+  @Field(() => [String])
+  strengths: string[];
+
+  @Field(() => [String])
+  weaknesses: string[];
+
+  @Field(() => [String])
+  recommendations: string[];
+
+  @Field(() => GraphQLJSONObject)
+  skillsMatch: {
+    matched: string[];
+    missing: string[];
+    percentage: number;
+  };
+
+  @Field(() => GraphQLJSONObject)
+  experienceMatch: {
+    relevant: boolean;
+    years: number;
+    details: string;
+  };
+
+  @Field(() => GraphQLJSONObject)
+  educationMatch: {
+    relevant: boolean;
+    details: string;
+  };
+
+  @Field()
+  overallFit: string;
+}

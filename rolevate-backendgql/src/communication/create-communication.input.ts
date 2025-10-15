@@ -1,26 +1,35 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { CommunicationType } from './communication.entity';
+import { CommunicationType, CommunicationDirection } from './communication.entity';
 
 @InputType()
 export class CreateCommunicationInput {
-  @Field()
-  applicationId: string;
+  @Field({ nullable: true })
+  candidateId?: string;
 
-  @Field()
-  senderId: string;
+  @Field({ nullable: true })
+  companyId?: string;
 
-  @Field()
-  recipientId: string;
+  @Field({ nullable: true })
+  jobId?: string;
+
+  @Field({ nullable: true })
+  applicationId?: string;
 
   @Field(() => CommunicationType)
   type: CommunicationType;
 
-  @Field({ nullable: true })
-  subject?: string;
+  @Field(() => CommunicationDirection)
+  direction: CommunicationDirection;
 
   @Field()
-  message: string;
+  content: string;
 
   @Field({ nullable: true })
-  isRead?: boolean;
+  phoneNumber?: string;
+
+  @Field({ nullable: true })
+  templateName?: string;
+
+  @Field(() => [String], { nullable: true })
+  templateParams?: string[];
 }

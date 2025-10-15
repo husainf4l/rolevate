@@ -3,6 +3,7 @@ import { InterviewService } from './interview.service';
 import { Interview } from './interview.entity';
 import { CreateInterviewInput } from './create-interview.input';
 import { UpdateInterviewInput } from './update-interview.input';
+import { SubmitInterviewFeedbackInput } from './submit-interview-feedback.input';
 
 @Resolver(() => Interview)
 export class InterviewResolver {
@@ -44,5 +45,38 @@ export class InterviewResolver {
   @Mutation(() => Boolean)
   async removeInterview(@Args('id', { type: () => ID }) id: string): Promise<boolean> {
     return this.interviewService.remove(id);
+  }
+
+  @Mutation(() => Interview, { nullable: true })
+  async submitInterviewFeedback(@Args('input') submitFeedbackInput: SubmitInterviewFeedbackInput): Promise<Interview | null> {
+    return this.interviewService.submitFeedback(submitFeedbackInput);
+  }
+
+  @Mutation(() => Interview, { nullable: true })
+  async completeInterview(@Args('id', { type: () => ID }) id: string): Promise<Interview | null> {
+    return this.interviewService.completeInterview(id);
+  }
+
+  @Mutation(() => Interview, { nullable: true })
+  async cancelInterview(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('reason', { nullable: true }) reason?: string,
+  ): Promise<Interview | null> {
+    return this.interviewService.cancelInterview(id, reason);
+  }
+
+  @Mutation(() => Interview, { nullable: true })
+  async markInterviewNoShow(@Args('id', { type: () => ID }) id: string): Promise<Interview | null> {
+    return this.interviewService.markNoShow(id);
+  }
+
+  @Query(() => Interview, { name: 'interviewWithTranscripts', nullable: true })
+  async getInterviewWithTranscripts(@Args('id', { type: () => ID }) id: string): Promise<Interview | null> {
+    return this.interviewService.getInterviewWithTranscripts(id);
+  }
+
+  @Query(() => [Interview], { name: 'applicationInterviewsWithTranscripts' })
+  async getApplicationInterviewsWithTranscripts(@Args('applicationId', { type: () => ID }) applicationId: string): Promise<Interview[]> {
+    return this.interviewService.getApplicationInterviewsWithTranscripts(applicationId);
   }
 }

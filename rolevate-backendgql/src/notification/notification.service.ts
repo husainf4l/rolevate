@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Notification, NotificationType } from './notification.entity';
+import { Notification, NotificationType, NotificationCategory } from './notification.entity';
 import { CreateNotificationInput } from './create-notification.input';
 import { NotificationDto } from './notification.dto';
 import { AuditService } from '../audit.service';
@@ -25,7 +25,8 @@ export class NotificationService {
       title: savedNotification.title,
       message: savedNotification.message,
       type: savedNotification.type,
-      isRead: savedNotification.isRead,
+      category: savedNotification.category,
+      read: savedNotification.read,
       createdAt: savedNotification.createdAt,
       readAt: savedNotification.readAt,
       userId: savedNotification.userId,
@@ -47,7 +48,7 @@ export class NotificationService {
       .take(limit);
 
     if (unreadOnly) {
-      queryBuilder.andWhere('notification.isRead = :isRead', { isRead: false });
+      queryBuilder.andWhere('notification.read = :read', { read: false });
     }
 
     const [notifications, total] = await queryBuilder.getManyAndCount();
@@ -58,7 +59,8 @@ export class NotificationService {
         title: notification.title,
         message: notification.message,
         type: notification.type,
-        isRead: notification.isRead,
+        category: notification.category,
+        read: notification.read,
         createdAt: notification.createdAt,
         readAt: notification.readAt,
         userId: notification.userId,
@@ -71,7 +73,7 @@ export class NotificationService {
   async markAsRead(userId: string, notificationId: string): Promise<boolean> {
     const result = await this.notificationRepository.update(
       { id: notificationId, userId },
-      { isRead: true, readAt: new Date() }
+      { read: true, readAt: new Date() }
     );
 
     if (result.affected && result.affected > 0) {
@@ -83,8 +85,8 @@ export class NotificationService {
 
   async markAllAsRead(userId: string): Promise<number> {
     const result = await this.notificationRepository.update(
-      { userId, isRead: false },
-      { isRead: true, readAt: new Date() }
+      { userId, read: false },
+      { read: true, readAt: new Date() }
     );
 
     const affected = result.affected ?? 0;
@@ -97,7 +99,7 @@ export class NotificationService {
 
   async getUnreadCount(userId: string): Promise<number> {
     return this.notificationRepository.count({
-      where: { userId, isRead: false },
+      where: { userId, read: false },
     });
   }
 
@@ -114,7 +116,6 @@ export class NotificationService {
     return (result.affected ?? 0) > 0;
   }
 
-  // Utility method for creating system notifications
   async createSystemNotification(
     userId: string,
     title: string,
@@ -125,7 +126,8 @@ export class NotificationService {
       userId,
       title,
       message,
-      type: NotificationType.SYSTEM,
+      type: NotificationType.INFO,
+      category: NotificationCategory.SYSTEM,
       metadata,
     });
   }
@@ -141,7 +143,8 @@ export class NotificationService {
       userId,
       title,
       message,
-      type: NotificationType.JOB_UPDATE,
+      type: NotificationType.INFO,
+      category: NotificationCategory.APPLICATION,
       metadata: { jobId },
     });
   }

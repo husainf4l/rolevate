@@ -1,29 +1,23 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { SecurityAction } from './security-log.entity';
+import { GraphQLJSONObject } from 'graphql-type-json';
 
 @InputType()
 export class CreateSecurityLogInput {
+  @Field()
+  type: string; // AUTH_FAILURE, UNAUTHORIZED_ACCESS, etc.
+
   @Field({ nullable: true })
   userId?: string;
 
-  @Field(() => SecurityAction)
-  action: SecurityAction;
+  @Field()
+  ipHash: string; // Hashed IP for privacy
+
+  @Field({ nullable: true })
+  userAgentHash?: string; // Hashed user agent
+
+  @Field(() => GraphQLJSONObject)
+  details: Record<string, any>; // Additional event details
 
   @Field()
-  resource: string;
-
-  @Field({ nullable: true })
-  resourceId?: string;
-
-  @Field({ nullable: true })
-  details?: string;
-
-  @Field({ nullable: true })
-  ipAddress?: string;
-
-  @Field({ nullable: true })
-  userAgent?: string;
-
-  @Field({ nullable: true })
-  success?: boolean;
+  severity: string; // LOW, MEDIUM, HIGH, CRITICAL
 }

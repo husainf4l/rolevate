@@ -1,75 +1,112 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, ManyToOne, BeforeInsert } from 'typeorm';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
-import { ReportTemplate } from './report-template.entity';
+import { Report } from './report.entity';
 import { User } from '../user/user.entity';
-import { Company } from '../company/company.entity';
-
-export enum ScheduleType {
-  DAILY = 'DAILY',
-  WEEKLY = 'WEEKLY',
-  MONTHLY = 'MONTHLY',
-  QUARTERLY = 'QUARTERLY',
-  YEARLY = 'YEARLY',
-}
-
-registerEnumType(ScheduleType, {
-  name: 'ScheduleType',
-});
+import { ReportFrequency, ReportFormat } from './report.enums';
+import { createId } from '@paralleldrive/cuid2';
 
 @Entity()
 @ObjectType()
 export class ReportSchedule {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   @Field(() => ID)
   id: string;
 
   @Column()
-  templateId: string;
+  reportId: string;
 
-  @ManyToOne(() => ReportTemplate, template => template.schedules)
-  @JoinColumn({ name: 'templateId' })
-  @Field(() => ReportTemplate)
-  template: ReportTemplate;
-
-  @Column()
-  userId: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  @Field(() => User)
-  user: User;
-
-  @Column({ nullable: true })
-  companyId?: string;
-
-  @ManyToOne(() => Company, { nullable: true })
-  @JoinColumn({ name: 'companyId' })
-  @Field(() => Company, { nullable: true })
-  company?: Company;
+  @OneToOne(() => Report, report => report.schedule)
+  @JoinColumn({ name: 'reportId' })
+  @Field(() => Report)
+  report: Report;
 
   @Column({
     type: 'enum',
-    enum: ScheduleType,
+    enum: ReportFrequency,
   })
-  @Field(() => ScheduleType)
-  scheduleType: ScheduleType;
+  @Field(() => ReportFrequency)
+  frequency: ReportFrequency;
 
-  @Column({ type: 'json' })
-  @Field(() => GraphQLJSONObject)
-  scheduleConfig: any;
+  @Column({ length: 100, nullable: true })
+  @Field({ nullable: true })
+  cronExpression?: string;
+
+  @Column({ type: 'timestamp' })
+  @Field()
+  startDate: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  endDate?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  nextRun?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  lastRun?: Date;
 
   @Column({ default: true })
   @Field()
   isActive: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ default: false })
+  @Field()
+  isPaused: boolean;
+
+  @Column({ length: 50, default: 'UTC' })
+  @Field()
+  timezone: string;
+
+  @Column('text', { array: true, default: [] })
+  @Field(() => [String])
+  recipients: string[];
+
+  @Column({
+    type: 'enum',
+    enum: ReportFormat,
+    default: 'PDF',
+  })
+  @Field(() => ReportFormat)
+  deliveryFormat: ReportFormat;
+
+  @Column({ length: 255, nullable: true })
   @Field({ nullable: true })
-  lastRunAt?: Date;
+  emailSubject?: string;
+
+  @Column('text', { nullable: true })
+  @Field({ nullable: true })
+  emailBody?: string;
+
+  @Column({ default: true })
+  @Field()
+  includeAttachment: boolean;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  maxExecutionTime?: number;
+
+  @Column({ default: 0 })
+  @Field()
+  retryCount: number;
+
+  @Column({ default: 3 })
+  @Field()
+  maxRetries: number;
+
+  @Column({ default: 0 })
+  @Field()
+  consecutiveFailures: number;
+
+  @Column('text', { nullable: true })
+  @Field({ nullable: true })
+  lastError?: string;
 
   @Column({ type: 'timestamp', nullable: true })
   @Field({ nullable: true })
-  nextRunAt?: Date;
+  lastSuccessfulRun?: Date;
 
   @CreateDateColumn()
   @Field()
@@ -78,4 +115,9 @@ export class ReportSchedule {
   @UpdateDateColumn()
   @Field()
   updatedAt: Date;
+
+  @BeforeInsert()
+  generateId() {
+    this.id = createId();
+  }
 }
