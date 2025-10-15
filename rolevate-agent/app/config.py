@@ -9,8 +9,12 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     
     # OpenAI Configuration
-    openai_api_key: str = Field(..., alias="OPENAI_API_KEY")
+    openai_api_key: str = Field(default="fake-key", alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4-turbo-preview", alias="OPENAI_MODEL")
+    
+    # Anthropic Configuration
+    anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
+    anthropic_model: str = Field(default="claude-3-5-sonnet-20241022", alias="ANTHROPIC_MODEL")
     
     # Server Configuration
     host: str = Field(default="0.0.0.0", alias="HOST")
@@ -18,11 +22,11 @@ class Settings(BaseSettings):
     debug: bool = Field(default=False, alias="DEBUG")
     
     # Database Configuration
-    database_url: str = Field(..., alias="DATABASE_URL")
+    database_url: str = Field(default="postgresql://user:pass@localhost/db", alias="DATABASE_URL")
     db_host: str = Field(default="localhost", alias="DB_HOST")
     db_port: int = Field(default=5432, alias="DB_PORT")
     db_user: str = Field(default="postgres", alias="DB_USER")
-    db_password: str = Field(..., alias="DB_PASSWORD")
+    db_password: str = Field(default="fake-password", alias="DB_PASSWORD")
     db_name: str = Field(default="rolegrow", alias="DB_NAME")
     
     # JWT Configuration
@@ -35,6 +39,7 @@ class Settings(BaseSettings):
     storage_type: Literal["local", "s3"] = Field(default="local", alias="STORAGE_TYPE")
     upload_dir: str = Field(default="./uploads", alias="UPLOAD_DIR")
     output_dir: str = Field(default="./outputs", alias="OUTPUT_DIR")
+    cv_storage_path: str = Field(default="./cv_storage", alias="CV_STORAGE_PATH")
     
     # AWS S3 Configuration
     aws_access_key_id: str = Field(default="", alias="AWS_ACCESS_KEY_ID")
@@ -71,6 +76,7 @@ class Settings(BaseSettings):
         """Create necessary directories if they don't exist."""
         os.makedirs(self.upload_dir, exist_ok=True)
         os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.cv_storage_path, exist_ok=True)
 
 
 # Global settings instance

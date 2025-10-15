@@ -148,3 +148,57 @@ class CVProcessResponse(BaseModel):
     file_path: Optional[str] = None
     download_url: Optional[str] = None
     cv_data: Optional[CVData] = None
+
+
+# Database Models (SQLAlchemy)
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
+
+Base = declarative_base()
+
+
+class CVDataDB(Base):
+    """Database model for storing CV data."""
+    __tablename__ = "cv_data"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    cv_id = Column(String(255), unique=True, index=True, nullable=False)
+    user_id = Column(String(255), ForeignKey("users.id"), nullable=True)
+    cv_data = Column(JSON, nullable=False)
+    version_hash = Column(String(255), nullable=False)
+    status = Column(String(50), default="active")
+    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    
+    # Relationships
+    versions = relationship("CVVersion", back_populates="cv_data")
+
+
+class CVVersion(Base):
+    """Database model for CV version history."""
+    __tablename__ = "cv_versions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    cv_data_id = Column(Integer, ForeignKey("cv_data.id"), nullable=False)
+    version_hash = Column(String(255), nullable=False)
+    cv_data_snapshot = Column(JSON, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    
+    # Relationships
+    cv_data = relationship("CVDataDB", back_populates="versions")
+
+
+class CVTemplate(Base):
+    """Database model for CV templates."""
+    __tablename__ = "cv_templates"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, nullable=False)
+    description = Column(Text, nullable=True)
+    template_file = Column(String(255), nullable=False)
+    style_category = Column(String(50), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))

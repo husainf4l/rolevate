@@ -15,6 +15,8 @@ from app.models.schemas import CVData
 from app.config import settings
 from app.database import init_db
 from app.api.auth_routes import router as auth_router, get_current_user_or_redirect
+from app.api.cv_builder_routes import router as cv_builder_router
+from app.api.resume_routes import router as resume_router
 # from app.api.chat_routes import router as chat_router
 from app.models.user import User
 
@@ -36,6 +38,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(cv_builder_router, prefix="/api/v1")
+app.include_router(resume_router, prefix="/api/v1")
 # Temporarily disabled while fixing imports
 # app.include_router(chat_router, prefix="/api/v1")
 
