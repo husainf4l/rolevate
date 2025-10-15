@@ -1,19 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
-import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Address } from '../address/address.entity';
 import { User } from '../user/user.entity';
 import { Job } from '../job/job.entity';
-
-export enum CompanySize {
-  SMALL = 'SMALL',
-  MEDIUM = 'MEDIUM',
-  LARGE = 'LARGE',
-  ENTERPRISE = 'ENTERPRISE',
-}
-
-registerEnumType(CompanySize, {
-  name: 'CompanySize',
-});
 
 @Entity()
 @ObjectType()
@@ -36,19 +25,23 @@ export class Company {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  email?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  phone?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   logo?: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
   industry?: string;
 
-  @Column({
-    type: 'enum',
-    enum: CompanySize,
-    nullable: true,
-  })
-  @Field(() => CompanySize, { nullable: true })
-  size?: CompanySize;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  size?: string;
 
   @Column({ type: 'date', nullable: true })
   @Field({ nullable: true })

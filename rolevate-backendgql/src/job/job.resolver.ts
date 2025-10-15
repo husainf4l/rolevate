@@ -3,6 +3,8 @@ import { UseGuards } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobDto } from './job.dto';
 import { CreateJobInput } from './create-job.input';
+import { JobFilterInput } from './job-filter.input';
+import { PaginationInput } from './pagination.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 
@@ -17,8 +19,11 @@ export class JobResolver {
   }
 
   @Query(() => [JobDto])
-  async jobs(): Promise<JobDto[]> {
-    return this.jobService.findAll();
+  async jobs(
+    @Args('filter', { nullable: true }) filter?: JobFilterInput,
+    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  ): Promise<JobDto[]> {
+    return this.jobService.findAll(filter, pagination);
   }
 
   @Query(() => JobDto, { nullable: true })

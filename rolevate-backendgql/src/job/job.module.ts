@@ -6,13 +6,14 @@ import { Job } from './job.entity';
 import { JobService } from './job.service';
 import { JobResolver } from './job.resolver';
 import { User } from '../user/user.entity';
+import { Company } from '../company/company.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { AuditService } from '../audit.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Job, User]),
+    TypeOrmModule.forFeature([Job, User, Company]),
     AuthModule,
     UserModule,
     JwtModule.registerAsync({

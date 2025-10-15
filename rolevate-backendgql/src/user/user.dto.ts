@@ -1,5 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { UserType } from './user.entity';
+import { CompanyDto } from '../company/company.dto';
 
 @ObjectType()
 export class UserDto {
@@ -26,6 +27,9 @@ export class UserDto {
 
   @Field({ nullable: true })
   companyId?: string;
+
+  @Field(() => CompanyDto, { nullable: true })
+  company?: CompanyDto;
 
   @Field()
   createdAt: Date;

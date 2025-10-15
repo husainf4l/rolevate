@@ -21,6 +21,6 @@ import { AuditService } from '../audit.service';
     }),
   ],
   providers: [AuthService, AuthResolver, JwtAuthGuard, ApiKeyGuard, AuditService],
-  exports: [JwtAuthGuard, ApiKeyGuard],
+  exports: [JwtAuthGuard, ApiKeyGuard, JwtModule, AuthService, UserModule],
 })
 export class AuthModule {}

@@ -5,8 +5,8 @@ import { Company } from '../company/company.entity';
 
 export enum UserType {
   SYSTEM = 'SYSTEM',
-  COMPANY = 'COMPANY',
   CANDIDATE = 'CANDIDATE',
+  BUSINESS = 'BUSINESS',
   ADMIN = 'ADMIN',
 }
 

@@ -1,5 +1,6 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import { UserDto } from '../user/user.dto';
+import { CompanyDto } from '../company/company.dto';
 import { JobType, JobLevel, WorkType, JobStatus } from './job.entity';
 
 // Register enums for GraphQL
@@ -70,7 +71,8 @@ export class JobDto {
   @Field(() => JobStatus)
   status: JobStatus;
 
-  // Note: Company relationship will be added when Company entity is created
+  @Field(() => CompanyDto, { nullable: true })
+  company?: CompanyDto;
 
   @Field({ nullable: true })
   cvAnalysisPrompt?: string;

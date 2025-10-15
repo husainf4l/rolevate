@@ -34,11 +34,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     // Don't expose stack traces or sensitive information
-    response.code(status).send({
-      statusCode: status,
-      message: status === HttpStatus.INTERNAL_SERVER_ERROR ? 'Internal server error' : message,
-      timestamp: new Date().toISOString(),
-      path: (request as any)?.url || request?.raw?.url || 'unknown',
-    });
+    if (typeof response.code === 'function') {
+      response.code(status).send({
+        statusCode: status,
+        message: status === HttpStatus.INTERNAL_SERVER_ERROR ? 'Internal server error' : message,
+        timestamp: new Date().toISOString(),
+        path: (request as any)?.url || request?.raw?.url || 'unknown',
+      });
+    } else {
+      // For GraphQL or other non-HTTP contexts, rethrow the exception
+      throw exception;
+    }
   }
 }

@@ -26,6 +26,36 @@ export class ApplicationDto {
   resumeUrl?: string;
 
   @Field({ nullable: true })
+  expectedSalary?: string;
+
+  @Field({ nullable: true })
+  noticePeriod?: string;
+
+  @Field({ nullable: true })
+  cvAnalysisScore?: number;
+
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  cvAnalysisResults?: any;
+
+  @Field({ nullable: true })
+  analyzedAt?: Date;
+
+  @Field({ nullable: true })
+  aiCvRecommendations?: string;
+
+  @Field({ nullable: true })
+  aiInterviewRecommendations?: string;
+
+  @Field({ nullable: true })
+  aiSecondInterviewRecommendations?: string;
+
+  @Field({ nullable: true })
+  recommendationsGeneratedAt?: Date;
+
+  @Field({ nullable: true })
+  companyNotes?: string;
+
+  @Field({ nullable: true })
   source?: string;
 
   @Field({ nullable: true })
@@ -36,6 +66,21 @@ export class ApplicationDto {
 
   @Field()
   interviewScheduled: boolean;
+
+  @Field({ nullable: true })
+  reviewedAt?: Date;
+
+  @Field({ nullable: true })
+  interviewScheduledAt?: Date;
+
+  @Field({ nullable: true })
+  interviewedAt?: Date;
+
+  @Field({ nullable: true })
+  rejectedAt?: Date;
+
+  @Field({ nullable: true })
+  acceptedAt?: Date;
 
   @Field()
   createdAt: Date;

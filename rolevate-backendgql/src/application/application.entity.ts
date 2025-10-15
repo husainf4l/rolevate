@@ -65,6 +65,46 @@ export class Application {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  expectedSalary?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  noticePeriod?: string;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  @Field({ nullable: true })
+  cvAnalysisScore?: number;
+
+  @Column({ type: 'json', nullable: true })
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  cvAnalysisResults?: any;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  analyzedAt?: Date;
+
+  @Column('text', { nullable: true })
+  @Field({ nullable: true })
+  aiCvRecommendations?: string;
+
+  @Column('text', { nullable: true })
+  @Field({ nullable: true })
+  aiInterviewRecommendations?: string;
+
+  @Column('text', { nullable: true })
+  @Field({ nullable: true })
+  aiSecondInterviewRecommendations?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  recommendationsGeneratedAt?: Date;
+
+  @Column('text', { nullable: true })
+  @Field({ nullable: true })
+  companyNotes?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   source?: string;
 
   @Column('text', { nullable: true })
@@ -78,6 +118,26 @@ export class Application {
   @Column({ default: false })
   @Field()
   interviewScheduled: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  reviewedAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  interviewScheduledAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  interviewedAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  rejectedAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  acceptedAt?: Date;
 
   @OneToMany(() => ApplicationNote, applicationNote => applicationNote.application)
   @Field(() => [ApplicationNote])

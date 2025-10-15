@@ -4,7 +4,10 @@ import { Repository } from 'typeorm';
 import { Job } from './job.entity';
 import { CreateJobInput } from './create-job.input';
 import { JobDto } from './job.dto';
+import { JobFilterInput } from './job-filter.input';
+import { PaginationInput } from './pagination.input';
 import { User } from '../user/user.entity';
+import { Company } from '../company/company.entity';
 import { AuditService } from '../audit.service';
 
 @Injectable()
@@ -14,6 +17,8 @@ export class JobService {
     private jobRepository: Repository<Job>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Company)
+    private companyRepository: Repository<Company>,
     private auditService: AuditService,
   ) {}
 
@@ -26,58 +31,66 @@ export class JobService {
     const job = this.jobRepository.create({
       ...input,
       postedBy,
+      companyId: postedBy.companyId,
     });
     const savedJob = await this.jobRepository.save(job);
     this.auditService.logJobCreation(input.postedById, savedJob.id);
 
-    return {
-      id: savedJob.id,
-      title: savedJob.title,
-      department: savedJob.department,
-      location: savedJob.location,
-      salary: savedJob.salary,
-      type: savedJob.type,
-      deadline: savedJob.deadline,
-      description: savedJob.description,
-      shortDescription: savedJob.shortDescription,
-      responsibilities: savedJob.responsibilities,
-      requirements: savedJob.requirements,
-      benefits: savedJob.benefits,
-      skills: savedJob.skills,
-      experience: savedJob.experience,
-      education: savedJob.education,
-      jobLevel: savedJob.jobLevel,
-      workType: savedJob.workType,
-      industry: savedJob.industry,
-      companyDescription: savedJob.companyDescription,
-      status: savedJob.status,
-      cvAnalysisPrompt: savedJob.cvAnalysisPrompt,
-      interviewPrompt: savedJob.interviewPrompt,
-      aiSecondInterviewPrompt: savedJob.aiSecondInterviewPrompt,
-      interviewLanguage: savedJob.interviewLanguage,
-      featured: savedJob.featured,
-      applicants: savedJob.applicants,
-      views: savedJob.views,
-      featuredJobs: savedJob.featuredJobs,
-      postedBy: {
-        id: postedBy.id,
-        userType: postedBy.userType,
-        email: postedBy.email,
-        name: postedBy.name,
-        phone: postedBy.phone,
-        avatar: postedBy.avatar,
-        isActive: postedBy.isActive,
-        companyId: postedBy.companyId,
-        createdAt: postedBy.createdAt,
-        updatedAt: postedBy.updatedAt,
-      },
-      createdAt: savedJob.createdAt,
-      updatedAt: savedJob.updatedAt,
-    };
+    // Return the full job with relations
+    return this.findOne(savedJob.id) as Promise<JobDto>;
   }
 
-  async findAll(): Promise<JobDto[]> {
-    const jobs = await this.jobRepository.find({ relations: ['postedBy'] });
+  async findAll(filter?: JobFilterInput, pagination?: PaginationInput): Promise<JobDto[]> {
+    const queryBuilder = this.jobRepository.createQueryBuilder('job')
+      .leftJoinAndSelect('job.postedBy', 'postedBy')
+      .leftJoinAndSelect('job.company', 'company');
+
+    if (filter) {
+      if (filter.status) {
+        queryBuilder.andWhere('job.status = :status', { status: filter.status });
+      }
+      if (filter.type) {
+        queryBuilder.andWhere('job.type = :type', { type: filter.type });
+      }
+      if (filter.jobLevel) {
+        queryBuilder.andWhere('job.jobLevel = :jobLevel', { jobLevel: filter.jobLevel });
+      }
+      if (filter.workType) {
+        queryBuilder.andWhere('job.workType = :workType', { workType: filter.workType });
+      }
+      if (filter.industry) {
+        queryBuilder.andWhere('job.industry ILIKE :industry', { industry: `%${filter.industry}%` });
+      }
+      if (filter.location) {
+        queryBuilder.andWhere('job.location ILIKE :location', { location: `%${filter.location}%` });
+      }
+      if (filter.department) {
+        queryBuilder.andWhere('job.department ILIKE :department', { department: `%${filter.department}%` });
+      }
+      if (filter.postedById) {
+        queryBuilder.andWhere('job.postedById = :postedById', { postedById: filter.postedById });
+      }
+      if (filter.companyId) {
+        queryBuilder.andWhere('job.companyId = :companyId', { companyId: filter.companyId });
+      }
+      if (filter.featured !== undefined) {
+        queryBuilder.andWhere('job.featured = :featured', { featured: filter.featured });
+      }
+    }
+
+    if (pagination) {
+      if (pagination.skip) {
+        queryBuilder.skip(pagination.skip);
+      }
+      if (pagination.take) {
+        queryBuilder.take(pagination.take);
+      }
+    } else {
+      queryBuilder.take(10); // default limit
+    }
+
+    const jobs = await queryBuilder.getMany();
+
     return jobs.map(job => ({
       id: job.id,
       title: job.title,
@@ -106,7 +119,21 @@ export class JobService {
       featured: job.featured,
       applicants: job.applicants,
       views: job.views,
-      featuredJobs: job.featuredJobs,
+      featuredJobs: job.featured,
+      company: job.company ? {
+        id: job.company.id,
+        name: job.company.name,
+        description: job.company.description,
+        website: job.company.website,
+        logo: job.company.logo,
+        industry: job.company.industry,
+        size: job.company.size,
+        founded: job.company.founded,
+        location: job.company.location,
+        addressId: job.company.addressId,
+        createdAt: job.company.createdAt,
+        updatedAt: job.company.updatedAt,
+      } : undefined,
       postedBy: {
         id: job.postedBy.id,
         userType: job.postedBy.userType,
@@ -127,7 +154,7 @@ export class JobService {
   async findOne(id: string): Promise<JobDto | null> {
     const job = await this.jobRepository.findOne({
       where: { id },
-      relations: ['postedBy'],
+      relations: ['postedBy', 'company'],
     });
     if (!job) return null;
 
@@ -160,6 +187,20 @@ export class JobService {
       applicants: job.applicants,
       views: job.views,
       featuredJobs: job.featuredJobs,
+      company: job.company ? {
+        id: job.company.id,
+        name: job.company.name,
+        description: job.company.description,
+        website: job.company.website,
+        logo: job.company.logo,
+        industry: job.company.industry,
+        size: job.company.size,
+        founded: job.company.founded,
+        location: job.company.location,
+        addressId: job.company.addressId,
+        createdAt: job.company.createdAt,
+        updatedAt: job.company.updatedAt,
+      } : undefined,
       postedBy: {
         id: job.postedBy.id,
         userType: job.postedBy.userType,

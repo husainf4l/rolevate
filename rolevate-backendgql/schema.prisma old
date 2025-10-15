@@ -99,8 +99,8 @@ datasource db {
 
 enum UserType {
   SYSTEM
-  COMPANY
   CANDIDATE
+  BUSINESS
   ADMIN
 }
 

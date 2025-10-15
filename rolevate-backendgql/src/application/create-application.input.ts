@@ -20,6 +20,12 @@ export class CreateApplicationInput {
   resumeUrl?: string;
 
   @Field({ nullable: true })
+  expectedSalary?: string;
+
+  @Field({ nullable: true })
+  noticePeriod?: string;
+
+  @Field({ nullable: true })
   source?: string;
 
   @Field({ nullable: true })

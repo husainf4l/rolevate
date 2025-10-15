@@ -25,19 +25,36 @@ export class AuthService {
       this.auditService.logLoginAttempt(user.email, true);
     }
 
+    // Fetch user with company relation
+    const fullUser = await this.userService.findOne(user.id);
+
     return {
       access_token,
       user: {
-        id: user.id,
-        userType: user.userType,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        avatar: user.avatar,
-        isActive: user.isActive,
-        companyId: user.companyId,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        id: fullUser!.id,
+        userType: fullUser!.userType,
+        email: fullUser!.email,
+        name: fullUser!.name,
+        phone: fullUser!.phone,
+        avatar: fullUser!.avatar,
+        isActive: fullUser!.isActive,
+        companyId: fullUser!.companyId,
+        company: fullUser!.company ? {
+          id: fullUser!.company.id,
+          name: fullUser!.company.name,
+          description: fullUser!.company.description,
+          website: fullUser!.company.website,
+          logo: fullUser!.company.logo,
+          industry: fullUser!.company.industry,
+          size: fullUser!.company.size,
+          founded: fullUser!.company.founded,
+          location: fullUser!.company.location,
+          addressId: fullUser!.company.addressId,
+          createdAt: fullUser!.company.createdAt,
+          updatedAt: fullUser!.company.updatedAt,
+        } : undefined,
+        createdAt: fullUser!.createdAt,
+        updatedAt: fullUser!.updatedAt,
       },
     };
   }
