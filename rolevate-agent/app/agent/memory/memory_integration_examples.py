@@ -5,12 +5,12 @@ Demonstrates how existing nodes should interact with the standardized CV memory 
 from typing import Dict, Any
 from loguru import logger
 
-from app.agent.shared_memory import (
+from app.agent.memory.shared_memory import (
     CVMemoryStructure,
     get_cv_memory_from_state,
     update_cv_memory_in_state
 )
-from app.agent.memory_integration import (
+from app.agent.memory.memory_integration import (
     cv_collector_memory,
     cv_writer_memory,
     template_agent_memory,
@@ -248,7 +248,7 @@ async def example_feedback_node_integration(state: Dict[str, Any]) -> Dict[str, 
     cv_memory = get_cv_memory_from_state(state)
     
     # Analyze completeness using feedback agent interface
-    from app.agent.memory_integration import feedback_agent_memory
+    from app.agent.memory.memory_integration import feedback_agent_memory
     analysis = feedback_agent_memory.analyze_completeness(cv_memory)
     
     # Generate contextual feedback
@@ -283,7 +283,7 @@ def example_fastapi_integration():
     
     # In chat endpoint
     async def chat_endpoint_example(session_id: str, message: str):
-        from app.agent.memory_integration import memory_integration_manager
+        from app.agent.memory.memory_integration import memory_integration_manager
         
         # Prepare workflow state from chat session
         workflow_state = memory_integration_manager.prepare_workflow_state_from_session(

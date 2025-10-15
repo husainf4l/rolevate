@@ -16,6 +16,7 @@ from loguru import logger
 from app.config import settings
 from app.models.schemas import CVData
 from app.services.template_filler import TemplateFiller
+from app.agent.tools.professional_profile_assistant import profile_assistant
 
 
 class IntentType(str, Enum):
@@ -144,17 +145,13 @@ class CVBuilderWorkflow:
         """
         Layer 1: Input Understanding
         - Detect user intent (add_experience, education, skills, etc.)
-        - Use regex + LLM for classification
+        - Use LLM for classification (no regex patterns)
         - Extract structured data from natural language
         """
         user_input = state["user_input"]
         
-        # Pattern-based intent detection
-        intent = self._detect_intent_patterns(user_input)
-        
-        # If pattern detection fails, use LLM
-        if intent.intent == IntentType.UNKNOWN:
-            intent = await self._detect_intent_llm(user_input)
+        # Always use LLM intent detection - no regex patterns
+        intent = await self._detect_intent_llm(user_input)
         
         # Update state
         state["intent"] = intent.intent
@@ -166,56 +163,66 @@ class CVBuilderWorkflow:
         
         return state
     
-    def _detect_intent_patterns(self, text: str) -> IntentResult:
-        """Detect intent using regex patterns."""
-        text_lower = text.lower()
-        
-        for intent_type, patterns in self.intent_patterns.items():
-            for pattern in patterns:
-                if re.search(pattern, text_lower):
-                    return IntentResult(
-                        intent=intent_type,
-                        confidence=0.8,
-                        extracted_data={"raw_text": text},
-                        raw_text=text
-                    )
-        
-        return IntentResult(
-            intent=IntentType.UNKNOWN,
-            confidence=0.0,
-            extracted_data={"raw_text": text},
-            raw_text=text
-        )
+    # DEPRECATED: Regex pattern matching (keeping for reference only)
+    # def _detect_intent_patterns(self, text: str) -> IntentResult:
+    #     """Detect intent using regex patterns (DEPRECATED - use LLM instead)."""
+    #     text_lower = text.lower()
+    #     
+    #     for intent_type, patterns in self.intent_patterns.items():
+    #         for pattern in patterns:
+    #             if re.search(pattern, text_lower):
+    #                 return IntentResult(
+    #                     intent=intent_type,
+    #                     confidence=0.8,
+    #                     extracted_data={"raw_text": text},
+    #                     raw_text=text
+    #                 )
+    #     
+    #     return IntentResult(
+    #         intent=IntentType.UNKNOWN,
+    #         confidence=0.0,
+    #         extracted_data={"raw_text": text},
+    #         raw_text=text
+    #     )
     
     async def _detect_intent_llm(self, text: str) -> IntentResult:
-        """Use LLM for intent detection when patterns fail."""
+        """Use LLM for intelligent intent detection and data extraction."""
         
         prompt = ChatPromptTemplate.from_template("""
-        Analyze the following user input and classify the intent for CV building:
+        You are a professional CV assistant. Analyze the user's message and determine what they are trying to add or update in their CV.
 
-        User Input: "{input}"
+        Message: "{input}"
 
         Available Intents:
-        - add_personal_info: Adding name, email, phone, address
-        - add_experience: Adding work experience, job history
-        - add_education: Adding education, degrees, certifications
-        - add_skills: Adding technical or soft skills
+        - add_personal_info: Adding name, email, phone, address, LinkedIn, etc.
+        - add_experience: Adding work experience, job history, positions
+        - add_education: Adding education, degrees, certifications, courses
+        - add_skills: Adding technical or soft skills, competencies
         - add_languages: Adding language proficiencies
-        - add_summary: Adding professional summary/bio
+        - add_summary: Adding professional summary, bio, career objective
         - select_template: Choosing CV template/design
         - generate_cv: Creating/downloading the final CV
         - edit_section: Modifying existing information
         - delete_section: Removing information
         - unknown: Unclear or unrelated input
 
-        Respond with JSON format:
+        Respond strictly in JSON format with intelligent extraction:
         {{
             "intent": "detected_intent",
             "confidence": 0.95,
             "extracted_data": {{
-                "key": "value"
+                "fields_detected": ["job_title", "company", "degree", "skills", "summary"],
+                "structured_info": {{
+                    "job_title": "Senior Relationship Manager",
+                    "company": "Jordan Commercial Bank",
+                    "years_experience": "15",
+                    "skills": ["Corporate Banking", "Credit Analysis"]
+                }},
+                "raw_text": "{input}"
             }}
         }}
+        
+        Be intelligent: extract as much structured information as possible from the user's natural language.
         """)
         
         try:
@@ -225,14 +232,15 @@ class CVBuilderWorkflow:
             return IntentResult(
                 intent=IntentType(result_json.get("intent", "unknown")),
                 confidence=result_json.get("confidence", 0.5),
-                extracted_data=result_json.get("extracted_data", {}),
+                extracted_data=result_json.get("extracted_data", {"raw_text": text}),
                 raw_text=text
             )
         except Exception as e:
+            logger.error(f"LLM intent detection failed: {e}")
             return IntentResult(
                 intent=IntentType.UNKNOWN,
                 confidence=0.0,
-                extracted_data={"error": str(e)},
+                extracted_data={"error": str(e), "raw_text": text},
                 raw_text=text
             )
 
@@ -682,28 +690,72 @@ class CVBuilderWorkflow:
         return pdf_url
     
     def _generate_completion_message(self, state: CVBuilderState) -> str:
-        """Generate an appropriate AI response based on the processing result."""
+        """Generate AI response using LLM for natural, context-aware replies."""
         
         intent = state.get("intent")
         processing_step = state.get("processing_step", "")
+        cv_data = state.get("cv_data", {})
         
-        if "complete" in processing_step:
-            if intent == IntentType.GENERATE_CV:
-                return f"🎉 Your CV has been generated successfully! You can download it here: {state.get('generated_pdf_url', '')}"
-            elif intent == IntentType.ADD_EXPERIENCE:
-                return "✅ Great! I've added your work experience. Would you like to add more details or move on to another section?"
-            elif intent == IntentType.ADD_EDUCATION:
-                return "✅ Perfect! I've added your education information. What would you like to add next?"
-            elif intent == IntentType.ADD_SKILLS:
-                return "✅ Excellent! I've added your skills. Feel free to add more or continue with other sections."
-            elif intent == IntentType.ADD_PERSONAL_INFO:
-                return "✅ I've updated your personal information. What would you like to add next?"
+        # Use LLM to generate contextual response
+        try:
+            context = {
+                "intent": str(intent),
+                "processing_step": processing_step,
+                "sections_completed": list(cv_data.keys()),
+                "has_personal_info": bool(cv_data.get("personal_info")),
+                "has_experience": bool(cv_data.get("experience")),
+                "has_education": bool(cv_data.get("education")),
+                "has_skills": bool(cv_data.get("skills"))
+            }
+            
+            prompt = ChatPromptTemplate.from_template("""
+            You are a friendly CV building assistant. Generate a natural, encouraging response based on the context.
+
+            Context:
+            - Intent: {intent}
+            - Processing Step: {processing_step}
+            - Sections Completed: {sections_completed}
+
+            Generate a brief, friendly response (1-2 sentences) that:
+            1. Acknowledges what the user just added
+            2. Shows progress or encouragement
+            3. Suggests what to add next (if CV incomplete)
+            4. Offers to generate CV if ready
+
+            Be conversational, warm, and helpful. Use emojis sparingly (max 1-2).
+            Response:
+            """)
+            
+            # Note: This should be async in production, but for simplicity keeping sync
+            # In real implementation, make this method async and await
+            response = self.llm.invoke(prompt.format_messages(
+                intent=context["intent"],
+                processing_step=context["processing_step"],
+                sections_completed=", ".join(context["sections_completed"])
+            ))
+            
+            return response.content.strip()
+            
+        except Exception as e:
+            logger.error(f"LLM response generation failed: {e}")
+            # Fallback responses (still better than pure regex)
+            if "complete" in processing_step:
+                if intent == IntentType.GENERATE_CV:
+                    return f"🎉 Your CV has been generated successfully! You can download it here: {state.get('generated_pdf_url', '')}"
+                elif intent == IntentType.ADD_EXPERIENCE:
+                    return "✅ Great! I've added your work experience. Would you like to add more details or move on to another section?"
+                elif intent == IntentType.ADD_EDUCATION:
+                    return "✅ Perfect! I've added your education information. What would you like to add next?"
+                elif intent == IntentType.ADD_SKILLS:
+                    return "✅ Excellent! I've added your skills. Feel free to add more or continue with other sections."
+                elif intent == IntentType.ADD_PERSONAL_INFO:
+                    return "✅ I've updated your personal information. What would you like to add next?"
+                else:
+                    return "✅ Information updated successfully! What would you like to do next?"
+            elif "error" in processing_step:
+                return f"❌ I encountered an issue: {processing_step}. Could you please try again or rephrase your request?"
             else:
-                return "✅ Information updated successfully! What would you like to do next?"
-        elif "error" in processing_step:
-            return f"❌ I encountered an issue: {processing_step}. Could you please try again or rephrase your request?"
-        else:
-            return "🤔 I'm processing your request. Please hold on..."
+                return "🤔 I'm processing your request. Please hold on..."
 
     # WORKFLOW ORCHESTRATION
     async def process_user_input(self, user_input: str, conversation_state: Optional[Dict] = None) -> CVBuilderState:
@@ -750,10 +802,161 @@ class CVBuilderWorkflow:
             state = await self.output_optimizer_node(state)
             
         except Exception as e:
+            logger.error(f"Workflow error: {e}")
             state["processing_step"] = f"workflow_error: {str(e)}"
-            state["messages"].append(AIMessage(content=f"❌ Sorry, I encountered an error: {str(e)}"))
+            # Generate LLM-powered error message
+            try:
+                error_response = await profile_assistant.enhance_content(
+                    f"I encountered a technical issue while processing your request. Let's try again - could you rephrase what you'd like to add?"
+                )
+                state["messages"].append(AIMessage(content=error_response))
+            except:
+                state["messages"].append(AIMessage(content=f"❌ Sorry, I encountered an error: {str(e)}"))
         
         return state
+    
+    async def process_chat_message(self, message: str, cv_memory: Dict[str, Any], session_id: str) -> Dict[str, Any]:
+        """
+        Process chat message using LLM-powered professional profile assistant.
+        This method uses FULL LLM MODE - no regex patterns.
+        """
+        try:
+            logger.info(f"🤖 Processing chat message with LLM (session: {session_id})")
+            
+            # Use LLM-powered profile assistant for extraction
+            extracted_data = await profile_assistant.extract_structured_data(message)
+            
+            logger.info(f"✅ LLM extracted data: {len(extracted_data)} fields")
+            
+            # Merge extracted data with existing CV memory
+            updated_cv_memory = self._merge_cv_data(cv_memory, extracted_data)
+            
+            # Calculate completion progress
+            completion_percentage = self._calculate_completion(updated_cv_memory)
+            
+            # Generate AI response using LLM (not static text)
+            if completion_percentage < 30:
+                base_message = f"Great! I've captured your information. Your CV is {completion_percentage}% complete."
+                # Get follow-up questions from LLM
+                questions = await profile_assistant.generate_follow_up_questions(updated_cv_memory)
+                if questions:
+                    base_message += f" {questions[0]}"
+                else:
+                    base_message += " What else would you like to add?"
+            elif completion_percentage < 70:
+                base_message = f"Excellent progress! Your CV is now {completion_percentage}% complete. Would you like to add more details about your experience, education, or skills?"
+            else:
+                base_message = f"Fantastic! Your CV is {completion_percentage}% complete and looking great! Would you like me to generate your professional CV now?"
+            
+            # Enhance the response using LLM for natural, conversational tone
+            enhanced_response = await profile_assistant.enhance_content(base_message)
+            
+            logger.info(f"💬 Generated LLM response: {enhanced_response[:100]}...")
+            
+            return {
+                "ai_response": enhanced_response,
+                "cv_memory": updated_cv_memory,
+                "intent": self._determine_intent(extracted_data),
+                "quality_score": completion_percentage,
+                "extracted_fields": list(extracted_data.keys())
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error in process_chat_message: {e}")
+            # Even error responses should be LLM-generated
+            fallback_response = "I'm here to help you build your CV! Could you tell me about your professional experience?"
+            try:
+                # Try to generate a contextual error response
+                error_prompt = f"Generate a friendly error recovery message for a CV building chatbot. Be encouraging and helpful."
+                enhanced_fallback = await profile_assistant.enhance_content(fallback_response)
+                fallback_response = enhanced_fallback
+            except:
+                pass
+            
+            return {
+                "ai_response": fallback_response,
+                "cv_memory": cv_memory,
+                "intent": "unknown",
+                "quality_score": 0,
+                "error": str(e)
+            }
+    
+    def _merge_cv_data(self, existing_cv: Dict[str, Any], new_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Merge new extracted data with existing CV memory."""
+        merged = existing_cv.copy()
+        
+        # Merge personal info
+        if "personal_info" in new_data:
+            merged.setdefault("personal_info", {}).update(new_data["personal_info"])
+        
+        # Append work experience
+        if "work_experience" in new_data:
+            merged.setdefault("work_experience", []).extend(new_data["work_experience"])
+        
+        # Append education
+        if "education" in new_data:
+            merged.setdefault("education", []).extend(new_data["education"])
+        
+        # Merge skills
+        if "skills" in new_data:
+            existing_skills = set(merged.get("skills", []))
+            new_skills = set(new_data["skills"])
+            merged["skills"] = list(existing_skills | new_skills)
+        
+        # Merge languages
+        if "languages" in new_data:
+            existing_langs = set(merged.get("languages", []))
+            new_langs = set(new_data["languages"])
+            merged["languages"] = list(existing_langs | new_langs)
+        
+        # Update summary if provided
+        if "professional_summary" in new_data:
+            merged["professional_summary"] = new_data["professional_summary"]
+        
+        # Merge certifications
+        if "certifications" in new_data:
+            merged.setdefault("certifications", []).extend(new_data["certifications"])
+        
+        return merged
+    
+    def _calculate_completion(self, cv_memory: Dict[str, Any]) -> int:
+        """Calculate CV completion percentage."""
+        required_fields = {
+            "personal_info": 20,
+            "work_experience": 30,
+            "education": 20,
+            "skills": 15,
+            "professional_summary": 15
+        }
+        
+        score = 0
+        for field, weight in required_fields.items():
+            if field in cv_memory and cv_memory[field]:
+                if isinstance(cv_memory[field], list):
+                    if len(cv_memory[field]) > 0:
+                        score += weight
+                elif isinstance(cv_memory[field], dict):
+                    if any(cv_memory[field].values()):
+                        score += weight
+                else:
+                    score += weight
+        
+        return min(score, 100)
+    
+    def _determine_intent(self, extracted_data: Dict[str, Any]) -> str:
+        """Determine user intent from extracted data."""
+        if "work_experience" in extracted_data:
+            return "add_experience"
+        elif "education" in extracted_data:
+            return "add_education"
+        elif "skills" in extracted_data:
+            return "add_skills"
+        elif "personal_info" in extracted_data:
+            return "add_personal_info"
+        elif "professional_summary" in extracted_data:
+            return "add_summary"
+        else:
+            return "general_info"
     
     def get_available_templates(self) -> List[Dict[str, str]]:
         """Get list of available CV templates."""

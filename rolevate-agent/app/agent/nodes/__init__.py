@@ -21,7 +21,7 @@ from app.agent.nodes.template_rendering_node import template_rendering_node
 from app.agent.nodes.output_optimization_node import output_optimization_node
 
 # Chat functionality
-from app.agent.nodes.chat_node import chat_node
+# from app.agent.nodes.chat_node import chat_node  # TODO: Implement chat_node
 
 __all__ = [
     # Core workflow nodes (primary 8-node pipeline)
@@ -45,5 +45,5 @@ __all__ = [
     "output_optimization_node",
     
     # Chat functionality
-    "chat_node"
+    # "chat_node"  # TODO: Implement
 ]
