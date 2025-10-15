@@ -6,9 +6,10 @@ import { TranscriptService } from './transcript.service';
 import { TranscriptResolver } from './transcript.resolver';
 import { Interview } from './interview.entity';
 import { Transcript } from './transcript.entity';
+import { WhatsAppModule } from '../whatsapp/whatsapp.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Interview, Transcript])],
+  imports: [TypeOrmModule.forFeature([Interview, Transcript]), WhatsAppModule],
   providers: [InterviewService, InterviewResolver, TranscriptService, TranscriptResolver],
   exports: [InterviewService, TranscriptService],
 })

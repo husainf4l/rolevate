@@ -5,6 +5,7 @@ import { Communication, CommunicationType, CommunicationDirection, Communication
 import { CreateCommunicationInput } from './create-communication.input';
 import { UpdateCommunicationInput } from './update-communication.input';
 import { WhatsAppService } from '../whatsapp/whatsapp.service';
+import { EmailService } from '../services/email.service';
 
 @Injectable()
 export class CommunicationService {
@@ -12,6 +13,7 @@ export class CommunicationService {
     @InjectRepository(Communication)
     private communicationRepository: Repository<Communication>,
     private readonly whatsappService: WhatsAppService,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createCommunicationInput: CreateCommunicationInput): Promise<Communication> {
@@ -51,6 +53,41 @@ export class CommunicationService {
 
       } catch (error) {
         console.error('Failed to send WhatsApp message:', error.message);
+        communicationStatus = CommunicationStatus.FAILED;
+        // Continue to create the record but mark as failed
+      }
+    }
+
+    // If it's an email and direction is OUTBOUND, actually send it
+    if (createCommunicationInput.type === CommunicationType.EMAIL && createCommunicationInput.direction === CommunicationDirection.OUTBOUND) {
+      try {
+        if (!createCommunicationInput.email) {
+          throw new Error('Email address is required for email messages');
+        }
+
+        console.log(`Sending email to ${createCommunicationInput.email}: ${createCommunicationInput.content}`);
+
+        if (createCommunicationInput.templateName) {
+          // Send template email with parameters
+          console.log(`Using template: ${createCommunicationInput.templateName} with params:`, createCommunicationInput.templateParams);
+          await this.emailService.sendTemplateEmail(
+            createCommunicationInput.email,
+            createCommunicationInput.templateName,
+            createCommunicationInput.templateParams || []
+          );
+        } else {
+          // Send regular email
+          await this.emailService.sendEmail(
+            createCommunicationInput.email,
+            'Notification', // Default subject
+            createCommunicationInput.content
+          );
+        }
+
+        console.log(`Email sent successfully to ${createCommunicationInput.email}`);
+
+      } catch (error) {
+        console.error('Failed to send email:', error.message);
         communicationStatus = CommunicationStatus.FAILED;
         // Continue to create the record but mark as failed
       }

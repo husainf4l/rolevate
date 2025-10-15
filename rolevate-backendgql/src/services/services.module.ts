@@ -10,6 +10,7 @@ import { FileValidationService } from './file-validation.service';
 import { CVErrorHandlingService } from './cv-error-handling.service';
 import { AiautocompleteService } from './aiautocomplete.service';
 import { AiautocompleteResolver } from './aiautocomplete.resolver';
+import { EmailService } from './email.service';
 import { Job } from '../job/job.entity';
 
 @Module({
@@ -24,6 +25,7 @@ import { Job } from '../job/job.entity';
     CVErrorHandlingService,
     AiautocompleteService,
     AiautocompleteResolver,
+    EmailService,
   ],
   exports: [
     AwsS3Service,
@@ -32,6 +34,7 @@ import { Job } from '../job/job.entity';
     FileValidationService,
     CVErrorHandlingService,
     AiautocompleteService,
+    EmailService,
   ],
 })
 export class ServicesModule {}

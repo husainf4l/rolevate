@@ -4,6 +4,7 @@ import { Interview } from './interview.entity';
 import { CreateInterviewInput } from './create-interview.input';
 import { UpdateInterviewInput } from './update-interview.input';
 import { SubmitInterviewFeedbackInput } from './submit-interview-feedback.input';
+import { InterviewWithTranscriptSummary } from './interview-with-transcript-summary.dto';
 
 @Resolver(() => Interview)
 export class InterviewResolver {
@@ -70,13 +71,13 @@ export class InterviewResolver {
     return this.interviewService.markNoShow(id);
   }
 
-  @Query(() => Interview, { name: 'interviewWithTranscripts', nullable: true })
-  async getInterviewWithTranscripts(@Args('id', { type: () => ID }) id: string): Promise<Interview | null> {
+  @Query(() => InterviewWithTranscriptSummary, { name: 'interviewWithTranscripts', nullable: true })
+  async getInterviewWithTranscripts(@Args('id', { type: () => ID }) id: string): Promise<InterviewWithTranscriptSummary | null> {
     return this.interviewService.getInterviewWithTranscripts(id);
   }
 
-  @Query(() => [Interview], { name: 'applicationInterviewsWithTranscripts' })
-  async getApplicationInterviewsWithTranscripts(@Args('applicationId', { type: () => ID }) applicationId: string): Promise<Interview[]> {
+  @Query(() => [InterviewWithTranscriptSummary], { name: 'applicationInterviewsWithTranscripts' })
+  async getApplicationInterviewsWithTranscripts(@Args('applicationId', { type: () => ID }) applicationId: string): Promise<InterviewWithTranscriptSummary[]> {
     return this.interviewService.getApplicationInterviewsWithTranscripts(applicationId);
   }
 }

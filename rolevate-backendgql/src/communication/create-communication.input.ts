@@ -28,6 +28,9 @@ export class CreateCommunicationInput {
   phoneNumber?: string;
 
   @Field({ nullable: true })
+  email?: string;
+
+  @Field({ nullable: true })
   templateName?: string;
 
   @Field(() => [String], { nullable: true })

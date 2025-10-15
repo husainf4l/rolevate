@@ -86,6 +86,10 @@ export class Communication {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  email?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   whatsappId?: string;
 
   @Column({
