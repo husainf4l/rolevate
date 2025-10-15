@@ -12,7 +12,7 @@ except ImportError:
     import logging
     logger = logging.getLogger(__name__)
 
-from app.agent.shared_memory import (
+from app.agent.memory.shared_memory import (
     CVMemoryStructure, 
     CVMemoryManager,
     get_cv_memory_from_state,
@@ -34,7 +34,7 @@ class MemoryIntegrationManager:
     def chat_memory(self):
         """Lazy load chat memory to avoid import issues"""
         if self._chat_memory is None:
-            from app.agent.chat_memory import chat_memory_manager
+            from app.agent.memory.chat_memory import chat_memory_manager
             self._chat_memory = chat_memory_manager
         return self._chat_memory
     

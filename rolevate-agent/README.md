@@ -1,114 +1,225 @@
-# Rolevate CV Agent
+# 🚀 Rolevate Agent - LLM-Powered CV Builder# Rolevate CV Agent
 
-AI-powered CV builder with chat interface and professional templates.
+
+
+> **AI-Driven Professional CV Generation Platform**  AI-powered CV builder with chat interface and professional templates.
+
+> Built with OpenAI GPT-4, LangChain, and LangGraph
 
 ## 🚀 Quick Start
 
-1. **Install dependencies:**
-   ```bash
-   python3 -m venv venv
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-green.svg)](https://openai.com/)1. **Install dependencies:**
+
+[![LangChain](https://img.shields.io/badge/LangChain-Enabled-orange.svg)](https://langchain.com/)   ```bash
+
+[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-teal.svg)](https://fastapi.tiangolo.com/)   python3 -m venv venv
+
    source venv/bin/activate
-   pip install -r requirements.txt
+
+---   pip install -r requirements.txt
+
    ```
+
+## 🌟 Overview
 
 2. **Configure environment:**
-   ```bash
+
+**Rolevate Agent** is an advanced CV building platform that leverages **100% LLM-powered processing** to intelligently extract, enhance, and format professional resumes. Unlike traditional regex-based parsers, our system uses OpenAI's GPT-4 to understand context, generate professional content, and create ATS-optimized CVs tailored for banking, finance, and corporate sectors.   ```bash
+
    cp .env.example .env
-   # Edit .env and add your OpenAI API key
+
+### Key Highlights   # Edit .env and add your OpenAI API key
+
    ```
 
-3. **Run the server:**
-   ```bash
-   PORT=8003 DEBUG=true venv/bin/python -m app.main
-   ```
+✅ **LLM-First Architecture** - All extraction and processing powered by OpenAI GPT-4  
+
+✅ **Intelligent Extraction** - Context-aware data parsing from professional descriptions  3. **Run the server:**
+
+✅ **Professional Writing** - AI-generated summaries, achievements, and descriptions     ```bash
+
+✅ **Smart Follow-ups** - Contextual questions to complete missing information     PORT=8003 DEBUG=true venv/bin/python -m app.main
+
+✅ **Industry Specialization** - Optimized for banking, finance, and corporate sectors     ```
+
+✅ **ATS-Friendly** - Generated CVs pass Applicant Tracking Systems  
 
 4. **Access the application:**
-   - Homepage: http://localhost:8003/
+
+---   - Homepage: http://localhost:8003/
+
    - CV Builder: http://localhost:8003/chat
-   - API Docs: http://localhost:8003/docs
+
+## 🏗️ Architecture   - API Docs: http://localhost:8003/docs
+
    - Health Check: http://localhost:8003/health
+
+### **LLM-Powered Workflow**
 
 ## 📁 Project Structure
 
 ```
-rolevate-agent/
+
+User Input → GPT-4 Understanding → Extraction → Enhancement → Optimization → PDF Export```
+
+```rolevate-agent/
+
 ├── app/
-│   ├── main.py                 # FastAPI application entry point
+
+All 17 workflow nodes use OpenAI GPT-4 for intelligent processing.│   ├── main.py                 # FastAPI application entry point
+
 │   ├── config.py              # Configuration settings
-│   ├── models/
+
+---│   ├── models/
+
 │   │   └── schemas.py         # Pydantic data models
-│   ├── services/
+
+## 📁 Project Structure│   ├── services/
+
 │   │   ├── cv_agent.py        # Main CV processing orchestrator
-│   │   ├── cv_extractor.py    # LLM-based CV extraction
-│   │   ├── cv_exporter.py     # PDF/DOCX export
-│   │   └── template_filler.py # Template rendering
-│   ├── agent/
-│   │   ├── agent.py           # LangGraph workflow orchestration
-│   │   ├── nodes/             # Processing nodes (extract, enhance, export)
-│   │   └── tools/             # Agent tools (validation, etc.)
-│   ├── utils/
-│   │   └── file_parser.py     # File parsing utilities
-│   └── templates/
-│       ├── components/        # Reusable UI components
-│       │   ├── base.html     # Base layout template
+
+```│   │   ├── cv_extractor.py    # LLM-based CV extraction
+
+rolevate-agent/│   │   ├── cv_exporter.py     # PDF/DOCX export
+
+├── app/agent/nodes/          # 17 LLM-powered workflow nodes│   │   └── template_filler.py # Template rendering
+
+├── app/agent/tools/          # AI tools (GPT-4 primary + utilities)│   ├── agent/
+
+├── app/api/                  # FastAPI routes│   │   ├── agent.py           # LangGraph workflow orchestration
+
+├── app/services/             # Business logic│   │   ├── nodes/             # Processing nodes (extract, enhance, export)
+
+├── tests/                    # Test suite│   │   └── tools/             # Agent tools (validation, etc.)
+
+├── scripts/                  # Utility scripts│   ├── utils/
+
+├── archive/                  # Archived components│   │   └── file_parser.py     # File parsing utilities
+
+├── docs/                     # Documentation│   └── templates/
+
+└── README.md                 # This file│       ├── components/        # Reusable UI components
+
+```│       │   ├── base.html     # Base layout template
+
 │       │   ├── navbar.html   # Navigation bar
-│       │   └── footer.html   # Footer
+
+---│       │   └── footer.html   # Footer
+
 │       ├── pages/            # Application pages
-│       │   ├── home.html     # Homepage (landing page)
+
+## 🛠️ Quick Start│       │   ├── home.html     # Homepage (landing page)
+
 │       │   └── chat.html     # CV Builder interface
-│       └── cv_templates/     # CV document templates
+
+### 1. Install Dependencies│       └── cv_templates/     # CV document templates
+
 │           ├── classic_cv.html
-│           ├── modern_cv.html
-│           └── executive_cv.html
-├── requirements.txt           # Python dependencies
-├── .env                       # Environment variables (not in git)
-└── .env.example              # Example environment config
 
-```
+```bash│           ├── modern_cv.html
 
-## 🔧 API Endpoints
+python -m venv venv│           └── executive_cv.html
 
-### Pages
-- `GET /` - Homepage (marketing landing page)
+source venv/bin/activate├── requirements.txt           # Python dependencies
+
+pip install -r requirements.txt├── .env                       # Environment variables (not in git)
+
+```└── .env.example              # Example environment config
+
+
+
+### 2. Configure Environment```
+
+
+
+```bash## 🔧 API Endpoints
+
+cp .env.example .env
+
+# Edit .env with your OPENAI_API_KEY### Pages
+
+```- `GET /` - Homepage (marketing landing page)
+
 - `GET /chat` - Chat-based CV builder interface
-- `GET /health` - Health check endpoint
 
-### CV Processing
-- `POST /api/v1/cv/extract` - Extract structured data from uploaded CV
-- `POST /api/v1/cv/fill` - Fill template with CV data and generate PDF/DOCX
+### 3. Run Application- `GET /health` - Health check endpoint
+
+
+
+```bash### CV Processing
+
+uvicorn app.main:app --reload --port 8001- `POST /api/v1/cv/extract` - Extract structured data from uploaded CV
+
+```- `POST /api/v1/cv/fill` - Fill template with CV data and generate PDF/DOCX
+
 - `GET /api/v1/cv/download/{filename}` - Download generated CV file
 
+Visit: `http://localhost:8001`
+
 ### Templates
-- `GET /api/v1/templates` - List available CV templates
 
-## 🎨 Templates
+---- `GET /api/v1/templates` - List available CV templates
 
-Three professional CV templates are available:
 
-1. **Classic** - Traditional layout with clean design
+
+## 🧪 Testing## 🎨 Templates
+
+
+
+```bashThree professional CV templates are available:
+
+python tests/test_llm_assistant.py
+
+```1. **Classic** - Traditional layout with clean design
+
 2. **Modern** - Contemporary styling with visual appeal
-3. **Executive** - Professional layout for senior positions
 
-All templates are:
+---3. **Executive** - Professional layout for senior positions
+
+
+
+## 📚 DocumentationAll templates are:
+
 - ATS-friendly (Applicant Tracking System compatible)
-- Mobile-responsive
-- Exportable as PDF or DOCX
 
-## 🤖 Features
+See `/docs/` directory for comprehensive guides:- Mobile-responsive
 
-- **AI Chat Interface** - Conversational CV building experience
+- `LLM_INTEGRATION_COMPLETE.md` - LLM architecture details- Exportable as PDF or DOCX
+
+- `CLEANUP_INVENTORY.md` - Project reorganization report
+
+- `TECHNOLOGY_STACK_IMPLEMENTATION.md` - Tech stack guide## 🤖 Features
+
+
+
+---- **AI Chat Interface** - Conversational CV building experience
+
 - **Smart Extraction** - Upload existing CV and extract data automatically
-- **Real-time Preview** - See changes as you build your CV
+
+## 🔄 Recent Updates (October 15, 2025)- **Real-time Preview** - See changes as you build your CV
+
 - **Multiple Formats** - Export as PDF or DOCX
-- **Professional Templates** - Choose from 3 carefully designed templates
-- **No Signup Required** - Start building immediately
-- **RESTful API** - Integrate into your own applications
 
-## 🛠️ Technology Stack
+- ✅ Migrated to 100% LLM-powered architecture- **Professional Templates** - Choose from 3 carefully designed templates
 
-- **Backend:** FastAPI, Python 3.12
+- ✅ Integrated OpenAI GPT-4 for all processing- **No Signup Required** - Start building immediately
+
+- ✅ Reorganized project structure- **RESTful API** - Integrate into your own applications
+
+- ✅ Archived obsolete regex-based components
+
+- ✅ Updated all documentation## 🛠️ Technology Stack
+
+
+
+---- **Backend:** FastAPI, Python 3.12
+
 - **AI/LLM:** OpenAI GPT-4, LangChain, LangGraph
-- **Export:** WeasyPrint (PDF), python-docx (DOCX)
+
+**Built with ❤️ by the Rolevate Team**- **Export:** WeasyPrint (PDF), python-docx (DOCX)
+
 - **Frontend:** Tailwind CSS, Vanilla JavaScript
 - **Templating:** Jinja2
 

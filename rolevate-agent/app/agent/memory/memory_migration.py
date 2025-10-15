@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import Dict, Any
 from loguru import logger
 
-from app.agent.shared_memory import CVMemoryManager
-from app.agent.chat_memory import CVChatMemory
+from app.agent.memory.shared_memory import CVMemoryManager
+from app.agent.memory.chat_memory import CVChatMemory
 
 
 class MemoryMigrator:

@@ -23,7 +23,7 @@ from app.agent.nodes.optimizer_node import optimizer_node, OPTIMIZER_NODE_METADA
 from app.agent.nodes.storage_node import storage_node, STORAGE_NODE_METADATA
 
 # Import shared memory system
-from app.agent.shared_memory import CVMemoryStructure, get_cv_memory_from_state, update_cv_memory_in_state
+from app.agent.memory.shared_memory import CVMemoryStructure, get_cv_memory_from_state, update_cv_memory_in_state
 
 
 class CVBuilderState(TypedDict):

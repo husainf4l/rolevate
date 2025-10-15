@@ -14,7 +14,7 @@ from app.config import settings
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from app.services.language_tool_service import LanguageToolService
-from app.services.anthropic_service import get_anthropic_service
+# Note: Anthropic service archived - using OpenAI only
 
 
 class CVOptimizer:
@@ -30,8 +30,8 @@ class CVOptimizer:
         # Initialize LanguageTool service for grammar checking
         self.language_tool = LanguageToolService()
         
-        # Initialize Anthropic service for alternative AI optimization
-        self.anthropic_service = get_anthropic_service()
+        # Using OpenAI only (Anthropic service archived)
+        self.anthropic_service = None
         
         # Track optimization statistics
         self.optimization_stats = {
@@ -151,53 +151,21 @@ class CVOptimizer:
         industry = context.get("industry", "general")
         text_type = context.get("text_type", "general")
         
-        # Check which services are available
+        # Check if OpenAI is available
         openai_available = settings.openai_api_key and settings.openai_api_key != "fake-key"
-        anthropic_available = self.anthropic_service.available
         
-        # Strategy 1: If both available, use Anthropic for certain text types, OpenAI for others
-        if openai_available and anthropic_available:
-            # Use Anthropic for professional summaries and experience descriptions (Claude excels at professional writing)
-            # Use OpenAI for technical content and achievements (GPT excels at technical language)
-            if text_type in ["professional_summary", "job_description"]:
-                try:
-                    optimized_text = await self.anthropic_service.optimize_cv_text(text, context)
-                    self.optimization_stats["anthropic_optimizations"] += 1
-                    logger.debug(f"Used Anthropic for {text_type} optimization")
-                    return optimized_text
-                except Exception as e:
-                    logger.warning(f"Anthropic optimization failed, falling back to OpenAI: {e}")
-                    # Fall through to OpenAI
-            
-            # Use OpenAI for other types or as fallback
-            try:
-                optimized_text = await self._optimize_with_openai(text, context)
-                self.optimization_stats["openai_optimizations"] += 1
-                return optimized_text
-            except Exception as e:
-                logger.warning(f"OpenAI optimization failed, trying Anthropic: {e}")
-                # Fall through to Anthropic fallback
-        
-        # Strategy 2: Use whichever service is available
-        if anthropic_available:
-            try:
-                optimized_text = await self.anthropic_service.optimize_cv_text(text, context)
-                self.optimization_stats["anthropic_optimizations"] += 1
-                logger.debug("Used Anthropic as primary AI service")
-                return optimized_text
-            except Exception as e:
-                logger.warning(f"Anthropic optimization failed: {e}")
-        
+        # Use OpenAI for optimization (primary and only LLM service)
         if openai_available:
             try:
                 optimized_text = await self._optimize_with_openai(text, context)
                 self.optimization_stats["openai_optimizations"] += 1
-                logger.debug("Used OpenAI as primary AI service")
+                logger.debug(f"Used OpenAI for {text_type} optimization")
                 return optimized_text
             except Exception as e:
                 logger.warning(f"OpenAI optimization failed: {e}")
+                # Fall through to pattern-based optimization
         
-        # Strategy 3: No AI services available, return pattern-improved text
+        # Fallback: No AI services available, return pattern-improved text
         logger.warning("No AI services available, using pattern improvements only")
         return self._apply_pattern_improvements(text, industry)
     
@@ -533,10 +501,8 @@ class CVOptimizer:
                 "industry_detected": self.detect_industry_context(cv_data),
                 "ai_services": {
                     "openai_available": bool(settings.openai_api_key and settings.openai_api_key != "fake-key"),
-                    "anthropic_available": self.anthropic_service.available,
                     "service_usage": {
-                        "openai_count": self.optimization_stats["openai_optimizations"],
-                        "anthropic_count": self.optimization_stats["anthropic_optimizations"]
+                        "openai_count": self.optimization_stats["openai_optimizations"]
                     }
                 },
                 "tools_used": tools_used,

@@ -10,7 +10,7 @@ import json
 import asyncio
 from loguru import logger
 
-from app.agent.chat_memory import chat_memory_manager, get_or_create_session
+from app.agent.memory.chat_memory import chat_memory_manager, get_or_create_session
 from app.agent.cv_builder_workflow import CVBuilderWorkflow
 
 

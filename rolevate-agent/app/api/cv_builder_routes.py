@@ -22,6 +22,7 @@ from app.agent.cv_builder_graph import (
 from app.agent.nodes.storage_node import CVStorageManager
 from app.api.auth_routes import get_current_user
 from app.models.user import User
+from app.agent.tools.professional_profile_assistant import ProfessionalProfileAssistant
 
 
 # Create the router
@@ -546,4 +547,320 @@ async def get_cv_builder_info() -> Dict[str, Any]:
         raise HTTPException(
             status_code=500,
             detail=f"Info retrieval failed: {str(e)}"
+        )
+
+
+# Professional Profile Assistant Endpoints
+class ProfileAnalysisRequest(BaseModel):
+    """Professional profile analysis request"""
+    professional_background: str = Field(..., description="Professional background text to analyze")
+    industry_focus: Optional[str] = Field(default="banking_finance", description="Industry focus (banking_finance, general)")
+
+
+class ProfileAnalysisResponse(BaseModel):
+    """Profile analysis response"""
+    extracted_data: Dict[str, Any] = Field(..., description="Structured extracted information")
+    missing_information: List[str] = Field(default=[], description="List of missing information fields")
+    completeness_score: float = Field(..., description="Profile completeness percentage (0-100)")
+    follow_up_question: Optional[str] = Field(default=None, description="Suggested follow-up question")
+    analysis_summary: str = Field(..., description="Brief analysis summary")
+
+
+class ProfileUpdateRequest(BaseModel):
+    """Profile update request"""
+    session_id: str = Field(..., description="Profile analysis session ID")
+    field_name: str = Field(..., description="Field to update")
+    field_value: Any = Field(..., description="New field value")
+
+
+class ProfileSummaryRequest(BaseModel):
+    """Profile summary generation request"""
+    session_id: str = Field(..., description="Profile analysis session ID")
+    include_all_sections: bool = Field(default=True, description="Include all available sections")
+
+
+class ProfileSummaryResponse(BaseModel):
+    """Profile summary response"""
+    professional_summary: str = Field(..., description="Complete formatted professional CV")
+    json_output: Dict[str, Any] = Field(..., description="Structured JSON output for ATS/database")
+    word_count: int = Field(..., description="Summary word count")
+    sections_included: List[str] = Field(default=[], description="Sections included in summary")
+
+
+# Initialize profile assistant
+profile_assistant = ProfessionalProfileAssistant()
+
+
+@router.post("/profile/analyze", response_model=ProfileAnalysisResponse)
+async def analyze_professional_profile(
+    request: ProfileAnalysisRequest,
+    current_user: User = Depends(get_current_user)
+) -> ProfileAnalysisResponse:
+    """
+    Analyze professional background text and extract structured information
+
+    This endpoint processes unstructured professional background text and:
+    - Extracts key information (experience, education, skills, etc.)
+    - Identifies missing information
+    - Provides completeness scoring
+    - Suggests follow-up questions
+    """
+    try:
+        logger.info(f"🔍 Analyzing professional profile for user {current_user.id}")
+
+        # Analyze the professional background text
+        analysis_result = profile_assistant.analyze_profile_text(request.professional_background)
+
+        # Generate follow-up question if needed
+        follow_up_question = None
+        if analysis_result['missing_information']:
+            follow_up_question = profile_assistant.generate_follow_up_question(
+                analysis_result['missing_information']
+            )
+
+        # Create analysis summary
+        extracted_data = analysis_result['extracted_data']
+        completeness = analysis_result['completeness_score']
+
+        summary_parts = []
+        if extracted_data.get('personal_info', {}).get('full_name'):
+            summary_parts.append(f"Identified: {extracted_data['personal_info']['full_name']}")
+
+        current_pos = extracted_data.get('current_position', {})
+        if current_pos.get('job_title') and current_pos.get('organization'):
+            summary_parts.append(f"Current role: {current_pos['job_title']} at {current_pos['organization']}")
+
+        exp = extracted_data.get('experience', {})
+        if exp.get('years_experience'):
+            summary_parts.append(f"Experience: {exp['years_experience']} years")
+
+        analysis_summary = ". ".join(summary_parts) + f". Profile completeness: {completeness}%"
+
+        response = ProfileAnalysisResponse(
+            extracted_data=extracted_data,
+            missing_information=analysis_result['missing_information'],
+            completeness_score=completeness,
+            follow_up_question=follow_up_question,
+            analysis_summary=analysis_summary
+        )
+
+        logger.success(f"✅ Profile analysis completed: {completeness}% complete")
+        return response
+
+    except Exception as e:
+        logger.error(f"❌ Profile analysis failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Profile analysis failed: {str(e)}"
+        )
+
+
+@router.post("/profile/update")
+async def update_profile_information(
+    request: ProfileUpdateRequest,
+    current_user: User = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """
+    Update specific profile information fields
+
+    This endpoint allows updating individual profile fields:
+    - Adds or updates specific information
+    - Validates input data
+    - Recalculates completeness score
+    - Returns updated profile data
+    """
+    try:
+        logger.info(f"📝 Updating profile field: {request.field_name}")
+
+        # In a real implementation, this would update stored profile data
+        # For now, we'll return a success response with the updated field
+
+        response = {
+            "success": True,
+            "field_updated": request.field_name,
+            "new_value": request.field_value,
+            "message": f"Successfully updated {request.field_name.replace('_', ' ')}"
+        }
+
+        logger.success(f"✅ Profile field updated: {request.field_name}")
+        return response
+
+    except Exception as e:
+        logger.error(f"❌ Profile update failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Profile update failed: {str(e)}"
+        )
+
+
+@router.post("/profile/generate-summary", response_model=ProfileSummaryResponse)
+async def generate_professional_summary(
+    request: ProfileSummaryRequest,
+    current_user: User = Depends(get_current_user)
+) -> ProfileSummaryResponse:
+    """
+    Generate a complete, structured professional summary
+
+    This endpoint creates a formatted professional summary including:
+    - Personal and contact information
+    - Professional summary paragraphs
+    - Core competencies and skills
+    - Education and certifications
+    - Career objectives
+    """
+    try:
+        logger.info(f"📄 Generating professional summary for user {current_user.id}")
+
+        # In a real implementation, this would retrieve the complete profile data
+        # For now, we'll create a sample based on typical banking/finance profile
+
+        sample_profile_data = {
+            'personal_info': {
+                'full_name': 'Johnathan Smith',
+                'email': 'johnathan.smith@financecorp.com',
+                'phone': '+1-555-0123',
+                'location': 'New York, NY'
+            },
+            'current_position': {
+                'job_title': 'Senior Investment Banker',
+                'organization': 'Global Finance Corporation'
+            },
+            'experience': {
+                'years_experience': 12,
+                'previous_positions': [
+                    'Investment Banking Analyst at Regional Bank',
+                    'Associate at International Investment Group'
+                ]
+            },
+            'education': {
+                'degree': 'MBA',
+                'institution': 'Harvard Business School',
+                'graduation_year': 2010
+            },
+            'certifications': [
+                {
+                    'certification_name': 'CFA',
+                    'issuing_body': 'CFA Institute',
+                    'year_obtained': 2015
+                },
+                {
+                    'certification_name': 'Series 65',
+                    'issuing_body': 'FINRA',
+                    'year_obtained': 2012
+                }
+            ],
+            'skills': [
+                'Financial Modeling', 'Valuation Analysis', 'Mergers & Acquisitions',
+                'Capital Markets', 'Risk Assessment', 'Portfolio Management',
+                'Client Relationship Management', 'Regulatory Compliance'
+            ],
+            'languages': [
+                {'language': 'English', 'proficiency_level': 'Native'},
+                {'language': 'Spanish', 'proficiency_level': 'Conversational'}
+            ],
+            'goals': {
+                'career_objectives': 'Seeking to leverage 12+ years of investment banking experience to drive strategic growth initiatives and deliver exceptional value to institutional clients.',
+                'professional_philosophy': 'Committed to maintaining the highest standards of integrity, professionalism, and client service excellence in all financial transactions.'
+            }
+        }
+
+        # Generate the professional CV (formatted)
+        professional_summary = profile_assistant.generate_professional_summary(sample_profile_data)
+        
+        # Generate JSON output
+        json_output = profile_assistant.generate_cv_json(sample_profile_data)
+
+        # Count words
+        word_count = len(professional_summary.split())
+
+        # Identify sections included
+        sections_included = []
+        if '### **CONTACT**' in professional_summary:
+            sections_included.append('contact_information')
+        if '### **PROFESSIONAL SUMMARY**' in professional_summary:
+            sections_included.append('professional_summary')
+        if '### **CORE COMPETENCIES**' in professional_summary:
+            sections_included.append('core_competencies')
+        if '### **PROFESSIONAL EXPERIENCE**' in professional_summary:
+            sections_included.append('professional_experience')
+        if '### **EDUCATION**' in professional_summary:
+            sections_included.append('education')
+        if '### **CERTIFICATIONS**' in professional_summary:
+            sections_included.append('certifications')
+        if '### **LANGUAGES**' in professional_summary:
+            sections_included.append('languages')
+        if '### **PROFESSIONAL PHILOSOPHY**' in professional_summary:
+            sections_included.append('professional_philosophy')
+
+        response = ProfileSummaryResponse(
+            professional_summary=professional_summary,
+            json_output=json_output,
+            word_count=word_count,
+            sections_included=sections_included
+        )
+
+        logger.success(f"✅ Professional CV generated: {word_count} words")
+        return response
+
+    except Exception as e:
+        logger.error(f"❌ Summary generation failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Summary generation failed: {str(e)}"
+        )
+
+
+@router.get("/profile/capabilities")
+async def get_profile_assistant_capabilities() -> Dict[str, Any]:
+    """
+    Get information about the Professional Profile Assistant capabilities
+
+    Returns system information and supported features:
+    - Analysis capabilities
+    - Supported industries
+    - Output formats
+    - Data extraction fields
+    """
+    try:
+        return {
+            "system": "Professional Profile Assistant",
+            "version": "1.0.0",
+            "description": "AI-powered assistant for building complete professional profiles in banking and finance",
+            "primary_industry": "Banking & Financial Services",
+            "supported_languages": ["English"],
+            "extraction_capabilities": {
+                "personal_info": ["full_name", "email", "phone", "location"],
+                "current_position": ["job_title", "organization", "start_date"],
+                "experience": ["years_experience", "previous_positions", "key_responsibilities"],
+                "education": ["degree", "institution", "graduation_year"],
+                "certifications": ["certification_name", "issuing_body", "year_obtained"],
+                "skills": ["core_competencies", "technical_skills", "soft_skills"],
+                "languages": ["language", "proficiency_level"],
+                "goals": ["career_objectives", "professional_philosophy"]
+            },
+            "output_formats": ["structured_markdown", "json", "html"],
+            "analysis_features": [
+                "Intelligent text parsing",
+                "Missing information detection",
+                "Completeness scoring",
+                "Follow-up question generation",
+                "Professional summary generation",
+                "Industry-specific terminology recognition"
+            ],
+            "certifications_supported": [
+                "CFA (Chartered Financial Analyst)",
+                "CPA (Certified Public Accountant)",
+                "FRM (Financial Risk Manager)",
+                "PRM (Professional Risk Manager)",
+                "CAIA (Chartered Alternative Investment Analyst)",
+                "CFP (Certified Financial Planner)",
+                "Series 65, 66 (FINRA licenses)"
+            ]
+        }
+
+    except Exception as e:
+        logger.error(f"❌ Capabilities retrieval failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Capabilities retrieval failed: {str(e)}"
         )

@@ -296,11 +296,13 @@
 
     <script>
         let cvData = {
-            contact_info: {},
-            experiences: [],
+            personal_info: {},
+            work_experience: [],
             education: [],
             skills: [],
-            summary: ''
+            languages: [],
+            certifications: [],
+            professional_summary: ''
         };
 
         let conversationState = 'initial';
@@ -435,54 +437,84 @@
 
             showTyping();
 
-            setTimeout(() => {
-                hideTyping();
-                processUserMessage(message);
-            }, 1000);
+            // Call LLM-powered backend API instead of static responses
+            await processUserMessage(message);
         }
 
-        function processUserMessage(message) {
-            const lowerMessage = message.toLowerCase();
+        async function processUserMessage(message) {
+            try {
+                // Get auth token
+                const token = localStorage.getItem('access_token');
+                
+                // Call the LLM-powered backend API (correct endpoint: /api/v1/chat)
+                const response = await fetch('/api/v1/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: getSessionId(),
+                        user_id: null
+                    })
+                });
 
-            if (conversationState === 'collecting_info') {
-                if (!cvData.contact_info.name) {
-                    cvData.contact_info.name = message;
-                    updateCVPreview();
-                    addMessage(`Nice to meet you, ${message}! What's your email?`, false);
-                } else if (!cvData.contact_info.email) {
-                    cvData.contact_info.email = message;
-                    updateCVPreview();
-                    addMessage("Great! What's your phone number?", false);
-                } else if (!cvData.contact_info.phone) {
-                    cvData.contact_info.phone = message;
-                    updateCVPreview();
-                    addMessage("Perfect! Tell me about your professional summary.", false);
-                } else if (!cvData.summary) {
-                    cvData.summary = message;
-                    updateCVPreview();
-                    addMessage("Excellent! What would you like to add next?", false, [
-                        { label: 'Experience', action: "quickAction('experience')" },
-                        { label: 'Education', action: "quickAction('education')" },
-                        { label: 'Skills', action: "quickAction('skills')" }
-                    ]);
+                hideTyping();
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
                 }
-            } else {
-                addMessage("I understand. Use the quick actions or ask me anything about your CV.", false);
+
+                const data = await response.json();
+                
+                // API returns: { response, session_id, cv_progress, suggestions, download_url }
+                // Update CV data from cv_progress
+                if (data.cv_progress && data.cv_progress.cv_memory) {
+                    cvData = data.cv_progress.cv_memory;
+                    updateCVPreview();
+                }
+
+                // Display AI response (powered by GPT-4)
+                addMessage(data.response || data.ai_response, false);
+
+                // Log extraction details for debugging
+                console.log('🤖 Session:', data.session_id);
+                console.log('📊 CV Progress:', data.cv_progress);
+                console.log('� Suggestions:', data.suggestions);
+
+            } catch (error) {
+                hideTyping();
+                console.error('Error calling LLM backend:', error);
+                addMessage("I'm having trouble connecting right now. Please try again in a moment.", false);
             }
         }
 
-        function quickAction(action) {
+        // Generate or retrieve session ID
+        function getSessionId() {
+            let sessionId = sessionStorage.getItem('cv_session_id');
+            if (!sessionId) {
+                sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                sessionStorage.setItem('cv_session_id', sessionId);
+            }
+            return sessionId;
+        }
+
+        async function quickAction(action) {
             if (action === 'skills') {
                 addMessage("Add skills", true);
-                addMessage("List your skills separated by commas (e.g., Python, JavaScript, Leadership)", false);
+                showTyping();
+                await processUserMessage("I want to add my skills");
             } else if (action === 'experience') {
                 addMessage("Add experience", true);
-                addMessage("Tell me about your position:\n• Company\n• Job title\n• Duration\n• Responsibilities", false);
+                showTyping();
+                await processUserMessage("I want to add my work experience");
             } else if (action === 'education') {
                 addMessage("Add education", true);
-                addMessage("Provide:\n• Degree\n• Institution\n• Year\n• Field of study", false);
+                showTyping();
+                await processUserMessage("I want to add my education");
             } else if (action === 'clear') {
-                if (confirm('Clear chat?')) {
+                if (confirm('Clear chat and CV data?')) {
                     location.reload();
                 }
             }
@@ -491,14 +523,20 @@
         function updateCVPreview() {
             const cvContent = document.getElementById('cvContent');
             
-            if (!cvData.contact_info.name && cvData.experiences.length === 0) {
+            // Check if CV has any data
+            const hasPersonalInfo = cvData.personal_info && Object.keys(cvData.personal_info).length > 0;
+            const hasExperience = cvData.work_experience && cvData.work_experience.length > 0;
+            const hasEducation = cvData.education && cvData.education.length > 0;
+            const hasSummary = cvData.professional_summary && cvData.professional_summary.length > 0;
+            
+            if (!hasPersonalInfo && !hasExperience && !hasEducation && !hasSummary) {
                 cvContent.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-center py-16">
                         <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center text-2xl mb-3">
                             📋
                         </div>
                         <h3 class="text-base font-semibold text-gray-900 mb-1">Your CV Preview</h3>
-                        <p class="text-sm text-gray-500">Start building to see your CV here</p>
+                        <p class="text-sm text-gray-500">Start chatting to build your CV</p>
                     </div>
                 `;
                 return;
@@ -506,39 +544,47 @@
 
             let html = '';
 
-            // Contact
-            if (cvData.contact_info.name) {
+            // Personal Info / Contact
+            if (hasPersonalInfo) {
+                const info = cvData.personal_info;
                 html += `
                     <div class="mb-6">
-                        <h1 class="text-3xl font-bold text-gray-900 mb-2">${cvData.contact_info.name}</h1>
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">${info.name || info.full_name || 'Your Name'}</h1>
                         <div class="flex flex-wrap gap-3 text-sm text-gray-600">
-                            ${cvData.contact_info.email ? `<div>${cvData.contact_info.email}</div>` : ''}
-                            ${cvData.contact_info.phone ? `<div>${cvData.contact_info.phone}</div>` : ''}
-                            ${cvData.contact_info.location ? `<div>${cvData.contact_info.location}</div>` : ''}
+                            ${info.email ? `<div>📧 ${info.email}</div>` : ''}
+                            ${info.phone ? `<div>📱 ${info.phone}</div>` : ''}
+                            ${info.location || info.address ? `<div>📍 ${info.location || info.address}</div>` : ''}
+                            ${info.linkedin ? `<div>💼 LinkedIn</div>` : ''}
                         </div>
                     </div>
                 `;
             }
 
-            // Summary
-            if (cvData.summary) {
+            // Professional Summary
+            if (hasSummary) {
                 html += `
                     <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Summary</h3>
-                        <p class="text-sm text-gray-700 leading-relaxed">${cvData.summary}</p>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Professional Summary</h3>
+                        <p class="text-sm text-gray-700 leading-relaxed">${cvData.professional_summary}</p>
                     </div>
                 `;
             }
 
-            // Experience
-            if (cvData.experiences && cvData.experiences.length > 0) {
-                html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Experience</h3>';
-                cvData.experiences.forEach(exp => {
+            // Work Experience
+            if (hasExperience) {
+                html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Work Experience</h3>';
+                cvData.work_experience.forEach(exp => {
                     html += `
                         <div class="mb-4">
-                            <h4 class="text-base font-semibold text-gray-900">${exp.job_title || exp.position} at ${exp.company}</h4>
-                            <div class="text-xs text-gray-500 mb-1">${exp.start_date || ''} - ${exp.end_date || 'Present'}</div>
-                            <p class="text-sm text-gray-700">${exp.description || exp.responsibilities || ''}</p>
+                            <h4 class="text-base font-semibold text-gray-900">${exp.job_title || exp.position || 'Position'}</h4>
+                            <div class="text-sm font-medium text-gray-700">${exp.company || 'Company'}</div>
+                            <div class="text-xs text-gray-500 mb-2">${exp.start_date || ''} - ${exp.end_date || 'Present'}</div>
+                            ${exp.description ? `<p class="text-sm text-gray-700 whitespace-pre-line">${exp.description}</p>` : ''}
+                            ${exp.achievements && exp.achievements.length > 0 ? `
+                                <ul class="mt-2 text-sm text-gray-700 list-disc list-inside space-y-1">
+                                    ${exp.achievements.map(a => `<li>${a}</li>`).join('')}
+                                </ul>
+                            ` : ''}
                         </div>
                     `;
                 });
@@ -546,13 +592,15 @@
             }
 
             // Education
-            if (cvData.education && cvData.education.length > 0) {
+            if (hasEducation) {
                 html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Education</h3>';
                 cvData.education.forEach(edu => {
                     html += `
                         <div class="mb-3">
-                            <h4 class="text-base font-semibold text-gray-900">${edu.degree} in ${edu.field_of_study || 'Field'}</h4>
-                            <div class="text-xs text-gray-500">${edu.institution} - ${edu.graduation_date || ''}</div>
+                            <h4 class="text-base font-semibold text-gray-900">${edu.degree || 'Degree'}</h4>
+                            <div class="text-sm font-medium text-gray-700">${edu.institution || 'Institution'}</div>
+                            <div class="text-xs text-gray-500">${edu.graduation_year || edu.end_date || edu.year || ''}</div>
+                            ${edu.gpa ? `<div class="text-xs text-gray-600 mt-1">GPA: ${edu.gpa}</div>` : ''}
                         </div>
                     `;
                 });
@@ -563,18 +611,52 @@
             if (cvData.skills && cvData.skills.length > 0) {
                 html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Skills</h3><div class="flex flex-wrap gap-2">';
                 cvData.skills.forEach(skill => {
-                    const skillName = typeof skill === 'string' ? skill : skill.name || skill.skill_name;
+                    const skillName = typeof skill === 'string' ? skill : skill.name || skill.skill_name || skill;
                     html += `<span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">${skillName}</span>`;
                 });
                 html += '</div></div>';
+            }
+
+            // Languages
+            if (cvData.languages && cvData.languages.length > 0) {
+                html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Languages</h3><div class="space-y-1">';
+                cvData.languages.forEach(lang => {
+                    const langName = typeof lang === 'string' ? lang : lang.language || lang.name;
+                    const proficiency = typeof lang === 'object' ? ` - ${lang.proficiency || ''}` : '';
+                    html += `<div class="text-sm text-gray-700">${langName}${proficiency}</div>`;
+                });
+                html += '</div></div>';
+            }
+
+            // Certifications
+            if (cvData.certifications && cvData.certifications.length > 0) {
+                html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Certifications</h3>';
+                cvData.certifications.forEach(cert => {
+                    const certName = typeof cert === 'string' ? cert : cert.name || cert.certification;
+                    const issuer = typeof cert === 'object' ? cert.issuer || cert.organization : '';
+                    const date = typeof cert === 'object' ? cert.date || cert.year : '';
+                    html += `
+                        <div class="mb-2">
+                            <div class="text-sm font-medium text-gray-900">${certName}</div>
+                            ${issuer ? `<div class="text-xs text-gray-600">${issuer}</div>` : ''}
+                            ${date ? `<div class="text-xs text-gray-500">${date}</div>` : ''}
+                        </div>
+                    `;
+                });
+                html += '</div>';
             }
 
             cvContent.innerHTML = html;
         }
 
         async function downloadCV(format = 'pdf') {
-            if (!cvData.contact_info.name) {
-                alert('Please build your CV first!');
+            // Check if CV has any data
+            const hasData = (cvData.personal_info && Object.keys(cvData.personal_info).length > 0) ||
+                           (cvData.work_experience && cvData.work_experience.length > 0) ||
+                           (cvData.education && cvData.education.length > 0);
+            
+            if (!hasData) {
+                alert('Please build your CV first by chatting with the AI!');
                 return;
             }
 
@@ -629,8 +711,42 @@
             addMessage(`Template: ${names[template]}`, false);
         }
 
-        // Focus input
+        // Focus input and initialize chat with LLM greeting
         document.getElementById('chatInput').focus();
+        
+        // Initialize chat with AI greeting
+        (async function initializeChat() {
+            showTyping();
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch('/api/v1/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        message: "Hello, I want to build my CV",
+                        session_id: getSessionId(),
+                        user_id: null
+                    })
+                });
+                
+                hideTyping();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage(data.response || data.ai_response, false);
+                } else {
+                    // Fallback greeting
+                    addMessage("👋 Welcome to Rolevate CV Builder! I'm your AI assistant powered by GPT-4. Tell me about your professional experience, and I'll help you create an outstanding CV. You can describe your background in natural language, and I'll intelligently extract and structure the information.", false);
+                }
+            } catch (error) {
+                hideTyping();
+                // Fallback greeting
+                addMessage("👋 Welcome to Rolevate CV Builder! I'm your AI assistant. Tell me about your professional experience, and I'll help you create an outstanding CV.", false);
+            }
+        })();
     </script>
 
     <script>
