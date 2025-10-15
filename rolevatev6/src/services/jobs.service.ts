@@ -1,10 +1,21 @@
 import { Job, JobFilters, JobsResponse } from '@/types/jobs';
-import { graphQLService } from './graphql.service';
+import { apolloClient } from '@/lib/apollo';
+import { gql } from '@apollo/client';
+
+interface PaginationInput {
+  take?: number;
+  skip?: number;
+}
+
+interface PaginationInput {
+  take?: number;
+  skip?: number;
+}
 
 class JobsService {
   // GraphQL Queries
 
-  private GET_JOB_BY_ID_QUERY = `
+  private GET_JOB_BY_ID_QUERY = gql`
     query GetJob($id: String!) {
       job(id: $id) {
         id
@@ -14,50 +25,32 @@ class JobsService {
         location
         salary
         type
-        deadline
-        shortDescription
-        responsibilities
-        requirements
-        benefits
-        skills
-        experience
-        education
         jobLevel
-        workType
-        industry
-        companyDescription
+        skills
         status
-        featured
-        applicants
-        views
-        postedBy {
-          id
-        }
         createdAt
         updatedAt
       }
     }
   `;
 
-  private GET_COMPANY_JOBS_QUERY = `
-    query GetCompanyJobs($filter: JobFilter, $pagination: PaginationInput) {
-      jobs(filter: $filter, pagination: $pagination) {
-        data {
-          id
-          title
-          description
-          status
-          createdAt
-          updatedAt
+  private GET_FEATURED_JOBS_QUERY = gql`
+    query GetFeaturedJobs {
+      jobs {
+        id
+        title
+        company {
+          name
         }
-        total
-        page
-        pages
+        location
+        salary
+        type
+        featured
       }
     }
   `;
 
-  private CREATE_JOB_MUTATION = `
+  private CREATE_JOB_MUTATION = gql`
     mutation CreateJob($input: CreateJobInput!) {
       createJob(input: $input) {
         id
@@ -70,7 +63,7 @@ class JobsService {
     }
   `;
 
-  private UPDATE_JOB_MUTATION = `
+  private UPDATE_JOB_MUTATION = gql`
     mutation UpdateJob($id: ID!, $input: UpdateJobInput!) {
       updateJob(id: $id, input: $input) {
         id
@@ -83,13 +76,13 @@ class JobsService {
     }
   `;
 
-  private DELETE_JOB_MUTATION = `
+  private DELETE_JOB_MUTATION = gql`
     mutation DeleteJob($id: ID!) {
       deleteJob(id: $id)
     }
   `;
 
-  private GET_ALL_JOBS_QUERY = `
+  private GET_ALL_JOBS_QUERY = gql`
     query GetAllJobs {
       jobs {
         id
@@ -108,74 +101,88 @@ class JobsService {
     }
   `;
 
+  private GET_COMPANY_JOBS_QUERY = gql`
+    query GetCompanyJobs($filter: JobFilterInput, $pagination: PaginationInput) {
+      jobs(filter: $filter, pagination: $pagination) {
+        id
+        title
+        department
+        location
+        salary
+        type
+        deadline
+        shortDescription
+        status
+        applicants
+        views
+        postedAt
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
   /**
    * Fetch jobs with optional filters and pagination
    */
   async getJobs(
-    page: number = 1, 
-    limit: number = 10, 
+    page: number = 1,
+    limit: number = 10,
     filters?: JobFilters
   ): Promise<JobsResponse> {
     try {
-      // Since the GraphQL API doesn't support filtering yet, we fetch all and filter client-side
-      const response = await graphQLService.request<{ jobs: any[] }>(
-        this.GET_ALL_JOBS_QUERY
-      );
+      // Build filter object for GraphQL
+      const gqlFilter: any = {};
 
-      let filteredJobs = response.jobs || [];
-
-      // Apply client-side filtering
-      if (filters) {
-        if (filters.search) {
-          const searchTerm = filters.search.toLowerCase();
-          filteredJobs = filteredJobs.filter(job => 
-            job.title.toLowerCase().includes(searchTerm) ||
-            job.description.toLowerCase().includes(searchTerm) ||
-            job.shortDescription?.toLowerCase().includes(searchTerm)
-          );
-        }
-        if (filters.location) {
-          filteredJobs = filteredJobs.filter(job => 
-            job.location.toLowerCase().includes(filters.location!.toLowerCase())
-          );
-        }
-        if (filters.type) {
-          filteredJobs = filteredJobs.filter(job => job.type === filters.type);
-        }
-        if (filters.level) {
-          filteredJobs = filteredJobs.filter(job => job.jobLevel === filters.level);
-        }
+      if (filters?.search) {
+        gqlFilter.search = filters.search;
+      }
+      if (filters?.location) {
+        gqlFilter.location = filters.location;
+      }
+      if (filters?.type) {
+        gqlFilter.type = filters.type;
+      }
+      if (filters?.level) {
+        gqlFilter.level = filters.level;
       }
 
-      // Apply pagination
-      const startIndex = (page - 1) * limit;
-      const paginatedJobs = filteredJobs.slice(startIndex, startIndex + limit);
+      const { data } = await apolloClient.query<{ jobs: any[] }>({
+        query: this.GET_COMPANY_JOBS_QUERY,
+        variables: {
+          filter: Object.keys(gqlFilter).length > 0 ? gqlFilter : undefined,
+          pagination: { take: limit, skip: (page - 1) * limit }
+        },
+        fetchPolicy: 'network-only'
+      });
+
+      const jobs = data?.jobs || [];
 
       // Map to our Job interface
-      const mappedJobs: Job[] = paginatedJobs.map(job => ({
+      const mappedJobs: Job[] = jobs.map((job: any) => ({
         id: job.id,
         title: job.title,
-        description: job.description,
+        description: job.shortDescription || job.description,
         company: job.department, // Using department as company for now
         location: job.location,
         salary: job.salary,
         type: job.type,
         level: job.jobLevel,
         skills: Array.isArray(job.skills) ? job.skills : [],
-        postedAt: job.createdAt,
+        postedAt: job.postedAt || job.createdAt,
         updatedAt: job.updatedAt,
         isActive: job.status === 'ACTIVE'
       }));
 
       return {
         jobs: mappedJobs,
-        total: filteredJobs.length,
+        total: jobs.length, // This should come from the API, but for now using array length
         page,
         limit
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching jobs:', error);
-      throw new Error('Failed to fetch jobs');
+      throw new Error(error?.message || 'Failed to fetch jobs');
     }
   }
 
@@ -184,12 +191,13 @@ class JobsService {
    */
   async getJobById(id: string): Promise<Job> {
     try {
-      const response = await graphQLService.request<{ job: any }>(
-        this.GET_JOB_BY_ID_QUERY,
-        { id }
-      );
+      const { data } = await apolloClient.query<{ job: any }>({
+        query: this.GET_JOB_BY_ID_QUERY,
+        variables: { id },
+        fetchPolicy: 'network-only'
+      });
 
-      const job = response.job;
+      const job = data?.job;
       if (!job) {
         throw new Error('Job not found');
       }
@@ -209,44 +217,29 @@ class JobsService {
         updatedAt: job.updatedAt,
         isActive: job.status === 'ACTIVE'
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching job:', error);
-      throw new Error('Failed to fetch job details');
+      throw new Error(error?.message || 'Failed to fetch job details');
     }
   }
-
-  private GET_FEATURED_JOBS_QUERY = `
-    query GetFeaturedJobs {
-      jobs {
-        id
-        title
-        company {
-          name
-        }
-        location
-        salary
-        type
-        featured
-      }
-    }
-  `;
 
   /**
    * Fetch featured jobs for homepage
    */
   async getFeaturedJobs(limit: number = 6): Promise<Job[]> {
     try {
-      const response = await graphQLService.request<{ jobs: any[] }>(
-        this.GET_FEATURED_JOBS_QUERY
-      );
+      const { data } = await apolloClient.query<{ jobs: any[] }>({
+        query: this.GET_FEATURED_JOBS_QUERY,
+        fetchPolicy: 'network-only'
+      });
 
       // Filter for featured jobs and limit the results
-      const featuredJobs = (response.jobs || [])
-        .filter(job => job.featured === true)
+      const featuredJobs = (data?.jobs || [])
+        .filter((job: any) => job.featured === true)
         .slice(0, limit);
 
       // Map to match the expected interface
-      const mappedJobs: Job[] = featuredJobs.map(job => ({
+      const mappedJobs: Job[] = featuredJobs.map((job: any) => ({
         id: job.id,
         title: job.title,
         description: '', // Not fetched for performance
@@ -262,7 +255,7 @@ class JobsService {
       }));
 
       return mappedJobs;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching featured jobs:', error);
       // Return empty array as fallback for homepage
       return [];
@@ -338,16 +331,36 @@ class JobsService {
   /**
    * Get company jobs for dashboard
    */
-  async getCompanyJobs(page: number = 1, limit: number = 100): Promise<any> {
+  async getCompanyJobs(page: number = 1, limit: number = 100, filters?: JobFilters): Promise<any[]> {
     try {
-      const response = await graphQLService.request<{ jobs: any }>(
-        this.GET_COMPANY_JOBS_QUERY,
-        { pagination: { page, limit } }
-      );
-      return response.jobs;
-    } catch (error) {
+      // Build filter object for GraphQL
+      const gqlFilter: any = {};
+
+      if (filters?.search) {
+        gqlFilter.search = filters.search;
+      }
+      if (filters?.location) {
+        gqlFilter.location = filters.location;
+      }
+      if (filters?.type) {
+        gqlFilter.type = filters.type;
+      }
+      if (filters?.level) {
+        gqlFilter.level = filters.level;
+      }
+
+      const { data } = await apolloClient.query<{ jobs: any[] }>({
+        query: this.GET_COMPANY_JOBS_QUERY,
+        variables: {
+          filter: Object.keys(gqlFilter).length > 0 ? gqlFilter : undefined,
+          pagination: { take: limit, skip: (page - 1) * limit }
+        },
+        fetchPolicy: 'network-only'
+      });
+      return data?.jobs || [];
+    } catch (error: any) {
       console.error('Error fetching company jobs:', error);
-      throw new Error('Failed to fetch company jobs');
+      throw new Error(error?.message || 'Failed to fetch company jobs');
     }
   }
 
@@ -356,14 +369,14 @@ class JobsService {
    */
   async createJob(input: any): Promise<any> {
     try {
-      const response = await graphQLService.request<{ createJob: any }>(
-        this.CREATE_JOB_MUTATION,
-        { input }
-      );
-      return response.createJob;
-    } catch (error) {
+      const { data } = await apolloClient.mutate<{ createJob: any }>({
+        mutation: this.CREATE_JOB_MUTATION,
+        variables: { input }
+      });
+      return data?.createJob;
+    } catch (error: any) {
       console.error('Error creating job:', error);
-      throw new Error('Failed to create job');
+      throw new Error(error?.message || 'Failed to create job');
     }
   }
 
@@ -372,14 +385,14 @@ class JobsService {
    */
   async updateJob(id: string, input: any): Promise<any> {
     try {
-      const response = await graphQLService.request<{ updateJob: any }>(
-        this.UPDATE_JOB_MUTATION,
-        { id, input }
-      );
-      return response.updateJob;
-    } catch (error) {
+      const { data } = await apolloClient.mutate<{ updateJob: any }>({
+        mutation: this.UPDATE_JOB_MUTATION,
+        variables: { id, input }
+      });
+      return data?.updateJob;
+    } catch (error: any) {
       console.error('Error updating job:', error);
-      throw new Error('Failed to update job');
+      throw new Error(error?.message || 'Failed to update job');
     }
   }
 
@@ -388,14 +401,14 @@ class JobsService {
    */
   async deleteJob(id: string): Promise<boolean> {
     try {
-      const response = await graphQLService.request<{ deleteJob: boolean }>(
-        this.DELETE_JOB_MUTATION,
-        { id }
-      );
-      return response.deleteJob;
-    } catch (error) {
+      const { data } = await apolloClient.mutate<{ deleteJob: boolean }>({
+        mutation: this.DELETE_JOB_MUTATION,
+        variables: { id }
+      });
+      return data?.deleteJob || false;
+    } catch (error: any) {
       console.error('Error deleting job:', error);
-      throw new Error('Failed to delete job');
+      throw new Error(error?.message || 'Failed to delete job');
     }
   }
 

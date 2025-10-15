@@ -26,23 +26,19 @@ import {
 } from "@/services/notification";
 
 const getNotificationIcon = (
-  type: Notification["type"],
-  category: Notification["category"]
+  type: Notification["type"]
 ) => {
-  const categoryIcon = {
-    APPLICATION: BriefcaseIcon,
-    INTERVIEW: ChatBubbleLeftRightIcon,
-    SYSTEM: InformationCircleIcon,
-    CANDIDATE: UserIcon,
-    OFFER: DocumentTextIcon,
-  }[category];
+  const typeIcon = {
+    application: BriefcaseIcon,
+    message: ChatBubbleLeftRightIcon,
+    system: InformationCircleIcon,
+  }[type];
 
-  const Icon = categoryIcon;
+  const Icon = typeIcon;
   const colorClass = {
-    SUCCESS: "text-green-600 bg-green-100",
-    WARNING: "text-yellow-600 bg-yellow-100",
-    INFO: "text-blue-600 bg-blue-100",
-    ERROR: "text-red-600 bg-red-100",
+    application: "text-green-600 bg-green-100",
+    message: "text-blue-600 bg-blue-100",
+    system: "text-yellow-600 bg-yellow-100",
   }[type];
 
   return (
@@ -91,8 +87,8 @@ export default function NotificationsPage() {
     try {
       setError(null);
       const data = await fetchNotifications();
-      setNotifications(data.notifications || []);
-      setUnreadCount(data.unreadCount || 0);
+      setNotifications(data);
+      setUnreadCount(data.filter(n => !n.read).length);
     } catch (err: any) {
       setError(err.message || "Failed to fetch notifications");
       showToast("Failed to load notifications", "error");
@@ -129,7 +125,7 @@ export default function NotificationsPage() {
         (filter === "unread" && !notification.read);
 
       const matchesCategoryFilter =
-        categoryFilter === "all" || notification.category === categoryFilter;
+        categoryFilter === "all" || notification.type === categoryFilter;
 
       const matchesSearchTerm =
         searchTerm === "" ||
@@ -272,12 +268,10 @@ export default function NotificationsPage() {
                         onChange={(e) => setCategoryFilter(e.target.value)}
                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                       >
-                        <option value="all">All Categories</option>
-                        <option value="APPLICATION">Applications</option>
-                        <option value="INTERVIEW">Interviews</option>
-                        <option value="CANDIDATE">Candidates</option>
-                        <option value="OFFER">Offers</option>
-                        <option value="SYSTEM">System</option>
+                        <option value="all">All Types</option>
+                        <option value="application">Applications</option>
+                        <option value="message">Messages</option>
+                        <option value="system">System</option>
                       </select>
                     </div>
 
@@ -316,8 +310,7 @@ export default function NotificationsPage() {
                       >
                         <div className="flex items-start gap-3">
                           {getNotificationIcon(
-                            notification.type,
-                            notification.category
+                            notification.type
                           )}
 
                           <div className="flex-1 min-w-0">
@@ -333,7 +326,7 @@ export default function NotificationsPage() {
                               </h3>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-gray-500">
-                                  {formatTimestamp(notification.timestamp)}
+                                  {formatTimestamp(notification.createdAt)}
                                 </span>
                                 {!notification.read && (
                                   <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
@@ -343,20 +336,6 @@ export default function NotificationsPage() {
                             <p className="text-sm text-gray-600 mt-1">
                               {notification.message}
                             </p>
-                            {notification.metadata && (
-                              <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                                {notification.metadata.candidateName && (
-                                  <span>
-                                    {notification.metadata.candidateName}
-                                  </span>
-                                )}
-                                {notification.metadata.jobTitle && (
-                                  <span>
-                                    {notification.metadata.jobTitle}
-                                  </span>
-                                )}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -388,8 +367,7 @@ export default function NotificationsPage() {
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
                         {getNotificationIcon(
-                          selectedNotification.type,
-                          selectedNotification.category
+                          selectedNotification.type
                         )}
                         <div>
                           <h4 className="font-medium text-gray-900">
@@ -430,71 +408,21 @@ export default function NotificationsPage() {
                           <div className="flex justify-between">
                             <span className="text-gray-500">Category:</span>
                             <span className="text-gray-900 capitalize">
-                              {selectedNotification.category}
+                              {selectedNotification.type}
                             </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Time:</span>
                             <span className="text-gray-900">
                               {new Date(
-                                selectedNotification.timestamp
+                                selectedNotification.createdAt
                               ).toLocaleString()}
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      {selectedNotification.metadata && (
-                        <div className="border-t pt-4">
-                          <h5 className="text-sm font-medium text-gray-900 mb-2">
-                            Additional Info
-                          </h5>
-                          <div className="space-y-2 text-sm">
-                            {selectedNotification.metadata.candidateName && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">
-                                  Candidate:
-                                </span>
-                                <span className="text-gray-900">
-                                  {selectedNotification.metadata.candidateName}
-                                </span>
-                              </div>
-                            )}
-                            {selectedNotification.metadata.jobTitle && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">Position:</span>
-                                <span className="text-gray-900">
-                                  {selectedNotification.metadata.jobTitle}
-                                </span>
-                              </div>
-                            )}
-                            {selectedNotification.metadata.applicationId && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">
-                                  Application ID:
-                                </span>
-                                <span className="text-gray-900">
-                                  {selectedNotification.metadata.applicationId}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
 
-                      {selectedNotification.actionUrl && (
-                        <div className="border-t pt-4">
-                          <button
-                            onClick={() =>
-                              (window.location.href =
-                                selectedNotification.actionUrl!)
-                            }
-                            className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
-                          >
-                            View Details
-                          </button>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ) : (

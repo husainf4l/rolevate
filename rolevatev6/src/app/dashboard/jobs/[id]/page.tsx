@@ -24,7 +24,7 @@ export default function EditJobPage() {
       try {
         setLoading(true);
         console.log("Fetching job with ID:", jobId);
-        const jobData = await JobService.getJobById(jobId);
+        const jobData = await JobService.getJob(jobId);
 
         console.log("Received job data:", jobData);
 
@@ -57,10 +57,10 @@ export default function EditJobPage() {
           workType: jobData.workType || "",
           industry: jobData.industry || "",
           interviewLanguage: jobData.interviewLanguage || "english",
-          aiCvAnalysisPrompt:
-            jobData.cvAnalysisPrompt || jobData.aiCvAnalysisPrompt || "",
-          aiFirstInterviewPrompt:
-            jobData.interviewPrompt || jobData.aiFirstInterviewPrompt || "",
+          cvAnalysisPrompt:
+            jobData.cvAnalysisPrompt || "",
+          interviewPrompt:
+            jobData.interviewPrompt || "",
           aiSecondInterviewPrompt: jobData.aiSecondInterviewPrompt || "",
         };
 
@@ -506,15 +506,15 @@ export default function EditJobPage() {
             <div className="space-y-6">
               <div>
                 <label
-                  htmlFor="aiCvAnalysisPrompt"
+                  htmlFor="cvAnalysisPrompt"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   AI CV Analysis Prompt
                 </label>
                 <textarea
-                  name="aiCvAnalysisPrompt"
-                  id="aiCvAnalysisPrompt"
-                  value={job.aiCvAnalysisPrompt}
+                  name="cvAnalysisPrompt"
+                  id="cvAnalysisPrompt"
+                  value={job.cvAnalysisPrompt}
                   onChange={handleChange}
                   rows={5}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
@@ -522,15 +522,15 @@ export default function EditJobPage() {
               </div>
               <div>
                 <label
-                  htmlFor="aiFirstInterviewPrompt"
+                  htmlFor="interviewPrompt"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   AI First Interview Prompt
                 </label>
                 <textarea
-                  name="aiFirstInterviewPrompt"
-                  id="aiFirstInterviewPrompt"
-                  value={job.aiFirstInterviewPrompt}
+                  name="interviewPrompt"
+                  id="interviewPrompt"
+                  value={job.interviewPrompt}
                   onChange={handleChange}
                   rows={5}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"

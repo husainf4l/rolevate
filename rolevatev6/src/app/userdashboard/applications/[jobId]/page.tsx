@@ -187,14 +187,14 @@ export default function ApplicationDetailsPage() {
                 <div className="bg-gray-50 rounded-sm p-4">
                   <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-primary-100 rounded-sm flex items-center justify-center flex-shrink-0 text-primary-600 font-bold text-lg">
-                      {application.job.company.name.charAt(0).toUpperCase()}
+                      {application.job.company?.name?.charAt(0).toUpperCase() || 'C'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-lg mb-1 truncate">
                         {application.job.title}
                       </h3>
                       <p className="text-primary-600 font-medium mb-3">
-                        {application.job.company.name}
+                        {application.job.company?.name || 'Unknown Company'}
                       </p>
                       <div className="flex items-center space-x-2 text-sm text-gray-500">
                         <ClockIcon className="w-4 h-4" />

@@ -99,11 +99,11 @@ const transformApplicationToCandidate = (
     location: "Not specified", // No location in current API response
     source: "direct" as const, // Default source, could be enhanced
     priority: "medium" as const, // Default priority, could be calculated
-    cvRating: application.cvAnalysisScore,
+    cvRating: application.cvAnalysisScore || 0,
     interview1Rating: 0, // These would come from interview data
     interview2Rating: 0,
     hrRating: 0,
-    overallRating: application.cvAnalysisScore,
+    overallRating: application.cvAnalysisScore || 0,
     appliedDate: new Date(application.appliedAt).toLocaleDateString(),
     lastActivity: new Date(application.appliedAt).toLocaleDateString(),
     experience: application.cvAnalysisResults?.experienceMatch?.years
@@ -347,7 +347,7 @@ export default function CandidatesPage() {
       .length,
     hr_interview: candidates.filter((c) => c.status === "INTERVIEWED").length,
     offer: candidates.filter((c) => c.status === "OFFERED").length,
-    hired: 0, // No equivalent in new enum - could be tracked separately
+    hired: 0, // No HIRED status in new interface
     rejected: candidates.filter((c) => c.status === "REJECTED").length,
   };
 
@@ -541,9 +541,7 @@ export default function CandidatesPage() {
                         <option value="all">All Status</option>
                         <option value="SUBMITTED">Submitted</option>
                         <option value="REVIEWING">Reviewing</option>
-                        <option value="INTERVIEW_SCHEDULED">
-                          Interview Scheduled
-                        </option>
+                        <option value="INTERVIEW_SCHEDULED">Interview Scheduled</option>
                         <option value="INTERVIEWED">Interviewed</option>
                         <option value="OFFERED">Offered</option>
                         <option value="REJECTED">Rejected</option>
@@ -624,7 +622,7 @@ export default function CandidatesPage() {
                             }
                             className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
                           >
-                            Schedule Interview
+                            Shortlist
                           </button>
                           <button
                             onClick={() => handleBulkStatusUpdate("OFFERED")}
@@ -893,7 +891,7 @@ export default function CandidatesPage() {
                                 }
                                 className="text-green-600 hover:text-green-700 font-medium text-sm"
                               >
-                                Schedule
+                                Shortlist
                               </button>
                               <button
                                 onClick={() =>

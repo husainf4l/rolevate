@@ -1,4 +1,5 @@
-import { graphQLService } from './graphql.service';
+import { apolloClient } from '@/lib/apollo';
+import { gql } from '@apollo/client';
 
 export interface Job {
   id: string;
@@ -24,6 +25,10 @@ export interface Job {
   featured?: boolean;
   applicants?: number;
   views?: number;
+  cvAnalysisPrompt?: string;
+  interviewPrompt?: string;
+  aiSecondInterviewPrompt?: string;
+  interviewLanguage?: string;
   postedBy?: {
     id: string;
   };
@@ -98,12 +103,12 @@ export interface JobFilter {
 }
 
 export interface PaginationInput {
-  page?: number;
-  limit?: number;
+  take?: number;
+  skip?: number;
 }
 
 class JobService {
-  private GET_COMPANY_JOBS_QUERY = `
+  private GET_COMPANY_JOBS_QUERY = gql`
     query GetCompanyJobs {
       jobs {
         id
@@ -138,25 +143,42 @@ class JobService {
     }
   `;
 
-  private GET_JOBS_QUERY = `
-    query GetJobs($filter: JobFilter, $pagination: PaginationInput) {
+  private GET_JOBS_QUERY = gql`
+    query GetJobs($filter: JobFilterInput, $pagination: PaginationInput) {
       jobs(filter: $filter, pagination: $pagination) {
-        data {
+        id
+        title
+        description
+        department
+        location
+        salary
+        type
+        deadline
+        shortDescription
+        responsibilities
+        requirements
+        benefits
+        skills
+        experience
+        education
+        jobLevel
+        workType
+        industry
+        companyDescription
+        status
+        featured
+        applicants
+        views
+        postedBy {
           id
-          title
-          description
-          status
-          createdAt
-          updatedAt
         }
-        total
-        page
-        pages
+        createdAt
+        updatedAt
       }
     }
   `;
 
-  private GET_JOB_QUERY = `
+  private GET_JOB_QUERY = gql`
     query GetJob($id: ID!) {
       job(id: $id) {
         id
@@ -169,7 +191,7 @@ class JobService {
     }
   `;
 
-  private CREATE_JOB_MUTATION = `
+  private CREATE_JOB_MUTATION = gql`
     mutation CreateJob($input: CreateJobInput!) {
       createJob(input: $input) {
         id
@@ -182,7 +204,7 @@ class JobService {
     }
   `;
 
-  private UPDATE_JOB_MUTATION = `
+  private UPDATE_JOB_MUTATION = gql`
     mutation UpdateJob($id: ID!, $input: UpdateJobInput!) {
       updateJob(id: $id, input: $input) {
         id
@@ -195,7 +217,7 @@ class JobService {
     }
   `;
 
-  private DELETE_JOB_MUTATION = `
+  private DELETE_JOB_MUTATION = gql`
     mutation DeleteJob($id: ID!) {
       deleteJob(id: $id)
     }
@@ -203,60 +225,71 @@ class JobService {
 
   async getCompanyJobs(): Promise<Job[]> {
     try {
-      const response = await graphQLService.request<{ jobs: Job[] }>(
-        this.GET_COMPANY_JOBS_QUERY
-      );
-      return response.jobs;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to fetch jobs');
+      const { data } = await apolloClient.query<{ jobs: Job[] }>({
+        query: this.GET_COMPANY_JOBS_QUERY,
+        fetchPolicy: 'network-only'
+      });
+      return data?.jobs || [];
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to fetch jobs');
     }
   }
 
   async getJob(id: string): Promise<Job> {
     try {
-      const response = await graphQLService.request<{ job: Job }>(
-        this.GET_JOB_QUERY,
-        { id }
-      );
-      return response.job;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to fetch job');
+      const { data } = await apolloClient.query<{ job: Job }>({
+        query: this.GET_JOB_QUERY,
+        variables: { id },
+        fetchPolicy: 'network-only'
+      });
+      if (!data?.job) {
+        throw new Error('Job not found');
+      }
+      return data.job;
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to fetch job');
     }
   }
 
   async createJob(input: CreateJobInput): Promise<Job> {
     try {
-      const response = await graphQLService.request<{ createJob: Job }>(
-        this.CREATE_JOB_MUTATION,
-        { input }
-      );
-      return response.createJob;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to create job');
+      const { data } = await apolloClient.mutate<{ createJob: Job }>({
+        mutation: this.CREATE_JOB_MUTATION,
+        variables: { input }
+      });
+      if (!data?.createJob) {
+        throw new Error('Failed to create job');
+      }
+      return data.createJob;
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to create job');
     }
   }
 
   async updateJob(id: string, input: UpdateJobInput): Promise<Job> {
     try {
-      const response = await graphQLService.request<{ updateJob: Job }>(
-        this.UPDATE_JOB_MUTATION,
-        { id, input }
-      );
-      return response.updateJob;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to update job');
+      const { data } = await apolloClient.mutate<{ updateJob: Job }>({
+        mutation: this.UPDATE_JOB_MUTATION,
+        variables: { id, input }
+      });
+      if (!data?.updateJob) {
+        throw new Error('Failed to update job');
+      }
+      return data.updateJob;
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to update job');
     }
   }
 
   async deleteJob(id: string): Promise<boolean> {
     try {
-      const response = await graphQLService.request<{ deleteJob: boolean }>(
-        this.DELETE_JOB_MUTATION,
-        { id }
-      );
-      return response.deleteJob;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to delete job');
+      const { data } = await apolloClient.mutate<{ deleteJob: boolean }>({
+        mutation: this.DELETE_JOB_MUTATION,
+        variables: { id }
+      });
+      return data?.deleteJob || false;
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to delete job');
     }
   }
 

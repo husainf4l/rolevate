@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Logo from "@/components/common/logo";
+import Logo from "@/components/common/Logo";
 import {
   CreateCompanyForm,
   JoinCompanyForm,

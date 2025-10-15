@@ -241,7 +241,7 @@ const transformApplicationToDetail = (
     notes:
       application.cvAnalysisResults?.summary || "",
     resume: application.resumeUrl || "",
-    jobId: application.jobId,
+    jobId: application.job.id,
     jobTitle: application.job.title || "Unknown Position",
     companyName: application.job?.company?.name || "Unknown Company",
     source: (application as any).source || "direct",
@@ -259,15 +259,15 @@ const transformApplicationToDetail = (
 const getStatusColor = (status: Application["status"]) => {
   switch (status) {
     case "SUBMITTED":
-      return "bg-gray-100 text-gray-800";
-    case "REVIEWING":
       return "bg-blue-100 text-blue-800";
+    case "REVIEWING":
+      return "bg-yellow-100 text-yellow-800";
     case "INTERVIEW_SCHEDULED":
-      return "bg-purple-100 text-purple-800";
-    case "INTERVIEWED":
-      return "bg-indigo-100 text-indigo-800";
-    case "OFFERED":
       return "bg-green-100 text-green-800";
+    case "INTERVIEWED":
+      return "bg-purple-100 text-purple-800";
+    case "OFFERED":
+      return "bg-indigo-100 text-indigo-800";
     case "REJECTED":
       return "bg-red-100 text-red-800";
     case "WITHDRAWN":
@@ -336,7 +336,7 @@ export default function JobCandidateProfile() {
         // Fetch application, job, and notes in parallel
         const [application, jobData] = await Promise.all([
           getApplicationById(applicationId),
-          JobService.getJobById(jobId)
+          JobService.getJob(jobId)
         ]);
         
         if (!application)
@@ -390,10 +390,10 @@ export default function JobCandidateProfile() {
     try {
       setAddingNote(true);
       const noteData: CreateNoteData = {
-        text: newNote.trim(),
-        source: "USER",
+        note: newNote.trim(),
+        isPrivate: false,
       };
-      const createdNote = await createApplicationNote(applicationId, noteData);
+      const createdNote = await createApplicationNote(applicationId, newNote.trim(), false);
       setNotes((prev) => [createdNote, ...prev]);
       setNewNote("");
     } catch (err) {
@@ -539,7 +539,7 @@ export default function JobCandidateProfile() {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">{job.title}</h2>
-                  <p className="text-white/80">{job.company?.name} • {job.department}</p>
+                  <p className="text-white/80">{job.department}</p>
                   <p className="text-white/60 text-sm">{job.location} • {job.type?.replace('_', ' ')}</p>
                 </div>
               </div>
@@ -682,7 +682,7 @@ export default function JobCandidateProfile() {
                             </span>
                             <ul className="mt-1 text-sm text-gray-600 list-disc list-inside">
                               {candidate.cvAnalysisResults.strengths.map(
-                                (strength, index) => (
+                                (strength: string, index: number) => (
                                   <li key={index}>{strength}</li>
                                 )
                               )}
@@ -698,7 +698,7 @@ export default function JobCandidateProfile() {
                             </span>
                             <ul className="mt-1 text-sm text-gray-600 list-disc list-inside">
                               {candidate.cvAnalysisResults.weaknesses.map(
-                                (weakness, index) => (
+                                (weakness: string, index: number) => (
                                   <li key={index}>{weakness}</li>
                                 )
                               )}
@@ -1220,24 +1220,16 @@ export default function JobCandidateProfile() {
                       <div key={note.id} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <p className="text-gray-800 text-sm">{note.text}</p>
+                            <p className="text-gray-800 text-sm">{note.note}</p>
                             <div className="flex items-center gap-2 mt-2">
                               <span
                                 className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  note.source === "USER"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : note.source === "AI"
-                                    ? "bg-purple-100 text-purple-800"
-                                    : note.source === "SYSTEM"
-                                    ? "bg-gray-100 text-gray-800"
-                                    : "bg-green-100 text-green-800"
+                                  note.isPrivate
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-blue-100 text-blue-800"
                                 }`}
                               >
-                                {note.source === "USER"
-                                  ? note.user?.name ||
-                                    note.user?.email ||
-                                    "USER"
-                                  : note.source}
+                                {note.isPrivate ? "Private" : "Public"}
                               </span>
                               <span className="text-xs text-gray-500">
                                 {new Date(note.createdAt).toLocaleDateString()}{" "}

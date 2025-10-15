@@ -90,11 +90,11 @@ const transformApplicationToCandidate = (
     location: "Not specified", // No location in current API response
     source: "direct" as const, // Default source, could be enhanced
     priority: "medium" as const, // Default priority, could be calculated
-    cvRating: application.cvAnalysisScore,
+    cvRating: application.cvAnalysisScore || 0,
     interview1Rating: 0, // These would come from interview data
     interview2Rating: 0,
     hrRating: 0,
-    overallRating: application.cvAnalysisScore,
+    overallRating: application.cvAnalysisScore || 0,
     appliedDate: new Date(application.appliedAt).toLocaleDateString(),
     lastActivity: new Date(application.updatedAt).toLocaleDateString(),
     experience: application.cvAnalysisResults?.experienceMatch?.years

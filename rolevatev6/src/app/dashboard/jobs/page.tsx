@@ -85,18 +85,17 @@ function JobsContent() {
           setError(null);
         }
         
-        const response = await JobService.getCompanyJobs(1, 100, debouncedSearchTerm);
+        const response = await JobService.getCompanyJobs();
         
         if (isMounted && !abortController.signal.aborted) {
-          setJobPosts(response.jobs);
-          console.log('Jobs fetched:', response.jobs.length, 'jobs');
+          setJobPosts(response);
+          console.log('Jobs fetched:', response.length, 'jobs');
           console.log('Search term:', debouncedSearchTerm);
-          console.log('Total jobs:', response.total);
           console.log('Jobs by status:', {
-            ACTIVE: response.jobs.filter(job => job.status === 'ACTIVE').length,
-            DRAFT: response.jobs.filter(job => job.status === 'DRAFT').length,
-            PAUSED: response.jobs.filter(job => job.status === 'PAUSED').length,
-            DELETED: response.jobs.filter(job => job.status === 'DELETED').length,
+            ACTIVE: response.filter(job => job.status === 'ACTIVE').length,
+            DRAFT: response.filter(job => job.status === 'DRAFT').length,
+            PAUSED: response.filter(job => job.status === 'PAUSED').length,
+            DELETED: response.filter(job => job.status === 'DELETED').length,
           });
         }
       } catch (err) {
@@ -161,9 +160,9 @@ function JobsContent() {
     setLoading(true);
     setError(null);
     try {
-      const response = await JobService.getCompanyJobs(1, 100, debouncedSearchTerm); // Get first 100 jobs with current search
-      setJobPosts(response.jobs);
-      console.log('Jobs refreshed:', response.jobs.length, 'jobs');
+      const response = await JobService.getCompanyJobs(); // Get all company jobs
+      setJobPosts(response);
+      console.log('Jobs refreshed:', response.length, 'jobs');
     } catch (err) {
       console.error('Failed to refresh jobs:', err);
       setError(err instanceof Error ? err.message : 'Failed to refresh jobs');

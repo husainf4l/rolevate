@@ -1,5 +1,6 @@
 // Configuration service for company setup
-import { graphQLService } from './graphql.service';
+import { apolloClient } from '@/lib/apollo';
+import { gql } from '@apollo/client';
 
 export interface CompanyData {
   name: string;
@@ -16,7 +17,7 @@ export interface CompanyData {
 }
 
 export class ConfigurationService {
-  private CREATE_COMPANY_MUTATION = `
+  private CREATE_COMPANY_MUTATION = gql`
     mutation CreateCompany($input: CreateCompanyInput!) {
       createCompany(input: $input) {
         id
@@ -37,7 +38,7 @@ export class ConfigurationService {
     }
   `;
 
-  private JOIN_COMPANY_MUTATION = `
+  private JOIN_COMPANY_MUTATION = gql`
     mutation JoinCompany($invitationCode: String!) {
       joinCompany(invitationCode: $invitationCode) {
         id
@@ -51,7 +52,7 @@ export class ConfigurationService {
     }
   `;
 
-  private GENERATE_DESCRIPTION_MUTATION = `
+  private GENERATE_DESCRIPTION_MUTATION = gql`
     mutation GenerateCompanyDescription($input: GenerateDescriptionInput!) {
       generateCompanyDescription(input: $input) {
         generatedDescription
@@ -78,28 +79,28 @@ export class ConfigurationService {
       
       console.log('[ConfigurationService] GraphQL input:', input);
       
-      const response = await graphQLService.request<{ createCompany: any }>(
-        this.CREATE_COMPANY_MUTATION,
-        { input }
-      );
+      const { data: response } = await apolloClient.mutate<{ createCompany: any }>({
+        mutation: this.CREATE_COMPANY_MUTATION,
+        variables: { input }
+      });
       
       console.log('[ConfigurationService] Response:', response);
-      return response.createCompany;
-    } catch (error) {
+      return response?.createCompany;
+    } catch (error: any) {
       console.error('[ConfigurationService] Error:', error);
-      throw new Error(error instanceof Error ? error.message : 'Failed to create company');
+      throw new Error(error?.message || 'Failed to create company');
     }
   }
 
   async joinCompany(data: { invitationCode: string }): Promise<any> {
     try {
-      const response = await graphQLService.request<{ joinCompany: any }>(
-        this.JOIN_COMPANY_MUTATION,
-        { invitationCode: data.invitationCode }
-      );
-      return response.joinCompany;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to join company');
+      const { data: response } = await apolloClient.mutate<{ joinCompany: any }>({
+        mutation: this.JOIN_COMPANY_MUTATION,
+        variables: { invitationCode: data.invitationCode }
+      });
+      return response?.joinCompany;
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to join company');
     }
   }
 
@@ -120,13 +121,13 @@ export class ConfigurationService {
         currentDescription: data.currentDescription,
         website: data.website,
       };
-      const response = await graphQLService.request<{ generateCompanyDescription: { generatedDescription: string } }>(
-        this.GENERATE_DESCRIPTION_MUTATION,
-        { input }
-      );
-      return response.generateCompanyDescription;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to generate description');
+      const { data: response } = await apolloClient.mutate<{ generateCompanyDescription: { generatedDescription: string } }>({
+        mutation: this.GENERATE_DESCRIPTION_MUTATION,
+        variables: { input }
+      });
+      return response?.generateCompanyDescription || { generatedDescription: '' };
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to generate description');
     }
   }
 

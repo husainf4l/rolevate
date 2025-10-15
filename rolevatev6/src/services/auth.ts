@@ -1,11 +1,12 @@
 import { User, LoginInput, SignupInput, AuthResponse, AuthError } from '@/types/auth';
-import { graphQLService } from './graphql.service';
+import { apolloClient } from '@/lib/apollo';
+import { gql } from '@apollo/client';
 
 class AuthService {
   private currentUser: User | null = null;
 
   // GraphQL Mutations
-  private LOGIN_MUTATION = `
+  private LOGIN_MUTATION = gql`
     mutation Login($input: LoginInput!) {
       login(input: $input) {
         access_token
@@ -23,7 +24,7 @@ class AuthService {
     }
   `;
 
-  private SIGNUP_MUTATION = `
+  private SIGNUP_MUTATION = gql`
     mutation CreateUser($input: CreateUserInput!) {
       createUser(input: $input) {
         id
@@ -34,25 +35,52 @@ class AuthService {
     }
   `;
 
+  private GET_CURRENT_USER_QUERY = gql`
+    query GetCurrentUser {
+      me {
+        id
+        email
+        name
+        userType
+        phone
+        avatar
+        company {
+          id
+          name
+          description
+          industry
+          website
+          email
+          phone
+        }
+        companyId
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
   /**
    * Login user with email and password
    */
   async login(input: LoginInput): Promise<AuthResponse> {
     try {
-      const response = await graphQLService.request<{ login: AuthResponse }>(
-        this.LOGIN_MUTATION,
-        { input }
-      );
+      const { data } = await apolloClient.mutate<{ login: AuthResponse }>({
+        mutation: this.LOGIN_MUTATION,
+        variables: { input }
+      });
 
-      const { access_token, user } = response.login;
+      const { access_token, user } = data!.login;
       
-      // Store token and user data
-      graphQLService.setToken(access_token);
+      // Store token in localStorage (Apollo will pick it up automatically)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('access_token', access_token);
+      }
       this.setUser(user);
 
-      return response.login;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Login failed');
+      return data!.login;
+    } catch (error: any) {
+      throw new Error(error?.message || 'Login failed');
     }
   }
 
@@ -61,14 +89,14 @@ class AuthService {
    */
   async signup(input: SignupInput): Promise<User> {
     try {
-      const response = await graphQLService.request<{ createUser: User }>(
-        this.SIGNUP_MUTATION,
-        { input }
-      );
+      const { data } = await apolloClient.mutate<{ createUser: User }>({
+        mutation: this.SIGNUP_MUTATION,
+        variables: { input }
+      });
 
-      return response.createUser;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Signup failed');
+      return data!.createUser;
+    } catch (error: any) {
+      throw new Error(error?.message || 'Signup failed');
     }
   }
 
@@ -76,8 +104,14 @@ class AuthService {
    * Logout user and clear stored data
    */
   logout(): void {
-    graphQLService.removeToken();
+    // Clear token from localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token');
+    }
     this.clearUser();
+    
+    // Clear Apollo cache
+    apolloClient.clearStore();
     
     // Redirect to home page
     if (typeof window !== 'undefined') {
@@ -112,43 +146,21 @@ class AuthService {
         return null;
       }
 
-      const GET_CURRENT_USER_QUERY = `
-        query GetCurrentUser {
-          me {
-            id
-            email
-            name
-            userType
-            phone
-            avatar
-            company {
-              id
-              name
-              description
-              industry
-              website
-              email
-              phone
-            }
-            companyId
-            createdAt
-            updatedAt
-          }
-        }
-      `;
-
-      const response = await graphQLService.request<{ me: User }>(GET_CURRENT_USER_QUERY);
+      const { data } = await apolloClient.query<{ me: User }>({
+        query: this.GET_CURRENT_USER_QUERY,
+        fetchPolicy: 'network-only' // Always fetch fresh data
+      });
       
-      if (response.me) {
-        this.setUser(response.me);
-        return response.me;
+      if (data?.me) {
+        this.setUser(data.me);
+        return data.me;
       }
       
       return null;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching current user:', error);
       // If error is authentication related, clear stored data
-      if (error instanceof Error && error.message.includes('Unauthorized')) {
+      if (error?.message?.includes('Unauthorized') || error?.message?.includes('Unauthenticated')) {
         this.logout();
       }
       return null;

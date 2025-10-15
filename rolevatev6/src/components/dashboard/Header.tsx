@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { logout } from "@/services/auth";
-import { markNotificationAsRead } from "@/services/notification";
+import { fetchNotifications as fetchNotificationsService, markNotificationAsRead } from "@/services/notification";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { API_CONFIG } from "@/lib/config";
@@ -100,12 +100,13 @@ export default function Header({
   const fetchNotifications = useCallback(async () => {
     setNotificationsLoading(true);
     try {
-      const res = await fetch(`${API_CONFIG.API_BASE_URL}/notifications`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch notifications");
-      const data = await res.json();
-      setNotifications(Array.isArray(data) ? data : data.notifications || []);
+      const data = await fetchNotificationsService();
+      setNotifications(data.map(n => ({
+        ...n,
+        timestamp: n.createdAt,
+        category: n.type as any, // Adjust type mapping if needed
+        type: 'info' as any // Default type, adjust based on n.type
+      })));
     } catch (err: any) {
       console.error("Error fetching notifications:", err);
       setNotifications([]);
