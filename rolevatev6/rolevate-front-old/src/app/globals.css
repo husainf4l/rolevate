@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+@theme {
+  /* Define your teal primary colors */
+  --color-primary-50: #f0fdfa;
+  --color-primary-100: #ccfbf1;
+  --color-primary-200: #99f6e4;
+  --color-primary-300: #5eead4;
+  --color-primary-400: #2dd4bf;
+  --color-primary-500: #14b8a6;
+  --color-primary-600: #0891b2;
+  --color-primary-700: #0c7594;
+  --color-primary-800: #155e75;
+  --color-primary-900: #164e63;
+  --color-primary-950: #083344;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 188 95% 43%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 188 94% 37%;
+    
+    --radius: 0.5rem;
+  }
+}
+
+/* Non-critical styles - loaded after initial render */
+
+:root {
+  --primary-teal: #13ead9;
+  --secondary-teal: #0891b2;
+  --accent-light: #f0fdfa;
+  --glass-white: rgba(255, 255, 255, 0.85);
+  --glass-white-strong: rgba(255, 255, 255, 0.95);
+  --border-subtle: rgba(255, 255, 255, 0.2);
+  --border-corporate: rgba(8, 145, 178, 0.1);
+  --text-secondary: #4b5563;
+  --text-tertiary: #6b7280;
+  --surface-elevated: rgba(255, 255, 255, 0.8);
+  --shadow-soft: 0 2px 24px rgba(0, 0, 0, 0.04);
+  --shadow-medium: 0 4px 32px rgba(0, 0, 0, 0.08);
+  --shadow-strong: 0 8px 48px rgba(0, 0, 0, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #ffffff;
+  color: var(--foreground);
+  font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  line-height: 1.47059;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+}
+
+/* Apple-style scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+  background-clip: content-box;
+}
+
+/* Glass morphism utility classes */
+.glass {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass-white);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-strong {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: var(--glass-white-strong);
+  border: 1px solid var(--border-corporate);
+}
+
+
+/* Smooth transitions for all interactive elements */
+button,
+a,
+[role="button"] {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Focus states */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--secondary-teal);
+  outline-offset: 2px;
+}
+
+/* Section spacing utilities */
+.section-spacing {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+@media (min-width: 768px) {
+  .section-spacing {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+}
+
+/* Corporate container */
+.container-corporate {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container-corporate {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+/* Removed text gradient utility, using solid colors instead */

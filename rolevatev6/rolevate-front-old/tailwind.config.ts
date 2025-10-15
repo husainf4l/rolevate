@@ -1,0 +1,99 @@
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Brand colors
+        brand: {
+          teal: {
+            light: '#13ead9',
+            DEFAULT: '#0891b2',
+          },
+          slate: {
+            DEFAULT: '#334155',
+          }
+        },
+        // Primary color shortcuts
+        primary: {
+          50: '#f0fdfa',
+          100: '#ccfbf1',
+          200: '#99f6e4',
+          300: '#5eead4',
+          400: '#2dd4bf',
+          500: '#14b8a6',
+          600: '#0891b2', // Our main brand color
+          700: '#0c7594',
+          800: '#155e75',
+          900: '#164e63',
+          950: '#083344',
+        }
+      },
+      fontFamily: {
+        'display': ['-apple-system', 'SF Pro Display', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+        'text': ['-apple-system', 'SF Pro Text', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+        'mono': ['SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'Courier New', 'monospace'],
+      },
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.025em' }],
+        'sm': ['0.875rem', { lineHeight: '1.5', letterSpacing: '0.01em' }],
+        'base': ['1rem', { lineHeight: '1.5', letterSpacing: '0' }],
+        'lg': ['1.125rem', { lineHeight: '1.5', letterSpacing: '-0.01em' }],
+        'xl': ['1.25rem', { lineHeight: '1.4', letterSpacing: '-0.02em' }],
+        '2xl': ['1.5rem', { lineHeight: '1.3', letterSpacing: '-0.02em' }],
+        '3xl': ['1.875rem', { lineHeight: '1.2', letterSpacing: '-0.03em' }],
+        '4xl': ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.03em' }],
+        '5xl': ['3rem', { lineHeight: '1', letterSpacing: '-0.04em' }],
+        '6xl': ['3.75rem', { lineHeight: '1', letterSpacing: '-0.04em' }],
+      },
+      backgroundImage: {
+        // Removed gradient backgrounds, using solid colors instead
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+        '144': '36rem',
+      },
+      boxShadow: {
+        'xs': '0 1px 3px rgba(0, 0, 0, 0.04)', // Level 1: Subtle (Cards at rest)
+        'sm': '0 1px 3px rgba(0, 0, 0, 0.04)', // Level 1: Subtle (Cards at rest)
+        'DEFAULT': '0 1px 3px rgba(0, 0, 0, 0.04)', // Level 1: Subtle (Cards at rest)
+        'md': '0 4px 12px rgba(0, 0, 0, 0.08)', // Level 2: Medium (Hover states, dropdowns)
+        'lg': '0 8px 24px rgba(0, 0, 0, 0.12)', // Level 3: Strong (Modals, popovers)
+        'xl': '0 8px 24px rgba(0, 0, 0, 0.12)', // Level 3: Strong (Modals, popovers)
+        '2xl': '0 8px 24px rgba(0, 0, 0, 0.12)', // Level 3: Strong (Modals, popovers)
+        'inner': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+        'glass': '0 8px 24px rgba(0, 0, 0, 0.12)', // Level 3: Strong
+        'corporate': '0 1px 3px rgba(0, 0, 0, 0.04)', // Level 1: Subtle
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'slide-up': 'slideUp 0.5s ease-out',
+        'scale-in': 'scaleIn 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        scaleIn: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      }
+    },
+  },
+  plugins: [],
+};
+
+export default config;
