@@ -113,7 +113,7 @@ export default function JobsPage() {
           <div className="text-center mb-8 lg:mb-10">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 tracking-tight">
               Find Your Next{" "}
-              <span className="text-cyan-600">
+              <span className="text-primary-600">
                 Opportunity
               </span>
             </h1>
@@ -144,7 +144,7 @@ export default function JobsPage() {
                   <input
                     type="text"
                     placeholder="Job title, company, or keywords..."
-                    className="w-full pl-12 pr-6 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500 text-base shadow-sm transition-all duration-200"
+                    className="w-full pl-12 pr-6 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500 text-base shadow-sm transition-all duration-200"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -152,7 +152,7 @@ export default function JobsPage() {
               </div>
               <button
                 onClick={() => setShowMobileFilters(!showMobileFilters)}
-                className="w-full flex items-center justify-center gap-2 text-cyan-600 hover:text-cyan-700 font-semibold transition-colors text-base py-2"
+                className="w-full flex items-center justify-center gap-2 text-primary-600 hover:text-primary-700 font-semibold transition-colors text-base py-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -178,7 +178,7 @@ export default function JobsPage() {
                       Job Type
                     </label>
                     <select
-                      className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base"
                       value={selectedType}
                       onChange={(e) => setSelectedType(e.target.value)}
                     >
@@ -194,7 +194,7 @@ export default function JobsPage() {
                       Location
                     </label>
                     <select
-                      className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base"
                       value={selectedLocation}
                       onChange={(e) => setSelectedLocation(e.target.value)}
                     >
@@ -210,7 +210,7 @@ export default function JobsPage() {
                       Experience Level
                     </label>
                     <select
-                      className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base"
                       value={selectedExperience}
                       onChange={(e) => setSelectedExperience(e.target.value)}
                     >
@@ -262,7 +262,7 @@ export default function JobsPage() {
                   <input
                     type="text"
                     placeholder="Job title, company, or skills..."
-                    className="w-full pl-12 pr-6 py-3.5 border border-gray-200 rounded-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500 text-base shadow-sm transition-all duration-200"
+                    className="w-full pl-12 pr-6 py-3.5 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500 text-base shadow-sm transition-all duration-200"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -275,7 +275,7 @@ export default function JobsPage() {
                     Job Type
                   </label>
                   <select
-                    className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base transition-all duration-200"
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
                   >
@@ -292,7 +292,7 @@ export default function JobsPage() {
                     Location
                   </label>
                   <select
-                    className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base transition-all duration-200"
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
                   >
@@ -309,7 +309,7 @@ export default function JobsPage() {
                     Experience Level
                   </label>
                   <select
-                    className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base transition-all duration-200"
                     value={selectedExperience}
                     onChange={(e) => setSelectedExperience(e.target.value)}
                   >
@@ -352,7 +352,7 @@ export default function JobsPage() {
                       selectedExperience !== "All") && (
                       <div className="flex flex-wrap gap-2">
                         {searchTerm && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                             Search: "{searchTerm}"
                           </span>
                         )}
@@ -375,7 +375,7 @@ export default function JobsPage() {
                       Sort by:
                     </span>
                     <select
-                      className="px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm text-gray-900 bg-white shadow-sm min-w-0 flex-shrink-0"
+                      className="px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-gray-900 bg-white shadow-sm min-w-0 flex-shrink-0"
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
                     >
@@ -390,7 +390,7 @@ export default function JobsPage() {
                   {loading ? (
                     <div className="flex flex-col items-center justify-center py-16 sm:py-20 lg:py-24">
                       <svg
-                        className="animate-spin h-12 w-12 sm:h-14 sm:w-14 text-cyan-500 mb-4"
+                        className="animate-spin h-12 w-12 sm:h-14 sm:w-14 text-primary-500 mb-4"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -449,7 +449,7 @@ export default function JobsPage() {
                               setSelectedLocation("All");
                               setSelectedExperience("All");
                             }}
-                            className="px-6 py-3 text-base bg-cyan-600 hover:bg-cyan-700"
+                            className="px-6 py-3 text-base bg-primary-600 hover:bg-primary-700"
                           >
                             Clear All Filters
                           </Button>

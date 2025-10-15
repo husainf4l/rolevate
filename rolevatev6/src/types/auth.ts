@@ -1,8 +1,12 @@
 export interface User {
-  id: number;
+  id: string;
   email: string;
   name: string;
-  role: 'BUSINESS' | 'CANDIDATE';
+  userType: 'BUSINESS' | 'CANDIDATE';
+  company?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface LoginInput {
@@ -14,7 +18,7 @@ export interface SignupInput {
   name: string;
   email: string;
   password: string;
-  role: 'BUSINESS' | 'CANDIDATE';
+  userType: 'BUSINESS' | 'CANDIDATE';
 }
 
 export interface AuthResponse {

@@ -24,8 +24,8 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await authService.login({ email, password });
-      router.push('/');
+      const response = await authService.login({ email, password });
+      authService.redirectAfterLogin(response.user);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -87,7 +87,7 @@ export default function LoginPage() {
                     id="remember"
                     name="remember"
                     type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-600"
+                    className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
                     disabled={loading}
                   />
                   <label htmlFor="remember" className="ml-2 block text-sm text-gray-600">
@@ -96,7 +96,7 @@ export default function LoginPage() {
                 </div>
                 <a
                   href="#"
-                  className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
                 >
                   Forgot password?
                 </a>
@@ -110,7 +110,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-[#0891b2] hover:bg-[#0891b2]/90 text-white h-12 font-medium text-base"
+                className="w-full bg-primary-600 hover:bg-primary-700 text-white h-12 font-medium text-base"
                 disabled={loading}
               >
                 {loading ? "Signing In..." : "Sign In"}
@@ -121,7 +121,7 @@ export default function LoginPage() {
               Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
-                className="text-cyan-600 hover:text-cyan-700 font-semibold"
+                className="text-primary-600 hover:text-primary-700 font-semibold"
               >
                 Sign up
               </Link>

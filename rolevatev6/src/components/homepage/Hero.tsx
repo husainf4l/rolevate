@@ -25,8 +25,8 @@ export default function Hero() {
                 quality={85}
               />
             </div>
-            <div className="absolute -top-4 -right-4 w-8 h-8 bg-cyan-400 rounded-full shadow-lg"></div>
-            <div className="absolute -bottom-6 -left-6 w-6 h-6 bg-cyan-600 rounded-full shadow-lg"></div>
+            <div className="absolute -top-4 -right-4 w-8 h-8 bg-primary-400 rounded-full shadow-lg"></div>
+            <div className="absolute -bottom-6 -left-6 w-6 h-6 bg-primary-600 rounded-full shadow-lg"></div>
           </div>
         </div>
 
@@ -34,7 +34,7 @@ export default function Hero() {
         <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left max-w-2xl order-2 lg:order-1">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1] px-2 sm:px-0">
             Land Your Dream Job{" "}
-            <span className="text-cyan-600 font-bold">
+            <span className="text-primary-600 font-bold">
               10x Faster
             </span>
           </h1>
@@ -46,7 +46,7 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-2 sm:px-0">
-            <Link href="/jobs" className="px-6 py-3 rounded-sm shadow-lg text-base font-semibold bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 hover:shadow-xl hover:scale-105 text-center">
+            <Link href="/jobs" className="px-6 py-3 rounded-sm shadow-lg text-base font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 hover:shadow-xl hover:scale-105 text-center">
               Explore Opportunities
             </Link>
           </div>

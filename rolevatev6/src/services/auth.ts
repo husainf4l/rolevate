@@ -12,8 +12,12 @@ class AuthService {
         user {
           id
           email
-          role
+          userType
           name
+          company {
+            id
+            name
+          }
         }
       }
     }
@@ -24,7 +28,7 @@ class AuthService {
       createUser(input: $input) {
         id
         email
-        role
+        userType
         name
       }
     }
@@ -82,9 +86,79 @@ class AuthService {
   }
 
   /**
-   * Get current authenticated user
+   * Redirect user based on their type and company status
    */
-  getCurrentUser(): User | null {
+  redirectAfterLogin(user: User): void {
+    if (user.userType === 'BUSINESS') {
+      if (!user.company) {
+        window.location.href = '/dashboard/setup-company';
+      } else {
+        window.location.href = '/dashboard';
+      }
+    } else if (user.userType === 'CANDIDATE') {
+      window.location.href = '/userdashboard';
+    } else {
+      window.location.href = '/';
+    }
+  }
+
+  /**
+   * Get current authenticated user from backend
+   */
+  async getCurrentUser(): Promise<User | null> {
+    try {
+      const token = this.hasValidToken();
+      if (!token) {
+        return null;
+      }
+
+      const GET_CURRENT_USER_QUERY = `
+        query GetCurrentUser {
+          me {
+            id
+            email
+            name
+            userType
+            phone
+            avatar
+            company {
+              id
+              name
+              description
+              industry
+              website
+              email
+              phone
+            }
+            companyId
+            createdAt
+            updatedAt
+          }
+        }
+      `;
+
+      const response = await graphQLService.request<{ me: User }>(GET_CURRENT_USER_QUERY);
+      
+      if (response.me) {
+        this.setUser(response.me);
+        return response.me;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      // If error is authentication related, clear stored data
+      if (error instanceof Error && error.message.includes('Unauthorized')) {
+        this.logout();
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Get user from localStorage (synchronous)
+   */
+  getUserFromStorage(): User | null {
     if (!this.currentUser && typeof window !== 'undefined') {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
@@ -103,7 +177,7 @@ class AuthService {
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
-    return this.getCurrentUser() !== null && this.hasValidToken();
+    return this.getUserFromStorage() !== null && this.hasValidToken();
   }
 
   /**
@@ -145,3 +219,8 @@ class AuthService {
 }
 
 export const authService = new AuthService();
+
+// Export convenience functions
+export const logout = () => authService.logout();
+export const getCurrentUser = () => authService.getCurrentUser();
+export const getUserFromStorage = () => authService.getUserFromStorage();

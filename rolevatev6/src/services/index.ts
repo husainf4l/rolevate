@@ -1,5 +1,6 @@
-export { authService } from './auth.service';
+export { authService } from './auth';
 export { jobsService } from './jobs.service';
+export { applicationService } from './application';
 export { graphQLService } from './graphql.service';
 
 // Export types

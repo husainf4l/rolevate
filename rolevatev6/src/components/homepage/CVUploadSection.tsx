@@ -63,7 +63,7 @@ export default function CVUploadSection() {
           <div className="text-center mb-16 md:mb-24">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
               Not Sure What{" "}
-              <span className="text-cyan-600">
+              <span className="text-primary-600">
                 Fits You?
               </span>
             </h2>
@@ -79,12 +79,12 @@ export default function CVUploadSection() {
             <div
               className={`relative border-2 border-dashed rounded-lg p-12 md:p-16 text-center transition-all duration-300 backdrop-blur-sm max-w-4xl mx-auto ${
                 isDragOver
-                  ? "border-cyan-600 bg-cyan-50"
+                  ? "border-primary-600 bg-primary-50"
                   : uploadedFile
                   ? "border-green-400 bg-green-50"
                   : uploadError
                   ? "border-red-400 bg-red-50"
-                  : "border-gray-300 hover:border-cyan-500 bg-white"
+                  : "border-gray-300 hover:border-primary-500 bg-white"
               }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -100,7 +100,7 @@ export default function CVUploadSection() {
 
               {isAnalyzing ? (
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 border-4 border-cyan-600 border-t-transparent rounded-full animate-spin mb-6"></div>
+                  <div className="w-20 h-20 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-6"></div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">
                     Analyzing Your CV
                   </h3>
@@ -136,7 +136,7 @@ export default function CVUploadSection() {
                       setUploadError(null);
                       setUploadedFile(null);
                     }}
-                    className="text-cyan-600 hover:text-cyan-700 font-medium transition-colors duration-200"
+                    className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
                   >
                     Try Again
                   </button>
@@ -172,16 +172,16 @@ export default function CVUploadSection() {
                       setUploadedFile(null);
                       setUploadError(null);
                     }}
-                    className="text-cyan-600 hover:text-cyan-700 font-medium transition-colors duration-200"
+                    className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
                   >
                     Upload Different CV
                   </button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-cyan-50 rounded-full flex items-center justify-center mb-6">
+                  <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mb-6">
                     <svg
-                      className="w-10 h-10 text-cyan-600"
+                      className="w-10 h-10 text-primary-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -202,7 +202,7 @@ export default function CVUploadSection() {
                   </p>
                   <Button 
                     onClick={openFileDialog} 
-                    className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                    className="bg-primary-600 hover:bg-primary-700 text-white"
                     size="lg"
                   >
                     Choose File
@@ -218,9 +218,9 @@ export default function CVUploadSection() {
           {/* Features - 3 Column Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             <div className="text-center">
-              <div className="w-20 h-20 bg-cyan-50 rounded-lg flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-primary-50 rounded-lg flex items-center justify-center mx-auto mb-6">
                 <svg
-                  className="w-10 h-10 text-cyan-600"
+                  className="w-10 h-10 text-primary-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -244,9 +244,9 @@ export default function CVUploadSection() {
             </div>
 
             <div className="text-center">
-              <div className="w-20 h-20 bg-cyan-50 rounded-lg flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-primary-50 rounded-lg flex items-center justify-center mx-auto mb-6">
                 <svg
-                  className="w-10 h-10 text-cyan-600"
+                  className="w-10 h-10 text-primary-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -269,9 +269,9 @@ export default function CVUploadSection() {
             </div>
 
             <div className="text-center md:col-span-2 lg:col-span-1">
-              <div className="w-20 h-20 bg-cyan-50 rounded-lg flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-primary-50 rounded-lg flex items-center justify-center mx-auto mb-6">
                 <svg
-                  className="w-10 h-10 text-cyan-600"
+                  className="w-10 h-10 text-primary-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

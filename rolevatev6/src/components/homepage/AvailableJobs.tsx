@@ -41,7 +41,7 @@ export default function AvailableJobs() {
         <div className="text-center mb-16 md:mb-20">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
             Featured{" "}
-            <span className="text-cyan-600">
+            <span className="text-primary-600">
               Opportunities
             </span>
           </h2>
@@ -114,7 +114,7 @@ export default function AvailableJobs() {
 
         {/* View All Jobs Button */}
         <div className="text-center">
-          <Link href="/jobs" className="px-6 py-3 rounded-sm shadow-lg text-base font-semibold bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 hover:shadow-xl hover:scale-105 inline-block">
+          <Link href="/jobs" className="px-6 py-3 rounded-sm shadow-lg text-base font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 hover:shadow-xl hover:scale-105 inline-block">
             View All Jobs
           </Link>
         </div>

@@ -141,7 +141,7 @@ export default function JobDetailPage() {
               {error || "The job you're looking for doesn't exist or has been removed."}
             </p>
             <Link href="/jobs">
-              <Button className="bg-cyan-600 hover:bg-cyan-700">
+              <Button className="bg-primary-600 hover:bg-primary-700">
                 Back to Jobs
               </Button>
             </Link>
@@ -170,8 +170,8 @@ export default function JobDetailPage() {
               </h1>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-cyan-100 rounded-sm flex items-center justify-center">
-                  <span className="text-cyan-600 font-bold text-lg">
+                <div className="w-12 h-12 bg-primary-100 rounded-sm flex items-center justify-center">
+                  <span className="text-primary-600 font-bold text-lg">
                     {job.company.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -223,7 +223,7 @@ export default function JobDetailPage() {
                 <div className="flex flex-col space-y-3">
                   <Button
                     size="lg"
-                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                    className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                   >
                     Apply Now
                   </Button>

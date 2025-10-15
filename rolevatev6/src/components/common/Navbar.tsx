@@ -4,19 +4,14 @@ import React, { useState, useEffect } from "react";
 import Logo from "./Logo";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { authService, User } from "@/services";
+import { useAuth } from "@/hooks/useAuth";
+import { logout } from "@/services/auth";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const pathname = usePathname();
-
-  // Check for logged in user
-  useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-  }, []);
 
   // Helper function to check if current path is active
   const isActivePage = (path: string) => {
@@ -43,8 +38,7 @@ export default function Navbar() {
   }, [showUserMenu]);
 
   const handleLogout = () => {
-    authService.logout();
-    setUser(null);
+    logout();
     setShowUserMenu(false);
   };
 
@@ -78,10 +72,10 @@ export default function Navbar() {
           <nav className="hidden items-center gap-10 text-sm font-medium md:flex">
             <Link
               href="/"
-              className={`transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-cyan-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+              className={`transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/")
-                  ? "text-cyan-600 after:w-full"
-                  : "text-gray-700 hover:text-cyan-600"
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
               }`}
             >
               Home
@@ -89,10 +83,10 @@ export default function Navbar() {
 
             <Link
               href="/jobs"
-              className={`transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-cyan-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+              className={`transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/jobs")
-                  ? "text-cyan-600 after:w-full"
-                  : "text-gray-700 hover:text-cyan-600"
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
               }`}
             >
               Jobs
@@ -100,10 +94,10 @@ export default function Navbar() {
 
             <Link
               href="/employers"
-              className={`transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-cyan-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+              className={`transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/employers")
-                  ? "text-cyan-600 after:w-full"
-                  : "text-gray-700 hover:text-cyan-600"
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
               }`}
             >
               For Employers
@@ -121,15 +115,15 @@ export default function Navbar() {
                   }}
                   className="hidden md:flex items-center gap-3 px-4 py-2 rounded-md bg-gray-100/60 hover:bg-gray-200/80 transition-all duration-200 border border-gray-200/50 backdrop-blur-sm"
                 >
-                  <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    {user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}
                   </div>
                   <div className="flex flex-col items-start">
                     <span className="text-sm font-medium text-gray-900">
-                      {user.name || user.email}
+                      {user.name || user.email || 'User'}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {user.role === "CANDIDATE" ? "Job Seeker" : "Employer"}
+                      {user.userType === "CANDIDATE" ? "Job Seeker" : "Employer"}
                     </span>
                   </div>
                   <svg
@@ -202,12 +196,12 @@ export default function Navbar() {
               // Not authenticated - show sign in and sign up buttons
               <div className="hidden md:flex items-center gap-3">
                 <Link href="/login">
-                  <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-cyan-600 transition-colors">
+                  <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
                     Sign In
                   </button>
                 </Link>
                 <Link href="/signup">
-                  <button className="px-5 py-2 text-sm font-semibold bg-cyan-600 hover:bg-cyan-700 text-white rounded-md transition-all duration-300 hover:shadow-lg hover:scale-105">
+                  <button className="px-5 py-2 text-sm font-semibold bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-all duration-300 hover:shadow-lg hover:scale-105">
                     Sign Up
                   </button>
                 </Link>
@@ -216,7 +210,7 @@ export default function Navbar() {
 
             <button
               onClick={toggleMenu}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-gray-100/60 text-gray-700 hover:bg-gray-200/80 hover:text-cyan-600 transition-all duration-300 md:hidden border border-gray-200/50 backdrop-blur-sm"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-gray-100/60 text-gray-700 hover:bg-gray-200/80 hover:text-primary-600 transition-all duration-300 md:hidden border border-gray-200/50 backdrop-blur-sm"
               aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isMenuOpen}
             >
@@ -271,8 +265,8 @@ export default function Navbar() {
                   href="/"
                   className={`hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl ${
                     isActivePage("/")
-                      ? "text-cyan-600 bg-cyan-50/80"
-                      : "text-gray-700 hover:text-cyan-600"
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
                   }`}
                   onClick={closeMenu}
                 >
@@ -283,8 +277,8 @@ export default function Navbar() {
                   href="/jobs"
                   className={`hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl ${
                     isActivePage("/jobs")
-                      ? "text-cyan-600 bg-cyan-50/80"
-                      : "text-gray-700 hover:text-cyan-600"
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
                   }`}
                   onClick={closeMenu}
                 >
@@ -295,8 +289,8 @@ export default function Navbar() {
                   href="/employers"
                   className={`hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl ${
                     isActivePage("/employers")
-                      ? "text-cyan-600 bg-cyan-50/80"
-                      : "text-gray-700 hover:text-cyan-600"
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
                   }`}
                   onClick={closeMenu}
                 >
@@ -308,15 +302,15 @@ export default function Navbar() {
                     // Authenticated user mobile menu
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/80 rounded-xl">
-                        <div className="w-10 h-10 bg-cyan-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                        <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-semibold">
+                          {user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}
                         </div>
                         <div className="flex flex-col">
                           <span className="text-base font-medium text-gray-900">
-                            {user.name || user.email}
+                            {user.name || user.email || 'User'}
                           </span>
                           <span className="text-sm text-gray-500">
-                            {user.role === "CANDIDATE" ? "Job Seeker" : "Employer"}
+                            {user.userType === "CANDIDATE" ? "Job Seeker" : "Employer"}
                           </span>
                         </div>
                       </div>
@@ -324,7 +318,7 @@ export default function Navbar() {
                       <Link href="/dashboard">
                         <button
                           onClick={closeMenu}
-                          className="w-full rounded-md py-2.5 text-base font-medium bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-200 shadow-sm"
+                          className="w-full rounded-md py-2.5 text-base font-medium bg-primary-600 hover:bg-primary-700 text-white transition-all duration-200 shadow-sm"
                         >
                           Go to Dashboard
                         </button>
@@ -346,7 +340,7 @@ export default function Navbar() {
                       <Link href="/login">
                         <button
                           onClick={closeMenu}
-                          className="w-full rounded-md py-3 text-base font-medium border border-cyan-600 text-cyan-600 hover:bg-cyan-50 transition-all duration-300"
+                          className="w-full rounded-md py-3 text-base font-medium border border-primary-600 text-primary-600 hover:bg-primary-50 transition-all duration-300"
                         >
                           Sign In
                         </button>
@@ -354,7 +348,7 @@ export default function Navbar() {
                       <Link href="/signup">
                         <button
                           onClick={closeMenu}
-                          className="w-full rounded-md py-3 text-base font-semibold bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+                          className="w-full rounded-md py-3 text-base font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-all duration-300 shadow-lg hover:shadow-xl"
                         >
                           Sign Up
                         </button>

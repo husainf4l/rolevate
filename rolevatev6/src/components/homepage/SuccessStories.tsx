@@ -6,7 +6,7 @@ export default function SuccessStories() {
       <div className="container mx-auto max-w-5xl text-center">
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
           Success{" "}
-          <span className="text-cyan-600">
+          <span className="text-primary-600">
             Stories
           </span>
         </h2>
@@ -16,7 +16,7 @@ export default function SuccessStories() {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-100">
-            <div className="w-16 h-16 rounded-full bg-cyan-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
+            <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
               A
             </div>
             <p className="text-gray-700 mb-3 leading-relaxed">
@@ -29,7 +29,7 @@ export default function SuccessStories() {
             </span>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-100">
-            <div className="w-16 h-16 rounded-full bg-cyan-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
+            <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
               M
             </div>
             <p className="text-gray-700 mb-3 leading-relaxed">
@@ -42,7 +42,7 @@ export default function SuccessStories() {
             </span>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-100">
-            <div className="w-16 h-16 rounded-full bg-cyan-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
+            <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
               L
             </div>
             <p className="text-gray-700 mb-3 leading-relaxed">

@@ -39,6 +39,56 @@ class JobsService {
     }
   `;
 
+  private GET_COMPANY_JOBS_QUERY = `
+    query GetCompanyJobs($filter: JobFilter, $pagination: PaginationInput) {
+      jobs(filter: $filter, pagination: $pagination) {
+        data {
+          id
+          title
+          description
+          status
+          createdAt
+          updatedAt
+        }
+        total
+        page
+        pages
+      }
+    }
+  `;
+
+  private CREATE_JOB_MUTATION = `
+    mutation CreateJob($input: CreateJobInput!) {
+      createJob(input: $input) {
+        id
+        title
+        description
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  private UPDATE_JOB_MUTATION = `
+    mutation UpdateJob($id: ID!, $input: UpdateJobInput!) {
+      updateJob(id: $id, input: $input) {
+        id
+        title
+        description
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  private DELETE_JOB_MUTATION = `
+    mutation DeleteJob($id: ID!) {
+      deleteJob(id: $id)
+    }
+  `;
+
   private GET_ALL_JOBS_QUERY = `
     query GetAllJobs {
       jobs {
@@ -49,25 +99,9 @@ class JobsService {
         location
         salary
         type
-        deadline
-        shortDescription
-        responsibilities
-        requirements
-        benefits
-        skills
-        experience
-        education
         jobLevel
-        workType
-        industry
-        companyDescription
+        skills
         status
-        featured
-        applicants
-        views
-        postedBy {
-          id
-        }
         createdAt
         updatedAt
       }
@@ -83,7 +117,7 @@ class JobsService {
     filters?: JobFilters
   ): Promise<JobsResponse> {
     try {
-      // Since the GraphQL API doesn't support filtering, we fetch all and filter client-side
+      // Since the GraphQL API doesn't support filtering yet, we fetch all and filter client-side
       const response = await graphQLService.request<{ jobs: any[] }>(
         this.GET_ALL_JOBS_QUERY
       );
@@ -97,7 +131,7 @@ class JobsService {
           filteredJobs = filteredJobs.filter(job => 
             job.title.toLowerCase().includes(searchTerm) ||
             job.description.toLowerCase().includes(searchTerm) ||
-            job.shortDescription.toLowerCase().includes(searchTerm)
+            job.shortDescription?.toLowerCase().includes(searchTerm)
           );
         }
         if (filters.location) {
@@ -181,13 +215,29 @@ class JobsService {
     }
   }
 
+  private GET_FEATURED_JOBS_QUERY = `
+    query GetFeaturedJobs {
+      jobs {
+        id
+        title
+        company {
+          name
+        }
+        location
+        salary
+        type
+        featured
+      }
+    }
+  `;
+
   /**
    * Fetch featured jobs for homepage
    */
   async getFeaturedJobs(limit: number = 6): Promise<Job[]> {
     try {
       const response = await graphQLService.request<{ jobs: any[] }>(
-        this.GET_ALL_JOBS_QUERY
+        this.GET_FEATURED_JOBS_QUERY
       );
 
       // Filter for featured jobs and limit the results
@@ -195,20 +245,20 @@ class JobsService {
         .filter(job => job.featured === true)
         .slice(0, limit);
 
-      // Map to our Job interface
+      // Map to match the expected interface
       const mappedJobs: Job[] = featuredJobs.map(job => ({
         id: job.id,
         title: job.title,
-        description: job.description,
-        company: job.department, // Using department as company for now
+        description: '', // Not fetched for performance
+        company: job.company.name,
         location: job.location,
         salary: job.salary,
         type: job.type,
-        level: job.jobLevel,
-        skills: Array.isArray(job.skills) ? job.skills : [],
-        postedAt: job.createdAt,
-        updatedAt: job.updatedAt,
-        isActive: job.status === 'ACTIVE'
+        level: 'ENTRY', // Default, not fetched
+        skills: [], // Not fetched
+        postedAt: '', // Not fetched
+        updatedAt: '', // Not fetched
+        isActive: true // Default
       }));
 
       return mappedJobs;
@@ -285,7 +335,83 @@ class JobsService {
     return this.getJobs(page, limit, { skills });
   }
 
+  /**
+   * Get company jobs for dashboard
+   */
+  async getCompanyJobs(page: number = 1, limit: number = 100): Promise<any> {
+    try {
+      const response = await graphQLService.request<{ jobs: any }>(
+        this.GET_COMPANY_JOBS_QUERY,
+        { pagination: { page, limit } }
+      );
+      return response.jobs;
+    } catch (error) {
+      console.error('Error fetching company jobs:', error);
+      throw new Error('Failed to fetch company jobs');
+    }
+  }
 
+  /**
+   * Create a new job
+   */
+  async createJob(input: any): Promise<any> {
+    try {
+      const response = await graphQLService.request<{ createJob: any }>(
+        this.CREATE_JOB_MUTATION,
+        { input }
+      );
+      return response.createJob;
+    } catch (error) {
+      console.error('Error creating job:', error);
+      throw new Error('Failed to create job');
+    }
+  }
+
+  /**
+   * Update a job
+   */
+  async updateJob(id: string, input: any): Promise<any> {
+    try {
+      const response = await graphQLService.request<{ updateJob: any }>(
+        this.UPDATE_JOB_MUTATION,
+        { id, input }
+      );
+      return response.updateJob;
+    } catch (error) {
+      console.error('Error updating job:', error);
+      throw new Error('Failed to update job');
+    }
+  }
+
+  /**
+   * Delete a job
+   */
+  async deleteJob(id: string): Promise<boolean> {
+    try {
+      const response = await graphQLService.request<{ deleteJob: boolean }>(
+        this.DELETE_JOB_MUTATION,
+        { id }
+      );
+      return response.deleteJob;
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      throw new Error('Failed to delete job');
+    }
+  }
+
+  /**
+   * Activate a job
+   */
+  async activateJob(id: string): Promise<any> {
+    return this.updateJob(id, { status: 'ACTIVE' });
+  }
+
+  /**
+   * Pause a job
+   */
+  async pauseJob(id: string): Promise<any> {
+    return this.updateJob(id, { status: 'PAUSED' });
+  }
 }
 
 export const jobsService = new JobsService();

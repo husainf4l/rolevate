@@ -40,13 +40,13 @@ export default function SignupPage() {
     }
 
     try {
-      const role = accountType === 'individual' ? 'CANDIDATE' : 'BUSINESS';
+      const userType = accountType === 'individual' ? 'CANDIDATE' : 'BUSINESS';
       
       await authService.signup({
         name: formData.name.trim(),
         email: formData.email,
         password: formData.password,
-        role,
+        userType,
       });
 
       setSuccess(true);
@@ -77,7 +77,7 @@ export default function SignupPage() {
               Redirecting you to the login page...
             </p>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cyan-600"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
             </div>
           </div>
         </div>
@@ -108,8 +108,8 @@ export default function SignupPage() {
                   onClick={() => setAccountType('individual')}
                   className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-all ${
                     accountType === 'individual'
-                      ? 'bg-cyan-600 text-white'
-                      : 'text-gray-600 hover:text-cyan-600'
+                      ? 'bg-primary-600 text-white'
+                      : 'text-gray-600 hover:text-primary-600'
                   }`}
                 >
                   Individual
@@ -119,8 +119,8 @@ export default function SignupPage() {
                   onClick={() => setAccountType('corporate')}
                   className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-all ${
                     accountType === 'corporate'
-                      ? 'bg-cyan-600 text-white'
-                      : 'text-gray-600 hover:text-cyan-600'
+                      ? 'bg-primary-600 text-white'
+                      : 'text-gray-600 hover:text-primary-600'
                   }`}
                 >
                   Corporate
@@ -140,7 +140,7 @@ export default function SignupPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20 focus:outline-none transition-all"
+                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
                 />
               </div>
 
@@ -155,7 +155,7 @@ export default function SignupPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20 focus:outline-none transition-all"
+                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
                 />
               </div>
 
@@ -170,7 +170,7 @@ export default function SignupPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20 focus:outline-none transition-all"
+                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
                 />
               </div>
 
@@ -185,7 +185,7 @@ export default function SignupPage() {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   required
-                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20 focus:outline-none transition-all"
+                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
                 />
               </div>
 
@@ -198,7 +198,7 @@ export default function SignupPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-4 rounded-sm font-medium text-base transition-all"
+                className="w-full bg-primary-600 hover:bg-primary-700 text-white py-4 rounded-sm font-medium text-base transition-all"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -215,7 +215,7 @@ export default function SignupPage() {
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="text-cyan-600 hover:text-cyan-700 font-semibold"
+                className="text-primary-600 hover:text-primary-700 font-semibold"
               >
                 Sign in here
               </Link>
@@ -246,15 +246,15 @@ export default function SignupPage() {
                 
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-gray-700">
-                    <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
                     <span className="text-sm">AI Interview Analysis</span>
                   </div>
                   <div className="flex items-center gap-3 text-gray-700">
-                    <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
                     <span className="text-sm">Smart Candidate Matching</span>
                   </div>
                   <div className="flex items-center gap-3 text-gray-700">
-                    <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
                     <span className="text-sm">Real-time Collaboration</span>
                   </div>
                 </div>
