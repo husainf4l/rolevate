@@ -36,7 +36,16 @@ class LLMProfileExtractor:
         extraction_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are an expert HR professional specialized in extracting structured data from professional descriptions in banking and finance.
 
-Extract ALL available information from the text and return it as JSON. Be thorough and capture every detail.
+Extract ALL available information from the ENTIRE text in a SINGLE extraction. Read the complete text carefully and capture every detail mentioned about:
+- Personal information (name, email, phone, location, LinkedIn, GitHub, website)
+- Work experience (all positions, companies, dates, responsibilities)
+- Education (all degrees, institutions, years)
+- Skills (all technical and soft skills)
+- Languages (all languages with proficiency)
+- Projects (all project names, descriptions, technologies)
+- Certifications (all certifications and their status)
+
+Be comprehensive and thorough - extract everything in ONE response, not piece by piece.
 
 Return a JSON object with this exact structure:
 {{
@@ -44,7 +53,10 @@ Return a JSON object with this exact structure:
     "full_name": "string or null",
     "email": "string or null",
     "phone": "string or null",
-    "location": "string or null"
+    "location": "string or null",
+    "linkedin": "string or null",
+    "github": "string or null",
+    "website": "string or null"
   }},
   "current_position": {{
     "job_title": "string or null",
@@ -66,17 +78,29 @@ Return a JSON object with this exact structure:
     ],
     "current_responsibilities": ["string"]
   }},
-  "education": {{
-    "degree": "string or null",
-    "field_of_study": "string or null",
-    "institution": "string or null",
-    "graduation_year": number or null
-  }},
+  "education": [
+    {{
+      "degree": "string or null",
+      "field_of_study": "string or null",
+      "institution": "string or null",
+      "graduation_year": number or null,
+      "start_year": number or null,
+      "end_year": number or null
+    }}
+  ],
   "certifications": [
     {{
       "certification_name": "string",
       "status": "Completed or In Progress",
       "issuing_body": "string or null"
+    }}
+  ],
+  "projects": [
+    {{
+      "project_name": "string",
+      "description": "string or null",
+      "role": "string or null",
+      "technologies": ["string"] or null
     }}
   ],
   "skills": ["string"],
@@ -91,13 +115,24 @@ Return a JSON object with this exact structure:
 }}
 
 Rules:
-- Extract ONLY information that is explicitly stated
+- Extract ALL information from the ENTIRE text in ONE comprehensive extraction
+- Process the complete message before responding - don't stop early
+- For work experience: extract ALL positions mentioned (not just the most recent)
+- For education: extract ALL degrees mentioned (bachelor's, master's, PhD, etc.)
+- For skills: extract ALL skills mentioned throughout the text
+- For languages: extract ALL languages mentioned with their proficiency levels
+- For projects: extract ALL projects mentioned with full details
 - For missing information, use null
 - For dates, extract years (YYYY format)
+- For LinkedIn: extract profile URL or username (e.g., "linkedin.com/in/username" or just "username")
+- For GitHub: extract profile URL or username (e.g., "github.com/username" or just "username")
+- For website: extract full URL or domain (e.g., "myportfolio.com" or "https://myportfolio.com")
+- For phone: extract full phone number with country code if available
 - Identify "In Progress" certifications (e.g., "preparing for", "studying for")
 - Capture professional philosophy statements
 - List all skills and competencies mentioned
-- Include responsibilities as bullet-style list items"""),
+- Include responsibilities as bullet-style list items
+- Be comprehensive: if the user provides a lot of information, extract ALL of it in one response"""),
             ("user", "Extract structured data from this professional description:\n\n{text}")
         ])
         
@@ -326,6 +361,75 @@ Generate 3-5 follow-up questions.""")
         except Exception as e:
             logger.error(f"❌ Question generation failed: {e}")
             return []
+    
+    async def generate_summary_paragraph(self, cv_data: Dict[str, Any]) -> str:
+        """Generate a concise professional summary paragraph from CV data"""
+        
+        summary_prompt = ChatPromptTemplate.from_messages([
+            ("system", """You are an expert CV writer for banking and finance professionals.
+
+Generate a compelling professional summary paragraph (3-5 sentences) that:
+1. Opens with years of experience and current/most recent role
+2. Highlights key areas of expertise and core competencies
+3. Mentions notable achievements or specializations
+4. Conveys professional value proposition
+
+Write in third person, past/present tense. Be concise, impactful, and ATS-friendly.
+Use executive-level language appropriate for banking and finance sector."""),
+            ("user", """Generate a professional summary paragraph based on this CV data:
+
+Personal Info: {personal_info}
+Current Position: {current_position}
+Work Experience: {experience}
+Education: {education}
+Skills: {skills}
+Languages: {languages}
+Certifications: {certifications}
+
+Write ONLY the summary paragraph, no headings or formatting.""")
+        ])
+        
+        try:
+            # Prepare data for prompt
+            personal_info = cv_data.get('personal_info', {})
+            current_position = cv_data.get('current_position', {})
+            
+            # Handle both work_experience (list) and experience (dict) formats
+            work_experience = cv_data.get('work_experience', [])
+            experience_obj = cv_data.get('experience', {})
+            if not work_experience and experience_obj:
+                # Convert experience dict format to work_experience list
+                previous_positions = experience_obj.get('previous_positions', []) if isinstance(experience_obj, dict) else []
+                work_experience = previous_positions
+            
+            # Handle both education list and dict formats
+            education = cv_data.get('education', [])
+            if isinstance(education, dict):
+                # Convert single dict to list
+                education = [education] if any(education.values()) else []
+            
+            skills = cv_data.get('skills', [])
+            languages = cv_data.get('languages', [])
+            certifications = cv_data.get('certifications', [])
+            
+            chain = summary_prompt | self.llm
+            response = await chain.ainvoke({
+                "personal_info": json.dumps(personal_info, indent=2),
+                "current_position": json.dumps(current_position, indent=2),
+                "experience": json.dumps(work_experience[:3], indent=2) if work_experience else "[]",  # Top 3 positions
+                "education": json.dumps(education, indent=2),
+                "skills": ", ".join(skills[:10]) if skills else "N/A",  # Top 10 skills
+                "languages": json.dumps(languages, indent=2),
+                "certifications": json.dumps(certifications, indent=2)
+            })
+            
+            summary = response.content.strip()
+            logger.info(f"✅ Generated professional summary ({len(summary)} chars)")
+            return summary
+            
+        except Exception as e:
+            logger.error(f"❌ Summary generation failed: {e}")
+            return ""
 
 
 class ProfessionalProfileAssistant:
@@ -342,17 +446,88 @@ class ProfessionalProfileAssistant:
         
         if self.use_llm:
             try:
+                # Use gpt-4o for higher token limits (supports up to 16,384 completion tokens)
+                model_name = settings.openai_model
+                max_completion_tokens = 10000  # Set to 10000 as requested
+                
+                # Adjust max_tokens based on model
+                if "gpt-4-turbo-preview" in model_name or "gpt-4-0125-preview" in model_name:
+                    max_completion_tokens = 4096  # Legacy models max limit
+                    logger.warning(f"⚠️ Model {model_name} only supports 4096 tokens. Consider using gpt-4o for higher limits.")
+                
                 self.llm = ChatOpenAI(
                     openai_api_key=settings.openai_api_key,
-                    model=settings.openai_model,
+                    model=model_name,
                     temperature=0.3,
-                    max_tokens=4096
+                    max_tokens=max_completion_tokens
                 )
                 self.llm_extractor = LLMProfileExtractor(self.llm)
-                logger.info("✅ OpenAI GPT-4 initialized for profile assistant")
+                logger.info(f"✅ OpenAI {model_name} initialized with max_tokens={max_completion_tokens}")
             except Exception as e:
                 logger.warning(f"⚠️ LLM initialization failed: {e}")
                 self.use_llm = False
+    
+    async def analyze_profile_text_async(self, text: str, use_llm: bool = None) -> Dict[str, Any]:
+        """
+        Async version: Analyze professional text and extract structured data
+        
+        Args:
+            text: Professional description text
+            use_llm: Override default LLM usage
+            
+        Returns:
+            Dictionary with extracted_data, missing_information, completeness_score
+        """
+        should_use_llm = use_llm if use_llm is not None else self.use_llm
+        
+        if should_use_llm and self.llm_extractor:
+            try:
+                # Use async LLM extraction directly
+                extracted = await self.llm_extractor.extract_structured_data(text)
+                logger.debug(f"🔍 Raw LLM output: {extracted}")
+                
+                if extracted:
+                    # Transform LLM output to expected format
+                    extracted_data = self._transform_llm_output(extracted, text)
+                    logger.debug(f"🔄 Transformed data - personal_info: {extracted_data.get('personal_info')}")
+                else:
+                    # Fallback to regex
+                    logger.warning("⚠️ LLM returned empty/null, using regex fallback")
+                    extracted_data = self._regex_extraction(text)
+            except Exception as e:
+                logger.error(f"❌ LLM extraction failed: {e}. Using regex fallback.")
+                extracted_data = self._regex_extraction(text)
+        else:
+            extracted_data = self._regex_extraction(text)
+        
+        # Calculate completeness
+        missing_info = self._identify_missing_information(extracted_data)
+        completeness = self._calculate_completeness(extracted_data)
+        
+        return {
+            'extracted_data': extracted_data,
+            'missing_information': missing_info,
+            'completeness_score': completeness
+        }
+    
+    async def generate_professional_summary_async(self, cv_data: Dict[str, Any]) -> str:
+        """
+        Async version: Generate professional summary paragraph from CV data
+        
+        Args:
+            cv_data: Complete CV data dictionary
+            
+        Returns:
+            Professional summary paragraph string
+        """
+        if self.use_llm and self.llm_extractor:
+            try:
+                summary = await self.llm_extractor.generate_summary_paragraph(cv_data)
+                return summary
+            except Exception as e:
+                logger.error(f"❌ Summary generation failed: {e}")
+                return ""
+        return ""
     
     def analyze_profile_text(self, text: str, use_llm: bool = None) -> Dict[str, Any]:
         """
@@ -511,6 +686,7 @@ class ProfessionalProfileAssistant:
             'experience': llm_data.get('experience', {}),
             'education': llm_data.get('education', {}),
             'certifications': llm_data.get('certifications', []),
+            'projects': llm_data.get('projects', []),
             'skills': llm_data.get('skills', []),
             'languages': llm_data.get('languages', []),
             'goals': {
@@ -561,9 +737,24 @@ class ProfessionalProfileAssistant:
         if not exp.get('years_experience'): missing.append('years_of_experience')
         if not exp.get('previous_positions'): missing.append('previous_positions')
         
-        edu = data.get('education', {})
-        if not edu.get('degree'): missing.append('education_degree')
-        if not edu.get('institution'): missing.append('education_institution')
+        # Handle education as either list or dict
+        edu = data.get('education', [])
+        if isinstance(edu, list):
+            if not edu or len(edu) == 0:
+                missing.append('education_degree')
+                missing.append('education_institution')
+            else:
+                # Check if any education entry has degree and institution
+                has_degree = any(e.get('degree') for e in edu if isinstance(e, dict))
+                has_institution = any(e.get('institution') for e in edu if isinstance(e, dict))
+                if not has_degree: missing.append('education_degree')
+                if not has_institution: missing.append('education_institution')
+        elif isinstance(edu, dict):
+            if not edu.get('degree'): missing.append('education_degree')
+            if not edu.get('institution'): missing.append('education_institution')
+        else:
+            missing.append('education_degree')
+            missing.append('education_institution')
         
         if not data.get('certifications'): missing.append('certifications')
         if not data.get('skills'): missing.append('key_skills')

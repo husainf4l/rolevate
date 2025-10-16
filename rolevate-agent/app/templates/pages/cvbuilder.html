@@ -544,45 +544,75 @@
 
             let html = '';
 
-            // Personal Info / Contact
+            // Personal Info / Contact - Enhanced Header
             if (hasPersonalInfo) {
                 const info = cvData.personal_info;
+                const name = info.name || info.full_name || 'Your Name';
+                const hasContact = info.email || info.phone || info.location || info.address || info.linkedin || info.github || info.website;
+                
                 html += `
-                    <div class="mb-6">
-                        <h1 class="text-3xl font-bold text-gray-900 mb-2">${info.name || info.full_name || 'Your Name'}</h1>
-                        <div class="flex flex-wrap gap-3 text-sm text-gray-600">
-                            ${info.email ? `<div>📧 ${info.email}</div>` : ''}
-                            ${info.phone ? `<div>📱 ${info.phone}</div>` : ''}
-                            ${info.location || info.address ? `<div>📍 ${info.location || info.address}</div>` : ''}
-                            ${info.linkedin ? `<div>💼 LinkedIn</div>` : ''}
-                        </div>
+                    <div class="mb-8 pb-6 border-b-2 border-gray-200">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-3 tracking-tight">${name}</h1>
+                        ${hasContact ? `
+                            <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+                                ${info.email ? `<div class="flex items-center gap-1.5"><span class="text-blue-600">📧</span><a href="mailto:${info.email}" class="hover:text-blue-600 hover:underline">${info.email}</a></div>` : ''}
+                                ${info.phone ? `<div class="flex items-center gap-1.5"><span class="text-green-600">📱</span><a href="tel:${info.phone}" class="hover:text-green-600 hover:underline">${info.phone}</a></div>` : ''}
+                                ${info.location || info.address ? `<div class="flex items-center gap-1.5"><span class="text-red-600">📍</span><span>${info.location || info.address}</span></div>` : ''}
+                                ${info.linkedin ? `<div class="flex items-center gap-1.5"><span class="text-blue-700">💼</span><a href="${info.linkedin.startsWith('http') ? info.linkedin : 'https://linkedin.com/in/' + info.linkedin}" target="_blank" class="hover:text-blue-700 hover:underline">LinkedIn</a></div>` : ''}
+                                ${info.github ? `<div class="flex items-center gap-1.5"><span class="text-gray-800">🔗</span><a href="${info.github.startsWith('http') ? info.github : 'https://github.com/' + info.github}" target="_blank" class="hover:text-gray-800 hover:underline">GitHub</a></div>` : ''}
+                                ${info.website ? `<div class="flex items-center gap-1.5"><span class="text-purple-600">🌐</span><a href="${info.website.startsWith('http') ? info.website : 'https://' + info.website}" target="_blank" class="hover:text-purple-600 hover:underline">Website</a></div>` : ''}
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }
 
-            // Professional Summary
+            // Professional Summary - Enhanced
             if (hasSummary) {
                 html += `
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Professional Summary</h3>
-                        <p class="text-sm text-gray-700 leading-relaxed">${cvData.professional_summary}</p>
+                    <div class="mb-7">
+                        <h2 class="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-blue-600 rounded"></span>
+                            <span>Professional Summary</span>
+                        </h2>
+                        <p class="text-sm text-gray-700 leading-relaxed pl-3 border-l-2 border-gray-200">${cvData.professional_summary}</p>
                     </div>
                 `;
             }
 
-            // Work Experience
+            // Work Experience - Enhanced with better layout
             if (hasExperience) {
-                html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Work Experience</h3>';
-                cvData.work_experience.forEach(exp => {
+                html += `
+                    <div class="mb-7">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-blue-600 rounded"></span>
+                            <span>Work Experience</span>
+                        </h2>
+                `;
+                cvData.work_experience.forEach((exp, index) => {
+                    // Handle both start_date/end_date and start_year/end_year formats
+                    const startDate = exp.start_date || exp.start_year || '';
+                    const endDate = exp.end_date || exp.end_year || 'Present';
+                    const position = exp.job_title || exp.position || 'Position';
+                    const company = exp.company || exp.organization || 'Company';
+                    const dateRange = startDate && endDate ? `${startDate} - ${endDate}` : '';
+                    
                     html += `
-                        <div class="mb-4">
-                            <h4 class="text-base font-semibold text-gray-900">${exp.job_title || exp.position || 'Position'}</h4>
-                            <div class="text-sm font-medium text-gray-700">${exp.company || 'Company'}</div>
-                            <div class="text-xs text-gray-500 mb-2">${exp.start_date || ''} - ${exp.end_date || 'Present'}</div>
-                            ${exp.description ? `<p class="text-sm text-gray-700 whitespace-pre-line">${exp.description}</p>` : ''}
+                        <div class="mb-5 pl-3 border-l-2 ${index === cvData.work_experience.length - 1 ? 'border-gray-200' : 'border-blue-100'}">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="text-base font-bold text-gray-900">${position}</h3>
+                                ${dateRange ? `<span class="text-xs text-gray-500 font-medium px-2 py-1 bg-gray-100 rounded">${dateRange}</span>` : ''}
+                            </div>
+                            <div class="text-sm font-semibold text-blue-600 mb-2">${company}</div>
+                            ${exp.description ? `<p class="text-sm text-gray-700 mb-2 leading-relaxed">${exp.description}</p>` : ''}
+                            ${exp.key_responsibilities && exp.key_responsibilities.length > 0 ? `
+                                <ul class="text-sm text-gray-700 space-y-1.5">
+                                    ${exp.key_responsibilities.map(r => `<li class="flex items-start gap-2"><span class="text-blue-600 mt-0.5">•</span><span>${r}</span></li>`).join('')}
+                                </ul>
+                            ` : ''}
                             ${exp.achievements && exp.achievements.length > 0 ? `
-                                <ul class="mt-2 text-sm text-gray-700 list-disc list-inside space-y-1">
-                                    ${exp.achievements.map(a => `<li>${a}</li>`).join('')}
+                                <ul class="mt-2 text-sm text-gray-700 space-y-1.5">
+                                    ${exp.achievements.map(a => `<li class="flex items-start gap-2"><span class="text-green-600 mt-0.5">✓</span><span>${a}</span></li>`).join('')}
                                 </ul>
                             ` : ''}
                         </div>
@@ -591,39 +621,103 @@
                 html += '</div>';
             }
 
-            // Education
+            // Education - Enhanced
             if (hasEducation) {
-                html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Education</h3>';
+                html += `
+                    <div class="mb-7">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-blue-600 rounded"></span>
+                            <span>Education</span>
+                        </h2>
+                `;
                 cvData.education.forEach(edu => {
+                    const degree = edu.degree || 'Degree';
+                    const institution = edu.institution || 'Institution';
+                    const field = edu.field_of_study ? ` in ${edu.field_of_study}` : '';
+                    const year = edu.graduation_year || edu.end_date || edu.year || '';
+                    
                     html += `
-                        <div class="mb-3">
-                            <h4 class="text-base font-semibold text-gray-900">${edu.degree || 'Degree'}</h4>
-                            <div class="text-sm font-medium text-gray-700">${edu.institution || 'Institution'}</div>
-                            <div class="text-xs text-gray-500">${edu.graduation_year || edu.end_date || edu.year || ''}</div>
-                            ${edu.gpa ? `<div class="text-xs text-gray-600 mt-1">GPA: ${edu.gpa}</div>` : ''}
+                        <div class="mb-4 pl-3 border-l-2 border-gray-200">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="text-base font-bold text-gray-900">${degree}${field}</h3>
+                                ${year ? `<span class="text-xs text-gray-500 font-medium px-2 py-1 bg-gray-100 rounded">${year}</span>` : ''}
+                            </div>
+                            <div class="text-sm font-semibold text-blue-600">${institution}</div>
+                            ${edu.gpa ? `<div class="text-xs text-gray-600 mt-1.5 flex items-center gap-1"><span class="font-semibold">GPA:</span><span>${edu.gpa}</span></div>` : ''}
                         </div>
                     `;
                 });
                 html += '</div>';
             }
 
-            // Skills
+            // Skills - Enhanced
             if (cvData.skills && cvData.skills.length > 0) {
-                html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Skills</h3><div class="flex flex-wrap gap-2">';
+                html += `
+                    <div class="mb-7">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-blue-600 rounded"></span>
+                            <span>Skills</span>
+                        </h2>
+                        <div class="flex flex-wrap gap-2">
+                `;
                 cvData.skills.forEach(skill => {
                     const skillName = typeof skill === 'string' ? skill : skill.name || skill.skill_name || skill;
-                    html += `<span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">${skillName}</span>`;
+                    html += `<span class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors">${skillName}</span>`;
                 });
                 html += '</div></div>';
             }
 
-            // Languages
+            // Projects - Enhanced
+            if (cvData.projects && cvData.projects.length > 0) {
+                html += `
+                    <div class="mb-7">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-blue-600 rounded"></span>
+                            <span>Projects</span>
+                        </h2>
+                `;
+                cvData.projects.forEach(project => {
+                    const projectName = typeof project === 'string' ? project : project.project_name || project.name || 'Project';
+                    const description = typeof project === 'object' ? project.description || '' : '';
+                    const role = typeof project === 'object' ? project.role || '' : '';
+                    const technologies = typeof project === 'object' && project.technologies ? project.technologies : [];
+                    html += `
+                        <div class="mb-5 pl-3 border-l-2 border-purple-100">
+                            <div class="flex justify-between items-start mb-1.5">
+                                <h3 class="text-base font-bold text-gray-900">${projectName}</h3>
+                                ${role ? `<span class="text-xs font-medium px-2 py-1 bg-purple-50 text-purple-700 rounded border border-purple-200">${role}</span>` : ''}
+                            </div>
+                            ${description ? `<p class="text-sm text-gray-700 mb-2 leading-relaxed">${description}</p>` : ''}
+                            ${technologies.length > 0 ? `
+                                <div class="flex flex-wrap gap-1.5 mt-2">
+                                    ${technologies.map(tech => `<span class="text-xs px-2 py-1 bg-gray-50 text-gray-700 rounded border border-gray-200">${tech}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // Languages - Enhanced
             if (cvData.languages && cvData.languages.length > 0) {
-                html += '<div class="mb-6"><h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b border-gray-200">Languages</h3><div class="space-y-1">';
+                html += `
+                    <div class="mb-7">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-blue-600 rounded"></span>
+                            <span>Languages</span>
+                        </h2>
+                        <div class="grid grid-cols-2 gap-3">
+                `;
                 cvData.languages.forEach(lang => {
                     const langName = typeof lang === 'string' ? lang : lang.language || lang.name;
-                    const proficiency = typeof lang === 'object' ? ` - ${lang.proficiency || ''}` : '';
-                    html += `<div class="text-sm text-gray-700">${langName}${proficiency}</div>`;
+                    const proficiency = typeof lang === 'object' ? lang.proficiency || '' : '';
+                    html += `
+                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
+                            <span class="text-sm font-semibold text-gray-900">${langName}</span>
+                            ${proficiency ? `<span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded font-medium">${proficiency}</span>` : ''}
+                        </div>
+                    `;
                 });
                 html += '</div></div>';
             }

@@ -249,7 +249,8 @@ class CVChatMemory:
                 "completed_sections": completed_sections,
                 "progress_percentage": progress_percentage,
                 "completion_status": completion_status,
-                "next_suggested_section": self.get_next_suggested_section(completion_status)
+                "next_suggested_section": self.get_next_suggested_section(completion_status),
+                "cv_memory": cv_memory  # Include the actual CV data for frontend
             }
             
         except Exception as e:

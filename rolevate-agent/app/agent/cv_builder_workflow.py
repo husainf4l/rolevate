@@ -823,24 +823,33 @@ class CVBuilderWorkflow:
         try:
             logger.info(f"🤖 Processing chat message with LLM (session: {session_id})")
             
-            # Use LLM-powered profile assistant for extraction
-            extracted_data = await profile_assistant.extract_structured_data(message)
+            # Use LLM-powered profile assistant for extraction (async version)
+            analysis_result = await profile_assistant.analyze_profile_text_async(message, use_llm=True)
+            extracted_data = analysis_result.get('extracted_data', {})
             
             logger.info(f"✅ LLM extracted data: {len(extracted_data)} fields")
+            logger.debug(f"📊 Extracted data keys: {list(extracted_data.keys())}")
+            logger.debug(f"📝 Personal info: {extracted_data.get('personal_info', {})}")
             
             # Merge extracted data with existing CV memory
             updated_cv_memory = self._merge_cv_data(cv_memory, extracted_data)
+            logger.debug(f"🔄 Merged CV memory keys: {list(updated_cv_memory.keys())}")
+            
+            # Auto-generate professional summary if needed
+            updated_cv_memory = await self._generate_summary_if_needed(updated_cv_memory, profile_assistant)
             
             # Calculate completion progress
             completion_percentage = self._calculate_completion(updated_cv_memory)
             
             # Generate AI response using LLM (not static text)
+            missing_info = analysis_result.get('missing_information', [])
+            
             if completion_percentage < 30:
                 base_message = f"Great! I've captured your information. Your CV is {completion_percentage}% complete."
-                # Get follow-up questions from LLM
-                questions = await profile_assistant.generate_follow_up_questions(updated_cv_memory)
-                if questions:
-                    base_message += f" {questions[0]}"
+                # Get follow-up question from LLM
+                if missing_info:
+                    question = profile_assistant.generate_follow_up_question(missing_info, updated_cv_memory)
+                    base_message += f" {question}"
                 else:
                     base_message += " What else would you like to add?"
             elif completion_percentage < 70:
@@ -848,8 +857,8 @@ class CVBuilderWorkflow:
             else:
                 base_message = f"Fantastic! Your CV is {completion_percentage}% complete and looking great! Would you like me to generate your professional CV now?"
             
-            # Enhance the response using LLM for natural, conversational tone
-            enhanced_response = await profile_assistant.enhance_content(base_message)
+            # For now, use the base message directly (enhance_content is also async and may not exist)
+            enhanced_response = base_message
             
             logger.info(f"💬 Generated LLM response: {enhanced_response[:100]}...")
             
@@ -863,6 +872,8 @@ class CVBuilderWorkflow:
             
         except Exception as e:
             logger.error(f"❌ Error in process_chat_message: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             # Even error responses should be LLM-generated
             fallback_response = "I'm here to help you build your CV! Could you tell me about your professional experience?"
             try:
@@ -884,30 +895,137 @@ class CVBuilderWorkflow:
     def _merge_cv_data(self, existing_cv: Dict[str, Any], new_data: Dict[str, Any]) -> Dict[str, Any]:
         """Merge new extracted data with existing CV memory."""
         merged = existing_cv.copy()
+        logger.debug(f"🔀 Merging - New data has: {list(new_data.keys())}")
         
-        # Merge personal info
-        if "personal_info" in new_data:
-            merged.setdefault("personal_info", {}).update(new_data["personal_info"])
+        # Merge personal info (only update non-null values to preserve existing data)
+        if "personal_info" in new_data and new_data["personal_info"]:
+            existing_info = merged.setdefault("personal_info", {})
+            new_info = new_data["personal_info"]
+            
+            # Only update fields that have actual values (not None/null)
+            for key, value in new_info.items():
+                if value is not None and value != "":
+                    existing_info[key] = value
+            
+            logger.debug(f"✅ Personal info merged: {existing_info}")
         
-        # Append work experience
-        if "work_experience" in new_data:
+        # Merge current position (only update non-null values)
+        if "current_position" in new_data and new_data["current_position"]:
+            existing_position = merged.setdefault("current_position", {})
+            new_position = new_data["current_position"]
+            
+            # Only update fields that have actual values
+            for key, value in new_position.items():
+                if value is not None and value != "":
+                    existing_position[key] = value
+        
+        # Merge experience (from LLM format)
+        if "experience" in new_data and new_data["experience"]:
+            merged["experience"] = new_data["experience"]
+            # Also extract to work_experience list format if needed
+            exp_data = new_data["experience"]
+            if exp_data.get("previous_positions"):
+                merged.setdefault("work_experience", []).extend(exp_data["previous_positions"])
+        
+        # Append work experience (legacy format)
+        if "work_experience" in new_data and isinstance(new_data["work_experience"], list):
             merged.setdefault("work_experience", []).extend(new_data["work_experience"])
         
-        # Append education
-        if "education" in new_data:
-            merged.setdefault("education", []).extend(new_data["education"])
+        # Deduplicate work experience entries
+        if "work_experience" in merged and isinstance(merged["work_experience"], list):
+            valid_experience = [
+                exp for exp in merged["work_experience"]
+                if isinstance(exp, dict) and (exp.get("position") or exp.get("job_title"))
+            ]
+            
+            # Deduplicate based on position + company + start_year
+            seen = set()
+            deduped_experience = []
+            for exp in valid_experience:
+                position = exp.get("position") or exp.get("job_title") or ""
+                company = exp.get("company") or exp.get("organization") or ""
+                start = exp.get("start_year") or exp.get("start_date") or ""
+                
+                key = (
+                    str(position).lower().strip(),
+                    str(company).lower().strip(),
+                    str(start).strip()
+                )
+                
+                if key not in seen and key != ("", "", ""):
+                    seen.add(key)
+                    deduped_experience.append(exp)
+            
+            merged["work_experience"] = deduped_experience
+            logger.debug(f"✅ Work experience deduplicated: {len(valid_experience)} → {len(deduped_experience)} entries")
         
-        # Merge skills
-        if "skills" in new_data:
+        # Append education - handle both dict and list formats
+        if "education" in new_data and new_data["education"]:
+            edu_data = new_data["education"]
+            if isinstance(edu_data, dict):
+                # Convert single education dict to list format
+                if any(edu_data.values()):  # Only add if has actual data
+                    edu_list_item = {
+                        "degree": edu_data.get("degree"),
+                        "field_of_study": edu_data.get("field_of_study"),
+                        "institution": edu_data.get("institution"),
+                        "graduation_year": edu_data.get("graduation_year")
+                    }
+                    merged.setdefault("education", []).append(edu_list_item)
+            elif isinstance(edu_data, list):
+                merged.setdefault("education", []).extend(edu_data)
+        
+        # Clean up and deduplicate education entries
+        if "education" in merged and isinstance(merged["education"], list):
+            # Filter out corrupted strings and invalid entries
+            valid_education = [
+                edu for edu in merged["education"] 
+                if isinstance(edu, dict) and edu.get("degree")
+            ]
+            
+            # Deduplicate education entries based on degree + institution + year
+            seen = set()
+            deduped_education = []
+            for edu in valid_education:
+                # Create unique key from degree, institution, and year
+                key = (
+                    str(edu.get("degree", "")).lower().strip(),
+                    str(edu.get("institution", "")).lower().strip(),
+                    str(edu.get("graduation_year", "")).strip()
+                )
+                if key not in seen and key != ("", "", ""):
+                    seen.add(key)
+                    deduped_education.append(edu)
+            
+            merged["education"] = deduped_education
+            logger.debug(f"✅ Education deduplicated: {len(valid_education)} → {len(deduped_education)} entries")
+        
+        # Merge skills (handle list of strings)
+        if "skills" in new_data and new_data["skills"]:
+            logger.debug(f"✅ Merging {len(new_data['skills'])} skills")
             existing_skills = set(merged.get("skills", []))
-            new_skills = set(new_data["skills"])
+            new_skills = set(new_data["skills"]) if isinstance(new_data["skills"], list) else set()
             merged["skills"] = list(existing_skills | new_skills)
+            logger.debug(f"📊 Total skills after merge: {len(merged['skills'])}")
         
-        # Merge languages
-        if "languages" in new_data:
-            existing_langs = set(merged.get("languages", []))
-            new_langs = set(new_data["languages"])
-            merged["languages"] = list(existing_langs | new_langs)
+        # Merge languages (handle both string and dict formats)
+        if "languages" in new_data and new_data["languages"]:
+            existing_langs = merged.get("languages", [])
+            new_langs = new_data["languages"]
+            
+            # If new languages are dicts (structured format), check for duplicates
+            if new_langs and isinstance(new_langs[0], dict):
+                # Get existing language names
+                existing_lang_names = {lang.get('language') for lang in existing_langs if isinstance(lang, dict)}
+                # Only add new languages that don't exist
+                for new_lang in new_langs:
+                    if new_lang.get('language') not in existing_lang_names:
+                        merged.setdefault("languages", []).append(new_lang)
+            else:
+                # If they're strings, use set to avoid duplicates
+                existing_set = set(existing_langs) if existing_langs and isinstance(existing_langs[0], str) else set()
+                new_set = set(new_langs) if isinstance(new_langs[0], str) else set()
+                merged["languages"] = list(existing_set | new_set)
         
         # Update summary if provided
         if "professional_summary" in new_data:
@@ -917,7 +1035,89 @@ class CVBuilderWorkflow:
         if "certifications" in new_data:
             merged.setdefault("certifications", []).extend(new_data["certifications"])
         
+        # Deduplicate certifications
+        if "certifications" in merged and isinstance(merged["certifications"], list):
+            valid_certs = [
+                cert for cert in merged["certifications"]
+                if isinstance(cert, dict) and cert.get("certification_name")
+            ]
+            
+            seen = set()
+            deduped_certs = []
+            for cert in valid_certs:
+                cert_name = str(cert.get("certification_name", "")).lower().strip()
+                issuing_body = str(cert.get("issuing_body", "")).lower().strip()
+                key = (cert_name, issuing_body)
+                
+                if key not in seen and cert_name:
+                    seen.add(key)
+                    deduped_certs.append(cert)
+            
+            merged["certifications"] = deduped_certs
+            logger.debug(f"✅ Certifications deduplicated: {len(valid_certs)} → {len(deduped_certs)} entries")
+        
+        # Merge projects
+        if "projects" in new_data and new_data["projects"]:
+            merged.setdefault("projects", []).extend(new_data["projects"])
+        
+        # Deduplicate projects
+        if "projects" in merged and isinstance(merged["projects"], list):
+            valid_projects = [
+                proj for proj in merged["projects"]
+                if isinstance(proj, dict) and (proj.get("project_name") or proj.get("name"))
+            ]
+            
+            seen = set()
+            deduped_projects = []
+            for proj in valid_projects:
+                project_name = str(proj.get("project_name") or proj.get("name") or "").lower().strip()
+                
+                if project_name and project_name not in seen:
+                    seen.add(project_name)
+                    deduped_projects.append(proj)
+            
+            merged["projects"] = deduped_projects
+            logger.debug(f"✅ Projects deduplicated: {len(valid_projects)} → {len(deduped_projects)} entries")
+        
+        # Final cleanup: Remove duplicate languages
+        if "languages" in merged and isinstance(merged["languages"], list):
+            seen_langs = set()
+            unique_langs = []
+            for lang in merged["languages"]:
+                if isinstance(lang, dict):
+                    lang_key = lang.get('language', '').lower()
+                    if lang_key and lang_key not in seen_langs:
+                        seen_langs.add(lang_key)
+                        unique_langs.append(lang)
+                elif isinstance(lang, str) and lang not in seen_langs:
+                    seen_langs.add(lang)
+                    unique_langs.append(lang)
+            merged["languages"] = unique_langs
+        
         return merged
+    
+    async def _generate_summary_if_needed(self, cv_memory: Dict[str, Any], profile_assistant) -> Dict[str, Any]:
+        """Generate professional summary if not exists and we have enough data"""
+        has_summary = cv_memory.get("professional_summary") or cv_memory.get("summary")
+        has_enough_data = (
+            cv_memory.get("personal_info", {}).get("full_name") and
+            (cv_memory.get("work_experience") or cv_memory.get("experience"))
+        )
+        
+        if not has_summary and has_enough_data:
+            logger.info("🤖 Auto-generating professional summary...")
+            try:
+                summary = await profile_assistant.generate_professional_summary_async(cv_memory)
+                
+                if summary:
+                    cv_memory["professional_summary"] = summary
+                    logger.info(f"✅ Auto-generated summary: {len(summary)} characters")
+                else:
+                    logger.warning("⚠️ Summary generation returned empty")
+            except Exception as e:
+                logger.error(f"❌ Summary auto-generation failed: {e}")
+        
+        return cv_memory
     
     def _calculate_completion(self, cv_memory: Dict[str, Any]) -> int:
         """Calculate CV completion percentage."""
