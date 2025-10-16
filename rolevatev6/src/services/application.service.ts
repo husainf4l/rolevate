@@ -9,8 +9,7 @@ export interface Application {
   };
   candidate: {
     id: string;
-    firstName: string;
-    lastName: string;
+    name: string;
     email: string;
   };
   status: 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'INTERVIEWED' | 'OFFERED' | 'HIRED' | 'REJECTED' | 'WITHDRAWN';
@@ -63,29 +62,55 @@ export interface PaginationInput {
 
 class ApplicationService {
   private GET_APPLICATIONS_QUERY = gql`
-    query GetApplications {
-      applications {
+  query GetApplications($jobId: ID, $status: ApplicationStatus, $limit: Int, $offset: Int) {
+    applications(jobId: $jobId, status: $status, limit: $limit, offset: $offset) {
+      id
+      job {
         id
-        appliedAt
-        candidate {
-          id
-          firstName
-          lastName
-          email
-        }
-        job {
-          id
-          title
-        }
-        status
-        cvAnalysisScore
-        cvAnalysisResults
-        resumeUrl
-        expectedSalary
+        title
       }
+      candidate {
+        id
+        name
+        email
+      }
+      status
+      appliedAt
+      coverLetter
+      resumeUrl
+      expectedSalary
+      noticePeriod
+      cvAnalysisScore
+      cvAnalysisResults
+      analyzedAt
+      aiCvRecommendations
+      aiInterviewRecommendations
+      aiSecondInterviewRecommendations
+      recommendationsGeneratedAt
+      companyNotes
+      source
+      notes
+      aiAnalysis
+      interviewScheduled
+      reviewedAt
+      interviewScheduledAt
+      interviewedAt
+      rejectedAt
+      acceptedAt
+      applicationNotes {
+        id
+        note
+        createdAt
+        createdBy {
+          id
+          name
+        }
+      }
+      createdAt
+      updatedAt
     }
-  `;
-
+  }
+`;
   private CREATE_APPLICATION_MUTATION = gql`
     mutation CreateApplication($input: CreateApplicationInput!) {
       createApplication(input: $input) {
@@ -98,8 +123,7 @@ class ApplicationService {
         }
         candidate {
           id
-          firstName
-          lastName
+          name
           email
         }
       }

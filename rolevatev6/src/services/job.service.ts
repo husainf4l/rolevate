@@ -109,8 +109,8 @@ export interface PaginationInput {
 
 class JobService {
   private GET_COMPANY_JOBS_QUERY = gql`
-    query GetCompanyJobs {
-      jobs {
+    query GetCompanyJobs($filter: JobFilterInput) {
+      jobs(filter: $filter) {
         id
         title
         description
@@ -225,8 +225,22 @@ class JobService {
 
   async getCompanyJobs(): Promise<Job[]> {
     try {
+      // Get current user to filter by company
+      const { authService } = await import('@/services/auth');
+      const currentUser = await authService.getCurrentUser();
+
+      if (!currentUser?.company?.id) {
+        console.warn('No company found for current user, returning empty jobs list');
+        return [];
+      }
+
       const { data } = await apolloClient.query<{ jobs: Job[] }>({
         query: this.GET_COMPANY_JOBS_QUERY,
+        variables: {
+          filter: {
+            companyId: currentUser.company.id
+          }
+        },
         fetchPolicy: 'network-only'
       });
       return data?.jobs || [];

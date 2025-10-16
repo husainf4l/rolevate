@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MapPin, Heart } from "lucide-react";
-import { Job } from "@/services";
+import { Job } from "@/types/jobs";
 
 interface JobCardProps {
   job: Job;
@@ -35,6 +35,20 @@ export default function JobCard({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Format posted date
+  const formatPostedDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "Posted today";
+    if (diffDays === 2) return "Posted yesterday";
+    if (diffDays <= 7) return `Posted ${diffDays - 1} days ago`;
+    if (diffDays <= 30) return `Posted ${Math.floor(diffDays / 7)} weeks ago`;
+    return `Posted ${Math.floor(diffDays / 30)} months ago`;
   };
 
   return (
@@ -84,7 +98,7 @@ export default function JobCard({
         </h3>
 
         {/* Location and salary */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1 text-sm text-slate-600">
             <MapPin className="w-4 h-4" />
             <span>{job.location}</span>
@@ -96,9 +110,37 @@ export default function JobCard({
           )}
         </div>
 
+        {/* Posted date */}
+        <div className="text-xs text-slate-500 mb-3">
+          {formatPostedDate(job.createdAt)}
+        </div>
+
+        {/* Skills preview */}
+        {job.skills && job.skills.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {job.skills.slice(0, 3).map((skill, index) => (
+              <Badge
+                key={index}
+                variant="outline"
+                className="text-xs px-2 py-0.5 bg-slate-50 text-slate-600 border-slate-200 rounded-sm"
+              >
+                {skill}
+              </Badge>
+            ))}
+            {job.skills.length > 3 && (
+              <Badge
+                variant="outline"
+                className="text-xs px-2 py-0.5 bg-slate-50 text-slate-600 border-slate-200 rounded-sm"
+              >
+                +{job.skills.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
+
         {/* Details button */}
         <div className="mt-4">
-          <Link href={`/jobs/${job.id}`}>
+          <Link href={`/jobs/${job.slug}`}>
             <Button className="w-full bg-[#0891b2] hover:bg-[#0891b2]/90 text-white font-medium rounded-sm">
               Details
             </Button>

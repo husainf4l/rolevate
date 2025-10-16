@@ -108,41 +108,77 @@ export default function UserProfilePage() {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`${API_CONFIG.API_BASE_URL}/auth/profile`, {
-        credentials: "include",
+      // Use GraphQL me query instead of REST API
+      const response = await fetch(`${API_CONFIG.API_BASE_URL.replace('/api', '')}/graphql`, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          query: `
+            query GetCurrentUser {
+              me {
+                id
+                name
+                email
+                phone
+                avatar
+                userType
+                company {
+                  id
+                  name
+                }
+                candidateProfile {
+                  id
+                  firstName
+                  lastName
+                  phone
+                  location
+                  bio
+                  skills
+                  experience
+                  education
+                  linkedinUrl
+                  githubUrl
+                  portfolioUrl
+                  resumeUrl
+                  availability
+                  salaryExpectation
+                  preferredWorkType
+                }
+                createdAt
+                updatedAt
+              }
+            }
+          `
+        }),
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setUserProfile({
-          id: data.id || "",
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
-          phone: data.phone || "",
-          position: data.position || "",
-          department: data.department || "",
-          avatar: data.avatar || "",
-          bio: data.bio || "",
-          timezone: data.timezone || "UTC",
-          language: data.language || "en",
-          dateFormat: data.dateFormat || "MM/DD/YYYY",
-          timeFormat: data.timeFormat || "12",
-        });
+        const result = await response.json();
+        const userData = result.data?.me;
 
-        // Set notification settings if available
-        if (data.notificationSettings) {
-          setNotificationSettings(data.notificationSettings);
+        if (userData) {
+          // Map GraphQL response to the interface expected by the component
+          setUserProfile({
+            id: userData.id || "",
+            firstName: userData.candidateProfile?.firstName || userData.name?.split(' ')[0] || "",
+            lastName: userData.candidateProfile?.lastName || userData.name?.split(' ').slice(1).join(' ') || "",
+            email: userData.email || "",
+            phone: userData.candidateProfile?.phone || userData.phone || "",
+            position: "", // This field doesn't exist in GraphQL, might need to be added
+            department: "", // This field doesn't exist in GraphQL, might need to be added
+            avatar: userData.avatar || "",
+            bio: userData.candidateProfile?.bio || "",
+            timezone: "UTC", // Default value
+            language: "en", // Default value
+            dateFormat: "MM/DD/YYYY", // Default value
+            timeFormat: "12", // Default value
+          });
         }
-
-        // Set security settings if available
-        if (data.securitySettings) {
-          setSecuritySettings(data.securitySettings);
-        }
+      } else {
+        throw new Error("Failed to fetch user profile");
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -156,28 +192,91 @@ export default function UserProfilePage() {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`${API_CONFIG.API_BASE_URL}/auth/profile`, {
-        method: "PUT",
-        credentials: "include",
+      // First get current user data to check if they have a candidate profile
+      const userResponse = await fetch(`${API_CONFIG.API_BASE_URL.replace('/api', '')}/graphql`, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify(userProfile),
+        body: JSON.stringify({
+          query: `
+            query GetCurrentUser {
+              me {
+                id
+                candidateProfile {
+                  id
+                }
+              }
+            }
+          `
+        }),
       });
 
-      if (response.ok) {
+      if (!userResponse.ok) {
+        throw new Error("Failed to get user data");
+      }
+
+      const userResult = await userResponse.json();
+      const candidateProfileId = userResult.data?.me?.candidateProfile?.id;
+
+      if (candidateProfileId) {
+        // Update candidate profile using GraphQL
+        const updateResponse = await fetch(`${API_CONFIG.API_BASE_URL.replace('/api', '')}/graphql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            query: `
+              mutation UpdateCandidateProfile($id: ID!, $input: UpdateCandidateProfileInput!) {
+                updateCandidateProfile(id: $id, input: $input) {
+                  id
+                  firstName
+                  lastName
+                  phone
+                  bio
+                }
+              }
+            `,
+            variables: {
+              id: candidateProfileId,
+              input: {
+                firstName: userProfile.firstName,
+                lastName: userProfile.lastName,
+                phone: userProfile.phone,
+                bio: userProfile.bio,
+              }
+            }
+          }),
+        });
+
+        if (updateResponse.ok) {
+          const updateResult = await updateResponse.json();
+          if (updateResult.errors) {
+            throw new Error(updateResult.errors[0].message);
+          }
+          setSaveStatus({
+            type: "success",
+            message: "Profile updated successfully!",
+          });
+          setTimeout(() => setSaveStatus(null), 3000);
+        } else {
+          throw new Error("Failed to update profile");
+        }
+      } else {
+        // No candidate profile found - would need updateUser mutation
+        console.warn("No candidate profile found for user. updateUser mutation needed.");
         setSaveStatus({
-          type: "success",
-          message: "Profile updated successfully!",
+          type: "error",
+          message: "Profile update not available - missing backend mutation",
         });
         setTimeout(() => setSaveStatus(null), 3000);
-      } else {
-        throw new Error("Failed to update profile");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving profile:", error);
-      setSaveStatus({ type: "error", message: "Failed to update profile" });
+      setSaveStatus({ type: "error", message: error.message || "Failed to update profile" });
       setTimeout(() => setSaveStatus(null), 3000);
     } finally {
       setLoading(false);
@@ -185,105 +284,21 @@ export default function UserProfilePage() {
   };
 
   const saveNotificationSettings = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(
-        `${API_CONFIG.API_BASE_URL}/auth/notification-settings`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(notificationSettings),
-        }
-      );
-
-      if (response.ok) {
-        setSaveStatus({
-          type: "success",
-          message: "Notification settings saved successfully!",
-        });
-        setTimeout(() => setSaveStatus(null), 3000);
-      } else {
-        throw new Error("Failed to save notification settings");
-      }
-    } catch (error) {
-      console.error("Error saving notification settings:", error);
-      setSaveStatus({
-        type: "error",
-        message: "Failed to save notification settings",
-      });
-      setTimeout(() => setSaveStatus(null), 3000);
-    } finally {
-      setLoading(false);
-    }
+    // TODO: Implement when notification settings mutations are added to GraphQL
+    setSaveStatus({
+      type: "error",
+      message: "Notification settings not available via GraphQL yet",
+    });
+    setTimeout(() => setSaveStatus(null), 3000);
   };
 
   const changePassword = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setSaveStatus({ type: "error", message: "New passwords do not match" });
-      setTimeout(() => setSaveStatus(null), 3000);
-      return;
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      setSaveStatus({
-        type: "error",
-        message: "Password must be at least 8 characters long",
-      });
-      setTimeout(() => setSaveStatus(null), 3000);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(
-        `${API_CONFIG.API_BASE_URL}/auth/change-password`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            currentPassword: passwordData.currentPassword,
-            newPassword: passwordData.newPassword,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        setSaveStatus({
-          type: "success",
-          message: "Password changed successfully!",
-        });
-        setPasswordData({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
-        setTimeout(() => setSaveStatus(null), 3000);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to change password");
-      }
-    } catch (error: any) {
-      console.error("Error changing password:", error);
-      setSaveStatus({
-        type: "error",
-        message: error.message || "Failed to change password",
-      });
-      setTimeout(() => setSaveStatus(null), 3000);
-    } finally {
-      setLoading(false);
-    }
+    // TODO: Implement when changePassword mutation is added to GraphQL
+    setSaveStatus({
+      type: "error",
+      message: "Password change not available via GraphQL yet",
+    });
+    setTimeout(() => setSaveStatus(null), 3000);
   };
 
   const handleAvatarUpload = async (
@@ -292,35 +307,55 @@ export default function UserProfilePage() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("avatar", file);
-
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const response = await fetch(
-        `${API_CONFIG.API_BASE_URL}/auth/upload-avatar`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
+      // Upload file to S3 using GraphQL mutation
+      const formData = new FormData();
+      formData.append('operations', JSON.stringify({
+        query: `
+          mutation UploadFileToS3($file: Upload!, $folder: String!) {
+            uploadFileToS3(file: $file, folder: $folder) {
+              url
+              key
+            }
+          }
+        `,
+        variables: {
+          file: null, // File will be in map
+          folder: "avatars"
         }
-      );
+      }));
+      formData.append('map', JSON.stringify({ "0": ["variables.file"] }));
+      formData.append('0', file);
 
-      if (response.ok) {
-        const data = await response.json();
-        setUserProfile({ ...userProfile, avatar: data.avatarUrl });
+      const uploadResponse = await fetch(`${API_CONFIG.API_BASE_URL.replace('/api', '')}/graphql`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload avatar");
+      }
+
+      const uploadResult = await uploadResponse.json();
+      const avatarUrl = uploadResult.data?.uploadFileToS3?.url;
+
+      if (avatarUrl) {
+        // Update user profile with new avatar URL using GraphQL
+        // For now, we'll update the local state - ideally this should use an updateUser mutation
+        setUserProfile({ ...userProfile, avatar: avatarUrl });
         setSaveStatus({
           type: "success",
-          message: "Avatar updated successfully!",
+          message: "Avatar uploaded successfully!",
         });
         setTimeout(() => setSaveStatus(null), 3000);
       } else {
-        throw new Error("Failed to upload avatar");
+        throw new Error("Failed to get avatar URL");
       }
     } catch (error) {
       console.error("Error uploading avatar:", error);
@@ -338,7 +373,7 @@ export default function UserProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-primary-50">
+    <div className="min-h-screen">
       <Header
         title="My Profile"
         subtitle="Manage your personal account settings and preferences"
@@ -364,7 +399,7 @@ export default function UserProfilePage() {
         )}
 
         {/* Profile Header */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-2xl p-8 mb-8 border border-white/20">
+        <div className="rounded-sm shadow-2xl p-8 mb-8 border border-gray-200">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-primary-600 flex items-center justify-center">
@@ -410,7 +445,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-xl border border-white/20 mb-8">
+        <div className="rounded-sm shadow-xl border border-gray-200 mb-8">
           <div className="flex gap-1 p-2">
             {tabs.map((tab) => (
               <button
@@ -430,7 +465,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-xl p-8 border border-white/20">
+        <div className="rounded-sm shadow-xl p-8 border border-gray-200">
           {/* Personal Info Tab */}
           {activeTab === "profile" && (
             <div className="space-y-8">
@@ -652,7 +687,7 @@ export default function UserProfilePage() {
               </div>
 
               <div className="space-y-6">
-                <div className="bg-gray-50 rounded-xl p-6">
+                <div className="rounded-xl p-6 border border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
                     Email Notifications
                   </h3>
@@ -759,7 +794,7 @@ export default function UserProfilePage() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-6">
+                <div className="rounded-xl p-6 border border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
                     Other Notifications
                   </h3>
@@ -842,7 +877,7 @@ export default function UserProfilePage() {
                 </p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-6">
+              <div className="rounded-xl p-6 border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-6">
                   Change Password
                 </h3>
@@ -999,7 +1034,7 @@ export default function UserProfilePage() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-6">
+              <div className="rounded-xl p-6 border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Security Settings
                 </h3>

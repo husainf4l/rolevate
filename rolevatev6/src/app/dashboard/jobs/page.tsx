@@ -338,7 +338,7 @@ function JobsContent() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 pt-24">
+      <div className="min-h-screen p-8 pt-24">
         <div className="max-w-7xl mx-auto">
           <Header
             title="Job Management"
@@ -363,7 +363,7 @@ function JobsContent() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 pt-24">
+      <div className="min-h-screen p-8 pt-24">
         <div className="max-w-7xl mx-auto">
           <Header
             title="Job Management"
@@ -392,7 +392,7 @@ function JobsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 pt-24">
+    <div className="min-h-screen p-8 pt-24">
       <div className="max-w-7xl mx-auto">
         <Header
           title="Job Management"

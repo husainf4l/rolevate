@@ -5,51 +5,12 @@ import Image from "next/image";
 import Header from "@/components/dashboard/Header";
 import { Button } from "@/components/ui/button";
 import { CameraIcon } from "@heroicons/react/24/outline";
-import { API_CONFIG } from "@/lib/config";
 import toast from "react-hot-toast";
-
-interface CompanyUser {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  avatar?: string;
-}
-
-interface CompanyProfile {
-  id?: number;
-  name?: string;
-  logo?: string;
-  industry?: string;
-  founded?: string;
-  employees?: string;
-  headquarters?: string;
-  website?: string;
-  description?: string;
-  mission?: string;
-  email?: string;
-  phone?: string;
-  values?: string[];
-  benefits?: string[];
-  stats?: { label: string; value: string }[];
-  subscription?: {
-    plan: string;
-    renewal: string;
-    status: string;
-    features: string[];
-  };
-  users?: CompanyUser[];
-}
-
-interface NotificationSettings {
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  pushNotifications: boolean;
-  applicationUpdates: boolean;
-  interviewReminders: boolean;
-  systemAlerts: boolean;
-  weeklyReports: boolean;
-}
+import { 
+  companyService, 
+  CompanyProfile, 
+  CompanyUser 
+} from "@/services/company.service";
 
 export default function CompanyProfilePage() {
   const [tab, setTab] = useState("company");
@@ -69,17 +30,6 @@ export default function CompanyProfilePage() {
     new: false,
     confirm: false,
   });
-  const [notificationSettings, setNotificationSettings] =
-    useState<NotificationSettings>({
-      emailNotifications: true,
-      smsNotifications: false,
-      pushNotifications: true,
-      applicationUpdates: true,
-      interviewReminders: true,
-      systemAlerts: true,
-      weeklyReports: false,
-    });
-
 
 
   useEffect(() => {
@@ -89,58 +39,29 @@ export default function CompanyProfilePage() {
   const fetchCompanyProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${API_CONFIG.API_BASE_URL}/company/me/company`,
-        {
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setCompanyProfile(data);
-      }
+      const data = await companyService.getCompanyProfile();
+      setCompanyProfile(data);
     } catch (error) {
       console.error("Error fetching company profile:", error);
+      toast.error("Failed to load company profile");
     } finally {
       setLoading(false);
     }
   }, []);
 
   const generateInvitationCode = useCallback(async () => {
-    if (!companyProfile?.id) return;
-    
     try {
       setGeneratingInvite(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${API_CONFIG.API_BASE_URL}/company/${companyProfile.id}/invitation`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setInvitationCode(data.code);
-      } else {
-        toast.error("Failed to generate invitation code");
-      }
-    } catch (error) {
+      const data = await companyService.generateInvitationCode();
+      setInvitationCode(data.code);
+      toast.success("Invitation code generated successfully!");
+    } catch (error: any) {
       console.error("Error generating invitation code:", error);
-      toast.error("Error generating invitation code");
+      toast.error(error.message || "Failed to generate invitation code");
     } finally {
       setGeneratingInvite(false);
     }
-  }, [companyProfile?.id]);
+  }, []);
 
   const copyInvitationLink = useCallback(async () => {
     if (!invitationCode) return;
@@ -154,33 +75,6 @@ export default function CompanyProfilePage() {
       toast.error("Failed to copy link. Please try again.");
     }
   }, [invitationCode]);
-
-  const saveNotificationSettings = useCallback(async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${API_CONFIG.API_BASE_URL}/company/notifications`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(notificationSettings),
-        }
-      );
-
-      if (response.ok) {
-        toast.success("Notification settings saved successfully!");
-      } else {
-        throw new Error("Failed to save notification settings");
-      }
-    } catch (error) {
-      console.error("Error saving notification settings:", error);
-      toast.error("Failed to save notification settings");
-    }
-  }, [notificationSettings]);
 
   const handleLogoUpload = useCallback(async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -200,33 +94,16 @@ export default function CompanyProfilePage() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("logo", file);
-
     try {
       setLoading(true);
-
-      const response = await fetch(
-        `${API_CONFIG.API_BASE_URL}/company/upload-logo`,
-        {
-          method: "POST",
-          credentials: "include",
-          body: formData,
-        }
+      const logoUrl = await companyService.uploadLogo(file);
+      setCompanyProfile((prev) =>
+        prev ? { ...prev, logo: logoUrl } : null
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setCompanyProfile((prev) =>
-          prev ? { ...prev, logo: data.logoUrl } : null
-        );
-        toast.success("Company logo updated successfully!");
-      } else {
-        throw new Error("Failed to upload logo");
-      }
-    } catch (error) {
+      toast.success("Company logo updated successfully!");
+    } catch (error: any) {
       console.error("Error uploading logo:", error);
-      toast.error("Failed to upload logo");
+      toast.error(error.message || "Failed to upload logo");
     } finally {
       setLoading(false);
     }
@@ -234,7 +111,7 @@ export default function CompanyProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-primary-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading company profile...</p>
@@ -245,7 +122,7 @@ export default function CompanyProfilePage() {
 
   if (!companyProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-primary-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">No company profile found</p>
         </div>
@@ -254,7 +131,7 @@ export default function CompanyProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-primary-50">
+    <div className="min-h-screen ">
       <Header
         title="Company Profile"
         subtitle="Manage your company, users, and subscription."
@@ -379,16 +256,6 @@ export default function CompanyProfilePage() {
               onClick={() => setTab("subscription")}
             >
               Subscription
-            </button>
-            <button
-              className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                tab === "notifications"
-                  ? "bg-primary-600 text-white shadow-lg"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-              }`}
-              onClick={() => setTab("notifications")}
-            >
-              Notifications
             </button>
             <button
               className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
@@ -780,219 +647,7 @@ export default function CompanyProfilePage() {
             </div>
           )}
 
-          {tab === "notifications" && (
-            <div className="space-y-8">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  Notification Preferences
-                </h3>
-                <p className="text-gray-600">
-                  Choose how you want to be notified about important events
-                </p>
-              </div>
-
-              <div className="max-w-3xl mx-auto space-y-6">
-                <div className="bg-white/60 rounded-sm p-8 shadow-lg border border-white/20">
-                  <h4 className="text-xl font-bold text-gray-900 mb-6">
-                    General Notifications
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-900">
-                          Email Notifications
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          Receive notifications via email
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.emailNotifications}
-                          onChange={(e) =>
-                            setNotificationSettings({
-                              ...notificationSettings,
-                              emailNotifications: e.target.checked,
-                            })
-                          }
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-900">
-                          SMS Notifications
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          Receive notifications via SMS
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.smsNotifications}
-                          onChange={(e) =>
-                            setNotificationSettings({
-                              ...notificationSettings,
-                              smsNotifications: e.target.checked,
-                            })
-                          }
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-900">
-                          Push Notifications
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          Receive push notifications in browser
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.pushNotifications}
-                          onChange={(e) =>
-                            setNotificationSettings({
-                              ...notificationSettings,
-                              pushNotifications: e.target.checked,
-                            })
-                          }
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/60 rounded-sm p-8 shadow-lg border border-white/20">
-                  <h4 className="text-xl font-bold text-gray-900 mb-6">
-                    Activity Notifications
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-900">
-                          Application Updates
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          New applications and status changes
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.applicationUpdates}
-                          onChange={(e) =>
-                            setNotificationSettings({
-                              ...notificationSettings,
-                              applicationUpdates: e.target.checked,
-                            })
-                          }
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-900">
-                          Interview Reminders
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          Upcoming interview notifications
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.interviewReminders}
-                          onChange={(e) =>
-                            setNotificationSettings({
-                              ...notificationSettings,
-                              interviewReminders: e.target.checked,
-                            })
-                          }
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-900">
-                          System Alerts
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          Important system updates and maintenance
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.systemAlerts}
-                          onChange={(e) =>
-                            setNotificationSettings({
-                              ...notificationSettings,
-                              systemAlerts: e.target.checked,
-                            })
-                          }
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-900">
-                          Weekly Reports
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                          Weekly activity and analytics reports
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.weeklyReports}
-                          onChange={(e) =>
-                            setNotificationSettings({
-                              ...notificationSettings,
-                              weeklyReports: e.target.checked,
-                            })
-                          }
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center">
-                  <Button
-                    variant="default"
-                    size="lg"
-                    onClick={saveNotificationSettings}
-                  >
-                    Save Notification Preferences
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
+      
 
           {tab === "security" && (
             <div className="space-y-8">
@@ -1013,7 +668,7 @@ export default function CompanyProfilePage() {
 
                   <form
                     className="space-y-6"
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
                       if (
                         passwordData.newPassword !==
@@ -1026,12 +681,21 @@ export default function CompanyProfilePage() {
                         toast.error("Password must be at least 8 characters long");
                         return;
                       }
-                      toast.success("Password changed successfully!");
-                      setPasswordData({
-                        currentPassword: "",
-                        newPassword: "",
-                        confirmPassword: "",
-                      });
+                      
+                      try {
+                        await companyService.changePassword(
+                          passwordData.currentPassword,
+                          passwordData.newPassword
+                        );
+                        toast.success("Password changed successfully!");
+                        setPasswordData({
+                          currentPassword: "",
+                          newPassword: "",
+                          confirmPassword: "",
+                        });
+                      } catch (error: any) {
+                        toast.error(error.message || "Failed to change password");
+                      }
                     }}
                   >
                     <div>

@@ -16,11 +16,17 @@ class JobsService {
   // GraphQL Queries
 
   private GET_JOB_BY_ID_QUERY = gql`
-    query GetJob($id: String!) {
-      job(id: $id) {
+    query GetJobBySlug($slug: String!) {
+      jobBySlug(slug: $slug) {
         id
         title
+        slug
         description
+        company {
+          id
+          name
+          description
+        }
         department
         location
         salary
@@ -39,6 +45,7 @@ class JobsService {
       jobs {
         id
         title
+        slug
         company {
           name
         }
@@ -88,6 +95,11 @@ class JobsService {
         id
         title
         description
+        company {
+          id
+          name
+          description
+        }
         department
         location
         salary
@@ -106,6 +118,12 @@ class JobsService {
       jobs(filter: $filter, pagination: $pagination) {
         id
         title
+        slug
+        company {
+          id
+          name
+          description
+        }
         department
         location
         salary
@@ -115,7 +133,6 @@ class JobsService {
         status
         applicants
         views
-        postedAt
         createdAt
         updatedAt
       }
@@ -146,6 +163,9 @@ class JobsService {
       if (filters?.level) {
         gqlFilter.level = filters.level;
       }
+      if (filters?.department) {
+        gqlFilter.department = filters.department;
+      }
 
       const { data } = await apolloClient.query<{ jobs: any[] }>({
         query: this.GET_COMPANY_JOBS_QUERY,
@@ -163,13 +183,19 @@ class JobsService {
         id: job.id,
         title: job.title,
         description: job.shortDescription || job.description,
-        company: job.department, // Using department as company for now
+        company: job.company?.name || job.department, // Use company name if available, fallback to department
+        companyData: job.company ? {
+          id: job.company.id,
+          name: job.company.name,
+          description: job.company.description
+        } : undefined,
         location: job.location,
         salary: job.salary,
         type: job.type,
         level: job.jobLevel,
         skills: Array.isArray(job.skills) ? job.skills : [],
-        postedAt: job.postedAt || job.createdAt,
+        slug: job.slug,
+        createdAt: job.createdAt,
         updatedAt: job.updatedAt,
         isActive: job.status === 'ACTIVE'
       }));
@@ -187,17 +213,17 @@ class JobsService {
   }
 
   /**
-   * Fetch a single job by ID
+   * Fetch a single job by slug
    */
-  async getJobById(id: string): Promise<Job> {
+  async getJobBySlug(slug: string): Promise<Job> {
     try {
-      const { data } = await apolloClient.query<{ job: any }>({
+      const { data } = await apolloClient.query<{ jobBySlug: any }>({
         query: this.GET_JOB_BY_ID_QUERY,
-        variables: { id },
+        variables: { slug },
         fetchPolicy: 'network-only'
       });
 
-      const job = data?.job;
+      const job = data?.jobBySlug;
       if (!job) {
         throw new Error('Job not found');
       }
@@ -207,13 +233,20 @@ class JobsService {
         id: job.id,
         title: job.title,
         description: job.description,
-        company: job.department, // Using department as company for now
+        company: job.company?.name || job.department, // Use company name if available, fallback to department
+        companyData: job.company ? {
+          id: job.company.id,
+          name: job.company.name,
+          description: job.company.description
+        } : undefined,
+        department: job.department, // Add department field
         location: job.location,
         salary: job.salary,
         type: job.type,
         level: job.jobLevel,
         skills: Array.isArray(job.skills) ? job.skills : [],
-        postedAt: job.createdAt,
+        slug: job.slug,
+        createdAt: job.createdAt,
         updatedAt: job.updatedAt,
         isActive: job.status === 'ACTIVE'
       };
@@ -249,7 +282,8 @@ class JobsService {
         type: job.type,
         level: 'ENTRY', // Default, not fetched
         skills: [], // Not fetched
-        postedAt: '', // Not fetched
+        slug: job.slug || `${job.id}-${job.title.toLowerCase().replace(/\s+/g, '-')}`, // Generate slug if not provided
+        createdAt: '', // Not fetched
         updatedAt: '', // Not fetched
         isActive: true // Default
       }));
@@ -333,8 +367,19 @@ class JobsService {
    */
   async getCompanyJobs(page: number = 1, limit: number = 100, filters?: JobFilters): Promise<any[]> {
     try {
+      // Get current user to filter by company
+      const { authService } = await import('@/services/auth');
+      const currentUser = await authService.getCurrentUser();
+
+      if (!currentUser?.company?.id) {
+        console.warn('No company found for current user, returning empty jobs list');
+        return [];
+      }
+
       // Build filter object for GraphQL
-      const gqlFilter: any = {};
+      const gqlFilter: any = {
+        companyId: currentUser.company.id // Always filter by company
+      };
 
       if (filters?.search) {
         gqlFilter.search = filters.search;
@@ -348,11 +393,14 @@ class JobsService {
       if (filters?.level) {
         gqlFilter.level = filters.level;
       }
+      if (filters?.department) {
+        gqlFilter.department = filters.department;
+      }
 
       const { data } = await apolloClient.query<{ jobs: any[] }>({
         query: this.GET_COMPANY_JOBS_QUERY,
         variables: {
-          filter: Object.keys(gqlFilter).length > 0 ? gqlFilter : undefined,
+          filter: gqlFilter,
           pagination: { take: limit, skip: (page - 1) * limit }
         },
         fetchPolicy: 'network-only'

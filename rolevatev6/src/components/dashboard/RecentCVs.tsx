@@ -148,7 +148,7 @@ export default function RecentApplications() {
                   <DocumentTextIcon className="w-5 h-5 text-primary-600" />
                   <div>
                     <h3 className="font-medium text-gray-900 mb-1">
-                      {application.candidate.firstName} {application.candidate.lastName}
+                      {application.candidate.name}
                     </h3>
                     <p className="text-sm text-gray-500">
                       {application.job.title} • {formatAppliedDate(application.appliedAt)}

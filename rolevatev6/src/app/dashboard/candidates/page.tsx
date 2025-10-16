@@ -109,7 +109,7 @@ const transformApplicationToCandidate = (
     experience: application.cvAnalysisResults?.experienceMatch?.years
       ? `${application.cvAnalysisResults.experienceMatch.years} years`
       : "Not specified",
-    name: `${application.candidate.firstName} ${application.candidate.lastName}`,
+    name: application.candidate.name || "Unknown Candidate",
     email: application.candidate.email,
   };
 };
@@ -352,7 +352,7 @@ export default function CandidatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Header
         title="Recruitment Pipeline"
         subtitle="Track and manage candidates through your AI-powered hiring process"

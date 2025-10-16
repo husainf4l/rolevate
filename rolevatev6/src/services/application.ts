@@ -13,8 +13,7 @@ export interface Application {
   };
   candidate: {
     id: string;
-    firstName: string;
-    lastName: string;
+    name: string;
     email: string;
   };
   status: 'SUBMITTED' | 'REVIEWING' | 'INTERVIEW_SCHEDULED' | 'INTERVIEWED' | 'OFFERED' | 'REJECTED' | 'WITHDRAWN';
@@ -73,8 +72,7 @@ class ApplicationService {
         appliedAt
         candidate {
           id
-          firstName
-          lastName
+          name
           email
         }
         job {
@@ -105,8 +103,7 @@ class ApplicationService {
         }
         candidate {
           id
-          firstName
-          lastName
+          name
           email
         }
       }

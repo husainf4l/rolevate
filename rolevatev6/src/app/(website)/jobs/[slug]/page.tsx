@@ -11,7 +11,7 @@ import { jobsService, Job } from "@/services";
 
 export default function JobDetailPage() {
   const params = useParams();
-  const jobId = params?.jobId as string;
+  const slug = params?.slug as string;
 
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +23,7 @@ export default function JobDetailPage() {
         setIsLoading(true);
         setError(null);
 
-        const jobDetail = await jobsService.getJobById(jobId);
+        const jobDetail = await jobsService.getJobBySlug(slug);
         setJob(jobDetail);
       } catch (err) {
         console.error("Failed to fetch job details:", err);
@@ -33,12 +33,64 @@ export default function JobDetailPage() {
       }
     };
 
-    if (jobId) {
+    if (slug) {
       fetchJobDetail();
     }
-  }, [jobId]);
+  }, [slug]);
 
-  const formatJobType = (type: string) => {
+  // Format posted date
+  const formatPostedDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "Posted today";
+    if (diffDays === 2) return "Posted yesterday";
+    if (diffDays <= 7) return `Posted ${diffDays - 1} days ago`;
+    if (diffDays <= 30) return `Posted ${Math.floor(diffDays / 7)} weeks ago`;
+    return `Posted ${Math.floor(diffDays / 30)} months ago`;
+  };
+
+  // Parse job description into sections
+  const parseJobDescription = (description: string) => {
+    const sections: { title: string; content: string }[] = [];
+    
+    // Split by common section headers
+    const lines = description.split('\n');
+    let currentSection = { title: 'Job Description', content: '' };
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Check for section headers
+      if (trimmedLine.toLowerCase().includes('key responsibilities') || 
+          trimmedLine.toLowerCase().includes('responsibilities')) {
+        if (currentSection.content.trim()) sections.push(currentSection);
+        currentSection = { title: 'Key Responsibilities', content: '' };
+      } else if (trimmedLine.toLowerCase().includes('requirements') || 
+                 trimmedLine.toLowerCase().includes('qualifications')) {
+        if (currentSection.content.trim()) sections.push(currentSection);
+        currentSection = { title: 'Requirements', content: '' };
+      } else if (trimmedLine.toLowerCase().includes('benefits') || 
+                 trimmedLine.toLowerCase().includes('what we offer')) {
+        if (currentSection.content.trim()) sections.push(currentSection);
+        currentSection = { title: 'Benefits', content: '' };
+      } else if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
+        // Bullet points
+        currentSection.content += line + '\n';
+      } else if (trimmedLine && !trimmedLine.startsWith('•') && !trimmedLine.startsWith('-')) {
+        // Regular paragraphs
+        currentSection.content += line + '\n';
+      }
+    }
+    
+    if (currentSection.content.trim()) sections.push(currentSection);
+    
+    return sections.length > 0 ? sections : [{ title: 'Job Description', content: description }];
+  };
+
+    const formatJobType = (type: string) => {
     switch (type) {
       case "FULL_TIME":
         return "Full-time";
@@ -75,9 +127,11 @@ export default function JobDetailPage() {
         <div className="max-w-6xl mx-auto px-6 py-12">
           {/* Breadcrumb Skeleton */}
           <div className="mb-8 flex items-center space-x-2">
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-4 w-1" />
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-1 rounded-full" />
             <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-1 rounded-full" />
+            <Skeleton className="h-4 w-48" />
           </div>
 
           {/* Header Skeleton */}
@@ -89,22 +143,115 @@ export default function JobDetailPage() {
                   <Skeleton className="w-12 h-12 rounded-sm" />
                   <div className="flex-1">
                     <Skeleton className="h-5 w-40 mb-2" />
-                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-64" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-6" />
+                    <div key={i} className="flex items-center gap-2">
+                      <Skeleton className="w-4 h-4 rounded" />
+                      <Skeleton className="h-4 w-20" />
+                    </div>
                   ))}
+                </div>
+                <div className="space-y-3 mb-8">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-4/5" />
                 </div>
               </div>
               <div className="lg:w-80 flex-shrink-0">
                 <Card className="p-6">
                   <CardContent className="p-0 space-y-4">
-                    <Skeleton className="h-11" />
-                    <Skeleton className="h-11" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <div className="pt-6 border-t border-gray-200 space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-4 h-4 rounded" />
+                        <div className="space-y-1">
+                          <Skeleton className="h-3 w-12" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-4 h-4 rounded" />
+                        <div className="space-y-1">
+                          <Skeleton className="h-3 w-16" />
+                          <Skeleton className="h-4 w-20" />
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Skeleton */}
+          <div className="grid lg:grid-cols-3 gap-12">
+            {/* Main Content Skeleton */}
+            <div className="lg:col-span-2 space-y-12">
+              {/* Job Description Sections Skeleton */}
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-6">
+                  <Skeleton className="h-8 w-64" />
+                  <div className="space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Sidebar Skeleton */}
+            <div className="space-y-12">
+              {/* Job Details Skeleton */}
+              <div className="space-y-6">
+                <Skeleton className="h-6 w-32" />
+                <div className="space-y-5">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton className="w-5 h-5 rounded" />
+                      <div className="space-y-1 flex-1">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skills Skeleton */}
+              <div className="space-y-6">
+                <Skeleton className="h-6 w-36" />
+                <div className="flex flex-wrap gap-2">
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="h-6 w-16 rounded-full" />
+                  ))}
+                </div>
+              </div>
+
+              {/* Company Info Skeleton */}
+              <div className="space-y-6">
+                <Skeleton className="h-6 w-40" />
+                <div className="space-y-5">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton className="w-5 h-5 rounded" />
+                      <div className="space-y-1 flex-1">
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-4 w-28" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="pt-6 border-t border-gray-200 space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-4/5" />
+                </div>
               </div>
             </div>
           </div>
@@ -158,6 +305,10 @@ export default function JobDetailPage() {
         <nav className="mb-8 text-sm text-gray-500">
           <Link href="/jobs" className="hover:text-gray-700">Jobs</Link>
           <span className="mx-2 text-gray-300">/</span>
+          <Link href={`/jobs?department=${job.department}`} className="hover:text-gray-700">
+            {job.department || 'General'}
+          </Link>
+          <span className="mx-2 text-gray-300">/</span>
           <span className="text-gray-900">{job.title}</span>
         </nav>
 
@@ -172,15 +323,15 @@ export default function JobDetailPage() {
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-primary-100 rounded-sm flex items-center justify-center">
                   <span className="text-primary-600 font-bold text-lg">
-                    {job.company.charAt(0).toUpperCase()}
+                    {job.companyData?.name.charAt(0).toUpperCase() || job.company.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
                   <div className="text-lg font-semibold text-gray-900">
-                    {job.company}
+                    {job.companyData?.name || job.company}
                   </div>
                   <div className="text-sm text-gray-500">
-                    Technology Company
+                    {job.companyData?.description || "Leading company in the industry"}
                   </div>
                 </div>
               </div>
@@ -245,7 +396,7 @@ export default function JobDetailPage() {
                     <div>
                       <div className="text-gray-500 text-xs">Posted</div>
                       <div className="text-gray-900 font-medium">
-                        {new Date(job.postedAt).toLocaleDateString()}
+                        {formatPostedDate(job.createdAt)}
                       </div>
                     </div>
                   </div>
@@ -270,43 +421,17 @@ export default function JobDetailPage() {
         <div className="grid lg:grid-cols-3 gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
-            {/* Job Description */}
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Job Description</h2>
-              <div className="prose prose-gray max-w-none">
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                  {job.description}
-                </p>
+            {/* Dynamic Job Description Sections */}
+            {parseJobDescription(job.description).map((section, index) => (
+              <div key={index}>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">{section.title}</h2>
+                <div className="prose prose-gray max-w-none">
+                  <div className="text-gray-600 leading-relaxed whitespace-pre-line">
+                    {section.content}
+                  </div>
+                </div>
               </div>
-            </div>
-
-            {/* Requirements */}
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Requirements</h2>
-              <div className="text-gray-600 leading-relaxed">
-                <p>We are looking for a qualified candidate with:</p>
-                <ul className="list-disc pl-6 mt-4 space-y-2">
-                  <li>Strong experience in relevant technologies</li>
-                  <li>Excellent problem-solving skills</li>
-                  <li>Team collaboration abilities</li>
-                  <li>Attention to detail</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Benefits */}
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Benefits</h2>
-              <div className="text-gray-600 leading-relaxed">
-                <ul className="list-disc pl-6 space-y-2">
-                  <li>Competitive salary package</li>
-                  <li>Health insurance</li>
-                  <li>Professional development opportunities</li>
-                  <li>Flexible working arrangements</li>
-                  <li>Annual leave and holidays</li>
-                </ul>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Sidebar */}
@@ -367,7 +492,7 @@ export default function JobDetailPage() {
 
             {/* Company Info */}
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">About {job.company}</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">About {job.companyData?.name || job.company}</h3>
               <div className="space-y-5">
                 <div className="flex items-center gap-3">
                   <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -398,6 +523,12 @@ export default function JobDetailPage() {
                     <div className="text-sm text-gray-500">Location</div>
                     <div className="text-gray-900 font-medium">{job.location}</div>
                   </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {job.companyData?.description || 'Company description not available.'}
+                  </p>
                 </div>
               </div>
             </div>

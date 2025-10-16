@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import JobCard from "@/components/common/JobCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,12 +33,28 @@ const experienceLevels = [
   "Senior Level",
   "Executive",
 ];
+const departments = [
+  "All",
+  "Engineering",
+  "Sales",
+  "Marketing",
+  "Finance",
+  "Human Resources",
+  "Operations",
+  "Customer Service",
+  "Product",
+  "Design",
+  "Legal",
+  "Other",
+];
 
 export default function JobsPage() {
+  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("All");
   const [selectedExperience, setSelectedExperience] = useState("All");
+  const [selectedDepartment, setSelectedDepartment] = useState("All");
   const [sortBy, setSortBy] = useState("latest");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -45,30 +62,57 @@ export default function JobsPage() {
   // API state
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Initialize filters from URL parameters
+  useEffect(() => {
+    const department = searchParams.get('department');
+    if (department && departments.includes(department)) {
+      setSelectedDepartment(department);
+    }
+  }, [searchParams]);
 
   // Fetch jobs from API
-  const fetchJobs = useCallback(async (search?: string) => {
+  const fetchJobs = useCallback(async (page: number = 1, append: boolean = false) => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await jobsService.getJobs(1, 20);
-      setJobs(response.jobs);
+      // Pass department filter to API
+      const filters: any = {};
+      if (selectedDepartment && selectedDepartment !== "All") {
+        filters.department = selectedDepartment;
+      }
+      // You can add other filters here as needed
+
+      const response = await jobsService.getJobs(page, 12, filters); // Fetch 12 jobs per page for better UX
+
+      if (append) {
+        setJobs(prev => [...prev, ...response.jobs]);
+      } else {
+        setJobs(response.jobs);
+      }
+
+      setTotalJobs(response.total);
+      setCurrentPage(page);
+      setHasMore(response.jobs.length === 12 && page * 12 < response.total);
     } catch (err) {
       console.error("Error fetching jobs:", err);
       setError("Failed to load jobs from server. Please check your connection and try again.");
-      setJobs([]);
+      if (!append) setJobs([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedDepartment]);
 
   // Initial fetch
   useEffect(() => {
-    fetchJobs(searchTerm);
-  }, [searchTerm, fetchJobs]);
+    fetchJobs(1);
+  }, [fetchJobs]);
 
-  // Filter jobs locally
+  // Filter jobs locally (only for search, type, location, experience - department is handled by backend)
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch = !searchTerm || 
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,6 +128,7 @@ export default function JobsPage() {
     const matchesExperience = selectedExperience === "All" ||
       job.level.toLowerCase().includes(selectedExperience.toLowerCase().split(" ")[0]);
 
+    // Department filtering is now handled by the backend API
     return matchesSearch && matchesType && matchesLocation && matchesExperience;
   });
 
@@ -91,10 +136,15 @@ export default function JobsPage() {
   const sortedJobs = [...filteredJobs].sort((a, b) => {
     switch (sortBy) {
       case "latest":
-        return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       case "salary":
-        // Basic salary comparison (you might want to improve this)
-        return (b.salary || "").localeCompare(a.salary || "");
+        // Extract numeric salary values for better sorting
+        const getSalaryValue = (salary: string | undefined) => {
+          if (!salary) return 0;
+          const match = salary.match(/(\d+(?:,\d+)?(?:\.\d+)?)/);
+          return match ? parseFloat(match[1].replace(',', '')) : 0;
+        };
+        return getSalaryValue(b.salary) - getSalaryValue(a.salary);
       default:
         return 0;
     }
@@ -221,12 +271,29 @@ export default function JobsPage() {
                       ))}
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Department
+                    </label>
+                    <select
+                      className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base"
+                      value={selectedDepartment}
+                      onChange={(e) => setSelectedDepartment(e.target.value)}
+                    >
+                      {departments.map((department) => (
+                        <option key={department} value={department}>
+                          {department}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <button
                     onClick={() => {
                       setSearchTerm("");
                       setSelectedType("All");
                       setSelectedLocation("All");
                       setSelectedExperience("All");
+                      setSelectedDepartment("All");
                     }}
                     className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-sm transition-colors text-base"
                   >
@@ -321,12 +388,30 @@ export default function JobsPage() {
                   </select>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Department
+                  </label>
+                  <select
+                    className="w-full px-4 py-3 border border-gray-200 rounded-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white shadow-sm text-base transition-all duration-200"
+                    value={selectedDepartment}
+                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                  >
+                    {departments.map((department) => (
+                      <option key={department} value={department}>
+                        {department}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <button
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedType("All");
                     setSelectedLocation("All");
                     setSelectedExperience("All");
+                    setSelectedDepartment("All");
                   }}
                   className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-sm transition-colors text-base"
                 >
@@ -341,15 +426,15 @@ export default function JobsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <div className="text-lg sm:text-xl font-semibold text-gray-900">
-                      {sortedJobs.length}{" "}
-                      {sortedJobs.length === 1 ? "Job" : "Jobs"} Found
+                      {totalJobs > 0 ? `${totalJobs} Jobs Found` : `${sortedJobs.length} Jobs Found`}
                     </div>
                     
                     {/* Active filters */}
                     {(searchTerm ||
                       selectedType !== "All" ||
                       selectedLocation !== "All" ||
-                      selectedExperience !== "All") && (
+                      selectedExperience !== "All" ||
+                      selectedDepartment !== "All") && (
                       <div className="flex flex-wrap gap-2">
                         {searchTerm && (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
@@ -364,6 +449,11 @@ export default function JobsPage() {
                         {selectedLocation !== "All" && (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                             {selectedLocation}
+                          </span>
+                        )}
+                        {selectedDepartment !== "All" && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {selectedDepartment}
                           </span>
                         )}
                       </div>
@@ -414,7 +504,7 @@ export default function JobsPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                         {sortedJobs.map((job) => (
                           <div
                             key={job.id}
@@ -448,10 +538,23 @@ export default function JobsPage() {
                               setSelectedType("All");
                               setSelectedLocation("All");
                               setSelectedExperience("All");
+                              setSelectedDepartment("All");
                             }}
                             className="px-6 py-3 text-base bg-primary-600 hover:bg-primary-700"
                           >
                             Clear All Filters
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Load More Button */}
+                      {sortedJobs.length > 0 && hasMore && !loading && (
+                        <div className="text-center mt-8">
+                          <Button
+                            onClick={() => fetchJobs(currentPage + 1, true)}
+                            className="px-8 py-3 text-base bg-primary-600 hover:bg-primary-700"
+                          >
+                            Load More Jobs
                           </Button>
                         </div>
                       )}

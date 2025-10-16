@@ -27,11 +27,7 @@ export class ConfigurationService {
         website
         email
         phone
-        address {
-          street
-          city
-          country
-        }
+        addressId
         createdAt
         updatedAt
       }

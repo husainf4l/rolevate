@@ -179,7 +179,7 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading notifications...</p>
@@ -190,7 +190,7 @@ export default function NotificationsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <button
@@ -205,7 +205,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       <Header
         title="Notifications"
         subtitle={`${unreadCount} unread notifications`}
@@ -294,7 +294,7 @@ export default function NotificationsPage() {
                     filteredNotifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-4 hover:bg-gray-50 cursor-pointer transition-all duration-200 ${
+                        className={`p-4 hover: cursor-pointer transition-all duration-200 ${
                           !notification.read ? "bg-blue-50 border-l-4 border-blue-500" : "border-l-4 border-transparent"
                         } ${
                           selectedNotification?.id === notification.id
