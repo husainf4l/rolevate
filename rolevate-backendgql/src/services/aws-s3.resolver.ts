@@ -2,83 +2,75 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { AwsS3Service } from './aws-s3.service';
 import { S3UploadResponse, S3PresignedUrlResponse } from './aws-s3.dto';
 import { GeneratePresignedUrlInput } from './aws-s3.input';
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
-import type { FileUpload } from 'graphql-upload/processRequest.mjs';
+
+/**
+ * BEST PRACTICE FOR APOLLO SERVER 5:
+ * Use base64 encoding instead of multipart uploads.
+ * 
+ * Why? Apollo Server 4+ removed built-in file upload support.
+ * Base64 encoding is:
+ * - Simpler and more reliable
+ * - Works with all GraphQL implementations
+ * - No multipart complexity
+ * - Industry standard for modern GraphQL APIs
+ */
 
 @Resolver()
 export class AwsS3Resolver {
   constructor(private readonly awsS3Service: AwsS3Service) {}
 
-  @Mutation(() => S3UploadResponse)
+  @Mutation(() => S3UploadResponse, {
+    description: 'Upload a file to S3 using base64 encoding. The file should be sent as a base64-encoded string along with filename and mimetype.'
+  })
   async uploadFileToS3(
-    @Args({ name: 'file', type: () => GraphQLUpload })
-    file: FileUpload,
-    @Args('folder', { nullable: true }) folder?: string,
+    @Args('base64File', { description: 'Base64 encoded file content' }) base64File: string,
+    @Args('filename', { description: 'Original filename with extension' }) filename: string,
+    @Args('mimetype', { description: 'File MIME type (e.g., application/pdf, image/jpeg)' }) mimetype: string,
+    @Args('folder', { nullable: true, description: 'Optional S3 folder path' }) folder?: string,
   ): Promise<S3UploadResponse> {
-    const { createReadStream, filename, mimetype } = await file;
+    try {
+      // Decode base64 to buffer
+      const buffer = Buffer.from(base64File, 'base64');
+      
+      // Upload to S3
+      const url = await this.awsS3Service.uploadFile(buffer, filename, folder);
+      const key = this.awsS3Service.extractKeyFromUrl(url);
 
-    // Convert stream to buffer
-    const chunks: Buffer[] = [];
-    const stream = createReadStream();
-
-    return new Promise((resolve, reject) => {
-      stream.on('data', (chunk) => chunks.push(chunk));
-      stream.on('end', async () => {
-        const buffer = Buffer.concat(chunks);
-
-        try {
-          const url = await this.awsS3Service.uploadFile(buffer, filename, folder);
-
-          // Extract key from URL
-          const key = this.awsS3Service.extractKeyFromUrl(url);
-
-          resolve({
-            url,
-            key,
-            bucket: process.env.AWS_BUCKET_NAME,
-          });
-        } catch (error) {
-          reject(error);
-        }
-      });
-      stream.on('error', reject);
-    });
+      return {
+        url,
+        key,
+        bucket: process.env.AWS_BUCKET_NAME,
+      };
+    } catch (error) {
+      throw new Error(`File upload failed: ${error.message}`);
+    }
   }
 
-  @Mutation(() => S3UploadResponse)
+  @Mutation(() => S3UploadResponse, {
+    description: 'Upload a CV/resume to S3 using base64 encoding. Files are stored in cvs/{candidateId}/ folder.'
+  })
   async uploadCVToS3(
-    @Args({ name: 'file', type: () => GraphQLUpload })
-    file: FileUpload,
-    @Args('candidateId', { nullable: true }) candidateId?: string,
+    @Args('base64File', { description: 'Base64 encoded file content' }) base64File: string,
+    @Args('filename', { description: 'Original filename with extension' }) filename: string,
+    @Args('mimetype', { description: 'File MIME type' }) mimetype: string,
+    @Args('candidateId', { nullable: true, description: 'Candidate ID for organizing CVs' }) candidateId?: string,
   ): Promise<S3UploadResponse> {
-    const { createReadStream, filename } = await file;
+    try {
+      // Decode base64 to buffer
+      const buffer = Buffer.from(base64File, 'base64');
+      
+      // Upload to S3
+      const url = await this.awsS3Service.uploadCV(buffer, filename, candidateId);
+      const key = this.awsS3Service.extractKeyFromUrl(url);
 
-    // Convert stream to buffer
-    const chunks: Buffer[] = [];
-    const stream = createReadStream();
-
-    return new Promise((resolve, reject) => {
-      stream.on('data', (chunk) => chunks.push(chunk));
-      stream.on('end', async () => {
-        const buffer = Buffer.concat(chunks);
-
-        try {
-          const url = await this.awsS3Service.uploadCV(buffer, filename, candidateId);
-
-          // Extract key from URL
-          const key = this.awsS3Service.extractKeyFromUrl(url);
-
-          resolve({
-            url,
-            key,
-            bucket: process.env.AWS_BUCKET_NAME,
-          });
-        } catch (error) {
-          reject(error);
-        }
-      });
-      stream.on('error', reject);
-    });
+      return {
+        url,
+        key,
+        bucket: process.env.AWS_BUCKET_NAME,
+      };
+    } catch (error) {
+      throw new Error(`CV upload failed: ${error.message}`);
+    }
   }
 
   @Mutation(() => S3PresignedUrlResponse)

@@ -1,8 +1,7 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, BeforeInsert, OneToMany, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany, Index, BeforeInsert } from 'typeorm';
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { User } from '../user/user.entity';
 import { Company } from '../company/company.entity';
-import { createId } from '@paralleldrive/cuid2';
 
 export enum JobType {
   FULL_TIME = 'FULL_TIME',
@@ -52,9 +51,14 @@ registerEnumType(JobStatus, {
 @Entity()
 @ObjectType()
 export class Job {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('uuid')
   @Field(() => ID)
   id: string;
+
+  @Column({ unique: true })
+  @Index()
+  @Field()
+  slug: string;
 
   @Column()
   @Field()
@@ -210,7 +214,14 @@ export class Job {
   postedById: string;
 
   @BeforeInsert()
-  generateId() {
-    this.id = createId();
+  generateSlug() {
+    if (!this.slug) {
+      const slug = this.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+      const timestamp = Date.now();
+      this.slug = `${slug}-${timestamp}`;
+    }
   }
 }

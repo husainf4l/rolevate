@@ -46,7 +46,7 @@ export class UserResolver {
   @Query(() => UserDto)
   @UseGuards(JwtAuthGuard)
   async me(@Context() context: any): Promise<UserDto> {
-    const userId = context.req.user.userId;
+    const userId = context.req.user.id;
     const user = await this.userService.findOne(userId);
     if (!user) throw new Error('User not found');
     

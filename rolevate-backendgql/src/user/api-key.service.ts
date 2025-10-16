@@ -68,4 +68,11 @@ export class ApiKeyService {
     if (apiKey.expiresAt && apiKey.expiresAt < new Date()) return false;
     return true;
   }
+
+  async findByKey(key: string): Promise<ApiKey | null> {
+    return this.apiKeyRepository.findOne({
+      where: { key, isActive: true },
+      relations: ['user'],
+    });
+  }
 }

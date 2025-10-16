@@ -8,7 +8,7 @@ import { Job, JobType, JobLevel, WorkType, JobStatus } from '../src/job/job.enti
 import { CandidateProfile } from '../src/candidate/candidate-profile.entity';
 import { Application, ApplicationStatus } from '../src/application/application.entity';
 import { Communication } from '../src/communication/communication.entity';
-import { createId } from '@paralleldrive/cuid2';
+import * as bcrypt from 'bcrypt';
 
 async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -104,35 +104,34 @@ async function seed() {
     for (const userData of [
       // Company admins
       {
-        id: createId(),
         userType: UserType.BUSINESS,
         email: 'admin@techcorp.com',
         name: 'Sarah Johnson',
         phone: '+1-555-1001',
         companyId: companies[0].id,
         isActive: true,
+        password: await bcrypt.hash('TT%%oo77', 10),
       },
       {
-        id: createId(),
         userType: UserType.BUSINESS,
         email: 'admin@innovatelabs.com',
         name: 'Michael Chen',
         phone: '+1-555-1002',
         companyId: companies[1].id,
         isActive: true,
+        password: await bcrypt.hash('TT%%oo77', 10),
       },
       {
-        id: createId(),
         userType: UserType.BUSINESS,
         email: 'admin@globalfinance.com',
         name: 'Emily Rodriguez',
         phone: '+1-555-1003',
         companyId: companies[2].id,
         isActive: true,
+        password: await bcrypt.hash('TT%%oo77', 10),
       },
       // Candidates
       {
-        id: createId(),
         userType: UserType.CANDIDATE,
         email: 'john.developer@email.com',
         name: 'John Smith',
@@ -140,7 +139,6 @@ async function seed() {
         isActive: true,
       },
       {
-        id: createId(),
         userType: UserType.CANDIDATE,
         email: 'sarah.engineer@email.com',
         name: 'Sarah Wilson',
@@ -148,7 +146,6 @@ async function seed() {
         isActive: true,
       },
       {
-        id: createId(),
         userType: UserType.CANDIDATE,
         email: 'mike.manager@email.com',
         name: 'Mike Davis',
@@ -156,7 +153,6 @@ async function seed() {
         isActive: true,
       },
       {
-        id: createId(),
         userType: UserType.CANDIDATE,
         email: 'lisa.designer@email.com',
         name: 'Lisa Brown',
@@ -164,7 +160,6 @@ async function seed() {
         isActive: true,
       },
       {
-        id: createId(),
         userType: UserType.CANDIDATE,
         email: 'alex.analyst@email.com',
         name: 'Alex Johnson',
@@ -479,8 +474,8 @@ Modern office environment`,
       },
     ];
 
-    for (const job of jobData) {
-      (job as any).id = createId(); // Manually generate ID before save
+    for (const jobInfo of jobData) {
+      const job = jobRepository.create(jobInfo);
       const savedJob = await jobRepository.save(job);
       jobs.push(savedJob);
     }

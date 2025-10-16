@@ -18,6 +18,9 @@ export class JobDto {
   title: string;
 
   @Field()
+  slug: string;
+
+  @Field()
   department: string;
 
   @Field()

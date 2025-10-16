@@ -52,6 +52,7 @@ import { AuditService } from './audit.service';
       autoSchemaFile: true,
       playground: true,
       context: ({ req, reply }) => ({ req, reply }),
+      csrfPrevention: false,
     }),
     UserModule,
     AuthModule,

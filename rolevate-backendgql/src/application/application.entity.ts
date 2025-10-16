@@ -28,7 +28,7 @@ export class Application {
   @Field(() => ID)
   id: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   jobId: string;
 
   @ManyToOne(() => Job)
@@ -36,18 +36,13 @@ export class Application {
   @Field(() => Job)
   job: Job;
 
-  @Column()
+  @Column({ type: 'uuid' })
   candidateId: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'candidateId' })
   @Field(() => User)
   candidate: User;
-
-  @ManyToOne(() => CandidateProfile)
-  @JoinColumn({ name: 'candidateId' })
-  @Field(() => CandidateProfile)
-  candidateProfile: CandidateProfile;
 
   @Column({
     type: 'enum',

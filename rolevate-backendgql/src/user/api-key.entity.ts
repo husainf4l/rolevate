@@ -1,10 +1,9 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn, BeforeInsert } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
-import { createId } from '@paralleldrive/cuid2';
 
 @Entity()
 export class ApiKey {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ unique: true })
@@ -28,9 +27,4 @@ export class ApiKey {
 
   @Column()
   userId: string;
-
-  @BeforeInsert()
-  generateId() {
-    this.id = createId();
-  }
 }

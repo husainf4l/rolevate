@@ -11,6 +11,7 @@ import { ApplicationPaginationInput } from './application-filter.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
+import { BusinessOrApiKeyGuard } from '../auth/business-or-api-key.guard';
 
 @Resolver(() => Application)
 export class ApplicationResolver {
@@ -27,12 +28,13 @@ export class ApplicationResolver {
   }
 
   @Query(() => [Application], { name: 'applications' })
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BusinessOrApiKeyGuard)
   async findAll(
+    @Context() context: any,
     @Args('filter', { nullable: true }) filter?: ApplicationFilterInput,
     @Args('pagination', { nullable: true }) pagination?: ApplicationPaginationInput,
   ): Promise<Application[]> {
-    return this.applicationService.findAll(filter, pagination);
+    return this.applicationService.findAll(filter, pagination, context.req.user);
   }
 
   @Query(() => Application, { name: 'application', nullable: true })

@@ -6,6 +6,7 @@ import { AuthResolver } from './auth.resolver';
 import { UserModule } from '../user/user.module';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ApiKeyGuard } from './api-key.guard';
+import { BusinessOrApiKeyGuard } from './business-or-api-key.guard';
 import { AuditService } from '../audit.service';
 
 @Module({
@@ -20,7 +21,7 @@ import { AuditService } from '../audit.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, AuthResolver, JwtAuthGuard, ApiKeyGuard, AuditService],
-  exports: [JwtAuthGuard, ApiKeyGuard, JwtModule, AuthService, UserModule],
+  providers: [AuthService, AuthResolver, JwtAuthGuard, ApiKeyGuard, BusinessOrApiKeyGuard, AuditService],
+  exports: [JwtAuthGuard, ApiKeyGuard, BusinessOrApiKeyGuard, JwtModule, AuthService, UserModule],
 })
 export class AuthModule {}

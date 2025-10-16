@@ -28,8 +28,16 @@ export class JobService {
       throw new NotFoundException('User not found');
     }
 
+    const slug = `${Date.now()}-${input.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // remove special chars except spaces
+      .replace(/\s+/g, '-') // replace spaces with hyphens
+      .replace(/^-+|-+$/g, '') // trim hyphens
+    }`;
+
     const job = this.jobRepository.create({
       ...input,
+      slug,
       postedBy,
       companyId: postedBy.companyId,
     });
@@ -94,6 +102,7 @@ export class JobService {
     return jobs.map(job => ({
       id: job.id,
       title: job.title,
+      slug: job.slug,
       department: job.department,
       location: job.location,
       salary: job.salary,
@@ -161,6 +170,7 @@ export class JobService {
     return {
       id: job.id,
       title: job.title,
+      slug: job.slug,
       department: job.department,
       location: job.location,
       salary: job.salary,
@@ -216,5 +226,15 @@ export class JobService {
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
     };
+  }
+
+  async findBySlug(slug: string): Promise<JobDto | null> {
+    const job = await this.jobRepository.findOne({
+      where: { slug },
+      relations: ['postedBy', 'company'],
+    });
+    if (!job) return null;
+
+    return this.findOne(job.id);
   }
 }

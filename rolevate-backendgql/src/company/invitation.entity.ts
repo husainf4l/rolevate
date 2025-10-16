@@ -22,9 +22,13 @@ export class Invitation {
   @Field(() => ID)
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   @Field()
-  email: string;
+  code: string; // Unique invitation code for the link
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  email?: string; // Optional: pre-assign to specific email
 
   @Column({
     type: 'enum',
@@ -60,6 +64,10 @@ export class Invitation {
   @Column({ type: 'timestamp', nullable: true })
   @Field({ nullable: true })
   expiresAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  usedAt?: Date; // Track when invitation was accepted
 
   @CreateDateColumn()
   @Field()

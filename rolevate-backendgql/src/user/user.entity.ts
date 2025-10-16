@@ -1,6 +1,5 @@
-import { Entity, Column, PrimaryColumn, BeforeInsert, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
-import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
-import { createId } from '@paralleldrive/cuid2';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { Company } from '../company/company.entity';
 import { CandidateProfile } from '../candidate/candidate-profile.entity';
 
@@ -18,8 +17,8 @@ registerEnumType(UserType, {
 @Entity()
 @ObjectType()
 export class User {
-  @PrimaryColumn()
-  @Field()
+  @PrimaryGeneratedColumn('uuid')
+  @Field(() => ID)
   id: string;
 
   @Column({
@@ -52,7 +51,7 @@ export class User {
   @Field()
   isActive: boolean;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   companyId?: string;
 
   @ManyToOne(() => Company, { nullable: true })
@@ -74,9 +73,4 @@ export class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   @Field()
   updatedAt: Date;
-
-  @BeforeInsert()
-  generateId() {
-    this.id = createId();
-  }
 }

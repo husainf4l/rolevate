@@ -18,15 +18,20 @@ export class AuthService {
   }
 
   async login(user: User): Promise<LoginResponseDto> {
-    const payload = { email: user.email, sub: user.id, userType: user.userType };
+    // Fetch user with company relation first to get companyId
+    const fullUser = await this.userService.findOne(user.id);
+    
+    const payload = { 
+      email: user.email, 
+      sub: user.id, 
+      userType: user.userType,
+      companyId: fullUser?.companyId || null
+    };
     const access_token = this.jwtService.sign(payload);
 
     if (user.email) {
       this.auditService.logLoginAttempt(user.email, true);
     }
-
-    // Fetch user with company relation
-    const fullUser = await this.userService.findOne(user.id);
 
     return {
       access_token,

@@ -154,7 +154,7 @@ export class ApplicationService {
         throw new Error('User exists but is not a candidate');
       }
 
-      candidateId = existingUser.candidateProfile.id;
+      candidateId = existingUser.id;
 
       // Check if already applied
       const existingApplication = await this.applicationRepository.findOne({
@@ -176,7 +176,7 @@ export class ApplicationService {
 
       // Create user and candidate profile
       const result = await this.createCandidateFromCV(candidateInfo, hashedPassword, createApplicationInput.resumeUrl);
-      candidateId = result.candidateProfile.id;
+      candidateId = result.user.id;
 
       candidateCredentials = {
         email: candidateInfo.email,
@@ -273,12 +273,32 @@ export class ApplicationService {
     return password;
   }
 
-  async findAll(filter?: ApplicationFilterInput, pagination?: ApplicationPaginationInput): Promise<Application[]> {
+  async findAll(filter?: ApplicationFilterInput, pagination?: ApplicationPaginationInput, user?: any): Promise<Application[]> {
+    console.log('🔍 DEBUG - findAll called with user:', {
+      userId: user?.id,
+      userType: user?.userType,
+      companyId: user?.companyId,
+      companyIdType: typeof user?.companyId
+    });
+
     const queryBuilder = this.applicationRepository.createQueryBuilder('application')
       .leftJoinAndSelect('application.job', 'job')
+      .leftJoinAndSelect('job.company', 'company')
       .leftJoinAndSelect('application.candidate', 'candidate')
-      .leftJoinAndSelect('application.candidateProfile', 'candidateProfile')
       .leftJoinAndSelect('application.applicationNotes', 'applicationNotes');
+
+    // If user is a BUSINESS user, filter by their company
+    if (user && user.userType === UserType.BUSINESS) {
+      if (user.companyId) {
+        const companyId = user.companyId;
+        console.log('🔍 DEBUG - Filtering by companyId:', companyId);
+        queryBuilder.andWhere('job.companyId = :companyId', { companyId });
+      } else {
+        console.log('⚠️ DEBUG - BUSINESS user without company');
+        // BUSINESS user without company - return no results
+        queryBuilder.andWhere('1 = 0');
+      }
+    }
 
     // Apply filters
     if (filter) {
@@ -315,27 +335,32 @@ export class ApplicationService {
       queryBuilder.orderBy('application.createdAt', 'DESC');
     }
 
+    // Log the generated SQL for debugging
+    const sql = queryBuilder.getSql();
+    console.log('🔍 DEBUG - Generated SQL:', sql);
+    console.log('🔍 DEBUG - Query parameters:', queryBuilder.getParameters());
+
     return queryBuilder.getMany();
   }
 
   async findOne(id: string): Promise<Application | null> {
     return this.applicationRepository.findOne({
       where: { id },
-      relations: ['job', 'candidate', 'candidateProfile', 'applicationNotes'],
+      relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
     });
   }
 
   async findByJobId(jobId: string): Promise<Application[]> {
     return this.applicationRepository.find({
       where: { jobId },
-      relations: ['job', 'candidate', 'candidateProfile', 'applicationNotes'],
+      relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
     });
   }
 
   async findByCandidateId(candidateId: string): Promise<Application[]> {
     return this.applicationRepository.find({
       where: { candidateId },
-      relations: ['job', 'candidate', 'candidateProfile', 'applicationNotes'],
+      relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
     });
   }
 
@@ -590,7 +615,7 @@ Format as clear, actionable recommendations for interview success.`;
       // Get full application with relations
       const fullApplication = await this.applicationRepository.findOne({
         where: { id: application.id },
-        relations: ['job', 'candidate', 'candidateProfile'],
+        relations: ['job', 'candidate'],
       });
 
       if (!fullApplication) {
@@ -604,7 +629,7 @@ Format as clear, actionable recommendations for interview success.`;
       const metadata = {
         applicationId: application.id,
         candidateId: fullApplication.candidateId,
-        candidatePhone: fullApplication.candidateProfile?.phone || fullApplication.candidate.phone,
+        candidatePhone: fullApplication.candidate.phone,
         jobId: fullApplication.jobId,
         jobTitle: fullApplication.job.title,
         companyId: fullApplication.job.companyId,
@@ -614,10 +639,7 @@ Format as clear, actionable recommendations for interview success.`;
       };
 
       // Create room with token for candidate
-      const candidateProfile = fullApplication.candidateProfile;
-      const participantName = candidateProfile 
-        ? `${candidateProfile.firstName || 'Unknown'} ${candidateProfile.lastName || 'Candidate'}`.trim()
-        : `${fullApplication.candidate.name || 'Unknown Candidate'}`;
+      const participantName = fullApplication.candidate.name || 'Unknown Candidate';
       const { room } = await this.liveKitService.createRoomWithToken(
         roomName,
         metadata,
@@ -631,7 +653,7 @@ Format as clear, actionable recommendations for interview success.`;
       });
 
       // Send WhatsApp template message to candidate
-      const candidatePhone = fullApplication.candidateProfile?.phone || fullApplication.candidate.phone;
+      const candidatePhone = fullApplication.candidate.phone;
       if (candidatePhone) {
         console.log('📱 Sending WhatsApp template invitation to candidate...');
 
@@ -639,9 +661,7 @@ Format as clear, actionable recommendations for interview success.`;
         // Template parameters:
         // - Body {{1}}: Candidate name
         // - Button URL {{1}}: Query parameters for https://rolevate.com/room{{1}}
-        const candidateName = candidateProfile 
-          ? `${candidateProfile.firstName || 'Unknown'} ${candidateProfile.lastName || 'Candidate'}`.trim()
-          : `${fullApplication.candidate.name || 'Unknown Candidate'}`;
+        const candidateName = fullApplication.candidate.name || 'Unknown Candidate';
 
         // Clean phone number (remove + and any spaces/special chars)
         const cleanPhone = candidatePhone.replace(/[+\s\-()]/g, '');
@@ -721,10 +741,7 @@ Format as clear, actionable recommendations for interview success.`;
       }
 
       // Get candidate name for notification
-      const candidateProfile = fullApplication.candidateProfile;
-      const candidateName = candidateProfile
-        ? `${candidateProfile.firstName || 'Unknown'} ${candidateProfile.lastName || 'Candidate'}`.trim()
-        : `${fullApplication.candidate.name || 'Unknown Candidate'}`;
+      const candidateName = fullApplication.candidate.name || 'Unknown Candidate';
 
       // Create notification for each company user
       const notificationPromises = companyUsers.map(user =>
@@ -753,7 +770,7 @@ Format as clear, actionable recommendations for interview success.`;
       // Get full application with relations
       const fullApplication = await this.applicationRepository.findOne({
         where: { id: application.id },
-        relations: ['job', 'candidate', 'candidateProfile'],
+        relations: ['job', 'candidate'],
       });
 
       if (!fullApplication) {
@@ -762,10 +779,7 @@ Format as clear, actionable recommendations for interview success.`;
       }
 
       // Get candidate name for notification
-      const candidateProfile = fullApplication.candidateProfile;
-      const candidateName = candidateProfile
-        ? `${candidateProfile.firstName || 'Unknown'} ${candidateProfile.lastName || 'Candidate'}`.trim()
-        : `${fullApplication.candidate.name || 'Unknown Candidate'}`;
+      const candidateName = fullApplication.candidate.name || 'Unknown Candidate';
 
       let notificationTitle = '';
       let notificationMessage = '';
@@ -824,7 +838,7 @@ Format as clear, actionable recommendations for interview success.`;
       // Get full application with relations
       const fullApplication = await this.applicationRepository.findOne({
         where: { id: application.id },
-        relations: ['job', 'candidate', 'candidateProfile'],
+        relations: ['job', 'candidate'],
       });
 
       if (!fullApplication) {
@@ -838,7 +852,7 @@ Format as clear, actionable recommendations for interview success.`;
       const metadata = {
         applicationId: application.id,
         candidateId: fullApplication.candidateId,
-        candidatePhone: fullApplication.candidateProfile?.phone || fullApplication.candidate.phone,
+        candidatePhone: fullApplication.candidate.phone,
         jobId: fullApplication.jobId,
         jobTitle: fullApplication.job.title,
         companyId: fullApplication.job.companyId,
@@ -849,10 +863,7 @@ Format as clear, actionable recommendations for interview success.`;
       };
 
       // Get candidate name for participant
-      const candidateProfile = fullApplication.candidateProfile;
-      const participantName = candidateProfile
-        ? `${candidateProfile.firstName || 'Unknown'} ${candidateProfile.lastName || 'Candidate'}`.trim()
-        : `${fullApplication.candidate.name || 'Unknown Candidate'}`;
+      const participantName = fullApplication.candidate.name || 'Unknown Candidate';
 
       // Create room with token for candidate
       const { room } = await this.liveKitService.createRoomWithToken(
@@ -868,13 +879,11 @@ Format as clear, actionable recommendations for interview success.`;
       });
 
       // Send WhatsApp notification about scheduled interview
-      const candidatePhone = fullApplication.candidateProfile?.phone || fullApplication.candidate.phone;
+      const candidatePhone = fullApplication.candidate.phone;
       if (candidatePhone) {
         console.log('📱 Sending WhatsApp interview notification...');
 
-        const candidateName = candidateProfile
-          ? `${candidateProfile.firstName || 'Unknown'} ${candidateProfile.lastName || 'Candidate'}`.trim()
-          : `${fullApplication.candidate.name || 'Unknown Candidate'}`;
+        const candidateName = fullApplication.candidate.name || 'Unknown Candidate';
 
         // Clean phone number
         const cleanPhone = candidatePhone.replace(/[+\s\-()]/g, '');
