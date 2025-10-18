@@ -32,14 +32,14 @@ const getNotificationIcon = (
     application: BriefcaseIcon,
     message: ChatBubbleLeftRightIcon,
     system: InformationCircleIcon,
-  }[type];
+  }[type] || InformationCircleIcon;
 
   const Icon = typeIcon;
   const colorClass = {
     application: "text-green-600 bg-green-100",
     message: "text-blue-600 bg-blue-100",
     system: "text-yellow-600 bg-yellow-100",
-  }[type];
+  }[type] || "text-gray-600 bg-gray-100";
 
   return (
     <div

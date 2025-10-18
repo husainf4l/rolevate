@@ -25,18 +25,14 @@ const GET_NOTIFICATIONS = gql`
 `;
 
 const MARK_AS_READ = gql`
-  mutation MarkAsRead($id: String!) {
-    markNotificationAsRead(id: $id) {
-      id
-    }
+  mutation MarkAsRead($notificationId: String!) {
+    markNotificationAsRead(notificationId: $notificationId)
   }
 `;
 
 const MARK_ALL_AS_READ = gql`
   mutation MarkAllAsRead {
-    markAllNotificationsAsRead {
-      success
-    }
+    markAllNotificationsAsRead
   }
 `;
 
@@ -59,7 +55,7 @@ export const fetchNotifications = async (): Promise<Notification[]> => {
 export const markNotificationAsRead = async (id: string): Promise<void> => {
   await apolloClient.mutate({
     mutation: MARK_AS_READ,
-    variables: { id }
+    variables: { notificationId: id }
   });
 };
 

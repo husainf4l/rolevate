@@ -129,7 +129,16 @@ export default function Header({
   // Fetch notifications on component mount
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [fetchNotifications]);
+
+  // Periodic polling every 30 seconds to keep notifications in sync
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   // Close menus on outside click
   useEffect(() => {

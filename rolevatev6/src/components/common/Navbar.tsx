@@ -167,7 +167,7 @@ export default function Navbar() {
                           Dashboard
                         </Link>
                         <Link
-                          href="/profile"
+                          href={user.userType === "CANDIDATE" ? "/userdashboard/profile" : "/dashboard/profile"}
                           onClick={closeUserMenu}
                           className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50/80 transition-colors"
                         >

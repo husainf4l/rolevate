@@ -1,6 +1,18 @@
 import { apolloClient } from '@/lib/apollo';
 import { gql } from '@apollo/client';
 
+export interface CvAnalysisResults {
+  match_score: number;
+  skills_matched: string[];
+  skills_missing: string[];
+  experience_summary: string;
+  strengths: string[];
+  concerns: string[];
+  recommendation: string;
+  detailed_feedback: string;
+  linkedin: string;
+}
+
 export interface Application {
   id: string;
   jobId?: string; // Add for backward compatibility
@@ -16,14 +28,14 @@ export interface Application {
     name: string;
     email: string;
   };
-  status: 'SUBMITTED' | 'REVIEWING' | 'INTERVIEW_SCHEDULED' | 'INTERVIEWED' | 'OFFERED' | 'REJECTED' | 'WITHDRAWN';
+  status: 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'INTERVIEWED' | 'OFFERED' | 'HIRED' | 'ANALYZED' | 'REJECTED' | 'WITHDRAWN';
   appliedAt: string;
   coverLetter?: string;
   resumeUrl?: string;
   expectedSalary?: string;
   noticePeriod?: string;
   cvAnalysisScore?: number;
-  cvAnalysisResults?: any;
+  cvAnalysisResults?: CvAnalysisResults;
   analyzedAt?: string;
   aiCvRecommendations?: string;
   aiInterviewRecommendations?: string;
@@ -56,7 +68,7 @@ export interface CreateApplicationInput {
 }
 
 export interface ApplicationFilter {
-  status?: 'SUBMITTED' | 'REVIEWING' | 'OFFERED' | 'REJECTED';
+  status?: 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'INTERVIEWED' | 'OFFERED' | 'HIRED' | 'ANALYZED' | 'REJECTED' | 'WITHDRAWN';
 }
 
 export interface PaginationInput {
@@ -139,13 +151,98 @@ export const applicationService = new ApplicationService();
 
 // Additional exports for compatibility
 export const getApplicationById = async (id: string): Promise<Application> => {
-  // TODO: Implement
-  return {} as Application;
+  const GET_APPLICATION_BY_ID_QUERY = gql`
+    query GetApplicationById($id: ID!) {
+      application(id: $id) {
+        id
+        job {
+          id
+          title
+          company {
+            name
+          }
+        }
+        candidate {
+          id
+          name
+          email
+        }
+        status
+        appliedAt
+        coverLetter
+        resumeUrl
+        expectedSalary
+        noticePeriod
+        cvAnalysisScore
+        cvAnalysisResults
+        analyzedAt
+        aiCvRecommendations
+        aiInterviewRecommendations
+        aiSecondInterviewRecommendations
+        recommendationsGeneratedAt
+        companyNotes
+        source
+        notes
+        aiAnalysis
+        interviewScheduled
+        reviewedAt
+        interviewScheduledAt
+        interviewedAt
+        rejectedAt
+        acceptedAt
+        applicationNotes {
+          id
+          note
+          isPrivate
+          createdAt
+        }
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await apolloClient.query<{ application: Application }>({
+      query: GET_APPLICATION_BY_ID_QUERY,
+      variables: { id },
+      fetchPolicy: 'network-only'
+    });
+    if (!data?.application) {
+      throw new Error('Application not found');
+    }
+    return data.application;
+  } catch (error: any) {
+    throw new Error(error?.message || 'Failed to fetch application');
+  }
 };
 
 export const updateApplicationStatus = async (id: string, status: string): Promise<Application> => {
-  // TODO: Implement
-  return {} as Application;
+  const UPDATE_APPLICATION_STATUS_MUTATION = gql`
+    mutation UpdateApplicationStatus($id: ID!, $input: UpdateApplicationInput!) {
+      updateApplication(id: $id, input: $input) {
+        id
+        status
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await apolloClient.mutate<{ updateApplication: Application }>({
+      mutation: UPDATE_APPLICATION_STATUS_MUTATION,
+      variables: { 
+        id, 
+        input: { status }
+      }
+    });
+    if (!data?.updateApplication) {
+      throw new Error('Failed to update application status');
+    }
+    return data.updateApplication;
+  } catch (error: any) {
+    throw new Error(error?.message || 'Failed to update application status');
+  }
 };
 
 export interface ApplicationNote {

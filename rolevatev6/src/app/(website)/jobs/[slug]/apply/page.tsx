@@ -58,6 +58,13 @@ export default function JobApplicationPage() {
   const [credentials, setCredentials] = useState<CandidateCredentials | null>(null);
   const [redirectCountdown, setRedirectCountdown] = useState(5);
 
+  // Handle redirect when countdown reaches 0
+  useEffect(() => {
+    if (redirectCountdown === 0 && success) {
+      router.push("/userdashboard/applications");
+    }
+  }, [redirectCountdown, success, router]);
+
   // Form state
   const [formData, setFormData] = useState({
     fullName: "",
@@ -346,7 +353,6 @@ export default function JobApplicationPage() {
           setRedirectCountdown((prev) => {
             if (prev <= 1) {
               clearInterval(interval);
-              router.push("/userdashboard/applications");
               return 0;
             }
             return prev - 1;

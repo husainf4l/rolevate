@@ -68,11 +68,29 @@ export class CompanyService {
           addressId
           createdAt
           updatedAt
-          users {
-            id
-            name
-            email
-          }
+        }
+      }
+    }
+  `;
+
+  private GET_COMPANY_QUERY = gql`
+    query GetCompany($id: ID!) {
+      company(id: $id) {
+        id
+        name
+        description
+        industry
+        website
+        email
+        phone
+        logo
+        size
+        founded
+        location
+        users {
+          id
+          name
+          email
         }
       }
     }
@@ -122,7 +140,24 @@ export class CompanyService {
       }
 
       const company = data.me.company;
-      const users = company.users || [];
+      const companyId = company.id;
+      
+      // Fetch company details separately to get users (me.company.users returns null)
+      let users: any[] = [];
+      try {
+        const { data: companyData } = await apolloClient.query<{ company: any }>({
+          query: this.GET_COMPANY_QUERY,
+          variables: { id: companyId },
+          fetchPolicy: 'network-only',
+        });
+        
+        if (companyData?.company?.users) {
+          users = companyData.company.users;
+        }
+      } catch (error) {
+        console.error('[CompanyService] Error fetching company users:', error);
+        // Continue without users if the query fails
+      }
       
       // Transform the GraphQL response to match the CompanyProfile interface
       return {

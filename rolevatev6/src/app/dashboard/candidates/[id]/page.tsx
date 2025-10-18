@@ -29,115 +29,7 @@ import {
   createApplicationNote,
   CreateNoteData,
 } from "@/services/application";
-import { API_CONFIG } from "@/lib/config";
-
-// Interview type
-interface Interview {
-  id: string;
-  candidateId: string;
-  jobId: string;
-  companyId: string;
-  title: string;
-  description?: string;
-  status: string;
-  type: string;
-  scheduledAt: string;
-  startedAt?: string;
-  endedAt?: string;
-  duration?: number;
-  roomId?: string;
-  videoLink?: string;
-  recordingUrl?: string;
-  aiAnalysis?: string;
-  aiScore?: number;
-  aiRecommendation?: string;
-  analyzedAt?: string;
-  interviewerNotes?: string;
-  candidateFeedback?: string;
-  overallRating?: number;
-  technicalQuestions?: any;
-  technicalAnswers?: any;
-  metadata?: any;
-  createdAt: string;
-  updatedAt: string;
-  candidate: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  job: {
-    id: string;
-    title: string;
-    department?: string;
-    location?: string;
-    salary?: string;
-    type?: string;
-    deadline?: string;
-    description?: string;
-    shortDescription?: string;
-    responsibilities?: string;
-    requirements?: string;
-    benefits?: string;
-    skills?: string[];
-    experience?: string;
-    education?: string;
-    jobLevel?: string;
-    workType?: string;
-    industry?: string;
-    companyDescription?: string;
-    status?: string;
-    companyId?: string;
-    cvAnalysisPrompt?: string;
-    interviewPrompt?: string;
-    aiSecondInterviewPrompt?: string;
-    interviewLanguage?: string;
-    featured?: boolean;
-    applicants?: number;
-    views?: number;
-    createdAt?: string;
-    updatedAt?: string;
-    company?: {
-      id: string;
-      name: string;
-      description?: string;
-      email?: string;
-      phone?: string;
-      website?: string;
-      logo?: string;
-      industry?: string;
-      numberOfEmployees?: number;
-      subscription?: string;
-      createdAt?: string;
-      updatedAt?: string;
-    };
-  };
-  company: {
-    id: string;
-    name: string;
-  };
-  transcripts: Array<{
-    id: string;
-    interviewId: string;
-    speakerType: string;
-    speakerName: string;
-    speakerId?: string;
-    content: string;
-    confidence?: number;
-    language: string;
-    startTime: number;
-    endTime: number;
-    duration: number;
-    sentiment?: string;
-    keywords: string[];
-    aiSummary?: string;
-    importance: number;
-    sequenceNumber: number;
-    metadata?: any;
-    createdAt: string;
-    updatedAt: string;
-  }>;
-}
+import { getInterviewsByApplication, Interview } from "@/services/interview.service";
 
 // Transform API application data to display format for detail view
 interface CandidateDetail {
@@ -164,6 +56,9 @@ interface CandidateDetail {
   expectedSalary: string;
   noticePeriod: string;
   cvAnalysisResults?: Application["cvAnalysisResults"];
+  aiCvRecommendations?: string;
+  aiInterviewRecommendations?: string;
+  aiSecondInterviewRecommendations?: string;
 }
 
 // Transform API application to candidate detail format
@@ -202,9 +97,10 @@ const transformApplicationToDetail = (
   // Check if CV analysis failed or has no meaningful data
   const hasValidAnalysis =
     application.cvAnalysisResults &&
-    application.cvAnalysisResults.overallFit &&
-    !application.cvAnalysisResults.summary?.includes("analysis failed") &&
-    !application.cvAnalysisResults.summary?.includes("CV analysis failed");
+    application.cvAnalysisResults.match_score !== undefined &&
+    application.cvAnalysisResults.match_score >= 0 &&
+    !application.cvAnalysisResults.experience_summary?.includes("analysis failed") &&
+    !application.cvAnalysisResults.experience_summary?.includes("CV analysis failed");
 
   console.log("Has valid CV analysis:", hasValidAnalysis);
 
@@ -216,27 +112,21 @@ const transformApplicationToDetail = (
     location: "Not specified", // No location in current API response
     experience:
       hasValidAnalysis &&
-      application.cvAnalysisResults?.experienceMatch?.years &&
-      application.cvAnalysisResults.experienceMatch.years > 0
-        ? `${application.cvAnalysisResults.experienceMatch.years} years`
+      application.cvAnalysisResults?.experience_summary
+        ? application.cvAnalysisResults.experience_summary
         : "Experience not analyzed",
-    education:
-      hasValidAnalysis &&
-      application.cvAnalysisResults?.educationMatch?.details &&
-      !application.cvAnalysisResults.educationMatch.details.includes(
-        "Analysis failed"
-      )
-        ? application.cvAnalysisResults.educationMatch.details
-        : "Education not analyzed",
+    education: "Education not analyzed", // Not available in current API response
     skills: hasValidAnalysis
-      ? application.cvAnalysisResults?.skillsMatch?.matched || []
+      ? application.cvAnalysisResults?.skills_matched || []
       : [],
     status: application.status,
     appliedDate: new Date(application.appliedAt).toLocaleDateString(),
     lastActivity: new Date(application.updatedAt).toLocaleDateString(),
     aiScore: application.cvAnalysisScore || 0,
     notes:
-      application.cvAnalysisResults?.summary || "CV analysis not available",
+      application.cvAnalysisResults?.detailed_feedback ||
+      application.cvAnalysisResults?.experience_summary ||
+      "CV analysis not available",
     resume: application.resumeUrl || "",
     jobId: application.job.id,
     jobTitle: application.job.title || "Unknown Position",
@@ -247,6 +137,9 @@ const transformApplicationToDetail = (
     expectedSalary: application.expectedSalary?.trim() || "Not specified",
     noticePeriod: application.noticePeriod?.trim() || "Not specified",
     cvAnalysisResults: application.cvAnalysisResults,
+    aiCvRecommendations: application.aiCvRecommendations,
+    aiInterviewRecommendations: application.aiInterviewRecommendations,
+    aiSecondInterviewRecommendations: application.aiSecondInterviewRecommendations,
   };
 
   console.log("Transformation result:", result);
@@ -255,16 +148,20 @@ const transformApplicationToDetail = (
 
 const getStatusColor = (status: Application["status"]) => {
   switch (status) {
-    case "SUBMITTED":
+    case "PENDING":
       return "bg-gray-100 text-gray-800";
-    case "REVIEWING":
+    case "REVIEWED":
       return "bg-blue-100 text-blue-800";
-    case "INTERVIEW_SCHEDULED":
+    case "SHORTLISTED":
       return "bg-purple-100 text-purple-800";
     case "INTERVIEWED":
       return "bg-indigo-100 text-indigo-800";
     case "OFFERED":
       return "bg-green-100 text-green-800";
+    case "HIRED":
+      return "bg-emerald-100 text-emerald-800";
+    case "ANALYZED":
+      return "bg-cyan-100 text-cyan-800";
     case "REJECTED":
       return "bg-red-100 text-red-800";
     case "WITHDRAWN":
@@ -305,20 +202,24 @@ const getSourceIcon = (source: CandidateDetail["source"]) => {
 
 const getStatusIcon = (status: Application["status"]) => {
   switch (status) {
-    case "SUBMITTED":
-      return ChartBarIcon;
-    case "REVIEWING":
+    case "PENDING":
+      return ClockIcon;
+    case "REVIEWED":
       return ChatBubbleLeftRightIcon;
-    case "INTERVIEW_SCHEDULED":
+    case "SHORTLISTED":
       return CalendarDaysIcon;
     case "INTERVIEWED":
       return UserIcon;
     case "OFFERED":
       return CheckCircleIcon;
+    case "HIRED":
+      return CheckCircleIcon;
+    case "ANALYZED":
+      return ChartBarIcon;
     case "REJECTED":
       return XCircleIcon;
     case "WITHDRAWN":
-      return ClockIcon;
+      return XCircleIcon;
     default:
       return ClockIcon;
   }
@@ -382,14 +283,10 @@ export default function CandidateProfile() {
         }
         // Fetch interviews
         try {
-          const res = await fetch(
-            `${API_CONFIG.API_BASE_URL}/interviews/candidate/${application.candidate.id}/job/${application.job.id}`
-          );
-          if (res.ok) {
-            const data = await res.json();
-            setInterviews(Array.isArray(data) ? data : []);
-          }
+          const interviewData = await getInterviewsByApplication(applicationId);
+          setInterviews(interviewData);
         } catch (err) {
+          console.error('Failed to fetch interviews:', err);
           // Interview fetch errors are non-blocking
         }
       } catch (err) {
@@ -603,9 +500,7 @@ export default function CandidateProfile() {
                           candidate.status
                         )}`}
                       >
-                        {candidate.status === "SUBMITTED"
-                          ? "Submitted"
-                          : candidate.status.replace("_", " ")}
+                        {candidate.status.replace("_", " ")}
                       </span>
                     </div>
                   </div>
@@ -619,13 +514,8 @@ export default function CandidateProfile() {
                     CV Analysis Results
                   </h3>
 
-                  {!candidate.cvAnalysisResults.overallFit ||
-                  candidate.cvAnalysisResults.summary?.includes(
-                    "analysis failed"
-                  ) ||
-                  candidate.cvAnalysisResults.summary?.includes(
-                    "CV analysis failed"
-                  ) ? (
+                  {!candidate.cvAnalysisResults.match_score ||
+                  candidate.cvAnalysisResults.match_score < 0 ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                       <div className="flex items-center">
                         <XCircleIcon className="w-5 h-5 text-yellow-600 mr-2" />
@@ -642,46 +532,84 @@ export default function CandidateProfile() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-700">
-                          Overall Fit
+                          Overall Match Score
                         </span>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            candidate.cvAnalysisResults.overallFit === "Good"
+                            candidate.cvAnalysisResults.match_score >= 80
                               ? "bg-green-100 text-green-800"
-                              : candidate.cvAnalysisResults.overallFit ===
-                                "Poor"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
+                              : candidate.cvAnalysisResults.match_score >= 60
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {candidate.cvAnalysisResults.overallFit}
+                          {candidate.cvAnalysisResults.match_score}%
                         </span>
                       </div>
 
-                      {candidate.cvAnalysisResults.skillsMatch && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-700">
-                            Skills Match
-                          </span>
-                          <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-primary-600 h-2 rounded-full"
-                              style={{
-                                width: `${
-                                  candidate.cvAnalysisResults.skillsMatch
-                                    .percentage || 0
-                                }%`,
-                              }}
-                            ></div>
-                          </div>
-                          <span className="text-xs text-gray-500">
-                            {candidate.cvAnalysisResults.skillsMatch
-                              .percentage || 0}
-                            % match
-                          </span>
+                      {/* Progress Bar for Match Score */}
+                      <div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-primary-600 h-2 rounded-full"
+                            style={{
+                              width: `${Math.min(
+                                candidate.cvAnalysisResults.match_score,
+                                100
+                              )}%`,
+                            }}
+                          ></div>
                         </div>
-                      )}
+                        <span className="text-xs text-gray-500 mt-1 block">
+                          {candidate.cvAnalysisResults.match_score}% match
+                        </span>
+                      </div>
 
+                      {/* Skills Matched */}
+                      {candidate.cvAnalysisResults.skills_matched &&
+                        candidate.cvAnalysisResults.skills_matched.length > 0 && (
+                          <div>
+                            <span className="text-sm font-medium text-gray-700">
+                              Skills You Have
+                            </span>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {candidate.cvAnalysisResults.skills_matched.map(
+                                (skill: string, index: number) => (
+                                  <span
+                                    key={index}
+                                    className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium"
+                                  >
+                                    {skill}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Skills Missing */}
+                      {candidate.cvAnalysisResults.skills_missing &&
+                        candidate.cvAnalysisResults.skills_missing.length > 0 && (
+                          <div>
+                            <span className="text-sm font-medium text-gray-700">
+                              Skills to Develop
+                            </span>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {candidate.cvAnalysisResults.skills_missing.map(
+                                (skill: string, index: number) => (
+                                  <span
+                                    key={index}
+                                    className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium"
+                                  >
+                                    {skill}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Strengths */}
                       {candidate.cvAnalysisResults.strengths &&
                         candidate.cvAnalysisResults.strengths.length > 0 && (
                           <div>
@@ -698,21 +626,34 @@ export default function CandidateProfile() {
                           </div>
                         )}
 
-                      {candidate.cvAnalysisResults.weaknesses &&
-                        candidate.cvAnalysisResults.weaknesses.length > 0 && (
+                      {/* Concerns */}
+                      {candidate.cvAnalysisResults.concerns &&
+                        candidate.cvAnalysisResults.concerns.length > 0 && (
                           <div>
                             <span className="text-sm font-medium text-gray-700">
                               Areas for Improvement
                             </span>
                             <ul className="mt-1 text-sm text-gray-600 list-disc list-inside">
-                              {candidate.cvAnalysisResults.weaknesses.map(
-                                (weakness: string, index: number) => (
-                                  <li key={index}>{weakness}</li>
+                              {candidate.cvAnalysisResults.concerns.map(
+                                (concern: string, index: number) => (
+                                  <li key={index}>{concern}</li>
                                 )
                               )}
                             </ul>
                           </div>
                         )}
+
+                      {/* Recommendation */}
+                      {candidate.cvAnalysisResults.recommendation && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">
+                            Recommendation
+                          </span>
+                          <p className="mt-1 text-sm text-gray-600 capitalize">
+                            {candidate.cvAnalysisResults.recommendation.replace("_", " ")}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -828,15 +769,53 @@ export default function CandidateProfile() {
                 </div>
               </div>
 
-              {/* AI Analysis Notes */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  AI Analysis Summary
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
-                  {candidate.notes}
-                </p>
-              </div>
+              {/* AI CV Recommendations */}
+              {candidate.cvAnalysisResults?.detailed_feedback && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Detailed CV Feedback
+                  </h3>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {candidate.cvAnalysisResults.detailed_feedback}
+                  </p>
+                </div>
+              )}
+
+              {/* AI Recommendations */}
+              {candidate.aiCvRecommendations && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    AI CV Recommendations
+                  </h3>
+                  <div className="prose prose-sm max-w-none">
+                    <div dangerouslySetInnerHTML={{ __html: candidate.aiCvRecommendations.replace(/\n/g, '<br />') }} />
+                  </div>
+                </div>
+              )}
+
+              {/* AI Interview Recommendations */}
+              {candidate.aiInterviewRecommendations && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    AI Interview Recommendations
+                  </h3>
+                  <div className="prose prose-sm max-w-none">
+                    <div dangerouslySetInnerHTML={{ __html: candidate.aiInterviewRecommendations.replace(/\n/g, '<br />') }} />
+                  </div>
+                </div>
+              )}
+
+              {/* AI Second Interview Recommendations */}
+              {candidate.aiSecondInterviewRecommendations && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    AI Second Interview Recommendations
+                  </h3>
+                  <div className="prose prose-sm max-w-none">
+                    <div dangerouslySetInnerHTML={{ __html: candidate.aiSecondInterviewRecommendations.replace(/\n/g, '<br />') }} />
+                  </div>
+                </div>
+              )}
 
               {/* Interview History Section - Moved from right column */}
               {interviews.length > 0 && (
@@ -894,7 +873,7 @@ export default function CandidateProfile() {
                               </div>
                               <div>
                                 <h4 className="text-lg font-bold text-gray-900 mb-1">
-                                  {interview.title}
+                                  Interview {interview.type.replace("_", " ")}
                                 </h4>
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                   <span>
@@ -925,36 +904,31 @@ export default function CandidateProfile() {
                           </div>
 
                           {/* AI Score - Compact */}
-                          {interview.aiScore && (
+                          {interview.aiAnalysis && typeof interview.aiAnalysis === 'object' && 'score' in interview.aiAnalysis && (
                             <div className="bg-white rounded-lg p-3 border border-gray-200 mb-3">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                   <ChartBarIcon className="w-5 h-5 text-blue-600" />
                                   <div>
                                     <div className="text-lg font-bold text-gray-900">
-                                      {interview.aiScore}%
+                                      {interview.aiAnalysis.score}%
                                     </div>
                                     <div className="text-xs text-gray-600">
                                       AI Score
                                     </div>
                                   </div>
                                 </div>
-                                {interview.aiRecommendation && (
+                                {interview.aiAnalysis.recommendation && (
                                   <span
                                     className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      interview.aiRecommendation ===
-                                      "SECOND_INTERVIEW"
+                                      interview.aiAnalysis.recommendation === "SECOND_INTERVIEW"
                                         ? "bg-green-100 text-green-700"
-                                        : interview.aiRecommendation ===
-                                          "REJECT"
+                                        : interview.aiAnalysis.recommendation === "REJECT"
                                         ? "bg-red-100 text-red-700"
                                         : "bg-yellow-100 text-yellow-700"
                                     }`}
                                   >
-                                    {interview.aiRecommendation.replace(
-                                      "_",
-                                      " "
-                                    )}
+                                    {interview.aiAnalysis.recommendation.replace("_", " ")}
                                   </span>
                                 )}
                               </div>
@@ -963,9 +937,9 @@ export default function CandidateProfile() {
 
                           {/* Quick Actions - Compact */}
                           <div className="flex gap-2">
-                            {interview.videoLink && (
+                            {interview.recordingUrl && (
                               <a
-                                href={interview.videoLink}
+                                href={interview.recordingUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
@@ -1009,9 +983,7 @@ export default function CandidateProfile() {
                     <StatusIcon className="w-6 h-6 text-primary-600" />
                     <div>
                       <p className="font-medium text-gray-900">
-                        {candidate.status === "SUBMITTED"
-                          ? "Submitted"
-                          : candidate.status.replace("_", " ")}
+                        {candidate.status.replace("_", " ")}
                       </p>
                       <p className="text-sm text-gray-600">
                         Last updated: {candidate.lastActivity}
@@ -1028,16 +1000,16 @@ export default function CandidateProfile() {
                 </h3>
                 <div className="space-y-3">
                   <button
-                    onClick={() => handleStatusUpdate("REVIEWING")}
-                    disabled={updating || candidate.status === "REVIEWING"}
+                    onClick={() => handleStatusUpdate("REVIEWED")}
+                    disabled={updating || candidate.status === "REVIEWED"}
                     className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {updating ? "Updating..." : "Move to Review"}
                   </button>
                   <button
-                    onClick={() => handleStatusUpdate("INTERVIEW_SCHEDULED")}
+                    onClick={() => handleStatusUpdate("SHORTLISTED")}
                     disabled={
-                      updating || candidate.status === "INTERVIEW_SCHEDULED"
+                      updating || candidate.status === "SHORTLISTED"
                     }
                     className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -1234,7 +1206,7 @@ export default function CandidateProfile() {
                             </div>
                             <div>
                               <h4 className="text-xl font-bold text-gray-900 mb-1">
-                                {interview.title}
+                                Interview {interview.type.replace("_", " ")}
                               </h4>
                               <div className="flex items-center gap-3 text-sm text-gray-600">
                                 <span className="font-medium">
@@ -1242,7 +1214,7 @@ export default function CandidateProfile() {
                                 </span>
                                 <span>•</span>
                                 <span>
-                                  {interview.job?.company?.name || "N/A"}
+                                  {interview.application.job?.company?.name || "N/A"}
                                 </span>
                               </div>
                             </div>
@@ -1274,26 +1246,6 @@ export default function CandidateProfile() {
                               {new Date(interview.scheduledAt).toLocaleString()}
                             </div>
                           </div>
-                          {interview.startedAt && (
-                            <div className="bg-white rounded-lg p-4 border border-gray-200">
-                              <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
-                                Started
-                              </div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {new Date(interview.startedAt).toLocaleString()}
-                              </div>
-                            </div>
-                          )}
-                          {interview.endedAt && (
-                            <div className="bg-white rounded-lg p-4 border border-gray-200">
-                              <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
-                                Completed
-                              </div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {new Date(interview.endedAt).toLocaleString()}
-                              </div>
-                            </div>
-                          )}
                           {interview.duration && (
                             <div className="bg-white rounded-lg p-4 border border-gray-200">
                               <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
@@ -1304,12 +1256,20 @@ export default function CandidateProfile() {
                               </div>
                             </div>
                           )}
+                          <div className="bg-white rounded-lg p-4 border border-gray-200">
+                            <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
+                              Status
+                            </div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {interview.status.replace("_", " ")}
+                            </div>
+                          </div>
                         </div>
 
                         {/* AI Analysis Section */}
-                        {(interview.aiScore ||
-                          interview.aiAnalysis ||
-                          interview.interviewerNotes) && (
+                        {(interview.aiAnalysis ||
+                          interview.notes ||
+                          interview.feedback) && (
                           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100">
                             <div className="flex items-center gap-3 mb-4">
                               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -1320,29 +1280,24 @@ export default function CandidateProfile() {
                               </h5>
                             </div>
 
-                            {interview.aiScore && (
+                            {interview.aiAnalysis && typeof interview.aiAnalysis === 'object' && 'score' in interview.aiAnalysis && (
                               <div className="mb-6">
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-4">
                                     <div className="text-3xl font-bold text-gray-900">
-                                      {interview.aiScore}%
+                                      {interview.aiAnalysis.score}%
                                     </div>
-                                    {interview.aiRecommendation && (
+                                    {interview.aiAnalysis.recommendation && (
                                       <span
                                         className={`px-3 py-1.5 rounded-full text-sm font-semibold ${
-                                          interview.aiRecommendation ===
-                                          "SECOND_INTERVIEW"
+                                          interview.aiAnalysis.recommendation === "SECOND_INTERVIEW"
                                             ? "bg-green-100 text-green-700 border border-green-200"
-                                            : interview.aiRecommendation ===
-                                              "REJECT"
+                                            : interview.aiAnalysis.recommendation === "REJECT"
                                             ? "bg-red-100 text-red-700 border border-red-200"
                                             : "bg-yellow-100 text-yellow-700 border border-yellow-200"
                                         }`}
                                       >
-                                        {interview.aiRecommendation.replace(
-                                          "_",
-                                          " "
-                                        )}
+                                        {interview.aiAnalysis.recommendation.replace("_", " ")}
                                       </span>
                                     )}
                                   </div>
@@ -1352,15 +1307,15 @@ export default function CandidateProfile() {
                                 <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
                                   <div
                                     className={`h-2.5 rounded-full ${
-                                      interview.aiScore >= 70
+                                      interview.aiAnalysis.score >= 70
                                         ? "bg-green-500"
-                                        : interview.aiScore >= 40
+                                        : interview.aiAnalysis.score >= 40
                                         ? "bg-yellow-500"
                                         : "bg-red-500"
                                     }`}
                                     style={{
                                       width: `${Math.min(
-                                        interview.aiScore,
+                                        interview.aiAnalysis.score,
                                         100
                                       )}%`,
                                     }}
@@ -1369,14 +1324,14 @@ export default function CandidateProfile() {
                               </div>
                             )}
 
-                            {interview.interviewerNotes && (
+                            {(interview.notes || interview.feedback) && (
                               <div>
                                 <h6 className="text-sm font-semibold text-gray-900 mb-3">
-                                  Detailed Assessment
+                                  Interview Notes
                                 </h6>
                                 <div className="bg-white rounded-lg p-4 border border-gray-200 max-h-64 overflow-y-auto">
                                   <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                    {interview.interviewerNotes}
+                                    {interview.notes || interview.feedback}
                                   </div>
                                 </div>
                               </div>
@@ -1400,7 +1355,7 @@ export default function CandidateProfile() {
                                 <div className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
                                   {
                                     interview.transcripts.filter(
-                                      (t) => t.speakerType !== "SYSTEM"
+                                      (t) => t.speaker !== "SYSTEM"
                                     ).length
                                   }{" "}
                                   exchanges
@@ -1411,7 +1366,7 @@ export default function CandidateProfile() {
                                 {interview.transcripts
                                   .filter(
                                     (transcript) =>
-                                      transcript.speakerType !== "SYSTEM"
+                                      transcript.speaker !== "SYSTEM"
                                   )
                                   .slice(0, 8)
                                   .map((transcript) => (
@@ -1421,13 +1376,13 @@ export default function CandidateProfile() {
                                     >
                                       <div
                                         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-                                          transcript.speakerType ===
+                                          transcript.speaker ===
                                           "AI_ASSISTANT"
                                             ? "bg-purple-100 text-purple-700"
                                             : "bg-blue-100 text-blue-700"
                                         }`}
                                       >
-                                        {transcript.speakerType ===
+                                        {transcript.speaker ===
                                         "AI_ASSISTANT"
                                           ? "AI"
                                           : "C"}
@@ -1438,7 +1393,7 @@ export default function CandidateProfile() {
                                         </div>
                                         <div className="text-xs text-gray-500 mt-2">
                                           {new Date(
-                                            transcript.createdAt
+                                            transcript.timestamp
                                           ).toLocaleTimeString()}
                                         </div>
                                       </div>
@@ -1446,13 +1401,13 @@ export default function CandidateProfile() {
                                   ))}
 
                                 {interview.transcripts.filter(
-                                  (t) => t.speakerType !== "SYSTEM"
+                                  (t) => t.speaker !== "SYSTEM"
                                 ).length > 8 && (
                                   <div className="text-center py-3">
                                     <span className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
                                       +
                                       {interview.transcripts.filter(
-                                        (t) => t.speakerType !== "SYSTEM"
+                                        (t) => t.speaker !== "SYSTEM"
                                       ).length - 8}{" "}
                                       more exchanges
                                     </span>
@@ -1464,9 +1419,9 @@ export default function CandidateProfile() {
 
                         {/* Action Buttons */}
                         <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
-                          {interview.videoLink && (
+                          {interview.recordingUrl && (
                             <a
-                              href={interview.videoLink}
+                              href={interview.recordingUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"

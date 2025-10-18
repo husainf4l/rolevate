@@ -22,14 +22,9 @@ interface UserProfile {
   lastName: string;
   email: string;
   phone?: string;
-  position?: string;
-  department?: string;
   avatar?: string;
   bio?: string;
-  timezone?: string;
-  language?: string;
-  dateFormat?: string;
-  timeFormat?: string;
+  userType?: string;
 }
 
 interface UserNotificationSettings {
@@ -61,14 +56,9 @@ export default function UserProfilePage() {
     lastName: "",
     email: "",
     phone: "",
-    position: "",
-    department: "",
     avatar: "",
     bio: "",
-    timezone: "UTC",
-    language: "en",
-    dateFormat: "MM/DD/YYYY",
-    timeFormat: "12",
+    userType: "",
   });
 
   const [notificationSettings, setNotificationSettings] =
@@ -106,10 +96,10 @@ export default function UserProfilePage() {
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("access_token");
 
-      // Use GraphQL me query instead of REST API
-      const response = await fetch(`${API_CONFIG.API_BASE_URL.replace('/api', '')}/graphql`, {
+      // First get user data
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,24 +119,6 @@ export default function UserProfilePage() {
                   id
                   name
                 }
-                candidateProfile {
-                  id
-                  firstName
-                  lastName
-                  phone
-                  location
-                  bio
-                  skills
-                  experience
-                  education
-                  linkedinUrl
-                  githubUrl
-                  portfolioUrl
-                  resumeUrl
-                  availability
-                  salaryExpectation
-                  preferredWorkType
-                }
                 createdAt
                 updatedAt
               }
@@ -157,24 +129,80 @@ export default function UserProfilePage() {
 
       if (response.ok) {
         const result = await response.json();
+        
+        // Check for GraphQL errors (like authentication errors)
+        if (result.errors) {
+          const isForbidden = result.errors.some((err: any) => 
+            err.extensions?.code === 'FORBIDDEN' || err.extensions?.originalError?.statusCode === 403
+          );
+          
+          if (isForbidden) {
+            // Token expired or invalid - redirect to login
+            localStorage.removeItem("access_token");
+            window.location.href = "/login";
+            return;
+          }
+          
+          throw new Error(result.errors[0].message);
+        }
+        
         const userData = result.data?.me;
 
         if (userData) {
+          // If user is a candidate, fetch their profile separately
+          let candidateProfile = null;
+          if (userData.userType === "CANDIDATE") {
+            const profileResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                query: `
+                  query GetCandidateProfile($userId: ID!) {
+                    candidateProfileByUser(userId: $userId) {
+                      id
+                      firstName
+                      lastName
+                      phone
+                      location
+                      bio
+                      skills
+                      experience
+                      education
+                      linkedinUrl
+                      githubUrl
+                      portfolioUrl
+                      resumeUrl
+                      availability
+                      salaryExpectation
+                      preferredWorkType
+                    }
+                  }
+                `,
+                variables: {
+                  userId: userData.id
+                }
+              }),
+            });
+
+            if (profileResponse.ok) {
+              const profileResult = await profileResponse.json();
+              candidateProfile = profileResult.data?.candidateProfileByUser;
+            }
+          }
+
           // Map GraphQL response to the interface expected by the component
           setUserProfile({
             id: userData.id || "",
-            firstName: userData.candidateProfile?.firstName || userData.name?.split(' ')[0] || "",
-            lastName: userData.candidateProfile?.lastName || userData.name?.split(' ').slice(1).join(' ') || "",
+            firstName: candidateProfile?.firstName || userData.name?.split(' ')[0] || "",
+            lastName: candidateProfile?.lastName || userData.name?.split(' ').slice(1).join(' ') || "",
             email: userData.email || "",
-            phone: userData.candidateProfile?.phone || userData.phone || "",
-            position: "", // This field doesn't exist in GraphQL, might need to be added
-            department: "", // This field doesn't exist in GraphQL, might need to be added
+            phone: candidateProfile?.phone || userData.phone || "",
             avatar: userData.avatar || "",
-            bio: userData.candidateProfile?.bio || "",
-            timezone: "UTC", // Default value
-            language: "en", // Default value
-            dateFormat: "MM/DD/YYYY", // Default value
-            timeFormat: "12", // Default value
+            bio: candidateProfile?.bio || "",
+            userType: userData.userType || "",
           });
         }
       } else {
@@ -182,6 +210,10 @@ export default function UserProfilePage() {
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
+      setSaveStatus({ 
+        type: "error", 
+        message: "Failed to load profile. Please try refreshing the page." 
+      });
     } finally {
       setLoading(false);
     }
@@ -190,10 +222,10 @@ export default function UserProfilePage() {
   const saveUserProfile = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("access_token");
 
-      // First get current user data to check if they have a candidate profile
-      const userResponse = await fetch(`${API_CONFIG.API_BASE_URL.replace('/api', '')}/graphql`, {
+      // First get current user data to check user type
+      const userResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,9 +236,7 @@ export default function UserProfilePage() {
             query GetCurrentUser {
               me {
                 id
-                candidateProfile {
-                  id
-                }
+                userType
               }
             }
           `
@@ -218,11 +248,12 @@ export default function UserProfilePage() {
       }
 
       const userResult = await userResponse.json();
-      const candidateProfileId = userResult.data?.me?.candidateProfile?.id;
+      const userId = userResult.data?.me?.id;
+      const userType = userResult.data?.me?.userType;
 
-      if (candidateProfileId) {
-        // Update candidate profile using GraphQL
-        const updateResponse = await fetch(`${API_CONFIG.API_BASE_URL.replace('/api', '')}/graphql`, {
+      if (userType === "CANDIDATE") {
+        // Get candidate profile ID
+        const profileResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -230,43 +261,73 @@ export default function UserProfilePage() {
           },
           body: JSON.stringify({
             query: `
-              mutation UpdateCandidateProfile($id: ID!, $input: UpdateCandidateProfileInput!) {
-                updateCandidateProfile(id: $id, input: $input) {
+              query GetCandidateProfile($userId: ID!) {
+                candidateProfileByUser(userId: $userId) {
                   id
-                  firstName
-                  lastName
-                  phone
-                  bio
                 }
               }
             `,
             variables: {
-              id: candidateProfileId,
-              input: {
-                firstName: userProfile.firstName,
-                lastName: userProfile.lastName,
-                phone: userProfile.phone,
-                bio: userProfile.bio,
-              }
+              userId: userId
             }
           }),
         });
 
-        if (updateResponse.ok) {
-          const updateResult = await updateResponse.json();
-          if (updateResult.errors) {
-            throw new Error(updateResult.errors[0].message);
+        if (profileResponse.ok) {
+          const profileResult = await profileResponse.json();
+          const candidateProfileId = profileResult.data?.candidateProfileByUser?.id;
+
+          if (candidateProfileId) {
+            // Update candidate profile using GraphQL
+            const updateResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                query: `
+                  mutation UpdateCandidateProfile($id: ID!, $input: UpdateCandidateProfileInput!) {
+                    updateCandidateProfile(id: $id, input: $input) {
+                      id
+                      firstName
+                      lastName
+                      phone
+                      bio
+                    }
+                  }
+                `,
+                variables: {
+                  id: candidateProfileId,
+                  input: {
+                    firstName: userProfile.firstName,
+                    lastName: userProfile.lastName,
+                    phone: userProfile.phone,
+                    bio: userProfile.bio,
+                  }
+                }
+              }),
+            });
+
+            if (updateResponse.ok) {
+              const updateResult = await updateResponse.json();
+              if (updateResult.errors) {
+                throw new Error(updateResult.errors[0].message);
+              }
+              setSaveStatus({
+                type: "success",
+                message: "Profile updated successfully!",
+              });
+              setTimeout(() => setSaveStatus(null), 3000);
+            } else {
+              throw new Error("Failed to update profile");
+            }
+          } else {
+            throw new Error("Candidate profile not found");
           }
-          setSaveStatus({
-            type: "success",
-            message: "Profile updated successfully!",
-          });
-          setTimeout(() => setSaveStatus(null), 3000);
-        } else {
-          throw new Error("Failed to update profile");
         }
       } else {
-        // No candidate profile found - would need updateUser mutation
+        // Business user - would need updateUser mutation
         console.warn("No candidate profile found for user. updateUser mutation needed.");
         setSaveStatus({
           type: "error",
@@ -309,7 +370,7 @@ export default function UserProfilePage() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("access_token");
 
       // Upload file to S3 using GraphQL mutation
       const formData = new FormData();
@@ -330,7 +391,7 @@ export default function UserProfilePage() {
       formData.append('map', JSON.stringify({ "0": ["variables.file"] }));
       formData.append('0', file);
 
-      const uploadResponse = await fetch(`${API_CONFIG.API_BASE_URL.replace('/api', '')}/graphql`, {
+      const uploadResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -437,7 +498,7 @@ export default function UserProfilePage() {
                 {userProfile.firstName} {userProfile.lastName}
               </h1>
               <p className="text-lg text-gray-600 mt-1">
-                {userProfile.position || "Team Member"}
+                {userProfile.userType === "CANDIDATE" ? "Job Seeker" : "Employer"}
               </p>
               <p className="text-sm text-gray-500">{userProfile.email}</p>
             </div>
@@ -474,7 +535,7 @@ export default function UserProfilePage() {
                   Personal Information
                 </h2>
                 <p className="text-gray-600">
-                  Update your personal details and preferences.
+                  Update your personal details.
                 </p>
               </div>
 
@@ -495,7 +556,13 @@ export default function UserProfilePage() {
                       }
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="Enter your first name"
+                      disabled={userProfile.userType === "BUSINESS"}
                     />
+                    {userProfile.userType === "BUSINESS" && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Business users: Please update your name in the full name field
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -513,6 +580,7 @@ export default function UserProfilePage() {
                       }
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="Enter your last name"
+                      disabled={userProfile.userType === "BUSINESS"}
                     />
                   </div>
 
@@ -531,9 +599,15 @@ export default function UserProfilePage() {
                       }
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                       placeholder="your.email@company.com"
+                      disabled
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Email cannot be changed
+                    </p>
                   </div>
+                </div>
 
+                <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Phone Number
@@ -552,107 +626,24 @@ export default function UserProfilePage() {
                     />
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Position/Title
-                    </label>
-                    <input
-                      type="text"
-                      value={userProfile.position}
-                      onChange={(e) =>
-                        setUserProfile({
-                          ...userProfile,
-                          position: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                      placeholder="HR Manager, Recruiter, etc."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Department
-                    </label>
-                    <input
-                      type="text"
-                      value={userProfile.department}
-                      onChange={(e) =>
-                        setUserProfile({
-                          ...userProfile,
-                          department: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                      placeholder="Human Resources, Talent Acquisition, etc."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Timezone
-                    </label>
-                    <select
-                      value={userProfile.timezone}
-                      onChange={(e) =>
-                        setUserProfile({
-                          ...userProfile,
-                          timezone: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                    >
-                      <option value="UTC">UTC</option>
-                      <option value="America/New_York">Eastern Time</option>
-                      <option value="America/Chicago">Central Time</option>
-                      <option value="America/Denver">Mountain Time</option>
-                      <option value="America/Los_Angeles">Pacific Time</option>
-                      <option value="Europe/London">London</option>
-                      <option value="Europe/Paris">Paris</option>
-                      <option value="Asia/Tokyo">Tokyo</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Language
-                    </label>
-                    <select
-                      value={userProfile.language}
-                      onChange={(e) =>
-                        setUserProfile({
-                          ...userProfile,
-                          language: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                    >
-                      <option value="en">English</option>
-                      <option value="ar">Arabic</option>
-                      <option value="es">Spanish</option>
-                      <option value="fr">French</option>
-                      <option value="de">German</option>
-                    </select>
-                  </div>
+              {userProfile.userType === "CANDIDATE" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    value={userProfile.bio}
+                    onChange={(e) =>
+                      setUserProfile({ ...userProfile, bio: e.target.value })
+                    }
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none"
+                    placeholder="Tell us about yourself..."
+                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bio
-                </label>
-                <textarea
-                  value={userProfile.bio}
-                  onChange={(e) =>
-                    setUserProfile({ ...userProfile, bio: e.target.value })
-                  }
-                  rows={4}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none"
-                  placeholder="Tell us about yourself..."
-                />
-              </div>
+              )}
 
               <div className="flex gap-4 pt-4">
                 <Button

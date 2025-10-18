@@ -21,7 +21,7 @@ export default function RecentApplications() {
       setLoading(true);
       const applications = await getCompanyApplications();
       // Get the most recent 4 applications
-      const sortedApplications = applications
+      const sortedApplications = [...applications]
         .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())
         .slice(0, 4);
       setRecentApplications(sortedApplications);
