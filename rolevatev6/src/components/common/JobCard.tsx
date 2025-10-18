@@ -51,6 +51,28 @@ export default function JobCard({
     return `Posted ${Math.floor(diffDays / 30)} months ago`;
   };
 
+  // Format deadline date
+  const formatDeadlineDate = (deadlineString: string) => {
+    const deadline = new Date(deadlineString);
+    const now = new Date();
+    const diffTime = deadline.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return "Deadline passed";
+    } else if (diffDays === 0) {
+      return "Due today";
+    } else if (diffDays === 1) {
+      return "Due tomorrow";
+    } else if (diffDays <= 7) {
+      return `Due in ${diffDays} days`;
+    } else if (diffDays <= 30) {
+      return `Due in ${Math.floor(diffDays / 7)} weeks`;
+    } else {
+      return `Due ${deadline.toLocaleDateString()}`;
+    }
+  };
+
   return (
     <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10 border border-slate-200/60 bg-white hover:bg-slate-50/50 rounded-sm">
       <CardContent className="p-4">
@@ -114,6 +136,19 @@ export default function JobCard({
         <div className="text-xs text-slate-500 mb-3">
           {formatPostedDate(job.createdAt)}
         </div>
+
+        {/* Deadline */}
+        {job.deadline && (
+          <div className={`text-xs mb-3 font-medium ${
+            new Date(job.deadline) < new Date() 
+              ? 'text-red-600' 
+              : new Date(job.deadline).getTime() - new Date().getTime() < 7 * 24 * 60 * 60 * 1000
+                ? 'text-orange-600'
+                : 'text-slate-600'
+          }`}>
+            {formatDeadlineDate(job.deadline)}
+          </div>
+        )}
 
         {/* Skills preview */}
         {job.skills && job.skills.length > 0 && (

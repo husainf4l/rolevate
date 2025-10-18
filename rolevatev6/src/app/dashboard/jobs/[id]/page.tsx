@@ -12,7 +12,7 @@ export default function EditJobPage() {
   const params = useParams();
   const jobId = params?.id as string;
 
-  const [job, setJob] = useState<UpdateJobRequest | null>(null);
+  const [job, setJob] = useState<Omit<UpdateJobRequest, 'id'> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -38,7 +38,7 @@ export default function EditJobPage() {
           ? new Date(jobData.deadline).toISOString().split("T")[0]
           : "";
 
-        const jobUpdateData: UpdateJobRequest = {
+        const jobUpdateData: Omit<UpdateJobRequest, 'id'> = {
           title: jobData.title || "",
           description: jobData.description || "",
           shortDescription: jobData.shortDescription || "",

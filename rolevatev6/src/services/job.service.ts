@@ -72,6 +72,7 @@ export interface CreateJobInput {
 }
 
 export interface UpdateJobInput {
+  id: string;  // ID is required in the input
   title?: string;
   department?: string;
   location?: string;
@@ -205,8 +206,8 @@ class JobService {
   `;
 
   private UPDATE_JOB_MUTATION = gql`
-    mutation UpdateJob($id: ID!, $input: UpdateJobInput!) {
-      updateJob(id: $id, input: $input) {
+    mutation UpdateJob($input: UpdateJobInput!) {
+      updateJob(input: $input) {
         id
         title
         description
@@ -280,11 +281,16 @@ class JobService {
     }
   }
 
-  async updateJob(id: string, input: UpdateJobInput): Promise<Job> {
+  async updateJob(id: string, input: Omit<UpdateJobInput, 'id'>): Promise<Job> {
     try {
       const { data } = await apolloClient.mutate<{ updateJob: Job }>({
         mutation: this.UPDATE_JOB_MUTATION,
-        variables: { id, input }
+        variables: { 
+          input: {
+            id,
+            ...input
+          }
+        }
       });
       if (!data?.updateJob) {
         throw new Error('Failed to update job');

@@ -393,11 +393,11 @@ export default function ApplicationDetailsPage() {
                             <div className="w-full bg-primary-200 rounded-sm h-3">
                               <div
                                 className={`h-3 rounded-sm transition-all duration-1000 ${getScoreBarColor(
-                                  application.cvAnalysisScore
+                                  application.cvAnalysisScore || 0
                                 )}`}
                                 style={{
                                   width: `${Math.max(
-                                    application.cvAnalysisScore,
+                                    application.cvAnalysisScore || 0,
                                     5
                                   )}%`,
                                 }}
@@ -412,10 +412,10 @@ export default function ApplicationDetailsPage() {
                           <div className="text-right">
                             <span
                               className={`text-4xl font-bold ${getScoreColor(
-                                application.cvAnalysisScore
+                                application.cvAnalysisScore || 0
                               )}`}
                             >
-                              {application.cvAnalysisScore}
+                              {application.cvAnalysisScore || 0}
                             </span>
                             <span className="text-lg text-gray-500">/100</span>
                           </div>

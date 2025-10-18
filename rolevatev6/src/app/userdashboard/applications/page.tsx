@@ -43,12 +43,12 @@ const convertToDisplayFormat = (
 
   return {
     id: application.id,
-    jobId: application.jobId,
+    jobId: application.jobId || '',
     jobTitle: application.job.title,
-    company: application.job.company.name,
+    company: application.job.company?.name || 'Unknown Company',
     appliedDate: application.appliedAt,
     status: statusMap[application.status] || "submitted",
-    cvAnalysisScore: application.cvAnalysisScore,
+    cvAnalysisScore: application.cvAnalysisScore || 0,
     overallFit: application.cvAnalysisResults?.overallFit || "Not analyzed",
     expectedSalary: application.expectedSalary || "Not specified",
     coverLetter: application.coverLetter || "No cover letter",

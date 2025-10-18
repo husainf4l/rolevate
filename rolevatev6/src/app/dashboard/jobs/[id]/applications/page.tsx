@@ -100,7 +100,7 @@ const transformApplicationToCandidate = (
     experience: application.cvAnalysisResults?.experienceMatch?.years
       ? `${application.cvAnalysisResults.experienceMatch.years} years`
       : "Not specified",
-    name: `${application.candidate.firstName} ${application.candidate.lastName}`,
+    name: application.candidate.name,
     email: application.candidate.email,
   };
 };
@@ -126,7 +126,7 @@ export default function JobApplicationsPage() {
 
         // Fetch job details and applications in parallel
         const [jobData, applications] = await Promise.all([
-          JobService.getJobById(jobId),
+          JobService.getJob(jobId),
           getApplicationsByJob(jobId),
         ]);
 
@@ -296,9 +296,7 @@ export default function JobApplicationsPage() {
         title={job ? `${job.title} - Applications` : "Job Applications"}
         subtitle={
           job
-            ? `${candidates.length} applications • ${
-                job.company?.name || "Your Company"
-              }`
+            ? `${candidates.length} applications • ${job.department || "Your Company"}`
             : "Manage job applications"
         }
       />
@@ -330,7 +328,7 @@ export default function JobApplicationsPage() {
                         {job.title}
                       </h1>
                       <p className="text-lg text-gray-600">
-                        {job.company?.name}
+                        {job.department || "Your Company"}
                       </p>
                       <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                         <span>{job.department}</span>

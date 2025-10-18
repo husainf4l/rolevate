@@ -1,9 +1,11 @@
+import { API_CONFIG } from '../lib/config';
+
 class GraphQLService {
   private baseURL: string;
 
   constructor() {
-    // Direct endpoint - pointing to local development server
-    this.baseURL = 'http://localhost:4005/graphql';
+    // Use the configured API base URL
+    this.baseURL = `${API_CONFIG.API_BASE_URL}/graphql`;
   }
 
   async request<T = any>(query: string, variables?: Record<string, any>): Promise<T> {

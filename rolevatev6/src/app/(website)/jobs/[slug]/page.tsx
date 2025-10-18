@@ -52,6 +52,28 @@ export default function JobDetailPage() {
     return `Posted ${Math.floor(diffDays / 30)} months ago`;
   };
 
+  // Format deadline date
+  const formatDeadlineDate = (deadlineString: string) => {
+    const deadline = new Date(deadlineString);
+    const now = new Date();
+    const diffTime = deadline.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return "Application deadline has passed";
+    } else if (diffDays === 0) {
+      return "Application deadline is today";
+    } else if (diffDays === 1) {
+      return "Application deadline is tomorrow";
+    } else if (diffDays <= 7) {
+      return `Application deadline in ${diffDays} days`;
+    } else if (diffDays <= 30) {
+      return `Application deadline in ${Math.floor(diffDays / 7)} weeks`;
+    } else {
+      return `Application deadline: ${deadline.toLocaleDateString()}`;
+    }
+  };
+
   // Parse job description into sections
   const parseJobDescription = (description: string) => {
     const sections: { title: string; content: string }[] = [];
@@ -176,6 +198,13 @@ export default function JobDetailPage() {
                       <div className="flex items-center gap-3">
                         <Skeleton className="w-4 h-4 rounded" />
                         <div className="space-y-1">
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-4 w-28" />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-4 h-4 rounded" />
+                        <div className="space-y-1">
                           <Skeleton className="h-3 w-16" />
                           <Skeleton className="h-4 w-20" />
                         </div>
@@ -212,7 +241,7 @@ export default function JobDetailPage() {
               <div className="space-y-6">
                 <Skeleton className="h-6 w-32" />
                 <div className="space-y-5">
-                  {[...Array(3)].map((_, i) => (
+                  {[...Array(4)].map((_, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <Skeleton className="w-5 h-5 rounded" />
                       <div className="space-y-1 flex-1">
@@ -372,12 +401,14 @@ export default function JobDetailPage() {
             <div className="lg:w-80 flex-shrink-0">
               <div className="bg-gray-50 rounded-sm p-6 border border-gray-100">
                 <div className="flex flex-col space-y-3">
-                  <Button
-                    size="lg"
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                  >
-                    Apply Now
-                  </Button>
+                  <Link href={`/jobs/${slug}/apply`}>
+                    <Button
+                      size="lg"
+                      className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                    >
+                      Apply Now
+                    </Button>
+                  </Link>
 
                   <Button
                     variant="outline"
@@ -400,6 +431,20 @@ export default function JobDetailPage() {
                       </div>
                     </div>
                   </div>
+
+                  {job.deadline && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <svg className="w-4 h-4 text-orange-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div>
+                        <div className="text-gray-500 text-xs">Application Deadline</div>
+                        <div className={`font-medium ${new Date(job.deadline) < new Date() ? 'text-red-600' : 'text-orange-600'}`}>
+                          {formatDeadlineDate(job.deadline)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-3 text-sm">
                     <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -459,6 +504,20 @@ export default function JobDetailPage() {
                     <div className="text-gray-900 font-medium">{formatJobLevel(job.level)}</div>
                   </div>
                 </div>
+
+                {job.deadline && (
+                  <div className="flex items-center gap-3">
+                    <svg className={`w-5 h-5 flex-shrink-0 ${new Date(job.deadline) < new Date() ? 'text-red-400' : 'text-orange-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <div className="text-sm text-gray-500">Application Deadline</div>
+                      <div className={`font-medium ${new Date(job.deadline) < new Date() ? 'text-red-600' : 'text-orange-600'}`}>
+                        {formatDeadlineDate(job.deadline)}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex items-center gap-3">
                   <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

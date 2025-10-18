@@ -33,6 +33,7 @@ class JobsService {
         type
         jobLevel
         skills
+        deadline
         status
         createdAt
         updatedAt
@@ -52,6 +53,7 @@ class JobsService {
         location
         salary
         type
+        deadline
         featured
       }
     }
@@ -71,8 +73,8 @@ class JobsService {
   `;
 
   private UPDATE_JOB_MUTATION = gql`
-    mutation UpdateJob($id: ID!, $input: UpdateJobInput!) {
-      updateJob(id: $id, input: $input) {
+    mutation UpdateJob($input: UpdateJobInput!) {
+      updateJob(input: $input) {
         id
         title
         description
@@ -141,6 +143,7 @@ class JobsService {
 
   /**
    * Fetch jobs with optional filters and pagination
+   * For public access (no token), only returns ACTIVE jobs
    */
   async getJobs(
     page: number = 1,
@@ -148,8 +151,23 @@ class JobsService {
     filters?: JobFilters
   ): Promise<JobsResponse> {
     try {
+      // Check if user is authenticated
+      const { authService } = await import('@/services/auth');
+      let currentUser;
+      try {
+        currentUser = await authService.getCurrentUser();
+      } catch (error) {
+        // User is not authenticated
+        currentUser = null;
+      }
+
       // Build filter object for GraphQL
       const gqlFilter: any = {};
+
+      // If no authentication token, only show ACTIVE jobs
+      if (!currentUser) {
+        gqlFilter.status = 'ACTIVE';
+      }
 
       if (filters?.search) {
         gqlFilter.search = filters.search;
@@ -173,7 +191,11 @@ class JobsService {
           filter: Object.keys(gqlFilter).length > 0 ? gqlFilter : undefined,
           pagination: { take: limit, skip: (page - 1) * limit }
         },
-        fetchPolicy: 'network-only'
+        fetchPolicy: 'network-only',
+        context: {
+          // Don't send auth header for public job listings if no user
+          headers: currentUser ? undefined : {}
+        }
       });
 
       const jobs = data?.jobs || [];
@@ -195,6 +217,7 @@ class JobsService {
         level: job.jobLevel,
         skills: Array.isArray(job.skills) ? job.skills : [],
         slug: job.slug,
+        deadline: job.deadline, // Add deadline field
         createdAt: job.createdAt,
         updatedAt: job.updatedAt,
         isActive: job.status === 'ACTIVE'
@@ -209,6 +232,86 @@ class JobsService {
     } catch (error: any) {
       console.error('Error fetching jobs:', error);
       throw new Error(error?.message || 'Failed to fetch jobs');
+    }
+  }
+
+  /**
+   * Fetch public jobs (ACTIVE only, no authentication required)
+   * Use this for job listings accessible to anonymous users
+   */
+  async getPublicJobs(
+    page: number = 1,
+    limit: number = 10,
+    filters?: JobFilters
+  ): Promise<JobsResponse> {
+    try {
+      // Build filter object for GraphQL
+      const gqlFilter: any = {
+        status: 'ACTIVE' // Only show ACTIVE jobs for public
+      };
+
+      if (filters?.search) {
+        gqlFilter.search = filters.search;
+      }
+      if (filters?.location) {
+        gqlFilter.location = filters.location;
+      }
+      if (filters?.type) {
+        gqlFilter.type = filters.type;
+      }
+      if (filters?.level) {
+        gqlFilter.level = filters.level;
+      }
+      if (filters?.department) {
+        gqlFilter.department = filters.department;
+      }
+
+      const { data } = await apolloClient.query<{ jobs: any[] }>({
+        query: this.GET_COMPANY_JOBS_QUERY,
+        variables: {
+          filter: gqlFilter,
+          pagination: { take: limit, skip: (page - 1) * limit }
+        },
+        fetchPolicy: 'network-only',
+        context: {
+          headers: {} // No auth header for public access
+        }
+      });
+
+      const jobs = data?.jobs || [];
+
+      // Map to our Job interface
+      const mappedJobs: Job[] = jobs.map((job: any) => ({
+        id: job.id,
+        title: job.title,
+        description: job.shortDescription || job.description,
+        company: job.company?.name || job.department,
+        companyData: job.company ? {
+          id: job.company.id,
+          name: job.company.name,
+          description: job.company.description
+        } : undefined,
+        location: job.location,
+        salary: job.salary,
+        type: job.type,
+        level: job.jobLevel,
+        skills: Array.isArray(job.skills) ? job.skills : [],
+        slug: job.slug,
+        deadline: job.deadline, // Add deadline field
+        createdAt: job.createdAt,
+        updatedAt: job.updatedAt,
+        isActive: true // All public jobs are active
+      }));
+
+      return {
+        jobs: mappedJobs,
+        total: jobs.length,
+        page,
+        limit
+      };
+    } catch (error: any) {
+      console.error('Error fetching public jobs:', error);
+      throw new Error(error?.message || 'Failed to fetch public jobs');
     }
   }
 
@@ -246,6 +349,7 @@ class JobsService {
         level: job.jobLevel,
         skills: Array.isArray(job.skills) ? job.skills : [],
         slug: job.slug,
+        deadline: job.deadline, // Add deadline field
         createdAt: job.createdAt,
         updatedAt: job.updatedAt,
         isActive: job.status === 'ACTIVE'
@@ -283,6 +387,7 @@ class JobsService {
         level: 'ENTRY', // Default, not fetched
         skills: [], // Not fetched
         slug: job.slug || `${job.id}-${job.title.toLowerCase().replace(/\s+/g, '-')}`, // Generate slug if not provided
+        deadline: job.deadline, // Add deadline field
         createdAt: '', // Not fetched
         updatedAt: '', // Not fetched
         isActive: true // Default
@@ -364,6 +469,8 @@ class JobsService {
 
   /**
    * Get company jobs for dashboard
+   * Returns ALL jobs for the authenticated company (including DRAFT, PAUSED, CLOSED)
+   * Requires authentication
    */
   async getCompanyJobs(page: number = 1, limit: number = 100, filters?: JobFilters): Promise<any[]> {
     try {
@@ -379,6 +486,7 @@ class JobsService {
       // Build filter object for GraphQL
       const gqlFilter: any = {
         companyId: currentUser.company.id // Always filter by company
+        // Note: We don't filter by status here so company can see ALL their jobs
       };
 
       if (filters?.search) {
@@ -435,7 +543,12 @@ class JobsService {
     try {
       const { data } = await apolloClient.mutate<{ updateJob: any }>({
         mutation: this.UPDATE_JOB_MUTATION,
-        variables: { id, input }
+        variables: { 
+          input: {
+            id,
+            ...input
+          }
+        }
       });
       return data?.updateJob;
     } catch (error: any) {

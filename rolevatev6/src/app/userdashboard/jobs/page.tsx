@@ -44,7 +44,7 @@ export default function UserDashboardJobsPage() {
   }, [updateSearchTerm]);
 
   // Use the useSavedJobs hook for canonical saved jobs state
-  const { isJobSaved, toggleSaveJob } = useSavedJobs();
+  const { isJobSaved, saveJob, unsaveJob } = useSavedJobs();
 
   // API state
   const [jobs, setJobs] = useState<JobData[]>([]);
@@ -191,7 +191,11 @@ export default function UserDashboardJobsPage() {
 
   const handleSaveJob = async (jobId: string) => {
     try {
-      await toggleSaveJob(jobId);
+      if (isJobSaved(jobId)) {
+        await unsaveJob(jobId);
+      } else {
+        await saveJob(jobId);
+      }
     } catch (error) {
       console.error("Failed to toggle save job:", error);
       // Error handling is already done in the hook

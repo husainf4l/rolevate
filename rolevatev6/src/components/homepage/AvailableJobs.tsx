@@ -71,6 +71,7 @@ export default function AvailableJobs() {
                     <Skeleton className="h-3 w-1/3" />
                     <Skeleton className="h-6 w-20" />
                   </div>
+                  <Skeleton className="h-3 w-1/4 mb-2" />
                   <Skeleton className="h-9 w-full mt-4" />
                 </CardContent>
               </Card>

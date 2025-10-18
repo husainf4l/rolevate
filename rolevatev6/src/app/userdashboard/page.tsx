@@ -137,14 +137,14 @@ export default function UserDashboardPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-xl"></div>
           <div className="text-center relative z-10">
             <h2 className="text-2xl font-bold mb-3 drop-shadow-lg">Need a new CV?</h2>
-            <p className="text-lg text-gray-100 mb-6 drop-shadow-md">Try our partners at rolegrow.com</p>
+            <p className="text-lg text-gray-100 mb-6 drop-shadow-md">Try our partners at rolekits.com</p>
             <a
-              href="https://rolegrow.com"
+              href="https://rolekits.com"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-primary-600 text-white px-8 py-3 rounded-sm font-semibold hover:bg-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Visit rolegrow.com
+              Visit rolekits.com
             </a>
           </div>
         </motion.div>

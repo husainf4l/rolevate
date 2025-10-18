@@ -197,9 +197,9 @@ const transformApplicationToDetail = (
   }
 
   // Handle potential missing or placeholder data
-  const firstName = application.candidate.firstName?.trim() || "Unknown";
-  const lastName = application.candidate.lastName?.trim() || "";
-  const fullName = `${firstName} ${lastName}`.trim() || "Unknown Candidate";
+  const firstName = application.candidate.name?.split(' ')[0] || "Unknown";
+  const lastName = application.candidate.name?.split(' ').slice(1).join(' ') || "";
+  const fullName = application.candidate.name || "Unknown Candidate";
   const email = application.candidate.email?.trim() || "No email provided";
 
   // Check if CV analysis failed or has no meaningful data

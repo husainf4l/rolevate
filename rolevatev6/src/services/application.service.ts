@@ -11,6 +11,7 @@ export interface Application {
     id: string;
     name: string;
     email: string;
+    phone?: string;
   };
   status: 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'INTERVIEWED' | 'OFFERED' | 'HIRED' | 'REJECTED' | 'WITHDRAWN';
   appliedAt: string;
@@ -154,6 +155,40 @@ class ApplicationService {
       return data.createApplication;
     } catch (error: any) {
       throw new Error(error?.message || 'Failed to create application');
+    }
+  }
+
+  async getApplicationByJobAndPhone(jobId: string, phone: string): Promise<Application | null> {
+    try {
+      const { data } = await apolloClient.query<{ applications: Application[] }>({
+        query: gql`
+          query GetApplicationsByJob($jobId: ID!) {
+            applications(jobId: $jobId) {
+              id
+              job {
+                id
+                title
+              }
+              candidate {
+                id
+                name
+                email
+                phone
+              }
+              status
+              appliedAt
+            }
+          }
+        `,
+        variables: { jobId },
+      });
+
+      const applications = data?.applications || [];
+      // Find application where candidate phone matches
+      return applications.find(app => app.candidate.phone === phone) || null;
+    } catch (error: any) {
+      console.error('Error finding application:', error);
+      return null;
     }
   }
 

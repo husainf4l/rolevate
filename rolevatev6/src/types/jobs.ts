@@ -17,6 +17,7 @@ export interface Job {
   level: 'ENTRY' | 'MID' | 'SENIOR' | 'EXECUTIVE';
   skills: string[];
   slug: string;
+  deadline?: string; // Add deadline field
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
