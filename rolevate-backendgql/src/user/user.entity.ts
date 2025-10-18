@@ -59,12 +59,12 @@ export class User {
   @Field(() => Company, { nullable: true })
   company?: Company;
 
-  @OneToOne(() => CandidateProfile, { nullable: true })
+  @OneToOne(() => CandidateProfile, (candidateProfile) => candidateProfile.user, { nullable: true })
   @Field(() => CandidateProfile, { nullable: true })
   candidateProfile?: CandidateProfile;
 
   // Note: Relations will be added when related entities are created
-  // refreshTokens, candidateProfile, applicationNotes, notifications, reports, etc.
+  // refreshTokens, applicationNotes, notifications, reports, etc.
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   @Field()

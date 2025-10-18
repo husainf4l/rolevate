@@ -28,18 +28,42 @@ export class LiveKitService {
       throw new Error('LiveKit configuration missing');
     }
 
-    // 1. Create room on LiveKit server with metadata
+            // 1. Check if room exists and DELETE it completely
     const httpUrl = liveKitUrl.replace('wss://', 'https://').replace('ws://', 'http://');
     const roomService = new RoomServiceClient(httpUrl, apiKey, apiSecret);
     
     try {
+      // Check if room exists
+      const existingRooms = await roomService.listRooms([name]);
+      
+      if (existingRooms.length > 0) {
+        console.log(`🔍 Found existing room: ${name}, deleting it completely...`);
+        
+        // Delete the room completely (removes all participants and room)
+        await roomService.deleteRoom(name);
+        console.log(`🗑️ Deleted existing room: ${name}`);
+        
+        // Wait a bit to ensure room is fully deleted
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } else {
+        console.log(`✅ No existing room found, will create new one: ${name}`);
+      }
+    } catch (error) {
+      console.log(`⚠️ Room check/delete failed: ${error.message}`);
+      // Continue anyway - we'll try to create the room
+    }
+    
+    // 2. Create brand new room with fresh metadata
+    try {
       // Convert metadata to JSON string for LiveKit
       const metadataJson = JSON.stringify(metadata);
       
-      console.log(`🏗️ Creating LiveKit room: ${name}`);
+      console.log(`🏗️ Creating NEW LiveKit room: ${name}`);
       console.log(`📋 Metadata size: ${metadataJson.length} characters`);
+      console.log(`📦 Full Metadata being sent to LiveKit:`);
+      console.log(JSON.stringify(metadata, null, 2));
       
-      // Create room on LiveKit server with metadata
+      // Create brand new room on LiveKit server with fresh metadata
       const liveKitRoom = await roomService.createRoom({
         name: name,
         metadata: metadataJson,
@@ -47,19 +71,72 @@ export class LiveKitService {
         maxParticipants: 10,
       });
       
-      console.log(`✅ LiveKit room created: ${liveKitRoom.name} with metadata`);
+      console.log(`✅ NEW LiveKit room created: ${liveKitRoom.name} with fresh metadata`);
+      console.log(`🔍 Room metadata stored on LiveKit server (${liveKitRoom.metadata?.length || 0} chars):`, liveKitRoom.metadata?.substring(0, 200));
       
     } catch (error) {
-      console.log(`⚠️ LiveKit room creation failed (might already exist): ${error.message}`);
-      // Continue anyway - room might already exist
+      console.error(`❌ CRITICAL: LiveKit room creation FAILED: ${error.message}`);
+      console.error(`❌ Stack:`, error.stack);
+      console.error(`❌ This means the agent will NOT receive metadata - continuing anyway`);
+      // Don't throw - let it continue, but log the error prominently
     }
 
-    // 2. Create room in our DB
-    const room = await this.liveKitRoomRepository.save({
-      name,
-      metadata,
-      createdBy: userId,
+    // 3. Create or update room in our DB
+
+    // 3. Create or update room in our DB
+    try {
+      // Convert metadata to JSON string for LiveKit
+      const metadataJson = JSON.stringify(metadata);
+      
+      console.log(`🏗️ Creating NEW LiveKit room: ${name}`);
+      console.log(`📋 Metadata size: ${metadataJson.length} characters`);
+      console.log(`📦 Full Metadata being sent to LiveKit:`);
+      console.log(JSON.stringify(metadata, null, 2));
+      
+      // Create brand new room on LiveKit server with fresh metadata
+      const liveKitRoom = await roomService.createRoom({
+        name: name,
+        metadata: metadataJson,
+        emptyTimeout: 10 * 60, // 10 minutes
+        maxParticipants: 10,
+      });
+      
+      console.log(`✅ NEW LiveKit room created: ${liveKitRoom.name} with fresh metadata`);
+      console.log(`� Room metadata stored on LiveKit server (${liveKitRoom.metadata?.length || 0} chars):`, liveKitRoom.metadata?.substring(0, 200));
+      
+    } catch (error) {
+      console.error(`❌ CRITICAL: LiveKit room creation FAILED: ${error.message}`);
+      console.error(`❌ Stack:`, error.stack);
+      console.error(`❌ This means the agent will NOT receive metadata - continuing anyway`);
+      // Don't throw - let it continue, but log the error prominently
+    }
+
+    // 3. Create or update room in our DB
+    let room: LiveKitRoom;
+    const existingDbRoom = await this.liveKitRoomRepository.findOne({
+      where: { name },
     });
+
+    if (existingDbRoom) {
+      // Update existing room with new metadata
+      await this.liveKitRoomRepository.update(existingDbRoom.id, {
+        metadata,
+        createdBy: userId,
+      });
+      const updatedRoom = await this.liveKitRoomRepository.findOne({
+        where: { name },
+      });
+      room = updatedRoom!; // We just updated it, so it exists
+      console.log(`📝 Updated existing room in database: ${name}`);
+    } else {
+      // Create new room
+      room = await this.liveKitRoomRepository.save({
+        name,
+        metadata,
+        createdBy: userId,
+      });
+      console.log(`💾 Created new room in database: ${name}`);
+    }
 
     // 3. Generate LiveKit token
     const roomName = name;

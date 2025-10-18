@@ -43,14 +43,16 @@ import { AuditService } from './audit.service';
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         migrations: [__dirname + '/migrations/*{.ts,.js}'],
         synchronize: false, // Disabled for production - use migrations instead
-        migrationsRun: true, // Automatically run migrations on startup
+        migrationsRun: false, // Disabled - run migrations manually via CLI
       }),
       inject: [ConfigService],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      path: '/api/graphql', // Explicit full path
       playground: true,
+      introspection: true,
       context: ({ req, reply }) => ({ req, reply }),
       csrfPrevention: false,
     }),

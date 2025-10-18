@@ -23,6 +23,7 @@ async function bootstrap() {
     fastifyAdapter,
   );
   
+  app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.enableCors({

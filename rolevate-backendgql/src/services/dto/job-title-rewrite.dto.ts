@@ -27,7 +27,10 @@ export class JobTitleRewriteRequestDto {
 @ObjectType()
 export class JobTitleRewriteResponseDto {
   @Field()
-  jobTitle: string;
+  rewrittenTitle: string;
+
+  @Field()
+  originalTitle: string;
 
   @Field()
   department: string;

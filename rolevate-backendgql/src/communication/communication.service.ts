@@ -6,6 +6,8 @@ import { CreateCommunicationInput } from './create-communication.input';
 import { UpdateCommunicationInput } from './update-communication.input';
 import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { EmailService } from '../services/email.service';
+import { JOSMSService } from '../services/josms.service';
+import { JOSMSMessageType } from '../services/josms.service';
 
 @Injectable()
 export class CommunicationService {
@@ -14,6 +16,7 @@ export class CommunicationService {
     private communicationRepository: Repository<Communication>,
     private readonly whatsappService: WhatsAppService,
     private readonly emailService: EmailService,
+    private readonly josmsService: JOSMSService,
   ) {}
 
   async create(createCommunicationInput: CreateCommunicationInput): Promise<Communication> {
@@ -88,6 +91,42 @@ export class CommunicationService {
 
       } catch (error) {
         console.error('Failed to send email:', error.message);
+        communicationStatus = CommunicationStatus.FAILED;
+        // Continue to create the record but mark as failed
+      }
+    }
+
+    // If it's an SMS and direction is OUTBOUND, actually send it
+    if (createCommunicationInput.type === CommunicationType.SMS && createCommunicationInput.direction === CommunicationDirection.OUTBOUND) {
+      try {
+        if (!createCommunicationInput.phoneNumber) {
+          throw new Error('Phone number is required for SMS messages');
+        }
+
+        console.log(`Sending SMS to ${createCommunicationInput.phoneNumber}: ${createCommunicationInput.content}`);
+
+        // Determine message type based on content or template
+        const messageType = createCommunicationInput.content.includes('OTP') || 
+                           createCommunicationInput.content.includes('verification code')
+          ? JOSMSMessageType.OTP
+          : JOSMSMessageType.GENERAL;
+
+        const smsResult = await this.josmsService.sendSMS(
+          createCommunicationInput.phoneNumber,
+          createCommunicationInput.content,
+          {
+            type: messageType,
+          }
+        );
+
+        if (!smsResult.success) {
+          throw new Error(smsResult.error || 'SMS sending failed');
+        }
+
+        console.log(`SMS sent successfully to ${createCommunicationInput.phoneNumber}. Message ID: ${smsResult.messageId}`);
+
+      } catch (error) {
+        console.error('Failed to send SMS:', error.message);
         communicationStatus = CommunicationStatus.FAILED;
         // Continue to create the record but mark as failed
       }

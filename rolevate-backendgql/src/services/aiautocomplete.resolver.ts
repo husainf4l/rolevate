@@ -32,6 +32,14 @@ import {
   JobDescriptionRewriteInput,
   JobDescriptionRewriteResponse,
 } from './dto/job-description-rewrite.dto';
+import {
+  JobAnalysisInput,
+  JobAnalysisResponse,
+} from './dto/job-analysis.dto';
+import {
+  AIConfigInput,
+  AIConfigResponse,
+} from './dto/ai-config.dto';
 
 @Resolver()
 export class AiautocompleteResolver {
@@ -96,5 +104,19 @@ export class AiautocompleteResolver {
     @Args('input') input: AboutCompanyPolishRequestDto,
   ): Promise<AboutCompanyPolishResponseDto> {
     return await this.aiautocompleteService.rewriteAboutCompany(input);
+  }
+
+  @Mutation(() => JobAnalysisResponse)
+  async generateJobAnalysis(
+    @Args('input') input: JobAnalysisInput,
+  ): Promise<JobAnalysisResponse> {
+    return await this.aiautocompleteService.generateJobAnalysis(input);
+  }
+
+  @Mutation(() => AIConfigResponse)
+  async generateAIConfiguration(
+    @Args('input') input: AIConfigInput,
+  ): Promise<AIConfigResponse> {
+    return await this.aiautocompleteService.generateAIConfiguration(input);
   }
 }

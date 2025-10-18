@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Job } from './job.entity';
+import { Job, JobStatus } from './job.entity';
 import { CreateJobInput } from './create-job.input';
+import { UpdateJobInput } from './update-job.input';
 import { JobDto } from './job.dto';
 import { JobFilterInput } from './job-filter.input';
 import { PaginationInput } from './pagination.input';
@@ -22,8 +23,15 @@ export class JobService {
     private auditService: AuditService,
   ) {}
 
-  async createJob(input: CreateJobInput): Promise<JobDto> {
-    const postedBy = await this.userRepository.findOne({ where: { id: input.postedById } });
+  async createJob(input: CreateJobInput, userId?: string): Promise<JobDto> {
+    // Use userId from parameter (from JWT token) if postedById is not provided in input
+    const postedById = input.postedById || userId;
+    
+    if (!postedById) {
+      throw new NotFoundException('User ID is required');
+    }
+
+    const postedBy = await this.userRepository.findOne({ where: { id: postedById } });
     if (!postedBy) {
       throw new NotFoundException('User not found');
     }
@@ -42,7 +50,7 @@ export class JobService {
       companyId: postedBy.companyId,
     });
     const savedJob = await this.jobRepository.save(job);
-    this.auditService.logJobCreation(input.postedById, savedJob.id);
+    this.auditService.logJobCreation(postedById, savedJob.id);
 
     // Return the full job with relations
     return this.findOne(savedJob.id) as Promise<JobDto>;
@@ -236,5 +244,78 @@ export class JobService {
     if (!job) return null;
 
     return this.findOne(job.id);
+  }
+
+  async updateJob(input: UpdateJobInput, userId: string): Promise<JobDto> {
+    const job = await this.jobRepository.findOne({
+      where: { id: input.id },
+      relations: ['postedBy', 'company'],
+    });
+
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    // Check if user has permission to update (must be the job poster or from the same company)
+    if (job.postedById !== userId && job.companyId !== (await this.userRepository.findOne({ where: { id: userId } }))?.companyId) {
+      throw new ForbiddenException('You do not have permission to update this job');
+    }
+
+    // Update only the fields that are provided
+    const { id, ...updateData } = input;
+    Object.assign(job, updateData);
+
+    const updatedJob = await this.jobRepository.save(job);
+    this.auditService.logJobCreation(userId, updatedJob.id); // Log the update
+
+    return this.findOne(updatedJob.id) as Promise<JobDto>;
+  }
+
+  async deleteJob(id: string, userId: string): Promise<boolean> {
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['postedBy'],
+    });
+
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    // Check if user has permission to delete (must be the job poster or from the same company)
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (job.postedById !== userId && job.companyId !== user?.companyId) {
+      throw new ForbiddenException('You do not have permission to delete this job');
+    }
+
+    // Soft delete: update status to DELETED instead of actually deleting
+    job.status = JobStatus.DELETED;
+    await this.jobRepository.save(job);
+    
+    this.auditService.logJobCreation(userId, id); // Log the deletion
+
+    return true;
+  }
+
+  async hardDeleteJob(id: string, userId: string): Promise<boolean> {
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['postedBy'],
+    });
+
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    // Check if user has permission to delete (must be the job poster or from the same company)
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (job.postedById !== userId && job.companyId !== user?.companyId) {
+      throw new ForbiddenException('You do not have permission to delete this job');
+    }
+
+    // Hard delete: actually remove from database
+    await this.jobRepository.remove(job);
+    this.auditService.logJobCreation(userId, id); // Log the deletion
+
+    return true;
   }
 }

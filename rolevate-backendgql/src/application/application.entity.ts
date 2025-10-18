@@ -140,6 +140,10 @@ export class Application {
   @Field({ nullable: true })
   acceptedAt?: Date;
 
+  @Column({ default: 'english' })
+  @Field()
+  interviewLanguage: string;
+
   @OneToMany(() => ApplicationNote, applicationNote => applicationNote.application)
   @Field(() => [ApplicationNote])
   applicationNotes: ApplicationNote[];

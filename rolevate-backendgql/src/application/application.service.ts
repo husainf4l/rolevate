@@ -9,6 +9,7 @@ import { CreateApplicationNoteInput } from './create-application-note.input';
 import { UpdateApplicationNoteInput } from './update-application-note.input';
 import { ApplicationFilterInput } from './application-filter.input';
 import { ApplicationPaginationInput } from './application-filter.input';
+import { ApplicationResponse } from './application-response.dto';
 import { AuditService } from '../audit.service';
 import { LiveKitService } from '../livekit/livekit.service';
 import { CommunicationService } from '../communication/communication.service';
@@ -17,9 +18,12 @@ import { CommunicationType, CommunicationDirection } from '../communication/comm
 import { NotificationType, NotificationCategory } from '../notification/notification.entity';
 import { OpenaiCvAnalysisService } from '../services/openai-cv-analysis.service';
 import { CvParsingService } from '../services/cv-parsing.service';
+import { SMSService } from '../services/sms.service';
+import { SMSMessageType } from '../services/sms.input';
 import { Job } from '../job/job.entity';
 import { User, UserType } from '../user/user.entity';
 import { CandidateProfile } from '../candidate/candidate-profile.entity';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -39,6 +43,8 @@ export class ApplicationService {
     private notificationService: NotificationService,
     private openaiCvAnalysisService: OpenaiCvAnalysisService,
     private cvParsingService: CvParsingService,
+    private smsService: SMSService,
+    private jwtService: JwtService,
   ) {}
 
   async create(createApplicationInput: CreateApplicationInput, userId?: string): Promise<Application> {
@@ -90,7 +96,7 @@ export class ApplicationService {
 
   async createAnonymousApplication(
     createApplicationInput: CreateApplicationInput
-  ): Promise<Application & { candidateCredentials?: { email: string; password: string } }> {
+  ): Promise<ApplicationResponse> {
     console.log('🔄 Processing anonymous application...');
 
     // Validate that resumeUrl is provided for anonymous applications
@@ -145,7 +151,7 @@ export class ApplicationService {
     });
 
     let candidateId: string;
-    let candidateCredentials: { email: string; password: string } | undefined;
+    let candidateCredentials: { email: string; password: string; token: string } | undefined;
 
     if (existingUser) {
       console.log('👤 Found existing user with email:', candidateInfo.email);
@@ -178,12 +184,32 @@ export class ApplicationService {
       const result = await this.createCandidateFromCV(candidateInfo, hashedPassword, createApplicationInput.resumeUrl);
       candidateId = result.user.id;
 
+      // Generate JWT token for the new candidate
+      const payload = { 
+        email: result.user.email, 
+        sub: result.user.id, 
+        userType: result.user.userType,
+        companyId: null
+      };
+      const token = this.jwtService.sign(payload);
+
       candidateCredentials = {
         email: candidateInfo.email,
-        password: randomPassword
+        password: randomPassword,
+        token: token
       };
 
       console.log('✅ Created new candidate account for:', candidateInfo.email);
+      
+      // Send SMS with login credentials to the new candidate
+      if (candidateInfo.phone) {
+        await this.sendLoginCredentialsSMS(
+          candidateInfo.phone,
+          candidateInfo.email,
+          randomPassword,
+          job.title
+        );
+      }
     }
 
     // Create the application
@@ -209,15 +235,29 @@ export class ApplicationService {
     // Notify company users about new application
     await this.notifyCompanyAboutNewApplication(savedApplication);
 
-    // Include credentials for new accounts
+    // Reload application with all relations for GraphQL response
+    const applicationWithRelations = await this.applicationRepository.findOne({
+      where: { id: savedApplication.id },
+      relations: ['job', 'job.company', 'candidate', 'candidate.candidateProfile'],
+    });
+
+    if (!applicationWithRelations) {
+      throw new Error('Failed to load application after creation');
+    }
+
+    // Return response with credentials for new accounts
     if (candidateCredentials) {
       return {
-        ...savedApplication,
-        candidateCredentials
+        application: applicationWithRelations,
+        candidateCredentials,
+        message: 'Application submitted successfully! A new candidate account has been created. Login credentials sent via SMS.'
       };
     }
 
-    return savedApplication;
+    return {
+      application: applicationWithRelations,
+      message: 'Application submitted successfully!'
+    };
   }
 
   private async createCandidateFromCV(
@@ -262,8 +302,8 @@ export class ApplicationService {
   }
 
   private generateRandomPassword(): string {
-    const length = 12;
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    const length = 6;
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     let password = '';
 
     for (let i = 0; i < length; i++) {
@@ -271,6 +311,57 @@ export class ApplicationService {
     }
 
     return password;
+  }
+
+  private async sendLoginCredentialsSMS(
+    phone: string,
+    email: string,
+    password: string,
+    jobTitle: string
+  ): Promise<void> {
+    try {
+      console.log('📱 Sending login credentials SMS to:', phone);
+
+      // Clean phone number - ensure it has country code
+      let cleanPhone = phone.replace(/[\s\-()]/g, '');
+      if (!cleanPhone.startsWith('+')) {
+        // If no country code, assume Jordan (+962)
+        if (cleanPhone.startsWith('0')) {
+          cleanPhone = '+962' + cleanPhone.substring(1);
+        } else if (cleanPhone.startsWith('962')) {
+          cleanPhone = '+' + cleanPhone;
+        } else {
+          cleanPhone = '+962' + cleanPhone;
+        }
+      }
+
+      // Create SMS message
+      const message = `Welcome to Rolevate!
+
+Your application for "${jobTitle}" has been submitted successfully.
+
+Track your application:
+🌐 rolevate.com
+
+Login Details:
+📧 Email: ${email}
+🔑 Password: ${password}
+
+Please change your password after first login.`;
+
+      // Send SMS
+      await this.smsService.sendSMS({
+        phoneNumber: cleanPhone,
+        message: message,
+        type: SMSMessageType.GENERAL,
+      });
+
+      console.log('✅ Login credentials SMS sent successfully to:', cleanPhone);
+
+    } catch (error) {
+      console.error('❌ Failed to send login credentials SMS:', error.message);
+      // Don't throw error - SMS failure shouldn't block application creation
+    }
   }
 
   async findAll(filter?: ApplicationFilterInput, pagination?: ApplicationPaginationInput, user?: any): Promise<Application[]> {
@@ -612,10 +703,10 @@ Format as clear, actionable recommendations for interview success.`;
     try {
       console.log('🎥 Creating LiveKit room for interview...');
 
-      // Get full application with relations
+      // Get full application with relations including candidate profile for phone number
       const fullApplication = await this.applicationRepository.findOne({
         where: { id: application.id },
-        relations: ['job', 'candidate'],
+        relations: ['job', 'candidate', 'candidate.candidateProfile'],
       });
 
       if (!fullApplication) {
@@ -633,7 +724,7 @@ Format as clear, actionable recommendations for interview success.`;
         jobId: fullApplication.jobId,
         jobTitle: fullApplication.job.title,
         companyId: fullApplication.job.companyId,
-        interviewLanguage: 'english', // Default to English
+        interviewLanguage: fullApplication.job.interviewLanguage || 'english',
         createdAt: new Date().toISOString(),
         type: 'interview'
       };
@@ -653,7 +744,8 @@ Format as clear, actionable recommendations for interview success.`;
       });
 
       // Send WhatsApp template message to candidate
-      const candidatePhone = fullApplication.candidate.phone;
+      // Get phone from candidate profile
+      const candidatePhone = fullApplication.candidate.candidateProfile?.phone;
       if (candidatePhone) {
         console.log('📱 Sending WhatsApp template invitation to candidate...');
 
@@ -718,10 +810,10 @@ Format as clear, actionable recommendations for interview success.`;
       // Get full application with job and company details
       const fullApplication = await this.applicationRepository.findOne({
         where: { id: application.id },
-        relations: ['job', 'candidate', 'candidateProfile'],
+        relations: ['job', 'candidate'],
       });
 
-      if (!fullApplication || !fullApplication.job.companyId) {
+      if (!fullApplication || !fullApplication.job?.companyId) {
         console.log('⚠️ No company associated with this job, skipping company notification');
         return;
       }

@@ -126,7 +126,8 @@ export class CreateJobInput {
   @IsBoolean()
   featured?: boolean;
 
-  @Field()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsString()
-  postedById: string;
+  postedById?: string;
 }

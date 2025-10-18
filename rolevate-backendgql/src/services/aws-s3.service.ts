@@ -25,9 +25,11 @@ export class AwsS3Service {
 
   async uploadCV(file: Buffer, originalName: string, candidateId?: string): Promise<string> {
     try {
-      // Generate unique filename
-      const fileExtension = originalName.split('.').pop() || 'pdf';
-      const fileName = `cvs/${candidateId || 'anonymous'}/${uuidv4()}.${fileExtension}`;
+      // Sanitize original filename and generate unique filename
+      const sanitizedName = this.sanitizeFilename(originalName);
+      const fileExtension = sanitizedName.split('.').pop() || 'pdf';
+      const baseFileName = sanitizedName.replace(/\.[^/.]+$/, ''); // Remove extension
+      const fileName = `cvs/${candidateId || 'anonymous'}/${uuidv4()}-${baseFileName}.${fileExtension}`;
 
       console.log('☁️ Uploading CV to S3:', fileName);
 
@@ -58,10 +60,12 @@ export class AwsS3Service {
 
   async uploadFile(file: Buffer, fileName: string, folder: string = 'files'): Promise<string> {
     try {
-      const key = `${folder}/${uuidv4()}-${fileName}`;
+      // Sanitize filename to remove spaces and special characters
+      const sanitizedFileName = this.sanitizeFilename(fileName);
+      const key = `${folder}/${uuidv4()}-${sanitizedFileName}`;
 
       // Determine content type from file extension
-      const fileExtension = fileName.split('.').pop()?.toLowerCase() || '';
+      const fileExtension = sanitizedFileName.split('.').pop()?.toLowerCase() || '';
       const contentType = this.getContentType(fileExtension);
 
       console.log('☁️ Uploading file to S3:', key);
@@ -171,6 +175,36 @@ export class AwsS3Service {
     // Format: https://bucket-name.s3.region.amazonaws.com/key
     const url = new URL(s3Url);
     return url.pathname.substring(1); // Remove leading slash
+  }
+
+  /**
+   * Sanitize filename by removing/replacing spaces and special characters
+   * Ensures S3 URLs are valid and don't require URL encoding
+   */
+  private sanitizeFilename(filename: string): string {
+    // Remove leading/trailing spaces
+    let sanitized = filename.trim();
+    
+    // Replace spaces with hyphens
+    sanitized = sanitized.replace(/\s+/g, '-');
+    
+    // Remove special characters except dots, hyphens, and underscores
+    sanitized = sanitized.replace(/[^a-zA-Z0-9.-_]/g, '');
+    
+    // Replace multiple consecutive hyphens with a single hyphen
+    sanitized = sanitized.replace(/-+/g, '-');
+    
+    // Remove leading/trailing hyphens
+    sanitized = sanitized.replace(/^-+|-+$/g, '');
+    
+    // Ensure filename is not empty
+    if (!sanitized || sanitized === '.') {
+      sanitized = `file-${Date.now()}`;
+    }
+    
+    console.log(`📝 Sanitized filename: "${filename}" → "${sanitized}"`);
+    
+    return sanitized;
   }
 
   private getContentType(fileExtension: string): string {

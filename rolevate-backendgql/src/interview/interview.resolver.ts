@@ -5,6 +5,8 @@ import { CreateInterviewInput } from './create-interview.input';
 import { UpdateInterviewInput } from './update-interview.input';
 import { SubmitInterviewFeedbackInput } from './submit-interview-feedback.input';
 import { InterviewWithTranscriptSummary } from './interview-with-transcript-summary.dto';
+import { RoomAccess } from './room-access.dto';
+import { Public } from '../auth/public.decorator';
 
 @Resolver(() => Interview)
 export class InterviewResolver {
@@ -79,5 +81,23 @@ export class InterviewResolver {
   @Query(() => [InterviewWithTranscriptSummary], { name: 'applicationInterviewsWithTranscripts' })
   async getApplicationInterviewsWithTranscripts(@Args('applicationId', { type: () => ID }) applicationId: string): Promise<InterviewWithTranscriptSummary[]> {
     return this.interviewService.getApplicationInterviewsWithTranscripts(applicationId);
+  }
+
+  @Public()
+  @Query(() => RoomAccess, { name: 'joinInterviewRoom' })
+  async joinInterviewRoom(
+    @Args('interviewId', { type: () => ID, nullable: true }) interviewId?: string,
+    @Args('participantName', { nullable: true }) participantName?: string,
+    @Args('jobId', { type: () => ID, nullable: true }) jobId?: string,
+    @Args('phone', { nullable: true }) phone?: string,
+    @Args('roomName', { nullable: true }) roomName?: string,
+  ): Promise<RoomAccess> {
+    return this.interviewService.generateRoomAccessToken(
+      interviewId,
+      participantName,
+      jobId,
+      phone,
+      roomName,
+    );
   }
 }

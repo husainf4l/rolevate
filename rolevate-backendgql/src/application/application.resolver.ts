@@ -8,23 +8,41 @@ import { CreateApplicationNoteInput } from './create-application-note.input';
 import { UpdateApplicationNoteInput } from './update-application-note.input';
 import { ApplicationFilterInput } from './application-filter.input';
 import { ApplicationPaginationInput } from './application-filter.input';
+import { ApplicationResponse } from './application-response.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { BusinessOrApiKeyGuard } from '../auth/business-or-api-key.guard';
+import { Public } from '../auth/public.decorator';
 
 @Resolver(() => Application)
 export class ApplicationResolver {
   constructor(private readonly applicationService: ApplicationService) {}
 
-  @Mutation(() => Application)
-  @UseGuards(JwtAuthGuard)
+  @Public()
+  @Mutation(() => ApplicationResponse)
   async createApplication(
     @Args('input') createApplicationInput: CreateApplicationInput,
     @Context() context: any,
-  ): Promise<Application> {
-    const userId = context.req.user.userId;
-    return this.applicationService.create(createApplicationInput, userId);
+  ): Promise<ApplicationResponse> {
+    // Check if user is authenticated
+    const userId = context.req?.user?.userId;
+    
+    // If candidateId is not provided and user is not authenticated, create anonymous application
+    if (!createApplicationInput.candidateId && !userId) {
+      return this.applicationService.createAnonymousApplication(createApplicationInput);
+    }
+    
+    // If candidateId is not provided but user is authenticated, use the authenticated user's ID
+    if (!createApplicationInput.candidateId && userId) {
+      createApplicationInput.candidateId = userId;
+    }
+    
+    const application = await this.applicationService.create(createApplicationInput, userId);
+    return {
+      application,
+      message: 'Application submitted successfully'
+    };
   }
 
   @Query(() => [Application], { name: 'applications' })

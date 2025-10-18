@@ -10,10 +10,10 @@ export class CreateApplicationInput {
   @IsString()
   jobId: string;
 
-  @Field()
-  @IsNotEmpty()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsString()
-  candidateId: string;
+  candidateId?: string;
 
   @Field(() => ApplicationStatus, { nullable: true })
   @IsOptional()
@@ -27,7 +27,7 @@ export class CreateApplicationInput {
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'resumeUrl must be a valid URL address' })
   resumeUrl?: string;
 
   @Field({ nullable: true })
@@ -58,6 +58,11 @@ export class CreateApplicationInput {
   @Field({ nullable: true })
   @IsOptional()
   interviewScheduled?: boolean;
+
+  @Field({ nullable: true, defaultValue: 'english' })
+  @IsOptional()
+  @IsString()
+  interviewLanguage?: string;
 
   // Additional fields for anonymous applications
   @Field({ nullable: true })
