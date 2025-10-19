@@ -1,14 +1,62 @@
 import { AwsS3Service } from '../services/aws-s3.service';
 
+async function downloadFromPresignedUrl(url: string): Promise<Buffer> {
+  try {
+    const https = require('https');
+    const http = require('http');
+
+    return new Promise((resolve, reject) => {
+      const protocol = url.startsWith('https:') ? https : http;
+      
+      protocol.get(url, (response: any) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
+          return;
+        }
+
+        const chunks: Buffer[] = [];
+        
+        response.on('data', (chunk: Buffer) => {
+          chunks.push(chunk);
+        });
+        
+        response.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+          console.log('📥 Downloaded file via presigned URL, size:', buffer.length, 'bytes');
+          resolve(buffer);
+        });
+        
+        response.on('error', (error: Error) => {
+          reject(error);
+        });
+      }).on('error', (error: Error) => {
+        reject(error);
+      });
+    });
+  } catch (error) {
+    console.error('❌ Failed to download from presigned URL:', error);
+    throw error;
+  }
+}
+
 export async function extractTextFromCV(cvUrl: string): Promise<string> {
   try {
     console.log('📄 Extracting text from CV URL:', cvUrl);
 
-    // Initialize S3 service
+    // Check if it's a presigned URL or direct S3 URL
     const awsS3Service = new AwsS3Service();
+    let fileBuffer: Buffer;
 
-    // Download file buffer from S3
-    const fileBuffer = await awsS3Service.getFileBuffer(cvUrl);
+    if (cvUrl.includes('X-Amz-Algorithm=AWS4-HMAC-SHA256') || cvUrl.includes('X-Amz-Signature')) {
+      // This is a presigned URL - download via HTTP
+      console.log('🔗 Detected presigned URL, downloading via HTTP...');
+      fileBuffer = await downloadFromPresignedUrl(cvUrl);
+    } else {
+      // This is a direct S3 URL - use S3 SDK (may fail with restricted IAM)
+      console.log('📥 Direct S3 URL detected, using S3 SDK...');
+      fileBuffer = await awsS3Service.getFileBuffer(cvUrl);
+    }
+
     console.log('✅ CV file buffer downloaded, size:', fileBuffer.length, 'bytes');
 
     // Determine file type and extract text

@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Job } from './job.entity';
+import { SavedJob } from './saved-job.entity';
 import { JobService } from './job.service';
 import { JobResolver } from './job.resolver';
 import { User } from '../user/user.entity';
@@ -13,7 +14,7 @@ import { AuditService } from '../audit.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Job, User, Company]),
+    TypeOrmModule.forFeature([Job, SavedJob, User, Company]),
     AuthModule,
     UserModule,
     JwtModule.registerAsync({

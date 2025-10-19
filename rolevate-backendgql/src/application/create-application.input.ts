@@ -88,5 +88,10 @@ export class CreateApplicationInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsUrl()
+  linkedin?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsUrl()
   portfolioUrl?: string;
 }

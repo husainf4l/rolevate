@@ -4,6 +4,7 @@ import { User } from './user.entity';
 import { UserDto } from './user.dto';
 import { UserService } from './user.service';
 import { CreateUserInput } from './create-user.input';
+import { ChangePasswordInput } from './change-password.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 
@@ -142,5 +143,25 @@ export class UserResolver {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  /**
+   * Change user password
+   * Requires authentication and current password verification
+   */
+  @Mutation(() => Boolean, {
+    description: 'Change the current user\'s password. Requires current password verification.'
+  })
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Args('input') input: ChangePasswordInput,
+    @Context() context: any,
+  ): Promise<boolean> {
+    const userId = context.req.user.id;
+    return this.userService.changePassword(
+      userId,
+      input.currentPassword,
+      input.newPassword
+    );
   }
 }

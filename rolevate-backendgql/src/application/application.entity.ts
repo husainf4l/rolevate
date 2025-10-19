@@ -13,6 +13,7 @@ export enum ApplicationStatus {
   INTERVIEWED = 'INTERVIEWED',
   OFFERED = 'OFFERED',
   HIRED = 'HIRED',
+  ANALYZED = 'ANALYZED',
   REJECTED = 'REJECTED',
   WITHDRAWN = 'WITHDRAWN',
 }
@@ -75,6 +76,22 @@ export class Application {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   @Field({ nullable: true })
   cvAnalysisScore?: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  @Field({ nullable: true })
+  cvScore?: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  @Field({ nullable: true })
+  firstInterviewScore?: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  @Field({ nullable: true })
+  secondInterviewScore?: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  @Field({ nullable: true })
+  finalScore?: number;
 
   @Column({ type: 'json', nullable: true })
   @Field(() => GraphQLJSONObject, { nullable: true })

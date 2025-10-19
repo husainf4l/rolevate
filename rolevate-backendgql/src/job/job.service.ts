@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job, JobStatus } from './job.entity';
@@ -9,6 +9,8 @@ import { JobFilterInput } from './job-filter.input';
 import { PaginationInput } from './pagination.input';
 import { User } from '../user/user.entity';
 import { Company } from '../company/company.entity';
+import { SavedJob } from './saved-job.entity';
+import { SavedJobDto } from './saved-job.dto';
 import { AuditService } from '../audit.service';
 
 @Injectable()
@@ -20,6 +22,8 @@ export class JobService {
     private userRepository: Repository<User>,
     @InjectRepository(Company)
     private companyRepository: Repository<Company>,
+    @InjectRepository(SavedJob)
+    private savedJobRepository: Repository<SavedJob>,
     private auditService: AuditService,
   ) {}
 
@@ -317,5 +321,111 @@ export class JobService {
     this.auditService.logJobCreation(userId, id); // Log the deletion
 
     return true;
+  }
+
+  // ==================== SAVED JOBS METHODS ====================
+
+  /**
+   * Save a job for a user (bookmark/favorite)
+   * @param userId - The ID of the user saving the job
+   * @param jobId - The ID of the job to save
+   * @param notes - Optional notes about why they saved this job
+   * @returns The saved job record
+   */
+  async saveJob(userId: string, jobId: string, notes?: string): Promise<SavedJobDto> {
+    // Verify job exists
+    const job = await this.jobRepository.findOne({ 
+      where: { id: jobId },
+      relations: ['postedBy', 'company']
+    });
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    // Check if already saved
+    const existing = await this.savedJobRepository.findOne({
+      where: { userId, jobId }
+    });
+    if (existing) {
+      throw new ConflictException('Job already saved');
+    }
+
+    // Create saved job record
+    const savedJob = this.savedJobRepository.create({
+      userId,
+      jobId,
+      notes
+    });
+
+    const saved = await this.savedJobRepository.save(savedJob);
+    
+    console.log(`✅ User ${userId} saved job ${jobId}`);
+
+    // Return with full job details
+    return {
+      id: saved.id,
+      userId: saved.userId,
+      jobId: saved.jobId,
+      savedAt: saved.savedAt,
+      notes: saved.notes,
+      job: await this.findOne(jobId) as JobDto
+    };
+  }
+
+  /**
+   * Unsave a job for a user (remove bookmark/favorite)
+   * @param userId - The ID of the user unsaving the job
+   * @param jobId - The ID of the job to unsave
+   * @returns True if successfully unsaved
+   */
+  async unsaveJob(userId: string, jobId: string): Promise<boolean> {
+    const savedJob = await this.savedJobRepository.findOne({
+      where: { userId, jobId }
+    });
+
+    if (!savedJob) {
+      throw new NotFoundException('Saved job not found');
+    }
+
+    await this.savedJobRepository.remove(savedJob);
+    
+    console.log(`🗑️ User ${userId} unsaved job ${jobId}`);
+
+    return true;
+  }
+
+  /**
+   * Check if a user has saved a specific job
+   * @param userId - The ID of the user
+   * @param jobId - The ID of the job
+   * @returns True if the job is saved
+   */
+  async isJobSaved(userId: string, jobId: string): Promise<boolean> {
+    const count = await this.savedJobRepository.count({
+      where: { userId, jobId }
+    });
+    return count > 0;
+  }
+
+  /**
+   * Get all saved jobs for a user
+   * @param userId - The ID of the user
+   * @returns List of saved jobs with full job details
+   */
+  async getSavedJobs(userId: string): Promise<SavedJobDto[]> {
+    const savedJobs = await this.savedJobRepository.find({
+      where: { userId },
+      relations: ['job', 'job.postedBy', 'job.company'],
+      order: { savedAt: 'DESC' }
+    });
+
+    return Promise.all(savedJobs.map(async (saved) => ({
+      id: saved.id,
+      userId: saved.userId,
+      jobId: saved.jobId,
+      savedAt: saved.savedAt,
+      notes: saved.notes,
+      job: await this.findOne(saved.jobId) as JobDto
+    })));
   }
 }

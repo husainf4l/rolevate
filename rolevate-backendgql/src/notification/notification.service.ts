@@ -2,8 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification, NotificationType, NotificationCategory } from './notification.entity';
+import { NotificationSettings } from './notification-settings.entity';
 import { CreateNotificationInput } from './create-notification.input';
+import { UpdateNotificationSettingsInput } from './update-notification-settings.input';
 import { NotificationDto } from './notification.dto';
+import { NotificationSettingsDto } from './notification-settings.dto';
 import { AuditService } from '../audit.service';
 
 @Injectable()
@@ -11,6 +14,8 @@ export class NotificationService {
   constructor(
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
+    @InjectRepository(NotificationSettings)
+    private notificationSettingsRepository: Repository<NotificationSettings>,
     private auditService: AuditService,
   ) {}
 
@@ -147,5 +152,143 @@ export class NotificationService {
       category: NotificationCategory.APPLICATION,
       metadata: { jobId },
     });
+  }
+
+  // ==================== NOTIFICATION SETTINGS METHODS ====================
+
+  /**
+   * Get notification settings for a user
+   * Creates default settings if none exist
+   * @param userId - The ID of the user
+   * @returns User's notification settings
+   */
+  async getNotificationSettings(userId: string): Promise<NotificationSettingsDto> {
+    let settings = await this.notificationSettingsRepository.findOne({
+      where: { userId }
+    });
+
+    // Create default settings if none exist
+    if (!settings) {
+      settings = await this.createDefaultSettings(userId);
+    }
+
+    return this.mapSettingsToDto(settings);
+  }
+
+  /**
+   * Update notification settings for a user
+   * Creates default settings first if none exist
+   * @param userId - The ID of the user
+   * @param input - The settings to update
+   * @returns Updated notification settings
+   */
+  async updateNotificationSettings(
+    userId: string,
+    input: UpdateNotificationSettingsInput
+  ): Promise<NotificationSettingsDto> {
+    let settings = await this.notificationSettingsRepository.findOne({
+      where: { userId }
+    });
+
+    // Create default settings if none exist
+    if (!settings) {
+      settings = await this.createDefaultSettings(userId);
+    }
+
+    // Update only provided fields
+    Object.assign(settings, input);
+    
+    const updated = await this.notificationSettingsRepository.save(settings);
+
+    console.log(`⚙️ Updated notification settings for user ${userId}`);
+
+    return this.mapSettingsToDto(updated);
+  }
+
+  /**
+   * Create default notification settings for a new user
+   * Called automatically when user is created or first accesses settings
+   * @param userId - The ID of the user
+   * @returns Created default settings
+   */
+  async createDefaultSettings(userId: string): Promise<NotificationSettings> {
+    const settings = this.notificationSettingsRepository.create({
+      userId,
+      // Email defaults (all true)
+      emailNotifications: true,
+      emailApplicationUpdates: true,
+      emailInterviewReminders: true,
+      emailJobRecommendations: true,
+      emailNewsletter: true,
+      // SMS defaults (all false - opt-in)
+      smsNotifications: false,
+      smsApplicationUpdates: false,
+      smsInterviewReminders: false,
+      // Push defaults (all true)
+      pushNotifications: true,
+      pushApplicationUpdates: true,
+      pushInterviewReminders: true,
+      pushNewMessages: true,
+      // Marketing defaults (all false - opt-in)
+      marketingEmails: false,
+      partnerOffers: false,
+    });
+
+    const saved = await this.notificationSettingsRepository.save(settings);
+
+    console.log(`✨ Created default notification settings for user ${userId}`);
+
+    return saved;
+  }
+
+  /**
+   * Check if a specific notification type is enabled for a user
+   * Useful for checking before sending notifications
+   * @param userId - The ID of the user
+   * @param type - The type of notification to check
+   * @returns True if the notification type is enabled
+   */
+  async isNotificationEnabled(
+    userId: string,
+    type: 'email' | 'sms' | 'push'
+  ): Promise<boolean> {
+    const settings = await this.getNotificationSettings(userId);
+
+    switch (type) {
+      case 'email':
+        return settings.emailNotifications;
+      case 'sms':
+        return settings.smsNotifications;
+      case 'push':
+        return settings.pushNotifications;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Helper method to map entity to DTO
+   */
+  private mapSettingsToDto(settings: NotificationSettings): NotificationSettingsDto {
+    return {
+      id: settings.id,
+      userId: settings.userId,
+      emailNotifications: settings.emailNotifications,
+      emailApplicationUpdates: settings.emailApplicationUpdates,
+      emailInterviewReminders: settings.emailInterviewReminders,
+      emailJobRecommendations: settings.emailJobRecommendations,
+      emailNewsletter: settings.emailNewsletter,
+      smsNotifications: settings.smsNotifications,
+      smsApplicationUpdates: settings.smsApplicationUpdates,
+      smsInterviewReminders: settings.smsInterviewReminders,
+      pushNotifications: settings.pushNotifications,
+      pushApplicationUpdates: settings.pushApplicationUpdates,
+      pushInterviewReminders: settings.pushInterviewReminders,
+      pushNewMessages: settings.pushNewMessages,
+      marketingEmails: settings.marketingEmails,
+      partnerOffers: settings.partnerOffers,
+      createdAt: settings.createdAt,
+      updatedAt: settings.updatedAt,
+    };
   }
 }

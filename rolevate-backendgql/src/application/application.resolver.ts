@@ -4,6 +4,7 @@ import { Application } from './application.entity';
 import { ApplicationNote } from './application-note.entity';
 import { CreateApplicationInput } from './create-application.input';
 import { UpdateApplicationInput } from './update-application.input';
+import { UpdateApplicationAnalysisInput } from './update-application-analysis.input';
 import { CreateApplicationNoteInput } from './create-application-note.input';
 import { UpdateApplicationNoteInput } from './update-application-note.input';
 import { ApplicationFilterInput } from './application-filter.input';
@@ -13,6 +14,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { BusinessOrApiKeyGuard } from '../auth/business-or-api-key.guard';
+import { JwtOrApiKeyGuard } from '../auth/jwt-or-api-key.guard';
 import { Public } from '../auth/public.decorator';
 
 @Resolver(() => Application)
@@ -56,7 +58,7 @@ export class ApplicationResolver {
   }
 
   @Query(() => Application, { name: 'application', nullable: true })
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard)
   async findOne(@Args('id', { type: () => ID }) id: string): Promise<Application | null> {
     return this.applicationService.findOne(id);
   }
@@ -83,7 +85,7 @@ export class ApplicationResolver {
   }
 
   @Mutation(() => Application, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOrApiKeyGuard)
   async updateApplication(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') updateApplicationInput: UpdateApplicationInput,
@@ -141,7 +143,7 @@ export class ApplicationResolver {
     return this.applicationService.updateApplicationNote(id, updateNoteInput, userId);
   }
 
-  @Mutation(() => Boolean)
+    @Mutation(() => Boolean, { name: 'removeApplicationNote' })
   @UseGuards(JwtAuthGuard)
   async removeApplicationNote(
     @Args('id', { type: () => ID }) id: string,
@@ -149,5 +151,19 @@ export class ApplicationResolver {
   ): Promise<boolean> {
     const userId = context.req.user.userId;
     return this.applicationService.removeApplicationNote(id, userId);
+  }
+
+  /**
+   * Update application CV analysis results
+   * This mutation is called by the FastAPI CV analysis service
+   * Requires API Key authentication (system API key)
+   */
+  @Mutation(() => Application, { name: 'updateApplicationAnalysis' })
+  @UseGuards(ApiKeyGuard)
+  async updateApplicationAnalysis(
+    @Args('input') input: UpdateApplicationAnalysisInput,
+  ): Promise<Application> {
+    console.log('📊 Received CV analysis results from FastAPI service for application:', input.applicationId);
+    return this.applicationService.updateApplicationAnalysis(input);
   }
 }

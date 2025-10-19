@@ -34,6 +34,18 @@ export class ApplicationDto {
   @Field({ nullable: true })
   cvAnalysisScore?: number;
 
+  @Field({ nullable: true })
+  cvScore?: number;
+
+  @Field({ nullable: true })
+  firstInterviewScore?: number;
+
+  @Field({ nullable: true })
+  secondInterviewScore?: number;
+
+  @Field({ nullable: true })
+  finalScore?: number;
+
   @Field(() => GraphQLJSONObject, { nullable: true })
   cvAnalysisResults?: any;
 

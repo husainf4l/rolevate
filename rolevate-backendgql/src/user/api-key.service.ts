@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { ApiKey } from './api-key.entity';
 import { CreateApiKeyInput } from './create-api-key.input';
@@ -13,6 +14,7 @@ export class ApiKeyService {
     @InjectRepository(ApiKey)
     private apiKeyRepository: Repository<ApiKey>,
     private auditService: AuditService,
+    private configService: ConfigService,
   ) {}
 
   async generateApiKey(userId: string, input: CreateApiKeyInput): Promise<ApiKeyDto> {
@@ -63,6 +65,14 @@ export class ApiKeyService {
   }
 
   async validateApiKey(key: string): Promise<boolean> {
+    // First check if it's the system API key from environment
+    const systemApiKey = this.configService.get<string>('SYSTEM_API_KEY');
+    if (systemApiKey && key === systemApiKey) {
+      console.log('✅ System API key validated from environment variable');
+      return true;
+    }
+
+    // Otherwise check database for user-generated API keys
     const apiKey = await this.apiKeyRepository.findOne({ where: { key, isActive: true } });
     if (!apiKey) return false;
     if (apiKey.expiresAt && apiKey.expiresAt < new Date()) return false;

@@ -1,11 +1,18 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Context } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginInput } from './login.input';
 import { LoginResponseDto } from './login-response.dto';
+import { ChangePasswordInput } from './change-password.input';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { UserService } from '../user/user.service';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @Mutation(() => LoginResponseDto)
   async login(@Args('input') input: LoginInput): Promise<LoginResponseDto> {
@@ -15,5 +22,21 @@ export class AuthResolver {
     }
     const token = await this.authService.login(user);
     return token;
+  }
+
+  @Mutation(() => Boolean, {
+    description: 'Change user password (requires authentication)',
+  })
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Args('input') input: ChangePasswordInput,
+    @Context() context: any,
+  ): Promise<boolean> {
+    const userId = context.req.user.id;
+    return this.userService.changePassword(
+      userId,
+      input.currentPassword,
+      input.newPassword,
+    );
   }
 }

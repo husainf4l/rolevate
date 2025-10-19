@@ -16,13 +16,13 @@ import { CommunicationService } from '../communication/communication.service';
 import { NotificationService } from '../notification/notification.service';
 import { CommunicationType, CommunicationDirection } from '../communication/communication.entity';
 import { NotificationType, NotificationCategory } from '../notification/notification.entity';
-import { OpenaiCvAnalysisService } from '../services/openai-cv-analysis.service';
-import { CvParsingService } from '../services/cv-parsing.service';
 import { SMSService } from '../services/sms.service';
 import { SMSMessageType } from '../services/sms.input';
 import { Job } from '../job/job.entity';
 import { User, UserType } from '../user/user.entity';
 import { CandidateProfile } from '../candidate/candidate-profile.entity';
+import { WorkExperience } from '../candidate/work-experience.entity';
+import { Education } from '../candidate/education.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
@@ -41,8 +41,6 @@ export class ApplicationService {
     private liveKitService: LiveKitService,
     private communicationService: CommunicationService,
     private notificationService: NotificationService,
-    private openaiCvAnalysisService: OpenaiCvAnalysisService,
-    private cvParsingService: CvParsingService,
     private smsService: SMSService,
     private jwtService: JwtService,
   ) {}
@@ -77,15 +75,16 @@ export class ApplicationService {
     // Notify company users about new application
     await this.notifyCompanyAboutNewApplication(savedApplication);
 
-    // Get full job details for CV analysis
-    const job = await this.applicationRepository.manager.findOne(Job, {
-      where: { id: createApplicationInput.jobId },
-      relations: ['company'],
-    });
-
-    // Trigger background CV analysis if resume and prompt are available
-    if (savedApplication.resumeUrl && job?.cvAnalysisPrompt) {
-      this.analyzeCVInBackground(savedApplication.id, savedApplication.resumeUrl, job.cvAnalysisPrompt, job);
+    // Trigger CV analysis via FastAPI service if resume is available
+    if (savedApplication.resumeUrl) {
+      this.triggerCVAnalysis(
+        savedApplication.id, 
+        savedApplication.candidateId,
+        createApplicationInput.jobId,
+        savedApplication.resumeUrl
+      ).catch(error => {
+        console.error('Failed to trigger CV analysis:', error);
+      });
     }
 
     // Create LiveKit room and send WhatsApp invitation
@@ -122,95 +121,49 @@ export class ApplicationService {
       throw new Error('Job application deadline has passed');
     }
 
-    // Extract candidate information from CV and merge with manual input
-    console.log('📄 Extracting candidate information from CV...');
-    const cvCandidateInfo = await this.cvParsingService.extractCandidateInfoFromCV(createApplicationInput.resumeUrl);
-
-    // Merge manual input with CV-extracted data (manual input takes priority)
+    // Generate anonymous candidate info - FastAPI will extract real data later
+    console.log('🆕 Creating anonymous candidate with placeholder data...');
+    const timestamp = Date.now();
+    const anonymousId = `anonymous-${timestamp}`;
+    
     const candidateInfo = {
-      ...cvCandidateInfo,
-      firstName: createApplicationInput.firstName || cvCandidateInfo.firstName,
-      lastName: createApplicationInput.lastName || cvCandidateInfo.lastName,
-      email: createApplicationInput.email || cvCandidateInfo.email,
-      phone: createApplicationInput.phone || cvCandidateInfo.phone,
+      firstName: createApplicationInput.firstName || 'Anonymous',
+      lastName: createApplicationInput.lastName || anonymousId,
+      email: createApplicationInput.email || `${anonymousId}@placeholder.temp`,
+      phone: createApplicationInput.phone || null,
+      linkedin: createApplicationInput.linkedin || null,
       portfolioUrl: createApplicationInput.portfolioUrl,
     };
 
-    // Validate required fields
-    if (!candidateInfo.email) {
-      throw new Error('Email is required (either provide manually or include in CV)');
-    }
-    if (!candidateInfo.firstName) {
-      throw new Error('First name is required (either provide manually or include in CV)');
-    }
+    // Always create new anonymous candidate - FastAPI will update with real data later
+    console.log('🆕 Creating new anonymous candidate account...');
 
-    // Check if user already exists with this email
-    const existingUser = await this.userRepository.findOne({
-      where: { email: candidateInfo.email },
-      relations: ['candidateProfile'],
-    });
+    // Generate random password
+    const randomPassword = this.generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
-    let candidateId: string;
-    let candidateCredentials: { email: string; password: string; token: string } | undefined;
+    // Create user and candidate profile with placeholder data
+    const result = await this.createCandidateFromCV(candidateInfo, hashedPassword, createApplicationInput.resumeUrl);
+    const candidateId = result.user.id;
 
-    if (existingUser) {
-      console.log('👤 Found existing user with email:', candidateInfo.email);
+    // Generate JWT token for the new candidate
+    const payload = { 
+      email: result.user.email, 
+      sub: result.user.id, 
+      userType: result.user.userType,
+      companyId: null
+    };
+    const token = this.jwtService.sign(payload);
 
-      if (!existingUser.candidateProfile) {
-        throw new Error('User exists but is not a candidate');
-      }
+    const candidateCredentials = {
+      email: candidateInfo.email,
+      password: randomPassword,
+      token: token
+    };
 
-      candidateId = existingUser.id;
-
-      // Check if already applied
-      const existingApplication = await this.applicationRepository.findOne({
-        where: {
-          jobId: createApplicationInput.jobId,
-          candidateId: candidateId,
-        },
-      });
-
-      if (existingApplication) {
-        throw new Error('This candidate has already applied for this job');
-      }
-    } else {
-      console.log('🆕 Creating new candidate account...');
-
-      // Generate random password
-      const randomPassword = this.generateRandomPassword();
-      const hashedPassword = await bcrypt.hash(randomPassword, 10);
-
-      // Create user and candidate profile
-      const result = await this.createCandidateFromCV(candidateInfo, hashedPassword, createApplicationInput.resumeUrl);
-      candidateId = result.user.id;
-
-      // Generate JWT token for the new candidate
-      const payload = { 
-        email: result.user.email, 
-        sub: result.user.id, 
-        userType: result.user.userType,
-        companyId: null
-      };
-      const token = this.jwtService.sign(payload);
-
-      candidateCredentials = {
-        email: candidateInfo.email,
-        password: randomPassword,
-        token: token
-      };
-
-      console.log('✅ Created new candidate account for:', candidateInfo.email);
-      
-      // Send SMS with login credentials to the new candidate
-      if (candidateInfo.phone) {
-        await this.sendLoginCredentialsSMS(
-          candidateInfo.phone,
-          candidateInfo.email,
-          randomPassword,
-          job.title
-        );
-      }
-    }
+    console.log('✅ Created anonymous candidate account with ID:', candidateId);
+    console.log('📧 Placeholder email:', candidateInfo.email);
+    console.log('🔄 FastAPI will update with real candidate data from CV');
 
     // Create the application
     const application = this.applicationRepository.create({
@@ -224,9 +177,16 @@ export class ApplicationService {
       applicants: job.applicants + 1,
     });
 
-    // Trigger AI CV analysis in the background
-    if (createApplicationInput.resumeUrl && job.cvAnalysisPrompt) {
-      this.analyzeCVInBackground(savedApplication.id, createApplicationInput.resumeUrl, job.cvAnalysisPrompt, job);
+    // Trigger CV analysis via FastAPI service if resume is available
+    if (createApplicationInput.resumeUrl) {
+      this.triggerCVAnalysis(
+        savedApplication.id, 
+        savedApplication.candidateId,
+        createApplicationInput.jobId,
+        createApplicationInput.resumeUrl
+      ).catch(error => {
+        console.error('Failed to trigger CV analysis:', error);
+      });
     }
 
     // Create LiveKit room and send WhatsApp invitation
@@ -245,18 +205,11 @@ export class ApplicationService {
       throw new Error('Failed to load application after creation');
     }
 
-    // Return response with credentials for new accounts
-    if (candidateCredentials) {
-      return {
-        application: applicationWithRelations,
-        candidateCredentials,
-        message: 'Application submitted successfully! A new candidate account has been created. Login credentials sent via SMS.'
-      };
-    }
-
+    // Return response with anonymous credentials
     return {
       application: applicationWithRelations,
-      message: 'Application submitted successfully!'
+      candidateCredentials,
+      message: 'Application submitted successfully! Anonymous account created. We will extract your details from the CV and update your profile.'
     };
   }
 
@@ -268,31 +221,93 @@ export class ApplicationService {
     console.log('🏗️ Creating user and candidate profile from CV data...');
 
     return await this.applicationRepository.manager.transaction(async (manager) => {
-      // Create user
-      const user = await manager.save(User, {
-        email: candidateInfo.email,
-        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
-        password: hashedPassword,
-        userType: UserType.CANDIDATE,
-        isActive: true,
+      // Check if user already exists with this email
+      let user = await manager.findOne(User, {
+        where: { email: candidateInfo.email }
       });
 
-      // Create candidate profile
-      const candidateProfile = await manager.save(CandidateProfile, {
-        userId: user.id,
-        firstName: candidateInfo.firstName,
-        lastName: candidateInfo.lastName,
-        email: candidateInfo.email,
-        phone: candidateInfo.phone,
-        currentJobTitle: candidateInfo.currentJobTitle,
-        currentCompany: candidateInfo.currentCompany,
-        totalExperience: candidateInfo.totalExperience,
-        skills: candidateInfo.skills || [],
-        resumeUrl: resumeUrl,
-        profileSummary: candidateInfo.summary,
-        isOpenToWork: true,
-        isProfilePublic: true,
+      if (user) {
+        console.log('ℹ️ User already exists with email:', candidateInfo.email);
+        // Update user info if needed
+        await manager.update(User, { id: user.id }, {
+          name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+          password: hashedPassword, // Update password
+        });
+        // Reload user
+        user = await manager.findOne(User, {
+          where: { email: candidateInfo.email }
+        });
+      } else {
+        // Create new user
+        console.log('🆕 Creating new user with email:', candidateInfo.email);
+        user = await manager.save(User, {
+          email: candidateInfo.email,
+          name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+          password: hashedPassword,
+          userType: UserType.CANDIDATE,
+          isActive: true,
+        });
+      }
+
+      if (!user) {
+        throw new Error('Failed to create or find user');
+      }
+
+      // Check if candidate profile already exists for this user
+      let candidateProfile = await manager.findOne(CandidateProfile, {
+        where: { userId: user.id }
       });
+
+      if (candidateProfile) {
+        console.log('ℹ️ Candidate profile already exists, updating it...');
+        // Update existing profile
+        await manager.update(CandidateProfile, { userId: user.id }, {
+          firstName: candidateInfo.firstName,
+          lastName: candidateInfo.lastName,
+          phone: candidateInfo.phone,
+          location: candidateInfo.location,
+          skills: candidateInfo.skills || [],
+          linkedinUrl: candidateInfo.linkedin || candidateInfo.linkedinUrl,
+          githubUrl: candidateInfo.githubUrl,
+          portfolioUrl: candidateInfo.portfolioUrl,
+          resumeUrl: resumeUrl,
+          bio: candidateInfo.summary || candidateInfo.bio,
+        });
+        // Reload to get updated profile
+        candidateProfile = await manager.findOne(CandidateProfile, {
+          where: { userId: user.id }
+        });
+      } else {
+        // Create new candidate profile
+        console.log('🆕 Creating new candidate profile for user:', user.id);
+        candidateProfile = await manager.save(CandidateProfile, {
+          userId: user.id,
+          firstName: candidateInfo.firstName,
+          lastName: candidateInfo.lastName,
+          phone: candidateInfo.phone,
+          location: candidateInfo.location,
+          skills: candidateInfo.skills || [],
+          linkedinUrl: candidateInfo.linkedin || candidateInfo.linkedinUrl,
+          githubUrl: candidateInfo.githubUrl,
+          portfolioUrl: candidateInfo.portfolioUrl,
+          resumeUrl: resumeUrl,
+          bio: candidateInfo.summary || candidateInfo.bio,
+        });
+      }
+
+      if (!candidateProfile) {
+        throw new Error('Failed to create or find candidate profile');
+      }
+
+      // Process work experience (handles both string and structured array formats)
+      if (candidateInfo.experience) {
+        await this.processWorkExperience(candidateProfile.id, candidateInfo.experience, manager);
+      }
+
+      // Process education (handles both string and structured array formats)
+      if (candidateInfo.education) {
+        await this.processEducation(candidateProfile.id, candidateInfo.education, manager);
+      }
 
       return {
         user,
@@ -311,6 +326,158 @@ export class ApplicationService {
     }
 
     return password;
+  }
+
+  /**
+   * Process and save work experience data from CV analysis
+   * Handles both string (summary) and structured array formats
+   */
+  private async processWorkExperience(
+    candidateProfileId: string,
+    experienceData: any,
+    manager: any
+  ): Promise<void> {
+    if (!experienceData) return;
+
+    try {
+      // If experience is a string, save it to the profile's experience field
+      if (typeof experienceData === 'string') {
+        await manager.update(CandidateProfile, candidateProfileId, {
+          experience: experienceData
+        });
+        console.log('📝 Saved experience summary to profile');
+        return;
+      }
+
+      // If it's an array of structured experience objects
+      if (Array.isArray(experienceData) && experienceData.length > 0) {
+        // Delete existing work experiences for this profile to avoid duplicates
+        await manager.delete(WorkExperience, { candidateProfileId });
+
+        // Create new work experience records
+        for (const exp of experienceData) {
+          if (!exp.company && !exp.position) continue; // Skip invalid entries
+
+          const workExperience = {
+            candidateProfileId,
+            company: exp.company || exp.organization || 'Not specified',
+            position: exp.position || exp.title || exp.role || 'Not specified',
+            description: exp.description || exp.responsibilities || null,
+            startDate: this.parseDate(exp.startDate || exp.start_date),
+            endDate: exp.isCurrent || exp.is_current ? null : this.parseDate(exp.endDate || exp.end_date),
+            isCurrent: exp.isCurrent || exp.is_current || false,
+          };
+
+          await manager.save(WorkExperience, workExperience);
+        }
+
+        // Also save a summary to the experience field
+        const experienceSummary = experienceData
+          .map(exp => `${exp.position || exp.title} at ${exp.company || exp.organization}`)
+          .join('; ');
+        
+        await manager.update(CandidateProfile, candidateProfileId, {
+          experience: experienceSummary
+        });
+
+        console.log(`✅ Created ${experienceData.length} work experience records`);
+      }
+    } catch (error) {
+      console.error('❌ Error processing work experience:', error.message);
+      // Continue execution - don't fail the whole process
+    }
+  }
+
+  /**
+   * Process and save education data from CV analysis
+   * Handles both string (summary) and structured array formats
+   */
+  private async processEducation(
+    candidateProfileId: string,
+    educationData: any,
+    manager: any
+  ): Promise<void> {
+    if (!educationData) return;
+
+    try {
+      // If education is a string, save it to the profile's education field
+      if (typeof educationData === 'string') {
+        await manager.update(CandidateProfile, candidateProfileId, {
+          education: educationData
+        });
+        console.log('📝 Saved education summary to profile');
+        return;
+      }
+
+      // If it's an array of structured education objects
+      if (Array.isArray(educationData) && educationData.length > 0) {
+        // Delete existing education records for this profile to avoid duplicates
+        await manager.delete(Education, { candidateProfileId });
+
+        // Create new education records
+        for (const edu of educationData) {
+          if (!edu.institution && !edu.degree) continue; // Skip invalid entries
+
+          const education = {
+            candidateProfileId,
+            institution: edu.institution || edu.school || edu.university || 'Not specified',
+            degree: edu.degree || edu.qualification || 'Not specified',
+            fieldOfStudy: edu.fieldOfStudy || edu.field_of_study || edu.major || null,
+            grade: edu.grade || edu.gpa || null,
+            description: edu.description || null,
+            startDate: this.parseDate(edu.startDate || edu.start_date),
+            endDate: this.parseDate(edu.endDate || edu.end_date || edu.graduationDate),
+          };
+
+          await manager.save(Education, education);
+        }
+
+        // Also save a summary to the education field
+        const educationSummary = educationData
+          .map(edu => `${edu.degree || edu.qualification} in ${edu.fieldOfStudy || edu.field_of_study || 'General'} from ${edu.institution || edu.school}`)
+          .join('; ');
+        
+        await manager.update(CandidateProfile, candidateProfileId, {
+          education: educationSummary
+        });
+
+        console.log(`✅ Created ${educationData.length} education records`);
+      }
+    } catch (error) {
+      console.error('❌ Error processing education:', error.message);
+      // Continue execution - don't fail the whole process
+    }
+  }
+
+  /**
+   * Parse date from various formats (string, Date object, or null)
+   * Returns a Date object or null
+   */
+  private parseDate(dateValue: any): Date | null {
+    if (!dateValue) return null;
+    
+    try {
+      // If it's already a Date object
+      if (dateValue instanceof Date) {
+        return dateValue;
+      }
+      
+      // If it's a string
+      if (typeof dateValue === 'string') {
+        // Handle "Present", "Current", etc.
+        if (['present', 'current', 'now'].includes(dateValue.toLowerCase())) {
+          return null;
+        }
+        
+        const parsed = new Date(dateValue);
+        return isNaN(parsed.getTime()) ? null : parsed;
+      }
+      
+      return null;
+    } catch (error) {
+      console.warn('⚠️ Could not parse date:', dateValue);
+      return null;
+    }
   }
 
   private async sendLoginCredentialsSMS(
@@ -376,6 +543,7 @@ Please change your password after first login.`;
       .leftJoinAndSelect('application.job', 'job')
       .leftJoinAndSelect('job.company', 'company')
       .leftJoinAndSelect('application.candidate', 'candidate')
+      .leftJoinAndSelect('candidate.candidateProfile', 'candidateProfile')
       .leftJoinAndSelect('application.applicationNotes', 'applicationNotes');
 
     // If user is a BUSINESS user, filter by their company
@@ -526,8 +694,9 @@ Please change your password after first login.`;
   private async validateStatusTransition(currentStatus: ApplicationStatus, newStatus: ApplicationStatus): Promise<void> {
     // Define valid status transitions
     const validTransitions: Record<ApplicationStatus, ApplicationStatus[]> = {
-      [ApplicationStatus.PENDING]: [ApplicationStatus.REVIEWED, ApplicationStatus.REJECTED],
-      [ApplicationStatus.REVIEWED]: [ApplicationStatus.SHORTLISTED, ApplicationStatus.INTERVIEWED, ApplicationStatus.REJECTED],
+      [ApplicationStatus.PENDING]: [ApplicationStatus.REVIEWED, ApplicationStatus.ANALYZED, ApplicationStatus.REJECTED],
+      [ApplicationStatus.REVIEWED]: [ApplicationStatus.ANALYZED, ApplicationStatus.SHORTLISTED, ApplicationStatus.INTERVIEWED, ApplicationStatus.REJECTED],
+      [ApplicationStatus.ANALYZED]: [ApplicationStatus.REVIEWED, ApplicationStatus.SHORTLISTED, ApplicationStatus.INTERVIEWED, ApplicationStatus.REJECTED],
       [ApplicationStatus.SHORTLISTED]: [ApplicationStatus.INTERVIEWED, ApplicationStatus.REJECTED],
       [ApplicationStatus.INTERVIEWED]: [ApplicationStatus.OFFERED, ApplicationStatus.REJECTED],
       [ApplicationStatus.OFFERED]: [ApplicationStatus.HIRED, ApplicationStatus.REJECTED],
@@ -538,6 +707,150 @@ Please change your password after first login.`;
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
       throw new Error(`Invalid status transition from ${currentStatus} to ${newStatus}`);
+    }
+  }
+
+  /**
+   * Update application with CV analysis results from FastAPI service
+   */
+  async updateApplicationAnalysis(input: any): Promise<Application> {
+    try {
+      console.log('📊 Updating application analysis for:', input.applicationId);
+
+      // Parse the JSON results
+      const cvAnalysisResults = typeof input.cvAnalysisResults === 'string'
+        ? JSON.parse(input.cvAnalysisResults)
+        : input.cvAnalysisResults;
+
+      // Prepare update data
+      const updateData: any = {
+        analyzedAt: new Date(),
+        recommendationsGeneratedAt: new Date(),
+      };
+
+      // Add score fields if provided
+      if (input.cvAnalysisScore !== undefined) updateData.cvAnalysisScore = input.cvAnalysisScore;
+      if (input.cvScore !== undefined) updateData.cvScore = input.cvScore;
+      if (input.firstInterviewScore !== undefined) updateData.firstInterviewScore = input.firstInterviewScore;
+      if (input.secondInterviewScore !== undefined) updateData.secondInterviewScore = input.secondInterviewScore;
+      if (input.finalScore !== undefined) updateData.finalScore = input.finalScore;
+
+      // Add analysis results and recommendations if provided
+      if (cvAnalysisResults !== undefined) updateData.cvAnalysisResults = cvAnalysisResults;
+      if (input.aiCvRecommendations !== undefined) updateData.aiCvRecommendations = input.aiCvRecommendations;
+      if (input.aiInterviewRecommendations !== undefined) updateData.aiInterviewRecommendations = input.aiInterviewRecommendations;
+      if (input.aiSecondInterviewRecommendations !== undefined) updateData.aiSecondInterviewRecommendations = input.aiSecondInterviewRecommendations;
+      if (input.aiAnalysis !== undefined) updateData.aiAnalysis = input.aiAnalysis;
+
+      // Update application with analysis results
+      await this.applicationRepository.update(input.applicationId, updateData);
+
+      // If FastAPI extracted candidate info from CV, update the candidate profile
+      if (input.candidateInfo) {
+        console.log('👤 Updating candidate profile with data extracted from CV...');
+        
+        const application = await this.applicationRepository.findOne({
+          where: { id: input.applicationId },
+          relations: ['candidate', 'candidate.candidateProfile'],
+        });
+
+        if (application?.candidate) {
+          const candidateInfo = input.candidateInfo;
+          
+          // Update User entity if email is placeholder
+          if (application.candidate.email?.includes('@placeholder.temp') && candidateInfo.email) {
+            await this.userRepository.update(application.candidate.id, {
+              email: candidateInfo.email,
+              name: candidateInfo.name || `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+            });
+            console.log('✅ Updated user email from placeholder to:', candidateInfo.email);
+          }
+
+          // Create or Update CandidateProfile entity
+          if (!application.candidate.candidateProfile) {
+            // Create new candidate profile if it doesn't exist
+            console.log('🆕 Creating new candidate profile...');
+            const newProfile = this.applicationRepository.manager.getRepository(CandidateProfile).create({
+              userId: application.candidate.id,
+              firstName: candidateInfo.firstName,
+              lastName: candidateInfo.lastName,
+              phone: candidateInfo.phone,
+              location: candidateInfo.location,
+              bio: candidateInfo.bio,
+              skills: candidateInfo.skills || [],
+              linkedinUrl: candidateInfo.linkedinUrl,
+              githubUrl: candidateInfo.githubUrl,
+              portfolioUrl: candidateInfo.portfolioUrl,
+            });
+            const savedProfile = await this.applicationRepository.manager.getRepository(CandidateProfile).save(newProfile);
+            console.log('✅ Created new candidate profile with extracted data');
+
+            // Process work experience and education using transaction manager
+            await this.applicationRepository.manager.transaction(async (manager) => {
+              if (candidateInfo.experience) {
+                await this.processWorkExperience(savedProfile.id, candidateInfo.experience, manager);
+              }
+              if (candidateInfo.education) {
+                await this.processEducation(savedProfile.id, candidateInfo.education, manager);
+              }
+            });
+          } else {
+            // Update existing profile
+            const profileUpdate: any = {};
+            
+            if (candidateInfo.firstName) profileUpdate.firstName = candidateInfo.firstName;
+            if (candidateInfo.lastName) profileUpdate.lastName = candidateInfo.lastName;
+            if (candidateInfo.phone) profileUpdate.phone = candidateInfo.phone;
+            if (candidateInfo.location) profileUpdate.location = candidateInfo.location;
+            if (candidateInfo.bio) profileUpdate.bio = candidateInfo.bio;
+            if (candidateInfo.skills) profileUpdate.skills = candidateInfo.skills;
+            if (candidateInfo.linkedinUrl) profileUpdate.linkedinUrl = candidateInfo.linkedinUrl;
+            if (candidateInfo.githubUrl) profileUpdate.githubUrl = candidateInfo.githubUrl;
+            if (candidateInfo.portfolioUrl) profileUpdate.portfolioUrl = candidateInfo.portfolioUrl;
+            
+            await this.applicationRepository.manager.getRepository(CandidateProfile).update(
+              application.candidate.candidateProfile.id,
+              profileUpdate
+            );
+            
+            console.log('✅ Updated candidate profile with extracted data');
+
+            // Process work experience and education using transaction manager
+            const profileId = application.candidate.candidateProfile.id;
+            await this.applicationRepository.manager.transaction(async (manager) => {
+              if (candidateInfo.experience) {
+                await this.processWorkExperience(profileId, candidateInfo.experience, manager);
+              }
+              if (candidateInfo.education) {
+                await this.processEducation(profileId, candidateInfo.education, manager);
+              }
+            });
+          }
+          
+          // Send SMS with real credentials if phone was extracted
+          if (candidateInfo.phone && candidateInfo.email && !application.candidate.email?.includes('@placeholder.temp')) {
+            // Get the password from candidateCredentials if stored, or generate new instructions
+            console.log('📱 Candidate has real contact info, consider sending login credentials');
+          }
+        }
+      }
+
+      console.log('✅ Application analysis updated successfully');
+
+      // Return updated application
+      const updatedApplication = await this.applicationRepository.findOne({
+        where: { id: input.applicationId },
+        relations: ['job', 'job.company', 'candidate', 'candidate.candidateProfile'],
+      });
+
+      if (!updatedApplication) {
+        throw new Error('Application not found after update');
+      }
+
+      return updatedApplication;
+    } catch (error) {
+      console.error('❌ Failed to update application analysis:', error);
+      throw error;
     }
   }
 
@@ -597,106 +910,65 @@ Please change your password after first login.`;
   }
 
   private async analyzeCVInBackground(applicationId: string, resumeUrl: string, analysisPrompt: string, job: any): Promise<void> {
+    // This method is deprecated and replaced by triggerCVAnalysis
+    // Kept for backward compatibility during migration
+    console.warn('⚠️ analyzeCVInBackground is deprecated. Use triggerCVAnalysis instead.');
+  }
+
+  /**
+   * Trigger CV analysis by calling FastAPI service
+   * The FastAPI service will handle the analysis and post results back via GraphQL
+   */
+  private async triggerCVAnalysis(
+    applicationId: string, 
+    candidateId: string,
+    jobId: string,
+    cvUrl: string
+  ): Promise<void> {
     try {
-      console.log('🔍 Starting background CV analysis for application:', applicationId);
+      const fastApiUrl = process.env.CV_ANALYSIS_API_URL || 'http://localhost:8000';
+      
+      console.log('🚀 Triggering CV analysis for application:', applicationId);
+      console.log('👤 Candidate ID:', candidateId);
+      console.log('� Job ID:', jobId);
+      console.log('� CV URL:', cvUrl);
 
-      // Run analysis in background (non-blocking)
-      setTimeout(async () => {
-        try {
-          console.log('🤖 Performing AI CV analysis...');
-          const analysisResult = await this.openaiCvAnalysisService.analyzeCVWithOpenAI(resumeUrl, analysisPrompt, job);
+      const payload = {
+        application_id: applicationId,
+        candidateid: candidateId,
+        jobid: jobId,
+        cv_link: cvUrl,
+        callbackUrl: process.env.GRAPHQL_API_URL || 'http://localhost:4005/api/graphql',
+        systemApiKey: process.env.SYSTEM_API_KEY || '',
+      };
 
-          // Generate AI recommendations based on the analysis
-          const cvRecommendations = await this.generateCVRecommendations(analysisResult, job);
-          const interviewRecommendations = await this.generateInterviewRecommendations(analysisResult, job);
+      // Fire and forget - FastAPI will analyze and post results back via callback
+      const axios = await import('axios');
+      axios.default.post(`${fastApiUrl}/cv-analysis`, payload, {
+        timeout: 30000, // 30 seconds - CV analysis with OpenAI can take time
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(err => {
+        console.error('❌ Failed to trigger CV analysis:', err.message);
+      });
 
-          // Update application with analysis results
-          await this.applicationRepository.update(applicationId, {
-            cvAnalysisScore: analysisResult.score,
-            cvAnalysisResults: analysisResult as any, // Cast to any for JSON field
-            analyzedAt: new Date(),
-            aiCvRecommendations: cvRecommendations,
-            aiInterviewRecommendations: interviewRecommendations,
-            recommendationsGeneratedAt: new Date(),
-          });
-
-          console.log('✅ CV analysis completed for application:', applicationId, 'Score:', analysisResult.score);
-
-        } catch (error) {
-          console.error('❌ Background CV analysis failed for application:', applicationId, error);
-        }
-      }, 1000); // Small delay to ensure application is saved
+      console.log('✅ CV analysis triggered successfully');
 
     } catch (error) {
-      console.error('❌ Failed to start background CV analysis:', error);
+      console.error('❌ Error triggering CV analysis:', error.message);
+      // Don't throw - this is a background process, we don't want to fail the application creation
     }
   }
 
   private async generateCVRecommendations(analysisResult: any, job: any): Promise<string> {
-    try {
-      const prompt = `Based on the CV analysis results for a ${job.title} position, provide specific recommendations for CV improvement.
-
-CV Analysis Results:
-- Score: ${analysisResult.score}/100
-- Overall Fit: ${analysisResult.overallFit}
-- Strengths: ${analysisResult.strengths?.join(', ') || 'N/A'}
-- Weaknesses: ${analysisResult.weaknesses?.join(', ') || 'N/A'}
-- Missing Skills: ${analysisResult.skillsMatch?.missing?.join(', ') || 'N/A'}
-
-Job Requirements:
-- Title: ${job.title}
-- Skills: ${job.skills?.join(', ') || 'Not specified'}
-- Experience: ${job.experience || 'Not specified'}
-- Education: ${job.education || 'Not specified'}
-
-Please provide specific, actionable recommendations to improve the CV for this position. Focus on:
-1. Skills to highlight or add
-2. Experience sections to enhance
-3. Keywords to include
-4. Format improvements
-5. Specific achievements to emphasize
-
-Format as clear, numbered recommendations.`;
-
-      return await this.openaiCvAnalysisService.generateRecommendations(prompt);
-    } catch (error) {
-      console.error('Failed to generate CV recommendations:', error);
-      return 'Unable to generate CV recommendations at this time. Please consult with your career advisor for personalized guidance.';
-    }
+    // This method is deprecated and will be handled by FastAPI service
+    console.warn('⚠️ generateCVRecommendations is deprecated. Handled by CV analysis service.');
+    return '';
   }
 
   private async generateInterviewRecommendations(analysisResult: any, job: any): Promise<string> {
-    try {
-      const prompt = `Based on the CV analysis results, generate specific interview preparation recommendations for a ${job.title} position.
-
-CV Analysis Results:
-- Score: ${analysisResult.score}/100
-- Overall Fit: ${analysisResult.overallFit}
-- Strengths: ${analysisResult.strengths?.join(', ') || 'N/A'}
-- Weaknesses: ${analysisResult.weaknesses?.join(', ') || 'N/A'}
-- Skills Match: ${analysisResult.skillsMatch?.matched?.join(', ') || 'N/A'}
-- Missing Skills: ${analysisResult.skillsMatch?.missing?.join(', ') || 'N/A'}
-
-Job Requirements:
-- Title: ${job.title}
-- Skills: ${job.skills?.join(', ') || 'Not specified'}
-- Experience: ${job.experience || 'Not specified'}
-- Education: ${job.education || 'Not specified'}
-
-Please provide specific interview preparation recommendations including:
-1. Key questions to prepare for based on the job requirements
-2. How to address any skill gaps identified in the analysis
-3. Stories/examples to prepare from their experience
-4. Technical concepts they should review
-5. Questions to ask the interviewer about the role/company
-
-Format as clear, actionable recommendations for interview success.`;
-
-      return await this.openaiCvAnalysisService.generateRecommendations(prompt);
-    } catch (error) {
-      console.error('Failed to generate interview recommendations:', error);
-      return 'Unable to generate interview recommendations at this time. Please prepare by reviewing the job description and practicing common interview questions for this role.';
-    }
+    // This method is deprecated and will be handled by FastAPI service
+    console.warn('⚠️ generateInterviewRecommendations is deprecated. Handled by CV analysis service.');
+    return '';
   }
 
   private async createLiveKitRoomAndNotifyCandidate(application: Application): Promise<void> {

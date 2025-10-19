@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Notification } from './notification.entity';
+import { NotificationSettings } from './notification-settings.entity';
 import { NotificationService } from './notification.service';
 import { NotificationResolver } from './notification.resolver';
 import { AuditService } from '../audit.service';
@@ -11,7 +12,7 @@ import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Notification]),
+    TypeOrmModule.forFeature([Notification, NotificationSettings]),
     AuthModule,
     UserModule,
     JwtModule.registerAsync({
