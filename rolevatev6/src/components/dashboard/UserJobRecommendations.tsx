@@ -112,10 +112,10 @@ export default function UserJobRecommendations({
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    {job.company?.logo || job.companyLogo ? (
+                    {(job as any).company?.logo || (job as any).companyLogo ? (
                       <img
-                        src={job.company?.logo || job.companyLogo}
-                        alt={job.company?.name || "Company"}
+                        src={(job as any).company?.logo || (job as any).companyLogo}
+                        alt={(job as any).company?.name || "Unknown" || "Company"}
                         className="w-10 h-10 rounded-lg object-cover border border-gray-200"
                       />
                     ) : (
@@ -128,7 +128,7 @@ export default function UserJobRecommendations({
                         {job.title}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {job.company?.name || "Company"}
+                        {(job as any).company?.name || "Unknown" || "Company"}
                       </p>
                     </div>
                   </div>
@@ -153,7 +153,7 @@ export default function UserJobRecommendations({
                 </div>
                 <div className="flex items-center gap-1">
                   <ClockIcon className="w-4 h-4" />
-                  <span className="capitalize">{job.type.toLowerCase().replace("_", " ")}</span>
+                  <span className="capitalize">{job.type?.toLowerCase().replace("_", " ") || "Full-time"}</span>
                 </div>
                 {job.salary && (
                   <div className="flex items-center gap-1">
@@ -182,7 +182,7 @@ export default function UserJobRecommendations({
               )}
 
               <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
-                <span>Posted {new Date(job.postedAt).toLocaleDateString()}</span>
+                <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
                 <span className="text-primary-600 font-medium group-hover:underline">
                   View Details →
                 </span>

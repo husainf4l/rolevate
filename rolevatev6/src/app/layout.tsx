@@ -19,6 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Rolevate - Elevate Your Career | AI-Powered Job Matching Platform",
   description: "Transform your career with Rolevate's AI-powered job matching platform. Connect with top employers, showcase your skills, and find your perfect role.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
 };
 
 export default function RootLayout({

@@ -22,11 +22,11 @@ interface RecentApplicationsWidgetProps {
 
 const getStatusInfo = (status: Application["status"]) => {
   switch (status) {
-    case "SUBMITTED":
+    case "PENDING":
       return { label: "Submitted", color: "blue", icon: ClockIcon };
-    case "REVIEWING":
+    case "REVIEWED":
       return { label: "Under Review", color: "amber", icon: ClockIcon };
-    case "INTERVIEW_SCHEDULED":
+    case "SHORTLISTED":
       return { label: "Interview Scheduled", color: "purple", icon: CalendarIcon };
     case "INTERVIEWED":
       return { label: "Interviewed", color: "indigo", icon: CheckCircleIcon };
@@ -129,7 +129,7 @@ export default function RecentApplicationsWidget({
                     </h3>
                     <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                       <BuildingOfficeIcon className="w-4 h-4" />
-                      <span>{application.job.company.name}</span>
+                      <span>{application.job.company?.name || "Unknown"}</span>
                     </div>
                   </div>
                   <span

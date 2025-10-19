@@ -45,11 +45,11 @@ interface CandidateDisplay extends Application {
 
 const getStatusColor = (status: Application["status"]) => {
   switch (status) {
-    case "SUBMITTED":
+    case "PENDING":
       return "bg-gray-100 text-gray-800";
-    case "REVIEWING":
+    case "REVIEWED":
       return "bg-blue-100 text-blue-800";
-    case "INTERVIEW_SCHEDULED":
+    case "SHORTLISTED":
       return "bg-purple-100 text-purple-800";
     case "INTERVIEWED":
       return "bg-indigo-100 text-indigo-800";
@@ -86,7 +86,7 @@ const transformApplicationToCandidate = (
   return {
     ...application,
     position: application.job.title,
-    skills: application.cvAnalysisResults?.skillsMatch?.matched || [],
+    skills: application.cvAnalysisResults?.skills_matched || [],
     location: "Not specified", // No location in current API response
     source: "direct" as const, // Default source, could be enhanced
     priority: "medium" as const, // Default priority, could be calculated
@@ -97,9 +97,7 @@ const transformApplicationToCandidate = (
     overallRating: application.cvAnalysisScore || 0,
     appliedDate: new Date(application.appliedAt).toLocaleDateString(),
     lastActivity: new Date(application.updatedAt).toLocaleDateString(),
-    experience: application.cvAnalysisResults?.experienceMatch?.years
-      ? `${application.cvAnalysisResults.experienceMatch.years} years`
-      : "Not specified",
+    experience: application.cvAnalysisResults?.experience_summary || "Not specified",
     name: application.candidate.name,
     email: application.candidate.email,
   };
@@ -219,9 +217,9 @@ export default function JobApplicationsPage() {
 
   // Map API statuses to display statuses
   const statusCounts = {
-    ai_analysis: candidates.filter((c) => c.status === "SUBMITTED").length,
-    ai_interview_1: candidates.filter((c) => c.status === "REVIEWING").length,
-    ai_interview_2: candidates.filter((c) => c.status === "INTERVIEW_SCHEDULED")
+    ai_analysis: candidates.filter((c) => c.status === "PENDING").length,
+    ai_interview_1: candidates.filter((c) => c.status === "REVIEWED").length,
+    ai_interview_2: candidates.filter((c) => c.status === "SHORTLISTED")
       .length,
     hr_interview: candidates.filter((c) => c.status === "INTERVIEWED").length,
     offer: candidates.filter((c) => c.status === "OFFERED").length,
@@ -470,9 +468,9 @@ export default function JobApplicationsPage() {
                     className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                   >
                     <option value="all">All Status</option>
-                    <option value="SUBMITTED">Submitted</option>
-                    <option value="REVIEWING">Reviewing</option>
-                    <option value="INTERVIEW_SCHEDULED">
+                    <option value="PENDING">Submitted</option>
+                    <option value="REVIEWED">Reviewing</option>
+                    <option value="SHORTLISTED">
                       Interview Scheduled
                     </option>
                     <option value="INTERVIEWED">Interviewed</option>
@@ -519,14 +517,14 @@ export default function JobApplicationsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleBulkStatusUpdate("REVIEWING")}
+                        onClick={() => handleBulkStatusUpdate("REVIEWED")}
                         className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                       >
                         Move to Review
                       </button>
                       <button
                         onClick={() =>
-                          handleBulkStatusUpdate("INTERVIEW_SCHEDULED")
+                          handleBulkStatusUpdate("SHORTLISTED")
                         }
                         className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
                       >
@@ -683,9 +681,9 @@ export default function JobApplicationsPage() {
                             candidate.status
                           )}`}
                         >
-                          {candidate.status === "SUBMITTED"
+                          {candidate.status === "PENDING"
                             ? "Submitted"
-                            : candidate.status === "INTERVIEW_SCHEDULED"
+                            : candidate.status === "SHORTLISTED"
                             ? "Interview Scheduled"
                             : candidate.status === "INTERVIEWED"
                             ? "Interviewed"
@@ -763,7 +761,7 @@ export default function JobApplicationsPage() {
                             onClick={() =>
                               handleSingleStatusUpdate(
                                 candidate.id,
-                                "INTERVIEW_SCHEDULED"
+                                "SHORTLISTED"
                               )
                             }
                             className="text-green-600 hover:text-green-700 font-medium text-sm"

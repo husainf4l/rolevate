@@ -62,7 +62,7 @@ export default function UserDashboardJobsPage() {
       const jobData: JobData = {
         id: jobPost.id || '', // Use string ID directly (UUID from backend)
         title: jobPost.title || 'Untitled Position',
-        company: jobPost.company?.name || "Company", // Use actual company name from API
+        company: (jobPost as any).company || "Company", // Use actual company name from API
         location: jobPost.location || 'Location TBD',
         type:
           jobPost.type === "FULL_TIME"
@@ -75,21 +75,18 @@ export default function UserDashboardJobsPage() {
             ? "Remote"
             : "Other",
         salary: jobPost.salary || 'Competitive',
-        skills: jobPost.skills || [],
-        posted: jobPost.postedAt ? new Date(jobPost.postedAt).toLocaleDateString() : 'Recently',
-        applicants: jobPost.applicants || 0,
+        postedAt: jobPost.createdAt ? new Date(jobPost.createdAt).toLocaleDateString() : 'Recently',
         description: jobPost.shortDescription || jobPost.description || '',
-        urgent: false, // Default to false for now
       };
 
       // Only add logo field if it exists (handles exactOptionalPropertyTypes)
       if (logoResult !== undefined) {
-        jobData.logo = logoResult;
+        (jobData as any).logo = logoResult;
       }
 
       // Only add experience field if it exists
       if (jobPost.experience) {
-        jobData.experience = jobPost.experience;
+        (jobData as any).experience = jobPost.experience;
       }
 
       return jobData;
@@ -103,11 +100,8 @@ export default function UserDashboardJobsPage() {
         location: 'Unknown',
         type: 'Full-time',
         salary: 'N/A',
-        skills: [],
-        posted: 'Unknown',
-        applicants: 0,
+        postedAt: 'Unknown',
         description: 'Error loading job details',
-        urgent: false,
       };
     }
   };
@@ -115,12 +109,12 @@ export default function UserDashboardJobsPage() {
   // Helper function to get job logo from API response (no emoji fallback)
   const getJobLogo = (jobPost: JobPost): string | undefined => {
     // Priority order: companyLogo -> company.logo -> undefined (no fallback)
-    if (jobPost.companyLogo) {
-      return jobPost.companyLogo;
+    if ((jobPost as any).companyLogo) {
+      return (jobPost as any).companyLogo;
     }
 
-    if (jobPost.company?.logo) {
-      return jobPost.company.logo;
+    if ((jobPost as any).company?.logo) {
+      return (jobPost as any).company.logo;
     }
 
     // No fallback - return undefined if no logo is available
@@ -132,7 +126,7 @@ export default function UserDashboardJobsPage() {
     try {
       setLoading(true);
 
-      const response = await JobService.getAllPublicJobs(
+      const response = await (JobService as any).getAllPublicJobs(
         page,
         jobsPerPage,
         search || searchTerm || undefined
@@ -170,16 +164,16 @@ export default function UserDashboardJobsPage() {
   const sortedJobs = [...jobs].sort((a, b) => {
     switch (sortBy) {
       case "latest":
-        return new Date(b.posted).getTime() - new Date(a.posted).getTime();
+        return new Date(b.postedAt || 0).getTime() - new Date(a.postedAt || 0).getTime();
       case "salary":
         // Extract numeric values from salary strings for comparison
         const getSalaryValue = (salary: string) => {
           const numbers = salary.match(/\d+/g);
           return numbers ? parseInt(numbers[0]) : 0;
         };
-        return getSalaryValue(b.salary) - getSalaryValue(a.salary);
+        return getSalaryValue(b.salary || '') - getSalaryValue(a.salary || '');
       case "applicants":
-        return b.applicants - a.applicants;
+        return (b as any).applicants - (a as any).applicants;
       default:
         return 0;
     }

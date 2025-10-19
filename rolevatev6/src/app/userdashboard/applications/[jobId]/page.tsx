@@ -50,11 +50,11 @@ export default function ApplicationDetailsPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "SUBMITTED":
+      case "PENDING":
         return <ClockIcon className="w-5 h-5 text-yellow-500" />;
-      case "REVIEWING":
+      case "REVIEWED":
         return <EyeIcon className="w-5 h-5 text-blue-500" />;
-      case "INTERVIEW_SCHEDULED":
+      case "SHORTLISTED":
       case "INTERVIEWED":
         return <EyeIcon className="w-5 h-5 text-purple-500" />;
       case "OFFERED":
@@ -70,11 +70,11 @@ export default function ApplicationDetailsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "SUBMITTED":
+      case "PENDING":
         return "bg-yellow-100 text-yellow-800";
-      case "REVIEWING":
+      case "REVIEWED":
         return "bg-blue-100 text-blue-800";
-      case "INTERVIEW_SCHEDULED":
+      case "SHORTLISTED":
       case "INTERVIEWED":
         return "bg-purple-100 text-purple-800";
       case "OFFERED":
@@ -233,11 +233,11 @@ export default function ApplicationDetailsPage() {
                   {/* Status description */}
                   <div className="bg-gray-50 rounded-sm p-3">
                     <p className="text-sm text-gray-600 leading-relaxed">
-                      {application.status === "SUBMITTED" &&
+                      {application.status === "PENDING" &&
                         "Your application has been received and is awaiting review."}
-                      {application.status === "REVIEWING" &&
+                      {application.status === "REVIEWED" &&
                         "Our team is currently reviewing your application."}
-                      {application.status === "INTERVIEW_SCHEDULED" &&
+                      {application.status === "SHORTLISTED" &&
                         "Congratulations! An interview has been scheduled."}
                       {application.status === "INTERVIEWED" &&
                         "Your interview has been completed. We're making our decision."}
@@ -308,7 +308,7 @@ export default function ApplicationDetailsPage() {
                     Your Application Analysis
                   </h2>
                 </div>
-                {application.cvAnalysisResults?.summary?.includes("failed") ? (
+                {application.cvAnalysisResults?.detailed_feedback?.includes("failed") ? (
                   <div className="flex items-center space-x-3 bg-amber-50 px-4 py-2 rounded-sm border border-amber-200">
                     <span className="text-sm font-semibold text-amber-700">
                       Manual Review
@@ -324,7 +324,7 @@ export default function ApplicationDetailsPage() {
                 )}
               </div>
 
-              {application.cvAnalysisResults?.summary?.includes("failed") ? (
+              {application.cvAnalysisResults?.detailed_feedback?.includes("failed") ? (
                 <div className="bg-blue-50 border border-blue-200 rounded-sm p-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-8 h-8 bg-blue-100 rounded-sm flex items-center justify-center flex-shrink-0">
@@ -354,7 +354,7 @@ export default function ApplicationDetailsPage() {
                         Analysis completed successfully
                       </h3>
                       <p className="text-primary-700 text-sm leading-relaxed">
-                        {application.cvAnalysisResults?.summary ||
+                        {application.cvAnalysisResults?.detailed_feedback ||
                           "Your CV has been analyzed against the job requirements."}
                       </p>
                     </div>
@@ -365,7 +365,7 @@ export default function ApplicationDetailsPage() {
 
             {/* Only show detailed analysis if CV analysis was successful */}
             {application.cvAnalysisResults &&
-              !application.cvAnalysisResults.summary?.includes("failed") && (
+              !application.cvAnalysisResults.detailed_feedback?.includes("failed") && (
                 <>
                   {/* Match Score Section */}
                   <div className="bg-white rounded-sm border border-gray-200 p-6 sm:p-8">
@@ -430,13 +430,13 @@ export default function ApplicationDetailsPage() {
                         <div className="flex items-center space-x-4">
                           <div
                             className={`w-5 h-5 rounded-full ${
-                              application.cvAnalysisResults.overallFit ===
+                              application.cvAnalysisResults.recommendation ===
                               "Excellent"
                                 ? "bg-primary-500"
-                                : application.cvAnalysisResults.overallFit ===
+                                : application.cvAnalysisResults.recommendation ===
                                   "Good"
                                 ? "bg-yellow-500"
-                                : application.cvAnalysisResults.overallFit ===
+                                : application.cvAnalysisResults.recommendation ===
                                   "Fair"
                                 ? "bg-orange-500"
                                 : "bg-red-500"
@@ -444,7 +444,7 @@ export default function ApplicationDetailsPage() {
                           ></div>
                           <div className="flex-1">
                             <span className="text-2xl font-bold text-gray-900 block">
-                              {application.cvAnalysisResults.overallFit}
+                              {application.cvAnalysisResults.recommendation}
                             </span>
                             <span className="text-sm text-gray-500">
                               Fit Rating
@@ -456,9 +456,9 @@ export default function ApplicationDetailsPage() {
                   </div>
 
                   {/* Skills Analysis */}
-                  {(application.cvAnalysisResults.skillsMatch?.matched?.length >
+                  {(application.cvAnalysisResults.skills_matched?.length >
                     0 ||
-                    application.cvAnalysisResults.skillsMatch?.missing?.length >
+                    application.cvAnalysisResults.skills_missing?.length >
                       0) && (
                     <div className="bg-white rounded-sm border border-gray-200 p-6 sm:p-8">
                       <div className="flex items-center space-x-4 mb-8">
@@ -472,20 +472,20 @@ export default function ApplicationDetailsPage() {
                         </h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {application.cvAnalysisResults.skillsMatch?.matched
+                        {application.cvAnalysisResults.skills_matched
                           ?.length > 0 && (
                           <div className="bg-white p-6 rounded-sm border border-gray-200">
                             <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center">
                               <CheckCircleIcon className="w-5 h-5 mr-3 text-primary-600" />
                               Your Matching Skills (
                               {
-                                application.cvAnalysisResults.skillsMatch
-                                  .matched.length
+                                application.cvAnalysisResults.skills_matched
+                                  .length
                               }
                               )
                             </h4>
                             <div className="flex flex-wrap gap-2">
-                              {application.cvAnalysisResults.skillsMatch.matched.map(
+                              {application.cvAnalysisResults.skills_matched.map(
                                 (skill: string, index: number) => (
                                   <span
                                     key={index}
@@ -502,7 +502,7 @@ export default function ApplicationDetailsPage() {
                           </div>
                         )}
 
-                        {application.cvAnalysisResults.skillsMatch?.missing
+                        {application.cvAnalysisResults.skills_missing
                           ?.length > 0 && (
                           <div className="bg-white p-6 rounded-sm border border-gray-200">
                             <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center">
@@ -513,13 +513,13 @@ export default function ApplicationDetailsPage() {
                               </span>
                               Skills to Develop (
                               {
-                                application.cvAnalysisResults.skillsMatch
-                                  .missing.length
+                                application.cvAnalysisResults.skills_missing
+                                  .length
                               }
                               )
                             </h4>
                             <div className="flex flex-wrap gap-2 mb-4">
-                              {application.cvAnalysisResults.skillsMatch.missing.map(
+                              {application.cvAnalysisResults.skills_missing.map(
                                 (skill: string, index: number) => (
                                   <span
                                     key={index}

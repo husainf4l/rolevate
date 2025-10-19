@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import JobCard from "@/components/common/JobCard";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ const locations = [
   "All",
   "Saudi Arabia",
   "Qatar",
-  "Jordan", 
+  "Jordan",
   "UAE",
   "Kuwait",
   "Bahrain",
@@ -29,7 +29,7 @@ const locations = [
 const experienceLevels = [
   "All",
   "Entry Level",
-  "Mid Level", 
+  "Mid Level",
   "Senior Level",
   "Executive",
 ];
@@ -48,7 +48,7 @@ const departments = [
   "Other",
 ];
 
-export default function JobsPage() {
+function JobsPageContent() {
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
@@ -582,5 +582,22 @@ export default function JobsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">Loading jobs...</p>
+          </div>
+        </div>
+      }
+    >
+      <JobsPageContent />
+    </Suspense>
   );
 }

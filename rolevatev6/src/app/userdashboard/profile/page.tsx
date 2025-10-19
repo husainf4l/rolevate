@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ProfileService } from "@/services/profile";
+import { getProfile } from "@/services/profile";
 import {
   CVData,
   uploadCV,
@@ -54,8 +54,8 @@ export default function ProfilePage() {
         setLoadingUser(true);
         setUserError(null);
         console.log('🔄 Fetching user profile...');
-        // ProfileService.getUserProfile() returns CandidateProfile directly
-        const profileData = await ProfileService.getUserProfile();
+        // getProfile() returns CandidateProfile directly
+        const profileData = await getProfile();
         console.log('✅ Profile data received:', profileData);
         setUser(profileData);
       } catch (err) {
@@ -94,11 +94,11 @@ export default function ProfilePage() {
       setUploading(true);
       setCvError(null);
       const response = await uploadCV(file);
-      const transformedCV = transformCVData(response);
+      const transformedCV = transformCVData(response as any);
       setCvs((prev) => [transformedCV, ...prev]);
 
       // Show activation modal for the newly uploaded CV
-      setPendingActivationCV({ id: response.id, name: file.name });
+      setPendingActivationCV({ id: (response as any).id, name: file.name });
       setShowActivationModal(true);
     } catch (err) {
       setCvError(err instanceof Error ? err.message : "Failed to upload CV");
@@ -198,7 +198,7 @@ export default function ProfilePage() {
   };
 
   const handleDownload = (cv: CVData) => {
-    window.open(cv.downloadUrl, "_blank");
+    window.open((cv as any).downloadUrl, "_blank");
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -788,23 +788,23 @@ export default function ProfilePage() {
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
                           <span className="text-primary-600 font-bold text-sm">
-                            {cv.originalFileName.charAt(0).toUpperCase()}
+                            {(cv as any).originalFileName.charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-3 mb-1">
                             <h3 className="text-sm font-semibold text-gray-900 truncate">
-                              {cv.originalFileName}
+                              {(cv as any).originalFileName}
                             </h3>
-                            {cv.isActive && (
+                            {(cv as any).isActive && (
                               <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-100 text-primary-800">
                                 <span>Active CV</span>
                               </span>
                             )}
                           </div>
                           <div className="flex items-center space-x-4 text-xs text-gray-600">
-                            <span>Updated {new Date(cv.lastUpdated).toLocaleDateString()}</span>
-                            <span>{cv.fileSize}</span>
+                            <span>Updated {new Date((cv as any).lastUpdated).toLocaleDateString()}</span>
+                            <span>{(cv as any).fileSize}</span>
                           </div>
                         </div>
                       </div>
@@ -831,7 +831,7 @@ export default function ProfilePage() {
                           >
                             Delete
                           </button>
-                          {!cv.isActive && (
+                          {!(cv as any).isActive && (
                             <button
                               onClick={() => handleActivateCV(cv.id)}
                               className="inline-flex items-center space-x-1 px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm text-xs font-medium"

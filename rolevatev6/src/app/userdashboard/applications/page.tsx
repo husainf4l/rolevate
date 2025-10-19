@@ -32,11 +32,13 @@ const convertToDisplayFormat = (
   // Map API status to display status
   const statusMap: Record<Application["status"], ApplicationDisplay["status"]> =
     {
-      SUBMITTED: "submitted",
-      REVIEWING: "reviewing",
-      INTERVIEW_SCHEDULED: "interview",
+      PENDING: "submitted",
+      ANALYZED: "reviewing",
+      REVIEWED: "reviewing",
+      SHORTLISTED: "interview",
       INTERVIEWED: "interview",
       OFFERED: "offered",
+      HIRED: "accepted",
       REJECTED: "rejected",
       WITHDRAWN: "withdrawn",
     };
@@ -49,7 +51,7 @@ const convertToDisplayFormat = (
     appliedDate: application.appliedAt,
     status: statusMap[application.status] || "submitted",
     cvAnalysisScore: application.cvAnalysisScore || 0,
-    overallFit: application.cvAnalysisResults?.overallFit || "Not analyzed",
+    overallFit: application.cvAnalysisResults?.recommendation || "Not analyzed",
     expectedSalary: application.expectedSalary || "Not specified",
     coverLetter: application.coverLetter || "No cover letter",
   };

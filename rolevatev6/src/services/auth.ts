@@ -60,6 +60,12 @@ class AuthService {
     }
   `;
 
+  private CHANGE_PASSWORD_MUTATION = gql`
+    mutation ChangePassword($input: ChangePasswordInput!) {
+      changePassword(input: $input)
+    }
+  `;
+
   /**
    * Login user with email and password
    */
@@ -223,6 +229,28 @@ class AuthService {
   }
 
   /**
+   * Change user password
+   */
+  async changePassword(currentPassword: string, newPassword: string): Promise<boolean> {
+    try {
+      const { data } = await apolloClient.mutate<{ changePassword: boolean }>({
+        mutation: this.CHANGE_PASSWORD_MUTATION,
+        variables: {
+          input: {
+            currentPassword,
+            newPassword
+          }
+        }
+      });
+
+      return data?.changePassword || false;
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      throw new Error(error?.message || 'Failed to change password');
+    }
+  }
+
+  /**
    * Initialize auth service (call on app startup)
    */
   init(): void {
@@ -236,3 +264,5 @@ export const authService = new AuthService();
 export const logout = () => authService.logout();
 export const getCurrentUser = () => authService.getCurrentUser();
 export const getUserFromStorage = () => authService.getUserFromStorage();
+export const changePassword = (currentPassword: string, newPassword: string) =>
+  authService.changePassword(currentPassword, newPassword);

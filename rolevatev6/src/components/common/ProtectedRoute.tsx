@@ -18,24 +18,30 @@ export default function ProtectedRoute({
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
-  console.log('[ProtectedRoute] State:', {
-    isLoading,
-    hasUser: !!user,
-    userType: user?.userType,
-    allowedUserTypes,
-    pathname: typeof window !== 'undefined' ? window.location.pathname : 'unknown'
-  });
+  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    console.log('[ProtectedRoute] State:', {
+      isLoading,
+      hasUser: !!user,
+      userType: user?.userType,
+      allowedUserTypes,
+      pathname: window.location.pathname
+    });
+  }
 
   useEffect(() => {
     if (!isLoading) {
-      console.log('[ProtectedRoute] Check auth:', {
-        hasUser: !!user,
-        userType: user?.userType,
-        allowedUserTypes
-      });
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[ProtectedRoute] Check auth:', {
+          hasUser: !!user,
+          userType: user?.userType,
+          allowedUserTypes
+        });
+      }
 
       if (!user) {
-        console.log('[ProtectedRoute] No user, redirecting to:', redirectTo);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[ProtectedRoute] No user, redirecting to:', redirectTo);
+        }
         router.push(redirectTo);
         return;
       }
@@ -43,36 +49,50 @@ export default function ProtectedRoute({
       // Check user type if restrictions are specified
       if (allowedUserTypes && allowedUserTypes.length > 0) {
         const hasCorrectType = allowedUserTypes.includes(user.userType);
-        
-        console.log('[ProtectedRoute] User type check:', {
-          userType: user.userType,
-          allowedUserTypes,
-          hasCorrectType
-        });
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[ProtectedRoute] User type check:', {
+            userType: user.userType,
+            allowedUserTypes,
+            hasCorrectType
+          });
+        }
 
         if (!hasCorrectType) {
-          console.log('[ProtectedRoute] Wrong user type, redirecting based on type');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[ProtectedRoute] Wrong user type, redirecting based on type');
+          }
           // Redirect to appropriate dashboard based on user type
           if (user.userType === 'BUSINESS') {
             if (!user.company) {
-              console.log('[ProtectedRoute] Business user without company, going to setup');
+              if (process.env.NODE_ENV === 'development') {
+                console.log('[ProtectedRoute] Business user without company, going to setup');
+              }
               router.push('/dashboard/setup-company');
             } else {
-              console.log('[ProtectedRoute] Business user with company, going to dashboard');
+              if (process.env.NODE_ENV === 'development') {
+                console.log('[ProtectedRoute] Business user with company, going to dashboard');
+              }
               router.push('/dashboard');
             }
           } else if (user.userType === 'CANDIDATE') {
-            console.log('[ProtectedRoute] Candidate user, going to user dashboard');
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[ProtectedRoute] Candidate user, going to user dashboard');
+            }
             router.push('/userdashboard');
           } else {
-            console.log('[ProtectedRoute] Unknown user type, going home');
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[ProtectedRoute] Unknown user type, going home');
+            }
             router.push('/');
           }
           return;
         }
       }
 
-      console.log('[ProtectedRoute] Access granted');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[ProtectedRoute] Access granted');
+      }
     }
   }, [user, isLoading, router, redirectTo, allowedUserTypes]);
 

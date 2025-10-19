@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { CalendarDaysIcon, ClockIcon } from "@heroicons/react/24/outline";
-import { DashboardEvent } from "@/services/dashboard";
+// import { DashboardEvent } from "@/services/dashboard";
+interface DashboardEvent {
+  id: string;
+  jobTitle: string;
+  company: string;
+  date: string;
+  time: string;
+  type: string;
+}
 
 export default function Calendar() {
   const [events, setEvents] = useState<DashboardEvent[]>([]);
@@ -84,7 +92,7 @@ export default function Calendar() {
             >
               <div className="flex-1">
                 <h3 className="font-medium text-gray-900 mb-1">
-                  {event.title}
+                  {event.jobTitle}
                 </h3>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <ClockIcon className="w-4 h-4" />

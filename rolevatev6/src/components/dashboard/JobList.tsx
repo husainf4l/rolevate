@@ -371,11 +371,11 @@ const JobListItem: React.FC<JobListItemProps> = ({
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              <span>Posted {formatPostedDate(job.postedAt)}</span>
+              <span>Posted {formatPostedDate(job.createdAt)}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              <span>Deadline: {formatDeadline(job.deadline)}</span>
+              <span>Deadline: {formatDeadline(job.deadline || "")}</span>
             </div>
           </div>
           

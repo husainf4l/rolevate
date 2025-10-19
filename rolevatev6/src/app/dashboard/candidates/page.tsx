@@ -45,20 +45,20 @@ const getStatusLabel = (status: Application["status"]) => {
       return "Pending";
     case "ANALYZED":
       return "Analyzed";
-    case "REVIEWING":
-      return "Reviewing";
-    case "INTERVIEW_SCHEDULED":
-      return "Scheduled";
+    case "REVIEWED":
+      return "Reviewed";
+    case "SHORTLISTED":
+      return "Shortlisted";
     case "INTERVIEWED":
       return "Interviewed";
     case "OFFERED":
       return "Offered";
+    case "HIRED":
+      return "Hired";
     case "REJECTED":
       return "Rejected";
     case "WITHDRAWN":
       return "Withdrawn";
-    case "SUBMITTED":
-      return "Submitted";
     default:
       return String(status).replace(/_/g, " ");
   }
@@ -70,19 +70,19 @@ const getStatusColor = (status: Application["status"]) => {
       return "bg-amber-50 text-amber-700 border border-amber-200";
     case "ANALYZED":
       return "bg-blue-50 text-blue-700 border border-blue-200";
-    case "REVIEWING":
+    case "REVIEWED":
       return "bg-sky-50 text-sky-700 border border-sky-200";
-    case "INTERVIEW_SCHEDULED":
+    case "SHORTLISTED":
       return "bg-violet-50 text-violet-700 border border-violet-200";
     case "INTERVIEWED":
       return "bg-primary-50 text-primary-700 border border-primary-200";
     case "OFFERED":
       return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+    case "HIRED":
+      return "bg-green-50 text-green-700 border border-green-200";
     case "REJECTED":
       return "bg-rose-50 text-rose-700 border border-rose-200";
     case "WITHDRAWN":
-      return "bg-slate-50 text-slate-700 border border-slate-200";
-    case "SUBMITTED":
       return "bg-slate-50 text-slate-700 border border-slate-200";
     default:
       return "bg-slate-50 text-slate-700 border border-slate-200";
@@ -338,10 +338,11 @@ export default function CandidatesPage() {
   const statusCounts = {
     pending: candidates.filter((c) => c.status === "PENDING").length,
     analyzed: candidates.filter((c) => c.status === "ANALYZED").length,
-    reviewing: candidates.filter((c) => c.status === "REVIEWING").length,
-    interview_scheduled: candidates.filter((c) => c.status === "INTERVIEW_SCHEDULED").length,
+    reviewed: candidates.filter((c) => c.status === "REVIEWED").length,
+    shortlisted: candidates.filter((c) => c.status === "SHORTLISTED").length,
     interviewed: candidates.filter((c) => c.status === "INTERVIEWED").length,
     offered: candidates.filter((c) => c.status === "OFFERED").length,
+    hired: candidates.filter((c) => c.status === "HIRED").length,
     rejected: candidates.filter((c) => c.status === "REJECTED").length,
   };
 
@@ -418,18 +419,18 @@ export default function CandidatesPage() {
 
                 <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Reviewing</p>
+                    <p className="text-sm font-medium text-gray-600">Reviewed</p>
                     <ClockIcon className="w-5 h-5 text-sky-500" />
                   </div>
-                  <p className="text-2xl font-bold text-sky-700">{statusCounts.reviewing}</p>
+                  <p className="text-2xl font-bold text-sky-700">{statusCounts.reviewed}</p>
                 </div>
 
                 <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Scheduled</p>
+                    <p className="text-sm font-medium text-gray-600">Shortlisted</p>
                     <ClockIcon className="w-5 h-5 text-violet-500" />
                   </div>
-                  <p className="text-2xl font-bold text-violet-700">{statusCounts.interview_scheduled}</p>
+                  <p className="text-2xl font-bold text-violet-700">{statusCounts.shortlisted}</p>
                 </div>
 
                 <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
@@ -446,6 +447,14 @@ export default function CandidatesPage() {
                     <CheckCircleIcon className="w-5 h-5 text-emerald-500" />
                   </div>
                   <p className="text-2xl font-bold text-emerald-700">{statusCounts.offered}</p>
+                </div>
+
+                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-gray-600">Hired</p>
+                    <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                  </div>
+                  <p className="text-2xl font-bold text-green-700">{statusCounts.hired}</p>
                 </div>
 
                 <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
@@ -482,10 +491,11 @@ export default function CandidatesPage() {
                       <option value="all">All Status</option>
                       <option value="PENDING">Pending</option>
                       <option value="ANALYZED">Analyzed</option>
-                      <option value="REVIEWING">Reviewing</option>
-                      <option value="INTERVIEW_SCHEDULED">Scheduled</option>
+                      <option value="REVIEWED">Reviewed</option>
+                      <option value="SHORTLISTED">Shortlisted</option>
                       <option value="INTERVIEWED">Interviewed</option>
                       <option value="OFFERED">Offered</option>
+                      <option value="HIRED">Hired</option>
                       <option value="REJECTED">Rejected</option>
                       <option value="WITHDRAWN">Withdrawn</option>
                     </select>
@@ -529,16 +539,16 @@ export default function CandidatesPage() {
                           Analyze
                         </button>
                         <button
-                          onClick={() => handleBulkStatusUpdate("REVIEWING")}
+                          onClick={() => handleBulkStatusUpdate("REVIEWED")}
                           className="px-4 py-2 text-sm bg-sky-600 text-white rounded-sm hover:bg-sky-700 transition-colors font-medium"
                         >
                           Review
                         </button>
                         <button
-                          onClick={() => handleBulkStatusUpdate("INTERVIEW_SCHEDULED")}
+                          onClick={() => handleBulkStatusUpdate("SHORTLISTED")}
                           className="px-4 py-2 text-sm bg-violet-600 text-white rounded-sm hover:bg-violet-700 transition-colors font-medium"
                         >
-                          Schedule
+                          Shortlist
                         </button>
                         <button
                           onClick={() => handleBulkStatusUpdate("OFFERED")}
@@ -707,12 +717,12 @@ export default function CandidatesPage() {
                                     Analyze
                                   </button>
                                 )}
-                                {(candidate.status === "ANALYZED" || candidate.status === "REVIEWING") && (
+                                {(candidate.status === "ANALYZED" || candidate.status === "REVIEWED") && (
                                   <button
-                                    onClick={() => handleSingleStatusUpdate(candidate.id, "INTERVIEW_SCHEDULED")}
+                                    onClick={() => handleSingleStatusUpdate(candidate.id, "SHORTLISTED")}
                                     className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
                                   >
-                                    Schedule
+                                    Shortlist
                                   </button>
                                 )}
                                 <button

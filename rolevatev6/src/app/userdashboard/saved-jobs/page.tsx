@@ -86,7 +86,7 @@ const formatJobType = (type: string) => {
 };
 
 export default function SavedJobsPage() {
-  const { toggleSaveJob } = useSavedJobs();
+  const { saveJob, unsaveJob } = useSavedJobs();
   const [savedJobsDetails, setSavedJobsDetails] = useState<SavedJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export default function SavedJobsPage() {
         setIsLoading(true);
         setError(null);
         const response = await getSavedJobsDetails();
-        setSavedJobsDetails(response.savedJobs);
+        setSavedJobsDetails(response as any);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load saved jobs"
@@ -114,7 +114,7 @@ export default function SavedJobsPage() {
 
   const handleUnsaveJob = async (jobId: string) => {
     try {
-      await toggleSaveJob(jobId);
+      await unsaveJob(jobId);
       // Remove from local state
       setSavedJobsDetails((prev) => prev.filter((job) => job.id !== jobId));
     } catch (error) {

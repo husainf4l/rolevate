@@ -8,7 +8,7 @@ import UserUpcomingInterviews, { Interview } from "@/components/dashboard/UserUp
 import UserQuickActions from "@/components/dashboard/UserQuickActions";
 import UserProfileCompletionWidget from "@/components/dashboard/UserProfileCompletionWidget";
 import { getCandidateApplications, Application } from "@/services/application";
-import { ProfileService, CandidateProfile } from "@/services/profile";
+import { getProfile, CandidateProfile } from "@/services/profile";
 import { motion } from "framer-motion";
 
 export default function UserDashboardPage() {
@@ -22,14 +22,14 @@ export default function UserDashboardPage() {
   const stats = {
     totalApplications: applications.length,
     activeApplications: applications.filter((app) =>
-      ["SUBMITTED", "REVIEWING", "INTERVIEW_SCHEDULED"].includes(app.status)
+      ["PENDING", "REVIEWED", "SHORTLISTED"].includes(app.status)
     ).length,
     interviews: applications.filter((app) =>
-      ["INTERVIEW_SCHEDULED", "INTERVIEWED"].includes(app.status)
+      ["SHORTLISTED", "INTERVIEWED"].includes(app.status)
     ).length,
     offers: applications.filter((app) => app.status === "OFFERED").length,
     pending: applications.filter((app) =>
-      ["SUBMITTED", "REVIEWING"].includes(app.status)
+      ["PENDING", "REVIEWED"].includes(app.status)
     ).length,
     rejected: applications.filter((app) => app.status === "REJECTED").length,
   };
@@ -39,22 +39,22 @@ export default function UserDashboardPage() {
   const profileSections = [
     {
       label: "Add Resume/CV",
-      completed: !!currentProfile?.resumeUrl,
+      completed: !!(currentProfile as any)?.resumeUrl,
       href: "/userdashboard/profile?tab=resume",
     },
     {
       label: "Complete Work Experience",
-      completed: (currentProfile?.workExperiences?.length || 0) > 0,
+      completed: ((currentProfile as any)?.workExperiences?.length || 0) > 0,
       href: "/userdashboard/profile?tab=experience",
     },
     {
       label: "Add Skills",
-      completed: (currentProfile?.skills?.length || 0) > 0,
+      completed: ((currentProfile as any)?.skills?.length || 0) > 0,
       href: "/userdashboard/profile?tab=skills",
     },
     {
       label: "Add Education",
-      completed: (currentProfile?.educationHistory?.length || 0) > 0,
+      completed: ((currentProfile as any)?.educationHistory?.length || 0) > 0,
       href: "/userdashboard/profile?tab=education",
     },
     {
@@ -78,7 +78,7 @@ export default function UserDashboardPage() {
       setLoading(true);
 
       // Fetch profile
-      const profileData = await ProfileService.getUserProfile();
+      const profileData = await getProfile();
       setProfile(profileData);
 
       // Fetch applications
@@ -87,11 +87,11 @@ export default function UserDashboardPage() {
 
       // Mock upcoming interviews (replace with actual API call when available)
       const mockInterviews: Interview[] = applicationsData
-        .filter((app) => app.status === "INTERVIEW_SCHEDULED")
+        .filter((app) => app.status === "SHORTLISTED")
         .map((app) => ({
           id: app.id,
           jobTitle: app.job.title,
-          company: app.job.company.name,
+          company: app.job.company?.name || 'Unknown',
           date: new Date(
             Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000
           ).toISOString(),

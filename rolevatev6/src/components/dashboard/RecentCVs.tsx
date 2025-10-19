@@ -57,11 +57,11 @@ export default function RecentApplications() {
   };
   const getStatusColor = (status: Application["status"]) => {
     switch (status) {
-      case "SUBMITTED":
+      case "PENDING":
         return "bg-yellow-100 text-yellow-800";
-      case "REVIEWING":
+      case "REVIEWED":
         return "bg-blue-100 text-blue-800";
-      case "INTERVIEW_SCHEDULED":
+      case "SHORTLISTED":
         return "bg-purple-100 text-purple-800";
       case "INTERVIEWED":
         return "bg-indigo-100 text-indigo-800";
@@ -78,11 +78,11 @@ export default function RecentApplications() {
 
   const getStatusDisplayText = (status: Application["status"]) => {
     switch (status) {
-      case "SUBMITTED":
+      case "PENDING":
         return "Submitted";
-      case "REVIEWING":
+      case "REVIEWED":
         return "Under Review";
-      case "INTERVIEW_SCHEDULED":
+      case "SHORTLISTED":
         return "Interview Scheduled";
       case "INTERVIEWED":
         return "Interviewed";
