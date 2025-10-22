@@ -1,12 +1,12 @@
-import { Resolver, Query, Mutation, Args, Int, Context, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobDto } from './job.dto';
 import { SavedJobDto } from './saved-job.dto';
+import { JobFilterInput } from './job-filter.input';
+import { PaginationInput } from '../common/pagination.dto';
 import { CreateJobInput } from './create-job.input';
 import { UpdateJobInput } from './update-job.input';
-import { JobFilterInput } from './job-filter.input';
-import { PaginationInput } from './pagination.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 

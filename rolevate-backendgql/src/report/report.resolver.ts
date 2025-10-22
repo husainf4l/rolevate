@@ -2,9 +2,11 @@ import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ReportService } from './report.service';
 import { ReportDto } from './report.dto';
+import { PaginatedReportResponse } from './paginated-report-response.dto';
 import { CreateReportInput } from './create-report.input';
 import { UpdateReportInput } from './update-report.input';
 import { ReportFilterInput } from './report-filter.input';
+import { PaginationInput } from '../common/pagination.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Resolver(() => ReportDto)
@@ -22,12 +24,16 @@ export class ReportResolver {
     return this.mapToDto(report);
   }
 
-  @Query(() => [ReportDto], { name: 'reports' })
+  @Query(() => PaginatedReportResponse, { name: 'reports' })
   async findAll(
     @Args('filter', { nullable: true }) filter?: ReportFilterInput,
-  ): Promise<ReportDto[]> {
-    const reports = await this.reportService.findAll(filter);
-    return reports.map(report => this.mapToDto(report));
+    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  ): Promise<PaginatedReportResponse> {
+    const result = await this.reportService.findAll(filter, pagination);
+    return {
+      data: result.data.map(report => this.mapToDto(report)),
+      meta: result.meta,
+    };
   }
 
   @Query(() => ReportDto, { name: 'report', nullable: true })

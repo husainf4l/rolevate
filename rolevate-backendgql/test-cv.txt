@@ -1,3 +1,0 @@
-This is a test CV file for GraphQL upload testing.
-Name: John Doe
-Skills: JavaScript, TypeScript, Node.js

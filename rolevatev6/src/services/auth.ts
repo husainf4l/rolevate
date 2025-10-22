@@ -66,6 +66,45 @@ class AuthService {
     }
   `;
 
+  private LOGOUT_MUTATION = gql`
+    mutation Logout {
+      logout
+    }
+  `;
+
+  private UPLOAD_AVATAR_TO_S3_MUTATION = gql`
+    mutation UploadFileToS3(
+      $base64File: String!
+      $filename: String!
+      $mimetype: String!
+    ) {
+      uploadFileToS3(
+        base64File: $base64File
+        filename: $filename
+        mimetype: $mimetype
+      ) {
+        url
+        key
+        bucket
+      }
+    }
+  `;
+
+  private UPDATE_USER_MUTATION = gql`
+    mutation UpdateUser($id: String!, $input: UpdateUserInput!) {
+      updateUser(id: $id, input: $input) {
+        id
+        email
+        name
+        userType
+        phone
+        avatar
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
   /**
    * Login user with email and password
    */
@@ -110,6 +149,13 @@ class AuthService {
    * Logout user and clear stored data
    */
   logout(): void {
+    // Call logout mutation on server (fire and forget)
+    apolloClient.mutate({
+      mutation: this.LOGOUT_MUTATION
+    }).catch(() => {
+      // Ignore errors, as token might be expired
+    });
+
     // Clear token from localStorage
     if (typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
@@ -251,6 +297,130 @@ class AuthService {
   }
 
   /**
+   * Convert File to base64 string
+   */
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  /**
+   * Upload avatar to S3 and update user profile
+   * @param file - The image file to upload (JPEG, PNG, etc.)
+   * @returns The URL of the uploaded avatar
+   */
+  async updateAvatar(file: File): Promise<string> {
+    try {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('File must be an image');
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        throw new Error('Image size must be less than 5MB');
+      }
+
+      // Convert file to base64
+      const base64File = await this.fileToBase64(file);
+
+      // Upload to S3 via GraphQL
+      const { data: uploadData } = await apolloClient.mutate<{
+        uploadFileToS3: { url: string; key: string; bucket: string };
+      }>({
+        mutation: this.UPLOAD_AVATAR_TO_S3_MUTATION,
+        variables: {
+          base64File,
+          filename: file.name,
+          mimetype: file.type
+        }
+      });
+
+      if (!uploadData?.uploadFileToS3?.url) {
+        throw new Error('Failed to upload avatar to S3');
+      }
+
+      const avatarUrl = uploadData.uploadFileToS3.url;
+
+      // Get current user ID
+      const currentUser = this.getUserFromStorage();
+      if (!currentUser?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      // Update user with new avatar URL
+      const { data: updateData } = await apolloClient.mutate<{ updateUser: User }>({
+        mutation: this.UPDATE_USER_MUTATION,
+        variables: {
+          id: currentUser.id,
+          input: {
+            avatar: avatarUrl
+          }
+        },
+        refetchQueries: ['GetCurrentUser']
+      });
+
+      if (!updateData?.updateUser) {
+        throw new Error('Failed to update user avatar');
+      }
+
+      // Update the local user cache
+      this.setUser(updateData.updateUser);
+
+      return avatarUrl;
+    } catch (error: any) {
+      console.error('Error updating avatar:', error);
+      throw new Error(error?.message || 'Failed to update avatar');
+    }
+  }
+
+  /**
+   * Remove user avatar
+   */
+  async removeAvatar(): Promise<boolean> {
+    try {
+      // Get current user ID
+      const currentUser = this.getUserFromStorage();
+      if (!currentUser?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data } = await apolloClient.mutate<{ updateUser: User }>({
+        mutation: this.UPDATE_USER_MUTATION,
+        variables: {
+          id: currentUser.id,
+          input: {
+            avatar: null
+          }
+        },
+        refetchQueries: ['GetCurrentUser']
+      });
+
+      if (!data?.updateUser) {
+        throw new Error('Failed to remove avatar');
+      }
+
+      // Update the local user cache
+      this.setUser(data.updateUser);
+
+      return true;
+    } catch (error: any) {
+      console.error('Error removing avatar:', error);
+      throw new Error(error?.message || 'Failed to remove avatar');
+    }
+  }
+
+  /**
    * Initialize auth service (call on app startup)
    */
   init(): void {
@@ -266,3 +436,5 @@ export const getCurrentUser = () => authService.getCurrentUser();
 export const getUserFromStorage = () => authService.getUserFromStorage();
 export const changePassword = (currentPassword: string, newPassword: string) =>
   authService.changePassword(currentPassword, newPassword);
+export const updateAvatar = (file: File) => authService.updateAvatar(file);
+export const removeAvatar = () => authService.removeAvatar();

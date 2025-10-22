@@ -368,35 +368,64 @@ export default function UserProfilePage() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type - only allow images
+    if (!file.type.startsWith('image/')) {
+      setSaveStatus({ type: "error", message: "Please select a valid image file" });
+      setTimeout(() => setSaveStatus(null), 3000);
+      return;
+    }
+
+    // Validate file size (max 5MB for avatars)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      setSaveStatus({ type: "error", message: "Please upload an image smaller than 5MB" });
+      setTimeout(() => setSaveStatus(null), 3000);
+      return;
+    }
+
     try {
       setLoading(true);
       const token = localStorage.getItem("access_token");
 
-      // Upload file to S3 using GraphQL mutation
-      const formData = new FormData();
-      formData.append('operations', JSON.stringify({
-        query: `
-          mutation UploadFileToS3($file: Upload!, $folder: String!) {
-            uploadFileToS3(file: $file, folder: $folder) {
-              url
-              key
-            }
-          }
-        `,
-        variables: {
-          file: null, // File will be in map
-          folder: "avatars"
-        }
-      }));
-      formData.append('map', JSON.stringify({ "0": ["variables.file"] }));
-      formData.append('0', file);
+      // Convert file to base64
+      const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => {
+            const result = reader.result as string;
+            // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+            const base64 = result.split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = error => reject(error);
+        });
+      };
 
+      const base64File = await fileToBase64(file);
+
+      // Upload file to S3 using GraphQL mutation with base64
       const uploadResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({
+          query: `
+            mutation UploadCVToS3($base64File: String!, $filename: String!, $mimetype: String!) {
+              uploadCVToS3(base64File: $base64File, filename: $filename, mimetype: $mimetype) {
+                url
+                key
+              }
+            }
+          `,
+          variables: {
+            base64File,
+            filename: file.name,
+            mimetype: file.type
+          }
+        }),
       });
 
       if (!uploadResponse.ok) {
@@ -404,11 +433,45 @@ export default function UserProfilePage() {
       }
 
       const uploadResult = await uploadResponse.json();
-      const avatarUrl = uploadResult.data?.uploadFileToS3?.url;
+      const avatarUrl = uploadResult.data?.uploadCVToS3?.url;
 
       if (avatarUrl) {
-        // Update user profile with new avatar URL using GraphQL
-        // For now, we'll update the local state - ideally this should use an updateUser mutation
+        // Update user profile with new avatar URL in database
+        const updateUserResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            query: `
+              mutation UpdateUser($id: String!, $input: UpdateUserInput!) {
+                updateUser(id: $id, input: $input) {
+                  id
+                  avatar
+                }
+              }
+            `,
+            variables: {
+              id: userProfile.id,
+              input: {
+                avatar: avatarUrl
+              }
+            }
+          }),
+        });
+
+        if (!updateUserResponse.ok) {
+          throw new Error("Failed to update user profile");
+        }
+
+        const updateUserResult = await updateUserResponse.json();
+        
+        if (updateUserResult.errors) {
+          throw new Error(updateUserResult.errors[0].message);
+        }
+
+        // Update local state
         setUserProfile({ ...userProfile, avatar: avatarUrl });
         setSaveStatus({
           type: "success",
@@ -425,9 +488,7 @@ export default function UserProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const tabs = [
+  };  const tabs = [
     { id: "profile", label: "Personal Info", icon: UserIcon },
     { id: "notifications", label: "Notifications", icon: BellIcon },
     { id: "security", label: "Security", icon: KeyIcon },

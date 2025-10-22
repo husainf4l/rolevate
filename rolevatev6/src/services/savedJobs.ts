@@ -9,6 +9,7 @@ export interface SavedJob {
   savedAt: string;
   job: {
     id: string;
+    slug: string;
     title: string;
     department?: string;
     location: string;
@@ -46,13 +47,14 @@ class SavedJobsService {
   // GraphQL Queries
   private GET_MY_SAVED_JOBS_QUERY = gql`
     query GetMySavedJobs {
-      mySavedJobs {
+      savedJobs {
         id
         userId
         jobId
         savedAt
         job {
           id
+          slug
           title
           department
           location
@@ -116,11 +118,11 @@ class SavedJobsService {
    */
   async getMySavedJobs(): Promise<SavedJob[]> {
     try {
-      const { data } = await apolloClient.query<{ mySavedJobs: SavedJob[] }>({
+      const { data } = await apolloClient.query<{ savedJobs: SavedJob[] }>({
         query: this.GET_MY_SAVED_JOBS_QUERY,
         fetchPolicy: 'network-only'
       });
-      return data?.mySavedJobs || [];
+      return data?.savedJobs || [];
     } catch (error: any) {
       console.error('Error fetching saved jobs:', error);
       throw new Error(error?.message || 'Failed to fetch saved jobs');

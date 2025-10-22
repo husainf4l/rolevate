@@ -3,13 +3,8 @@ import { apolloClient } from '@/lib/apollo';
 import { gql } from '@apollo/client';
 
 interface PaginationInput {
-  take?: number;
-  skip?: number;
-}
-
-interface PaginationInput {
-  take?: number;
-  skip?: number;
+  page?: number;
+  limit?: number;
 }
 
 class JobsService {
@@ -189,7 +184,7 @@ class JobsService {
         query: this.GET_COMPANY_JOBS_QUERY,
         variables: {
           filter: Object.keys(gqlFilter).length > 0 ? gqlFilter : undefined,
-          pagination: { take: limit, skip: (page - 1) * limit }
+          pagination: { page, limit }
         },
         fetchPolicy: 'network-only',
         context: {
@@ -270,7 +265,7 @@ class JobsService {
         query: this.GET_COMPANY_JOBS_QUERY,
         variables: {
           filter: gqlFilter,
-          pagination: { take: limit, skip: (page - 1) * limit }
+          pagination: { page, limit }
         },
         fetchPolicy: 'network-only',
         context: {
@@ -509,7 +504,7 @@ class JobsService {
         query: this.GET_COMPANY_JOBS_QUERY,
         variables: {
           filter: gqlFilter,
-          pagination: { take: limit, skip: (page - 1) * limit }
+          pagination: { page, limit }
         },
         fetchPolicy: 'network-only'
       });

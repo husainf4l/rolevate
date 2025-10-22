@@ -6,9 +6,13 @@ import { CandidateProfile } from './candidate-profile.entity';
 import { WorkExperience } from './work-experience.entity';
 import { Education } from './education.entity';
 import { CV } from './cv.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CandidateProfile, WorkExperience, Education, CV])],
+  imports: [
+    TypeOrmModule.forFeature([CandidateProfile, WorkExperience, Education, CV]),
+    AuthModule,
+  ],
   providers: [CandidateProfileService, CandidateProfileResolver],
   exports: [CandidateProfileService],
 })

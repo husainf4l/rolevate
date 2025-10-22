@@ -4,7 +4,7 @@ export default function SuccessStories() {
   return (
     <section className="w-full py-16 px-4 md:px-0 bg-white">
       <div className="container mx-auto max-w-5xl text-center">
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
           Success{" "}
           <span className="text-primary-600">
             Stories

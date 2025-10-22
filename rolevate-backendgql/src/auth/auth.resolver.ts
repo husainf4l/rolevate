@@ -6,12 +6,14 @@ import { LoginResponseDto } from './login-response.dto';
 import { ChangePasswordInput } from './change-password.input';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserService } from '../user/user.service';
+import { AuditService } from '../audit.service';
 
 @Resolver()
 export class AuthResolver {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly auditService: AuditService,
   ) {}
 
   @Mutation(() => LoginResponseDto)
@@ -38,5 +40,13 @@ export class AuthResolver {
       input.currentPassword,
       input.newPassword,
     );
+  }
+
+  @Mutation(() => Boolean, { description: 'Logout user' })
+  @UseGuards(JwtAuthGuard)
+  async logout(@Context() context: any): Promise<boolean> {
+    const user = context.req.user;
+    this.auditService.logUserLogout(user.sub, user.email);
+    return true;
   }
 }

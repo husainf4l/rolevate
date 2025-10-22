@@ -38,7 +38,7 @@ const REWRITE_JOB_DESCRIPTION = gql`
   mutation RewriteJobDescription($input: JobDescriptionRewriteInput!) {
     rewriteJobDescription(input: $input) {
       rewrittenDescription
-      originalDescription
+      rewrittenShortDescription
     }
   }
 `;
@@ -47,33 +47,25 @@ const POLISH_REQUIREMENTS = gql`
   mutation PolishRequirements($input: RequirementsPolishRequestDto!) {
     polishRequirements(input: $input) {
       polishedRequirements
-      originalRequirements
+      suggestions
     }
   }
 `;
 
 const POLISH_RESPONSIBILITIES = gql`
-  mutation PolishResponsibilities($input: PolishResponsibilitiesInput!) {
+  mutation PolishResponsibilities($input: ResponsibilitiesPolishRequestDto!) {
     polishResponsibilities(input: $input) {
       polishedResponsibilities
-      originalResponsibilities
+      suggestions
     }
   }
 `;
 
 const POLISH_BENEFITS = gql`
-  mutation PolishBenefits($input: PolishBenefitsInput!) {
+  mutation PolishBenefits($input: BenefitsPolishRequestDto!) {
     polishBenefits(input: $input) {
       polishedBenefits
-      originalBenefits
-    }
-  }
-`;
-
-const SUGGEST_SKILLS = gql`
-  mutation SuggestSkills($input: SuggestSkillsInput!) {
-    suggestSkills(input: $input) {
-      skills
+      suggestions
     }
   }
 `;
@@ -266,12 +258,12 @@ export default function CreateJobPage() {
     setAiLoading("description");
     try {
       const { data } = await apolloClient.mutate<{
-        rewriteJobDescription: { rewrittenDescription: string; originalDescription: string }
+        rewriteJobDescription: { rewrittenDescription: string; rewrittenShortDescription: string }
       }>({
         mutation: REWRITE_JOB_DESCRIPTION,
         variables: {
           input: {
-            description: formData.description,
+            jobDescription: formData.description,
           },
         },
       });
@@ -292,12 +284,15 @@ export default function CreateJobPage() {
     setAiLoading("requirements");
     try {
       const { data } = await apolloClient.mutate<{
-        polishRequirements: { polishedRequirements: string; originalRequirements: string }
+        polishRequirements: { polishedRequirements: string; suggestions?: string }
       }>({
         mutation: POLISH_REQUIREMENTS,
         variables: {
           input: {
             requirements: formData.requirements,
+            jobTitle: formData.title,
+            industry: formData.industry,
+            experienceLevel: formData.experience,
           },
         },
       });
@@ -310,7 +305,7 @@ export default function CreateJobPage() {
     } finally {
       setAiLoading(null);
     }
-  }, [formData.requirements, handleInputChange]);
+  }, [formData.requirements, formData.title, formData.industry, formData.experience, handleInputChange]);
 
   const polishResponsibilities = useCallback(async () => {
     if (!formData.responsibilities.trim()) return;
@@ -318,12 +313,16 @@ export default function CreateJobPage() {
     setAiLoading("responsibilities");
     try {
       const { data } = await apolloClient.mutate<{
-        polishResponsibilities: { polishedResponsibilities: string; originalResponsibilities: string }
+        polishResponsibilities: { polishedResponsibilities: string; suggestions?: string }
       }>({
         mutation: POLISH_RESPONSIBILITIES,
         variables: {
           input: {
             responsibilities: formData.responsibilities,
+            jobTitle: formData.title,
+            experienceLevel: formData.experience,
+            industry: formData.industry,
+            jobLevel: formData.jobLevel,
           },
         },
       });
@@ -336,7 +335,7 @@ export default function CreateJobPage() {
     } finally {
       setAiLoading(null);
     }
-  }, [formData.responsibilities, handleInputChange]);
+  }, [formData.responsibilities, formData.title, formData.experience, formData.industry, formData.jobLevel, handleInputChange]);
 
   const polishBenefits = useCallback(async () => {
     if (!formData.benefits.trim()) return;
@@ -344,12 +343,15 @@ export default function CreateJobPage() {
     setAiLoading("benefits");
     try {
       const { data } = await apolloClient.mutate<{
-        polishBenefits: { polishedBenefits: string; originalBenefits: string }
+        polishBenefits: { polishedBenefits: string; suggestions?: string }
       }>({
         mutation: POLISH_BENEFITS,
         variables: {
           input: {
             benefits: formData.benefits,
+            industry: formData.industry,
+            location: formData.location,
+            jobLevel: formData.jobLevel,
           },
         },
       });
@@ -362,37 +364,7 @@ export default function CreateJobPage() {
     } finally {
       setAiLoading(null);
     }
-  }, [formData.benefits, handleInputChange]);
-
-  const suggestSkills = useCallback(async () => {
-    if (!formData.title.trim()) return;
-    
-    setAiLoading("skills");
-    try {
-      const { data } = await apolloClient.mutate<{
-        suggestSkills: { skills: string[] }
-      }>({
-        mutation: SUGGEST_SKILLS,
-        variables: {
-          input: {
-            jobTitle: formData.title,
-            description: formData.description || undefined,
-          },
-        },
-      });
-      
-      if (data?.suggestSkills?.skills) {
-        const newSkills = data.suggestSkills.skills.filter(
-          (skill: string) => !formData.skills.includes(skill)
-        );
-        handleInputChange("skills", [...formData.skills, ...newSkills]);
-      }
-    } catch (error) {
-      console.error("Failed to suggest skills:", error);
-    } finally {
-      setAiLoading(null);
-    }
-  }, [formData.title, formData.description, formData.skills, handleInputChange]);
+  }, [formData.benefits, formData.industry, formData.location, formData.jobLevel, handleInputChange]);
 
   // Generate job analysis when moving from basic to details
   const generateJobAnalysis = useCallback(async () => {
@@ -1003,25 +975,6 @@ export default function CreateJobPage() {
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <Label className="text-sm font-medium">Skills *</Label>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={suggestSkills}
-            disabled={aiLoading === "skills"}
-          >
-            {aiLoading === "skills" ? (
-              <>
-                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                Suggesting...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-3 h-3 mr-1" />
-                Suggest
-              </>
-            )}
-          </Button>
         </div>
         <div className="flex flex-wrap gap-2 mb-2">
           {formData.skills.map((skill) => (
@@ -1100,7 +1053,7 @@ export default function CreateJobPage() {
         </div>
       </div>
     </div>
-  ), [formData, errors, handleInputChange, enhanceDescription, polishRequirements, polishResponsibilities, polishBenefits, suggestSkills, aiLoading, addSkill, removeSkill]);
+  ), [formData, errors, handleInputChange, enhanceDescription, polishRequirements, polishResponsibilities, polishBenefits, aiLoading, addSkill, removeSkill]);
 
   const InterviewQuestionsStep = useMemo(() => (
     <div className="space-y-4">

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job, JobStatus } from './job.entity';
@@ -6,7 +6,7 @@ import { CreateJobInput } from './create-job.input';
 import { UpdateJobInput } from './update-job.input';
 import { JobDto } from './job.dto';
 import { JobFilterInput } from './job-filter.input';
-import { PaginationInput } from './pagination.input';
+import { PaginationInput } from '../common/pagination.dto';
 import { User } from '../user/user.entity';
 import { Company } from '../company/company.entity';
 import { SavedJob } from './saved-job.entity';
@@ -15,6 +15,8 @@ import { AuditService } from '../audit.service';
 
 @Injectable()
 export class JobService {
+  private readonly logger = new Logger(JobService.name);
+
   constructor(
     @InjectRepository(Job)
     private jobRepository: Repository<Job>,
@@ -61,61 +63,66 @@ export class JobService {
   }
 
   async findAll(filter?: JobFilterInput, pagination?: PaginationInput): Promise<JobDto[]> {
-    const queryBuilder = this.jobRepository.createQueryBuilder('job')
-      .leftJoinAndSelect('job.postedBy', 'postedBy')
-      .leftJoinAndSelect('job.company', 'company');
+    try {
+      this.logger.log('Finding all jobs with filters and pagination');
+      
+      const queryBuilder = this.jobRepository.createQueryBuilder('job')
+        .leftJoinAndSelect('job.postedBy', 'postedBy')
+        .leftJoinAndSelect('job.company', 'company');
 
-    if (filter) {
-      if (filter.status) {
-        queryBuilder.andWhere('job.status = :status', { status: filter.status });
+      if (filter) {
+        if (filter.status) {
+          queryBuilder.andWhere('job.status = :status', { status: filter.status });
+        }
+        if (filter.type) {
+          queryBuilder.andWhere('job.type = :type', { type: filter.type });
+        }
+        if (filter.jobLevel) {
+          queryBuilder.andWhere('job.jobLevel = :jobLevel', { jobLevel: filter.jobLevel });
+        }
+        if (filter.workType) {
+          queryBuilder.andWhere('job.workType = :workType', { workType: filter.workType });
+        }
+        if (filter.industry) {
+          queryBuilder.andWhere('job.industry ILIKE :industry', { industry: `%${filter.industry}%` });
+        }
+        if (filter.location) {
+          queryBuilder.andWhere('job.location ILIKE :location', { location: `%${filter.location}%` });
+        }
+        if (filter.department) {
+          queryBuilder.andWhere('job.department ILIKE :department', { department: `%${filter.department}%` });
+        }
+        if (filter.postedById) {
+          queryBuilder.andWhere('job.postedById = :postedById', { postedById: filter.postedById });
+        }
+        if (filter.companyId) {
+          queryBuilder.andWhere('job.companyId = :companyId', { companyId: filter.companyId });
+        }
+        if (filter.featured !== undefined) {
+          queryBuilder.andWhere('job.featured = :featured', { featured: filter.featured });
+        }
       }
-      if (filter.type) {
-        queryBuilder.andWhere('job.type = :type', { type: filter.type });
-      }
-      if (filter.jobLevel) {
-        queryBuilder.andWhere('job.jobLevel = :jobLevel', { jobLevel: filter.jobLevel });
-      }
-      if (filter.workType) {
-        queryBuilder.andWhere('job.workType = :workType', { workType: filter.workType });
-      }
-      if (filter.industry) {
-        queryBuilder.andWhere('job.industry ILIKE :industry', { industry: `%${filter.industry}%` });
-      }
-      if (filter.location) {
-        queryBuilder.andWhere('job.location ILIKE :location', { location: `%${filter.location}%` });
-      }
-      if (filter.department) {
-        queryBuilder.andWhere('job.department ILIKE :department', { department: `%${filter.department}%` });
-      }
-      if (filter.postedById) {
-        queryBuilder.andWhere('job.postedById = :postedById', { postedById: filter.postedById });
-      }
-      if (filter.companyId) {
-        queryBuilder.andWhere('job.companyId = :companyId', { companyId: filter.companyId });
-      }
-      if (filter.featured !== undefined) {
-        queryBuilder.andWhere('job.featured = :featured', { featured: filter.featured });
-      }
-    }
 
-    if (pagination) {
-      if (pagination.skip) {
-        queryBuilder.skip(pagination.skip);
+      if (pagination) {
+        const page = pagination.page || 1;
+        const limit = pagination.limit || 10;
+        const skip = (page - 1) * limit;
+        
+        queryBuilder.skip(skip);
+        queryBuilder.take(limit);
+      } else {
+        queryBuilder.take(10); // default limit
       }
-      if (pagination.take) {
-        queryBuilder.take(pagination.take);
-      }
-    } else {
-      queryBuilder.take(10); // default limit
-    }
 
-    const jobs = await queryBuilder.getMany();
+      const jobs = await queryBuilder.getMany();
+      
+      this.logger.log(`Found ${jobs.length} jobs`);
 
-    return jobs.map(job => ({
-      id: job.id,
-      title: job.title,
-      slug: job.slug,
-      department: job.department,
+      return jobs.map(job => ({
+        id: job.id,
+        title: job.title,
+        slug: job.slug,
+        department: job.department,
       location: job.location,
       salary: job.salary,
       type: job.type,
@@ -170,14 +177,23 @@ export class JobService {
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
     }));
+    } catch (error) {
+      this.logger.error(`Failed to find jobs: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve jobs');
+    }
   }
 
   async findOne(id: string): Promise<JobDto | null> {
-    const job = await this.jobRepository.findOne({
-      where: { id },
-      relations: ['postedBy', 'company'],
-    });
-    if (!job) return null;
+    try {
+      const job = await this.jobRepository.findOne({
+        where: { id },
+        relations: ['postedBy', 'company'],
+      });
+      
+      if (!job) {
+        this.logger.warn(`Job not found: ${id}`);
+        return null;
+      }
 
     return {
       id: job.id,
@@ -238,16 +254,29 @@ export class JobService {
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
     };
+    } catch (error) {
+      this.logger.error(`Failed to find job ${id}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve job');
+    }
   }
 
   async findBySlug(slug: string): Promise<JobDto | null> {
-    const job = await this.jobRepository.findOne({
-      where: { slug },
-      relations: ['postedBy', 'company'],
-    });
-    if (!job) return null;
+    try {
+      const job = await this.jobRepository.findOne({
+        where: { slug },
+        relations: ['postedBy', 'company'],
+      });
+      
+      if (!job) {
+        this.logger.warn(`Job not found with slug: ${slug}`);
+        return null;
+      }
 
-    return this.findOne(job.id);
+      return this.findOne(job.id);
+    } catch (error) {
+      this.logger.error(`Failed to find job by slug ${slug}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve job');
+    }
   }
 
   async updateJob(input: UpdateJobInput, userId: string): Promise<JobDto> {

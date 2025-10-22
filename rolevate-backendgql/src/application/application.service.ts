@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Application, ApplicationStatus } from './application.entity';
@@ -28,6 +28,8 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ApplicationService {
+  private readonly logger = new Logger(ApplicationService.name);
+
   constructor(
     @InjectRepository(Application)
     private applicationRepository: Repository<Application>,
@@ -532,95 +534,130 @@ Please change your password after first login.`;
   }
 
   async findAll(filter?: ApplicationFilterInput, pagination?: ApplicationPaginationInput, user?: any): Promise<Application[]> {
-    console.log('🔍 DEBUG - findAll called with user:', {
-      userId: user?.id,
-      userType: user?.userType,
-      companyId: user?.companyId,
-      companyIdType: typeof user?.companyId
-    });
+    try {
+      this.logger.log('Finding all applications with filters and pagination', {
+        userId: user?.id,
+        userType: user?.userType,
+        companyId: user?.companyId,
+      });
 
-    const queryBuilder = this.applicationRepository.createQueryBuilder('application')
-      .leftJoinAndSelect('application.job', 'job')
-      .leftJoinAndSelect('job.company', 'company')
-      .leftJoinAndSelect('application.candidate', 'candidate')
-      .leftJoinAndSelect('candidate.candidateProfile', 'candidateProfile')
-      .leftJoinAndSelect('application.applicationNotes', 'applicationNotes');
+      const queryBuilder = this.applicationRepository.createQueryBuilder('application')
+        .leftJoinAndSelect('application.job', 'job')
+        .leftJoinAndSelect('job.company', 'company')
+        .leftJoinAndSelect('application.candidate', 'candidate')
+        .leftJoinAndSelect('candidate.candidateProfile', 'candidateProfile')
+        .leftJoinAndSelect('application.applicationNotes', 'applicationNotes');
 
-    // If user is a BUSINESS user, filter by their company
-    if (user && user.userType === UserType.BUSINESS) {
-      if (user.companyId) {
-        const companyId = user.companyId;
-        console.log('🔍 DEBUG - Filtering by companyId:', companyId);
-        queryBuilder.andWhere('job.companyId = :companyId', { companyId });
+      // If user is a BUSINESS user, filter by their company
+      if (user && user.userType === UserType.BUSINESS) {
+        if (user.companyId) {
+          const companyId = user.companyId;
+          this.logger.debug(`Filtering applications by companyId: ${companyId}`);
+          queryBuilder.andWhere('job.companyId = :companyId', { companyId });
+        } else {
+          this.logger.warn('BUSINESS user without company - returning no results');
+          // BUSINESS user without company - return no results
+          queryBuilder.andWhere('1 = 0');
+        }
+      }
+
+      // If user is a CANDIDATE user, filter by their candidate ID
+      if (user && user.userType === UserType.CANDIDATE) {
+        const candidateId = user.userId;
+        this.logger.debug(`Filtering applications by candidateId: ${candidateId}`);
+        queryBuilder.andWhere('application.candidateId = :candidateId', { candidateId });
+      }
+
+      // Apply filters
+      if (filter) {
+        if (filter.status) {
+          queryBuilder.andWhere('application.status = :status', { status: filter.status });
+        }
+        if (filter.jobId) {
+          queryBuilder.andWhere('application.jobId = :jobId', { jobId: filter.jobId });
+        }
+        if (filter.candidateId) {
+          queryBuilder.andWhere('application.candidateId = :candidateId', { candidateId: filter.candidateId });
+        }
+        if (filter.source) {
+          queryBuilder.andWhere('application.source = :source', { source: filter.source });
+        }
+        if (filter.search) {
+          queryBuilder.andWhere(
+            '(application.coverLetter ILIKE :search OR application.notes ILIKE :search OR candidate.firstName ILIKE :search OR candidate.lastName ILIKE :search OR job.title ILIKE :search)',
+            { search: `%${filter.search}%` }
+          );
+        }
+      }
+
+      // Apply pagination and sorting
+      if (pagination) {
+        const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'DESC' } = pagination;
+        const skip = (page - 1) * limit;
+
+        queryBuilder
+          .orderBy(`application.${sortBy}`, sortOrder)
+          .skip(skip)
+          .take(limit);
       } else {
-        console.log('⚠️ DEBUG - BUSINESS user without company');
-        // BUSINESS user without company - return no results
-        queryBuilder.andWhere('1 = 0');
+        queryBuilder.orderBy('application.createdAt', 'DESC');
       }
+
+      const applications = await queryBuilder.getMany();
+      this.logger.log(`Found ${applications.length} applications`);
+      
+      return applications;
+    } catch (error) {
+      this.logger.error(`Failed to find applications: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve applications');
     }
-
-    // Apply filters
-    if (filter) {
-      if (filter.status) {
-        queryBuilder.andWhere('application.status = :status', { status: filter.status });
-      }
-      if (filter.jobId) {
-        queryBuilder.andWhere('application.jobId = :jobId', { jobId: filter.jobId });
-      }
-      if (filter.candidateId) {
-        queryBuilder.andWhere('application.candidateId = :candidateId', { candidateId: filter.candidateId });
-      }
-      if (filter.source) {
-        queryBuilder.andWhere('application.source = :source', { source: filter.source });
-      }
-      if (filter.search) {
-        queryBuilder.andWhere(
-          '(application.coverLetter ILIKE :search OR application.notes ILIKE :search OR candidate.firstName ILIKE :search OR candidate.lastName ILIKE :search OR job.title ILIKE :search)',
-          { search: `%${filter.search}%` }
-        );
-      }
-    }
-
-    // Apply pagination and sorting
-    if (pagination) {
-      const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'DESC' } = pagination;
-      const skip = (page - 1) * limit;
-
-      queryBuilder
-        .orderBy(`application.${sortBy}`, sortOrder)
-        .skip(skip)
-        .take(limit);
-    } else {
-      queryBuilder.orderBy('application.createdAt', 'DESC');
-    }
-
-    // Log the generated SQL for debugging
-    const sql = queryBuilder.getSql();
-    console.log('🔍 DEBUG - Generated SQL:', sql);
-    console.log('🔍 DEBUG - Query parameters:', queryBuilder.getParameters());
-
-    return queryBuilder.getMany();
   }
 
   async findOne(id: string): Promise<Application | null> {
-    return this.applicationRepository.findOne({
-      where: { id },
-      relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
-    });
+    try {
+      const application = await this.applicationRepository.findOne({
+        where: { id },
+        relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
+      });
+      
+      if (!application) {
+        this.logger.warn(`Application not found: ${id}`);
+        return null;
+      }
+      
+      return application;
+    } catch (error) {
+      this.logger.error(`Failed to find application ${id}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve application');
+    }
   }
 
   async findByJobId(jobId: string): Promise<Application[]> {
-    return this.applicationRepository.find({
-      where: { jobId },
-      relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
-    });
+    try {
+      this.logger.log(`Finding applications for job: ${jobId}`);
+      return await this.applicationRepository.find({
+        where: { jobId },
+        relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
+        order: { createdAt: 'DESC' },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to find applications for job ${jobId}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve job applications');
+    }
   }
 
   async findByCandidateId(candidateId: string): Promise<Application[]> {
-    return this.applicationRepository.find({
-      where: { candidateId },
-      relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
-    });
+    try {
+      this.logger.log(`Finding applications for candidate: ${candidateId}`);
+      return await this.applicationRepository.find({
+        where: { candidateId },
+        relations: ['job', 'job.company', 'candidate', 'applicationNotes'],
+        order: { createdAt: 'DESC' },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to find applications for candidate ${candidateId}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve candidate applications');
+    }
   }
 
   async update(id: string, updateApplicationInput: UpdateApplicationInput, userId?: string): Promise<Application | null> {

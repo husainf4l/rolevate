@@ -104,8 +104,8 @@ export interface JobFilter {
 }
 
 export interface PaginationInput {
-  take?: number;
-  skip?: number;
+  page?: number;
+  limit?: number;
 }
 
 class JobService {

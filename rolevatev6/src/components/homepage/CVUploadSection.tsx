@@ -61,7 +61,7 @@ export default function CVUploadSection() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16 md:mb-24">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
               Not Sure What{" "}
               <span className="text-primary-600">
                 Fits You?

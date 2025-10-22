@@ -32,9 +32,9 @@ export default function Hero() {
 
         {/* Text Section - Second on Mobile */}
         <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left max-w-2xl order-2 lg:order-1">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight leading-[1.1] px-2 sm:px-0">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-gray-900 mb-6 tracking-tight leading-[1.1] px-2 sm:px-0">
             Land Your Dream Job{" "}
-            <span className="text-primary-600 font-bold">
+            <span className="text-primary-600 font-light">
               10x Faster
             </span>
           </h1>

@@ -392,77 +392,77 @@ export default function CandidatesPage() {
           {!loading && !error && (
             <>
               {/* Stats Overview */}
-              <div className="grid grid-cols-4 md:grid-cols-8 gap-4 mb-8">
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4 mb-8">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Total</p>
-                    <UsersIcon className="w-5 h-5 text-slate-400" />
+                    <p className="text-xs font-medium text-gray-600">Total</p>
+                    <UsersIcon className="w-4 h-4 text-slate-400" />
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">{candidates.length}</p>
+                  <p className="text-xl font-bold text-gray-900">{candidates.length}</p>
                 </div>
 
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Pending</p>
-                    <DocumentTextIcon className="w-5 h-5 text-amber-500" />
+                    <p className="text-xs font-medium text-gray-600">Pending</p>
+                    <DocumentTextIcon className="w-4 h-4 text-amber-500" />
                   </div>
-                  <p className="text-2xl font-bold text-amber-700">{statusCounts.pending}</p>
+                  <p className="text-xl font-bold text-amber-700">{statusCounts.pending}</p>
                 </div>
 
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Analyzed</p>
-                    <CheckCircleIcon className="w-5 h-5 text-blue-500" />
+                    <p className="text-xs font-medium text-gray-600">Analyzed</p>
+                    <CheckCircleIcon className="w-4 h-4 text-blue-500" />
                   </div>
-                  <p className="text-2xl font-bold text-blue-700">{statusCounts.analyzed}</p>
+                  <p className="text-xl font-bold text-blue-700">{statusCounts.analyzed}</p>
                 </div>
 
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Reviewed</p>
-                    <ClockIcon className="w-5 h-5 text-sky-500" />
+                    <p className="text-xs font-medium text-gray-600">Reviewed</p>
+                    <ClockIcon className="w-4 h-4 text-sky-500" />
                   </div>
-                  <p className="text-2xl font-bold text-sky-700">{statusCounts.reviewed}</p>
+                  <p className="text-xl font-bold text-sky-700">{statusCounts.reviewed}</p>
                 </div>
 
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Shortlisted</p>
-                    <ClockIcon className="w-5 h-5 text-violet-500" />
+                    <p className="text-xs font-medium text-gray-600">Shortlisted</p>
+                    <ClockIcon className="w-4 h-4 text-violet-500" />
                   </div>
-                  <p className="text-2xl font-bold text-violet-700">{statusCounts.shortlisted}</p>
+                  <p className="text-xl font-bold text-violet-700">{statusCounts.shortlisted}</p>
                 </div>
 
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Interviewed</p>
-                    <CheckCircleIcon className="w-5 h-5 text-primary-500" />
+                    <p className="text-xs font-medium text-gray-600">Interviewed</p>
+                    <CheckCircleIcon className="w-4 h-4 text-primary-500" />
                   </div>
-                  <p className="text-2xl font-bold text-primary-700">{statusCounts.interviewed}</p>
+                  <p className="text-xl font-bold text-primary-700">{statusCounts.interviewed}</p>
                 </div>
 
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Offered</p>
-                    <CheckCircleIcon className="w-5 h-5 text-emerald-500" />
+                    <p className="text-xs font-medium text-gray-600">Offered</p>
+                    <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
                   </div>
-                  <p className="text-2xl font-bold text-emerald-700">{statusCounts.offered}</p>
+                  <p className="text-xl font-bold text-emerald-700">{statusCounts.offered}</p>
                 </div>
 
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Hired</p>
-                    <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                    <p className="text-xs font-medium text-gray-600">Hired</p>
+                    <CheckCircleIcon className="w-4 h-4 text-green-500" />
                   </div>
-                  <p className="text-2xl font-bold text-green-700">{statusCounts.hired}</p>
+                  <p className="text-xl font-bold text-green-700">{statusCounts.hired}</p>
                 </div>
 
-                <div className="bg-white rounded-sm p-6 shadow-sm border border-gray-200 hover:shadow transition-shadow">
+                <div className="bg-white rounded-sm p-4 shadow-sm border border-gray-200 hover:shadow transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">Rejected</p>
-                    <XCircleIcon className="w-5 h-5 text-rose-500" />
+                    <p className="text-xs font-medium text-gray-600">Rejected</p>
+                    <XCircleIcon className="w-4 h-4 text-rose-500" />
                   </div>
-                  <p className="text-2xl font-bold text-rose-700">{statusCounts.rejected}</p>
+                  <p className="text-xl font-bold text-rose-700">{statusCounts.rejected}</p>
                 </div>
               </div>
 

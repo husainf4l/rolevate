@@ -18,6 +18,7 @@ import { SecurityModule } from './security/security.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { ServicesModule } from './services/services.module';
 import { LiveKitModule } from './livekit/livekit.module';
+import { DatabaseBackupModule } from './database-backup/database-backup.module';
 import { AuditService } from './audit.service';
 
 @Module({
@@ -58,6 +59,8 @@ import { AuditService } from './audit.service';
     }),
     UserModule,
     AuthModule,
+    ServicesModule,
+    DatabaseBackupModule, // Must come after AuthModule and ServicesModule
     JobModule,
     NotificationModule,
     CompanyModule,
@@ -68,7 +71,6 @@ import { AuditService } from './audit.service';
     ReportModule,
     SecurityModule,
     WhatsAppModule,
-    ServicesModule,
     LiveKitModule,
   ],
   providers: [AuditService],

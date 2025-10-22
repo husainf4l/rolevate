@@ -20,6 +20,10 @@ export class AuditService {
     this.logger.log(`User login: ${userId} (${email})`);
   }
 
+  logUserLogout(userId: string, email: string) {
+    this.logger.log(`User logout: ${userId} (${email})`);
+  }
+
   logUserRegistration(userId: string, email: string) {
     this.logger.log(`User registration: ${userId} (${email})`);
   }

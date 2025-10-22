@@ -11,6 +11,7 @@ import {
   activateCV,
   transformCVData,
 } from "@/services/cv";
+import AvatarUpload from "@/components/common/AvatarUpload";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -77,12 +78,17 @@ export default function ProfilePage() {
 
   const loadCVs = async () => {
     try {
+      console.log('[loadCVs] Starting to load CVs...');
       setLoadingCVs(true);
       setCvError(null);
       const response = await getCVs();
+      console.log('[loadCVs] Received response:', response);
       const transformedCVs = response.map(transformCVData);
+      console.log('[loadCVs] Transformed CVs:', transformedCVs);
       setCvs(transformedCVs);
+      console.log('[loadCVs] CVs loaded successfully, count:', transformedCVs.length);
     } catch (err) {
+      console.error('[loadCVs] Error loading CVs:', err);
       setCvError(err instanceof Error ? err.message : "Failed to load CVs");
     } finally {
       setLoadingCVs(false);
@@ -91,16 +97,20 @@ export default function ProfilePage() {
 
   const handleFileUpload = async (file: File) => {
     try {
+      console.log('[handleFileUpload] Starting upload for file:', file.name);
       setUploading(true);
       setCvError(null);
-      const response = await uploadCV(file);
-      const transformedCV = transformCVData(response as any);
-      setCvs((prev) => [transformedCV, ...prev]);
+      const fileUrl = await uploadCV(file);
+      console.log('[handleFileUpload] Upload successful, URL:', fileUrl);
 
-      // Show activation modal for the newly uploaded CV
-      setPendingActivationCV({ id: (response as any).id, name: file.name });
-      setShowActivationModal(true);
+      // Reload CVs from backend to get the complete CV object with ID
+      console.log('[handleFileUpload] Reloading CVs from backend...');
+      await loadCVs();
+
+      setSuccessMessage(`CV "${file.name}" uploaded successfully!`);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
+      console.error('[handleFileUpload] Error:', err);
       setCvError(err instanceof Error ? err.message : "Failed to upload CV");
     } finally {
       setUploading(false);
@@ -163,29 +173,39 @@ export default function ProfilePage() {
   };
 
   const handleDeleteCV = async (cvId: string) => {
+    console.log('[handleDeleteCV] Called with cvId:', cvId);
     if (!confirm("Are you sure you want to delete this CV?")) {
+      console.log('[handleDeleteCV] User cancelled');
       return;
     }
 
     try {
+      console.log('[handleDeleteCV] Calling deleteCV service...');
       await deleteCV(cvId);
+      console.log('[handleDeleteCV] Success, updating state');
       setCvs((prev) => prev.filter((cv) => cv.id !== cvId));
+      setSuccessMessage("CV deleted successfully!");
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
+      console.error('[handleDeleteCV] Error:', err);
       setCvError(err instanceof Error ? err.message : "Failed to delete CV");
     }
   };
 
   const handleActivateCV = async (cvId: string) => {
+    console.log('[handleActivateCV] Called with cvId:', cvId);
     try {
       setCvError(null);
       setSuccessMessage(null);
+      console.log('[handleActivateCV] Calling activateCV service...');
       await activateCV(cvId);
+      console.log('[handleActivateCV] Success, updating state');
 
       // Update the CVs list - deactivate all others and activate the selected one
       setCvs((prev) =>
         prev.map((cv) => ({
           ...cv,
-          isActive: cv.id === cvId,
+          isPrimary: cv.id === cvId,
         }))
       );
 
@@ -193,12 +213,20 @@ export default function ProfilePage() {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
+      console.error('[handleActivateCV] Error:', err);
       setCvError(err instanceof Error ? err.message : "Failed to activate CV");
     }
   };
 
   const handleDownload = (cv: CVData) => {
-    window.open((cv as any).downloadUrl, "_blank");
+    console.log('[handleDownload] Called with cv:', cv);
+    if (cv.fileUrl) {
+      console.log('[handleDownload] Opening URL:', cv.fileUrl);
+      window.open(cv.fileUrl, "_blank");
+    } else {
+      console.error('[handleDownload] No fileUrl found');
+      setCvError("Cannot download: CV file URL is missing");
+    }
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -271,13 +299,14 @@ export default function ProfilePage() {
 
   // user is now the CandidateProfile directly
   const profile = user;
-  const fullName = `${profile.firstName} ${profile.lastName}`.trim() || profile.email;
+  const userEmail = profile.user?.email || '';
+  const fullName = `${profile.firstName} ${profile.lastName}`.trim() || userEmail;
   const initials = fullName.split(' ').map((n: string) => n.charAt(0)).join('').toUpperCase();
 
   // Calculate profile completeness
   const completedFields = [
     !!profile.firstName,
-    profile.email,
+    !!userEmail,
     profile.phone && profile.phone !== "a", // Exclude placeholder phone
     profile.profileSummary && !profile.profileSummary.includes("CV parsing failed"),
     profile.skills && profile.skills.length > 0,
@@ -323,10 +352,12 @@ export default function ProfilePage() {
           <Card className="bg-white border-0 shadow-sm">
             <CardContent className="p-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1">
-                  <div className="w-20 h-20 bg-primary-600 rounded-xl flex items-center justify-center mx-auto lg:mx-0">
-                    <span className="text-white text-2xl font-bold">{initials}</span>
-                  </div>
+                <div className="lg:col-span-1 flex justify-center lg:justify-start">
+                  <AvatarUpload
+                    size="xl"
+                    editable={true}
+                    showName={false}
+                  />
                 </div>
                 <div className="lg:col-span-2">
                   <h3 className="text-2xl font-bold text-gray-900 mb-1">
@@ -338,7 +369,7 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Email</p>
-                      <p className="text-sm font-medium text-gray-900">{profile.email}</p>
+                      <p className="text-sm font-medium text-gray-900">{userEmail || 'Email not available'}</p>
                     </div>
                     <div>
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Phone</p>
@@ -779,41 +810,40 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                {cvs.map((cv) => (
-                  <div
-                    key={cv.id}
-                    className="px-6 py-4 hover:bg-gray-50 transition-colors duration-200"
-                  >
+                {cvs.map((cv, index) => (
+                  <div key={cv.id || `cv-${index}`} className="px-6 py-4 hover:bg-gray-50 transition-colors duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
                           <span className="text-primary-600 font-bold text-sm">
-                            {(cv as any).originalFileName.charAt(0).toUpperCase()}
+                            {(cv.fileName || 'CV').charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-3 mb-1">
                             <h3 className="text-sm font-semibold text-gray-900 truncate">
-                              {(cv as any).originalFileName}
+                              {cv.fileName || 'Untitled CV'}
                             </h3>
-                            {(cv as any).isActive && (
+                            {cv.isPrimary && (
                               <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-100 text-primary-800">
                                 <span>Active CV</span>
                               </span>
                             )}
                           </div>
                           <div className="flex items-center space-x-4 text-xs text-gray-600">
-                            <span>Updated {new Date((cv as any).lastUpdated).toLocaleDateString()}</span>
-                            <span>{(cv as any).fileSize}</span>
+                            <span>Updated {new Date(cv.updatedAt).toLocaleDateString()}</span>
+                            {cv.fileSize && <span>{Math.round(cv.fileSize / 1024)} KB</span>}
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center space-x-3">
                         {/* Status Badge */}
-                        <div className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold text-white ${getStatusColor(cv.status)}`}>
-                          <span className="capitalize">{cv.status.replace('_', ' ')}</span>
-                        </div>
+                        {cv.status && (
+                          <div className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold text-white ${getStatusColor(cv.status)}`}>
+                            <span className="capitalize">{cv.status.replace('_', ' ')}</span>
+                          </div>
+                        )}
 
                         {/* Action Buttons */}
                         <div className="flex items-center space-x-2">

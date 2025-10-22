@@ -48,7 +48,7 @@ export class ApplicationResolver {
   }
 
   @Query(() => [Application], { name: 'applications' })
-  @UseGuards(BusinessOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard)
   async findAll(
     @Context() context: any,
     @Args('filter', { nullable: true }) filter?: ApplicationFilterInput,

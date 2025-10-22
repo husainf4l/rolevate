@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import JobListCard, { JobData } from "@/components/common/JobListCard";
 import { Button } from "@/components/ui/button";
-import { JobService, JobPost } from "@/services/job";
+import { jobsService } from "@/services/jobs.service";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 
 export default function UserDashboardJobsPage() {
@@ -55,7 +55,7 @@ export default function UserDashboardJobsPage() {
   const jobsPerPage = 10;
 
   // Helper function to convert JobPost to JobData format
-  const convertJobPostToJobData = (jobPost: JobPost): JobData => {
+  const convertJobPostToJobData = (jobPost: any): JobData => {
     try {
       const logoResult = getJobLogo(jobPost);
 
@@ -107,7 +107,7 @@ export default function UserDashboardJobsPage() {
   };
 
   // Helper function to get job logo from API response (no emoji fallback)
-  const getJobLogo = (jobPost: JobPost): string | undefined => {
+  const getJobLogo = (jobPost: any): string | undefined => {
     // Priority order: companyLogo -> company.logo -> undefined (no fallback)
     if ((jobPost as any).companyLogo) {
       return (jobPost as any).companyLogo;
@@ -126,10 +126,10 @@ export default function UserDashboardJobsPage() {
     try {
       setLoading(true);
 
-      const response = await (JobService as any).getAllPublicJobs(
+      const response = await jobsService.getPublicJobs(
         page,
         jobsPerPage,
-        search || searchTerm || undefined
+        search || searchTerm ? { search: search || searchTerm } : undefined
       );
 
       console.log("API Response:", response); // Debug log
@@ -142,7 +142,15 @@ export default function UserDashboardJobsPage() {
       const convertedJobs = response.jobs.map(convertJobPostToJobData);
 
       setJobs(convertedJobs);
-      setPagination(response.pagination);
+      setPagination({
+        totalPages: Math.ceil(response.total / jobsPerPage),
+        currentPage: page,
+        hasNextPage: page < Math.ceil(response.total / jobsPerPage),
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        total: response.total
+      });
       setCurrentPage(page);
     } catch (error) {
       console.error("Error fetching jobs:", error);

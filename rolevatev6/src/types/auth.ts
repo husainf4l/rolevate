@@ -3,10 +3,16 @@ export interface User {
   email: string;
   name: string;
   userType: 'BUSINESS' | 'CANDIDATE';
+  phone?: string;
+  avatar?: string;
   company?: {
     id: string;
     name: string;
   };
+  companyId?: string;
+  candidateProfile?: any;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface LoginInput {

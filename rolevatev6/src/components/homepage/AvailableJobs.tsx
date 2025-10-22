@@ -39,7 +39,7 @@ export default function AvailableJobs() {
       <div className="container mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="text-center mb-16 md:mb-20">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
             Featured{" "}
             <span className="text-primary-600">
               Opportunities
@@ -79,7 +79,7 @@ export default function AvailableJobs() {
           ) : error ? (
             // Error state
             <div className="col-span-full text-center py-12">
-              <div className="text-red-500 text-lg font-medium mb-2">
+              <div className="text-red-500 text-lg font-light mb-2">
                 Failed to load jobs
               </div>
               <p className="text-gray-600 mb-4">{error}</p>

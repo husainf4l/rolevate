@@ -13,6 +13,7 @@ import { Company } from '../company/company.entity';
 import { Application } from '../application/application.entity';
 import { Job } from '../job/job.entity';
 import { AuthModule } from '../auth/auth.module';
+import { ServicesModule } from '../services/services.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AuthModule } from '../auth/auth.module';
       Job,
     ]),
     AuthModule,
+    ServicesModule,
   ],
   providers: [ReportService, ReportResolver],
   exports: [ReportService],

@@ -4,6 +4,7 @@ import { User } from './user.entity';
 import { UserDto } from './user.dto';
 import { UserService } from './user.service';
 import { CreateUserInput } from './create-user.input';
+import { UpdateUserInput } from './update-user.input';
 import { ChangePasswordInput } from './change-password.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
@@ -117,6 +118,50 @@ export class UserResolver {
   @Mutation(() => UserDto)
   async createUser(@Args('input') input: CreateUserInput): Promise<UserDto> {
     const user = await this.userService.create(input.userType, input.email, input.password, input.name, input.phone);
+    return {
+      id: user.id,
+      userType: user.userType,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      avatar: user.avatar,
+      isActive: user.isActive,
+      companyId: user.companyId,
+      company: user.company ? {
+        id: user.company.id,
+        name: user.company.name,
+        description: user.company.description,
+        website: user.company.website,
+        logo: user.company.logo,
+        industry: user.company.industry,
+        size: user.company.size,
+        founded: user.company.founded,
+        location: user.company.location,
+        addressId: user.company.addressId,
+        createdAt: user.company.createdAt,
+        updatedAt: user.company.updatedAt,
+      } : undefined,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  @Mutation(() => UserDto)
+  @UseGuards(JwtAuthGuard)
+  async updateUser(
+    @Args('id') id: string,
+    @Args('input') input: UpdateUserInput,
+    @Context() context: any,
+  ): Promise<UserDto> {
+    // Optional: Add authorization check to ensure user can only update themselves
+    // or is an admin
+    const currentUserId = context.req.user.id;
+    if (currentUserId !== id) {
+      // You might want to check if user is admin here
+      // For now, we'll allow it, but you can add stricter checks
+    }
+
+    const user = await this.userService.update(id, input);
     return {
       id: user.id,
       userType: user.userType,

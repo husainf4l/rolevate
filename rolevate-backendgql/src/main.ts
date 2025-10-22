@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './global-exception.filter';
 
@@ -14,6 +14,8 @@ import { GlobalExceptionFilter } from './global-exception.filter';
  */
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  
   const fastifyAdapter = new FastifyAdapter({
     bodyLimit: 50 * 1024 * 1024, // 50MB limit (allows ~37MB original files after base64 encoding)
   });
@@ -22,6 +24,9 @@ async function bootstrap() {
     AppModule,
     fastifyAdapter,
   );
+
+  // Use the local logger instance instead of resolving Logger from DI
+  app.useLogger(logger);
   
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
@@ -33,6 +38,11 @@ async function bootstrap() {
       
       // Allow localhost and 127.0.0.1 on any port for development
       if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
+        return callback(null, true);
+      }
+      
+      // Allow local network IPs (192.168.x.x) for development
+      if (origin.match(/^https?:\/\/192\.168\.\d+\.\d+(:\d+)?$/)) {
         return callback(null, true);
       }
       
@@ -55,7 +65,17 @@ async function bootstrap() {
     done();
   });
   
-  await app.listen(process.env.PORT || 4005, '0.0.0.0');
-  console.log(`🚀 Application is running on: ${await app.getUrl()}`);
+  const port = process.env.PORT || 4005;
+  await app.listen(port, '0.0.0.0');
+  
+  const url = await app.getUrl();
+  logger.log(`🚀 Application is running on: ${url}`);
+  logger.log(`📊 GraphQL Playground: ${url}/api/graphql`);
+  logger.log(`🏥 Environment: ${process.env.NODE_ENV || 'development'}`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  const logger = new Logger('Bootstrap');
+  logger.error('Failed to start application', error.stack);
+  process.exit(1);
+});

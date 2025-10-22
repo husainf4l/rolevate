@@ -5,9 +5,13 @@ export interface CVData {
   id: string;
   fileName: string;
   fileUrl: string;
-  status: 'PENDING' | 'ANALYZED' | 'FAILED';
+  fileSize?: number;
+  mimeType?: string;
+  isPrimary?: boolean;
+  status?: 'PENDING' | 'ANALYZED' | 'FAILED';
   analysisResults?: any;
   uploadedAt: string;
+  createdAt?: string;
   updatedAt: string;
 }
 
@@ -18,16 +22,29 @@ export interface CVUploadResponse {
 }
 
 class CVService {
-  private GET_CVS_QUERY = gql`
-    query GetCVs {
-      cvs {
+  private GET_USER_ID_QUERY = gql`
+    query GetUserId {
+      me {
         id
-        fileName
-        fileUrl
-        status
-        analysisResults
-        uploadedAt
-        updatedAt
+      }
+    }
+  `;
+
+  private GET_CVS_QUERY = gql`
+    query GetCandidateCVs($userId: ID!) {
+      candidateProfileByUser(userId: $userId) {
+        id
+        cvs {
+          id
+          fileName
+          fileUrl
+          fileSize
+          mimeType
+          isPrimary
+          uploadedAt
+          createdAt
+          updatedAt
+        }
       }
     }
   `;
@@ -66,11 +83,31 @@ class CVService {
 
   async getCVs(): Promise<CVData[]> {
     try {
-      const { data } = await apolloClient.query<{ cvs: CVData[] }>({
-        query: this.GET_CVS_QUERY,
+      // First, get the current user's ID
+      const { data: userData } = await apolloClient.query<{
+        me: { id: string }
+      }>({
+        query: this.GET_USER_ID_QUERY,
         fetchPolicy: 'network-only'
       });
-      return data?.cvs || [];
+
+      if (!userData?.me?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      // Then, fetch the candidate profile with CVs
+      const { data: cvData } = await apolloClient.query<{
+        candidateProfileByUser: {
+          id: string;
+          cvs: CVData[]
+        }
+      }>({
+        query: this.GET_CVS_QUERY,
+        variables: { userId: userData.me.id },
+        fetchPolicy: 'network-only'
+      });
+
+      return cvData?.candidateProfileByUser?.cvs || [];
     } catch (error: any) {
       throw new Error(error?.message || 'Failed to fetch CVs');
     }
@@ -126,25 +163,41 @@ class CVService {
   }
 
   async deleteCV(id: string): Promise<boolean> {
+    if (!id) {
+      throw new Error('CV ID is required');
+    }
+
     try {
+      console.log('[deleteCV] Deleting CV with ID:', id);
       const { data } = await apolloClient.mutate<{ deleteCV: boolean }>({
         mutation: this.DELETE_CV_MUTATION,
-        variables: { id }
+        variables: { id },
+        refetchQueries: ['GetCandidateCVs']
       });
+      console.log('[deleteCV] Success:', data);
       return data?.deleteCV || false;
     } catch (error: any) {
+      console.error('[deleteCV] Error:', error);
       throw new Error(error?.message || 'Failed to delete CV');
     }
   }
 
   async activateCV(id: string): Promise<boolean> {
+    if (!id) {
+      throw new Error('CV ID is required');
+    }
+
     try {
+      console.log('[activateCV] Activating CV with ID:', id);
       const { data } = await apolloClient.mutate<{ activateCV: boolean }>({
         mutation: this.ACTIVATE_CV_MUTATION,
-        variables: { id }
+        variables: { id },
+        refetchQueries: ['GetCandidateCVs']
       });
+      console.log('[activateCV] Success:', data);
       return data?.activateCV || false;
     } catch (error: any) {
+      console.error('[activateCV] Error:', error);
       throw new Error(error?.message || 'Failed to activate CV');
     }
   }

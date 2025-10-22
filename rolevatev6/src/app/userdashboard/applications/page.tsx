@@ -4,6 +4,16 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getCandidateApplications, Application } from "@/services/application";
+import {
+  BriefcaseIcon,
+  BuildingOfficeIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  XCircleIcon,
+  DocumentTextIcon,
+} from "@heroicons/react/24/outline";
 
 interface ApplicationDisplay {
   id: string;
@@ -62,21 +72,42 @@ const convertToDisplayFormat = (
 const getStatusColor = (status: ApplicationDisplay["status"]) => {
   switch (status) {
     case "submitted":
-      return "bg-yellow-100 text-yellow-800";
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
     case "reviewing":
-      return "bg-blue-100 text-blue-800";
+      return "bg-blue-100 text-blue-800 border-blue-200";
     case "interview":
-      return "bg-purple-100 text-purple-800";
+      return "bg-purple-100 text-purple-800 border-purple-200";
     case "offered":
-      return "bg-emerald-100 text-emerald-800";
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
     case "accepted":
-      return "bg-green-100 text-green-800";
+      return "bg-green-100 text-green-800 border-green-200";
     case "rejected":
-      return "bg-red-100 text-red-800";
+      return "bg-red-100 text-red-800 border-red-200";
     case "withdrawn":
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-100 text-gray-800 border-gray-200";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
+};
+
+const getStatusIcon = (status: ApplicationDisplay["status"]) => {
+  switch (status) {
+    case "submitted":
+      return <ClockIcon className="w-4 h-4" />;
+    case "reviewing":
+      return <DocumentTextIcon className="w-4 h-4" />;
+    case "interview":
+      return <BriefcaseIcon className="w-4 h-4" />;
+    case "offered":
+      return <CheckCircleIcon className="w-4 h-4" />;
+    case "accepted":
+      return <CheckCircleIcon className="w-4 h-4" />;
+    case "rejected":
+      return <XCircleIcon className="w-4 h-4" />;
+    case "withdrawn":
+      return <XCircleIcon className="w-4 h-4" />;
+    default:
+      return <ClockIcon className="w-4 h-4" />;
   }
 };
 
@@ -164,7 +195,7 @@ export default function ApplicationsPage() {
               </span>
             </h1>
             <p className="font-text text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Track and manage all your job applications in one place.
+              Track and manage all your job applications
             </p>
           </div>
         </div>
@@ -250,11 +281,12 @@ export default function ApplicationsPage() {
         </div>
 
         {/* Applications List */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="text-lg font-semibold text-gray-900">
-            {filteredApplications.length} {filteredApplications.length === 1 ? "Application" : "Applications"} Found
+        <div className="max-w-5xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <div className="text-lg font-semibold text-gray-900">
+              {filteredApplications.length} {filteredApplications.length === 1 ? "Application" : "Applications"} Found
+            </div>
           </div>
-        </div>
         {filteredApplications.length === 0 ? (
           <div className="text-center py-12">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -265,12 +297,19 @@ export default function ApplicationsPage() {
                 ? "You haven't applied to any jobs yet. Start exploring opportunities!"
                 : `No applications with status: ${filterStatus}`}
             </p>
-            {filterStatus !== "All Status" && (
+            {filterStatus !== "All Status" ? (
               <button
                 onClick={() => setFilterStatus("All Status")}
                 className="px-4 py-2 bg-primary-600 text-white rounded-sm hover:bg-primary-700 transition-colors"
               >
                 Clear Filter
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/userdashboard/jobs")}
+                className="px-4 py-2 bg-primary-600 text-white rounded-sm hover:bg-primary-700 transition-colors"
+              >
+                Explore Jobs
               </button>
             )}
           </div>
@@ -279,29 +318,39 @@ export default function ApplicationsPage() {
             {filteredApplications.map((application) => (
               <div
                 key={application.id}
-                className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10 bg-white hover:bg-slate-50/50 rounded-sm p-4 sm:p-4 shadow-sm"
+                className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/10 bg-white border border-gray-200 hover:border-primary-300 rounded-sm p-5 sm:p-6"
               >
                 {/* Mobile Layout */}
                 <div className="block sm:hidden">
                   {/* Top row - Job title and company */}
                   <div className="mb-3">
-                    <h3 className="font-semibold text-slate-900 leading-tight text-base group-hover:text-teal-700 transition-colors mb-1">
+                    <h3 className="font-semibold text-gray-900 leading-tight text-base group-hover:text-primary-600 transition-colors mb-1">
                       {application.jobTitle}
                     </h3>
-                    <p className="text-xs font-medium text-slate-700 mb-2">{application.company}</p>
-                    <div className="flex items-center gap-1 text-xs text-slate-600 mb-2">
+                    <p className="text-xs font-medium text-gray-700 mb-2">{application.company}</p>
+                    <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
+                      <CalendarIcon className="w-3.5 h-3.5" />
                       <span>Applied {new Date(application.appliedDate).toLocaleDateString()}</span>
                     </div>
+                    {application.cvAnalysisScore > 0 && (
+                      <div className="inline-flex items-center gap-1.5 bg-primary-50 px-2.5 py-1 rounded border border-primary-200">
+                        <ChartBarIcon className="w-3.5 h-3.5 text-primary-600" />
+                        <span className="text-xs font-semibold text-primary-700">
+                          {application.cvAnalysisScore}% Match
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Bottom row - Status, Details button */}
-                  <div className="flex items-center justify-end pt-3 border-t border-slate-100">
+                  <div className="flex items-center justify-end pt-3 border-t border-gray-100">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-sm ${getStatusColor(
+                        className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-sm border ${getStatusColor(
                           application.status
                         )}`}
                       >
+                        {getStatusIcon(application.status)}
                         {application.status.charAt(0).toUpperCase() +
                           application.status.slice(1)}
                       </span>
@@ -319,24 +368,37 @@ export default function ApplicationsPage() {
                 <div className="hidden sm:flex sm:items-center sm:justify-between gap-4">
                   {/* Left side - Application info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 leading-tight text-base group-hover:text-teal-700 transition-colors">
+                    <h3 className="font-semibold text-gray-900 leading-tight text-base group-hover:text-primary-600 transition-colors mb-1">
                       {application.jobTitle}
                     </h3>
-                    <div className="flex flex-wrap items-center gap-3 mt-1">
-                      <p className="text-sm font-medium text-slate-700">{application.company}</p>
-                      <span className="text-sm text-slate-600">
-                        Applied {new Date(application.appliedDate).toLocaleDateString()}
-                      </span>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                        <BuildingOfficeIcon className="w-4 h-4 text-gray-400" />
+                        <span>{application.company}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                        <CalendarIcon className="w-4 h-4" />
+                        <span>Applied {new Date(application.appliedDate).toLocaleDateString()}</span>
+                      </div>
+                      {application.cvAnalysisScore > 0 && (
+                        <div className="flex items-center gap-1.5 bg-primary-50 px-3 py-1.5 rounded border border-primary-200">
+                          <ChartBarIcon className="w-4 h-4 text-primary-600" />
+                          <span className="text-sm font-semibold text-primary-700">
+                            {application.cvAnalysisScore}% Match
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Right side - Status and Details button */}
                   <div className="flex items-center gap-3 flex-shrink-0">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-sm ${getStatusColor(
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-sm border ${getStatusColor(
                         application.status
                       )}`}
                     >
+                      {getStatusIcon(application.status)}
                       {application.status.charAt(0).toUpperCase() +
                         application.status.slice(1)}
                     </span>
@@ -352,8 +414,8 @@ export default function ApplicationsPage() {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
 }
-

@@ -272,17 +272,102 @@ export const getApplicationsByJob = async (jobId: string): Promise<Application[]
   return [];
 };
 
-export const getCandidateApplicationDetails = async (applicationId: string): Promise<Application> => {
-  // TODO: Implement
-  return {} as Application;
+export const getCandidateApplicationDetails = async (jobId: string): Promise<Application> => {
+  const GET_APPLICATION_DETAILS_QUERY = gql`
+    query GetApplicationDetails {
+      applications {
+        id
+        appliedAt
+        job {
+          id
+          title
+          company {
+            name
+          }
+        }
+        status
+        cvAnalysisScore
+        cvAnalysisResults
+        coverLetter
+        expectedSalary
+        resumeUrl
+        aiCvRecommendations
+        aiInterviewRecommendations
+        aiSecondInterviewRecommendations
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await apolloClient.query<{ applications: Application[] }>({
+      query: GET_APPLICATION_DETAILS_QUERY,
+      fetchPolicy: 'network-only'
+    });
+    
+    // Find the application with matching jobId
+    const application = (data?.applications || []).find(app => app.job.id === jobId);
+    
+    if (!application) {
+      throw new Error('Application not found for this job');
+    }
+    
+    // Add jobId for backward compatibility
+    return {
+      ...application,
+      jobId: application.job.id
+    };
+  } catch (error: any) {
+    console.error('Error fetching application details:', error);
+    throw new Error(error?.message || 'Failed to fetch application details');
+  }
 };
 
 export const getCompanyApplications = () => applicationService.getCompanyApplications();
 
 export const getCandidateApplications = async (): Promise<Application[]> => {
-  // For now, return empty array - this would need a different GraphQL query
-  // that fetches applications for the authenticated candidate
-  return [];
+  const GET_CANDIDATE_APPLICATIONS_QUERY = gql`
+    query GetCandidateApplications {
+      applications {
+        id
+        appliedAt
+        job {
+          id
+          title
+          company {
+            name
+          }
+        }
+        status
+        cvAnalysisScore
+        cvAnalysisResults
+        coverLetter
+        expectedSalary
+        resumeUrl
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await apolloClient.query<{ applications: Application[] }>({
+      query: GET_CANDIDATE_APPLICATIONS_QUERY,
+      fetchPolicy: 'network-only'
+    });
+    
+    // Add jobId for backward compatibility
+    const applications = (data?.applications || []).map(app => ({
+      ...app,
+      jobId: app.job.id
+    }));
+    
+    return applications;
+  } catch (error: any) {
+    console.error('Error fetching candidate applications:', error);
+    throw new Error(error?.message || 'Failed to fetch applications');
+  }
 };
 
 export const bulkUpdateApplicationStatus = async (applicationIds: string[], status: string): Promise<Application[]> => {

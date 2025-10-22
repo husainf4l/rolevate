@@ -14,10 +14,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 import { getSavedJobsDetails } from "@/services/savedJobs";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface SavedJob {
   id: string;
+  slug?: string;
   title: string;
   department: string;
   location: string;
@@ -86,7 +86,7 @@ const formatJobType = (type: string) => {
 };
 
 export default function SavedJobsPage() {
-  const { saveJob, unsaveJob } = useSavedJobs();
+  const { unsaveJob } = useSavedJobs();
   const [savedJobsDetails, setSavedJobsDetails] = useState<SavedJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +98,9 @@ export default function SavedJobsPage() {
         setIsLoading(true);
         setError(null);
         const response = await getSavedJobsDetails();
-        setSavedJobsDetails(response as any);
+        // Extract job details from the savedJobs response
+        const jobs = response.map((savedJob: any) => savedJob.job);
+        setSavedJobsDetails(jobs);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load saved jobs"
@@ -150,132 +152,113 @@ export default function SavedJobsPage() {
     );
   }
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center mb-4">
-            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-              Saved{" "}
-              <span className="text-primary-600">
-                Jobs
-              </span>
-            </h1>
-            <p className="font-text text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Keep track of interesting opportunities you want to apply to later
-            </p>
-          </div>
+    <div className="flex-1 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-sm p-6 border border-gray-200 shadow-sm">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Saved Jobs
+          </h1>
+          <p className="text-gray-600">
+            Keep track of interesting opportunities you want to apply to later
+          </p>
         </div>
-      </div>
 
-      {/* Jobs Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Saved</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {savedJobsDetails.length}
-                  </p>
-                </div>
-                <div className="p-3 bg-[#0fc4b5] bg-opacity-10 rounded-lg">
-                  <BookmarkIcon className="w-6 h-6 text-[#0fc4b5]" />
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-sm p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Saved</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {savedJobsDetails.length}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Applied From Saved
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
-                </div>
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <BriefcaseIcon className="w-6 h-6 text-green-600" />
-                </div>
+              <div className="p-3 bg-primary-100 rounded-lg">
+                <BookmarkIcon className="w-6 h-6 text-primary-600" />
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Deadlines Soon
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {
-                      savedJobsDetails.filter(
-                        (job) =>
-                          job.deadline && isDeadlineApproaching(job.deadline)
-                      ).length
-                    }
-                  </p>
-                </div>
-                <div className="p-3 bg-red-100 rounded-lg">
-                  <ClockIcon className="w-6 h-6 text-red-600" />
-                </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-sm p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Applied From Saved
+                </p>
+                <p className="text-2xl font-bold text-gray-900">0</p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="p-3 bg-green-100 rounded-lg">
+                <BriefcaseIcon className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-sm p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Deadlines Soon
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {
+                    savedJobsDetails.filter(
+                      (job) =>
+                        job.deadline && isDeadlineApproaching(job.deadline)
+                    ).length
+                  }
+                </p>
+              </div>
+              <div className="p-3 bg-red-100 rounded-lg">
+                <ClockIcon className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-                  <option>All Jobs</option>
-                  <option>Full-time</option>
-                  <option>Part-time</option>
-                  <option>Contract</option>
-                  <option>Remote</option>
-                </select>
-                <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-                  <option>Sort by: Most Recent</option>
-                  <option>Sort by: Best Match</option>
-                  <option>Sort by: Salary</option>
-                  <option>Sort by: Deadline</option>
-                </select>
-              </div>
-              <div className="text-sm text-gray-500">
-                {savedJobsDetails.length} saved jobs
-              </div>
+        <div className="bg-white rounded-sm p-4 border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <select className="px-3 py-2 border border-gray-300 rounded-sm text-sm text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-600">
+                <option>All Jobs</option>
+                <option>Full-time</option>
+                <option>Part-time</option>
+                <option>Contract</option>
+                <option>Remote</option>
+              </select>
+              <select className="px-3 py-2 border border-gray-300 rounded-sm text-sm text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-600">
+                <option>Sort by: Most Recent</option>
+                <option>Sort by: Best Match</option>
+                <option>Sort by: Salary</option>
+                <option>Sort by: Deadline</option>
+              </select>
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-sm text-gray-500">
+              {savedJobsDetails.length} saved jobs
+            </div>
+          </div>
+        </div>
 
         {/* Saved Jobs List */}
         {savedJobsDetails.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <HeartIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No saved jobs yet
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Start saving jobs you're interested in to keep track of them here.
-              </p>
-              <a
-                href="/userdashboard/jobs"
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0ba399] transition-colors"
-              >
-                <span>Browse Jobs</span>
-              </a>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-sm p-12 text-center border border-gray-200 shadow-sm">
+            <HeartIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No saved jobs yet
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Start saving jobs you're interested in to keep track of them here.
+            </p>
+            <a
+              href="/userdashboard/jobs"
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-sm hover:bg-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <span>Browse Jobs</span>
+            </a>
+          </div>
         ) : (
           <div className="space-y-4">
             {savedJobsDetails.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
+              <div key={job.id} className="bg-white rounded-sm border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
@@ -298,8 +281,8 @@ export default function SavedJobsPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-lg text-[#0fc4b5] font-medium mb-2">
-                      {job.company.name}
+                    <p className="text-lg text-primary-600 font-medium mb-2">
+                      {job.company?.name || 'Company Name Not Available'}
                     </p>
                     <p className="text-gray-600 mb-4 line-clamp-2">
                       {job.description}
@@ -307,20 +290,24 @@ export default function SavedJobsPage() {
                     <div className="flex items-center space-x-6 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">
                         <MapPinIcon className="w-4 h-4" />
-                        <span>{job.location}</span>
+                        <span>{job.location || 'Location Not Specified'}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <CurrencyDollarIcon className="w-4 h-4" />
-                        <span>{job.salary}</span>
-                      </div>
+                      {job.salary && (
+                        <div className="flex items-center space-x-1">
+                          <CurrencyDollarIcon className="w-4 h-4" />
+                          <span>{job.salary}</span>
+                        </div>
+                      )}
                       <div className="flex items-center space-x-1">
                         <BriefcaseIcon className="w-4 h-4" />
                         <span>{formatJobType(job.type)}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <ClockIcon className="w-4 h-4" />
-                        <span>{job.experience}</span>
-                      </div>
+                      {job.experience && (
+                        <div className="flex items-center space-x-1">
+                          <ClockIcon className="w-4 h-4" />
+                          <span>{job.experience}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-start space-x-2">
@@ -350,29 +337,31 @@ export default function SavedJobsPage() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <a
-                      href={`/jobs/${job.id}`}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      href={`/jobs/${job.slug || job.id}`}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-sm hover:bg-gray-50 transition-colors"
                     >
                       View Details
                     </a>
-                    <button className="px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0ba399] transition-colors">
+                    <a
+                      href={`/jobs/${job.slug || job.id}/apply`}
+                      className="px-4 py-2 bg-primary-600 text-white rounded-sm hover:bg-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    >
                       Apply Now
-                    </button>
+                    </a>
                   </div>
                 </div>
-                </CardContent>
-              </Card>
+              </div>
             ))}
           </div>
         )}
 
         {/* Tips */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
-            <LightBulbIcon className="w-5 h-5" />
+        <div className="bg-primary-50 rounded-sm p-6 border border-primary-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <LightBulbIcon className="w-5 h-5 text-primary-600" />
             Tips for Managing Saved Jobs
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
             <div>
               <p className="font-medium mb-1">Set Application Reminders</p>
               <p>

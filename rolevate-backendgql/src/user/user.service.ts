@@ -42,6 +42,29 @@ export class UserService {
     return this.userRepository.findOne({ where: { email } });
   }
 
+  async update(id: string, updateData: Partial<User>): Promise<User> {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // If password is being updated, hash it
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    // Update user
+    await this.userRepository.update(id, updateData);
+
+    // Return updated user
+    const updatedUser = await this.findOne(id);
+    if (!updatedUser) {
+      throw new BadRequestException('Failed to retrieve updated user');
+    }
+
+    return updatedUser;
+  }
+
   async validatePassword(email: string, password: string): Promise<User | null> {
     const user = await this.findByEmail(email);
     if (user && user.password && await bcrypt.compare(password, user.password)) {

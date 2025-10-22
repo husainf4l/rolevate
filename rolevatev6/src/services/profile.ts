@@ -4,46 +4,47 @@ import { gql } from '@apollo/client';
 
 export interface WorkExperience {
   id?: string;
-  jobTitle: string;
   company: string;
-  location?: string;
+  position: string;
   startDate: string;
   endDate?: string;
   description?: string;
-  isCurrentRole?: boolean;
+  isCurrent?: boolean;
 }
 
 export interface Education {
   id?: string;
   degree: string;
-  university: string;
+  institution: string;
   fieldOfStudy?: string;
   startDate?: string;
-  graduationYear: string;
+  endDate?: string;
   grade?: string;
 }
 
 export interface CandidateProfile {
   id: string;
-  userId: string;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
   firstName?: string;
   lastName?: string;
-  email?: string;
   phone?: string;
-  currentJobTitle?: string;
-  currentLocation?: string;
-  profileSummary?: string;
+  location?: string;
+  bio?: string;
   skills?: string[];
-  linkedInUrl?: string;
+  experience?: string;
+  education?: string;
+  linkedinUrl?: string;
   githubUrl?: string;
   portfolioUrl?: string;
-  yearsOfExperience?: number;
-  expectedSalary?: string;
-  workExperiences?: WorkExperience[];
-  educationHistory?: Education[];
-  languages?: string[];
-  certifications?: string[];
   availability?: string;
+  salaryExpectation?: string;
+  preferredWorkType?: string;
+  workExperiences?: WorkExperience[];
+  educations?: Education[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -52,18 +53,17 @@ export interface UpdateProfileInput {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  currentJobTitle?: string;
-  currentLocation?: string;
-  profileSummary?: string;
+  location?: string;
+  bio?: string;
   skills?: string[];
-  linkedInUrl?: string;
+  experience?: string;
+  education?: string;
+  linkedinUrl?: string;
   githubUrl?: string;
   portfolioUrl?: string;
-  yearsOfExperience?: number;
-  expectedSalary?: string;
-  languages?: string[];
-  certifications?: string[];
   availability?: string;
+  salaryExpectation?: string;
+  preferredWorkType?: string;
 }
 
 class ProfileService {
@@ -82,42 +82,43 @@ class ProfileService {
     query GetCandidateProfile($userId: ID!) {
       candidateProfileByUser(userId: $userId) {
         id
-        userId
+        user {
+          id
+          email
+          name
+        }
         firstName
         lastName
-        email
         phone
-        currentJobTitle
-        currentLocation
-        profileSummary
+        location
+        bio
         skills
-        linkedInUrl
+        experience
+        education
+        linkedinUrl
         githubUrl
         portfolioUrl
-        yearsOfExperience
-        expectedSalary
+        availability
+        salaryExpectation
+        preferredWorkType
         workExperiences {
           id
-          jobTitle
           company
-          location
+          position
           startDate
           endDate
           description
-          isCurrentRole
+          isCurrent
         }
-        educationHistory {
+        educations {
           id
           degree
-          university
+          institution
           fieldOfStudy
           startDate
-          graduationYear
+          endDate
           grade
         }
-        languages
-        certifications
-        availability
         createdAt
         updatedAt
       }
@@ -129,23 +130,25 @@ class ProfileService {
     mutation UpdateCandidateProfile($userId: ID!, $input: UpdateCandidateProfileInput!) {
       updateCandidateProfile(userId: $userId, input: $input) {
         id
-        userId
+        user {
+          id
+          email
+          name
+        }
         firstName
         lastName
-        email
         phone
-        currentJobTitle
-        currentLocation
-        profileSummary
+        location
+        bio
         skills
-        linkedInUrl
+        experience
+        education
+        linkedinUrl
         githubUrl
         portfolioUrl
-        yearsOfExperience
-        expectedSalary
-        languages
-        certifications
         availability
+        salaryExpectation
+        preferredWorkType
         updatedAt
       }
     }
