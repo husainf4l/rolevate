@@ -89,8 +89,8 @@ export class ApplicationService {
       });
     }
 
-    // Create LiveKit room and send WhatsApp invitation
-    this.createLiveKitRoomAndNotifyCandidate(savedApplication);
+    // Send interview room link to candidate (room will be created on-demand)
+    this.sendInterviewLinkToCandidate(savedApplication);
 
     return savedApplication;
   }
@@ -115,12 +115,34 @@ export class ApplicationService {
       throw new Error('Job not found');
     }
 
-    if (job.status !== 'ACTIVE') {
-      throw new Error('Job is not accepting applications');
+    // Allow applications for ACTIVE and PAUSED jobs
+    if (job.status === 'CLOSED' || job.status === 'EXPIRED' || job.status === 'DELETED') {
+      throw new Error(`Job is ${job.status.toLowerCase()} and not accepting applications`);
     }
 
     if (new Date() > job.deadline) {
       throw new Error('Job application deadline has passed');
+    }
+
+    // Validate required candidate information
+    if (!createApplicationInput.email || createApplicationInput.email.trim() === '') {
+      throw new BadRequestException('Email is required and cannot be empty');
+    }
+    if (!createApplicationInput.phone || createApplicationInput.phone.trim() === '') {
+      throw new BadRequestException('Phone number is required and cannot be empty');
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(createApplicationInput.email)) {
+      throw new BadRequestException('Invalid email format');
+    }
+
+    // Validate phone number format (basic validation)
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    const cleanPhone = createApplicationInput.phone.replace(/[\s\-\(\)]/g, '');
+    if (!phoneRegex.test(cleanPhone)) {
+      throw new BadRequestException('Invalid phone number format');
     }
 
     // Generate anonymous candidate info - FastAPI will extract real data later
@@ -131,8 +153,8 @@ export class ApplicationService {
     const candidateInfo = {
       firstName: createApplicationInput.firstName || 'Anonymous',
       lastName: createApplicationInput.lastName || anonymousId,
-      email: createApplicationInput.email || `${anonymousId}@placeholder.temp`,
-      phone: createApplicationInput.phone || null,
+      email: createApplicationInput.email,
+      phone: createApplicationInput.phone,
       linkedin: createApplicationInput.linkedin || null,
       portfolioUrl: createApplicationInput.portfolioUrl,
     };
@@ -191,8 +213,8 @@ export class ApplicationService {
       });
     }
 
-    // Create LiveKit room and send WhatsApp invitation
-    this.createLiveKitRoomAndNotifyCandidate(savedApplication);
+    // Send interview room link to candidate (room will be created on-demand)
+    this.sendInterviewLinkToCandidate(savedApplication);
 
     // Notify company users about new application
     await this.notifyCompanyAboutNewApplication(savedApplication);
@@ -220,7 +242,7 @@ export class ApplicationService {
     hashedPassword: string,
     resumeUrl: string
   ) {
-    console.log('🏗️ Creating user and candidate profile from CV data...');
+    console.log('🏗️ Creating user and empty candidate profile from basic CV data...');
 
     return await this.applicationRepository.manager.transaction(async (manager) => {
       // Check if user already exists with this email
@@ -234,6 +256,7 @@ export class ApplicationService {
         await manager.update(User, { id: user.id }, {
           name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
           password: hashedPassword, // Update password
+          phone: candidateInfo.phone, // Save phone to User entity
         });
         // Reload user
         user = await manager.findOne(User, {
@@ -247,6 +270,7 @@ export class ApplicationService {
           name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
           password: hashedPassword,
           userType: UserType.CANDIDATE,
+          phone: candidateInfo.phone, // Save phone to User entity
           isActive: true,
         });
       }
@@ -261,54 +285,42 @@ export class ApplicationService {
       });
 
       if (candidateProfile) {
-        console.log('ℹ️ Candidate profile already exists, updating it...');
-        // Update existing profile
+        console.log('ℹ️ Candidate profile already exists, updating basic info...');
+        // Update existing profile with basic info only
         await manager.update(CandidateProfile, { userId: user.id }, {
           firstName: candidateInfo.firstName,
           lastName: candidateInfo.lastName,
           phone: candidateInfo.phone,
-          location: candidateInfo.location,
-          skills: candidateInfo.skills || [],
-          linkedinUrl: candidateInfo.linkedin || candidateInfo.linkedinUrl,
-          githubUrl: candidateInfo.githubUrl,
-          portfolioUrl: candidateInfo.portfolioUrl,
           resumeUrl: resumeUrl,
-          bio: candidateInfo.summary || candidateInfo.bio,
+          // Leave CV analysis fields empty - FastAPI will fill them
         });
         // Reload to get updated profile
         candidateProfile = await manager.findOne(CandidateProfile, {
           where: { userId: user.id }
         });
       } else {
-        // Create new candidate profile
-        console.log('🆕 Creating new candidate profile for user:', user.id);
+        // Create new candidate profile with basic info only
+        console.log('🆕 Creating new candidate profile with basic info...');
         candidateProfile = await manager.save(CandidateProfile, {
           userId: user.id,
           firstName: candidateInfo.firstName,
           lastName: candidateInfo.lastName,
           phone: candidateInfo.phone,
-          location: candidateInfo.location,
-          skills: candidateInfo.skills || [],
-          linkedinUrl: candidateInfo.linkedin || candidateInfo.linkedinUrl,
-          githubUrl: candidateInfo.githubUrl,
-          portfolioUrl: candidateInfo.portfolioUrl,
           resumeUrl: resumeUrl,
-          bio: candidateInfo.summary || candidateInfo.bio,
+          // Leave all CV analysis fields empty - FastAPI will populate them
+          skills: [],
+          experience: undefined,
+          education: undefined,
+          bio: undefined,
+          location: undefined,
+          linkedinUrl: undefined,
+          githubUrl: undefined,
+          portfolioUrl: undefined,
         });
       }
 
       if (!candidateProfile) {
         throw new Error('Failed to create or find candidate profile');
-      }
-
-      // Process work experience (handles both string and structured array formats)
-      if (candidateInfo.experience) {
-        await this.processWorkExperience(candidateProfile.id, candidateInfo.experience, manager);
-      }
-
-      // Process education (handles both string and structured array formats)
-      if (candidateInfo.education) {
-        await this.processEducation(candidateProfile.id, candidateInfo.education, manager);
       }
 
       return {
@@ -1008,9 +1020,13 @@ Please change your password after first login.`;
     return '';
   }
 
-  private async createLiveKitRoomAndNotifyCandidate(application: Application): Promise<void> {
+  /**
+   * Send interview room link to candidate via WhatsApp
+   * Room will be created on-demand when candidate clicks the link
+   */
+  private async sendInterviewLinkToCandidate(application: Application): Promise<void> {
     try {
-      console.log('🎥 Creating LiveKit room for interview...');
+      console.log('📱 Sending interview room link to candidate...');
 
       // Get full application with relations including candidate profile for phone number
       const fullApplication = await this.applicationRepository.findOne({
@@ -1022,92 +1038,61 @@ Please change your password after first login.`;
         throw new Error('Application not found');
       }
 
-      // Create unique room name
-      const roomName = `interview_${application.id}_${Date.now()}`;
-
-      // Prepare metadata
-      const metadata = {
-        applicationId: application.id,
-        candidateId: fullApplication.candidateId,
-        candidatePhone: fullApplication.candidate.phone,
-        jobId: fullApplication.jobId,
-        jobTitle: fullApplication.job.title,
-        companyId: fullApplication.job.companyId,
-        interviewLanguage: fullApplication.job.interviewLanguage || 'english',
-        createdAt: new Date().toISOString(),
-        type: 'interview'
-      };
-
-      // Create room with token for candidate
-      const participantName = fullApplication.candidate.name || 'Unknown Candidate';
-      const { room } = await this.liveKitService.createRoomWithToken(
-        roomName,
-        metadata,
-        'system', // Created by system
-        participantName
-      );
-
-      console.log('✅ LiveKit room created:', {
-        roomId: room.id,
-        roomName: room.name,
-      });
-
-      // Send WhatsApp template message to candidate
-      // Get phone from candidate profile
-      const candidatePhone = fullApplication.candidate.candidateProfile?.phone;
-      if (candidatePhone) {
-        console.log('📱 Sending WhatsApp template invitation to candidate...');
-
-        // Use cv_received_notification template
-        // Template parameters:
-        // - Body {{1}}: Candidate name
-        // - Button URL {{1}}: Query parameters for https://rolevate.com/room{{1}}
-        const candidateName = fullApplication.candidate.name || 'Unknown Candidate';
-
-        // Clean phone number (remove + and any spaces/special chars)
-        const cleanPhone = candidatePhone.replace(/[+\s\-()]/g, '');
-
-        // Create query parameters for the interview room
-        const queryParams = `?phone=${cleanPhone}&jobId=${encodeURIComponent(fullApplication.jobId)}&roomName=${encodeURIComponent(room.name)}`;
-
-        const templateParams = [
-          candidateName,  // Body parameter: candidate name
-          queryParams     // Button URL parameter: query string for room URL
-        ];
-
-        // Send WhatsApp template message using communication service
-        await this.communicationService.create({
-          candidateId: fullApplication.candidateId,
-          companyId: fullApplication.job.companyId,
-          jobId: fullApplication.jobId,
-          applicationId: application.id,
-          type: CommunicationType.WHATSAPP,
-          direction: CommunicationDirection.OUTBOUND,
-          content: `Interview invitation sent to ${candidateName} for ${fullApplication.job.title}`,
-          phoneNumber: candidatePhone,
-          templateName: 'cv_received_notification',
-          templateParams: templateParams,
-        });
-
-        console.log('✅ WhatsApp template invitation sent to:', candidatePhone);
-        console.log('📋 Template params:', { candidateName, queryParams });
-      } else {
+      // Get phone from candidate profile or User entity
+      const candidatePhone = fullApplication.candidate.candidateProfile?.phone || fullApplication.candidate.phone;
+      
+      if (!candidatePhone) {
         console.log('⚠️ No phone number available for candidate, skipping WhatsApp notification');
+        return;
       }
 
-      // Update application with room information
-      await this.applicationRepository.update(application.id, {
-        companyNotes: `LiveKit room created: ${room.name}. Interview link sent via WhatsApp.`,
+      console.log('📱 Sending WhatsApp interview link to candidate...');
+
+      const candidateName = fullApplication.candidate.name || 'Candidate';
+
+      // Clean phone number (remove + and any spaces/special chars)
+      const cleanPhone = candidatePhone.replace(/[+\s\-()]/g, '');
+
+      // Create query parameters for the interview room link
+      // Room will be created on-demand when user accesses this link
+      // Only include applicationId - the backend can get all other info from it
+      const queryParams = `?applicationId=${encodeURIComponent(application.id)}`;
+
+      const templateParams = [
+        candidateName,  // Body parameter: candidate name
+        queryParams     // Button URL parameter: query string for room URL
+      ];
+
+      // Send WhatsApp template message using communication service
+      await this.communicationService.create({
+        candidateId: fullApplication.candidateId,
+        companyId: fullApplication.job.companyId,
+        jobId: fullApplication.jobId,
+        applicationId: application.id,
+        type: CommunicationType.WHATSAPP,
+        direction: CommunicationDirection.OUTBOUND,
+        content: `Interview link sent to ${candidateName} for ${fullApplication.job.title}`,
+        phoneNumber: candidatePhone,
+        templateName: 'cv_received_notification',
+        templateParams: templateParams,
       });
 
-      console.log('🎬 Interview setup completed successfully!');
+      console.log('✅ WhatsApp interview link sent to:', candidatePhone);
+      console.log('📋 Link params:', { candidateName, queryParams });
+
+      // Update application with notification info
+      await this.applicationRepository.update(application.id, {
+        companyNotes: `Interview link sent via WhatsApp. Room will be created when candidate joins.`,
+      });
+
+      console.log('🎬 Interview link notification completed successfully!');
 
     } catch (error) {
-      console.error('❌ Failed to create LiveKit room or send notification:', error);
+      console.error('❌ Failed to send interview link:', error);
 
       // Log the error but don't fail the application creation
       await this.applicationRepository.update(application.id, {
-        companyNotes: `Error creating interview room: ${error.message}`,
+        companyNotes: `Error sending interview link: ${error.message}`,
       });
     }
   }
@@ -1276,7 +1261,7 @@ Please change your password after first login.`;
 
       console.log('✅ Interview room created:', {
         roomId: room.id,
-        roomName: room.name,
+        roomName: room.roomName,
       });
 
       // Send WhatsApp notification about scheduled interview
@@ -1290,7 +1275,7 @@ Please change your password after first login.`;
         const cleanPhone = candidatePhone.replace(/[+\s\-()]/g, '');
 
         // Create query parameters for the interview room
-        const queryParams = `?phone=${cleanPhone}&jobId=${encodeURIComponent(fullApplication.jobId)}&roomName=${encodeURIComponent(room.name)}&type=interview`;
+        const queryParams = `?phone=${cleanPhone}&jobId=${encodeURIComponent(fullApplication.jobId)}&roomName=${encodeURIComponent(room.roomName)}&type=interview`;
 
         const templateParams = [
           candidateName,
@@ -1317,7 +1302,7 @@ Please change your password after first login.`;
 
       // Update application with interview room information
       await this.applicationRepository.update(application.id, {
-        companyNotes: `Interview room created: ${room.name}. Interview link sent via WhatsApp.`,
+        companyNotes: `Interview room created: ${room.roomName}. Interview link sent via WhatsApp.`,
         interviewScheduled: true,
         interviewScheduledAt: new Date(),
       });

@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LiveKitRoom } from './livekit-room.entity';
+import { Application } from '../application/application.entity';
 import { ConfigService } from '@nestjs/config';
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { WhatsAppService } from '../whatsapp/whatsapp.service';
+import { CreateRoomResponse, RoomTokenResponse } from './livekit.dto';
 
 @Injectable()
 export class LiveKitService {
@@ -112,28 +117,24 @@ export class LiveKitService {
     }
 
     // 3. Create or update room in our DB
-    let room: LiveKitRoom;
+    let room: LiveKitRoom = {} as LiveKitRoom;
     const existingDbRoom = await this.liveKitRoomRepository.findOne({
-      where: { name },
+      where: { roomName: name },
     });
 
     if (existingDbRoom) {
-      // Update existing room with new metadata
-      await this.liveKitRoomRepository.update(existingDbRoom.id, {
-        metadata,
-        createdBy: userId,
-      });
-      const updatedRoom = await this.liveKitRoomRepository.findOne({
-        where: { name },
-      });
-      room = updatedRoom!; // We just updated it, so it exists
-      console.log(`📝 Updated existing room in database: ${name}`);
+      // Room exists, use it
+      room = existingDbRoom;
+      console.log(`📝 Using existing room from database: ${name}`);
     } else {
-      // Create new room
+      // Create new room - Note: This old method is deprecated, use LiveKitInterviewService instead
       room = await this.liveKitRoomRepository.save({
-        name,
-        metadata,
-        createdBy: userId,
+        roomName: name,
+        roomSid: name, // Use name as sid for backward compatibility
+        roomPassword: 'legacy', // Legacy rooms don't have password
+        passwordExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+        passwordUsed: true,
+        applicationId: userId, // Temporary - this is not ideal
       });
       console.log(`💾 Created new room in database: ${name}`);
     }

@@ -5,6 +5,7 @@ import Navbar from "@/components/common/Navbar";
 import Footer from "@/components/common/Footer";
 import AuthProvider from "@/components/common/AuthProvider";
 import GraphQLProvider from "@/components/common/GraphQLProvider";
+import MaintenancePage from "@/components/common/MaintenancePage";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,6 +23,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
 };
 
+const mintanance = false;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -37,7 +40,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <GraphQLProvider>
-            {children}
+            {mintanance ? <MaintenancePage /> : children}
           </GraphQLProvider>
         </AuthProvider>
       </body>
