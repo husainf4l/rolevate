@@ -255,6 +255,57 @@
             border-left-color: #28a745;
             color: #28a745;
         }
+
+        .transcript {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transcript h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .transcript-entry {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .transcript-entry.agent {
+            background: #e3f2fd;
+            border-left: 3px solid #2196f3;
+        }
+
+        .transcript-entry.user {
+            background: #f3e5f5;
+            border-left: 3px solid #9c27b0;
+        }
+
+        .transcript-entry .speaker {
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .transcript-entry .text {
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .transcript-entry .timestamp {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -281,7 +332,7 @@
 
             <div class="form-group">
                 <label for="roomName">Room Name</label>
-                <input type="text" id="roomName" value="" placeholder="Paste your room name here">
+                <input type="text" id="roomName" value="6f5b51c8-dbae-4557-9a2d-40afa92eecae" placeholder="Paste your room name here">
             </div>
 
             <div class="button-group">
@@ -296,6 +347,11 @@
         </div>
 
         <div id="videoContainer" class="video-container"></div>
+
+        <div class="transcript">
+            <h3>📝 Live Transcript</h3>
+            <div id="transcriptContainer"></div>
+        </div>
 
         <div class="logs">
             <h3>Connection Logs</h3>
@@ -318,6 +374,7 @@
         const muteAudioBtn = document.getElementById('muteAudioBtn');
         const muteVideoBtn = document.getElementById('muteVideoBtn');
         const logContainer = document.getElementById('logContainer');
+        const transcriptContainer = document.getElementById('transcriptContainer');
 
         function addLog(message, type = 'info') {
             const logEntry = document.createElement('div');
@@ -325,6 +382,18 @@
             logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
             logContainer.appendChild(logEntry);
             logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function addTranscript(speaker, text, isFinal = true) {
+            const entry = document.createElement('div');
+            entry.className = `transcript-entry ${speaker}`;
+            entry.innerHTML = `
+                <div class="speaker">${speaker === 'agent' ? '🤖 AI Interviewer' : '👤 You'}</div>
+                <div class="text">${text}</div>
+                <div class="timestamp">${new Date().toLocaleTimeString()}</div>
+            `;
+            transcriptContainer.appendChild(entry);
+            transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
         }
 
         function updateStatus(status, message) {
@@ -357,10 +426,50 @@
         async function connectToRoom() {
             try {
                 const url = document.getElementById('url').value;
+                const roomName = document.getElementById('roomName').value;
+
+                if (!url || !roomName) {
+                    alert('Please enter both URL and room name');
+                    return;
+                }
+
+                // Request room and token from backend
+                try {
+                    addLog('Requesting room and token from backend...', 'info');
+                    const query = `mutation CreateInterviewRoom($applicationId: String!) {
+                        createInterviewRoom(createRoomInput: { applicationId: $applicationId }) {
+                            roomName
+                            message
+                            token
+                        }
+                    }`;
+                    const variables = { applicationId: roomName };
+                    const response = await fetch('http://localhost:4005/api/graphql', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query, variables })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    const data = await response.json();
+                    if (data.errors) {
+                        throw new Error(data.errors[0].message);
+                    }
+                    const { roomName: newRoomName, token: newToken } = data.data.createInterviewRoom;
+                    document.getElementById('roomName').value = newRoomName;
+                    document.getElementById('token').value = newToken;
+                    addLog('✅ Room and token received from backend', 'success');
+                } catch (error) {
+                    console.error('Backend request error:', error);
+                    addLog(`❌ Failed to get room/token: ${error.message}`, 'error');
+                    return;
+                }
+
                 const token = document.getElementById('token').value;
 
-                if (!url || !token) {
-                    alert('Please enter both URL and token');
+                if (!token) {
+                    alert('Failed to obtain token');
                     return;
                 }
 
@@ -384,6 +493,7 @@
                 room.on(LivekitClient.RoomEvent.LocalTrackPublished, handleLocalTrackPublished);
                 room.on(LivekitClient.RoomEvent.ParticipantConnected, handleParticipantConnected);
                 room.on(LivekitClient.RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+                room.on(LivekitClient.RoomEvent.TrackTranscriptionReceived, handleTranscription);
 
                 // Connect to the room
                 await room.connect(url, token);
@@ -538,6 +648,15 @@
             addLog(`📤 Published ${publication.kind} track`, 'success');
         }
 
+        function handleTranscription(transcription, publication, participant) {
+            // Only process final transcriptions to avoid duplicates
+            if (transcription.final) {
+                const speaker = participant.isLocal ? 'user' : 'agent';
+                addTranscript(speaker, transcription.text, true);
+                addLog(`📝 Transcription: ${transcription.text.substring(0, 50)}...`, 'info');
+            }
+        }
+
         function handleDisconnect() {
             addLog('Disconnected from room', 'info');
             updateStatus('disconnected', 'Disconnected');
@@ -553,6 +672,7 @@
 
         function cleanup() {
             videoContainer.innerHTML = '';
+            transcriptContainer.innerHTML = '';
             controlsEl.classList.add('hidden');
             connectBtn.style.display = 'block';
             disconnectBtn.classList.remove('active');

@@ -1,9 +1,18 @@
-livekit-agents[openai]
+# Rolevate Interview Agent Dependencies
+
+# Core LiveKit
+livekit-agents[openai]>=1.2.15
 python-dotenv
+
+# LiveKit Plugins
+livekit-plugins-soniox              # Soniox STT (Arabic & English)
+livekit-plugins-elevenlabs          # ElevenLabs TTS
+livekit-plugins-silero              # Silero VAD
+livekit-plugins-openai              # OpenAI GPT-4
+livekit-plugins-google              # Google services
 livekit-plugins-noise-cancellation~=0.2
-livekit-plugins-elevenlabs
-livekit-plugins-silero
-livekit-plugins-google
-boto3
-psycopg2-binary
-aiohttp
+
+# Backend & Database
+boto3                               # AWS S3 integration
+psycopg2-binary                     # PostgreSQL database
+aiohttp                             # Async HTTP client
