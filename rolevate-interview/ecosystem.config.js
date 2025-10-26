@@ -3,7 +3,7 @@ module.exports = {
     name: 'rolevate-agent',
     script: 'venv/bin/python',
     args: 'main.py dev',
-    cwd: '/home/husain/rolevate/rolevate-interview',
+    cwd: '/Users/husain/Desktop/rolevate/rolevate-interview',
     interpreter: 'none',
     autorestart: true,
     watch: false,
