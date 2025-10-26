@@ -96,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppColors.primary600.withOpacity(0.3),
+                                      color: AppColors.primary600.withValues(alpha: 0.3),
                                       offset: const Offset(0, 4),
                                       blurRadius: 12,
                                     ),
@@ -132,8 +132,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 ),
                                 decoration: BoxDecoration(
                                   color: isBusiness 
-                                      ? AppColors.primary600.withOpacity(0.1)
-                                      : AppColors.info.withOpacity(0.1),
+                                      ? AppColors.primary600.withValues(alpha: 0.1)
+                                      : AppColors.info.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                                 ),
                                 child: Text(
@@ -160,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           userName,
                           CupertinoIcons.person,
                           onTap: () {
-                            // Edit name
+                            Get.toNamed('/edit-profile');
                           },
                         ),
                         const SizedBox(height: AppTheme.spacing8),
@@ -169,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           userEmail,
                           CupertinoIcons.mail,
                           onTap: () {
-                            // Edit email
+                            Get.toNamed('/edit-profile');
                           },
                         ),
                         const SizedBox(height: AppTheme.spacing8),
@@ -178,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           'Not set',
                           CupertinoIcons.phone,
                           onTap: () {
-                            // Edit phone
+                            Get.toNamed('/edit-profile');
                           },
                         ),
                         const SizedBox(height: AppTheme.spacing24),
@@ -193,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           'Change Password',
                           CupertinoIcons.lock_shield,
                           () {
-                            // Change password
+                            Get.toNamed('/change-password');
                           },
                         ),
                         const SizedBox(height: AppTheme.spacing8),
@@ -230,10 +230,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                           child: Container(
                             padding: const EdgeInsets.all(AppTheme.spacing16),
                             decoration: BoxDecoration(
-                              color: AppColors.error.withOpacity(0.1),
+                              color: AppColors.error.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                               border: Border.all(
-                                color: AppColors.error.withOpacity(0.3),
+                                color: AppColors.error.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
@@ -268,7 +268,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             GestureDetector(
               onTap: _closeDrawer,
               child: Container(
-                color: CupertinoColors.black.withOpacity(0.3),
+                color: CupertinoColors.black.withValues(alpha: 0.3),
               ),
             ),
 
@@ -305,7 +305,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.primary600.withOpacity(0.1),
+                color: AppColors.primary600.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSm),
               ),
               child: Icon(

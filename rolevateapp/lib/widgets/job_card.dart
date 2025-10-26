@@ -47,14 +47,14 @@ class JobCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: AppColors.primary50,
                             borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                            image: job.company?.logo != null
+                            image: job.company.logo != null
                                 ? DecorationImage(
-                                    image: NetworkImage(job.company!.logo!),
+                                    image: NetworkImage(job.company.logo!),
                                     fit: BoxFit.cover,
                                   )
                                 : null,
                           ),
-                          child: job.company?.logo == null
+                          child: job.company.logo == null
                               ? const Icon(
                                   CupertinoIcons.building_2_fill,
                                   color: AppColors.primary600,
@@ -68,7 +68,7 @@ class JobCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                job.company?.name ?? 'Company',
+                                job.company.name,
                                 style: AppTypography.labelLarge.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
@@ -76,7 +76,7 @@ class JobCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                job.location ?? 'Location',
+                                job.location,
                                 style: AppTypography.labelSmall.copyWith(
                                   color: AppColors.textTertiary,
                                 ),
@@ -92,7 +92,6 @@ class JobCard extends StatelessWidget {
                   // Bookmark button
                   Obx(() => CupertinoButton(
                         padding: EdgeInsets.zero,
-                        minSize: 32,
                         onPressed: () {
                           jobController.toggleSaveJob(job.id);
                         },
@@ -120,15 +119,13 @@ class JobCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               
-              if (job.department != null) ...[
-                const SizedBox(height: AppTheme.spacing4),
-                Text(
-                  job.department!,
-                  style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              const SizedBox(height: AppTheme.spacing4),
+              Text(
+                job.department,
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.textSecondary,
                 ),
-              ],
+              ),
               
               const SizedBox(height: AppTheme.spacing12),
               
@@ -137,68 +134,61 @@ class JobCard extends StatelessWidget {
                 spacing: AppTheme.spacing8,
                 runSpacing: AppTheme.spacing8,
                 children: [
-                  if (job.type != null)
-                    _buildChip(
-                      job.type!.displayName,
-                      CupertinoIcons.briefcase,
-                    ),
-                  if (job.jobLevel != null)
-                    _buildChip(
-                      job.jobLevel!.displayName,
-                      CupertinoIcons.chart_bar,
-                    ),
-                  if (job.workType != null)
-                    _buildChip(
-                      job.workType!.displayName,
-                      CupertinoIcons.location,
-                    ),
+                  _buildChip(
+                    job.type.displayName,
+                    CupertinoIcons.briefcase,
+                  ),
+                  _buildChip(
+                    job.jobLevel.displayName,
+                    CupertinoIcons.chart_bar,
+                  ),
+                  _buildChip(
+                    job.workType.displayName,
+                    CupertinoIcons.location,
+                  ),
                 ],
               ),
               
-              if (job.salary != null) ...[
-                const SizedBox(height: AppTheme.spacing12),
-                Row(
-                  children: [
-                    const Icon(
-                      CupertinoIcons.money_dollar_circle,
-                      size: 16,
+              const SizedBox(height: AppTheme.spacing12),
+              Row(
+                children: [
+                  const Icon(
+                    CupertinoIcons.money_dollar_circle,
+                    size: 16,
+                    color: AppColors.primary600,
+                  ),
+                  const SizedBox(width: AppTheme.spacing4),
+                  Text(
+                    job.salary,
+                    style: AppTypography.labelLarge.copyWith(
                       color: AppColors.primary600,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: AppTheme.spacing4),
-                    Text(
-                      job.salary!,
-                      style: AppTypography.labelLarge.copyWith(
-                        color: AppColors.primary600,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
               
-              if (job.deadline != null) ...[
-                const SizedBox(height: AppTheme.spacing8),
-                Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.time,
-                      size: 14,
+              const SizedBox(height: AppTheme.spacing8),
+              Row(
+                children: [
+                  Icon(
+                    CupertinoIcons.time,
+                    size: 14,
+                    color: job.isExpired
+                        ? AppColors.error
+                        : AppColors.textTertiary,
+                  ),
+                  const SizedBox(width: AppTheme.spacing4),
+                  Text(
+                    job.formattedDeadline,
+                    style: AppTypography.labelSmall.copyWith(
                       color: job.isExpired
                           ? AppColors.error
                           : AppColors.textTertiary,
                     ),
-                    const SizedBox(width: AppTheme.spacing4),
-                    Text(
-                      job.formattedDeadline,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: job.isExpired
-                            ? AppColors.error
-                            : AppColors.textTertiary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
               
               // Featured badge
               if (job.featured) ...[
@@ -209,7 +199,7 @@ class JobCard extends StatelessWidget {
                     vertical: AppTheme.spacing4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.1),
+                    color: AppColors.warning.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   ),
                   child: Row(

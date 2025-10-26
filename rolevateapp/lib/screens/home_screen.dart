@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolevateapp/controllers/job_controller.dart';
 import 'package:rolevateapp/core/theme/app_colors.dart';
@@ -20,6 +19,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   late AnimationController _drawerController;
   late Animation<Offset> _drawerAnimation;
   bool _isDrawerOpen = false;
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -60,6 +61,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     }
   }
 
+  void _performSearch() {
+    final query = _searchController.text.trim();
+    if (query.isNotEmpty) {
+      // Navigate to browse jobs with search query
+      Get.toNamed('/browse-jobs', arguments: {'search': query});
+    } else {
+      // Navigate to browse jobs without search
+      Get.toNamed('/browse-jobs');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final jobController = Get.put(JobController());
@@ -96,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     Text(
                       'AI-powered interviews and intelligent matching.\nConnect with top Middle East employers.',
                       style: AppTypography.bodyMedium.copyWith(
-                        color: CupertinoColors.white.withOpacity(0.9),
+                        color: CupertinoColors.white.withValues(alpha: 0.9),
                         height: 1.5,
                       ),
                     ),
@@ -108,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         borderRadius: AppTheme.radiusLg,
                       ),
                       child: CupertinoTextField(
+                        controller: _searchController,
                         placeholder: 'Search jobs, companies, or keywords...',
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppTheme.spacing16,
@@ -126,7 +139,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           padding: const EdgeInsets.only(right: AppTheme.spacing8),
                           child: CupertinoButton(
                             padding: EdgeInsets.zero,
-                            minSize: 0,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppTheme.spacing16,
@@ -145,12 +157,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               ),
                             ),
                             onPressed: () {
-                              // Handle search
+                              _performSearch();
                             },
                           ),
                         ),
                         onSubmitted: (value) {
-                          // Handle search
+                          _performSearch();
                         },
                       ),
                     ),
@@ -178,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ),
                       ),
                       onPressed: () {
-                        // Navigate to all jobs
+                        Get.toNamed('/browse-jobs');
                       },
                     ),
                   ],
@@ -250,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             GestureDetector(
               onTap: _closeDrawer,
               child: Container(
-                color: CupertinoColors.black.withOpacity(0.4),
+                color: CupertinoColors.black.withValues(alpha: 0.4),
               ),
             ),
           // Drawer

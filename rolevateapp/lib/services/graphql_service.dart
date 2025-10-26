@@ -1,13 +1,36 @@
+import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:get_storage/get_storage.dart';
 
 class GraphQLService {
   static GraphQLClient? _client;
+  static String? _apiUrl;
 
   static void initialize(String apiUrl) {
-    final HttpLink httpLink = HttpLink(apiUrl);
+    _apiUrl = apiUrl;
+    _client = _createClient();
+  }
 
-    _client = GraphQLClient(
-      link: httpLink,
+  static GraphQLClient _createClient() {
+    debugPrint('🔧 Creating GraphQL client with URL: $_apiUrl');
+    
+    final HttpLink httpLink = HttpLink(_apiUrl!);
+    
+    // Add authentication link that adds token to every request
+    final AuthLink authLink = AuthLink(
+      getToken: () {
+        final storage = GetStorage();
+        final token = storage.read('token');
+        debugPrint('🔑 Token from storage: ${token != null ? 'Present' : 'Null'}');
+        return token != null ? 'Bearer $token' : null;
+      },
+    );
+
+    // Combine auth link with http link
+    final Link link = authLink.concat(httpLink);
+
+    return GraphQLClient(
+      link: link,
       cache: GraphQLCache(store: HiveStore()),
     );
   }
@@ -17,6 +40,13 @@ class GraphQLService {
       throw Exception('GraphQL client not initialized. Call initialize() first.');
     }
     return _client!;
+  }
+
+  // Update the client when token changes
+  static void updateClient() {
+    if (_apiUrl != null) {
+      _client = _createClient();
+    }
   }
 
   // Jobs queries
@@ -98,6 +128,52 @@ class GraphQLService {
         name
         userType
       }
+    }
+  ''';
+
+  // Job mutations
+  static const String createJobMutation = '''
+    mutation CreateJob(\$input: CreateJobInput!) {
+      createJob(input: \$input) {
+        id
+        slug
+        title
+        department
+        location
+        salary
+        type
+        jobLevel
+        workType
+        status
+        description
+        shortDescription
+        responsibilities
+        requirements
+        benefits
+        skills
+        deadline
+        createdAt
+        updatedAt
+      }
+    }
+  ''';
+
+  // Profile mutations
+  static const String updateProfileMutation = '''
+    mutation UpdateProfile(\$input: UpdateProfileInput!) {
+      updateProfile(input: \$input) {
+        id
+        email
+        name
+        phone
+        userType
+      }
+    }
+  ''';
+
+  static const String changePasswordMutation = '''
+    mutation ChangePassword(\$input: ChangePasswordInput!) {
+      changePassword(input: \$input)
     }
   ''';
 }

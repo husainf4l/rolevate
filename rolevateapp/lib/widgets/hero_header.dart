@@ -38,7 +38,7 @@ class HeroHeader extends StatelessWidget {
                       horizontal: AppTheme.spacing16,
                       vertical: AppTheme.spacing8,
                     ),
-                    color: CupertinoColors.white.withOpacity(0.2),
+                    color: CupertinoColors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppTheme.radius2xl),
                     onPressed: () => Get.toNamed('/login'),
                     child: Row(
@@ -103,7 +103,6 @@ class HeroHeader extends StatelessWidget {
                     padding: const EdgeInsets.only(right: AppTheme.spacing8),
                     child: CupertinoButton(
                       padding: EdgeInsets.zero,
-                      minSize: 0,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppTheme.spacing16,

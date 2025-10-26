@@ -1,18 +1,43 @@
 import 'package:flutter/cupertino.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:rolevateapp/services/graphql_service.dart';
+import 'package:get/get.dart';
+import 'package:rolevateapp/controllers/job_controller.dart';
+import 'package:rolevateapp/controllers/auth_controller.dart';
+import 'package:rolevateapp/core/theme/app_colors.dart';
 
-class JobDetailScreen extends StatelessWidget {
+class JobDetailScreen extends StatefulWidget {
   final String jobId;
 
   const JobDetailScreen({super.key, required this.jobId});
 
   @override
+  State<JobDetailScreen> createState() => _JobDetailScreenState();
+}
+
+class _JobDetailScreenState extends State<JobDetailScreen> {
+  final JobController jobController = Get.find<JobController>();
+  final AuthController authController = Get.find<AuthController>();
+  
+  final bool _isApplying = false;
+  bool _hasApplied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user has already applied to this job
+    _checkApplicationStatus();
+  }
+
+  void _checkApplicationStatus() {
+    _hasApplied = jobController.hasApplied(widget.jobId);
+  }
+    @override
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
         document: gql(GraphQLService.jobByIdQuery),
-        variables: {'id': jobId},
+        variables: {'id': widget.jobId},
       ),
       builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
         if (result.hasException) {
@@ -52,6 +77,21 @@ class JobDetailScreen extends StatelessWidget {
         return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             middle: Text(job['title']),
+            trailing: Obx(() => CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                jobController.toggleSaveJob(widget.jobId);
+              },
+              child: Icon(
+                jobController.isJobSaved(widget.jobId)
+                    ? CupertinoIcons.bookmark_fill
+                    : CupertinoIcons.bookmark,
+                color: jobController.isJobSaved(widget.jobId)
+                    ? AppColors.primary600
+                    : AppColors.textTertiary,
+                size: 20,
+              ),
+            )),
           ),
           child: SafeArea(
             child: SingleChildScrollView(
@@ -157,18 +197,25 @@ class JobDetailScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: CupertinoButton(
-                      color: CupertinoColors.systemBlue,
+                      color: _hasApplied ? AppColors.iosSystemGrey : AppColors.primary600,
                       borderRadius: BorderRadius.circular(12),
-                      child: const Text(
-                        'Apply Now',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onPressed: () {
-                        // Handle apply
+                      onPressed: _hasApplied || _isApplying ? null : () {
+                        Get.toNamed('/job-application', arguments: {
+                          'jobId': widget.jobId,
+                          'jobTitle': job['title'] ?? 'Job Title',
+                          'companyName': job['company']?['name'] ?? 'Company Name',
+                        });
                       },
+                      child: _isApplying
+                          ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                          : Text(
+                              _hasApplied ? 'Already Applied' : 'Apply Now',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: CupertinoColors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -184,7 +231,7 @@ class JobDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBlue.withOpacity(0.1),
+        color: CupertinoColors.systemBlue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

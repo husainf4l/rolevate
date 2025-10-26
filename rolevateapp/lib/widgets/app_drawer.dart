@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolevateapp/controllers/auth_controller.dart';
 import 'package:rolevateapp/core/theme/app_colors.dart';
@@ -22,7 +21,7 @@ class AppDrawer extends StatelessWidget {
         color: CupertinoColors.white,
         boxShadow: [
           BoxShadow(
-            color: CupertinoColors.black.withOpacity(0.2),
+            color: CupertinoColors.black.withValues(alpha: 0.2),
             offset: const Offset(2, 0),
             blurRadius: 8,
           ),
@@ -44,10 +43,12 @@ class AppDrawer extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Image.asset(
-                        'assets/logos/Rolevate.webp',
-                        height: 40,
-                        fit: BoxFit.contain,
+                      Flexible(
+                        child: Image.asset(
+                          'assets/logos/Rolevate.webp',
+                          height: 40,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       CupertinoButton(
                         padding: EdgeInsets.zero,
@@ -55,6 +56,7 @@ class AppDrawer extends StatelessWidget {
                         child: const Icon(
                           CupertinoIcons.xmark,
                           color: CupertinoColors.white,
+                          size: 20,
                         ),
                       ),
                     ],
@@ -75,7 +77,7 @@ class AppDrawer extends StatelessWidget {
                           Text(
                             authController.user.value?['email'] ?? '',
                             style: AppTypography.bodySmall.copyWith(
-                              color: CupertinoColors.white.withOpacity(0.9),
+                              color: CupertinoColors.white.withValues(alpha: 0.9),
                             ),
                           ),
                         ],
@@ -143,7 +145,7 @@ class AppDrawer extends StatelessWidget {
                     icon: CupertinoIcons.search,
                     title: 'Browse Jobs',
                     onTap: () {
-                      // Navigate to browse jobs
+                      Get.toNamed('/browse-jobs');
                     },
                   ),
                   Obx(() {
@@ -194,27 +196,37 @@ class AppDrawer extends StatelessWidget {
                       color: AppColors.iosSystemGrey5,
                     ),
                   ),
-                  _buildMenuItem(
-                    icon: CupertinoIcons.settings,
-                    title: 'Settings',
-                    onTap: () {
-                      Get.toNamed('/settings');
-                    },
-                  ),
-                  _buildMenuItem(
-                    icon: CupertinoIcons.question_circle,
-                    title: 'Help & Support',
-                    onTap: () {
-                      Get.toNamed('/support');
-                    },
-                  ),
-                  _buildMenuItem(
-                    icon: CupertinoIcons.info_circle,
-                    title: 'About',
-                    onTap: () {
-                      Get.toNamed('/about');
-                    },
-                  ),
+                  Obx(() {
+                    if (authController.isAuthenticated.value) {
+                      return Column(
+                        children: [
+                          _buildMenuItem(
+                            icon: CupertinoIcons.settings,
+                            title: 'Settings',
+                            onTap: () {
+                              Get.toNamed('/settings');
+                            },
+                          ),
+                          _buildMenuItem(
+                            icon: CupertinoIcons.question_circle,
+                            title: 'Help & Support',
+                            onTap: () {
+                              Get.toNamed('/support');
+                            },
+                          ),
+                          _buildMenuItem(
+                            icon: CupertinoIcons.info_circle,
+                            title: 'About',
+                            onTap: () {
+                              Get.toNamed('/about');
+                            },
+                          ),
+                        ],
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  }),
                 ],
               ),
             ),
@@ -236,7 +248,7 @@ class AppDrawer extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                       vertical: AppTheme.spacing12,
                     ),
-                    color: AppColors.error.withOpacity(0.1),
+                    color: AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     onPressed: () {
                       onClose();

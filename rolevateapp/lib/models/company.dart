@@ -35,8 +35,8 @@ class Company {
   /// Create Company from JSON
   factory Company.fromJson(Map<String, dynamic> json) {
     return Company(
-      id: json['id'] as String,
-      name: json['name'] as String,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? 'Unknown Company',
       description: json['description'] as String?,
       website: json['website'] as String?,
       email: json['email'] as String?,
@@ -49,8 +49,12 @@ class Company {
           : null,
       location: json['location'] as String?,
       addressId: json['addressId'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
     );
   }
 

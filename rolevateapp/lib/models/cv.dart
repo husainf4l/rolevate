@@ -78,7 +78,7 @@ class CV {
   }
 
   @override
-  String toString() => 'CV($fileName, ${formattedFileSize})';
+  String toString() => 'CV($fileName, $formattedFileSize)';
 
   @override
   bool operator ==(Object other) {
