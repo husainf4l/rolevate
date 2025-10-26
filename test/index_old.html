@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقارنة نماذج التعرف على الكلام العربي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { 
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .record-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .record-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.3);
+        }
+        .record-btn.recording {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #555;
+            min-height: 30px;
+        }
+        .status.recording {
+            color: #f5576c;
+            font-weight: bold;
+        }
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .model-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .model-card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .transcription {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 200px;
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .transcription.empty {
+            color: #999;
+            font-style: italic;
+        }
+        .stats {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .stats-item {
+            display: inline-block;
+            margin-left: 20px;
+            color: #666;
+        }
+        .stats-item strong {
+            color: #333;
+        }
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 مقارنة التعرف على الكلام العربي المباشر</h1>
+        
+        <div class="controls">
+            <button id="recordBtn" class="record-btn" onclick="toggleRecording()">
+                🎙️ ابدأ التسجيل والتعرف المباشر
+            </button>
+            <div id="status" class="status"></div>
+        </div>
+
+        <div class="comparison-container">
+            <div class="model-card">
+                <h2>🔵 Google Speech-to-Text</h2>
+                <div class="transcription empty" id="google-transcription">
+                    اضغط على زر التسجيل للبدء...
+                </div>
+                <div class="stats">
+                    <span class="stats-item"><strong>الوقت:</strong> <span id="google-time">--</span></span>
+                    <span class="stats-item"><strong>عدد الكلمات:</strong> <span id="google-words">0</span></span>
+                </div>
+            </div>
+
+            <div class="model-card">
+                <h2>🟢 OpenAI Whisper</h2>
+                <div class="transcription empty" id="whisper-transcription">
+                    اضغط على زر التسجيل للبدء...
+                </div>
+                <div class="stats">
+                    <span class="stats-item"><strong>الوقت:</strong> <span id="whisper-time">--</span></span>
+                    <span class="stats-item"><strong>عدد الكلمات:</strong> <span id="whisper-words">0</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let googleWs = null;
+        let whisperWs = null;
+        let mediaRecorder;
+        let audioContext;
+        let isRecording = false;
+
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioContext = new AudioContext({ sampleRate: 16000 });
+                const source = audioContext.createMediaStreamSource(stream);
+                const processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+                isRecording = true;
+
+                // Update UI
+                const btn = document.getElementById('recordBtn');
+                btn.textContent = '⏹️ إيقاف التسجيل';
+                btn.classList.add('recording');
+                document.getElementById('status').textContent = '🔴 جاري التسجيل والنسخ المباشر...';
+                document.getElementById('status').classList.add('recording');
+
+                // Clear previous results
+                resetTranscriptions();
+
+                // Connect to WebSockets
+                googleWs = new WebSocket('ws://localhost:8001/ws/google');
+                whisperWs = new WebSocket('ws://localhost:8001/ws/whisper');
+
+                let googleTranscript = '';
+                let whisperTranscript = '';
+                let googleStartTime = Date.now();
+                let whisperStartTime = Date.now();
+
+                googleWs.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.error) {
+                        updateTranscription('google', data.error, '--');
+                    } else {
+                        if (data.is_final) {
+                            googleTranscript += data.transcript + ' ';
+                            googleStartTime = Date.now();
+                        } else {
+                            const tempTranscript = googleTranscript + data.transcript;
+                            const duration = ((Date.now() - googleStartTime) / 1000).toFixed(2);
+                            updateTranscription('google', tempTranscript, duration);
+                        }
+                    }
+                };
+
+                whisperWs.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.error) {
+                        updateTranscription('whisper', data.error, '--');
+                    } else {
+                        whisperTranscript += data.transcript + ' ';
+                        const duration = ((Date.now() - whisperStartTime) / 1000).toFixed(2);
+                        updateTranscription('whisper', whisperTranscript, duration);
+                    }
+                };
+
+                // Process audio data
+                processor.onaudioprocess = (e) => {
+                    if (!isRecording) return;
+
+                    const inputData = e.inputBuffer.getChannelData(0);
+                    const pcmData = convertFloat32ToInt16(inputData);
+
+                    if (googleWs && googleWs.readyState === WebSocket.OPEN) {
+                        googleWs.send(pcmData);
+                    }
+                    if (whisperWs && whisperWs.readyState === WebSocket.OPEN) {
+                        whisperWs.send(pcmData);
+                    }
+                };
+
+                source.connect(processor);
+                processor.connect(audioContext.destination);
+
+                // Store for cleanup
+                window.audioStream = stream;
+                window.audioProcessor = processor;
+
+            } catch (error) {
+                alert('خطأ في الوصول إلى الميكروفون: ' + error.message);
+                resetRecording();
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+
+            if (window.audioProcessor) {
+                window.audioProcessor.disconnect();
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+            if (window.audioStream) {
+                window.audioStream.getTracks().forEach(track => track.stop());
+            }
+            if (googleWs) {
+                googleWs.close();
+            }
+            if (whisperWs) {
+                whisperWs.send(JSON.stringify({ type: 'stop' }));
+                whisperWs.close();
+            }
+
+            const btn = document.getElementById('recordBtn');
+            btn.textContent = '🎙️ ابدأ التسجيل والتعرف المباشر';
+            btn.classList.remove('recording');
+            document.getElementById('status').textContent = '✅ اكتمل التعرف على الصوت';
+            document.getElementById('status').classList.remove('recording');
+        }
+
+        function convertFloat32ToInt16(buffer) {
+            const l = buffer.length;
+            const buf = new Int16Array(l);
+            for (let i = 0; i < l; i++) {
+                buf[i] = Math.min(1, buffer[i]) * 0x7FFF;
+            }
+            return buf.buffer;
+        }
+
+        function updateTranscription(model, text, duration) {
+            const transcriptionEl = document.getElementById(`${model}-transcription`);
+            const timeEl = document.getElementById(`${model}-time`);
+            const wordsEl = document.getElementById(`${model}-words`);
+
+            transcriptionEl.textContent = text || 'جاري الاستماع...';
+            transcriptionEl.classList.remove('empty');
+            timeEl.textContent = `${duration}s`;
+            
+            // Count words (split by spaces for Arabic)
+            const wordCount = text ? text.trim().split(/\s+/).length : 0;
+            wordsEl.textContent = wordCount;
+        }
+
+        function resetTranscriptions() {
+            ['google', 'whisper'].forEach(model => {
+                document.getElementById(`${model}-transcription`).textContent = 'جاري الاستماع...';
+                document.getElementById(`${model}-transcription`).classList.add('empty');
+                document.getElementById(`${model}-time`).textContent = '0.00';
+                document.getElementById(`${model}-words`).textContent = '0';
+            });
+        }
+
+        function resetRecording() {
+            isRecording = false;
+            const btn = document.getElementById('recordBtn');
+            btn.textContent = '🎙️ ابدأ التسجيل والتعرف المباشر';
+            btn.classList.remove('recording');
+            document.getElementById('status').textContent = '';
+            document.getElementById('status').classList.remove('recording');
+        }
+    </script>
+</body>
+</html>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .model { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        .model h2 { margin-top: 0; }
+        .transcription { background-color: #f9f9f9; padding: 10px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>مقارنة نماذج التعرف على الكلام العربي</h1>
+    <p>هذه الصفحة تعرض النصوص المستخرجة من نماذج مختلفة للتعرف على الكلام العربي. اضغط على زر التسجيل لتسجيل صوتك مباشرة.</p>
+    <div id="status" style="font-weight: bold; color: red;"></div>
+
+    <div class="model">
+        <h2>Google Speech-to-Text</h2>
+        <button onclick="startRecording('google')">تسجيل وتعرف</button>
+        <div class="transcription" id="google-transcription">النص المستخرج سيظهر هنا...</div>
+    </div>
+
+    <div class="model">
+        <h2>Azure Speech Services</h2>
+        <button onclick="startRecording('azure')">تسجيل وتعرف</button>
+        <div class="transcription" id="azure-transcription">النص المستخرج سيظهر هنا...</div>
+    </div>
+
+    <div class="model">
+        <h2>AWS Transcribe</h2>
+        <button onclick="startRecording('aws')">تسجيل وتعرف</button>
+        <div class="transcription" id="aws-transcription">النص المستخرج سيظهر هنا...</div>
+    </div>
+
+    <div class="model">
+        <h2>OpenAI Whisper</h2>
+        <button onclick="startRecording('whisper')">تسجيل وتعرف</button>
+        <div class="transcription" id="whisper-transcription">النص المستخرج سيظهر هنا...</div>
+    </div>
+
+    <div class="model">
+        <h2>تعرف مباشر من المتصفح (Browser)</h2>
+        <button onclick="startLiveTranscription()">ابدأ التعرف المباشر</button>
+        <button onclick="stopLiveTranscription()">إيقاف</button>
+        <div class="transcription" id="live-transcription">النص المستخرج سيظهر هنا...</div>
+    </div>
+
+    <div class="model">
+        <h2>تعرف مباشر عبر WebSocket</h2>
+        <button onclick="startLiveTranscriptionWS('google')">بدء التعرف المباشر (Google)</button>
+        <button onclick="startLiveTranscriptionWS('whisper')">بدء التعرف المباشر (Whisper)</button>
+        <div class="transcription" id="ws-transcription">النص المستخرج سيظهر هنا...</div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        async function startRecording(model) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                recordedChunks = [];
+                document.getElementById('status').textContent = 'جاري التسجيل...';
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                mediaRecorder.onstop = () => {
+                    document.getElementById('status').textContent = 'تم التسجيل، جاري التعرف...';
+                    const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                    sendAudio(blob, model);
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                mediaRecorder.start();
+                // Stop recording after 10 seconds
+                setTimeout(() => {
+                    if (mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, 10000);
+            } catch (error) {
+                alert('خطأ في الوصول إلى الميكروفون: ' + error.message);
+            }
+        }
+
+        async function sendAudio(blob, model) {
+            const formData = new FormData();
+            formData.append('audio', blob, 'audio.webm');
+            document.getElementById('status').textContent = 'جاري الإرسال والتعرف...';
+            try {
+                const response = await fetch(`http://localhost:8001/transcribe/${model}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                document.getElementById(`${model}-transcription`).textContent = data.result;
+                document.getElementById('status').textContent = '';
+            } catch (error) {
+                document.getElementById(`${model}-transcription`).textContent = 'خطأ: ' + error.message;
+                document.getElementById('status').textContent = '';
+            }
+        }
+
+        let recognition;
+
+        function startLiveTranscription() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('المتصفح لا يدعم التعرف على الكلام');
+                return;
+            }
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'ar-SA';
+            recognition.interimResults = false;
+            recognition.continuous = true;
+            recognition.onresult = function(event) {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById('live-transcription').textContent = transcript;
+            };
+            recognition.onend = function() {
+                // Restart if continuous
+                if (recognition.continuous) {
+                    recognition.start();
+                }
+            };
+            recognition.start();
+        }
+
+        function stopLiveTranscription() {
+            if (recognition) {
+                recognition.stop();
+                recognition.continuous = false;
+            }
+        }
+
+        function startLiveTranscriptionWS(model) {
+            const ws = new WebSocket(`ws://localhost:8001/ws/${model}`);
+            ws.onopen = () => {
+                startRecordingWS(ws);
+            };
+            ws.onmessage = (event) => {
+                document.getElementById('ws-transcription').textContent = event.data;
+            };
+            ws.onclose = () => {
+                console.log('WebSocket closed');
+            };
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        function startRecordingWS(ws) {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        event.data.arrayBuffer().then(buffer => {
+                            const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+                            ws.send(JSON.stringify({type: 'audio', data: base64}));
+                        });
+                    }
+                };
+                mediaRecorder.start(1000); // Send chunks every 1 second
+                document.getElementById('status').textContent = 'جاري التسجيل والإرسال...';
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                    ws.send(JSON.stringify({type: 'stop'}));
+                    stream.getTracks().forEach(track => track.stop());
+                    document.getElementById('status').textContent = 'تم الإرسال، جاري التعرف...';
+                }, 10000);
+            }).catch(error => {
+                alert('خطأ في الوصول إلى الميكروفون: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+.env
+adlaan-6ab4ea63e430.json
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.vscode/
+.DS_Store

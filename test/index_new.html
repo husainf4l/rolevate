@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقارنة التعرف على الكلام - Google vs Whisper</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #1d1d1f;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(90deg, #0071e3, #00c7be);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 21px;
+            color: #6e6e73;
+            font-weight: 400;
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 18px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            text-align: center;
+        }
+        
+        .record-button {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #0071e3, #00c7be);
+            color: white;
+            font-size: 56px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 113, 227, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        
+        .record-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 113, 227, 0.4);
+        }
+        
+        .record-button.recording {
+            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        
+        .status {
+            margin-top: 24px;
+            font-size: 17px;
+            color: #6e6e73;
+            min-height: 30px;
+            font-weight: 500;
+        }
+        
+        .status.active {
+            color: #ff3b30;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+        
+        .model-card {
+            background: white;
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            transition: transform 0.3s ease;
+        }
+        
+        .model-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+        
+        .model-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e5e7;
+        }
+        
+        .model-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-left: 16px;
+        }
+        
+        .google-icon {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+        }
+        
+        .whisper-icon {
+            background: linear-gradient(135deg, #10a37f, #1a7f64);
+        }
+        
+        .model-name {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .transcript-box {
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 24px;
+            min-height: 250px;
+            font-size: 18px;
+            line-height: 1.8;
+            color: #1d1d1f;
+            margin-bottom: 20px;
+            position: relative;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+        
+        .transcript-box.empty {
+            color: #86868b;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .interim {
+            color: #86868b;
+            font-style: italic;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        
+        .metric {
+            background: #f5f5f7;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .metric-label {
+            font-size: 13px;
+            color: #86868b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .error-message {
+            color: #ff3b30;
+            font-size: 16px;
+            padding: 16px;
+            background: #fff5f5;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        
+        @media (max-width: 968px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 36px;
+            }
+            
+            .subtitle {
+                font-size: 17px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>مقارنة التعرف على الكلام المباشر</h1>
+            <p class="subtitle">Google Speech-to-Text vs OpenAI Whisper</p>
+        </header>
+        
+        <div class="control-panel">
+            <button id="recordBtn" class="record-button" onclick="toggleRecording()">
+                🎤
+            </button>
+            <div id="status" class="status">اضغط على الميكروفون للبدء</div>
+        </div>
+
+        <div class="comparison-grid">
+            <!-- Google Card -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-icon google-icon">🔵</div>
+                    <div class="model-name">Google Speech-to-Text</div>
+                </div>
+                <div class="transcript-box empty" id="google-transcript">
+                    في انتظار التسجيل...
+                </div>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-label">الوقت</div>
+                        <div class="metric-value" id="google-time">0s</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">الكلمات</div>
+                        <div class="metric-value" id="google-words">0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">الحالة</div>
+                        <div class="metric-value" id="google-status">●</div>
+                    </div>
+                </div>
+                <div id="google-error" class="error-message" style="display:none;"></div>
+            </div>
+
+            <!-- Whisper Card -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-icon whisper-icon">🟢</div>
+                    <div class="model-name">OpenAI Whisper</div>
+                </div>
+                <div class="transcript-box empty" id="whisper-transcript">
+                    في انتظار التسجيل...
+                </div>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-label">الوقت</div>
+                        <div class="metric-value" id="whisper-time">0s</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">الكلمات</div>
+                        <div class="metric-value" id="whisper-words">0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">الحالة</div>
+                        <div class="metric-value" id="whisper-status">●</div>
+                    </div>
+                </div>
+                <div id="whisper-error" class="error-message" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let googleWs = null;
+        let whisperWs = null;
+        let audioContext = null;
+        let mediaStream = null;
+        let processor = null;
+        
+        let googleStartTime = null;
+        let whisperStartTime = null;
+        let googleFinalText = '';
+        let whisperFinalText = '';
+
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                // Request microphone access
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        channelCount: 1,
+                        sampleRate: 16000,
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    } 
+                });
+
+                // Create audio context
+                audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+                const source = audioContext.createMediaStreamSource(mediaStream);
+                processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+                // Update UI
+                isRecording = true;
+                document.getElementById('recordBtn').classList.add('recording');
+                document.getElementById('recordBtn').textContent = '⏹️';
+                document.getElementById('status').textContent = 'جاري التسجيل والنسخ المباشر...';
+                document.getElementById('status').classList.add('active');
+
+                // Reset displays
+                resetTranscripts();
+
+                // Connect WebSockets
+                connectGoogleWebSocket();
+                connectWhisperWebSocket();
+
+                // Process audio
+                processor.onaudioprocess = (e) => {
+                    if (!isRecording) return;
+                    
+                    const inputData = e.inputBuffer.getChannelData(0);
+                    const pcm16 = convertFloat32ToInt16(inputData);
+                    
+                    // Send to both services
+                    if (googleWs && googleWs.readyState === WebSocket.OPEN) {
+                        googleWs.send(pcm16);
+                    }
+                    if (whisperWs && whisperWs.readyState === WebSocket.OPEN) {
+                        whisperWs.send(pcm16);
+                    }
+                };
+
+                source.connect(processor);
+                processor.connect(audioContext.destination);
+
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                showError('google', 'خطأ في الوصول إلى الميكروفون: ' + error.message);
+                showError('whisper', 'خطأ في الوصول إلى الميكروفون: ' + error.message);
+                resetRecording();
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+
+            // Close WebSockets
+            if (googleWs) googleWs.close();
+            if (whisperWs) whisperWs.close();
+
+            // Stop audio processing
+            if (processor) {
+                processor.disconnect();
+                processor = null;
+            }
+            if (audioContext) {
+                audioContext.close();
+                audioContext = null;
+            }
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+
+            // Update UI
+            document.getElementById('recordBtn').classList.remove('recording');
+            document.getElementById('recordBtn').textContent = '🎤';
+            document.getElementById('status').textContent = 'التسجيل متوقف';
+            document.getElementById('status').classList.remove('active');
+            
+            updateStatus('google', '⏸️');
+            updateStatus('whisper', '⏸️');
+        }
+
+        function connectGoogleWebSocket() {
+            googleWs = new WebSocket('ws://localhost:8001/ws/google');
+            googleStartTime = Date.now();
+            updateStatus('google', '🔄');
+
+            googleWs.onopen = () => {
+                updateStatus('google', '✅');
+            };
+
+            googleWs.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.error) {
+                        showError('google', data.error);
+                        updateStatus('google', '❌');
+                        return;
+                    }
+
+                    const elapsed = ((Date.now() - googleStartTime) / 1000).toFixed(1);
+                    document.getElementById('google-time').textContent = elapsed + 's';
+
+                    if (data.is_final) {
+                        googleFinalText += data.transcript + ' ';
+                        updateTranscript('google', googleFinalText, false);
+                    } else {
+                        const fullText = googleFinalText + data.transcript;
+                        updateTranscript('google', fullText, true);
+                    }
+                } catch (error) {
+                    console.error('Google WS error:', error);
+                }
+            };
+
+            googleWs.onerror = (error) => {
+                showError('google', 'خطأ في الاتصال بـ Google');
+                updateStatus('google', '❌');
+            };
+
+            googleWs.onclose = () => {
+                updateStatus('google', '⏸️');
+            };
+        }
+
+        function connectWhisperWebSocket() {
+            whisperWs = new WebSocket('ws://localhost:8001/ws/whisper');
+            whisperStartTime = Date.now();
+            updateStatus('whisper', '🔄');
+
+            whisperWs.onopen = () => {
+                updateStatus('whisper', '✅');
+            };
+
+            whisperWs.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.error) {
+                        showError('whisper', data.error);
+                        updateStatus('whisper', '❌');
+                        return;
+                    }
+
+                    const elapsed = ((Date.now() - whisperStartTime) / 1000).toFixed(1);
+                    document.getElementById('whisper-time').textContent = elapsed + 's';
+
+                    whisperFinalText += data.transcript + ' ';
+                    updateTranscript('whisper', whisperFinalText, false);
+                } catch (error) {
+                    console.error('Whisper WS error:', error);
+                }
+            };
+
+            whisperWs.onerror = (error) => {
+                showError('whisper', 'خطأ في الاتصال بـ Whisper');
+                updateStatus('whisper', '❌');
+            };
+
+            whisperWs.onclose = () => {
+                updateStatus('whisper', '⏸️');
+            };
+        }
+
+        function updateTranscript(model, text, isInterim) {
+            const el = document.getElementById(`${model}-transcript`);
+            el.classList.remove('empty');
+            
+            if (isInterim) {
+                el.innerHTML = text.substring(0, text.lastIndexOf(' ')) + 
+                              '<span class="interim">' + text.substring(text.lastIndexOf(' ')) + '</span>';
+            } else {
+                el.textContent = text;
+            }
+            
+            el.scrollTop = el.scrollHeight;
+            
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            document.getElementById(`${model}-words`).textContent = words;
+        }
+
+        function updateStatus(model, status) {
+            document.getElementById(`${model}-status`).textContent = status;
+        }
+
+        function showError(model, message) {
+            const errorEl = document.getElementById(`${model}-error`);
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function hideError(model) {
+            document.getElementById(`${model}-error`).style.display = 'none';
+        }
+
+        function resetTranscripts() {
+            googleFinalText = '';
+            whisperFinalText = '';
+            
+            ['google', 'whisper'].forEach(model => {
+                document.getElementById(`${model}-transcript`).textContent = 'جاري الاستماع...';
+                document.getElementById(`${model}-transcript`).classList.add('empty');
+                document.getElementById(`${model}-time`).textContent = '0s';
+                document.getElementById(`${model}-words`).textContent = '0';
+                hideError(model);
+            });
+        }
+
+        function resetRecording() {
+            isRecording = false;
+            document.getElementById('recordBtn').classList.remove('recording');
+            document.getElementById('recordBtn').textContent = '🎤';
+            document.getElementById('status').textContent = 'اضغط على الميكروفون للبدء';
+            document.getElementById('status').classList.remove('active');
+        }
+
+        function convertFloat32ToInt16(buffer) {
+            const l = buffer.length;
+            const buf = new Int16Array(l);
+            for (let i = 0; i < l; i++) {
+                const s = Math.max(-1, Math.min(1, buffer[i]));
+                buf[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+            return buf.buffer;
+        }
+    </script>
+</body>
+</html>

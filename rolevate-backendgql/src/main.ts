@@ -31,31 +31,13 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new GlobalExceptionFilter());
+  
+  // CORS Configuration - Accept all origins for development
+  // TODO: Restrict to specific origins in production
   app.enableCors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      // Allow localhost and 127.0.0.1 on any port for development
-      if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
-        return callback(null, true);
-      }
-      
-      // Allow local network IPs (192.168.x.x) for development
-      if (origin.match(/^https?:\/\/192\.168\.\d+\.\d+(:\d+)?$/)) {
-        return callback(null, true);
-      }
-      
-      // Allow specific origins from environment or defaults
-      const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3005', 'http://127.0.0.1:3000'];
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      
-      return callback(new Error('Not allowed by CORS'), false);
-    },
+    origin: true, // Accept all origins (for development)
     credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Apollo-Require-Preflight'],
   });
   

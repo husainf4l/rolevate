@@ -66,7 +66,7 @@ export default function Navbar() {
             href="/"
             className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200"
           >
-            <Logo size={120} />
+            <Logo size={120} href="" />
           </Link>
           
           <nav className="hidden items-center gap-10 text-sm font-medium md:flex">

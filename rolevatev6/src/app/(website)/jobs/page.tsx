@@ -87,7 +87,8 @@ function JobsPageContent() {
       }
       // You can add other filters here as needed
 
-      const response = await jobsService.getJobs(page, 12, filters); // Fetch 12 jobs per page for better UX
+      // Use getPublicJobs to ensure only ACTIVE jobs are shown
+      const response = await jobsService.getPublicJobs(page, 12, filters); // Fetch 12 jobs per page for better UX
 
       if (append) {
         setJobs(prev => [...prev, ...response.jobs]);
@@ -114,6 +115,9 @@ function JobsPageContent() {
 
   // Filter jobs locally (only for search, type, location, experience - department is handled by backend)
   const filteredJobs = jobs.filter((job) => {
+    // Only show active jobs
+    const isActive = job.isActive !== false;
+    
     const matchesSearch = !searchTerm || 
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,7 +133,7 @@ function JobsPageContent() {
       job.level.toLowerCase().includes(selectedExperience.toLowerCase().split(" ")[0]);
 
     // Department filtering is now handled by the backend API
-    return matchesSearch && matchesType && matchesLocation && matchesExperience;
+    return isActive && matchesSearch && matchesType && matchesLocation && matchesExperience;
   });
 
   // Sort the filtered jobs

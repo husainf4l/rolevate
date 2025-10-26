@@ -39,135 +39,150 @@ export function useRoomConnection({
       const directToken = searchParams.get("token");
       const directRoomName = searchParams.get("roomName");
       const directServerUrl = searchParams.get("serverUrl");
-      const phone = searchParams.get("phone");
-      const jobId = searchParams.get("jobId");
-      const backendRoomName = searchParams.get("roomName");
+      const applicationId = searchParams.get("applicationId");
 
       console.log("📋 Connection parameters:", {
         directToken: !!directToken,
         directRoomName,
         directServerUrl,
-        phone,
-        jobId,
-        backendRoomName
+        applicationId
       });
 
       let token = directToken;
       let roomName = directRoomName;
       let serverUrl = directServerUrl || "wss://rolvate2-ckmk80qb.livekit.cloud";
 
-      // Create interview via backend if needed
-      if (!token && phone && jobId && backendRoomName) {
-        console.log("🏗️ Creating interview via backend...");
-
-        // Get current user as interviewer (optional for room access)
-        const currentUser = await authService.getCurrentUser();
+      // If we have applicationId but no token, create interview room and get token
+      if (applicationId && !token) {
+        console.log("🔑 Creating interview room for applicationId:", applicationId);
         
-        // For room access, we allow unauthenticated users
-        // If authenticated, try to create interview; otherwise proceed with direct room access
-        let interview: any = null;
-        if (currentUser) {
-          // Find application by jobId and phone
-          const application = await applicationService.getApplicationByJobAndPhone(jobId, phone);
-          if (!application) {
-            throw new Error("Application not found for this job and phone number");
-          }
-
-          // Generate room name if not provided
-          const generatedRoomName = backendRoomName || roomService.generateRoomName(application.id);
-
-          const interviewInput = {
-            applicationId: application.id,
-            interviewerId: currentUser.id,
-            scheduledAt: new Date().toISOString(),
-            type: InterviewType.TECHNICAL,
-            status: InterviewStatus.IN_PROGRESS,
-            roomId: generatedRoomName, // Pass the room name to backend
-          };
-
-          interview = await roomService.createInterviewRoom(interviewInput);
-
-          console.log("✅ Interview created successfully:", interview);
-
-          // Use roomId from interview response, fallback to generated name
-          roomName = interview.roomId || generatedRoomName;
-
-          console.log("🔍 Using room details:", {
-            roomName,
-            interviewId: interview.id,
-            applicationId: application.id,
-            hasToken: !!token,
+        try {
+          // Mutation to create interview room and get token directly
+          const { data } = await apolloClient.mutate<{ 
+            createInterviewRoom: { 
+              roomName: string;
+              token: string;
+              message?: string;
+            } 
+          }>({
+            mutation: gql`
+              mutation CreateInterviewRoom($createRoomInput: CreateRoomInput!) {
+                createInterviewRoom(createRoomInput: $createRoomInput) {
+                  roomName
+                  token
+                  message
+                }
+              }
+            `,
+            variables: { 
+              createRoomInput: {
+                applicationId
+              }
+            },
           });
 
-          // Extract enhanced data from interview response
-          if (onJobDataUpdate) {
-            const jobData = {
-              title: interview.application.job.title,
-              location: null,
-              experience: null
-            };
+          console.log("🔍 Create Interview Room Response:", {
+            hasData: !!data?.createInterviewRoom,
+            hasToken: !!data?.createInterviewRoom?.token,
+            roomName: data?.createInterviewRoom?.roomName,
+            message: data?.createInterviewRoom?.message,
+            fullData: data
+          });
 
-            const companyData = {
-              name: interview.application.job.company.name
-            };
+          if (data?.createInterviewRoom?.token) {
+            token = data.createInterviewRoom.token;
+            roomName = data.createInterviewRoom.roomName || roomName;
+            
+            console.log("✅ Got token and room details from interview room creation", {
+              hasToken: !!token,
+              roomName,
+              serverUrl
+            });
 
-            const participantData = interview.application.candidate.name;
-
-            console.log("Extracted data:", { jobData, companyData, participantData });
-            onJobDataUpdate(jobData, companyData, participantData);
-          }
-        } else {
-          console.log("⚠️ User not authenticated, proceeding with direct room access");
-          // Use backendRoomName as provided in URL
-          roomName = backendRoomName;
-          
-          // For unauthenticated access, try to get token via GraphQL joinInterviewRoom
-          if (!token) {
+            // Now fetch application details to get job and candidate info
             try {
-              // For unauthenticated room joining, use jobId, phone, and roomName
-              // Backend should find the interview by these parameters
-              
-              const { data } = await apolloClient.query<{ joinInterviewRoom: { success: boolean; token?: string; roomName?: string; liveKitUrl?: string; error?: string } }>({
+              const { data: appData } = await apolloClient.query<{
+                application: {
+                  candidate: {
+                    name: string;
+                  };
+                  job: {
+                    title: string;
+                    company: {
+                      name: string;
+                    };
+                  };
+                }
+              }>({
                 query: gql`
-                  query JoinInterviewRoom($jobId: ID!, $phone: String!, $roomName: String!, $participantName: String!) {
-                    joinInterviewRoom(jobId: $jobId, phone: $phone, roomName: $roomName, participantName: $participantName) {
-                      success
-                      token
-                      roomName
-                      liveKitUrl
-                      error
+                  query GetApplication($id: ID!) {
+                    application(id: $id) {
+                      candidate {
+                        name
+                      }
+                      job {
+                        title
+                        company {
+                          name
+                        }
+                      }
                     }
                   }
                 `,
-                variables: { 
-                  jobId,
-                  phone,
-                  roomName: backendRoomName,
-                  participantName: "Candidate" // Default participant name for unauthenticated access
-                },
+                variables: { id: applicationId },
+                fetchPolicy: 'network-only'
               });
 
-              if (data?.joinInterviewRoom?.success && data.joinInterviewRoom.token) {
-                token = data.joinInterviewRoom.token;
-                roomName = data.joinInterviewRoom.roomName || backendRoomName;
-                serverUrl = data.joinInterviewRoom.liveKitUrl || serverUrl;
-                console.log("✅ Got room access token from GraphQL");
-              } else {
-                console.warn("⚠️ Failed to join room:", data?.joinInterviewRoom?.error);
+              if (onJobDataUpdate && appData?.application) {
+                const jobData = {
+                  title: appData.application.job.title,
+                  location: null
+                };
+                const companyData = {
+                  name: appData.application.job.company.name
+                };
+                const participantData = appData.application.candidate.name;
+                
+                console.log("📋 Extracted data from application:", { jobData, companyData, participantData });
+                onJobDataUpdate(jobData, companyData, participantData);
               }
-            } catch (error) {
-              console.warn("⚠️ Could not get room access via GraphQL:", error);
+            } catch (appError) {
+              console.warn("⚠️ Could not fetch application details:", appError);
+              // Continue anyway, room connection is more important
             }
+          } else {
+            console.error("❌ No token returned from createInterviewRoom");
+            throw new Error("Failed to get access token for interview room");
           }
+        } catch (error: any) {
+          console.error("❌ Failed to create interview room:", error);
+          console.error("Error details:", {
+            message: error.message,
+            graphQLErrors: error.graphQLErrors,
+            networkError: error.networkError
+          });
+          throw new Error(error.message || "Failed to create interview room. Please check your invitation link.");
         }
       }
 
       if (!token || !roomName) {
-        console.error("Missing required parameters:", { token: !!token, roomName });
+        console.error("Missing required parameters after processing:", { 
+          token: !!token, 
+          roomName,
+          applicationId,
+          directToken: !!directToken,
+          directRoomName 
+        });
         const missing = [];
         if (!token) missing.push("LiveKit token");
         if (!roomName) missing.push("room name");
-        throw new Error(`Missing required parameters: ${missing.join(", ")}. Please ensure you have the correct room link.`);
+        
+        // More helpful error message
+        if (applicationId) {
+          throw new Error(`Failed to get ${missing.join(", ")} from backend for this application. Please ensure the application ID is valid and the interview is scheduled.`);
+        } else {
+          throw new Error(`Missing required parameters: ${missing.join(", ")}. Please use a valid interview invitation link with applicationId parameter.`);
+        }
       }
 
       console.log("Connecting to LiveKit room:", { roomName, serverUrl });

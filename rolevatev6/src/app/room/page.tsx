@@ -1,159 +1,144 @@
-"use client";
+'use client';
 
-import "@livekit/components-styles";
-import React, { useState, useEffect, useRef, Suspense } from "react";
-import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
-import { Room } from "livekit-client";
-import { RoomContext, RoomAudioRenderer } from "@livekit/components-react";
-import ParticleBackground from "@/components/interview/ParticleBackground";
-import { InterviewLayout } from "./components/InterviewLayout";
-import { ConnectionManager } from "./components/ConnectionManager";
-import { useInterviewState } from "./hooks/useInterviewState";
-import { useRoomConnection } from "./hooks/useRoomConnection";
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { LiveKitRoom, RoomAudioRenderer } from '@livekit/components-react';
+import { SessionView } from './components/SessionView';
+import { apolloClient } from '@/lib/apollo';
+import { gql } from '@apollo/client';
 
-function Room4Content() {
+function LoadingScreen({ message = 'Connecting to interview room...' }: { message?: string }) {
+  return (
+    <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-400">{message}</p>
+      </div>
+    </div>
+  );
+}
+
+function RoomContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const [room] = useState(() => new Room());
-  const connectionAttemptedRef = useRef(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [roomToken, setRoomToken] = useState<string | null>(null);
+  const [wsURL, setWSURL] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Create fallback for searchParams if null
-  const safeSearchParams = searchParams || (new URLSearchParams() as ReadonlyURLSearchParams);
-
-  const {
-    isConnected,
-    isConnecting,
-    error,
-    needsPermission,
-    participantName,
-    companyInfo,
-    jobInfo,
-    handleStartInterview,
-    setIsConnected,
-    setIsConnecting,
-    setError,
-    setJobInfo,
-    setCompanyInfo,
-    setParticipantName,
-  } = useInterviewState();
-
-  const { connectToRoom } = useRoomConnection({
-    room,
-    searchParams: safeSearchParams,
-    onConnectionChange: (connected, connecting) => {
-      setIsConnected(connected);
-      setIsConnecting(connecting);
-    },
-    onError: (errorMessage) => {
-      setError(errorMessage);
-    },
-    onJobDataUpdate: (jobData, companyData, participantData) => {
-      if (jobData) setJobInfo(jobData);
-      if (companyData) setCompanyInfo(companyData);
-      if (participantData) setParticipantName(participantData);
-    },
-  });
-
-  // Debug URL parameters
   useEffect(() => {
-    console.log("🔍 URL Parameters:", {
-      token: safeSearchParams.get("token"),
-      roomName: safeSearchParams.get("roomName"),
-      serverUrl: safeSearchParams.get("serverUrl"),
-      phone: safeSearchParams.get("phone"),
-      jobId: safeSearchParams.get("jobId"),
-      allParams: Object.fromEntries(safeSearchParams.entries()),
-    });
-  }, [safeSearchParams]);
+    const connectToRoom = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get applicationId from URL
+        const applicationId = searchParams?.get('applicationId');
+        
+        if (!applicationId) {
+          setError('Missing application ID. Please use a valid interview invitation link.');
+          setIsLoading(false);
+          return;
+        }
 
-  // Connect to room when permissions are granted
-  useEffect(() => {
-    console.log("🔍 Connection effect triggered:", {
-      needsPermission,
-      isConnected,
-      isConnecting,
-      hasError: !!error,
-      connectionAttempted: connectionAttemptedRef.current,
-    });
+        console.log('🔑 Creating interview room for applicationId:', applicationId);
 
-    if (
-      !needsPermission &&
-      !isConnected &&
-      !isConnecting &&
-      !error &&
-      !connectionAttemptedRef.current
-    ) {
-      console.log("Triggering room connection...");
-      connectionAttemptedRef.current = true;
-      connectToRoom();
-    }
-  }, [needsPermission, isConnected, isConnecting, error, connectToRoom]);
+        // Create interview room and get token from backend
+        const { data } = await apolloClient.mutate<{ 
+          createInterviewRoom: { 
+            roomName: string;
+            token: string;
+            message?: string;
+          } 
+        }>({
+          mutation: gql`
+            mutation CreateInterviewRoom($createRoomInput: CreateRoomInput!) {
+              createInterviewRoom(createRoomInput: $createRoomInput) {
+                roomName
+                token
+                message
+              }
+            }
+          `,
+          variables: { 
+            createRoomInput: {
+              applicationId
+            }
+          },
+        });
 
-  if (needsPermission || error || isConnecting || !isConnected) {
+        console.log('✅ Interview room created:', {
+          hasToken: !!data?.createInterviewRoom?.token,
+          roomName: data?.createInterviewRoom?.roomName,
+        });
+
+        if (data?.createInterviewRoom?.token) {
+          const token = data.createInterviewRoom.token;
+          const serverUrl = 'wss://rolvate2-ckmk80qb.livekit.cloud';
+          
+          setRoomToken(token);
+          setWSURL(serverUrl);
+          setIsConnected(true);
+          setIsLoading(false);
+        } else {
+          throw new Error('Failed to get access token for interview room');
+        }
+      } catch (err: any) {
+        console.error('❌ Failed to create interview room:', err);
+        setError(err.message || 'Failed to connect to interview room. Please try again.');
+        setIsLoading(false);
+      }
+    };
+
+    connectToRoom();
+  }, [searchParams]);
+
+  const handleDisconnected = useCallback(() => {
+    setIsConnected(false);
+    router.push('/userdashboard');
+  }, [router]);
+
+  if (error) {
     return (
-      <ConnectionManager
-        needsPermission={needsPermission}
-        error={error}
-        isConnecting={isConnecting}
-        isConnected={isConnected}
-        onStartInterview={handleStartInterview}
-      />
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center p-8 max-w-md">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Connection Error</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={() => router.push('/userdashboard')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
     );
   }
 
+  if (isLoading || !isConnected || !roomToken || !wsURL) {
+    return <LoadingScreen message={isLoading ? 'Creating interview room...' : 'Connecting...'} />;
+  }
+
   return (
-    <RoomContext.Provider value={room}>
-      <div className="min-h-screen bg-slate-50 relative overflow-hidden">
-        <ParticleBackground />
-
-        <InterviewLayout
-          jobInfo={jobInfo}
-          companyInfo={companyInfo}
-          participantName={participantName}
-        />
-
-        <div className="fixed top-0 left-0 w-0 h-0 overflow-visible">
-          <RoomAudioRenderer volume={1.0} muted={false} />
-        </div>
-
-        {/* Mobile-specific audio enhancement */}
-        <div className="sm:hidden fixed bottom-0 left-0 w-full h-0 overflow-visible">
-          <audio 
-            autoPlay 
-            playsInline 
-            style={{ display: 'none' }}
-            ref={(audio) => {
-              if (audio && room && typeof window !== 'undefined') {
-                // Enhanced audio settings for mobile clarity
-                audio.volume = 1.0;
-                audio.preload = 'auto';
-                
-                // Mobile-specific audio optimizations
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                if (isMobile) {
-                  // Force audio context resume on mobile interaction
-                  const resumeAudio = () => {
-                    if (audio.paused) {
-                      audio.play().catch(console.warn);
-                    }
-                  };
-                  
-                  document.addEventListener('touchstart', resumeAudio, { once: true });
-                  document.addEventListener('click', resumeAudio, { once: true });
-                }
-              }
-            }}
-          />
-        </div>
-      </div>
-    </RoomContext.Provider>
+    <LiveKitRoom
+      token={roomToken}
+      serverUrl={wsURL}
+      connect={true}
+      audio={true}
+      video={true}
+      onDisconnected={handleDisconnected}
+      className="h-screen w-screen"
+    >
+      <SessionView />
+      <RoomAudioRenderer />
+    </LiveKitRoom>
   );
 }
 
-export default function Room4Page() {
+export default function RoomPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Room4Content />
+    <Suspense fallback={<LoadingScreen message="Loading interview..." />}>
+      <RoomContent />
     </Suspense>
   );
 }
-

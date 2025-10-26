@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,12 +11,17 @@ import { authService } from "@/services";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
 
   // Form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +37,14 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  if (!isMounted) {
+    return (
+      <section className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </section>
+    );
+  }
 
   return (
     <section className="min-h-screen bg-white flex items-center justify-center p-4">

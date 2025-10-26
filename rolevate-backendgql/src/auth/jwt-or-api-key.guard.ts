@@ -25,9 +25,12 @@ export class JwtOrApiKeyGuard implements CanActivate {
     // First try API key authentication (including system API key)
     const apiKey = request.headers['x-api-key'];
     if (apiKey) {
+      console.log('🔑 API Key detected in x-api-key header');
+      
       // Check if it's the system API key (special case)
       const systemApiKey = this.configService.get<string>('SYSTEM_API_KEY');
       if (systemApiKey && apiKey === systemApiKey) {
+        console.log('✅ System API key validated - granting access');
         // System API key - create a system user context
         request.user = {
           userId: 'system',
@@ -41,6 +44,7 @@ export class JwtOrApiKeyGuard implements CanActivate {
       // Regular API key - validate and get the associated user
       const isValidApiKey = await this.apiKeyService.validateApiKey(apiKey);
       if (isValidApiKey) {
+        console.log('✅ Regular API key validated - fetching user');
         const apiKeyEntity = await this.apiKeyService.findByKey(apiKey);
         if (apiKeyEntity && apiKeyEntity.user) {
           request.user = {
@@ -48,9 +52,13 @@ export class JwtOrApiKeyGuard implements CanActivate {
             userId: apiKeyEntity.user.id,
             isApiKey: true,
           };
+          console.log(`✅ API key authenticated for user: ${apiKeyEntity.user.id}`);
           return true;
         }
       }
+      console.log('❌ API key validation failed');
+    } else {
+      console.log('ℹ️  No API key found in x-api-key header, trying JWT...');
     }
 
     // If API key fails, try JWT authentication
@@ -76,6 +84,7 @@ export class JwtOrApiKeyGuard implements CanActivate {
     }
 
     if (!token) {
+      console.log('❌ No authentication provided (no API key, no JWT token)');
       return false;
     }
 
@@ -83,6 +92,7 @@ export class JwtOrApiKeyGuard implements CanActivate {
       const payload = this.jwtService.verify(token);
       const user = await this.userService.findOne(payload.sub);
       if (user && user.isActive) {
+        console.log(`✅ JWT authenticated for user: ${user.id}`);
         request.user = {
           ...user,
           userId: user.id,
@@ -91,6 +101,7 @@ export class JwtOrApiKeyGuard implements CanActivate {
         return true;
       }
     } catch (error) {
+      console.log('❌ JWT verification failed:', error.message);
       // JWT verification failed
     }
 

@@ -3,13 +3,6 @@ import Logo from "./Logo";
 
 const footerLinks = [
   {
-    title: "Company",
-    links: [
-      { label: "About", href: "/about" },
-      { label: "Contact", href: "/contact" },
-    ],
-  },
-  {
     title: "Legal",
     links: [
       { label: "Privacy Policy", href: "/privacy-policy" },
