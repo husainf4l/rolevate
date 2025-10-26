@@ -128,7 +128,7 @@ export function TileLayout() {
                     className={cn([
                       'bg-white/20 min-h-2.5 w-2.5 md:min-h-3 md:w-3 rounded-full',
                       'origin-center transition-all duration-200 ease-out',
-                      'data-[lk-highlighted=true]:bg-gradient-to-t data-[lk-highlighted=true]:from-blue-400 data-[lk-highlighted=true]:to-cyan-300 data-[lk-highlighted=true]:shadow-lg data-[lk-highlighted=true]:shadow-blue-500/50',
+                      'data-[lk-highlighted=true]:bg-gradient-to-t data-[lk-highlighted=true]:from-[#0891b2] data-[lk-highlighted=true]:to-[#06b6d4] data-[lk-highlighted=true]:shadow-lg data-[lk-highlighted=true]:shadow-[#0891b2]/50',
                       'data-[lk-muted=true]:bg-white/10',
                     ])}
                   />
