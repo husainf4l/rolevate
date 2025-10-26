@@ -37,6 +37,8 @@ dependencies:
   graphql_flutter: ^5.1.2
   get: ^4.6.6
   get_storage: ^2.1.1
+  file_picker: ^8.0.0+1
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:rolevateapp/models/models.dart';
 import 'package:rolevateapp/services/job_service.dart';
@@ -53,7 +54,7 @@ class JobController extends GetxController {
     }
 
     try {
-      final offset = loadMore ? currentPage.value * pageSize.value : 0;
+      final page = loadMore ? currentPage.value + 1 : 1;
 
       final fetchedJobs = await _jobService.getJobs(
         type: selectedType.value,
@@ -64,7 +65,7 @@ class JobController extends GetxController {
         department: searchDepartment.value.isNotEmpty ? searchDepartment.value : null,
         featured: featuredOnly.value ? true : null,
         limit: pageSize.value,
-        offset: offset,
+        page: page,
       );
 
       if (loadMore) {
@@ -78,7 +79,15 @@ class JobController extends GetxController {
       hasMore.value = fetchedJobs.length >= pageSize.value;
     } catch (e) {
       error.value = e.toString();
-      print('Error fetching jobs: $e');
+      debugPrint('❌ Error fetching jobs: $e');
+      
+      // Show user-friendly error message
+      Get.snackbar(
+        'Error Loading Jobs',
+        'Failed to load jobs. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+      );
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
@@ -95,7 +104,7 @@ class JobController extends GetxController {
       currentJob.value = job;
     } catch (e) {
       error.value = e.toString();
-      print('Error fetching job: $e');
+      debugPrint('Error fetching job: $e');
     } finally {
       isLoading.value = false;
     }
@@ -111,7 +120,7 @@ class JobController extends GetxController {
       currentJob.value = job;
     } catch (e) {
       error.value = e.toString();
-      print('Error fetching job by slug: $e');
+      debugPrint('Error fetching job by slug: $e');
     } finally {
       isLoading.value = false;
     }
@@ -123,11 +132,12 @@ class JobController extends GetxController {
       final success = await _jobService.saveJob(jobId, notes: notes);
       if (success) {
         savedJobIds.add(jobId);
-        await fetchSavedJobs(); // Refresh saved jobs list
+        // Note: Not calling fetchSavedJobs here for mock implementation
+        // In production, this would sync with the server
       }
       return success;
     } catch (e) {
-      print('Error saving job: $e');
+      debugPrint('Error saving job: $e');
       return false;
     }
   }
@@ -138,11 +148,12 @@ class JobController extends GetxController {
       final success = await _jobService.unsaveJob(jobId);
       if (success) {
         savedJobIds.remove(jobId);
-        await fetchSavedJobs(); // Refresh saved jobs list
+        // Note: Not calling fetchSavedJobs here for mock implementation
+        // In production, this would sync with the server
       }
       return success;
     } catch (e) {
-      print('Error unsaving job: $e');
+      debugPrint('Error unsaving job: $e');
       return false;
     }
   }
@@ -173,7 +184,7 @@ class JobController extends GetxController {
         savedJobIds.add(savedJob.jobId);
       }
     } catch (e) {
-      print('Error fetching saved jobs: $e');
+      debugPrint('Error fetching saved jobs: $e');
     }
   }
 
@@ -183,7 +194,7 @@ class JobController extends GetxController {
       final applications = await _applicationService.getMyApplications();
       myApplications.assignAll(applications);
     } catch (e) {
-      print('Error fetching applications: $e');
+      debugPrint('Error fetching applications: $e');
     }
   }
 

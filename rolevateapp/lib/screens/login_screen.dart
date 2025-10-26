@@ -25,10 +25,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    print('📝 Login button pressed');
+    debugPrint('📝 Login button pressed');
     
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      print('⚠️ Validation failed: Empty email or password');
+      debugPrint('⚠️ Validation failed: Empty email or password');
       Get.snackbar(
         'Validation Error',
         'Please enter both email and password',
@@ -39,8 +39,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    print('📧 Email: ${_emailController.text}');
-    print('🔑 Password: ${_passwordController.text.replaceAll(RegExp(r'.'), '*')}');
+    debugPrint('📧 Email: ${_emailController.text}');
+    debugPrint('🔑 Password: ${_passwordController.text.replaceAll(RegExp(r'.'), '*')}');
     
     await authController.login(
       _emailController.text,
@@ -168,7 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   CupertinoButton(
                     padding: EdgeInsets.zero,
-                    minSize: 0,
                     child: Text(
                       'Sign Up',
                       style: AppTypography.button.copyWith(

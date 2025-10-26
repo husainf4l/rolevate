@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolevateapp/controllers/auth_controller.dart';
 import 'package:rolevateapp/core/theme/app_colors.dart';
@@ -26,7 +25,7 @@ class AppNavBar extends StatelessWidget implements ObstructingPreferredSizeWidge
         ),
         boxShadow: [
           BoxShadow(
-            color: CupertinoColors.black.withOpacity(0.05),
+            color: CupertinoColors.black.withValues(alpha: 0.05),
             offset: const Offset(0, 1),
             blurRadius: 2,
           ),
@@ -45,7 +44,6 @@ class AppNavBar extends StatelessWidget implements ObstructingPreferredSizeWidge
             // Menu Icon
             CupertinoButton(
               padding: EdgeInsets.zero,
-              minSize: 36,
               onPressed: onMenuTap,
               child: const Icon(
                 CupertinoIcons.line_horizontal_3,
@@ -78,7 +76,6 @@ class AppNavBar extends StatelessWidget implements ObstructingPreferredSizeWidge
                 if (authController.isAuthenticated.value) {
                   return CupertinoButton(
                     padding: EdgeInsets.zero,
-                    minSize: 36,
                     onPressed: () {
                       _showUserMenu(context, authController);
                     },
@@ -90,7 +87,7 @@ class AppNavBar extends StatelessWidget implements ObstructingPreferredSizeWidge
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary600.withOpacity(0.3),
+                            color: AppColors.primary600.withValues(alpha: 0.3),
                             offset: const Offset(0, 2),
                             blurRadius: 4,
                           ),
@@ -111,7 +108,6 @@ class AppNavBar extends StatelessWidget implements ObstructingPreferredSizeWidge
                 } else {
                   return CupertinoButton(
                     padding: EdgeInsets.zero,
-                    minSize: 36,
                     onPressed: () {
                       Get.toNamed('/login');
                     },

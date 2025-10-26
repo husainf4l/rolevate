@@ -92,7 +92,7 @@ class Address {
   }
 
   @override
-  String toString() => 'Address(${fullAddress})';
+  String toString() => 'Address($fullAddress)';
 
   @override
   bool operator ==(Object other) {

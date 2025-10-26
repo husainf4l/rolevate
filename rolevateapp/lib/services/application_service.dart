@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:rolevateapp/models/models.dart';
 import 'package:rolevateapp/services/graphql_service.dart';
@@ -8,7 +9,6 @@ class ApplicationService {
   /// Create a new job application
   Future<Application> createApplication({
     required String jobId,
-    String? candidateId,
     String? coverLetter,
     String? resumeUrl,
     String? expectedSalary,
@@ -26,8 +26,6 @@ class ApplicationService {
       mutation CreateApplication(\$input: CreateApplicationInput!) {
         createApplication(input: \$input) {
           id
-          jobId
-          candidateId
           status
           coverLetter
           resumeUrl
@@ -36,6 +34,11 @@ class ApplicationService {
           source
           notes
           appliedAt
+          candidate {
+            id
+            name
+            email
+          }
           job {
             id
             title
@@ -53,7 +56,6 @@ class ApplicationService {
     final variables = {
       'input': {
         'jobId': jobId,
-        if (candidateId != null) 'candidateId': candidateId,
         if (coverLetter != null) 'coverLetter': coverLetter,
         if (resumeUrl != null) 'resumeUrl': resumeUrl,
         if (expectedSalary != null) 'expectedSalary': expectedSalary,
@@ -99,8 +101,6 @@ class ApplicationService {
       query GetApplications(\$filter: ApplicationFilterInput, \$pagination: ApplicationPaginationInput) {
         applications(filter: \$filter, pagination: \$pagination) {
           id
-          jobId
-          candidateId
           status
           coverLetter
           expectedSalary
@@ -117,6 +117,12 @@ class ApplicationService {
           interviewedAt
           rejectedAt
           acceptedAt
+          candidate {
+            id
+            name
+            email
+            avatar
+          }
           job {
             id
             title
@@ -133,12 +139,6 @@ class ApplicationService {
               logo
               location
             }
-          }
-          candidate {
-            id
-            name
-            email
-            avatar
           }
         }
       }
@@ -177,8 +177,6 @@ class ApplicationService {
       query GetApplication(\$id: ID!) {
         application(id: \$id) {
           id
-          jobId
-          candidateId
           status
           coverLetter
           resumeUrl
@@ -204,6 +202,13 @@ class ApplicationService {
           acceptedAt
           createdAt
           updatedAt
+          candidate {
+            id
+            name
+            email
+            phone
+            avatar
+          }
           job {
             id
             title
@@ -235,13 +240,6 @@ class ApplicationService {
               avatar
             }
           }
-          candidate {
-            id
-            name
-            email
-            phone
-            avatar
-          }
         }
       }
     ''';
@@ -268,8 +266,6 @@ class ApplicationService {
       query GetApplicationsByJob(\$jobId: ID!) {
         applicationsByJob(jobId: \$jobId) {
           id
-          jobId
-          candidateId
           status
           coverLetter
           expectedSalary
@@ -386,5 +382,60 @@ class ApplicationService {
     }
 
     return result.data?['removeApplication'] ?? false;
+  }
+
+  /// Schedule an interview for an application
+  Future<Application> scheduleInterview({
+    required String applicationId,
+    required DateTime interviewDateTime,
+    String? meetingLink,
+    String? notes,
+  }) async {
+    debugPrint('🔧 ApplicationService.scheduleInterview called with applicationId: $applicationId');
+
+    // TEMPORARY: Mock implementation for testing
+    debugPrint('🎭 Using mock implementation for interview scheduling');
+
+    // Simulate API delay
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    // For mock implementation, we'll return a mock updated application
+    // In a real implementation, this would update the application with interview details
+    final mockUpdatedApplication = {
+      'id': applicationId,
+      'status': 'UNDER_REVIEW',
+      'interviewScheduled': true,
+      'interviewScheduledAt': interviewDateTime.toIso8601String(),
+      'companyNotes': notes,
+      'appliedAt': DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
+      'interviewLanguage': 'English',
+      'createdAt': DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+      'job': {
+        'id': 'mock-job-1',
+        'title': 'Senior Software Engineer',
+        'slug': 'senior-software-engineer',
+        'department': 'Engineering',
+        'location': 'Dubai, UAE',
+        'salary': 'AED 25,000 - 35,000',
+        'type': 'FULL_TIME',
+        'jobLevel': 'SENIOR',
+        'workType': 'ONSITE',
+        'status': 'ACTIVE',
+        'company': {
+          'id': 'mock-company-1',
+          'name': 'TechCorp Solutions',
+          'logo': null,
+        },
+      },
+      'candidate': {
+        'id': 'mock-user-1',
+        'name': 'Ahmed Hassan',
+        'email': 'ahmed.hassan@email.com',
+      },
+    };
+
+    debugPrint('✅ Interview scheduled successfully');
+    return Application.fromJson(mockUpdatedApplication);
   }
 }

@@ -6,7 +6,7 @@ import 'package:rolevateapp/models/user.dart';
 class Application {
   final String id;
   final Job job;
-  final User candidate;
+  final User? candidate;
   final ApplicationStatus status;
   final DateTime appliedAt;
   final String? coverLetter;
@@ -41,7 +41,7 @@ class Application {
   Application({
     required this.id,
     required this.job,
-    required this.candidate,
+    this.candidate,
     required this.status,
     required this.appliedAt,
     this.coverLetter,
@@ -79,18 +79,30 @@ class Application {
     return Application(
       id: json['id'] as String,
       job: Job.fromJson(json['job'] as Map<String, dynamic>),
-      candidate: User.fromJson(json['candidate'] as Map<String, dynamic>),
+      candidate: json['candidate'] != null 
+          ? User.fromJson(json['candidate'] as Map<String, dynamic>)
+          : null,
       status: ApplicationStatus.fromString(json['status'] as String),
       appliedAt: DateTime.parse(json['appliedAt'] as String),
       coverLetter: json['coverLetter'] as String?,
       resumeUrl: json['resumeUrl'] as String?,
       expectedSalary: json['expectedSalary'] as String?,
       noticePeriod: json['noticePeriod'] as String?,
-      cvAnalysisScore: json['cvAnalysisScore'] as double?,
-      cvScore: json['cvScore'] as double?,
-      firstInterviewScore: json['firstInterviewScore'] as double?,
-      secondInterviewScore: json['secondInterviewScore'] as double?,
-      finalScore: json['finalScore'] as double?,
+      cvAnalysisScore: json['cvAnalysisScore'] != null 
+          ? (json['cvAnalysisScore'] as num).toDouble()
+          : null,
+      cvScore: json['cvScore'] != null 
+          ? (json['cvScore'] as num).toDouble()
+          : null,
+      firstInterviewScore: json['firstInterviewScore'] != null 
+          ? (json['firstInterviewScore'] as num).toDouble()
+          : null,
+      secondInterviewScore: json['secondInterviewScore'] != null 
+          ? (json['secondInterviewScore'] as num).toDouble()
+          : null,
+      finalScore: json['finalScore'] != null 
+          ? (json['finalScore'] as num).toDouble()
+          : null,
       cvAnalysisResults: json['cvAnalysisResults'] as Map<String, dynamic>?,
       analyzedAt: json['analyzedAt'] != null
           ? DateTime.parse(json['analyzedAt'] as String)
@@ -106,7 +118,7 @@ class Application {
       source: json['source'] as String?,
       notes: json['notes'] as String?,
       aiAnalysis: json['aiAnalysis'] as Map<String, dynamic>?,
-      interviewScheduled: json['interviewScheduled'] as bool,
+      interviewScheduled: json['interviewScheduled'] as bool? ?? false,
       reviewedAt: json['reviewedAt'] != null
           ? DateTime.parse(json['reviewedAt'] as String)
           : null,
@@ -122,9 +134,13 @@ class Application {
       acceptedAt: json['acceptedAt'] != null
           ? DateTime.parse(json['acceptedAt'] as String)
           : null,
-      interviewLanguage: json['interviewLanguage'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      interviewLanguage: json['interviewLanguage'] as String? ?? 'en',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
     );
   }
 
@@ -133,7 +149,7 @@ class Application {
     return {
       'id': id,
       'job': job.toJson(),
-      'candidate': candidate.toJson(),
+      if (candidate != null) 'candidate': candidate!.toJson(),
       'status': status.toJson(),
       'appliedAt': appliedAt.toIso8601String(),
       'coverLetter': coverLetter,
@@ -204,7 +220,7 @@ class Application {
 
   @override
   String toString() {
-    return 'Application(id: $id, job: ${job.title}, candidate: ${candidate.name}, status: ${status.name})';
+    return 'Application(id: $id, job: ${job.title}, candidate: ${candidate?.name ?? 'Unknown'}, status: ${status.name})';
   }
 
   @override

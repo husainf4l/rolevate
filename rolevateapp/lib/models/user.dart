@@ -30,18 +30,24 @@ class User {
   /// Create User from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] as String,
-      userType: UserType.fromString(json['userType'] as String),
+      id: json['id'] as String? ?? '',
+      userType: json['userType'] != null 
+          ? UserType.fromString(json['userType'] as String)
+          : UserType.candidate,
       email: json['email'] as String?,
       name: json['name'] as String?,
       phone: json['phone'] as String?,
       avatar: json['avatar'] as String?,
-      isActive: json['isActive'] as bool,
+      isActive: json['isActive'] as bool? ?? true,
       company: json['company'] != null
           ? Company.fromJson(json['company'] as Map<String, dynamic>)
           : null,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
     );
   }
 

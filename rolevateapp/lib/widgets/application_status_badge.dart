@@ -54,42 +54,42 @@ class ApplicationStatusBadge extends StatelessWidget {
     switch (status) {
       case ApplicationStatus.pending:
         return {
-          'background': AppColors.warning.withOpacity(0.1),
+          'background': AppColors.warning.withValues(alpha: 0.1),
           'foreground': AppColors.warning,
         };
       case ApplicationStatus.reviewed:
         return {
-          'background': AppColors.info.withOpacity(0.1),
+          'background': AppColors.info.withValues(alpha: 0.1),
           'foreground': AppColors.info,
         };
       case ApplicationStatus.shortlisted:
         return {
-          'background': AppColors.primary.withOpacity(0.1),
+          'background': AppColors.primary.withValues(alpha: 0.1),
           'foreground': AppColors.primary,
         };
       case ApplicationStatus.interviewed:
         return {
-          'background': AppColors.primary.withOpacity(0.15),
+          'background': AppColors.primary.withValues(alpha: 0.15),
           'foreground': AppColors.primary700,
         };
       case ApplicationStatus.offered:
         return {
-          'background': AppColors.success.withOpacity(0.1),
+          'background': AppColors.success.withValues(alpha: 0.1),
           'foreground': AppColors.success,
         };
       case ApplicationStatus.hired:
         return {
-          'background': AppColors.success.withOpacity(0.2),
+          'background': AppColors.success.withValues(alpha: 0.2),
           'foreground': AppColors.success,
         };
       case ApplicationStatus.analyzed:
         return {
-          'background': AppColors.primary.withOpacity(0.1),
+          'background': AppColors.primary.withValues(alpha: 0.1),
           'foreground': AppColors.primary,
         };
       case ApplicationStatus.rejected:
         return {
-          'background': AppColors.error.withOpacity(0.1),
+          'background': AppColors.error.withValues(alpha: 0.1),
           'foreground': AppColors.error,
         };
       case ApplicationStatus.withdrawn:
