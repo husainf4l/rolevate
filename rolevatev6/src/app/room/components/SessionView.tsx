@@ -37,16 +37,16 @@ export function SessionView() {
 
   if (!isMounted) {
     return (
-      <section className="relative z-10 h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <section className="relative z-10 h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <div className="h-full w-full flex items-center justify-center">
-          <div className="w-16 h-16 border-3 border-slate-300 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-3 border-white/20 border-t-white rounded-full animate-spin"></div>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="relative z-10 h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <section className="relative z-10 h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       {/* Main Content - Full width */}
       <div className="h-screen w-full flex flex-col">
         {/* Agent Video/Audio with integrated transcript */}
@@ -62,7 +62,7 @@ export function SessionView() {
       >
         <div className="relative px-3 md:px-8 pb-3 md:pb-8 pointer-events-auto">
           {/* Gradient fade */}
-          <div className="absolute inset-x-0 bottom-0 h-24 md:h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none -z-10"></div>
+          <div className="absolute inset-x-0 bottom-0 h-24 md:h-32 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none -z-10"></div>
           <AgentControlBar />
         </div>
       </MotionBottom>
