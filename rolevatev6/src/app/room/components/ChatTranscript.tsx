@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useVoiceAssistant, useRoomContext } from '@livekit/components-react';
 import type { TranscriptionSegment } from 'livekit-client';
@@ -11,11 +11,35 @@ interface ChatTranscriptProps {
   className?: string;
 }
 
+// Detect if text contains Arabic characters
+const containsArabic = (text: string): boolean => {
+  const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  return arabicRegex.test(text);
+};
+
+// Detect primary text direction
+const detectTextDirection = (text: string): 'rtl' | 'ltr' => {
+  if (!text) return 'ltr';
+  
+  // Count Arabic vs Latin characters
+  const arabicChars = (text.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
+  const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
+  
+  // If more than 30% Arabic characters, use RTL
+  return arabicChars > latinChars * 0.3 ? 'rtl' : 'ltr';
+};
+
 export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
   const room = useRoomContext();
   const { state: agentState } = useVoiceAssistant();
-  const [currentText, setCurrentText] = useState<string>('');
-  const [isFinal, setIsFinal] = useState<boolean>(false);
+  const [currentParagraph, setCurrentParagraph] = useState<string>('');
+  const [isInterim, setIsInterim] = useState<boolean>(false);
+  const lastFinalTextRef = useRef<string>('');
+
+  // Detect text direction
+  const textDirection = useMemo(() => {
+    return detectTextDirection(currentParagraph);
+  }, [currentParagraph]);
 
   // Listen to transcription events from LiveKit
   useEffect(() => {
@@ -31,10 +55,24 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
         
         // Only show agent's speech
         if (isAgent && segment.text.trim()) {
-          console.log('📝 Agent transcript:', segment.text, 'Final:', segment.final);
+          const trimmedText = segment.text.trim();
           
-          setCurrentText(segment.text.trim());
-          setIsFinal(segment.final);
+          if (segment.final) {
+            // Final segment - if it's different from last, start new paragraph
+            console.log('📝 Agent transcript (final):', trimmedText);
+            
+            // Check if this is a new paragraph (different from last final text)
+            if (trimmedText !== lastFinalTextRef.current) {
+              setCurrentParagraph(trimmedText);
+              lastFinalTextRef.current = trimmedText;
+              setIsInterim(false);
+            }
+          } else {
+            // Interim segment - update current paragraph
+            console.log('📝 Agent transcript (interim):', trimmedText);
+            setCurrentParagraph(trimmedText);
+            setIsInterim(true);
+          }
         }
       });
     };
@@ -48,22 +86,13 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
     };
   }, [room]);
 
+  const hasContent = currentParagraph;
+
   return (
     <div className={className}>
-      {/* Header - More compact on mobile */}
-      <div className="flex items-center justify-between mb-2 md:mb-4 px-0.5">
-        <h3 className="text-[11px] md:text-sm font-semibold text-white/90 tracking-wide">LIVE TRANSCRIPT</h3>
-        {agentState === 'speaking' && (
-          <div className="flex items-center gap-1 md:gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-            <span className="text-[10px] md:text-xs text-white/60 uppercase tracking-wider">Speaking</span>
-          </div>
-        )}
-      </div>
-
       {/* Current Paragraph Display - Optimized for mobile */}
       <div className="flex items-center justify-center min-h-[80px] md:min-h-[180px] lg:min-h-[220px]">
-        {!currentText ? (
+        {!hasContent ? (
           <div className="flex flex-col items-center justify-center gap-2 md:gap-3 text-white/30">
             <div className="w-8 md:w-12 h-8 md:h-12 rounded-full border-2 border-white/10 flex items-center justify-center">
               <svg className="w-4 md:w-6 h-4 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,42 +108,29 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
             animate={{ opacity: 1 }}
             className="w-full"
           >
-            <div className={`
-              backdrop-blur-xl rounded-xl md:rounded-2xl lg:rounded-3xl 
-              px-2.5 md:px-5 lg:px-6 py-2.5 md:py-4 lg:py-6 
-              border transition-all duration-300
-              ${isFinal 
-                ? 'bg-white/5 border-white/10' 
-                : 'bg-gradient-to-br from-blue-500/15 via-purple-500/15 to-cyan-500/15 border-blue-400/25 shadow-lg shadow-blue-500/10'
-              }
-            `}>
-              <div className="flex items-start gap-2 md:gap-3 lg:gap-4">
-                {/* AI Avatar - Smaller on mobile */}
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-6 h-6 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-blue-400 via-cyan-400 to-purple-500 flex items-center justify-center shadow-lg ring-2 ring-white/10">
-                    <span className="text-white text-[9px] md:text-xs lg:text-sm font-bold">AI</span>
-                  </div>
-                </div>
-                
-                {/* Text Content with smooth typing */}
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <motion.p 
-                    key={currentText}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                    className="text-white/95 text-[13px] leading-[1.5] md:text-sm md:leading-relaxed lg:text-base xl:text-lg font-medium"
-                  >
-                    {currentText}
-                    {!isFinal && agentState === 'speaking' && (
-                      <motion.span 
-                        className="inline-block ml-1 w-0.5 h-3 md:h-4 lg:h-5 bg-blue-400 rounded-full"
-                        animate={{ opacity: [1, 0.3, 1] }}
-                        transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                    )}
-                  </motion.p>
-                </div>
+            <div className="backdrop-blur-xl rounded-xl md:rounded-2xl lg:rounded-3xl px-2.5 md:px-5 lg:px-6 py-2.5 md:py-4 lg:py-6 border border-white/10 bg-white/5">
+              {/* Text Content - current paragraph with bidirectional support */}
+              <div className="w-full">
+                <p 
+                  dir={textDirection}
+                  className={`text-white/95 text-[13px] leading-[1.5] md:text-sm md:leading-relaxed lg:text-base xl:text-lg font-medium ${
+                    textDirection === 'rtl' ? 'text-right' : 'text-left'
+                  }`}
+                  lang={textDirection === 'rtl' ? 'ar' : 'en'}
+                >
+                  {/* Current paragraph */}
+                  <span className={isInterim ? 'text-white/90' : 'text-white/95'}>
+                    {currentParagraph}
+                  </span>
+                  {/* Typing cursor when speaking and interim */}
+                  {isInterim && agentState === 'speaking' && (
+                    <motion.span 
+                      className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 h-3 md:h-4 lg:h-5 bg-[#0891b2] rounded-full`}
+                      animate={{ opacity: [1, 0.3, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  )}
+                </p>
               </div>
             </div>
           </MotionDiv>

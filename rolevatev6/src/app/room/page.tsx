@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LiveKitRoom, RoomAudioRenderer } from '@livekit/components-react';
 import { SessionView } from './components/SessionView';
+import { PreRoomSetup } from './components/PreRoomSetup';
 import { apolloClient } from '@/lib/apollo';
 import { gql } from '@apollo/client';
 
@@ -21,14 +22,21 @@ function LoadingScreen({ message = 'Connecting to interview room...' }: { messag
 function RoomContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [setupComplete, setSetupComplete] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [roomToken, setRoomToken] = useState<string | null>(null);
   const [wsURL, setWSURL] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const connectToRoom = async () => {
+    // Only connect after setup is complete
+    if (!setupComplete) return;
+
+    let isMounted = true;
+    let retryTimeoutId: NodeJS.Timeout | null = null;
+
+    const connectToRoom = async (retryCount = 0) => {
       try {
         setIsLoading(true);
         
@@ -41,7 +49,7 @@ function RoomContent() {
           return;
         }
 
-        console.log('🔑 Creating interview room for applicationId:', applicationId);
+        console.log('🔑 Creating interview room for applicationId:', applicationId, 'Retry:', retryCount);
 
         // Create interview room and get token from backend
         const { data } = await apolloClient.mutate<{ 
@@ -74,7 +82,7 @@ function RoomContent() {
 
         if (data?.createInterviewRoom?.token) {
           const token = data.createInterviewRoom.token;
-          const serverUrl = 'wss://rolvate2-ckmk80qb.livekit.cloud';
+          const serverUrl = 'wss://rolvate-fi6h6rke.livekit.cloud';
           
           setRoomToken(token);
           setWSURL(serverUrl);
@@ -85,18 +93,50 @@ function RoomContent() {
         }
       } catch (err: any) {
         console.error('❌ Failed to create interview room:', err);
-        setError(err.message || 'Failed to connect to interview room. Please try again.');
+        
+        // Handle rate limiting (429 error)
+        if (err.message?.includes('429') || err.message?.toLowerCase().includes('rate limit')) {
+          if (retryCount < 3 && isMounted) {
+            const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 10000); // Exponential backoff, max 10s
+            console.log(`⏰ Rate limited. Retrying in ${retryDelay}ms... (attempt ${retryCount + 1}/3)`);
+            setError(`Rate limited. Retrying in ${Math.ceil(retryDelay / 1000)} seconds...`);
+            
+            retryTimeoutId = setTimeout(() => {
+              if (isMounted) {
+                connectToRoom(retryCount + 1);
+              }
+            }, retryDelay);
+            return;
+          } else {
+            setError('Service temporarily unavailable due to high usage. Please wait a few minutes and try again.');
+          }
+        } else {
+          setError(err.message || 'Failed to connect to interview room. Please try again.');
+        }
         setIsLoading(false);
       }
     };
 
     connectToRoom();
-  }, [searchParams]);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      if (retryTimeoutId) {
+        clearTimeout(retryTimeoutId);
+      }
+    };
+  }, [searchParams, setupComplete]);
 
   const handleDisconnected = useCallback(() => {
     setIsConnected(false);
     router.push('/userdashboard');
   }, [router]);
+
+  // Show pre-room setup first
+  if (!setupComplete) {
+    return <PreRoomSetup onComplete={() => setSetupComplete(true)} />;
+  }
 
   if (error) {
     return (

@@ -2,16 +2,16 @@ module.exports = {
   apps: [
     {
       name: 'rolevate-v6',
-      script: 'node_modules/next/dist/bin/next',
-      args: 'start -p 3005',
-      cwd: '/home/husain/rolevate/rolevatev6',
+      script: 'npm',
+      args: 'run dev -- -p 3005',
+      cwd: '/Users/husain/Desktop/rolevate/rolevatev6',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
       env: {
-        NODE_ENV: 'production',
+        NODE_ENV: 'development',
         PORT: 3005
       },
       error_file: './logs/pm2-error.log',
