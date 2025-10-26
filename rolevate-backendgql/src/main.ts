@@ -32,13 +32,25 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new GlobalExceptionFilter());
   
-  // CORS Configuration - Accept all origins for development
-  // TODO: Restrict to specific origins in production
+  // CORS Configuration - Allow ALL domains/origins (Most Permissive)
   app.enableCors({
-    origin: true, // Accept all origins (for development)
+    origin: '*', // Allow all origins - most permissive setting
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Apollo-Require-Preflight'],
+    methods: '*', // Allow all HTTP methods
+    allowedHeaders: '*', // Allow all headers
+    exposedHeaders: ['Content-Length', 'Content-Type'],
+    maxAge: 86400, // Cache preflight for 24 hours
+    optionsSuccessStatus: 200,
+    preflightContinue: false,
+  });
+  
+  // Additional CORS headers for maximum compatibility
+  app.getHttpAdapter().getInstance().addHook('onRequest', (request, reply, done) => {
+    reply.header('Access-Control-Allow-Origin', '*');
+    reply.header('Access-Control-Allow-Methods', '*');
+    reply.header('Access-Control-Allow-Headers', '*');
+    reply.header('Access-Control-Allow-Credentials', 'true');
+    done();
   });
   
   // Set Referrer-Policy header
