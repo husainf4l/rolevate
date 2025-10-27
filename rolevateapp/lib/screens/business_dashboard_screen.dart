@@ -303,6 +303,14 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen>
                           Get.toNamed('/schedule-interview');
                         },
                       ),
+                      const SizedBox(height: AppTheme.spacing8),
+                      _buildActionButton(
+                        'View All Interviews',
+                        CupertinoIcons.calendar,
+                        () {
+                          Get.toNamed('/interviews');
+                        },
+                      ),
                       const SizedBox(height: AppTheme.spacing24),
 
                       // Recent activity - Real Data

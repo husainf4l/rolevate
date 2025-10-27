@@ -12,9 +12,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notificationsEnabled = true;
-  bool _darkModeEnabled = false;
-
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -39,44 +36,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               () => Get.toNamed('/profile'),
             ),
             _buildSettingItem(
-              'Privacy',
-              'Privacy settings and data',
-              CupertinoIcons.lock,
-              () {
-                // TODO: Navigate to privacy settings
-              },
+              'Privacy & Security',
+              'Privacy settings and data protection',
+              CupertinoIcons.lock_shield,
+              () => Get.toNamed('/privacy-security'),
             ),
 
             const SizedBox(height: AppTheme.spacing24),
 
             // Notifications Section
             _buildSectionHeader('Notifications'),
-            _buildSwitchItem(
-              'Push Notifications',
-              'Receive notifications about jobs and applications',
-              CupertinoIcons.bell,
-              _notificationsEnabled,
-              (value) => setState(() => _notificationsEnabled = value),
-            ),
             _buildSettingItem(
               'Notification Preferences',
               'Customize what you want to be notified about',
               CupertinoIcons.bell_fill,
-              () {
-                // TODO: Navigate to notification preferences
-              },
+              () => Get.toNamed('/notification-preferences'),
             ),
 
             const SizedBox(height: AppTheme.spacing24),
 
             // Appearance Section
             _buildSectionHeader('Appearance'),
-            _buildSwitchItem(
+            _buildSettingItem(
               'Dark Mode',
-              'Switch to dark theme',
-              CupertinoIcons.moon,
-              _darkModeEnabled,
-              (value) => setState(() => _darkModeEnabled = value),
+              'Theme and appearance settings',
+              CupertinoIcons.moon_fill,
+              () => Get.toNamed('/dark-mode-settings'),
             ),
 
             const SizedBox(height: AppTheme.spacing24),
@@ -181,45 +166,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSwitchItem(String title, String subtitle, IconData icon, bool value, ValueChanged<bool> onChanged) {
-    return Container(
-      padding: const EdgeInsets.all(AppTheme.spacing16),
-      margin: const EdgeInsets.only(bottom: AppTheme.spacing8),
-      decoration: BoxDecoration(
-        color: AppColors.iosSystemGrey6,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.primary600, size: 24),
-          const SizedBox(width: AppTheme.spacing16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.bodyLarge,
-                ),
-                const SizedBox(height: AppTheme.spacing4),
-                Text(
-                  subtitle,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          CupertinoSwitch(
-            value: value,
-            onChanged: onChanged,
-          ),
-        ],
       ),
     );
   }

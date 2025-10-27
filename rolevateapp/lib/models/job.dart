@@ -108,7 +108,23 @@ class Job {
       status: json['status'] != null 
           ? JobStatus.fromString(json['status'] as String)
           : JobStatus.active,
-      company: Company.fromJson(json['company'] as Map<String, dynamic>),
+      company: json['company'] != null 
+          ? Company.fromJson(json['company'] as Map<String, dynamic>)
+          : Company(
+              id: '',
+              name: 'Unknown Company',
+              logo: null,
+              website: null,
+              email: null,
+              phone: null,
+              industry: null,
+              size: null,
+              location: null,
+              description: null,
+              founded: null,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
       cvAnalysisPrompt: json['cvAnalysisPrompt'] as String?,
       interviewPrompt: json['interviewPrompt'] as String?,
       aiSecondInterviewPrompt: json['aiSecondInterviewPrompt'] as String?,
@@ -123,7 +139,19 @@ class Job {
       updatedAt: json['updatedAt'] != null 
           ? DateTime.parse(json['updatedAt'] as String)
           : DateTime.now(),
-      postedBy: User.fromJson(json['postedBy'] as Map<String, dynamic>),
+      postedBy: json['postedBy'] != null
+          ? User.fromJson(json['postedBy'] as Map<String, dynamic>)
+          : User(
+              id: '',
+              email: 'unknown@example.com',
+              name: 'Unknown User',
+              userType: UserType.candidate,
+              phone: null,
+              avatar: null,
+              isActive: true,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
     );
   }
 

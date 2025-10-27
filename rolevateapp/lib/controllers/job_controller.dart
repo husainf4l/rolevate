@@ -37,7 +37,8 @@ class JobController extends GetxController {
   void onInit() {
     super.onInit();
     fetchJobs();
-    fetchSavedJobs();
+    // Don't auto-fetch saved jobs on init - let screens fetch when needed
+    // fetchSavedJobs();
     fetchMyApplications();
   }
 
@@ -132,8 +133,24 @@ class JobController extends GetxController {
       final success = await _jobService.saveJob(jobId, notes: notes);
       if (success) {
         savedJobIds.add(jobId);
-        // Note: Not calling fetchSavedJobs here for mock implementation
-        // In production, this would sync with the server
+        
+        // Find the job in the jobs list and add it to savedJobs
+        final job = jobs.firstWhereOrNull((j) => j.id == jobId);
+        if (job != null) {
+          // Create a SavedJob entry
+          final savedJob = SavedJob(
+            id: 'saved_${DateTime.now().millisecondsSinceEpoch}',
+            userId: 'current_user',
+            jobId: jobId,
+            savedAt: DateTime.now(),
+            notes: notes,
+            job: job,
+          );
+          
+          // Add to the beginning of the list
+          savedJobs.insert(0, savedJob);
+          debugPrint('✅ Job added to savedJobs list, total: ${savedJobs.length}');
+        }
       }
       return success;
     } catch (e) {
@@ -148,8 +165,11 @@ class JobController extends GetxController {
       final success = await _jobService.unsaveJob(jobId);
       if (success) {
         savedJobIds.remove(jobId);
-        // Note: Not calling fetchSavedJobs here for mock implementation
-        // In production, this would sync with the server
+        
+        // Remove from savedJobs list
+        savedJobs.removeWhere((savedJob) => savedJob.jobId == jobId);
+        
+        debugPrint('✅ Job removed from savedJobs list, total: ${savedJobs.length}');
       }
       return success;
     } catch (e) {
@@ -160,10 +180,46 @@ class JobController extends GetxController {
 
   /// Toggle save status of a job
   Future<bool> toggleSaveJob(String jobId, {String? notes}) async {
-    if (isJobSaved(jobId)) {
-      return await unsaveJob(jobId);
+    final wasSaved = isJobSaved(jobId);
+    
+    if (wasSaved) {
+      final success = await unsaveJob(jobId);
+      if (success) {
+        debugPrint('✅ Job unsaved successfully, total saved jobs: ${savedJobs.length}');
+        Get.snackbar(
+          'Job Removed',
+          'Job removed from saved jobs',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to remove job. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+        );
+      }
+      return success;
     } else {
-      return await saveJob(jobId, notes: notes);
+      final success = await saveJob(jobId, notes: notes);
+      if (success) {
+        debugPrint('✅ Job saved successfully, total saved jobs: ${savedJobs.length}');
+        Get.snackbar(
+          'Job Saved',
+          'Job added to your saved jobs',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          'Failed to save job. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+        );
+      }
+      return success;
     }
   }
 
@@ -175,16 +231,22 @@ class JobController extends GetxController {
   /// Fetch all saved jobs
   Future<void> fetchSavedJobs() async {
     try {
+      debugPrint('🔄 Fetching saved jobs from API...');
       final saved = await _jobService.getSavedJobs();
+      debugPrint('📦 Received ${saved.length} saved jobs from API');
+      
       savedJobs.assignAll(saved);
       
       // Update saved job IDs set
       savedJobIds.clear();
       for (final savedJob in saved) {
         savedJobIds.add(savedJob.jobId);
+        debugPrint('  - Saved job: ${savedJob.job?.title ?? savedJob.jobId}');
       }
+      
+      debugPrint('✅ Saved jobs updated: ${savedJobIds.length} total');
     } catch (e) {
-      debugPrint('Error fetching saved jobs: $e');
+      debugPrint('❌ Error fetching saved jobs: $e');
     }
   }
 

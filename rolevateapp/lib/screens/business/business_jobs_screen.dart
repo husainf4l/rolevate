@@ -29,6 +29,18 @@ class _BusinessJobsScreenState extends State<BusinessJobsScreen> {
     _loadJobs();
   }
   
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Check if we should refresh the jobs list
+    final args = Get.arguments;
+    if (args != null && args is Map && args['refresh'] == true) {
+      debugPrint('🔄 Refresh argument detected, reloading jobs...');
+      _loadJobs();
+    }
+  }
+  
   Future<void> _loadJobs() async {
     setState(() {
       _isLoading = true;
@@ -147,18 +159,33 @@ class _BusinessJobsScreenState extends State<BusinessJobsScreen> {
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: AppTheme.spacing16),
-                              CupertinoButton.filled(
-                                child: const Text('Post a Job'),
+                              CupertinoButton(
+                                color: CupertinoColors.systemBlue,
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                child: const Text(
+                                  'Post a Job',
+                                  style: TextStyle(
+                                    color: CupertinoColors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 onPressed: () => Get.toNamed('/post-job'),
                               ),
                             ],
                           ),
                         ),
                       )
-                    : ListView.builder(
-          padding: const EdgeInsets.all(AppTheme.spacing16),
-          itemCount: _jobs.length,
-          itemBuilder: (context, index) {
+                    : CustomScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          CupertinoSliverRefreshControl(
+                            onRefresh: _loadJobs,
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.all(AppTheme.spacing16),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
             final job = _jobs[index];
             final applicantCount = _applicantCounts[job.id] ?? 0;
             final statusText = _formatStatus(job.status);
@@ -266,7 +293,13 @@ class _BusinessJobsScreenState extends State<BusinessJobsScreen> {
                             ),
                             color: AppColors.primary600,
                             borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                            child: const Text('View Details'),
+                            child: const Text(
+                              'View Details',
+                              style: TextStyle(
+                                color: CupertinoColors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             onPressed: () => Get.toNamed('/job-detail', arguments: job.id),
                           ),
                         ),
@@ -289,8 +322,13 @@ class _BusinessJobsScreenState extends State<BusinessJobsScreen> {
                 ),
               ),
             );
-          },
-        ),
+                                },
+                                childCount: _jobs.length,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
       ),
     );
   }
@@ -357,6 +395,13 @@ class _BusinessJobsScreenState extends State<BusinessJobsScreen> {
             },
           ),
           CupertinoActionSheetAction(
+            child: const Text('Publish Job'),
+            onPressed: () {
+              Navigator.pop(context);
+              _publishJob(context, job);
+            },
+          ),
+          CupertinoActionSheetAction(
             child: const Text('Edit Job'),
             onPressed: () {
               Navigator.pop(context);
@@ -411,6 +456,82 @@ class _BusinessJobsScreenState extends State<BusinessJobsScreen> {
               Navigator.pop(context);
               // TODO: Implement delete job
               Get.snackbar('Coming Soon', 'Delete job feature will be available soon');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _publishJob(BuildContext context, Job job) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Publish Job'),
+        content: Text('Do you want to publish "${job.title}" and make it visible to candidates?'),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('Publish'),
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              // Show loading indicator
+              showCupertinoDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext dialogContext) => const CupertinoAlertDialog(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CupertinoActivityIndicator(),
+                      SizedBox(height: 16),
+                      Text('Publishing job...'),
+                    ],
+                  ),
+                ),
+              );
+              
+              try {
+                // Call API to publish job (set status to ACTIVE)
+                await _jobService.updateJob(
+                  jobId: job.id,
+                  status: JobStatus.active,
+                );
+                
+                Navigator.of(context).pop(); // Close loading dialog
+                
+                // Show success message
+                Get.snackbar(
+                  'Job Published',
+                  '${job.title} has been published successfully and is now visible to candidates',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: CupertinoColors.systemGreen,
+                  colorText: CupertinoColors.white,
+                  duration: const Duration(seconds: 3),
+                );
+                
+                // Refresh the jobs list
+                _loadJobs();
+              } catch (e) {
+                Navigator.of(context).pop(); // Close loading dialog
+                
+                // Show error message
+                Get.snackbar(
+                  'Error',
+                  'Failed to publish job: ${e.toString()}',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: CupertinoColors.destructiveRed,
+                  colorText: CupertinoColors.white,
+                  duration: const Duration(seconds: 3),
+                );
+              }
             },
           ),
         ],

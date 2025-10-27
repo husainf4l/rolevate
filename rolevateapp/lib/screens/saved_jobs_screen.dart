@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:rolevateapp/controllers/job_controller.dart';
 import 'package:rolevateapp/core/theme/app_colors.dart';
@@ -15,13 +16,29 @@ class SavedJobsScreen extends StatefulWidget {
 
 class _SavedJobsScreenState extends State<SavedJobsScreen> {
   final JobController jobController = Get.find<JobController>();
+  final RxBool _isLoading = false.obs;
 
   @override
   void initState() {
     super.initState();
-    // Fetch saved jobs if not already loaded
-    if (jobController.savedJobs.isEmpty) {
-      jobController.fetchSavedJobs();
+    // Only fetch if we don't have data already
+    if (jobController.savedJobs.isEmpty && !_isLoading.value) {
+      _loadSavedJobs();
+    }
+  }
+  
+  Future<void> _loadSavedJobs() async {
+    if (_isLoading.value) return; // Prevent multiple simultaneous calls
+    
+    _isLoading.value = true;
+    try {
+      await jobController.fetchSavedJobs();
+    } catch (e) {
+      debugPrint('Error loading saved jobs: $e');
+    } finally {
+      if (mounted) {
+        _isLoading.value = false;
+      }
     }
   }
 
@@ -29,7 +46,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text('Saved Jobs'),
+        middle: const Text('Saved Jobs'),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           child: const Icon(CupertinoIcons.back),
@@ -38,49 +55,9 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
       ),
       child: SafeArea(
         child: Obx(() {
-          if (jobController.isLoading.value) {
+          if (_isLoading.value) {
             return const Center(
               child: CupertinoActivityIndicator(),
-            );
-          }
-
-          if (jobController.error.value.isNotEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    CupertinoIcons.exclamationmark_triangle,
-                    size: 48,
-                    color: AppColors.error,
-                  ),
-                  const SizedBox(height: AppTheme.spacing16),
-                  Text(
-                    'Error loading saved jobs',
-                    style: AppTypography.headlineMedium,
-                  ),
-                  const SizedBox(height: AppTheme.spacing8),
-                  Text(
-                    jobController.error.value,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppTheme.spacing16),
-                  CupertinoButton(
-                    color: AppColors.primary600,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                    child: Text(
-                      'Retry',
-                      style: AppTypography.button.copyWith(
-                        color: CupertinoColors.white,
-                      ),
-                    ),
-                    onPressed: () => jobController.fetchSavedJobs(),
-                  ),
-                ],
-              ),
             );
           }
 

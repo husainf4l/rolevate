@@ -125,6 +125,17 @@ class Interview {
   final Map<String, dynamic>? aiAnalysis;
   final String? recordingUrl;
   final String? roomId;
+  
+  // Rolevate AI Interview System
+  final String? interviewLink; // Unique Rolevate interview link
+  final String? aiAgentId; // AI agent conducting the interview
+  final Map<String, dynamic>? interviewQuestions; // AI-generated questions
+  final Map<String, dynamic>? candidateResponses; // Candidate answers
+  final double? aiScore; // AI-evaluated score
+  final String? aiRecommendation; // AI recommendation for employer
+  final DateTime? startedAt; // When interview actually started
+  final DateTime? completedAt; // When interview was completed
+  
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -142,6 +153,14 @@ class Interview {
     this.aiAnalysis,
     this.recordingUrl,
     this.roomId,
+    this.interviewLink,
+    this.aiAgentId,
+    this.interviewQuestions,
+    this.candidateResponses,
+    this.aiScore,
+    this.aiRecommendation,
+    this.startedAt,
+    this.completedAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -162,6 +181,14 @@ class Interview {
       aiAnalysis: json['aiAnalysis'] as Map<String, dynamic>?,
       recordingUrl: json['recordingUrl'] as String?,
       roomId: json['roomId'] as String?,
+      interviewLink: json['interviewLink'] as String?,
+      aiAgentId: json['aiAgentId'] as String?,
+      interviewQuestions: json['interviewQuestions'] as Map<String, dynamic>?,
+      candidateResponses: json['candidateResponses'] as Map<String, dynamic>?,
+      aiScore: json['aiScore'] as double?,
+      aiRecommendation: json['aiRecommendation'] as String?,
+      startedAt: json['startedAt'] != null ? DateTime.parse(json['startedAt'] as String) : null,
+      completedAt: json['completedAt'] != null ? DateTime.parse(json['completedAt'] as String) : null,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -183,6 +210,14 @@ class Interview {
       'aiAnalysis': aiAnalysis,
       'recordingUrl': recordingUrl,
       'roomId': roomId,
+      'interviewLink': interviewLink,
+      'aiAgentId': aiAgentId,
+      'interviewQuestions': interviewQuestions,
+      'candidateResponses': candidateResponses,
+      'aiScore': aiScore,
+      'aiRecommendation': aiRecommendation,
+      'startedAt': startedAt?.toIso8601String(),
+      'completedAt': completedAt?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

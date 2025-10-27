@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:rolevateapp/services/graphql_service.dart';
 import 'package:rolevateapp/models/enums.dart';
+import 'dart:io';
 
 class AuthController extends GetxController {
   final isAuthenticated = false.obs;
@@ -22,14 +23,98 @@ class AuthController extends GetxController {
   void _loadStoredAuth() {
     final storedToken = storage.read('token');
     final storedUser = storage.read('user');
+    final savedAvatarPath = storage.read('avatar_local_path');
     
     if (storedToken != null && storedUser != null) {
       token.value = storedToken;
       user.value = Map<String, dynamic>.from(storedUser);
+      
+      // CRITICAL: Load saved avatar from permanent storage
+      if (savedAvatarPath != null) {
+        final avatarFile = File(savedAvatarPath);
+        if (avatarFile.existsSync()) {
+          user.value!['avatar'] = 'file://$savedAvatarPath';
+          debugPrint('✅ Loaded saved avatar from storage: $savedAvatarPath');
+        } else {
+          debugPrint('⚠️ Saved avatar file not found: $savedAvatarPath');
+          storage.remove('avatar_local_path');
+        }
+      }
+      
       isAuthenticated.value = true;
       
       // Update GraphQL client with stored token
       GraphQLService.updateClient();
+    }
+  }
+  
+  Future<void> _checkAndNavigateBusiness() async {
+    try {
+      debugPrint('🏢 Checking if company profile exists...');
+      
+      // Query to check if user has company profile
+      const String query = '''
+        query CheckCompany {
+          me {
+            id
+            company {
+              id
+              name
+            }
+          }
+        }
+      ''';
+      
+      final result = await GraphQLService.client.query(
+        QueryOptions(
+          document: gql(query),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          // If timeout, just go to dashboard
+          debugPrint('⏱️ Company check timeout, going to dashboard');
+          Get.offAllNamed('/business-dashboard');
+          throw Exception('Timeout');
+        },
+      );
+      
+      if (result.hasException) {
+        debugPrint('❌ Error checking company: ${result.exception}');
+        // On error, go to dashboard (user can set up later)
+        Get.offAllNamed('/business-dashboard');
+        return;
+      }
+      
+      final userData = result.data?['me'];
+      final hasCompany = userData?['company'] != null;
+      
+      debugPrint('🏢 Has company: $hasCompany');
+      
+      if (hasCompany) {
+        // Company exists, go to business dashboard
+        Get.offAllNamed('/business-dashboard');
+      } else {
+        // No company, redirect to company setup
+        debugPrint('📝 Redirecting to company setup...');
+        Get.offAllNamed('/company-settings');
+        
+        Get.snackbar(
+          'Complete Your Profile',
+          'Please set up your company profile to continue',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: CupertinoColors.systemBlue,
+          colorText: CupertinoColors.white,
+          duration: const Duration(seconds: 3),
+        );
+      }
+    } catch (e) {
+      if (e.toString() != 'Exception: Timeout') {
+        debugPrint('❌ Error in _checkAndNavigateBusiness: $e');
+      }
+      // On any error, just go to dashboard
+      Get.offAllNamed('/business-dashboard');
     }
   }
   
@@ -118,7 +203,8 @@ class AuthController extends GetxController {
           
           // Navigate based on user type
           if (userType.toLowerCase() == 'business') {
-            Get.offAllNamed('/business-dashboard');
+            // Check if company profile exists
+            await _checkAndNavigateBusiness();
           } else if (userType.toLowerCase() == 'candidate') {
             Get.offAllNamed('/candidate-dashboard');
           } else {

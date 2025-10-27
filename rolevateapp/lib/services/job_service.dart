@@ -6,6 +6,79 @@ import 'package:rolevateapp/services/graphql_service.dart';
 class JobService {
   JobService();
 
+  /// Generate AI-powered job analysis and suggestions
+  Future<Map<String, dynamic>> generateJobAnalysis({
+    required String jobTitle,
+    required String location,
+    String? department,
+    String? industry,
+    String? jobLevel,
+    String? workType,
+    String? country,
+  }) async {
+    debugPrint('🤖 JobService.generateJobAnalysis called for: $jobTitle');
+    
+    const String mutation = '''
+      mutation GenerateJob(\$input: JobAnalysisInput!) {
+        generateJobAnalysis(input: \$input) {
+          description
+          shortDescription
+          responsibilities
+          requirements
+          benefits
+          skills
+          suggestedSalary
+          experienceLevel
+          educationLevel
+        }
+      }
+    ''';
+
+    final variables = {
+      'input': {
+        'jobTitle': jobTitle,
+        'location': location,
+        if (department != null) 'department': department,
+        if (industry != null) 'industry': industry,
+        if (jobLevel != null) 'jobLevel': jobLevel,
+        if (workType != null) 'workType': workType,
+        if (country != null) 'country': country,
+      },
+    };
+
+    debugPrint('🤖 Generating AI analysis with input: $variables');
+
+    try {
+      final result = await GraphQLService.client.mutate(
+        MutationOptions(
+          document: gql(mutation),
+          variables: variables,
+        ),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('AI generation timeout - please try again');
+        },
+      );
+
+      if (result.hasException) {
+        debugPrint('❌ AI generation exception: ${result.exception}');
+        throw Exception('Failed to generate job details: ${result.exception}');
+      }
+
+      final analysisData = result.data?['generateJobAnalysis'];
+      if (analysisData == null) {
+        throw Exception('No analysis data returned');
+      }
+
+      debugPrint('✅ AI analysis generated successfully');
+      return Map<String, dynamic>.from(analysisData);
+    } catch (e) {
+      debugPrint('❌ Error in generateJobAnalysis: $e');
+      rethrow;
+    }
+  }
+
   /// Fetch jobs with optional filters and pagination
   Future<List<Job>> getJobs({
     JobType? type,
@@ -21,128 +94,8 @@ class JobService {
     int? page,
   }) async {
     debugPrint('🔧 JobService.getJobs called');
-
-    /*
-    // TEMPORARY: Mock implementation for testing
-    debugPrint('🎭 Using mock implementation for job fetching');
-
-    // Simulate API delay
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Create mock jobs data
-    final mockJobsData = [
-      {
-        'id': 'mock-job-1',
-        'slug': 'senior-software-engineer',
-        'title': 'Senior Software Engineer',
-        'department': 'Engineering',
-        'location': 'Dubai, UAE',
-        'salary': 'AED 25,000 - 35,000',
-        'type': 'FULL_TIME',
-        'jobLevel': 'SENIOR',
-        'workType': 'ONSITE',
-        'status': 'ACTIVE',
-        'shortDescription': 'We are looking for a Senior Software Engineer to join our team.',
-        'applicants': 12.0,
-        'views': 156.0,
-        'featured': true,
-        'deadline': DateTime.now().add(const Duration(days: 14)).toIso8601String(),
-        'createdAt': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
-        'updatedAt': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
-        'company': {
-          'id': 'mock-company-1',
-          'name': 'TechCorp Solutions',
-          'logo': null,
-          'industry': 'Technology',
-          'size': '201-500',
-          'location': 'Dubai, UAE',
-        },
-        'postedBy': {
-          'id': 'mock-user-1',
-          'name': 'John Smith',
-          'avatar': null,
-        },
-      },
-      {
-        'id': 'mock-job-2',
-        'slug': 'product-manager',
-        'title': 'Product Manager',
-        'department': 'Product',
-        'location': 'Abu Dhabi, UAE',
-        'salary': 'AED 20,000 - 30,000',
-        'type': 'FULL_TIME',
-        'jobLevel': 'MID',
-        'workType': 'HYBRID',
-        'status': 'ACTIVE',
-        'shortDescription': 'Join our product team to drive innovation and user experience.',
-        'applicants': 8.0,
-        'views': 89.0,
-        'featured': false,
-        'deadline': DateTime.now().add(const Duration(days: 21)).toIso8601String(),
-        'createdAt': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
-        'updatedAt': DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
-        'company': {
-          'id': 'mock-company-2',
-          'name': 'InnovateLabs',
-          'logo': null,
-          'industry': 'Technology',
-          'size': '51-200',
-          'location': 'Abu Dhabi, UAE',
-        },
-        'postedBy': {
-          'id': 'mock-user-2',
-          'name': 'Sarah Johnson',
-          'avatar': null,
-        },
-      },
-      {
-        'id': 'mock-job-3',
-        'slug': 'ux-designer',
-        'title': 'UX Designer',
-        'department': 'Design',
-        'location': 'Dubai, UAE',
-        'salary': 'AED 15,000 - 22,000',
-        'type': 'FULL_TIME',
-        'jobLevel': 'MID',
-        'workType': 'REMOTE',
-        'status': 'ACTIVE',
-        'shortDescription': 'Create amazing user experiences for our digital products.',
-        'applicants': 15.0,
-        'views': 203.0,
-        'featured': true,
-        'deadline': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
-        'createdAt': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
-        'updatedAt': DateTime.now().toIso8601String(),
-        'company': {
-          'id': 'mock-company-3',
-          'name': 'DesignStudio',
-          'logo': null,
-          'industry': 'Design',
-          'size': '11-50',
-          'location': 'Dubai, UAE',
-        },
-        'postedBy': {
-          'id': 'mock-user-3',
-          'name': 'Mike Chen',
-          'avatar': null,
-        },
-      },
-    ];
-
-    // Add any newly created jobs to the list
-    final allJobsData = [...mockJobsData, ..._mockCreatedJobs];
-
-    debugPrint('✅ Mock jobs fetched successfully (${allJobsData.length} jobs)');
-    debugPrint('📊 Mock jobs: ${mockJobsData.length}, Created jobs: ${_mockCreatedJobs.length}');
-    if (_mockCreatedJobs.isNotEmpty) {
-      debugPrint('🆕 Newly created jobs:');
-      for (var job in _mockCreatedJobs) {
-        debugPrint('   - ${job['title']} (ID: ${job['id']})');
-      }
-    }
-    return allJobsData.map((json) => Job.fromJson(json)).toList();
-    */
-    // ORIGINAL CODE - Uncomment when backend is ready
+    
+    // REAL BACKEND - GraphQL Query
     const String query = '''
       query GetJobs(\$filter: JobFilterInput, \$pagination: PaginationInput) {
         jobs(filter: \$filter, pagination: \$pagination) {
@@ -226,175 +179,13 @@ class JobService {
 
     final List<dynamic> jobsData = result.data?['jobs'] ?? [];
     return jobsData.map((json) => Job.fromJson(json)).toList();
-    /*
-    // ORIGINAL CODE - Uncomment when backend is ready
-    const String query = '''
-      query GetJobs(\$filter: JobFilterInput, \$pagination: PaginationInput) {
-        jobs(filter: \$filter, pagination: \$pagination) {
-          id
-          slug
-          title
-          department
-          location
-          salary
-          type
-          jobLevel
-          workType
-          status
-          shortDescription
-          applicants
-          views
-          featured
-          deadline
-          createdAt
-          updatedAt
-          company {
-            id
-            name
-            logo
-            industry
-            size
-            location
-          }
-          postedBy {
-            id
-            name
-            avatar
-          }
-        }
-      }
-    ''';
-
-    final variables = {
-      'filter': {
-        if (type != null) 'type': type.toJson(),
-        if (jobLevel != null) 'jobLevel': jobLevel.toJson(),
-        if (workType != null) 'workType': workType.toJson(),
-        if (status != null) 'status': status.toJson(),
-        if (industry != null) 'industry': industry,
-        if (location != null) 'location': location,
-        if (department != null) 'department': department,
-        if (companyId != null) 'companyId': companyId,
-        if (featured != null) 'featured': featured,
-      },
-      'pagination': {
-        if (limit != null) 'limit': limit,
-        if (page != null) 'page': page,
-      },
-    };
-
-    final result = await GraphQLService.client.query(
-      QueryOptions(
-        document: gql(query),
-        variables: variables,
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
-    );
-
-    if (result.hasException) {
-      debugPrint('❌ GraphQL Exception in getJobs: ${result.exception.toString()}');
-
-      // Extract more specific error information
-      if (result.exception?.graphqlErrors.isNotEmpty ?? false) {
-        for (var error in result.exception!.graphqlErrors) {
-          debugPrint('  - GraphQL Error: ${error.message}');
-          debugPrint('  - Extensions: ${error.extensions}');
-        }
-      }
-
-      if (result.exception?.linkException != null) {
-        debugPrint('  - Link Exception: ${result.exception!.linkException}');
-      }
-
-      throw Exception(result.exception.toString());
-    }
-
-    final List<dynamic> jobsData = result.data?['jobs'] ?? [];
-    return jobsData.map((json) => Job.fromJson(json)).toList();
-    */
   }
 
   /// Get a single job by ID
   Future<Job?> getJob(String id) async {
     debugPrint('🔧 JobService.getJob called with id: $id');
-
-    /*
-    // TEMPORARY: Mock implementation for testing
-    debugPrint('🎭 Using mock implementation for single job fetch');
-    debugPrint('📊 Total stored created jobs: ${_mockCreatedJobs.length}');
-
-    // First check if it's a newly created job
-    debugPrint('🔍 Checking for newly created job with ID: $id');
-    for (var job in _mockCreatedJobs) {
-      debugPrint('   - Stored job ID: ${job['id']}, Title: ${job['title']}');
-      if (job['id'] == id) {
-        debugPrint('✅ Found newly created job: ${job['title']}');
-        return Job.fromJson(job);
-      }
-    }
-
-    debugPrint('❌ Job not found in created jobs, checking mock data...');
-
-    // Return mock job data for the requested ID (only for existing mock jobs)
-    if (id == 'mock-job-1') {
-      debugPrint('✅ Returning mock job: Senior Software Engineer');
-      final mockJobData = {
-        'id': id,
-        'slug': 'senior-software-engineer',
-        'title': 'Senior Software Engineer',
-        'department': 'Engineering',
-        'location': 'Dubai, UAE',
-        'salary': 'AED 25,000 - 35,000',
-        'type': 'FULL_TIME',
-        'jobLevel': 'SENIOR',
-        'workType': 'ONSITE',
-        'status': 'ACTIVE',
-        'description': 'We are looking for a Senior Software Engineer to join our dynamic team. You will be working on cutting-edge technologies and contributing to innovative projects that impact millions of users.',
-        'shortDescription': 'We are looking for a Senior Software Engineer to join our team.',
-        'responsibilities': '• Design and develop scalable software solutions\n• Collaborate with cross-functional teams\n• Mentor junior developers\n• Participate in code reviews',
-        'requirements': '• 5+ years of software development experience\n• Strong knowledge of Flutter/Dart\n• Experience with GraphQL\n• Bachelor\'s degree in Computer Science',
-        'benefits': '• Competitive salary\n• Health insurance\n• Flexible working hours\n• Professional development opportunities',
-        'skills': ['Flutter', 'Dart', 'GraphQL', 'Firebase', 'Git'],
-        'applicants': 12.0,
-        'views': 156.0,
-        'featured': true,
-        'deadline': DateTime.now().add(const Duration(days: 14)).toIso8601String(),
-        'cvAnalysisPrompt': 'Analyze the candidate\'s experience with mobile development',
-        'interviewPrompt': 'Focus on technical skills and problem-solving abilities',
-        'aiSecondInterviewPrompt': 'Evaluate cultural fit and long-term potential',
-        'interviewLanguage': 'English',
-        'createdAt': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
-        'updatedAt': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
-        'company': {
-          'id': 'mock-company-1',
-          'name': 'TechCorp Solutions',
-          'description': 'Leading technology company specializing in mobile and web solutions',
-          'website': 'https://techcorp.com',
-          'email': 'careers@techcorp.com',
-          'phone': '+971-4-123-4567',
-          'logo': null,
-          'industry': 'Technology',
-          'size': '201-500',
-          'location': 'Dubai, UAE',
-          'founded': '2015',
-        },
-        'postedBy': {
-          'id': 'mock-user-1',
-          'name': 'John Smith',
-          'email': 'john.smith@techcorp.com',
-          'avatar': null,
-        },
-      };
-
-      debugPrint('✅ Mock job fetched successfully');
-      return Job.fromJson(mockJobData);
-    }
-
-    // Job not found
-    debugPrint('❌ Job not found: $id');
-    return null;
-    */
-    // ORIGINAL CODE - Uncomment when backend is ready
+    
+    // REAL BACKEND - GraphQL Query
     const String query = '''
       query GetJob(\$id: ID!) {
         job(id: \$id) {
@@ -543,95 +334,7 @@ class JobService {
   Future<List<Job>> getCompanyJobs() async {
     debugPrint('🔧 JobService.getCompanyJobs called');
 
-    /*
-    // TEMPORARY: Mock implementation for testing
-    debugPrint('🎭 Using mock implementation for company jobs fetching');
-
-    // Simulate API delay
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Create mock jobs data (same as getJobs but filtered for company)
-    final mockJobsData = [
-      {
-        'id': 'mock-job-1',
-        'slug': 'senior-software-engineer',
-        'title': 'Senior Software Engineer',
-        'department': 'Engineering',
-        'location': 'Dubai, UAE',
-        'salary': 'AED 25,000 - 35,000',
-        'type': 'FULL_TIME',
-        'jobLevel': 'SENIOR',
-        'workType': 'ONSITE',
-        'status': 'ACTIVE',
-        'shortDescription': 'We are looking for a Senior Software Engineer to join our team.',
-        'applicants': 12.0,
-        'views': 156.0,
-        'featured': true,
-        'deadline': DateTime.now().add(const Duration(days: 14)).toIso8601String(),
-        'createdAt': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
-        'updatedAt': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
-        'company': {
-          'id': 'mock-company-1',
-          'name': 'TechCorp Solutions',
-          'logo': null,
-          'industry': 'Technology',
-          'size': '201-500',
-          'location': 'Dubai, UAE',
-        },
-        'postedBy': {
-          'id': 'mock-user-1',
-          'name': 'John Smith',
-          'avatar': null,
-        },
-      },
-      {
-        'id': 'mock-job-2',
-        'slug': 'product-manager',
-        'title': 'Product Manager',
-        'department': 'Product',
-        'location': 'Abu Dhabi, UAE',
-        'salary': 'AED 20,000 - 30,000',
-        'type': 'FULL_TIME',
-        'jobLevel': 'MID',
-        'workType': 'HYBRID',
-        'status': 'ACTIVE',
-        'shortDescription': 'Join our product team to drive innovation and user experience.',
-        'applicants': 8.0,
-        'views': 89.0,
-        'featured': false,
-        'deadline': DateTime.now().add(const Duration(days: 21)).toIso8601String(),
-        'createdAt': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
-        'updatedAt': DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
-        'company': {
-          'id': 'mock-company-2',
-          'name': 'InnovateLabs',
-          'logo': null,
-          'industry': 'Technology',
-          'size': '51-200',
-          'location': 'Abu Dhabi, UAE',
-        },
-        'postedBy': {
-          'id': 'mock-user-2',
-          'name': 'Sarah Johnson',
-          'avatar': null,
-        },
-      },
-    ];
-
-    // Add any newly created jobs to the list
-    final allJobsData = [...mockJobsData, ..._mockCreatedJobs];
-
-    debugPrint('✅ Mock company jobs fetched successfully (${allJobsData.length} jobs)');
-    debugPrint('📊 Mock jobs: ${mockJobsData.length}, Created jobs: ${_mockCreatedJobs.length}');
-    if (_mockCreatedJobs.isNotEmpty) {
-      debugPrint('🆕 Newly created jobs:');
-      for (var job in _mockCreatedJobs) {
-        debugPrint('   - ${job['title']} (ID: ${job['id']})');
-      }
-    }
-    return allJobsData.map((json) => Job.fromJson(json)).toList();
-    */
-    // ORIGINAL CODE - Uncomment when backend is ready
+    // REAL BACKEND - GraphQL API
     const String query = '''
       query GetCompanyJobs {
         companyJobs {
@@ -668,62 +371,47 @@ class JobService {
 
     final List<dynamic> jobsData = result.data?['companyJobs'] ?? [];
     return jobsData.map((json) => Job.fromJson(json)).toList();
-
-    /*
-    // ORIGINAL CODE - Uncomment when backend is ready
-    const String query = '''
-      query GetCompanyJobs {
-        companyJobs {
-          id
-          slug
-          title
-          department
-          location
-          salary
-          type
-          jobLevel
-          workType
-          status
-          applicants
-          views
-          featured
-          deadline
-          createdAt
-          updatedAt
-        }
-      }
-    ''';
-
-    final result = await GraphQLService.client.query(
-      QueryOptions(
-        document: gql(query),
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
-    );
-
-    if (result.hasException) {
-      throw Exception(result.exception.toString());
-    }
-
-    final List<dynamic> jobsData = result.data?['companyJobs'] ?? [];
-    return jobsData.map((json) => Job.fromJson(json)).toList();
-    */
   }
 
   /// Check if a job is saved
   Future<bool> isJobSaved(String jobId) async {
     debugPrint('🔧 JobService.isJobSaved called with jobId: $jobId');
 
-    // TEMPORARY: Mock implementation for testing
-    debugPrint('🎭 Using mock implementation for job saved check');
+    try {
+      const query = r'''
+        query IsJobSaved($jobId: ID!) {
+          isJobSaved(jobId: $jobId)
+        }
+      ''';
 
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 300));
+      final variables = {
+        'jobId': jobId,
+      };
 
-    // Mock: randomly return true/false for testing
-    final isSaved = jobId.hashCode % 2 == 0;
-    debugPrint('✅ Job saved status: $isSaved');
-    return isSaved;
+      final result = await GraphQLService.client.query(
+        QueryOptions(
+          document: gql(query),
+          variables: variables,
+        ),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Check saved status timeout');
+        },
+      );
+
+      if (result.hasException) {
+        debugPrint('❌ Failed to check if job is saved: ${result.exception}');
+        return false;
+      }
+
+      final isSaved = result.data?['isJobSaved'] as bool? ?? false;
+      debugPrint('✅ Job saved status: $isSaved');
+      return isSaved;
+    } catch (e) {
+      debugPrint('❌ Error checking if job is saved: $e');
+      return false;
+    }
   }
 
   /// Save a job to favorites
@@ -731,13 +419,49 @@ class JobService {
     debugPrint('🔧 JobService.saveJob called with jobId: $jobId');
 
     // TEMPORARY: Mock implementation for testing
-    debugPrint('🎭 Using mock implementation for job saving');
-
-    // Simulate API delay
+    debugPrint('🎭 Using mock implementation for saving job');
     await Future.delayed(const Duration(milliseconds: 500));
-
-    debugPrint('✅ Job saved successfully');
+    debugPrint('✅ Mock job saved successfully');
     return true;
+
+    /* REAL BACKEND - Uncomment when backend is ready
+    try {
+      const mutation = r'''
+        mutation SaveJob($jobId: ID!, $notes: String) {
+          saveJob(jobId: $jobId, notes: $notes)
+        }
+      ''';
+
+      final variables = {
+        'jobId': jobId,
+        if (notes != null) 'notes': notes,
+      };
+
+      final result = await GraphQLService.client.mutate(
+        MutationOptions(
+          document: gql(mutation),
+          variables: variables,
+        ),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Save job timeout');
+        },
+      );
+
+      if (result.hasException) {
+        debugPrint('❌ Failed to save job: ${result.exception}');
+        return false;
+      }
+
+      final success = result.data?['saveJob'] as bool? ?? false;
+      debugPrint('✅ Job saved successfully: $success');
+      return success;
+    } catch (e) {
+      debugPrint('❌ Error saving job: $e');
+      return false;
+    }
+    */
   }
 
   /// Remove a job from favorites
@@ -745,26 +469,141 @@ class JobService {
     debugPrint('🔧 JobService.unsaveJob called with jobId: $jobId');
 
     // TEMPORARY: Mock implementation for testing
-    debugPrint('🎭 Using mock implementation for job unsaving');
-
-    // Simulate API delay
+    debugPrint('🎭 Using mock implementation for unsaving job');
     await Future.delayed(const Duration(milliseconds: 500));
-
-    debugPrint('✅ Job unsaved successfully');
+    debugPrint('✅ Mock job unsaved successfully');
     return true;
+
+    /* REAL BACKEND - Uncomment when backend is ready
+    try {
+      const mutation = r'''
+        mutation UnsaveJob($jobId: ID!) {
+          unsaveJob(jobId: $jobId)
+        }
+      ''';
+
+      final variables = {
+        'jobId': jobId,
+      };
+
+      final result = await GraphQLService.client.mutate(
+        MutationOptions(
+          document: gql(mutation),
+          variables: variables,
+        ),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Unsave job timeout');
+        },
+      );
+
+      if (result.hasException) {
+        debugPrint('❌ Failed to unsave job: ${result.exception}');
+        return false;
+      }
+
+      final success = result.data?['unsaveJob'] as bool? ?? false;
+      debugPrint('✅ Job unsaved successfully: $success');
+      return success;
+    } catch (e) {
+      debugPrint('❌ Error unsaving job: $e');
+      return false;
+    }
+    */
   }
 
   /// Get all saved jobs
   Future<List<SavedJob>> getSavedJobs() async {
-    // TEMPORARY: Mock implementation for testing
-    debugPrint('🎭 Using mock implementation for getting saved jobs');
+    debugPrint('🔧 JobService.getSavedJobs called');
 
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 300));
+    try {
+      const query = r'''
+        query GetMySavedJobs {
+          mySavedJobs {
+            id
+            userId
+            jobId
+            savedAt
+            notes
+            job {
+              id
+              title
+              department
+              location
+              salary
+              type
+              jobLevel
+              workType
+              status
+              description
+              shortDescription
+              responsibilities
+              requirements
+              benefits
+              skills
+              experience
+              education
+              industry
+              companyDescription
+              deadline
+              featured
+              applicants
+              views
+              createdAt
+              updatedAt
+              company {
+                id
+                name
+                logo
+                website
+                industry
+                size
+              }
+              postedBy {
+                id
+                name
+                email
+              }
+            }
+          }
+        }
+      ''';
 
-    // Return empty list initially - jobs will be saved as user interacts
-    debugPrint('✅ Mock saved jobs fetched successfully (0 jobs)');
-    return [];
+      final result = await GraphQLService.client.query(
+        QueryOptions(
+          document: gql(query),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Get saved jobs timeout');
+        },
+      );
+
+      if (result.hasException) {
+        debugPrint('❌ Failed to fetch saved jobs: ${result.exception}');
+        return [];
+      }
+
+      final savedJobsJson = result.data?['mySavedJobs'] as List<dynamic>?;
+      
+      if (savedJobsJson == null || savedJobsJson.isEmpty) {
+        debugPrint('✅ No saved jobs found');
+        return [];
+      }
+
+      final savedJobs = savedJobsJson
+          .map((json) => SavedJob.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      debugPrint('✅ Fetched ${savedJobs.length} saved jobs');
+      return savedJobs;
+    } catch (e) {
+      debugPrint('❌ Error fetching saved jobs: $e');
+      return [];
+    }
   }
 
   /// Create a new job
@@ -782,77 +621,15 @@ class JobService {
     String? requirements,
     String? benefits,
     List<String>? skills,
+    String? experience,
+    String? education,
+    String? industry,
+    String? companyDescription,
     required DateTime deadline,
   }) async {
     debugPrint('🔧 JobService.createJob called with title: $title');
     
-    /*
-    // TEMPORARY: Mock implementation for testing
-    debugPrint('🎭 Using mock implementation for job creation');
-    
-    // Simulate API delay
-    await Future.delayed(const Duration(seconds: 2));
-    
-    // Create a mock job response
-    final mockJobData = {
-      'id': 'mock-job-${DateTime.now().millisecondsSinceEpoch}',
-      'slug': title.toLowerCase().replaceAll(' ', '-'),
-      'title': title,
-      'department': department,
-      'location': location,
-      'salary': salary,
-      'type': type.toJson(),
-      'jobLevel': jobLevel.toJson(),
-      'workType': workType.toJson(),
-      'status': 'ACTIVE',
-      'description': description,
-      'shortDescription': shortDescription,
-      'responsibilities': responsibilities,
-      'requirements': requirements,
-      'benefits': benefits,
-      'skills': skills,
-      'deadline': deadline.toIso8601String(),
-      'createdAt': DateTime.now().toIso8601String(),
-      'updatedAt': DateTime.now().toIso8601String(),
-      'featured': false,
-      'applicants': 0.0,
-      'views': 0.0,
-      'company': {
-        'id': 'mock-company-id',
-        'name': 'Mock Company',
-        'description': 'A mock company for testing',
-        'website': 'https://mockcompany.com',
-        'email': 'contact@mockcompany.com',
-        'phone': '+971-50-123-4567',
-        'logo': null,
-        'industry': 'Technology',
-        'size': '51-200',
-        'location': 'Dubai, UAE',
-        'createdAt': DateTime.now().toIso8601String(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      },
-      'postedBy': {
-        'id': 'mock-user-id',
-        'userType': 'BUSINESS',
-        'email': 'business@mockcompany.com',
-        'name': 'Mock Business User',
-        'phone': '+971-50-123-4567',
-        'avatar': null,
-        'isActive': true,
-        'createdAt': DateTime.now().toIso8601String(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      },
-    };
-    
-    // Store the created job for future retrieval
-    _mockCreatedJobs.add(mockJobData);
-    
-    debugPrint('✅ Mock job created and stored successfully');
-    debugPrint('📝 Created job: ${mockJobData['title']} (ID: ${mockJobData['id']})');
-    debugPrint('📊 Total stored jobs: ${_mockCreatedJobs.length}');
-    return Job.fromJson(mockJobData);
-    */
-    // ORIGINAL CODE - Uncomment when backend is ready
+    // REAL BACKEND - GraphQL Mutation
     const String mutation = '''
       mutation CreateJob(\$input: CreateJobInput!) {
         createJob(input: \$input) {
@@ -875,6 +652,23 @@ class JobService {
           deadline
           createdAt
           updatedAt
+          featured
+          applicants
+          views
+          company {
+            id
+            name
+            logo
+            industry
+            size
+            location
+          }
+          postedBy {
+            id
+            name
+            email
+            avatar
+          }
         }
       }
     ''';
@@ -890,45 +684,194 @@ class JobService {
         'workType': workType.toJson(),
         'description': description,
         'shortDescription': shortDescription,
-        'responsibilities': responsibilities,
-        'requirements': requirements,
-        'benefits': benefits,
-        'skills': skills,
+        // Backend requires these fields - provide defaults if not specified
+        'responsibilities': responsibilities ?? 'To be discussed during interview',
+        'requirements': requirements ?? 'See job description for details',
+        'benefits': benefits ?? 'Competitive package',
+        'skills': skills != null && skills.isNotEmpty ? skills : ['General'],
+        'experience': experience ?? 'As per job level',
+        'education': education ?? 'As per job requirements',
+        'industry': industry ?? 'Technology',
+        'companyDescription': companyDescription ?? 'Growing company',
         'deadline': deadline.toIso8601String(),
       },
     };
 
     debugPrint('📡 Sending GraphQL mutation with variables: $variables');
 
-    final result = await GraphQLService.client.mutate(
-      MutationOptions(
-        document: gql(mutation),
-        variables: variables,
-      ),
-    );
+    try {
+      final result = await GraphQLService.client.mutate(
+        MutationOptions(
+          document: gql(mutation),
+          variables: variables,
+        ),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          debugPrint('⏱️ GraphQL mutation timeout after 30 seconds');
+          throw Exception('Request timeout: The server took too long to respond. Please check your connection and try again.');
+        },
+      );
 
-    debugPrint('📡 GraphQL response received');
+      debugPrint('📡 GraphQL response received');
     
-    if (result.hasException) {
-      debugPrint('❌ GraphQL exception: ${result.exception.toString()}');
-      if (result.exception?.graphqlErrors.isNotEmpty ?? false) {
-        for (var error in result.exception!.graphqlErrors) {
-          debugPrint('  - GraphQL Error: ${error.message}');
-          debugPrint('  - Extensions: ${error.extensions}');
+      if (result.hasException) {
+        debugPrint('❌ GraphQL exception: ${result.exception.toString()}');
+        if (result.exception?.graphqlErrors.isNotEmpty ?? false) {
+          for (var error in result.exception!.graphqlErrors) {
+            debugPrint('  - GraphQL Error: ${error.message}');
+            debugPrint('  - Extensions: ${error.extensions}');
+          }
+        }
+        throw Exception(result.exception.toString());
+      }
+
+      final jobData = result.data?['createJob'];
+      debugPrint('📦 Job data received: $jobData');
+      
+      if (jobData == null) {
+        debugPrint('❌ Job data is null');
+        throw Exception('Failed to create job');
+      }
+
+      debugPrint('✅ Job created successfully');
+      return Job.fromJson(jobData);
+    } catch (e) {
+      debugPrint('❌ Error in createJob: $e');
+      rethrow;
+    }
+  }
+
+  /// Update job (including status changes like publishing)
+  Future<Job> updateJob({
+    required String jobId,
+    JobStatus? status,
+    String? title,
+    String? department,
+    String? location,
+    String? salary,
+    JobType? type,
+    JobLevel? jobLevel,
+    WorkType? workType,
+    String? description,
+    String? shortDescription,
+    String? responsibilities,
+    String? requirements,
+    String? benefits,
+    List<String>? skills,
+    String? experience,
+    String? education,
+    String? industry,
+    String? companyDescription,
+    DateTime? deadline,
+    bool? featured,
+  }) async {
+    debugPrint('🔧 JobService.updateJob called for jobId: $jobId');
+    
+    const String mutation = '''
+      mutation UpdateJob(\$input: UpdateJobInput!) {
+        updateJob(input: \$input) {
+          id
+          slug
+          title
+          department
+          location
+          salary
+          type
+          jobLevel
+          workType
+          status
+          description
+          shortDescription
+          responsibilities
+          requirements
+          benefits
+          skills
+          deadline
+          featured
+          applicants
+          views
+          createdAt
+          updatedAt
+          company {
+            id
+            name
+            logo
+            industry
+            size
+            location
+          }
+          postedBy {
+            id
+            name
+            email
+            avatar
+          }
         }
       }
-      throw Exception(result.exception.toString());
-    }
+    ''';
 
-    final jobData = result.data?['createJob'];
-    debugPrint('📦 Job data received: $jobData');
-    
-    if (jobData == null) {
-      debugPrint('❌ Job data is null');
-      throw Exception('Failed to create job');
-    }
+    final variables = {
+      'input': {
+        'id': jobId,
+        if (status != null) 'status': status.toJson(),
+        if (title != null) 'title': title,
+        if (department != null) 'department': department,
+        if (location != null) 'location': location,
+        if (salary != null) 'salary': salary,
+        if (type != null) 'type': type.toJson(),
+        if (jobLevel != null) 'jobLevel': jobLevel.toJson(),
+        if (workType != null) 'workType': workType.toJson(),
+        if (description != null) 'description': description,
+        if (shortDescription != null) 'shortDescription': shortDescription,
+        if (responsibilities != null) 'responsibilities': responsibilities,
+        if (requirements != null) 'requirements': requirements,
+        if (benefits != null) 'benefits': benefits,
+        if (skills != null) 'skills': skills,
+        if (experience != null) 'experience': experience,
+        if (education != null) 'education': education,
+        if (industry != null) 'industry': industry,
+        if (companyDescription != null) 'companyDescription': companyDescription,
+        if (deadline != null) 'deadline': deadline.toIso8601String(),
+        if (featured != null) 'featured': featured,
+      },
+    };
 
-    debugPrint('✅ Job created successfully');
-    return Job.fromJson(jobData);
+    debugPrint('📡 Sending updateJob mutation with variables: $variables');
+
+    try {
+      final result = await GraphQLService.client.mutate(
+        MutationOptions(
+          document: gql(mutation),
+          variables: variables,
+        ),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('Request timeout: The server took too long to respond.');
+        },
+      );
+
+      if (result.hasException) {
+        debugPrint('❌ GraphQL exception: ${result.exception.toString()}');
+        if (result.exception?.graphqlErrors.isNotEmpty ?? false) {
+          for (var error in result.exception!.graphqlErrors) {
+            debugPrint('  - GraphQL Error: ${error.message}');
+          }
+        }
+        throw Exception(result.exception.toString());
+      }
+
+      final jobData = result.data?['updateJob'];
+      if (jobData == null) {
+        throw Exception('Failed to update job');
+      }
+
+      debugPrint('✅ Job updated successfully');
+      return Job.fromJson(jobData);
+    } catch (e) {
+      debugPrint('❌ Error in updateJob: $e');
+      rethrow;
+    }
   }
 }

@@ -5,6 +5,7 @@ import 'package:rolevateapp/core/theme/app_theme.dart';
 import 'package:rolevateapp/core/theme/app_typography.dart';
 import 'package:rolevateapp/services/job_service.dart';
 import 'package:rolevateapp/models/enums.dart';
+import 'package:rolevateapp/utils/connection_test.dart';
 
 class PostJobScreen extends StatefulWidget {
   const PostJobScreen({super.key});
@@ -28,6 +29,10 @@ class _PostJobScreenState extends State<PostJobScreen> {
   final _requirementsController = TextEditingController();
   final _benefitsController = TextEditingController();
   final _skillsController = TextEditingController();
+  final _experienceController = TextEditingController();
+  final _educationController = TextEditingController();
+  final _industryController = TextEditingController();
+  final _companyDescriptionController = TextEditingController();
 
   // Form state
   JobType _selectedJobType = JobType.fullTime;
@@ -35,6 +40,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
   WorkType _selectedWorkType = WorkType.onsite;
   DateTime _selectedDeadline = DateTime.now().add(const Duration(days: 30));
   bool _isLoading = false;
+  bool _isGenerating = false;
 
   @override
   void initState() {
@@ -54,7 +60,221 @@ class _PostJobScreenState extends State<PostJobScreen> {
     _requirementsController.dispose();
     _benefitsController.dispose();
     _skillsController.dispose();
+    _experienceController.dispose();
+    _educationController.dispose();
+    _industryController.dispose();
+    _companyDescriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _runDiagnostics() async {
+    debugPrint('🔍 Running diagnostics...');
+    
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Running Diagnostics...'),
+        content: const Column(
+          children: [
+            SizedBox(height: 16),
+            CupertinoActivityIndicator(),
+            SizedBox(height: 16),
+            Text('Testing backend connection and authentication'),
+          ],
+        ),
+      ),
+      barrierDismissible: false,
+    );
+    
+    try {
+      final results = await ConnectionTest.testConnection().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          return {
+            'connection': false,
+            'authentication': false,
+            'userType': null,
+            'hasCompany': false,
+            'errors': ['Diagnostic test timed out - backend may be unreachable'],
+          };
+        },
+      );
+      
+      Navigator.of(context).pop(); // Close loading dialog
+      
+      // Show results
+      final hasIssues = (results['errors'] as List).isNotEmpty;
+      
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: Text(hasIssues ? '⚠️ Issues Found' : '✅ All Checks Passed'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16),
+                _buildDiagnosticRow('Connection', results['connection'] ?? false),
+                _buildDiagnosticRow('Authentication', results['authentication'] ?? false),
+                _buildDiagnosticRow('Business User', results['userType'] == 'BUSINESS'),
+                _buildDiagnosticRow('Has Company', results['hasCompany'] ?? false),
+                if (hasIssues) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Errors:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ...(results['errors'] as List).map((error) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      '• $error',
+                      style: const TextStyle(
+                        color: CupertinoColors.destructiveRed,
+                        fontSize: 12,
+                      ),
+                    ),
+                  )),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint('❌ Diagnostics failed: $e');
+      Navigator.of(context).pop(); // Close loading dialog
+      
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Diagnostic Error'),
+          content: Text('Failed to run diagnostics: $e'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+  
+  Widget _buildDiagnosticRow(String label, bool passed) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(
+            passed ? CupertinoIcons.check_mark_circled_solid : CupertinoIcons.xmark_circle_fill,
+            color: passed ? CupertinoColors.systemGreen : CupertinoColors.destructiveRed,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Text(label),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _generateWithAI() async {
+    debugPrint('🤖 _generateWithAI called');
+    
+    // Validate that we have at least title and location
+    if (_titleController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Missing Information',
+        'Please enter a job title first',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: CupertinoColors.systemOrange,
+        colorText: CupertinoColors.white,
+      );
+      return;
+    }
+    
+    if (_locationController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Missing Information',
+        'Please enter a location first',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: CupertinoColors.systemOrange,
+        colorText: CupertinoColors.white,
+      );
+      return;
+    }
+
+    setState(() => _isGenerating = true);
+
+    try {
+      debugPrint('🤖 Calling AI generation service...');
+      
+      final analysis = await _jobService.generateJobAnalysis(
+        jobTitle: _titleController.text.trim(),
+        location: _locationController.text.trim(),
+        department: _departmentController.text.trim().isNotEmpty 
+            ? _departmentController.text.trim() 
+            : null,
+        industry: _industryController.text.trim().isNotEmpty
+            ? _industryController.text.trim()
+            : null,
+        jobLevel: _selectedJobLevel.name.toUpperCase(),
+        workType: _selectedWorkType.name.toUpperCase(),
+      );
+
+      debugPrint('✅ AI analysis received');
+      
+      // Fill in the form fields with AI-generated content
+      setState(() {
+        _descriptionController.text = analysis['description'] ?? '';
+        _shortDescriptionController.text = analysis['shortDescription'] ?? '';
+        _responsibilitiesController.text = analysis['responsibilities'] ?? '';
+        _requirementsController.text = analysis['requirements'] ?? '';
+        _benefitsController.text = analysis['benefits'] ?? '';
+        _salaryController.text = analysis['suggestedSalary'] ?? '';
+        _experienceController.text = analysis['experienceLevel'] ?? '';
+        _educationController.text = analysis['educationLevel'] ?? '';
+        
+        // Parse skills array
+        if (analysis['skills'] != null && analysis['skills'] is List) {
+          _skillsController.text = (analysis['skills'] as List).join(', ');
+        }
+      });
+
+      Get.snackbar(
+        '✨ AI Generated',
+        'Job details have been auto-filled. Review and edit as needed.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: CupertinoColors.systemGreen,
+        colorText: CupertinoColors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } catch (e) {
+      debugPrint('❌ Error generating with AI: $e');
+      
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('AI Generation Failed'),
+          content: Text('Could not generate job details: ${e.toString()}'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      setState(() => _isGenerating = false);
+    }
   }
 
   Future<void> _postJob() async {
@@ -62,6 +282,24 @@ class _PostJobScreenState extends State<PostJobScreen> {
     
     if (!_formKey.currentState!.validate()) {
       debugPrint('❌ Form validation failed');
+      
+      // Show which fields are missing
+      String errorMessage = 'Please fill in all required fields:\n';
+      if (_titleController.text.trim().isEmpty) errorMessage += '• Job Title\n';
+      if (_departmentController.text.trim().isEmpty) errorMessage += '• Department\n';
+      if (_locationController.text.trim().isEmpty) errorMessage += '• Location\n';
+      if (_salaryController.text.trim().isEmpty) errorMessage += '• Salary\n';
+      if (_descriptionController.text.trim().isEmpty) errorMessage += '• Description\n';
+      if (_shortDescriptionController.text.trim().isEmpty) errorMessage += '• Short Description\n';
+      
+      Get.snackbar(
+        'Validation Error',
+        errorMessage,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: CupertinoColors.destructiveRed,
+        colorText: CupertinoColors.white,
+        duration: const Duration(seconds: 4),
+      );
       return;
     }
 
@@ -96,6 +334,18 @@ class _PostJobScreenState extends State<PostJobScreen> {
             ? _benefitsController.text.trim()
             : null,
         skills: skills.isNotEmpty ? skills : null,
+        experience: _experienceController.text.trim().isNotEmpty
+            ? _experienceController.text.trim()
+            : null,
+        education: _educationController.text.trim().isNotEmpty
+            ? _educationController.text.trim()
+            : null,
+        industry: _industryController.text.trim().isNotEmpty
+            ? _industryController.text.trim()
+            : null,
+        companyDescription: _companyDescriptionController.text.trim().isNotEmpty
+            ? _companyDescriptionController.text.trim()
+            : null,
         deadline: _selectedDeadline,
       );
 
@@ -107,18 +357,77 @@ class _PostJobScreenState extends State<PostJobScreen> {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: CupertinoColors.systemGreen,
         colorText: CupertinoColors.white,
+        duration: const Duration(seconds: 2),
       );
       
-      // Navigate to jobs list instead of back to dashboard
-      Get.offNamed('/jobs');
+      // Navigate to business jobs screen with result to trigger refresh
+      Get.offAllNamed('/jobs', arguments: {'refresh': true});
     } catch (e) {
       debugPrint('❌ Error creating job: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to post job: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: CupertinoColors.destructiveRed,
-        colorText: CupertinoColors.white,
+      debugPrint('❌ Error type: ${e.runtimeType}');
+      debugPrint('❌ Stack trace: ${StackTrace.current}');
+      
+      // Show detailed error information
+      final detailedError = ConnectionTest.getDetailedError(e);
+      debugPrint('📋 Detailed error: $detailedError');
+      
+      // Check if it's a timeout error
+      final isTimeout = e.toString().contains('timeout') || e.toString().contains('Timeout');
+      
+      // Check if it's an authentication error
+      final isAuthError = e.toString().toLowerCase().contains('unauthorized') || 
+                         e.toString().toLowerCase().contains('authentication') ||
+                         e.toString().toLowerCase().contains('token');
+      
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: Text(
+            isTimeout ? 'Connection Timeout' : 
+            isAuthError ? 'Authentication Error' :
+            'Failed to Post Job'
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  isTimeout 
+                    ? 'The request took too long. Please check:\n\n• Your internet connection\n• Backend server status\n• Try again in a moment'
+                    : isAuthError
+                      ? 'Authentication failed. Please:\n\n• Log out and log back in\n• Check if you are a business user\n• Verify your company is registered'
+                      : detailedError,
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('Copy Error'),
+              onPressed: () {
+                // Copy full error to clipboard (you'll need clipboard package)
+                debugPrint('Full error for copying: $e');
+                Navigator.of(context).pop();
+              },
+            ),
+            if (!isTimeout && !isAuthError)
+              CupertinoDialogAction(
+                child: const Text('Run Diagnostics'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _runDiagnostics();
+                },
+              ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -135,12 +444,28 @@ class _PostJobScreenState extends State<PostJobScreen> {
           child: const Icon(CupertinoIcons.back),
           onPressed: () => Get.back(),
         ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _postJob,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : const Text('Post'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Diagnostic button
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: _runDiagnostics,
+              child: const Icon(
+                CupertinoIcons.info_circle,
+                color: AppColors.primary600,
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Post button
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: _isLoading ? null : _postJob,
+              child: _isLoading
+                  ? const CupertinoActivityIndicator()
+                  : const Text('Post'),
+            ),
+          ],
         ),
       ),
       child: SafeArea(
@@ -233,6 +558,106 @@ class _PostJobScreenState extends State<PostJobScreen> {
                   itemBuilder: (workType) => Text(workType.displayName),
                 ),
 
+                // AI Generate Button
+                Container(
+                  margin: const EdgeInsets.only(bottom: AppTheme.spacing20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppTheme.spacing16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primary600.withOpacity(0.1),
+                              AppColors.primary400.withOpacity(0.05),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                          border: Border.all(
+                            color: AppColors.primary600.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  CupertinoIcons.sparkles,
+                                  color: AppColors.primary600,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'AI Auto-Complete',
+                                  style: AppTypography.labelLarge.copyWith(
+                                    color: AppColors.primary600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Let AI generate job description, requirements, benefits, and more based on the job title and location you\'ve entered.',
+                              style: AppTypography.labelMedium.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: CupertinoButton(
+                                color: AppColors.primary600,
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                onPressed: _isGenerating ? null : _generateWithAI,
+                                child: _isGenerating
+                                    ? const Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          CupertinoActivityIndicator(color: CupertinoColors.white),
+                                          SizedBox(width: 12),
+                                          Text(
+                                            'Generating...',
+                                            style: TextStyle(
+                                              color: CupertinoColors.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            CupertinoIcons.sparkles,
+                                            color: CupertinoColors.white,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text(
+                                            'Generate with AI',
+                                            style: TextStyle(
+                                              color: CupertinoColors.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 // Application Deadline
                 _buildDatePickerField(),
 
@@ -305,11 +730,23 @@ class _PostJobScreenState extends State<PostJobScreen> {
                 const SizedBox(height: AppTheme.spacing32),
 
                 // Post Button
-                CupertinoButton.filled(
-                  onPressed: _isLoading ? null : _postJob,
-                  child: _isLoading
-                      ? const CupertinoActivityIndicator()
-                      : const Text('Post Job'),
+                SizedBox(
+                  width: double.infinity,
+                  child: CupertinoButton(
+                    color: CupertinoColors.systemBlue,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    onPressed: _isLoading ? null : _postJob,
+                    child: _isLoading
+                        ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                        : const Text(
+                            'Post Job',
+                            style: TextStyle(
+                              color: CupertinoColors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
                 ),
               ],
             ),

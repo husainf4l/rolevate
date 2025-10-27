@@ -96,6 +96,44 @@ class AppTheme {
     );
   }
   
+  static CupertinoThemeData get darkTheme {
+    return CupertinoThemeData(
+      brightness: Brightness.dark,
+      primaryColor: AppColors.primary600,
+      primaryContrastingColor: CupertinoColors.black,
+      scaffoldBackgroundColor: const Color(0xFF000000),
+      barBackgroundColor: const Color(0xFF1C1C1E),
+      textTheme: CupertinoTextThemeData(
+        primaryColor: CupertinoColors.white,
+        textStyle: AppTypography.bodyMedium.copyWith(
+          color: CupertinoColors.white,
+        ),
+        actionTextStyle: AppTypography.button.copyWith(
+          color: AppColors.primary600,
+        ),
+        tabLabelTextStyle: AppTypography.labelSmall.copyWith(
+          color: CupertinoColors.systemGrey,
+        ),
+        navTitleTextStyle: AppTypography.headlineMedium.copyWith(
+          color: CupertinoColors.white,
+          fontWeight: FontWeight.w600,
+        ),
+        navLargeTitleTextStyle: AppTypography.displayLarge.copyWith(
+          color: CupertinoColors.white,
+        ),
+        navActionTextStyle: AppTypography.button.copyWith(
+          color: AppColors.primary600,
+        ),
+        pickerTextStyle: AppTypography.bodyMedium.copyWith(
+          color: CupertinoColors.white,
+        ),
+        dateTimePickerTextStyle: AppTypography.bodyMedium.copyWith(
+          color: CupertinoColors.white,
+        ),
+      ),
+    );
+  }
+  
   // Animation Durations
   static const Duration fastAnimation = Duration(milliseconds: 150);
   static const Duration normalAnimation = Duration(milliseconds: 250);

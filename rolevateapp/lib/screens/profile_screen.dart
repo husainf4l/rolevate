@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show CircleAvatar;
 import 'package:get/get.dart';
 import 'package:rolevateapp/controllers/auth_controller.dart';
 import 'package:rolevateapp/core/theme/app_colors.dart';
@@ -6,6 +7,7 @@ import 'package:rolevateapp/core/theme/app_theme.dart';
 import 'package:rolevateapp/core/theme/app_typography.dart';
 import 'package:rolevateapp/widgets/app_nav_bar.dart';
 import 'package:rolevateapp/widgets/app_drawer.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -88,30 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         Center(
                           child: Column(
                             children: [
-                              Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary600,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary600.withValues(alpha: 0.3),
-                                      offset: const Offset(0, 4),
-                                      blurRadius: 12,
-                                    ),
-                                  ],
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    userName[0].toUpperCase(),
-                                    style: AppTypography.displayLarge.copyWith(
-                                      color: CupertinoColors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              _buildProfileAvatar(user),
                               const SizedBox(height: AppTheme.spacing16),
                               Text(
                                 userName,
@@ -183,33 +162,60 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                         const SizedBox(height: AppTheme.spacing24),
 
-                        // Account actions
+                        // Settings & Preferences
                         Text(
-                          'Account',
+                          'Settings',
                           style: AppTypography.headlineMedium,
                         ),
                         const SizedBox(height: AppTheme.spacing12),
                         _buildActionButton(
-                          'Change Password',
+                          'Privacy & Security',
                           CupertinoIcons.lock_shield,
                           () {
-                            Get.toNamed('/change-password');
+                            debugPrint('🔒 Navigating to Privacy & Security');
+                            Get.toNamed('/privacy-security');
                           },
                         ),
                         const SizedBox(height: AppTheme.spacing8),
                         _buildActionButton(
-                          'Notification Settings',
-                          CupertinoIcons.bell,
+                          'Notification Preferences',
+                          CupertinoIcons.bell_fill,
                           () {
-                            Get.toNamed('/settings');
+                            debugPrint('🔔 Navigating to Notification Preferences');
+                            Get.toNamed('/notification-preferences');
                           },
                         ),
                         const SizedBox(height: AppTheme.spacing8),
                         _buildActionButton(
-                          'Privacy & Security',
-                          CupertinoIcons.lock_circle,
+                          'Dark Mode',
+                          CupertinoIcons.moon_fill,
                           () {
-                            // Privacy settings
+                            debugPrint('🌙 Navigating to Dark Mode Settings');
+                            Get.toNamed('/dark-mode-settings');
+                          },
+                        ),
+                        const SizedBox(height: AppTheme.spacing24),
+
+                        // Support & Info
+                        Text(
+                          'Support',
+                          style: AppTypography.headlineMedium,
+                        ),
+                        const SizedBox(height: AppTheme.spacing12),
+                        _buildActionButton(
+                          'Help & Support',
+                          CupertinoIcons.question_circle,
+                          () {
+                            Get.toNamed('/help-support');
+                          },
+                        ),
+                        const SizedBox(height: AppTheme.spacing8),
+                        _buildActionButton(
+                          'About',
+                          CupertinoIcons.info_circle,
+                          () {
+                            debugPrint('ℹ️ Navigating to About');
+                            Get.toNamed('/about');
                           },
                         ),
                         const SizedBox(height: AppTheme.spacing24),
@@ -371,6 +377,108 @@ class _ProfileScreenState extends State<ProfileScreen>
               size: 20,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileAvatar(Map<String, dynamic>? user) {
+    final userName = user?['name'] ?? 'User';
+    final avatarUrl = user?['avatar'] as String?;
+    
+    // Helper to build initials fallback
+    Widget buildInitials() {
+      return Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: AppColors.primary600,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary600.withValues(alpha: 0.3),
+              offset: const Offset(0, 4),
+              blurRadius: 12,
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            userName[0].toUpperCase(),
+            style: AppTypography.displayLarge.copyWith(
+              color: CupertinoColors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    // If no avatar, show initials
+    if (avatarUrl == null || avatarUrl.isEmpty) {
+      return buildInitials();
+    }
+    
+    // Check if it's a local file:// URL (from mock upload)
+    if (avatarUrl.startsWith('file://')) {
+      final filePath = avatarUrl.replaceFirst('file://', '');
+      final file = File(filePath);
+      
+      return Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary600.withValues(alpha: 0.3),
+              offset: const Offset(0, 4),
+              blurRadius: 12,
+            ),
+          ],
+        ),
+        child: ClipOval(
+          child: Image.file(
+            file,
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              print('❌ Error loading profile avatar: $error');
+              return buildInitials();
+            },
+          ),
+        ),
+      );
+    }
+    
+    // It's a network URL
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary600.withValues(alpha: 0.3),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Image.network(
+          avatarUrl,
+          width: 100,
+          height: 100,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return buildInitials();
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return buildInitials();
+          },
         ),
       ),
     );

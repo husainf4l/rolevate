@@ -27,7 +27,7 @@ export class CreateApplicationInput {
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsUrl({}, { message: 'resumeUrl must be a valid URL address' })
+  @IsString()
   resumeUrl?: string;
 
   @Field({ nullable: true })

@@ -170,7 +170,7 @@ class AppDrawer extends StatelessWidget {
                             icon: CupertinoIcons.doc_text,
                             title: 'My Applications',
                             onTap: () {
-                              Get.toNamed('/applications');
+                              Get.toNamed('/my-applications');
                             },
                           ),
                           _buildMenuItem(

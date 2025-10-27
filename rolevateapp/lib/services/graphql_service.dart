@@ -14,15 +14,26 @@ class GraphQLService {
   static GraphQLClient _createClient() {
     debugPrint('🔧 Creating GraphQL client with URL: $_apiUrl');
     
-    final HttpLink httpLink = HttpLink(_apiUrl!);
+    final HttpLink httpLink = HttpLink(
+      _apiUrl!,
+      defaultHeaders: {
+        'Content-Type': 'application/json',
+      },
+    );
     
     // Add authentication link that adds token to every request
     final AuthLink authLink = AuthLink(
       getToken: () {
-        final storage = GetStorage();
-        final token = storage.read('token');
-        debugPrint('🔑 Token from storage: ${token != null ? 'Present' : 'Null'}');
-        return token != null ? 'Bearer $token' : null;
+        try {
+          final storage = GetStorage();
+          // Try both 'access_token' and 'token' for backward compatibility
+          final token = storage.read('access_token') ?? storage.read('token');
+          debugPrint('🔑 Token from storage: ${token != null ? 'Present' : 'Null'}');
+          return token != null ? 'Bearer $token' : null;
+        } catch (e) {
+          debugPrint('❌ Error reading token: $e');
+          return null;
+        }
       },
     );
 
@@ -32,6 +43,17 @@ class GraphQLService {
     return GraphQLClient(
       link: link,
       cache: GraphQLCache(store: HiveStore()),
+      defaultPolicies: DefaultPolicies(
+        query: Policies(
+          fetch: FetchPolicy.networkOnly,
+          error: ErrorPolicy.all,
+          cacheReread: CacheRereadPolicy.ignoreAll,
+        ),
+        mutate: Policies(
+          fetch: FetchPolicy.networkOnly,
+          error: ErrorPolicy.all,
+        ),
+      ),
     );
   }
 

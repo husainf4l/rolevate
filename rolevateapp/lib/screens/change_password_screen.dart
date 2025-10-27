@@ -222,8 +222,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               CupertinoButton.filled(
                 onPressed: _isLoading ? null : _changePassword,
                 child: _isLoading
-                    ? const CupertinoActivityIndicator()
-                    : const Text('Change Password'),
+                    ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                    : const Text(
+                        'Change Password',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ],
           ),

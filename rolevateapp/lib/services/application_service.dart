@@ -1,10 +1,96 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math' show min;
 import 'package:flutter/foundation.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:rolevateapp/models/models.dart';
 import 'package:rolevateapp/services/graphql_service.dart';
 
 class ApplicationService {
   ApplicationService();
+
+  /// Upload CV/Resume to S3 and return the URL
+  Future<String> uploadCVToS3({
+    required String filePath,
+    required String filename,
+    String? candidateId,
+  }) async {
+    debugPrint('📤 Uploading CV to S3: $filename');
+    
+    try {
+      // Read file as bytes
+      final file = File(filePath);
+      if (!await file.exists()) {
+        throw Exception('File not found: $filePath');
+      }
+      
+      final bytes = await file.readAsBytes();
+      final base64File = base64Encode(bytes);
+      
+      // Determine MIME type based on file extension
+      final extension = filename.toLowerCase().split('.').last;
+      String mimetype;
+      switch (extension) {
+        case 'pdf':
+          mimetype = 'application/pdf';
+          break;
+        case 'doc':
+          mimetype = 'application/msword';
+          break;
+        case 'docx':
+          mimetype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          break;
+        default:
+          mimetype = 'application/octet-stream';
+      }
+      
+      debugPrint('📄 File size: ${bytes.length} bytes, MIME: $mimetype');
+      
+      const String mutation = '''
+        mutation UploadFileToS3(\$base64File: String!, \$filename: String!, \$mimetype: String!, \$candidateId: String) {
+          uploadFileToS3(base64File: \$base64File, filename: \$filename, mimetype: \$mimetype, candidateId: \$candidateId) {
+            url
+            key
+            bucket
+          }
+        }
+      ''';
+
+      final variables = {
+        'base64File': base64File,
+        'filename': filename,
+        'mimetype': mimetype,
+        if (candidateId != null) 'candidateId': candidateId,
+      };
+
+      final result = await GraphQLService.client.mutate(
+        MutationOptions(
+          document: gql(mutation),
+          variables: variables,
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      if (result.hasException) {
+        debugPrint('❌ Upload Exception: ${result.exception}');
+        throw Exception('Failed to upload CV: ${result.exception}');
+      }
+
+      final uploadData = result.data?['uploadFileToS3'];
+      if (uploadData == null || uploadData['url'] == null) {
+        debugPrint('❌ No URL in upload response');
+        throw Exception('Failed to upload CV - no URL returned');
+      }
+
+      final url = uploadData['url'] as String;
+      debugPrint('✅ CV uploaded successfully: $url');
+      return url;
+    } catch (e) {
+      debugPrint('❌ CV upload error: $e');
+      rethrow;
+    }
+  }
 
   /// Create a new job application
   Future<Application> createApplication({
@@ -22,33 +108,38 @@ class ApplicationService {
     String? linkedin,
     String? portfolioUrl,
   }) async {
+    debugPrint('📤 Creating application for job: $jobId');
+    
     const String mutation = '''
       mutation CreateApplication(\$input: CreateApplicationInput!) {
         createApplication(input: \$input) {
-          id
-          status
-          coverLetter
-          resumeUrl
-          expectedSalary
-          noticePeriod
-          source
-          notes
-          appliedAt
-          candidate {
+          application {
             id
-            name
-            email
-          }
-          job {
-            id
-            title
-            slug
-            company {
+            status
+            coverLetter
+            resumeUrl
+            expectedSalary
+            noticePeriod
+            source
+            notes
+            appliedAt
+            candidate {
               id
               name
-              logo
+              email
+            }
+            job {
+              id
+              title
+              slug
+              company {
+                id
+                name
+                logo
+              }
             }
           }
+          message
         }
       }
     ''';
@@ -56,38 +147,114 @@ class ApplicationService {
     final variables = {
       'input': {
         'jobId': jobId,
-        if (coverLetter != null) 'coverLetter': coverLetter,
+        if (coverLetter != null && coverLetter.isNotEmpty) 'coverLetter': coverLetter,
+        // Include resumeUrl if provided and valid, or omit it entirely if null
         if (resumeUrl != null) 'resumeUrl': resumeUrl,
-        if (expectedSalary != null) 'expectedSalary': expectedSalary,
-        if (noticePeriod != null) 'noticePeriod': noticePeriod,
-        if (source != null) 'source': source,
-        if (notes != null) 'notes': notes,
-        if (firstName != null) 'firstName': firstName,
-        if (lastName != null) 'lastName': lastName,
-        if (email != null) 'email': email,
-        if (phone != null) 'phone': phone,
-        if (linkedin != null) 'linkedin': linkedin,
-        if (portfolioUrl != null) 'portfolioUrl': portfolioUrl,
+        if (expectedSalary != null && expectedSalary.isNotEmpty) 'expectedSalary': expectedSalary,
+        if (noticePeriod != null && noticePeriod.isNotEmpty) 'noticePeriod': noticePeriod,
+        if (source != null && source.isNotEmpty) 'source': source,
+        if (notes != null && notes.isNotEmpty) 'notes': notes,
+        if (firstName != null && firstName.isNotEmpty) 'firstName': firstName,
+        if (lastName != null && lastName.isNotEmpty) 'lastName': lastName,
+        if (email != null && email.isNotEmpty) 'email': email,
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
+        if (linkedin != null && linkedin.isNotEmpty) 'linkedin': linkedin,
+        if (portfolioUrl != null && portfolioUrl.isNotEmpty) 'portfolioUrl': portfolioUrl,
       },
     };
 
-    final result = await GraphQLService.client.mutate(
-      MutationOptions(
-        document: gql(mutation),
-        variables: variables,
-      ),
-    );
-
-    if (result.hasException) {
-      throw Exception(result.exception.toString());
+    debugPrint('📝 Application variables: ${jsonEncode(variables['input'])}');
+    debugPrint('🔐 Checking authentication token...');
+    
+    // Check if we have an auth token
+    try {
+      final storage = GetStorage();
+      final token = storage.read('access_token') ?? storage.read('token');
+      debugPrint('🔑 Token present: ${token != null ? 'YES (length: ${token.toString().length})' : 'NO - THIS WILL FAIL!'}');
+      if (token != null) {
+        debugPrint('🔑 Token starts with: ${token.toString().substring(0, min(20, token.toString().length))}...');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Could not check token: $e');
     }
 
-    final applicationData = result.data?['createApplication'];
-    if (applicationData == null) {
-      throw Exception('Failed to create application');
-    }
+    try {
+      debugPrint('🌐 Sending GraphQL mutation to backend...');
+      final result = await GraphQLService.client.mutate(
+        MutationOptions(
+          document: gql(mutation),
+          variables: variables,
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
 
-    return Application.fromJson(applicationData);
+      debugPrint('📥 Received response from backend');
+      debugPrint('📊 Has exception: ${result.hasException}');
+      debugPrint('📊 Has data: ${result.data != null}');
+
+      if (result.hasException) {
+        debugPrint('❌ GraphQL Exception: ${result.exception}');
+        
+        // Extract more detailed error information
+        final errors = result.exception?.graphqlErrors;
+        if (errors != null && errors.isNotEmpty) {
+          final errorMessage = errors.first.message;
+          debugPrint('❌ Error message: $errorMessage');
+          debugPrint('❌ Error extensions: ${errors.first.extensions}');
+          
+          // Check for specific error types
+          if (errorMessage.toLowerCase().contains('forbidden') || 
+              errorMessage.toLowerCase().contains('unauthorized')) {
+            throw Exception('Authentication required. Please login to submit an application.');
+          } else if (errorMessage.toLowerCase().contains('already applied')) {
+            throw Exception('You have already applied for this job.');
+          } else if (errorMessage.toLowerCase().contains('not found')) {
+            throw Exception('Job not found or no longer available.');
+          } else if (errorMessage.toLowerCase().contains('must be a valid url')) {
+            throw Exception('Invalid resume URL format. Please try uploading your resume again.');
+          }
+          
+          throw Exception(errorMessage);
+        }
+        
+        // Check for network/link errors
+        final linkException = result.exception?.linkException;
+        if (linkException != null) {
+          debugPrint('❌ Link exception: $linkException');
+          
+          if (linkException.toString().contains('Failed host lookup') ||
+              linkException.toString().contains('SocketException')) {
+            throw Exception('Network error. Please check your internet connection.');
+          } else if (linkException.toString().contains('403') || 
+                     linkException.toString().contains('Forbidden')) {
+            throw Exception('Authentication required. Please login to submit an application.');
+          } else if (linkException.toString().contains('401') || 
+                     linkException.toString().contains('Unauthorized')) {
+            throw Exception('Session expired. Please login again.');
+          }
+        }
+        
+        throw Exception(result.exception.toString());
+      }
+
+      final responseData = result.data?['createApplication'];
+      if (responseData == null) {
+        debugPrint('❌ No response data received');
+        throw Exception('Failed to create application - no response from server');
+      }
+
+      final applicationData = responseData['application'];
+      if (applicationData == null) {
+        debugPrint('❌ No application data in response');
+        throw Exception('Failed to create application - invalid response format');
+      }
+
+      debugPrint('✅ Application created successfully: ${applicationData['id']}');
+      return Application.fromJson(applicationData);
+    } catch (e) {
+      debugPrint('❌ Application creation error: $e');
+      rethrow;
+    }
   }
 
   /// Get all applications for the current user
