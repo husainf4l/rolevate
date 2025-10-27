@@ -100,10 +100,9 @@ export class ApplicationService {
   ): Promise<ApplicationResponse> {
     console.log('🔄 Processing anonymous application...');
 
-    // Validate that resumeUrl is provided for anonymous applications
-    if (!createApplicationInput.resumeUrl) {
-      throw new Error('Resume URL is required for anonymous applications');
-    }
+    // Resume URL is optional for now - allow applications without resumes
+    // Later we can make it required after implementing file upload
+    const resumeUrl = createApplicationInput.resumeUrl || null;
 
     // Get job details to verify it exists and is active
     const job = await this.applicationRepository.manager.findOne(Job, {
@@ -125,24 +124,22 @@ export class ApplicationService {
     }
 
     // Validate required candidate information
-    if (!createApplicationInput.email || createApplicationInput.email.trim() === '') {
-      throw new BadRequestException('Email is required and cannot be empty');
-    }
-    if (!createApplicationInput.phone || createApplicationInput.phone.trim() === '') {
-      throw new BadRequestException('Phone number is required and cannot be empty');
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(createApplicationInput.email)) {
-      throw new BadRequestException('Invalid email format');
+    // Email and phone are optional - they can be extracted from CV or provided by user
+    if (createApplicationInput.email) {
+      // Validate email format only if provided
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(createApplicationInput.email.trim())) {
+        throw new BadRequestException('Invalid email format');
+      }
     }
 
-    // Validate phone number format (basic validation)
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    const cleanPhone = createApplicationInput.phone.replace(/[\s\-\(\)]/g, '');
-    if (!phoneRegex.test(cleanPhone)) {
-      throw new BadRequestException('Invalid phone number format');
+    if (createApplicationInput.phone) {
+      // Validate phone number format only if provided
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      const cleanPhone = createApplicationInput.phone.replace(/[\s\-\(\)]/g, '');
+      if (!phoneRegex.test(cleanPhone)) {
+        throw new BadRequestException('Invalid phone number format');
+      }
     }
 
     // Generate anonymous candidate info - FastAPI will extract real data later
@@ -150,11 +147,16 @@ export class ApplicationService {
     const timestamp = Date.now();
     const anonymousId = `anonymous-${timestamp}`;
     
+    // If email is not provided, generate a placeholder email
+    // FastAPI will update it with the real email from the CV
+    const email = createApplicationInput.email || `${anonymousId}@placeholder.temp`;
+    const phone = createApplicationInput.phone || `+962${timestamp.toString().slice(-9)}`;
+    
     const candidateInfo = {
       firstName: createApplicationInput.firstName || 'Anonymous',
       lastName: createApplicationInput.lastName || anonymousId,
-      email: createApplicationInput.email,
-      phone: createApplicationInput.phone,
+      email: email,
+      phone: phone,
       linkedin: createApplicationInput.linkedin || null,
       portfolioUrl: createApplicationInput.portfolioUrl,
     };
@@ -166,8 +168,10 @@ export class ApplicationService {
     const randomPassword = this.generateRandomPassword();
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
-    // Create user and candidate profile with placeholder data
-    const result = await this.createCandidateFromCV(candidateInfo, hashedPassword, createApplicationInput.resumeUrl);
+    // Create user and candidate profile with or without CV
+    const result = resumeUrl 
+      ? await this.createCandidateFromCV(candidateInfo, hashedPassword, resumeUrl)
+      : await this.createCandidateWithoutCV(candidateInfo, hashedPassword);
     const candidateId = result.user.id;
 
     // Generate JWT token for the new candidate
@@ -186,7 +190,8 @@ export class ApplicationService {
     };
 
     console.log('✅ Created anonymous candidate account with ID:', candidateId);
-    console.log('📧 Placeholder email:', candidateInfo.email);
+    console.log('📧 Email:', candidateInfo.email, candidateInfo.email.includes('@placeholder.temp') ? '(placeholder - will be extracted from CV)' : '(provided)');
+    console.log('📱 Phone:', candidateInfo.phone, createApplicationInput.phone ? '(provided)' : '(placeholder - will be extracted from CV)');
     console.log('🔄 FastAPI will update with real candidate data from CV');
 
     // Create the application
@@ -340,6 +345,69 @@ export class ApplicationService {
     }
 
     return password;
+  }
+
+  /**
+   * Create candidate without CV (basic registration only)
+   */
+  private async createCandidateWithoutCV(
+    candidateInfo: any,
+    hashedPassword: string
+  ) {
+    console.log('🏗️ Creating user and candidate profile without CV...');
+
+    return await this.applicationRepository.manager.transaction(async (manager) => {
+      // Check if user already exists with this email
+      let user = await manager.findOne(User, {
+        where: { email: candidateInfo.email }
+      });
+
+      if (user) {
+        console.log('ℹ️ User already exists with email:', candidateInfo.email);
+      } else {
+        // Create new user
+        console.log('🆕 Creating new user with email:', candidateInfo.email);
+        user = await manager.save(User, {
+          email: candidateInfo.email,
+          name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+          password: hashedPassword,
+          userType: UserType.CANDIDATE,
+          phone: candidateInfo.phone,
+          isActive: true,
+        });
+      }
+
+      if (!user) {
+        throw new Error('Failed to create or find user');
+      }
+
+      // Check if candidate profile already exists
+      let candidateProfile = await manager.findOne(CandidateProfile, {
+        where: { userId: user.id }
+      });
+
+      if (!candidateProfile) {
+        console.log('🆕 Creating new candidate profile without CV...');
+        candidateProfile = await manager.save(CandidateProfile, {
+          userId: user.id,
+          firstName: candidateInfo.firstName,
+          lastName: candidateInfo.lastName,
+          phone: candidateInfo.phone,
+          linkedinUrl: candidateInfo.linkedin || undefined,
+          portfolioUrl: candidateInfo.portfolioUrl || undefined,
+          skills: [],
+        });
+      }
+
+      if (!candidateProfile) {
+        throw new Error('Failed to create candidate profile');
+      }
+
+      return {
+        user,
+        candidateProfile
+      };
+    });
   }
 
   /**
