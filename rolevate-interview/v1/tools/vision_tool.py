@@ -11,7 +11,7 @@ import aiohttp
 from livekit import rtc
 from livekit.agents import llm
 
-from src.core.config import settings
+from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 

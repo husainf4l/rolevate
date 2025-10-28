@@ -16,6 +16,12 @@ aiohttp>=3.9.0                             # Async HTTP client for GraphQL
 # AWS S3 for video storage
 boto3>=1.34.0                              # AWS SDK for S3 uploads
 
+# Image Processing for Vision Tool
+Pillow>=10.0.0                             # PIL for image processing
+
+# Tokenization
+blingfire>=0.1.8                           # Fast sentence tokenization
+
 # Development Dependencies (optional - install with: pip install -r requirements.txt -r requirements-dev.txt)
 # pytest>=7.4.0
 # pytest-asyncio>=0.21.0

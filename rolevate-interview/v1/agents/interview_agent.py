@@ -9,9 +9,9 @@ from typing import Optional
 from livekit.agents import Agent
 from livekit import rtc
 
-from src.core.models import InterviewContext, InterviewLanguage
-from src.agents.language_handler import get_language_handler
-from src.tools.vision_tool import EnvironmentAnalysisTool
+from ..core.models import InterviewContext, InterviewLanguage
+from .language_handler import get_language_handler
+from ..tools.vision_tool import EnvironmentAnalysisTool
 
 logger = logging.getLogger(__name__)
 

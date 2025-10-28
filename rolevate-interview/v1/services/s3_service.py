@@ -6,7 +6,7 @@ import logging
 import boto3
 from pathlib import Path
 from datetime import datetime
-from src.core.config import settings
+from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 

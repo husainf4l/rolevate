@@ -4,7 +4,7 @@ Simplifies language logic with strategy pattern
 """
 
 from typing import Optional
-from src.core.models import InterviewContext, InterviewLanguage
+from ..core.models import InterviewContext, InterviewLanguage
 
 
 class LanguageHandler:

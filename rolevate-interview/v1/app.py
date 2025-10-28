@@ -10,11 +10,11 @@ from pathlib import Path
 from livekit.agents import AgentSession, JobContext, JobProcess, WorkerOptions, cli, tokenize
 from livekit.plugins import soniox, openai, elevenlabs, silero
 
-from src.core.config import settings
-from src.services.api_client import RolevateAPIClient
-from src.services.s3_service import upload_video_to_s3
-from src.agents.interview_agent import InterviewAgent
-from src.utils.helpers import parse_application_id
+from .core.config import settings
+from .services.api_client import RolevateAPIClient
+from .services.s3_service import upload_video_to_s3
+from .agents.interview_agent import InterviewAgent
+from .utils.helpers import parse_application_id
 
 # Setup logging
 logging.basicConfig(
@@ -30,8 +30,12 @@ logger = logging.getLogger(__name__)
 
 def prewarm(proc: JobProcess) -> None:
     """Preload VAD model"""
-    proc.userdata["vad"] = silero.VAD.load()
-    settings.validate()
+    try:
+        proc.userdata["vad"] = silero.VAD.load()
+        settings.validate()
+    except Exception as e:
+        logger.error(f"Prewarm failed: {e}")
+        raise
 
 
 async def fetch_context(application_id: str):
@@ -83,39 +87,53 @@ async def _process_recording(ctx: JobContext, application_id: str):
 
 async def entrypoint(ctx: JobContext) -> None:
     """Main entry point for interview session"""
-    application_id = parse_application_id(ctx.room.name)
-    
-    # Connect to room first
-    await ctx.connect()
-    
-    # Fetch context and start recording handler
-    interview_context = await fetch_context(application_id)
-    if application_id and settings.aws_bucket_name:
-        asyncio.create_task(upload_and_save_video(ctx, application_id))
-    
-    # Configure session
-    session = AgentSession(
-        stt=soniox.STT(params=soniox.STTOptions(language_hints=["en", "ar"])),
-        llm=openai.LLM(model=settings.openai.model),
-        tts=elevenlabs.TTS(
-            voice_id=settings.elevenlabs.voice_id,
-            model="eleven_flash_v2_5",  # FASTEST model (~75ms latency) - Oct 2025
-            auto_mode=True,
-            word_tokenizer=tokenize.blingfire.SentenceTokenizer(),
-            encoding="pcm_22050",  # Optimize for faster streaming
-            streaming_latency=1,  # Lower latency for real-time feel
-        ),
-        vad=ctx.proc.userdata.get("vad") or silero.VAD.load(),
-        preemptive_generation=True,
-    )
-    
-    # Start agent with room access for vision tool
-    agent = InterviewAgent(context=interview_context, room=ctx.room)
-    
     try:
+        logger.info("Starting entrypoint")
+        application_id = parse_application_id(ctx.room.name)
+        logger.info(f"Parsed application_id: {application_id}")
+        
+        # Connect to room first
+        logger.info("Connecting to room")
+        await ctx.connect()
+        logger.info("Connected to room")
+        
+        # Fetch context and start recording handler
+        logger.info("Fetching context")
+        interview_context = await fetch_context(application_id)
+        logger.info(f"Fetched context: {interview_context}")
+        if application_id and settings.aws_bucket_name:
+            asyncio.create_task(upload_and_save_video(ctx, application_id))
+        
+        # Configure session
+        logger.info("Creating AgentSession")
+        session = AgentSession(
+            stt=soniox.STT(params=soniox.STTOptions(language_hints=["en", "ar"])),
+            llm=openai.LLM(model=settings.openai.model),
+            tts=elevenlabs.TTS(
+                voice_id=settings.elevenlabs.voice_id,
+                model="eleven_turbo_v2",  # Faster model
+                auto_mode=True,
+                # word_tokenizer=tokenize.blingfire.SentenceTokenizer(),
+                # encoding="pcm_22050",  # Use default
+                # streaming_latency=1,  # Use default
+            ),
+            vad=ctx.proc.userdata.get("vad") or silero.VAD.load(),
+            preemptive_generation=True,
+        )
+        logger.info("AgentSession created")
+        
+        # Start agent with room access for vision tool
+        logger.info("Creating InterviewAgent")
+        agent = InterviewAgent(context=interview_context, room=ctx.room)
+        logger.info("InterviewAgent created")
+        
+        logger.info("Starting session")
         await session.start(agent=agent, room=ctx.room)
+        logger.info("Session started")
     except Exception as e:
-        logger.error(f"Session error: {e}")
+        logger.error(f"Entrypoint error: {e}")
+        import traceback
+        traceback.print_exc()
         raise
 
 
@@ -128,7 +146,7 @@ def main():
     import os
     num_processes = int(os.getenv("AGENT_PROCESSES", "3"))
     
-    logger.info(f"🚀 Rolevate Agent v4.2.0 - CV Analysis + GPT-5 Mini - {settings.openai.model}")
+    logger.info(f"🚀 Rolevate Agent v4.2.0 - CV Analysis + GPT-4o Mini - {settings.openai.model}")
     logger.info(f"📊 Concurrent capacity: {num_processes} interviews")
     
     cli.run_app(WorkerOptions(

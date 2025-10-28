@@ -9,9 +9,9 @@ from typing import Optional
 
 import aiohttp
 
-from src.core.config import settings
-from src.core.models import InterviewContext, InterviewLanguage
-from src.core.exceptions import APIConnectionError, APIResponseError, APITimeoutError
+from ..core.config import settings
+from ..core.models import InterviewContext, InterviewLanguage
+from ..core.exceptions import APIConnectionError, APIResponseError, APITimeoutError
 
 logger = logging.getLogger(__name__)
 

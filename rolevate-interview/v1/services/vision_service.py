@@ -12,7 +12,7 @@ from pathlib import Path
 import aiohttp
 from livekit import rtc
 
-from src.core.config import settings
+from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 
