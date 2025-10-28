@@ -807,102 +807,37 @@ Return ONLY the culture and values-focused company description without any title
     }
   }
 
-    async generateJobAnalysis(input: JobAnalysisInput): Promise<JobAnalysisResponse> {
-    try {
-      // Convert JobAnalysisInput to SalaryRecommendationRequestDto format
-      const salaryRequest: SalaryRecommendationRequestDto = {
-        jobTitle: input.jobTitle,
-        department: input.department,
-        industry: input.industry,
-        employeeType: input.employeeType,
-        jobLevel: input.jobLevel,
-        workType: input.workType,
-        location: input.location,
-        country: input.country,
-      };
+  async generateJobAnalysis(input: JobAnalysisInput): Promise<JobAnalysisResponse> {
+    // Convert JobAnalysisInput to SalaryRecommendationRequestDto format
+    const salaryRequest: SalaryRecommendationRequestDto = {
+      jobTitle: input.jobTitle,
+      department: input.department,
+      industry: input.industry,
+      employeeType: input.employeeType,
+      jobLevel: input.jobLevel,
+      workType: input.workType,
+      location: input.location,
+      country: input.country,
+    };
 
-      // Get the full salary recommendation which includes job analysis
-      const salaryRecommendation = await this.generateSalaryRecommendation(salaryRequest);
+    // Get the full salary recommendation which includes job analysis
+    const salaryRecommendation = await this.generateSalaryRecommendation(salaryRequest);
 
-      // Transform the response to match JobAnalysisResponse format
-      const response: JobAnalysisResponse = {
-        description: salaryRecommendation.jobRequirements.description,
-        shortDescription: salaryRecommendation.jobRequirements.shortDescription || '',
-        responsibilities: salaryRecommendation.jobRequirements.keyResponsibilities,
-        requirements: salaryRecommendation.jobRequirements.qualifications.join('\n'),
-        benefits: salaryRecommendation.jobRequirements.benefitsAndPerks?.join('\n') || '',
-        skills: salaryRecommendation.jobRequirements.requiredSkills,
-        suggestedSalary: `${salaryRecommendation.salaryRange.currency} ${salaryRecommendation.salaryRange.min.toLocaleString()} - ${salaryRecommendation.salaryRange.max.toLocaleString()} ${salaryRecommendation.salaryRange.period}`,
-        experienceLevel: salaryRecommendation.experienceLevel,
-        educationLevel: salaryRecommendation.educationRequirements.join(', '),
-      };
+    // Transform the response to match JobAnalysisResponse format
+    const response: JobAnalysisResponse = {
+      description: salaryRecommendation.jobRequirements.description,
+      shortDescription: salaryRecommendation.jobRequirements.shortDescription || '',
+      responsibilities: salaryRecommendation.jobRequirements.keyResponsibilities,
+      requirements: salaryRecommendation.jobRequirements.qualifications.join('\n'),
+      benefits: salaryRecommendation.jobRequirements.benefitsAndPerks?.join('\n') || '',
+      skills: salaryRecommendation.jobRequirements.requiredSkills,
+      suggestedSalary: `${salaryRecommendation.salaryRange.currency} ${salaryRecommendation.salaryRange.min.toLocaleString()} - ${salaryRecommendation.salaryRange.max.toLocaleString()} ${salaryRecommendation.salaryRange.period}`,
+      experienceLevel: salaryRecommendation.experienceLevel,
+      educationLevel: salaryRecommendation.educationRequirements.join(', '),
+    };
 
-      return response;
-    } catch (error) {
-      // If salary generation fails, generate job details without salary using a simpler prompt
-      console.error('Salary recommendation failed, generating job details without salary:', error);
-      
-      const prompt = `Generate a professional job analysis for the following position:
-
-Job Title: ${input.jobTitle}
-Location: ${input.location}
-${input.department ? `Department: ${input.department}` : ''}
-${input.industry ? `Industry: ${input.industry}` : ''}
-${input.jobLevel ? `Job Level: ${input.jobLevel}` : ''}
-${input.workType ? `Work Type: ${input.workType}` : ''}
-
-Please provide a detailed job analysis in JSON format:
-{
-  "description": "Full detailed job description (2-3 paragraphs)",
-  "shortDescription": "Brief 1-2 sentence summary",
-  "responsibilities": "Bullet-pointed key responsibilities",
-  "requirements": "Bullet-pointed qualifications and requirements",
-  "benefits": "Bullet-pointed benefits and perks",
-  "skills": ["skill1", "skill2", "skill3"],
-  "experienceLevel": "X-Y years",
-  "educationLevel": "Required education level"
-}`;
-
-      try {
-        const completion = await this.openai.chat.completions.create({
-          model: 'gpt-4o',
-          messages: [{ role: 'user', content: prompt }],
-          max_tokens: 1500,
-          temperature: 0.7,
-        });
-
-        const aiResponse = completion.choices[0]?.message?.content?.trim() || '';
-        let jsonStr = aiResponse;
-        
-        // Extract JSON from response
-        if (jsonStr.includes('```json')) {
-          jsonStr = jsonStr.split('```json')[1].split('```')[0].trim();
-        } else if (jsonStr.includes('```')) {
-          jsonStr = jsonStr.split('```')[1].split('```')[0].trim();
-        }
-        
-        const parsedResponse = JSON.parse(jsonStr);
-        
-        const response: JobAnalysisResponse = {
-          description: parsedResponse.description || '',
-          shortDescription: parsedResponse.shortDescription || '',
-          responsibilities: parsedResponse.responsibilities || '',
-          requirements: parsedResponse.requirements || '',
-          benefits: parsedResponse.benefits || '',
-          skills: parsedResponse.skills || [],
-          suggestedSalary: '', // No salary when salary generation fails
-          experienceLevel: parsedResponse.experienceLevel || '',
-          educationLevel: parsedResponse.educationLevel || '',
-        };
-
-        return response;
-      } catch (fallbackError) {
-        console.error('Fallback job analysis also failed:', fallbackError);
-        throw new InternalServerErrorException('Failed to generate job analysis');
-      }
-    }
+    return response;
   }
-
 
   async generateAIConfiguration(input: AIConfigInput): Promise<AIConfigResponse> {
     const {
