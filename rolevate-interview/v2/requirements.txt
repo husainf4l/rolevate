@@ -1,0 +1,8 @@
+livekit-agents
+livekit-plugins-openai
+livekit-plugins-soniox
+livekit-plugins-silero
+python-dotenv
+requests
+boto3
+livekit
