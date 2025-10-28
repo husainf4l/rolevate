@@ -1,8 +1,9 @@
 """
-Rolevate GraphQL API client
-Handles all communication with the backend API
+Rolevate GraphQL API client - Simplified
+Handles communication with the backend API
 """
 
+import asyncio
 import logging
 from typing import Optional
 
@@ -10,11 +11,7 @@ import aiohttp
 
 from src.core.config import settings
 from src.core.models import InterviewContext, InterviewLanguage
-from src.core.exceptions import (
-    APIConnectionError,
-    APIResponseError,
-    APITimeoutError
-)
+from src.core.exceptions import APIConnectionError, APIResponseError, APITimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -68,11 +65,6 @@ class RolevateAPIClient:
             
         Returns:
             InterviewContext if successful, None otherwise
-            
-        Raises:
-            APIConnectionError: If unable to connect
-            APITimeoutError: If request times out
-            APIResponseError: If API returns an error
         """
         if not self.api_key:
             logger.warning("API key not configured, returning minimal context")
@@ -81,44 +73,30 @@ class RolevateAPIClient:
         query = """
         query GetInterviewDetails($applicationId: ID!) {
             application(id: $applicationId) {
-                candidate {
-                    name
-                }
+                candidate { name }
                 job {
                     title
                     interviewLanguage
-                    company {
-                        name
-                    }
+                    company { name }
                 }
+                cvAnalysisResults
             }
         }
         """
         
         try:
             await self._ensure_session()
-            
-            result = await self._execute_query(
-                query=query,
-                variables={"applicationId": application_id}
-            )
-            
+            result = await self._execute_query(query, {"applicationId": application_id})
             return self._parse_interview_context(result, application_id)
             
-        except aiohttp.ClientError as e:
-            raise APIConnectionError(f"Failed to connect to API: {e}")
-        except asyncio.TimeoutError:
-            raise APITimeoutError(f"API request timed out after {self.timeout}s")
+        except (APIConnectionError, APITimeoutError, APIResponseError) as e:
+            logger.error(f"API error: {e}")
+            return InterviewContext(application_id=application_id)
         except Exception as e:
-            logger.error(f"Unexpected error fetching interview context: {e}", exc_info=True)
-            # Return minimal context on error
+            logger.error(f"Unexpected error: {e}", exc_info=True)
             return InterviewContext(application_id=application_id)
     
-    async def _execute_query(
-        self, 
-        query: str, 
-        variables: dict
-    ) -> dict:
+    async def _execute_query(self, query: str, variables: dict) -> dict:
         """
         Execute a GraphQL query
         
@@ -128,51 +106,46 @@ class RolevateAPIClient:
             
         Returns:
             Parsed JSON response
-            
-        Raises:
-            APIResponseError: If API returns an error
         """
         headers = {
             "x-api-key": self.api_key,
             "Content-Type": "application/json",
         }
         
-        payload = {
-            "query": query,
-            "variables": variables
-        }
-        
+        payload = {"query": query, "variables": variables}
         logger.debug(f"Executing GraphQL query with variables: {variables}")
         
-        async with self._session.post(
-            self.api_url,
-            json=payload,
-            headers=headers,
-            timeout=aiohttp.ClientTimeout(total=self.timeout)
-        ) as response:
-            logger.info(f"GraphQL API response status: {response.status}")
-            
-            if response.status != 200:
-                error_text = await response.text()
-                raise APIResponseError(
-                    f"API returned error: {error_text}",
-                    status_code=response.status
-                )
-            
-            result = await response.json()
-            
-            # Check for GraphQL errors
-            if "errors" in result:
-                error_msg = "; ".join(str(e) for e in result["errors"])
-                raise APIResponseError(f"GraphQL errors: {error_msg}")
-            
-            return result
+        try:
+            async with self._session.post(
+                self.api_url,
+                json=payload,
+                headers=headers,
+                timeout=aiohttp.ClientTimeout(total=self.timeout)
+            ) as response:
+                logger.info(f"GraphQL API response status: {response.status}")
+                
+                if response.status != 200:
+                    error_text = await response.text()
+                    raise APIResponseError(
+                        f"API returned error: {error_text}",
+                        status_code=response.status
+                    )
+                
+                result = await response.json()
+                
+                # Check for GraphQL errors
+                if "errors" in result:
+                    error_msg = "; ".join(str(e) for e in result["errors"])
+                    raise APIResponseError(f"GraphQL errors: {error_msg}")
+                
+                return result
+                
+        except asyncio.TimeoutError:
+            raise APITimeoutError(f"Request timed out after {self.timeout}s")
+        except aiohttp.ClientError as e:
+            raise APIConnectionError(f"Connection error: {e}")
     
-    def _parse_interview_context(
-        self, 
-        result: dict, 
-        application_id: str
-    ) -> InterviewContext:
+    def _parse_interview_context(self, result: dict, application_id: str) -> InterviewContext:
         """
         Parse GraphQL response into InterviewContext
         
@@ -183,49 +156,32 @@ class RolevateAPIClient:
         Returns:
             Parsed InterviewContext
         """
-        data = result.get("data", {})
-        application = data.get("application")
+        application = result.get("data", {}).get("application")
         
         if not application:
             logger.warning("No application data in API response")
             return InterviewContext(application_id=application_id)
         
-        # Extract candidate info
-        candidate_name = None
-        candidate = application.get("candidate", {})
-        if candidate:
-            candidate_name = candidate.get("name")
-        
-        # Extract job and company info
-        job_title = None
-        company_name = None
-        interview_language = InterviewLanguage.ENGLISH
+        # Extract data with safe navigation
+        candidate_name = application.get("candidate", {}).get("name")
         
         job = application.get("job", {})
-        if job:
-            job_title = job.get("title")
-            
-            # Parse language
-            lang_str = job.get("interviewLanguage")
-            interview_language = InterviewLanguage.from_string(lang_str)
-            
-            # Extract company
-            company = job.get("company", {})
-            if company:
-                company_name = company.get("name")
+        job_title = job.get("title")
+        company_name = job.get("company", {}).get("name")
+        interview_language = InterviewLanguage.from_string(job.get("interviewLanguage"))
+        
+        # Get CV analysis results
+        cv_analysis = application.get("cvAnalysisResults")
         
         context = InterviewContext(
             application_id=application_id,
             candidate_name=candidate_name,
             job_title=job_title,
             company_name=company_name,
-            interview_language=interview_language
+            interview_language=interview_language,
+            cv_analysis=cv_analysis
         )
         
         logger.info(f"Successfully parsed interview context: {context.get_display_summary()}")
-        
         return context
 
-
-# Import asyncio for timeout handling
-import asyncio
