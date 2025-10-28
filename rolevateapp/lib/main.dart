@@ -17,7 +17,6 @@ import 'package:rolevateapp/screens/profile_screen.dart';
 import 'package:rolevateapp/screens/business/post_job_screen.dart';
 import 'package:rolevateapp/screens/business/business_jobs_screen.dart';
 import 'package:rolevateapp/screens/business/applications_screen.dart';
-import 'package:rolevateapp/screens/business/schedule_interview_screen.dart';
 import 'package:rolevateapp/screens/business/interviews_screen.dart';
 import 'package:rolevateapp/screens/browse_jobs_screen.dart';
 import 'package:rolevateapp/screens/saved_jobs_screen.dart';
@@ -32,7 +31,6 @@ import 'package:rolevateapp/screens/help_support_screen.dart';
 import 'package:rolevateapp/screens/about_screen.dart';
 import 'package:rolevateapp/screens/privacy_security_screen.dart';
 import 'package:rolevateapp/screens/notification_preferences_screen.dart';
-import 'package:rolevateapp/screens/dark_mode_settings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -147,11 +145,6 @@ class MyApp extends StatelessWidget {
             middlewares: [BusinessOnlyMiddleware()],
           ),
           GetPage(
-            name: '/schedule-interview', 
-            page: () => const ScheduleInterviewScreen(),
-            middlewares: [BusinessOnlyMiddleware()],
-          ),
-          GetPage(
             name: '/interviews', 
             page: () => const InterviewsScreen(),
           ),
@@ -168,7 +161,6 @@ class MyApp extends StatelessWidget {
           GetPage(name: '/about', page: () => const AboutScreen()),
           GetPage(name: '/privacy-security', page: () => const PrivacySecurityScreen()),
           GetPage(name: '/notification-preferences', page: () => const NotificationPreferencesScreen()),
-          GetPage(name: '/dark-mode-settings', page: () => const DarkModeSettingsScreen()),
           GetPage(
             name: '/job-application',
             page: () {

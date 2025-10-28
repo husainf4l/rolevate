@@ -10,6 +10,7 @@ class JobService {
   Future<Map<String, dynamic>> generateJobAnalysis({
     required String jobTitle,
     required String location,
+    required String employeeType,
     String? department,
     String? industry,
     String? jobLevel,
@@ -19,7 +20,7 @@ class JobService {
     debugPrint('🤖 JobService.generateJobAnalysis called for: $jobTitle');
     
     const String mutation = '''
-      mutation GenerateJob(\$input: JobAnalysisInput!) {
+      mutation GenerateJobAnalysis(\$input: JobAnalysisInput!) {
         generateJobAnalysis(input: \$input) {
           description
           shortDescription
@@ -30,6 +31,7 @@ class JobService {
           suggestedSalary
           experienceLevel
           educationLevel
+          __typename
         }
       }
     ''';
@@ -38,37 +40,43 @@ class JobService {
       'input': {
         'jobTitle': jobTitle,
         'location': location,
-        if (department != null) 'department': department,
-        if (industry != null) 'industry': industry,
-        if (jobLevel != null) 'jobLevel': jobLevel,
-        if (workType != null) 'workType': workType,
-        if (country != null) 'country': country,
+        'employeeType': employeeType,
+        if (department != null && department.isNotEmpty) 'department': department,
+        if (industry != null && industry.isNotEmpty) 'industry': industry,
+        if (jobLevel != null && jobLevel.isNotEmpty) 'jobLevel': jobLevel,
+        if (workType != null && workType.isNotEmpty) 'workType': workType,
+        if (country != null && country.isNotEmpty) 'country': country,
       },
     };
 
     debugPrint('🤖 Generating AI analysis with input: $variables');
 
     try {
+      // AI generation can take 30-90 seconds
+      // The GraphQLService now has a TimeoutLink with 120-second timeout
+      print('📡 Sending GraphQL mutation...');
       final result = await GraphQLService.client.mutate(
         MutationOptions(
           document: gql(mutation),
           variables: variables,
+          fetchPolicy: FetchPolicy.networkOnly,
         ),
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          throw Exception('AI generation timeout - please try again');
-        },
       );
+      print('📡 GraphQL mutation completed');
 
       if (result.hasException) {
-        debugPrint('❌ AI generation exception: ${result.exception}');
-        throw Exception('Failed to generate job details: ${result.exception}');
+        print('❌ HAS EXCEPTION!');
+        print('❌ Full exception: ${result.exception}');
+        print('❌ Exception type: ${result.exception.runtimeType}');
+        print('❌ GraphQL errors: ${result.exception?.graphqlErrors}');
+        print('❌ Link exception: ${result.exception?.linkException}');
+        print('❌ Link exception type: ${result.exception?.linkException.runtimeType}');
+        throw Exception('Failed to generate job details. Please try again or fill in manually.');
       }
 
       final analysisData = result.data?['generateJobAnalysis'];
       if (analysisData == null) {
-        throw Exception('No analysis data returned');
+        throw Exception('No data returned from AI service. Please try again.');
       }
 
       debugPrint('✅ AI analysis generated successfully');

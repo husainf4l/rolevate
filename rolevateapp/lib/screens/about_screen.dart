@@ -85,7 +85,7 @@ class _AboutScreenState extends State<AboutScreen> {
       'companyName': 'Rolevate Inc.',
       'website': 'https://rolevate.com',
       'email': 'support@rolevate.com',
-      'phone': '+962 6 123 4567',
+      'phone': '009627900020333',
       'address': 'Amman, Jordan',
       'termsUrl': 'https://rolevate.com/terms',
       'privacyUrl': 'https://rolevate.com/privacy',

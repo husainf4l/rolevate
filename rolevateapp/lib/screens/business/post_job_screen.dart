@@ -190,23 +190,35 @@ class _PostJobScreenState extends State<PostJobScreen> {
     
     // Validate that we have at least title and location
     if (_titleController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Missing Information',
-        'Please enter a job title first',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: CupertinoColors.systemOrange,
-        colorText: CupertinoColors.white,
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Missing Information'),
+          content: const Text('Please enter a job title first before using AI generation.'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
       );
       return;
     }
     
     if (_locationController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Missing Information',
-        'Please enter a location first',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: CupertinoColors.systemOrange,
-        colorText: CupertinoColors.white,
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Missing Information'),
+          content: const Text('Please enter a location first before using AI generation.'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
       );
       return;
     }
@@ -219,6 +231,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
       final analysis = await _jobService.generateJobAnalysis(
         jobTitle: _titleController.text.trim(),
         location: _locationController.text.trim(),
+        employeeType: _selectedJobType.toJson(),
         department: _departmentController.text.trim().isNotEmpty 
             ? _departmentController.text.trim() 
             : null,
@@ -238,7 +251,13 @@ class _PostJobScreenState extends State<PostJobScreen> {
         _responsibilitiesController.text = analysis['responsibilities'] ?? '';
         _requirementsController.text = analysis['requirements'] ?? '';
         _benefitsController.text = analysis['benefits'] ?? '';
-        _salaryController.text = analysis['suggestedSalary'] ?? '';
+        
+        // Only set salary if it's provided and not empty
+        if (analysis['suggestedSalary'] != null && 
+            analysis['suggestedSalary'].toString().isNotEmpty) {
+          _salaryController.text = analysis['suggestedSalary'];
+        }
+        
         _experienceController.text = analysis['experienceLevel'] ?? '';
         _educationController.text = analysis['educationLevel'] ?? '';
         
@@ -248,13 +267,18 @@ class _PostJobScreenState extends State<PostJobScreen> {
         }
       });
 
-      Get.snackbar(
-        '✨ AI Generated',
-        'Job details have been auto-filled. Review and edit as needed.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: CupertinoColors.systemGreen,
-        colorText: CupertinoColors.white,
-        duration: const Duration(seconds: 3),
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('✨ AI Generated'),
+          content: const Text('Job details have been auto-filled. Please review and edit as needed before posting.'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
       );
     } catch (e) {
       debugPrint('❌ Error generating with AI: $e');
@@ -262,12 +286,24 @@ class _PostJobScreenState extends State<PostJobScreen> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('AI Generation Failed'),
-          content: Text('Could not generate job details: ${e.toString()}'),
+          title: const Text('⚠️ AI Generation Failed'),
+          content: Text(
+            e.toString().replaceAll('Exception: ', ''),
+          ),
           actions: [
             CupertinoDialogAction(
-              child: const Text('OK'),
+              isDefaultAction: true,
+              child: const Text('Fill Manually'),
               onPressed: () => Navigator.of(context).pop(),
+            ),
+            CupertinoDialogAction(
+              child: const Text('Try Again'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  _generateWithAI();
+                });
+              },
             ),
           ],
         ),

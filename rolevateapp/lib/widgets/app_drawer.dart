@@ -45,8 +45,8 @@ class AppDrawer extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Image.asset(
-                          'assets/logos/Rolevate.webp',
-                          height: 40,
+                          'assets/logos/rolevate-white.png',
+                          height: 28,
                           fit: BoxFit.contain,
                         ),
                       ),

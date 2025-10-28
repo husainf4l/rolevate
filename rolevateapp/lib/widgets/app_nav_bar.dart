@@ -55,18 +55,9 @@ class AppNavBar extends StatelessWidget implements ObstructingPreferredSizeWidge
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Image.asset(
-                    'assets/logos/Rolevate-icon.webp',
-                    height: 32,
+                    'assets/logos/Rolevate.webp',
+                    height: 24,
                     fit: BoxFit.contain,
-                  ),
-                  const SizedBox(width: AppTheme.spacing8),
-                  Text(
-                    'RoleVate',
-                    style: AppTypography.headlineMedium.copyWith(
-                      color: AppColors.primary600,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
-                    ),
                   ),
                 ],
               ),

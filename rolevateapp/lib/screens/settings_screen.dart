@@ -55,17 +55,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: AppTheme.spacing24),
 
-            // Appearance Section
-            _buildSectionHeader('Appearance'),
-            _buildSettingItem(
-              'Dark Mode',
-              'Theme and appearance settings',
-              CupertinoIcons.moon_fill,
-              () => Get.toNamed('/dark-mode-settings'),
-            ),
-
-            const SizedBox(height: AppTheme.spacing24),
-
             // Support Section
             _buildSectionHeader('Support'),
             _buildSettingItem(

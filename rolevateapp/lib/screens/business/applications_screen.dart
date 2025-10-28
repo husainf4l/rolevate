@@ -245,33 +245,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                                     ],
                                   ),
                                   
-                                  // Action buttons for appropriate statuses
-                                  if (_canScheduleInterview(application.status))
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: AppTheme.spacing12),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: CupertinoButton(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: AppTheme.spacing12,
-                                                vertical: AppTheme.spacing8,
-                                              ),
-                                              color: AppColors.primary600,
-                                              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                                              child: Text(
-                                                'Schedule Interview',
-                                                style: AppTypography.button.copyWith(
-                                                  color: CupertinoColors.white,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              onPressed: () => _scheduleInterview(application),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                 ],
                               ),
                             ),
@@ -339,20 +312,5 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
       case ApplicationStatus.withdrawn:
         return AppColors.error;
     }
-  }
-
-  bool _canScheduleInterview(ApplicationStatus status) {
-    // Allow scheduling interviews for applications that are under review or shortlisted
-    return status == ApplicationStatus.reviewed || 
-           status == ApplicationStatus.analyzed || 
-           status == ApplicationStatus.shortlisted;
-  }
-
-  void _scheduleInterview(Application application) {
-    Get.toNamed('/schedule-interview', arguments: {
-      'applicationId': application.id,
-      'candidateName': application.candidate?.name ?? 'Unknown Candidate',
-      'candidateTitle': 'Applicant for ${application.job.title}',
-    });
   }
 }

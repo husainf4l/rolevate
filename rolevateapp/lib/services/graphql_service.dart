@@ -1,6 +1,38 @@
 import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:gql_exec/gql_exec.dart';
+import 'dart:async';
+
+// Custom Link that wraps requests with extended timeouts  
+class TimeoutLink extends Link {
+  final Link _link;
+  final Duration timeout;
+
+  TimeoutLink(this._link, {this.timeout = const Duration(seconds: 120)});
+
+  @override
+  Stream<Response> request(Request request, [NextLink? forward]) {
+    print('🔗 TimeoutLink: Starting request with ${timeout.inSeconds}s timeout');
+    
+    return _link.request(request, forward).timeout(
+      timeout,
+      onTimeout: (sink) {
+        print('⏰ TimeoutLink: TIMEOUT after ${timeout.inSeconds}s');
+        sink.addError(
+          TimeoutException('Request timeout after ${timeout.inSeconds} seconds'),
+        );
+        sink.close();
+      },
+    ).map((response) {
+      print('✅ TimeoutLink: Response received');
+      return response;
+    }).handleError((error) {
+      print('❌ TimeoutLink: Error - $error');
+      throw error;
+    });
+  }
+}
 
 class GraphQLService {
   static GraphQLClient? _client;
@@ -14,6 +46,7 @@ class GraphQLService {
   static GraphQLClient _createClient() {
     debugPrint('🔧 Creating GraphQL client with URL: $_apiUrl');
     
+    // Create HTTP link
     final HttpLink httpLink = HttpLink(
       _apiUrl!,
       defaultHeaders: {
@@ -37,8 +70,9 @@ class GraphQLService {
       },
     );
 
-    // Combine auth link with http link
-    final Link link = authLink.concat(httpLink);
+    // Combine links: Auth -> Timeout -> HTTP
+    // The timeout link wraps all requests with a 120-second timeout
+    final Link link = authLink.concat(TimeoutLink(httpLink));
 
     return GraphQLClient(
       link: link,

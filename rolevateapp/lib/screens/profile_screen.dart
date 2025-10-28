@@ -185,15 +185,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                             Get.toNamed('/notification-preferences');
                           },
                         ),
-                        const SizedBox(height: AppTheme.spacing8),
-                        _buildActionButton(
-                          'Dark Mode',
-                          CupertinoIcons.moon_fill,
-                          () {
-                            debugPrint('🌙 Navigating to Dark Mode Settings');
-                            Get.toNamed('/dark-mode-settings');
-                          },
-                        ),
                         const SizedBox(height: AppTheme.spacing24),
 
                         // Support & Info
