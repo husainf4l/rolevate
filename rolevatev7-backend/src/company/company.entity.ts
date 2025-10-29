@@ -27,9 +27,9 @@ export class Company {
   @Field({ nullable: true })
   email?: string;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  phone?: string;
+  @Column()
+  @Field()
+  phone: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

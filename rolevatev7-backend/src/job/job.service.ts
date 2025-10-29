@@ -6,7 +6,7 @@ import { CreateJobInput } from './create-job.input';
 import { UpdateJobInput } from './update-job.input';
 import { JobDto } from './job.dto';
 import { JobFilterInput } from './job-filter.input';
-import { PaginationInput } from '../common/pagination.dto';
+import { PaginationInput, createPaginationMeta, PaginatedResult } from '../common/pagination.dto';
 import { User } from '../user/user.entity';
 import { Company } from '../company/company.entity';
 import { SavedJob } from './saved-job.entity';
@@ -62,138 +62,86 @@ export class JobService {
     return this.findOne(savedJob.id) as Promise<JobDto>;
   }
 
-  async findAll(filter?: JobFilterInput, pagination?: PaginationInput): Promise<JobDto[]> {
-    try {
-      this.logger.log('Finding all jobs with filters and pagination');
-      
-      const queryBuilder = this.jobRepository.createQueryBuilder('job')
-        .leftJoinAndSelect('job.postedBy', 'postedBy')
-        .leftJoinAndSelect('job.company', 'company');
+  /**
+   * Find all jobs with optional filtering and pagination
+   * @param filter - Filter criteria (status, type, location, etc.)
+   * @param pagination - Pagination options (page, limit)
+   * @returns Paginated result with jobs and metadata
+   */
+  async findAll(filter?: JobFilterInput, pagination?: PaginationInput): Promise<PaginatedResult<JobDto>> {
+    this.logger.log('Finding all jobs with filters and pagination');
+    
+    const queryBuilder = this.jobRepository.createQueryBuilder('job')
+      .leftJoinAndSelect('job.postedBy', 'postedBy')
+      .leftJoinAndSelect('job.company', 'company')
+      .orderBy('job.createdAt', 'DESC'); // Most recent jobs first
 
-      if (filter) {
-        if (filter.status) {
-          queryBuilder.andWhere('job.status = :status', { status: filter.status });
-        }
-        if (filter.type) {
-          queryBuilder.andWhere('job.type = :type', { type: filter.type });
-        }
-        if (filter.jobLevel) {
-          queryBuilder.andWhere('job.jobLevel = :jobLevel', { jobLevel: filter.jobLevel });
-        }
-        if (filter.workType) {
-          queryBuilder.andWhere('job.workType = :workType', { workType: filter.workType });
-        }
-        if (filter.industry) {
-          queryBuilder.andWhere('job.industry ILIKE :industry', { industry: `%${filter.industry}%` });
-        }
-        if (filter.location) {
-          queryBuilder.andWhere('job.location ILIKE :location', { location: `%${filter.location}%` });
-        }
-        if (filter.department) {
-          queryBuilder.andWhere('job.department ILIKE :department', { department: `%${filter.department}%` });
-        }
-        if (filter.postedById) {
-          queryBuilder.andWhere('job.postedById = :postedById', { postedById: filter.postedById });
-        }
-        if (filter.companyId) {
-          queryBuilder.andWhere('job.companyId = :companyId', { companyId: filter.companyId });
-        }
-        if (filter.featured !== undefined) {
-          queryBuilder.andWhere('job.featured = :featured', { featured: filter.featured });
-        }
+    // Apply filters
+    if (filter) {
+      if (filter.status) {
+        queryBuilder.andWhere('job.status = :status', { status: filter.status });
       }
-
-      if (pagination) {
-        const page = pagination.page || 1;
-        const limit = pagination.limit || 10;
-        const skip = (page - 1) * limit;
-        
-        queryBuilder.skip(skip);
-        queryBuilder.take(limit);
-      } else {
-        queryBuilder.take(10); // default limit
+      if (filter.type) {
+        queryBuilder.andWhere('job.type = :type', { type: filter.type });
       }
-
-      const jobs = await queryBuilder.getMany();
-      
-      this.logger.log(`Found ${jobs.length} jobs`);
-
-      return jobs.map(job => ({
-        id: job.id,
-        title: job.title,
-        slug: job.slug,
-        department: job.department,
-      location: job.location,
-      salary: job.salary,
-      type: job.type,
-      deadline: job.deadline,
-      description: job.description,
-      shortDescription: job.shortDescription,
-      responsibilities: job.responsibilities,
-      requirements: job.requirements,
-      benefits: job.benefits,
-      skills: job.skills,
-      experience: job.experience,
-      education: job.education,
-      jobLevel: job.jobLevel,
-      workType: job.workType,
-      industry: job.industry,
-      companyDescription: job.companyDescription,
-      status: job.status,
-      cvAnalysisPrompt: job.cvAnalysisPrompt,
-      interviewPrompt: job.interviewPrompt,
-      aiSecondInterviewPrompt: job.aiSecondInterviewPrompt,
-      interviewLanguage: job.interviewLanguage,
-      featured: job.featured,
-      applicants: job.applicants,
-      views: job.views,
-      featuredJobs: job.featured,
-      company: job.company ? {
-        id: job.company.id,
-        name: job.company.name,
-        description: job.company.description,
-        website: job.company.website,
-        logo: job.company.logo,
-        industry: job.company.industry,
-        size: job.company.size,
-        founded: job.company.founded,
-        location: job.company.location,
-        addressId: job.company.addressId,
-        createdAt: job.company.createdAt,
-        updatedAt: job.company.updatedAt,
-      } : undefined,
-      postedBy: {
-        id: job.postedBy.id,
-        userType: job.postedBy.userType,
-        email: job.postedBy.email,
-        name: job.postedBy.name,
-        phone: job.postedBy.phone,
-        avatar: job.postedBy.avatar,
-        isActive: job.postedBy.isActive,
-        companyId: job.postedBy.companyId,
-        createdAt: job.postedBy.createdAt,
-        updatedAt: job.postedBy.updatedAt,
-      },
-      createdAt: job.createdAt,
-      updatedAt: job.updatedAt,
-    }));
-    } catch (error) {
-      this.logger.error(`Failed to find jobs: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Failed to retrieve jobs');
+      if (filter.jobLevel) {
+        queryBuilder.andWhere('job.jobLevel = :jobLevel', { jobLevel: filter.jobLevel });
+      }
+      if (filter.workType) {
+        queryBuilder.andWhere('job.workType = :workType', { workType: filter.workType });
+      }
+      if (filter.industry) {
+        queryBuilder.andWhere('job.industry ILIKE :industry', { industry: `%${filter.industry}%` });
+      }
+      if (filter.location) {
+        queryBuilder.andWhere('job.location ILIKE :location', { location: `%${filter.location}%` });
+      }
+      if (filter.department) {
+        queryBuilder.andWhere('job.department ILIKE :department', { department: `%${filter.department}%` });
+      }
+      if (filter.postedById) {
+        queryBuilder.andWhere('job.postedById = :postedById', { postedById: filter.postedById });
+      }
+      if (filter.companyId) {
+        queryBuilder.andWhere('job.companyId = :companyId', { companyId: filter.companyId });
+      }
+      if (filter.featured !== undefined) {
+        queryBuilder.andWhere('job.featured = :featured', { featured: filter.featured });
+      }
     }
+
+    // Apply pagination
+    const page = pagination?.page || 1;
+    const limit = Math.min(pagination?.limit || 20, 100); // Cap at 100
+    const skip = (page - 1) * limit;
+    
+    // Get total count for pagination metadata
+    const total = await queryBuilder.getCount();
+    
+    // Apply pagination to query
+    queryBuilder.skip(skip).take(limit);
+
+    // Execute query
+    const jobs = await queryBuilder.getMany();
+
+    this.logger.log(`Found ${jobs.length} jobs (page ${page}/${Math.ceil(total / limit)})`);
+
+    return {
+      data: jobs as JobDto[],
+      meta: createPaginationMeta(page, limit, total),
+    };
   }
 
   async findOne(id: string): Promise<JobDto | null> {
-    try {
-      const job = await this.jobRepository.findOne({
-        where: { id },
-        relations: ['postedBy', 'company'],
-      });
-      
-      if (!job) {
-        this.logger.warn(`Job not found: ${id}`);
-        return null;
-      }
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['postedBy', 'company'],
+    });
+    
+    if (!job) {
+      this.logger.warn(`Job not found: ${id}`);
+      return null;
+    }
 
     return {
       id: job.id,
@@ -254,29 +202,20 @@ export class JobService {
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
     };
-    } catch (error) {
-      this.logger.error(`Failed to find job ${id}: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Failed to retrieve job');
-    }
   }
 
   async findBySlug(slug: string): Promise<JobDto | null> {
-    try {
-      const job = await this.jobRepository.findOne({
-        where: { slug },
-        relations: ['postedBy', 'company'],
-      });
-      
-      if (!job) {
-        this.logger.warn(`Job not found with slug: ${slug}`);
-        return null;
-      }
-
-      return this.findOne(job.id);
-    } catch (error) {
-      this.logger.error(`Failed to find job by slug ${slug}: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Failed to retrieve job');
+    const job = await this.jobRepository.findOne({
+      where: { slug },
+      relations: ['postedBy', 'company'],
+    });
+    
+    if (!job) {
+      this.logger.warn(`Job not found with slug: ${slug}`);
+      return null;
     }
+
+    return this.findOne(job.id);
   }
 
   async updateJob(input: UpdateJobInput, userId: string): Promise<JobDto> {

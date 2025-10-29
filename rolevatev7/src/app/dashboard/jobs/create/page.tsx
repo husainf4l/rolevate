@@ -538,7 +538,6 @@ export default function CreateJobPage() {
             industry: formData.industry,
             deadline: formData.deadline,
             interviewLanguage: formData.interviewLanguage,
-            interviewQuestions: formData.interviewQuestions || undefined,
             cvAnalysisPrompt: formData.aiCvAnalysisPrompt || undefined,
             interviewPrompt: formData.aiFirstInterviewPrompt || undefined,
             aiSecondInterviewPrompt: formData.aiSecondInterviewPrompt || undefined,

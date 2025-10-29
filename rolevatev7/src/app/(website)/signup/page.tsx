@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
   });
@@ -70,6 +71,7 @@ export default function SignupPage() {
       await authService.signup({
         name: formData.name.trim(),
         email: formData.email,
+        phone: formData.phone,
         password: formData.password,
         userType,
       });
@@ -153,9 +155,9 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Full Name
                 </label>
                 <input
@@ -165,12 +167,12 @@ export default function SignupPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Email Address
                 </label>
                 <input
@@ -180,12 +182,28 @@ export default function SignupPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Phone Number
+                </label>
+                <input
+                  name="phone"
+                  type="tel"
+                  id="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="+962 7X XXX XXXX"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Password
                 </label>
                 <input
@@ -195,7 +213,7 @@ export default function SignupPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all"
                 />
                 {passwordValidation && (
                   <div className="mt-2">
@@ -211,13 +229,13 @@ export default function SignupPage() {
                     )}
                   </div>
                 )}
-                <div className="mt-2 text-xs text-gray-500">
+                <div className="mt-1.5 text-xs text-gray-500">
                   Password must contain at least 8 characters with uppercase, lowercase, and numbers.
                 </div>
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Confirm Password
                 </label>
                 <input
@@ -227,12 +245,12 @@ export default function SignupPage() {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   required
-                  className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
+                  className="block w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none transition-all"
                 />
               </div>
 
               {error && (
-                <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-sm p-3">
+                <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
                   {error}
                 </div>
               )}
@@ -240,7 +258,7 @@ export default function SignupPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary-600 hover:bg-primary-700 text-white py-4 rounded-sm font-medium text-base transition-all"
+                className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg font-medium text-sm transition-all"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">

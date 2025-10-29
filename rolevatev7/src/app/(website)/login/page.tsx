@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authService } from "@/services";
+import { apolloClient } from "@/lib/apollo";
+import { gql } from "@apollo/client";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,6 +21,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -35,6 +47,84 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+
+    try {
+      const { data } = await apolloClient.mutate<{ forgotPassword: boolean }>({
+        mutation: gql`
+          mutation ForgotPassword($input: ForgotPasswordInput!) {
+            forgotPassword(input: $input)
+          }
+        `,
+        variables: {
+          input: { email: forgotEmail }
+        }
+      });
+
+      if (data?.forgotPassword) {
+        toast.success("Reset code sent to your WhatsApp! Check your phone.");
+        setShowForgotPassword(false);
+        setShowResetPassword(true);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to send reset code");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!resetToken.trim()) {
+      toast.error("Please enter the reset code from WhatsApp");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
+
+    setForgotLoading(true);
+
+    try {
+      const { data } = await apolloClient.mutate<{ resetPassword: boolean }>({
+        mutation: gql`
+          mutation ResetPassword($input: ResetPasswordInput!) {
+            resetPassword(input: $input)
+          }
+        `,
+        variables: {
+          input: {
+            token: resetToken,
+            newPassword: newPassword
+          }
+        }
+      });
+
+      if (data?.resetPassword) {
+        toast.success("Password reset successfully! You can now login.");
+        setShowResetPassword(false);
+        setResetToken("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setForgotEmail("");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to reset password");
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -61,35 +151,33 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email address
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-1.5">
+                  Email
                 </Label>
                 <Input
                   type="email"
                   id="email"
-                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-2 h-12"
+                  className="mt-1.5 h-10 text-sm rounded-lg"
                   disabled={loading}
                 />
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-1.5">
                   Password
                 </Label>
                 <Input
                   type="password"
                   id="password"
-                  autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-2 h-12"
+                  className="mt-1.5 h-10 text-sm rounded-lg"
                   disabled={loading}
                 />
               </div>
@@ -107,23 +195,25 @@ export default function LoginPage() {
                     Remember me
                   </label>
                 </div>
-                <a
-                  href="#"
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
                   className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                  disabled={loading}
                 >
                   Forgot password?
-                </a>
+                </button>
               </div>
 
               {error && (
-                <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-sm p-3">
+                <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
                   {error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                className="w-full bg-primary-600 hover:bg-primary-700 text-white h-12 font-medium text-base"
+                className="w-full bg-primary-600 hover:bg-primary-700 text-white h-10 text-sm font-medium rounded-lg"
                 disabled={loading}
               >
                 {loading ? "Signing In..." : "Sign In"}
@@ -158,6 +248,148 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password?</h2>
+            <p className="text-gray-600 mb-6">
+              Enter your email address and we'll send you a reset code via WhatsApp. The code will be valid for 15 minutes.
+            </p>
+            
+            <form onSubmit={handleForgotPassword}>
+              <div className="mb-4">
+                <Label htmlFor="forgot-email" className="text-sm font-medium text-gray-700">
+                  Email address
+                </Label>
+                <Input
+                  type="email"
+                  id="forgot-email"
+                  required
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="mt-1.5 h-10 text-sm rounded-lg"
+                  disabled={forgotLoading}
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotEmail("");
+                  }}
+                  className="flex-1 h-10 text-sm rounded-lg"
+                  disabled={forgotLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 h-10 text-sm bg-primary-600 hover:bg-primary-700 rounded-lg"
+                  disabled={forgotLoading}
+                >
+                  {forgotLoading ? "Sending..." : "Send Code"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
+            <p className="text-gray-600 mb-6">
+              Enter the reset code sent to your WhatsApp and your new password. The code is valid for 15 minutes.
+            </p>
+            
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <Label htmlFor="reset-token" className="text-sm font-medium text-gray-700">
+                  Reset Code
+                </Label>
+                <Input
+                  type="text"
+                  id="reset-token"
+                  required
+                  value={resetToken}
+                  onChange={(e) => setResetToken(e.target.value)}
+                  className="mt-1.5 h-10 text-sm font-mono rounded-lg"
+                  disabled={forgotLoading}
+                  placeholder="Paste the code from WhatsApp"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="new-password" className="text-sm font-medium text-gray-700">
+                  New Password
+                </Label>
+                <Input
+                  type="password"
+                  id="new-password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="mt-1.5 h-10 text-sm rounded-lg"
+                  disabled={forgotLoading}
+                  placeholder="Minimum 8 characters"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-700">
+                  Confirm Password
+                </Label>
+                <Input
+                  type="password"
+                  id="confirm-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="mt-1.5 h-10 text-sm rounded-lg"
+                  disabled={forgotLoading}
+                  placeholder="Re-enter your password"
+                />
+              </div>
+
+              <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowResetPassword(false);
+                    setResetToken("");
+                    setNewPassword("");
+                    setConfirmPassword("");
+                  }}
+                  className="flex-1 h-10 text-sm rounded-lg"
+                  disabled={forgotLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 h-10 text-sm bg-primary-600 hover:bg-primary-700 rounded-lg"
+                  disabled={forgotLoading}
+                >
+                  {forgotLoading ? "Resetting..." : "Reset Password"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

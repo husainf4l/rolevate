@@ -100,10 +100,23 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     isMounted.current = true;
     loadUser();
 
+    // Set up periodic check for token validity (every 5 minutes)
+    const intervalId = setInterval(() => {
+      if (isMounted.current && user) {
+        // Check if token still exists
+        const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+        if (!token) {
+          console.log('[AuthProvider] Token expired or removed - clearing user data');
+          setUser(null);
+        }
+      }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+
     return () => {
       isMounted.current = false;
+      clearInterval(intervalId);
     };
-  }, []);
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, refreshUser }}>

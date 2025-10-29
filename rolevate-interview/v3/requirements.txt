@@ -1,0 +1,6 @@
+livekit
+pillow
+python-dotenv
+livekit-plugins-openai
+livekit-plugins-silero
+livekit-plugins-hedra

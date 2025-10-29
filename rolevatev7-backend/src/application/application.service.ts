@@ -221,17 +221,17 @@ export class ApplicationService {
     // Send interview room link to candidate (room will be created on-demand)
     this.sendInterviewLinkToCandidate(savedApplication);
 
-    // Send login credentials SMS to candidate if phone number is available
+    // Send login credentials via WhatsApp to candidate if phone number is available
     if (candidateInfo.phone && !candidateInfo.phone.includes('timestamp')) {
-      console.log('📱 Sending login credentials SMS to candidate...');
-      await this.sendLoginCredentialsSMS(
+      console.log('📱 Sending login credentials via WhatsApp to candidate...');
+      await this.sendLoginCredentialsWhatsApp(
         candidateInfo.phone,
         candidateInfo.email,
         randomPassword,
         job.title
       );
     } else {
-      console.log('⚠️ No valid phone number available for SMS, skipping login credentials SMS');
+      console.log('⚠️ No valid phone number available for WhatsApp, skipping login credentials message');
     }
 
     // Notify company users about new application
@@ -349,15 +349,28 @@ export class ApplicationService {
   }
 
   private generateRandomPassword(): string {
-    const length = 6;
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const length = 12; // Minimum 12 characters for security
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const symbols = '@$!%*?&';
+    const allChars = uppercase + lowercase + numbers + symbols;
+    
     let password = '';
-
-    for (let i = 0; i < length; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    
+    // Ensure at least one character from each category
+    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    password += symbols.charAt(Math.floor(Math.random() * symbols.length));
+    
+    // Fill the rest with random characters
+    for (let i = 4; i < length; i++) {
+      password += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
-
-    return password;
+    
+    // Shuffle the password to avoid predictable patterns
+    return password.split('').sort(() => Math.random() - 0.5).join('');
   }
 
   /**
@@ -575,54 +588,55 @@ export class ApplicationService {
     }
   }
 
-  private async sendLoginCredentialsSMS(
+  private async sendLoginCredentialsWhatsApp(
     phone: string,
-    email: string,
+    _email: string,
     password: string,
     jobTitle: string
   ): Promise<void> {
     try {
-      console.log('📱 Sending login credentials SMS to:', phone);
+      console.log('📱 Sending login credentials via WhatsApp to:', phone);
 
-      // Clean phone number - ensure it has country code
+      // Clean phone number - remove + and any spaces/special chars for WhatsApp
       let cleanPhone = phone.replace(/[\s\-()]/g, '');
-      if (!cleanPhone.startsWith('+')) {
-        // If no country code, assume Jordan (+962)
-        if (cleanPhone.startsWith('0')) {
-          cleanPhone = '+962' + cleanPhone.substring(1);
-        } else if (cleanPhone.startsWith('962')) {
-          cleanPhone = '+' + cleanPhone;
-        } else {
-          cleanPhone = '+962' + cleanPhone;
-        }
+      if (cleanPhone.startsWith('+')) {
+        cleanPhone = cleanPhone.substring(1);
+      }
+      
+      // If no country code, assume Jordan (+962)
+      if (cleanPhone.startsWith('0')) {
+        cleanPhone = '962' + cleanPhone.substring(1);
+      } else if (!cleanPhone.startsWith('962')) {
+        cleanPhone = '962' + cleanPhone;
       }
 
-      // Create SMS message
-      const message = `Welcome to Rolevate!
+      console.log('📱 Cleaned phone number:', cleanPhone);
 
-Your application for "${jobTitle}" has been submitted successfully.
+      // Send WhatsApp template message using temppassword template
+      // Template has only 1 parameter: the temporary password
+      const templateParams = [
+        password    // {{1}} - Temporary password
+      ];
 
-Track your application:
-🌐 rolevate.com
-
-Login Details:
-📧 Email: ${email}
-🔑 Password: ${password}
-
-Please change your password after first login.`;
-
-      // Send SMS
-      await this.smsService.sendSMS({
-        phoneNumber: cleanPhone,
-        message: message,
-        type: SMSMessageType.GENERAL,
+      // Send via communication service to track the message
+      await this.communicationService.create({
+        candidateId: undefined,
+        companyId: undefined,
+        jobId: undefined,
+        applicationId: undefined,
+        type: CommunicationType.WHATSAPP,
+        direction: CommunicationDirection.OUTBOUND,
+        content: `Temporary password sent via WhatsApp for ${jobTitle}`,
+        phoneNumber: phone,
+        templateName: 'temppassword',
+        templateParams: templateParams,
       });
 
-      console.log('✅ Login credentials SMS sent successfully to:', cleanPhone);
+      console.log('✅ Login credentials WhatsApp message sent successfully to:', cleanPhone);
 
     } catch (error) {
-      console.error('❌ Failed to send login credentials SMS:', error.message);
-      // Don't throw error - SMS failure shouldn't block application creation
+      console.error('❌ Failed to send login credentials WhatsApp:', error.message);
+      // Don't throw error - WhatsApp failure shouldn't block application creation
     }
   }
 

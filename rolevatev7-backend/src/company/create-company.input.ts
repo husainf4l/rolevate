@@ -1,4 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
+import { IsPhoneNumber, IsString } from 'class-validator';
 
 @InputType()
 export class CreateCompanyInput {
@@ -14,8 +15,10 @@ export class CreateCompanyInput {
   @Field({ nullable: true })
   email?: string;
 
-  @Field({ nullable: true })
-  phone?: string;
+  @Field()
+  @IsString()
+  @IsPhoneNumber(undefined, { message: 'Please provide a valid phone number' })
+  phone: string;
 
   @Field({ nullable: true })
   logo?: string;

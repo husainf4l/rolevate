@@ -10,6 +10,9 @@ import { Application } from '../application/application.entity';
 import { User } from '../user/user.entity';
 import { WhatsAppModule } from '../whatsapp/whatsapp.module';
 import { LiveKitModule } from '../livekit/livekit.module';
+import { InterviewerCreatorService } from './services/interviewer-creator.service';
+import { InterviewNotificationService } from './services/interview-notification.service';
+import { InterviewRoomService } from './services/interview-room.service';
 
 @Module({
   imports: [
@@ -17,7 +20,15 @@ import { LiveKitModule } from '../livekit/livekit.module';
     WhatsAppModule, 
     LiveKitModule
   ],
-  providers: [InterviewService, InterviewResolver, TranscriptService, TranscriptResolver],
+  providers: [
+    InterviewService,
+    InterviewResolver,
+    TranscriptService,
+    TranscriptResolver,
+    InterviewerCreatorService,
+    InterviewNotificationService,
+    InterviewRoomService,
+  ],
   exports: [InterviewService, TranscriptService],
 })
 export class InterviewModule {}

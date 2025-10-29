@@ -2,12 +2,17 @@ import { Resolver, Query, Mutation, Args, Context, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JobDto } from './job.dto';
+import { PaginatedJobsResponse } from './paginated-jobs.dto';
 import { SavedJobDto } from './saved-job.dto';
 import { JobFilterInput } from './job-filter.input';
 import { PaginationInput } from '../common/pagination.dto';
 import { CreateJobInput } from './create-job.input';
 import { UpdateJobInput } from './update-job.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { Public } from '../auth/public.decorator';
+import { UserType } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 
 @Resolver(() => JobDto)
@@ -18,7 +23,8 @@ export class JobResolver {
   ) {}
 
   @Mutation(() => JobDto)
-  @UseGuards(JwtAuthGuard) // Only authenticated users can post jobs
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS)
   async createJob(
     @Args('input') input: CreateJobInput,
     @Context() context: any,
@@ -28,7 +34,8 @@ export class JobResolver {
   }
 
   @Mutation(() => JobDto)
-  @UseGuards(JwtAuthGuard) // Only authenticated users can update jobs
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS)
   async updateJob(
     @Args('input') input: UpdateJobInput,
     @Context() context: any,
@@ -38,7 +45,8 @@ export class JobResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthGuard) // Only authenticated users can delete jobs
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS)
   async deleteJob(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
@@ -48,7 +56,8 @@ export class JobResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthGuard) // Only authenticated users can hard delete jobs
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN)
   async hardDeleteJob(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
@@ -57,33 +66,41 @@ export class JobResolver {
     return this.jobService.hardDeleteJob(id, userId);
   }
 
-  @Query(() => [JobDto])
+  @Query(() => PaginatedJobsResponse, { 
+    name: 'jobs',
+    description: 'Get all jobs with optional filtering and pagination. Public endpoint - no authentication required.'
+  })
+  @Public()
   async jobs(
-    @Args('filter', { nullable: true }) filter?: JobFilterInput,
-    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
-  ): Promise<JobDto[]> {
+    @Args('filter', { nullable: true, description: 'Filter jobs by various criteria' }) filter?: JobFilterInput,
+    @Args('pagination', { nullable: true, description: 'Pagination options (page, limit)' }) pagination?: PaginationInput,
+  ): Promise<PaginatedJobsResponse> {
     return this.jobService.findAll(filter, pagination);
   }
 
-  @Query(() => JobDto, { nullable: true })
+  @Query(() => JobDto, { nullable: true, description: 'Get a single job by ID. Public endpoint.' })
+  @Public()
   async job(@Args('id', { type: () => ID }) id: string): Promise<JobDto | null> {
     return this.jobService.findOne(id);
   }
 
-  @Query(() => JobDto, { nullable: true })
+  @Query(() => JobDto, { nullable: true, description: 'Get a single job by slug. Public endpoint.' })
+  @Public()
   async jobBySlug(@Args('slug') slug: string): Promise<JobDto | null> {
     return this.jobService.findBySlug(slug);
   }
 
-  @Query(() => [JobDto])
-  @UseGuards(JwtAuthGuard)
+  @Query(() => [JobDto], { description: 'Get all jobs posted by the authenticated user\'s company' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS)
   async companyJobs(@Context() context: any): Promise<JobDto[]> {
     const userId = context.req.user.id;
     const user = await this.userService.findOne(userId);
     if (!user || !user.companyId) {
       return [];
     }
-    return this.jobService.findAll({ companyId: user.companyId });
+    const result = await this.jobService.findAll({ companyId: user.companyId });
+    return result.data;
   }
 
   // ==================== SAVED JOBS MUTATIONS & QUERIES ====================

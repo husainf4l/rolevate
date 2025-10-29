@@ -68,7 +68,7 @@ export interface CreateJobInput {
   aiSecondInterviewPrompt?: string;
   interviewLanguage?: string;
   featured?: boolean;
-  postedById: string;
+  postedById?: string;
 }
 
 export interface UpdateJobInput {

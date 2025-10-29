@@ -184,7 +184,7 @@ function JobsPageContent() {
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
           <div className="text-center mb-8 lg:mb-10">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-light text-gray-900 mb-4 sm:mb-6 ">
               Find Your Next{" "}
               <span className="text-primary-600">
                 Opportunity

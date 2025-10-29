@@ -23,7 +23,6 @@ export class WhatsAppService {
             headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (!res.ok) {
-            const _error = await res.text();
             // DEBUG: Log the full error response
             const errorResponse = await res.json();
             console.error('DEBUG: Error response data:', util.inspect(errorResponse, { depth: 5 }));
@@ -36,9 +35,10 @@ export class WhatsAppService {
         // Set default language based on template name
         if (!lang) {
             // Map template names to their correct language codes
-            const templateLanguageMap = {
+            const templateLanguageMap: Record<string, string> = {
                 'hello_world': 'en_US',
-                'cv_received_notification': 'en'
+                'cv_received_notification': 'en',
+                'temppassword': 'en_US'
             };
             lang = templateLanguageMap[templateName] || 'en_US';
         }
@@ -50,24 +50,46 @@ export class WhatsAppService {
         // Build components for BODY and BUTTON if params are provided
         let components: any[] | undefined = undefined;
         if (params && params.length > 0) {
-            components = [
-                {
-                    type: 'body',
-                    parameters: [
-                        { type: 'text', text: params[0] }
-                    ]
+            // For AUTHENTICATION templates (like temppassword), needs body + URL button parameter
+            if (templateName === 'temppassword') {
+                components = [
+                    {
+                        type: 'body',
+                        parameters: [
+                            { type: 'text', text: params[0] }
+                        ]
+                    },
+                    {
+                        type: 'button',
+                        sub_type: 'url',
+                        index: 0,
+                        parameters: [
+                            { type: 'text', text: params[0] }
+                        ]
+                    }
+                ];
+            }
+            // For other templates with parameters
+            else {
+                components = [
+                    {
+                        type: 'body',
+                        parameters: [
+                            { type: 'text', text: params[0] }
+                        ]
+                    }
+                ];
+                // If a second param is provided, add a URL button parameter
+                if (params.length > 1) {
+                    components.push({
+                        type: 'button',
+                        sub_type: 'url',
+                        index: 0,
+                        parameters: [
+                            { type: 'text', text: params[1] }
+                        ]
+                    });
                 }
-            ];
-            // If a second param is provided, add a button parameter
-            if (params.length > 1) {
-                components.push({
-                    type: 'button',
-                    sub_type: 'url',
-                    index: 0,
-                    parameters: [
-                        { type: 'text', text: params[1] }
-                    ]
-                });
             }
         }
 
@@ -81,6 +103,10 @@ export class WhatsAppService {
                 ...(components ? { components } : {}),
             },
         };
+        
+        // DEBUG: Log the payload being sent
+        this.logger.log('Sending WhatsApp template message:', JSON.stringify(payload, null, 2));
+        
         const res = await fetch(url, {
             method: 'POST',
             headers: {
@@ -266,7 +292,7 @@ export class WhatsAppService {
     /**
      * Handle incoming text messages
      */
-    private async handleTextMessage(from: string, text: string, timestamp: string) {
+    private async handleTextMessage(from: string, text: string, _timestamp: string) {
         this.logger.log(`Processing text message from ${from}: ${text}`);
 
         // Here you could implement auto-responses, forward to customer service, etc.

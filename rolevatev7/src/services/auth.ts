@@ -199,6 +199,8 @@ class AuthService {
     try {
       const token = this.hasValidToken();
       if (!token) {
+        // No token means user is not logged in - clean up any stale data
+        this.clearUser();
         return null;
       }
 
@@ -212,13 +214,38 @@ class AuthService {
         return data.me;
       }
       
+      // If query succeeded but returned no user, clean up
+      this.clearUser();
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token');
+      }
       return null;
     } catch (error: any) {
       console.error('Error fetching current user:', error);
-      // If error is authentication related, clear stored data
-      if (error?.message?.includes('Unauthorized') || error?.message?.includes('Unauthenticated')) {
-        this.logout();
+      
+      // Check for various authentication-related errors
+      const isAuthError = 
+        error?.message?.includes('Unauthorized') ||
+        error?.message?.includes('Unauthenticated') ||
+        error?.message?.includes('401') ||
+        error?.message?.includes('Token') ||
+        error?.message?.includes('JWT') ||
+        error?.message?.includes('expired') ||
+        error?.graphQLErrors?.some((e: any) => 
+          e?.extensions?.code === 'UNAUTHENTICATED' ||
+          e?.extensions?.code === 'UNAUTHORIZED'
+        );
+      
+      // If it's an auth error, perform complete cleanup
+      if (isAuthError) {
+        console.log('Authentication error detected - cleaning up user data');
+        this.clearUser();
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token');
+        }
+        apolloClient.clearStore();
       }
+      
       return null;
     }
   }
@@ -228,13 +255,24 @@ class AuthService {
    */
   getUserFromStorage(): User | null {
     if (!this.currentUser && typeof window !== 'undefined') {
+      // Check if token exists before trying to get user
+      if (!this.hasValidToken()) {
+        this.clearUser();
+        return null;
+      }
+      
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         try {
           this.currentUser = JSON.parse(storedUser);
         } catch (error) {
           console.error('Error parsing stored user:', error);
-          this.logout();
+          // Clear invalid stored data
+          this.clearUser();
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token');
+          }
+          return null;
         }
       }
     }
@@ -245,7 +283,17 @@ class AuthService {
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
-    return this.getUserFromStorage() !== null && this.hasValidToken();
+    const hasToken = this.hasValidToken();
+    const hasUser = this.getUserFromStorage() !== null;
+    
+    // If we have a user but no token, clean up stale data
+    if (hasUser && !hasToken) {
+      console.log('Token missing but user data exists - cleaning up stale data');
+      this.clearUser();
+      return false;
+    }
+    
+    return hasToken && hasUser;
   }
 
   /**

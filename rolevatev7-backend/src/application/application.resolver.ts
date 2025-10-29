@@ -16,6 +16,9 @@ import { ApiKeyGuard } from '../auth/api-key.guard';
 import { BusinessOrApiKeyGuard } from '../auth/business-or-api-key.guard';
 import { JwtOrApiKeyGuard } from '../auth/jwt-or-api-key.guard';
 import { Public } from '../auth/public.decorator';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { UserType } from '../user/user.entity';
 
 @Resolver(() => Application)
 export class ApplicationResolver {
@@ -48,7 +51,8 @@ export class ApplicationResolver {
   }
 
   @Query(() => [Application], { name: 'applications' })
-  @UseGuards(JwtOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS, UserType.SYSTEM)
   async findAll(
     @Context() context: any,
     @Args('filter', { nullable: true }) filter?: ApplicationFilterInput,
@@ -58,66 +62,76 @@ export class ApplicationResolver {
   }
 
   @Query(() => Application, { name: 'application', nullable: true })
-  @UseGuards(JwtOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS, UserType.CANDIDATE, UserType.SYSTEM)
   async findOne(@Args('id', { type: () => ID }) id: string): Promise<Application | null> {
     return this.applicationService.findOne(id);
   }
 
   @Query(() => [Application], { name: 'applicationsByJob' })
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(ApiKeyGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS, UserType.SYSTEM)
   async findByJobId(@Args('jobId', { type: () => ID }) jobId: string): Promise<Application[]> {
     return this.applicationService.findByJobId(jobId);
   }
 
   @Query(() => [Application], { name: 'applicationsByCandidate' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.CANDIDATE, UserType.BUSINESS)
   async findByCandidateId(
     @Args('candidateId', { type: () => ID }) candidateId: string,
     @Context() context: any,
   ): Promise<Application[]> {
-    const userId = context.req.user.userId;
-    // Only allow users to see their own applications or authorized personnel
-    if (candidateId !== userId) {
-      // TODO: Add role-based authorization check
+    const userId = context.req.user.id;
+    const userType = context.req.user.userType;
+    
+    // Candidates can only view their own applications
+    if (userType === UserType.CANDIDATE && candidateId !== userId) {
       throw new Error('Unauthorized: Can only view your own applications');
     }
+    
+    // Admin and Business users can view any candidate's applications
     return this.applicationService.findByCandidateId(candidateId);
   }
 
   @Mutation(() => Application, { nullable: true })
-  @UseGuards(JwtOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS, UserType.SYSTEM)
   async updateApplication(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') updateApplicationInput: UpdateApplicationInput,
     @Context() context: any,
   ): Promise<Application | null> {
-    const userId = context.req.user.userId;
+    const userId = context.req.user.id;
     return this.applicationService.update(id, updateApplicationInput, userId);
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS)
   async removeApplication(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.userId;
+    const userId = context.req.user.id;
     return this.applicationService.remove(id, userId);
   }
 
   // Application Notes
   @Mutation(() => ApplicationNote)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS)
   async createApplicationNote(
     @Args('input') createNoteInput: CreateApplicationNoteInput,
     @Context() context: any,
   ): Promise<ApplicationNote> {
-    const userId = context.req.user.userId;
+    const userId = context.req.user.id;
     return this.applicationService.createApplicationNote(createNoteInput, userId);
   }
 
   @Query(() => [ApplicationNote], { name: 'applicationNotes' })
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(ApiKeyGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS, UserType.SYSTEM)
   async findApplicationNotes(
     @Args('applicationId', { type: () => ID }) applicationId: string,
   ): Promise<ApplicationNote[]> {
@@ -125,7 +139,8 @@ export class ApplicationResolver {
   }
 
   @Query(() => ApplicationNote, { name: 'applicationNote', nullable: true })
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(ApiKeyGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS, UserType.SYSTEM)
   async findApplicationNote(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<ApplicationNote | null> {
@@ -133,23 +148,25 @@ export class ApplicationResolver {
   }
 
   @Mutation(() => ApplicationNote, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS)
   async updateApplicationNote(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') updateNoteInput: UpdateApplicationNoteInput,
     @Context() context: any,
   ): Promise<ApplicationNote | null> {
-    const userId = context.req.user.userId;
+    const userId = context.req.user.id;
     return this.applicationService.updateApplicationNote(id, updateNoteInput, userId);
   }
 
     @Mutation(() => Boolean, { name: 'removeApplicationNote' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.BUSINESS)
   async removeApplicationNote(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.userId;
+    const userId = context.req.user.id;
     return this.applicationService.removeApplicationNote(id, userId);
   }
 
@@ -159,7 +176,8 @@ export class ApplicationResolver {
    * Requires API Key authentication (system API key)
    */
   @Mutation(() => Application, { name: 'updateApplicationAnalysis' })
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(ApiKeyGuard, RolesGuard)
+  @Roles(UserType.SYSTEM)
   async updateApplicationAnalysis(
     @Args('input') input: UpdateApplicationAnalysisInput,
   ): Promise<Application> {

@@ -1,9 +1,12 @@
 import { Resolver, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginInput } from './login.input';
 import { LoginResponseDto } from './login-response.dto';
 import { ChangePasswordInput } from './change-password.input';
+import { ForgotPasswordInput } from './forgot-password.input';
+import { ResetPasswordInput } from './reset-password.input';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import { AuditService } from '../audit.service';
@@ -17,6 +20,7 @@ export class AuthResolver {
   ) {}
 
   @Mutation(() => LoginResponseDto)
+  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 attempts per 5 minutes
   async login(@Args('input') input: LoginInput): Promise<LoginResponseDto> {
     const user = await this.authService.validateUser(input.email, input.password);
     if (!user) {
@@ -47,6 +51,30 @@ export class AuthResolver {
   async logout(@Context() context: any): Promise<boolean> {
     const user = context.req.user;
     this.auditService.logUserLogout(user.sub, user.email);
+    return true;
+  }
+
+  @Mutation(() => Boolean, {
+    description: 'Request password reset - sends 6-digit code via WhatsApp',
+  })
+  @Throttle({ default: { limit: 3, ttl: 300000 } }) // 3 attempts per 5 minutes
+  async forgotPassword(
+    @Args('input') input: ForgotPasswordInput,
+  ): Promise<boolean> {
+    console.log(`🔵 forgotPassword resolver called with email: ${input.email}`);
+    const result = await this.authService.forgotPassword(input.email);
+    console.log(`🔵 forgotPassword resolver result: ${result}`);
+    return result;
+  }
+
+  @Mutation(() => Boolean, {
+    description: 'Reset password using token received via WhatsApp',
+  })
+  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 attempts per 5 minutes
+  async resetPassword(
+    @Args('input') input: ResetPasswordInput,
+  ): Promise<boolean> {
+    await this.authService.resetPassword(input.token, input.newPassword);
     return true;
   }
 }

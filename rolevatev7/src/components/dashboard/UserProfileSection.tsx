@@ -17,8 +17,8 @@ export default function UserProfileSection({ userData, onLogout }: UserProfileSe
   return (
     <div className="border-t border-gray-200 p-2">
       {/* User Profile */}
-      <div className="flex flex-col items-center px-2 py-3 text-xs mb-3">
-        <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center mb-2">
+      <div className="flex flex-col items-center px-2 py-3 mb-3">
+        <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
           {userData.avatar ? (
             <img
               src={userData.avatar}
@@ -30,11 +30,6 @@ export default function UserProfileSection({ userData, onLogout }: UserProfileSe
               {userData.name ? userData.name.charAt(0).toUpperCase() : "U"}
             </span>
           )}
-        </div>
-        <div className="text-center">
-          <p className="text-xs font-medium text-gray-900 truncate max-w-full">
-            {userData.name || "Loading..."}
-          </p>
         </div>
       </div>
 
