@@ -1,15 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { savedJobsService, SavedJob } from '@/services/savedJobs';
+import { useAuth } from '@/hooks/useAuth';
 
 export type { SavedJob };
 
 export const useSavedJobs = () => {
+  const { user } = useAuth();
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch saved jobs on mount
+  // Fetch saved jobs on mount (only if user is authenticated)
   const fetchSavedJobs = useCallback(async () => {
+    // Don't fetch if user is not authenticated
+    if (!user) {
+      setLoading(false);
+      setSavedJobs([]);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -18,10 +27,12 @@ export const useSavedJobs = () => {
     } catch (err: any) {
       console.error('Error fetching saved jobs:', err);
       setError(err?.message || 'Failed to fetch saved jobs');
+      // Reset saved jobs on error
+      setSavedJobs([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchSavedJobs();
@@ -29,6 +40,12 @@ export const useSavedJobs = () => {
 
   // Save a job
   const saveJob = async (jobId: string) => {
+    if (!user) {
+      const error = new Error('Please login to save jobs');
+      setError(error.message);
+      throw error;
+    }
+
     try {
       setError(null);
       const savedJob = await savedJobsService.saveJob(jobId);
@@ -44,6 +61,12 @@ export const useSavedJobs = () => {
 
   // Unsave a job
   const unsaveJob = async (jobId: string) => {
+    if (!user) {
+      const error = new Error('Please login to manage saved jobs');
+      setError(error.message);
+      throw error;
+    }
+
     try {
       setError(null);
       const success = await savedJobsService.unsaveJob(jobId);

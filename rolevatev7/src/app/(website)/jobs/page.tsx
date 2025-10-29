@@ -536,7 +536,7 @@ function JobsPageContent() {
                             <JobCard
                               job={job}
                               onSave={handleSaveJob}
-                              isSaved={false}
+                              isSaved={user ? isJobSaved(String(job.id)) : false}
                               showSaveButton={true}
                             />
                           </div>
