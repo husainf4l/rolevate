@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
+"""
+Rolevate Interview Agent - Main Entry Point
+AI-powered interview agent using LiveKit for real-time voice interaction.
+"""
 
-import logging
-import os
 import asyncio
+import logging
 from typing import Optional
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables first
 load_dotenv()
 
-# Configure logging - suppress asyncio warnings
-logging.getLogger('asyncio').setLevel(logging.CRITICAL)
+# Import config to validate environment early
+from config import settings
+from utils.logging_config import setup_logging
+
+# Setup structured logging
+setup_logging()
 
 from livekit.agents import (
     Agent,
-    AgentSession,
     JobContext,
     JobProcess,
     RoomInputOptions,
@@ -22,247 +28,173 @@ from livekit.agents import (
     cli,
 )
 from livekit.agents.llm import function_tool
-from livekit.plugins import openai, elevenlabs, soniox, silero
+from livekit.plugins import silero
 
-from service.application_service import get_application_data
-from service.recording_service import RecordingService
-from service.interview_service import InterviewService
+from orchestrator import InterviewOrchestrator
+from models import ApplicationData
+from exceptions import RolevateException
 
-# Configure logging
-logger = logging.getLogger("rolevate-agent")
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class InterviewAssistant(Agent):
-    """AI Interview Assistant for Rolevate"""
+    """AI Interview Assistant for Rolevate with tool access."""
     
-    def __init__(self, instructions: str, application_data: dict) -> None:
+    def __init__(self, instructions: str, application_data: ApplicationData, greeting: str = "") -> None:
+        """
+        Initialize the interview assistant.
+        
+        Args:
+            instructions: System instructions for the AI
+            application_data: Application data for tool access
+            greeting: Initial greeting to speak
+        """
         super().__init__(instructions=instructions)
         self.application_data = application_data
+        self.greeting = greeting
+        self._greeted = False
     
     @function_tool
     async def get_application_info(self) -> str:
-        """Get detailed information about the job position and company when the candidate asks.
-        Use this when the candidate wants to know more about:
+        """
+        Get detailed information about the job position and company.
+        Use this when the candidate asks about:
         - Job title, description, or salary
         - Company name, description, contact information
+        
+        Returns:
+            Formatted string with job and company information
         """
-        job = self.application_data.get("job", {})
-        company = job.get("company", {})
+        job = self.application_data.job
+        company = job.company
         
         info = f"""Job Information:
-- Title: {job.get('title', 'N/A')}
-- Description: {job.get('description', 'N/A')}
-- Salary: {job.get('salary', 'N/A')}
+- Title: {job.title}
+- Description: {job.description or 'N/A'}
+- Salary: {job.salary or 'N/A'}
 
 Company Information:
-- Name: {company.get('name', 'N/A')}
-- Description: {company.get('description', 'N/A')}
-- Phone: {company.get('phone', 'N/A')}
-- Email: {company.get('email', 'N/A')}"""
+- Name: {company.name}
+- Description: {company.description or 'N/A'}
+- Phone: {company.phone or 'N/A'}
+- Email: {company.email or 'N/A'}"""
         
         return info
 
 
-def prewarm(proc: JobProcess):
-    """Prewarm models to reduce latency"""
+def prewarm(proc: JobProcess) -> None:
+    """
+    Prewarm models to reduce latency.
+    
+    Args:
+        proc: Job process instance
+    """
     proc.userdata["vad"] = silero.VAD.load()
-    logger.info("VAD model prewarmed")
+    logger.info("VAD model prewarmed successfully")
 
 
-async def entrypoint(ctx: JobContext):
-    """Main entry point for the LiveKit agent."""
+async def entrypoint(ctx: JobContext) -> None:
+    """
+    Main entry point for the LiveKit agent.
+    Orchestrates the complete interview workflow.
     
-    logger.info(f"Connecting to room {ctx.room.name}")
+    Args:
+        ctx: Job context from LiveKit
+    """
+    # Connect to the room immediately
+    await ctx.connect()
     
-    # Extract application_id from room name (format: interview-{application_id}-{suffix})
-    parts = ctx.room.name.split('-')
-    if len(parts) >= 6:
-        application_id = '-'.join(parts[1:6])
-    else:
-        logger.error(f"Invalid room name format: {ctx.room.name}")
+    logger.info(
+        "Agent starting",
+        extra={
+            "room_name": ctx.room.name,
+            "environment": settings.environment
+        }
+    )
+    
+    # Initialize orchestrator
+    try:
+        orchestrator = InterviewOrchestrator(
+            room_name=ctx.room.name,
+            vad_model=ctx.proc.userdata["vad"]
+        )
+    except Exception as e:
+        logger.error(
+            f"Failed to parse room name: {e}",
+            exc_info=True
+        )
+        ctx.shutdown()
         return
-    
-    # Fetch application data
-    application_data = get_application_data(application_id)
-    if not application_data:
-        logger.error("Failed to fetch application data")
-        return
-    
-    # Initialize services
-    recording_service = RecordingService()
-    interview_service = InterviewService()
-    recording_id = None
-    interview_id = None
     
     try:
-        # 1. Create interview record
-        candidate_id = application_data.get("candidate", {}).get("id")
-        if candidate_id:
-            interview_id = interview_service.create_interview(
-                application_id=application_id,
-                interviewer_id=candidate_id,
-                room_id=ctx.room.name
-            )
-            if interview_id:
-                logger.info(f"Interview created: {interview_id}")
+        # Setup phase: fetch data, create interview, start recording
+        setup_success = await orchestrator.setup()
+        if not setup_success:
+            logger.error("Setup phase failed, aborting interview")
+            await orchestrator.cleanup()
+            ctx.shutdown()
+            return
         
-        # 2. Start recording
-        recording_id = await recording_service.start_recording(ctx.room.name, application_id)
-        if recording_id:
-            logger.info(f"Recording started: {recording_id}")
+        # Build instructions and create agent session
+        instructions = orchestrator.build_instructions()
+        greeting = orchestrator.get_greeting()
+        session = orchestrator.create_agent_session()
         
-        # 3. Build interview instructions
-        interview_prompt = application_data.get("job", {}).get("interviewPrompt", "")
-        interview_language = application_data.get("job", {}).get("interviewLanguage", "English")
-        candidate_name = application_data.get("candidate", {}).get("name", "Candidate")
-        company_name = application_data.get("job", {}).get("company", {}).get("name", "the company")
-        job_title = application_data.get("job", {}).get("title", "this position")
-        cv_analysis = application_data.get("cvAnalysisResults", "")
+        logger.info(f"Starting agent with greeting: {greeting[:50]}...")
         
-        # Remove visual assessment instructions (agent is audio-only)
-        visual_keywords = [
-            "الكاميرا", "إضاءة", "الخلفية", "المظهر", "الملابس", "camera", "lighting", 
-            "background", "appearance", "posture", "eye contact", "facial expressions",
-            "body language", "visual", "observe", "see", "watch", "look"
-        ]
-        
-        # Clean the prompt
-        prompt_lines = interview_prompt.split('\n')
-        cleaned_lines = []
-        for line in prompt_lines:
-            # Skip lines that contain visual assessment keywords
-            if not any(keyword in line.lower() for keyword in visual_keywords):
-                cleaned_lines.append(line)
-        
-        interview_prompt = '\n'.join(cleaned_lines)
-        
-        # Add audio-only note
-        audio_note = "\n\nIMPORTANT: This is an AUDIO-ONLY interview. You cannot see the candidate. Focus only on their voice responses, tone, and content. Do not mention or ask about visual elements like lighting, camera, background, or appearance."
-        
-        instructions = f"""Candidate Name: {candidate_name}
-Company Name: {company_name}
-Job Title: {job_title}
-
-{interview_prompt}{audio_note}
-
-CV Analysis:
-{cv_analysis}
-
-Note: You have access to get_application_info() tool for company/job details."""
-        
-        # 4. Create agent session
-        session = AgentSession(
-            stt=soniox.STT(params=soniox.STTOptions(language_hints=["ar", "en"])),
-            llm=openai.LLM(model="gpt-4o-mini"),
-            tts=elevenlabs.TTS(voice_id="u0TsaWvt0v8migutHM3M"),
-            vad=ctx.proc.userdata["vad"],
-        )
-        
-        # 5. Setup transcript capture (only if interview was created)
-        if interview_id:
-            @session.on("user_speech_committed")
-            def on_user_speech(message):
-                if message.content:
-                    asyncio.create_task(
-                        save_transcript(interview_service, interview_id, message.content, candidate_name, interview_language)
-                    )
-            
-            @session.on("agent_speech_committed")
-            def on_agent_speech(message):
-                if message.content:
-                    asyncio.create_task(
-                        save_transcript(interview_service, interview_id, message.content, "Laila Al Noor", interview_language)
-                    )
-        
-        # 6. Start the agent
+        # Start the agent with greeting
         await session.start(
-            agent=InterviewAssistant(instructions=instructions, application_data=application_data),
+            agent=InterviewAssistant(
+                instructions=instructions,
+                application_data=orchestrator.application_data,
+                greeting=greeting
+            ),
             room=ctx.room,
-            room_input_options=RoomInputOptions(),
         )
         
-        logger.info("Agent started - sending greeting")
+        logger.info("Agent started successfully and is now active")
         
-        # 7. Agent greets first
-        greeting_lang = "Arabic" if interview_language.lower() == "arabic" else "English"
-        if greeting_lang == "Arabic":
-            greeting = f"مرحباً، أنا ليلى النور من {company_name}. أهلاً بك {candidate_name}، هل أنت جاهز لبدء المقابلة؟"
-        else:
-            greeting = f"Hello, I'm Laila Al Noor from {company_name}. Welcome {candidate_name}, are you ready to begin the interview?"
+        # Say the greeting immediately to start the interview
+        await asyncio.sleep(0.5)  # Small delay to ensure session is ready
+        session.say(greeting)
+        logger.info("Greeting delivered, interview started")
         
-        await session.say(greeting, allow_interruptions=True)
+        # Keep the function running - the agent stays active until the room closes
+        # Don't return/exit until the job is explicitly terminated
+        try:
+            await asyncio.Event().wait()  # Wait indefinitely
+        except asyncio.CancelledError:
+            logger.info("Agent cancelled by system")
         
-        logger.info("Greeting sent - waiting for candidate response")
-        
-        # 8. Wait for session to end
-        await session.aclose()
-        
+    except RolevateException as e:
+        logger.error(
+            f"Rolevate error in interview: {e.message}",
+            extra={"details": e.details},
+            exc_info=True
+        )
     except Exception as e:
-        logger.error(f"Error in interview session: {e}", exc_info=True)
+        logger.error(
+            f"Unexpected error in interview: {e}",
+            exc_info=True
+        )
     finally:
-        # 8. Cleanup: stop recording and complete interview
-        await cleanup_interview(recording_service, recording_id, interview_service, interview_id)
-
-
-async def save_transcript(
-    interview_service: InterviewService,
-    interview_id: str,
-    content: str,
-    speaker: str,
-    language: str
-):
-    """Save transcript entry"""
-    try:
-        lang_code = "ar" if language and language.lower() == "arabic" else "en"
-        interview_service.add_transcript(
-            interview_id=interview_id,
-            content=content,
-            speaker=speaker,
-            language=lang_code
-        )
-    except Exception as e:
-        logger.error(f"Failed to save transcript: {e}")
-
-
-async def cleanup_interview(
-    recording_service: RecordingService,
-    recording_id: Optional[str],
-    interview_service: InterviewService,
-    interview_id: Optional[str]
-):
-    """Stop recording and complete interview"""
-    recording_url = None
-    
-    # Stop recording if active
-    if recording_id:
-        logger.info("Stopping recording...")
-        try:
-            s3_path = await recording_service.stop_recording()
-            
-            # Validate S3 path before using it
-            if s3_path and not s3_path.endswith('/') and 'interviews/' in s3_path:
-                recording_url = s3_path
-                logger.info(f"Recording saved: {recording_url}")
-            else:
-                logger.warning("Recording too short or failed to upload")
-        except Exception as e:
-            logger.error(f"Error stopping recording: {e}")
-    
-    # Complete interview record if exists
-    if interview_id:
-        logger.info(f"Completing interview: {interview_id}")
-        try:
-            interview_service.complete_interview(
-                interview_id=interview_id,
-                recording_url=recording_url
-            )
-            logger.info("Interview completed successfully")
-        except Exception as e:
-            logger.error(f"Error completing interview: {e}")
+        # Cleanup phase: stop recording, complete interview, close services
+        await orchestrator.cleanup()
+        logger.info("Agent shutdown complete")
+        
+        # Properly shutdown the job context
+        ctx.shutdown()
 
 
 if __name__ == "__main__":
+    logger.info(
+        "Starting Rolevate Interview Agent",
+        extra={
+            "environment": settings.environment,
+            "log_level": settings.log_level
+        }
+    )
+    
     cli.run_app(
         WorkerOptions(
             entrypoint_fnc=entrypoint,

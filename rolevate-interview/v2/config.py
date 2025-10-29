@@ -63,6 +63,20 @@ class Settings(BaseSettings):
         description="Environment name (development, staging, production)"
     )
     
+    # Performance Tuning
+    min_endpointing_delay: float = Field(
+        default=0.5,
+        description="Minimum delay before considering speech ended (seconds)"
+    )
+    interruption_threshold: float = Field(
+        default=0.8,
+        description="Threshold for interruption detection (0-1)"
+    )
+    enable_interruptions: bool = Field(
+        default=True,
+        description="Allow user to interrupt agent speech"
+    )
+    
     # HTTP Client Configuration
     http_timeout: int = Field(
         default=30,
