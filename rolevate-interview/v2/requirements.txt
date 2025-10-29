@@ -7,7 +7,7 @@ livekit
 livekit-plugins-elevenlabs
 
 # HTTP and Async
-aiohttp==3.9.1
+aiohttp
 python-dotenv==1.0.0
 
 # AWS
