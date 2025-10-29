@@ -127,10 +127,9 @@ export class ConfigurationService {
     }
   }
 
-  async getCompanyById(id: string): Promise<any> {
+  async getCompanyDetails(id: string): Promise<any> {
     // TODO: Implement getting company details
-    console.log('Getting company:', id);
-    return { id, name: 'Sample Company' };
+    throw new Error('Not implemented');
   }
 }
 

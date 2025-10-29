@@ -132,8 +132,6 @@ export default function UserDashboardJobsPage() {
         search || searchTerm ? { search: search || searchTerm } : undefined
       );
 
-      console.log("API Response:", response); // Debug log
-
       // Check if response has the expected structure
       if (!response || !Array.isArray(response.jobs)) {
         throw new Error("Invalid response structure from API");

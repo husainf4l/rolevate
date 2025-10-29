@@ -23,7 +23,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
 };
 
-const mintanance = false;
+// Check environment variable for maintenance mode
+const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
 
 export default function RootLayout({
   children,
@@ -41,7 +42,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <GraphQLProvider>
-            {mintanance ? <MaintenancePage /> : children}
+            {isMaintenanceMode ? <MaintenancePage /> : children}
           </GraphQLProvider>
         </AuthProvider>
       </body>

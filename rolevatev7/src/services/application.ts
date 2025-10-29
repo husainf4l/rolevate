@@ -253,13 +253,60 @@ export interface ApplicationNote {
 }
 
 export const getApplicationNotes = async (applicationId: string): Promise<ApplicationNote[]> => {
-  // TODO: Implement
-  return [];
+  const GET_APPLICATION_NOTES_QUERY = gql`
+    query GetApplicationNotes($applicationId: ID!) {
+      application(id: $applicationId) {
+        applicationNotes {
+          id
+          note
+          isPrivate
+          createdAt
+        }
+      }
+    }
+  `;
+
+  try {
+    const { data } = await apolloClient.query<{ application: { applicationNotes: ApplicationNote[] } }>({
+      query: GET_APPLICATION_NOTES_QUERY,
+      variables: { applicationId },
+      fetchPolicy: 'network-only'
+    });
+    return data?.application?.applicationNotes || [];
+  } catch (error: any) {
+    console.error('Error fetching application notes:', error);
+    throw new Error(error?.message || 'Failed to fetch application notes');
+  }
 };
 
 export const createApplicationNote = async (applicationId: string, note: string, isPrivate: boolean): Promise<ApplicationNote> => {
-  // TODO: Implement
-  return {} as ApplicationNote;
+  const CREATE_APPLICATION_NOTE_MUTATION = gql`
+    mutation CreateApplicationNote($applicationId: ID!, $input: CreateApplicationNoteInput!) {
+      createApplicationNote(applicationId: $applicationId, input: $input) {
+        id
+        note
+        isPrivate
+        createdAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await apolloClient.mutate<{ createApplicationNote: ApplicationNote }>({
+      mutation: CREATE_APPLICATION_NOTE_MUTATION,
+      variables: { 
+        applicationId, 
+        input: { note, isPrivate }
+      }
+    });
+    if (!data?.createApplicationNote) {
+      throw new Error('Failed to create application note');
+    }
+    return data.createApplicationNote;
+  } catch (error: any) {
+    console.error('Error creating application note:', error);
+    throw new Error(error?.message || 'Failed to create application note');
+  }
 };
 
 export interface CreateNoteData {
@@ -268,8 +315,50 @@ export interface CreateNoteData {
 }
 
 export const getApplicationsByJob = async (jobId: string): Promise<Application[]> => {
-  // TODO: Implement
-  return [];
+  const GET_APPLICATIONS_BY_JOB_QUERY = gql`
+    query GetApplicationsByJob($jobId: ID!) {
+      applications(jobId: $jobId) {
+        id
+        appliedAt
+        candidate {
+          id
+          name
+          email
+        }
+        job {
+          id
+          title
+          company {
+            name
+          }
+        }
+        status
+        cvAnalysisScore
+        cvAnalysisResults
+        resumeUrl
+        expectedSalary
+        noticePeriod
+        aiCvRecommendations
+        aiInterviewRecommendations
+        aiSecondInterviewRecommendations
+        interviewScheduled
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await apolloClient.query<{ applications: Application[] }>({
+      query: GET_APPLICATIONS_BY_JOB_QUERY,
+      variables: { jobId },
+      fetchPolicy: 'network-only'
+    });
+    return data?.applications || [];
+  } catch (error: any) {
+    console.error('Error fetching applications by job:', error);
+    throw new Error(error?.message || 'Failed to fetch applications for this job');
+  }
 };
 
 export const getCandidateApplicationDetails = async (jobId: string): Promise<Application> => {
@@ -371,6 +460,29 @@ export const getCandidateApplications = async (): Promise<Application[]> => {
 };
 
 export const bulkUpdateApplicationStatus = async (applicationIds: string[], status: string): Promise<Application[]> => {
-  // TODO: Implement
-  return [];
+  const BULK_UPDATE_APPLICATION_STATUS_MUTATION = gql`
+    mutation BulkUpdateApplicationStatus($input: BulkUpdateApplicationStatusInput!) {
+      bulkUpdateApplicationStatus(input: $input) {
+        id
+        status
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await apolloClient.mutate<{ bulkUpdateApplicationStatus: Application[] }>({
+      mutation: BULK_UPDATE_APPLICATION_STATUS_MUTATION,
+      variables: { 
+        input: { 
+          applicationIds, 
+          status 
+        }
+      }
+    });
+    return data?.bulkUpdateApplicationStatus || [];
+  } catch (error: any) {
+    console.error('Error bulk updating application status:', error);
+    throw new Error(error?.message || 'Failed to bulk update application status');
+  }
 };

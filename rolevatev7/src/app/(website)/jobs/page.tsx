@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { jobsService, Job } from "@/services";
+import { useSavedJobs } from "@/hooks/useSavedJobs";
+import { useAuth } from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 const jobTypes = [
   "All",
@@ -50,6 +53,8 @@ const departments = [
 
 function JobsPageContent() {
   const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const { isJobSaved, toggleSaveJob } = useSavedJobs();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("All");
@@ -155,8 +160,22 @@ function JobsPageContent() {
   });
 
   const handleSaveJob = async (jobId: string) => {
-    console.log(`Saving job ID: ${jobId}`);
-    // TODO: Implement save functionality
+    if (!user) {
+      toast.error('Please login to save jobs');
+      return;
+    }
+
+    try {
+      await toggleSaveJob(jobId);
+      if (isJobSaved(jobId)) {
+        toast.success('Job removed from saved jobs');
+      } else {
+        toast.success('Job saved successfully');
+      }
+    } catch (error: any) {
+      console.error('Error toggling save job:', error);
+      toast.error(error?.message || 'Failed to save job');
+    }
   };
 
   return (

@@ -357,9 +357,30 @@ export const jobService = new JobService();
 // Export the service instance as JobService for backward compatibility
 export { jobService as JobService };
 
+// AI Request Types
+export interface JobAnalysisRequest {
+  jobTitle: string;
+  department: string;
+  industry: string;
+  type: string;
+  jobLevel: string;
+  workType: string;
+  location: string;
+}
+
+export interface AIConfigRequest {
+  jobTitle: string;
+  department: string;
+  industry: string;
+  jobLevel: string;
+  description: string;
+  responsibilities: string;
+  requirements: string;
+  skills: string[];
+  interviewQuestions?: string;
+}
+
 // Add missing type exports
 export type JobPost = Job;
 export type UpdateJobRequest = UpdateJobInput;
 export type CreateJobRequest = CreateJobInput;
-export type JobAnalysisRequest = any; // TODO: Define proper type
-export type AIConfigRequest = any; // TODO: Define proper type

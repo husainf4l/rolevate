@@ -542,7 +542,7 @@ export default function CreateJobPage() {
             cvAnalysisPrompt: formData.aiCvAnalysisPrompt || undefined,
             interviewPrompt: formData.aiFirstInterviewPrompt || undefined,
             aiSecondInterviewPrompt: formData.aiSecondInterviewPrompt || undefined,
-            companyDescription: "Company description placeholder", // TODO: Get from company profile
+            companyDescription: user?.company?.description || formData.description || "Join our team and make an impact",
             status: isDraft ? "DRAFT" : "ACTIVE",
           },
         },
