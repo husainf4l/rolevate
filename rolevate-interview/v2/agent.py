@@ -40,19 +40,16 @@ logger = logging.getLogger(__name__)
 class InterviewAssistant(Agent):
     """AI Interview Assistant for Rolevate with tool access."""
     
-    def __init__(self, instructions: str, application_data: ApplicationData, greeting: str = "") -> None:
+    def __init__(self, instructions: str, application_data: ApplicationData) -> None:
         """
         Initialize the interview assistant.
         
         Args:
             instructions: System instructions for the AI
             application_data: Application data for tool access
-            greeting: Initial greeting to speak
         """
         super().__init__(instructions=instructions)
         self.application_data = application_data
-        self.greeting = greeting
-        self._greeted = False
     
     @function_tool
     async def get_application_info(self) -> str:
@@ -101,89 +98,59 @@ async def entrypoint(ctx: JobContext) -> None:
     Args:
         ctx: Job context from LiveKit
     """
-    # Connect to the room immediately
-    await ctx.connect()
+    orchestrator = None
     
-    logger.info(
-        "Agent starting",
-        extra={
-            "room_name": ctx.room.name,
-            "environment": settings.environment
-        }
-    )
-    
-    # Initialize orchestrator
     try:
+        # Connect to the room
+        await ctx.connect()
+        
+        logger.info(
+            "Agent starting",
+            extra={"room_name": ctx.room.name}
+        )
+        
+        # Initialize orchestrator
         orchestrator = InterviewOrchestrator(
             room_name=ctx.room.name,
             vad_model=ctx.proc.userdata["vad"]
         )
-    except Exception as e:
-        logger.error(
-            f"Failed to parse room name: {e}",
-            exc_info=True
-        )
-        ctx.shutdown()
-        return
-    
-    try:
-        # Setup phase: fetch data, create interview, start recording
+        
+        # Setup phase: fetch data and create interview record
         setup_success = await orchestrator.setup()
         if not setup_success:
             logger.error("Setup phase failed, aborting interview")
-            await orchestrator.cleanup()
-            ctx.shutdown()
             return
         
-        # Build instructions and create agent session
+        # Build instructions and create session
         instructions = orchestrator.build_instructions()
-        greeting = orchestrator.get_greeting()
         session = orchestrator.create_agent_session()
         
-        logger.info(f"Starting agent with greeting: {greeting[:50]}...")
-        
-        # Start the agent with greeting
+        # Start the agent - it will begin speaking based on instructions
         await session.start(
             agent=InterviewAssistant(
                 instructions=instructions,
-                application_data=orchestrator.application_data,
-                greeting=greeting
+                application_data=orchestrator.application_data
             ),
             room=ctx.room,
         )
         
-        logger.info("Agent started successfully and is now active")
+        logger.info("Agent started and active")
         
-        # Say the greeting immediately to start the interview
-        await asyncio.sleep(0.5)  # Small delay to ensure session is ready
-        session.say(greeting)
-        logger.info("Greeting delivered, interview started")
+        # Keep running until the job is terminated by LiveKit
+        while True:
+            await asyncio.sleep(1)
         
-        # Keep the function running - the agent stays active until the room closes
-        # Don't return/exit until the job is explicitly terminated
-        try:
-            await asyncio.Event().wait()  # Wait indefinitely
-        except asyncio.CancelledError:
-            logger.info("Agent cancelled by system")
-        
+    except asyncio.CancelledError:
+        logger.info("Agent cancelled")
     except RolevateException as e:
-        logger.error(
-            f"Rolevate error in interview: {e.message}",
-            extra={"details": e.details},
-            exc_info=True
-        )
+        logger.error(f"Interview error: {e.message}", extra={"details": e.details})
     except Exception as e:
-        logger.error(
-            f"Unexpected error in interview: {e}",
-            exc_info=True
-        )
+        logger.error(f"Unexpected error: {e}", exc_info=True)
     finally:
-        # Cleanup phase: stop recording, complete interview, close services
-        await orchestrator.cleanup()
+        # Cleanup resources
+        if orchestrator:
+            await orchestrator.cleanup()
         logger.info("Agent shutdown complete")
-        
-        # Properly shutdown the job context
-        ctx.shutdown()
 
 
 if __name__ == "__main__":
