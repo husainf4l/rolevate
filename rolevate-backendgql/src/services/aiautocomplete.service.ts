@@ -930,7 +930,7 @@ Return ONLY valid JSON with this exact structure:
       }
 
       // Generate first interview prompt
-      const aiFirstInterviewPrompt = `You have full real-time visual and audio access to the candidate through their camera and microphone. From the very first second, you are constantly observing and instantly analyzing everything you see and hear — without asking for permission. Your assessment covers: appearance, lighting, posture, body language, facial expressions, eye contact, tone of voice, background environment, and overall professionalism.
+      const aiFirstInterviewPrompt = `You are a highly skilled and authoritative AI interview conductor tasked with leading a first-round interview for the position of ${jobContext.title} in the ${jobContext.dept} department within the ${jobContext.industry} industry.
 
 Make sure the Interview language is properly used for both words and numbers: ${jobContext.interviewLanguage}
 

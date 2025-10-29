@@ -82,7 +82,7 @@ function RoomContent() {
 
         if (data?.createInterviewRoom?.token) {
           const token = data.createInterviewRoom.token;
-          const serverUrl = 'wss://rolvate-fi6h6rke.livekit.cloud';
+          const serverUrl = 'wss://role-cohb2u30.livekit.cloud';
           
           setRoomToken(token);
           setWSURL(serverUrl);
@@ -130,7 +130,7 @@ function RoomContent() {
 
   const handleDisconnected = useCallback(() => {
     setIsConnected(false);
-    router.push('/userdashboard');
+    router.push('/');
   }, [router]);
 
   // Show pre-room setup first

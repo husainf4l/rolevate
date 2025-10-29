@@ -12,6 +12,7 @@ import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { LiveKitService } from '../livekit/livekit.service';
 import { ConfigService } from '@nestjs/config';
 import { Application } from '../application/application.entity';
+import { User, UserType } from '../user/user.entity';
 
 @Injectable()
 export class InterviewService {
@@ -20,6 +21,8 @@ export class InterviewService {
     private interviewRepository: Repository<Interview>,
     @InjectRepository(Application)
     private applicationRepository: Repository<Application>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private transcriptService: TranscriptService,
     private whatsAppService: WhatsAppService,
     private liveKitService: LiveKitService,
@@ -27,6 +30,25 @@ export class InterviewService {
   ) {}
 
   async create(createInterviewInput: CreateInterviewInput): Promise<Interview> {
+    // Check if interviewer exists, if not create an AI interviewer
+    const existingInterviewer = await this.userRepository.findOne({
+      where: { id: createInterviewInput.interviewerId }
+    });
+
+    if (!existingInterviewer) {
+      console.log(`🤖 Creating AI interviewer with ID: ${createInterviewInput.interviewerId}`);
+      // Create AI interviewer user
+      const aiInterviewer = this.userRepository.create({
+        id: createInterviewInput.interviewerId, // Use the provided ID
+        userType: UserType.SYSTEM,
+        name: 'AI Interviewer',
+        email: `ai-interviewer-${createInterviewInput.interviewerId}@rolevate.ai`,
+        isActive: true,
+      });
+      await this.userRepository.save(aiInterviewer);
+      console.log(`✅ AI interviewer created: ${aiInterviewer.name} (${aiInterviewer.id})`);
+    }
+
     const interview = this.interviewRepository.create(createInterviewInput);
     return this.interviewRepository.save(interview);
   }

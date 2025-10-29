@@ -7,12 +7,13 @@ import { TranscriptResolver } from './transcript.resolver';
 import { Interview } from './interview.entity';
 import { Transcript } from './transcript.entity';
 import { Application } from '../application/application.entity';
+import { User } from '../user/user.entity';
 import { WhatsAppModule } from '../whatsapp/whatsapp.module';
 import { LiveKitModule } from '../livekit/livekit.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Interview, Transcript, Application]), 
+    TypeOrmModule.forFeature([Interview, Transcript, Application, User]), 
     WhatsAppModule, 
     LiveKitModule
   ],

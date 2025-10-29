@@ -116,7 +116,7 @@ class AuthService {
       });
 
       const { access_token, user } = data!.login;
-      
+
       // Store token in localStorage (Apollo will pick it up automatically)
       if (typeof window !== 'undefined') {
         localStorage.setItem('access_token', access_token);
@@ -125,7 +125,9 @@ class AuthService {
 
       return data!.login;
     } catch (error: any) {
-      throw new Error(error?.message || 'Login failed');
+      // Parse and provide more specific error messages
+      const errorMessage = this.parseAuthError(error, 'login');
+      throw new Error(errorMessage);
     }
   }
 
@@ -141,7 +143,9 @@ class AuthService {
 
       return data!.createUser;
     } catch (error: any) {
-      throw new Error(error?.message || 'Signup failed');
+      // Parse and provide more specific error messages
+      const errorMessage = this.parseAuthError(error, 'signup');
+      throw new Error(errorMessage);
     }
   }
 
@@ -421,10 +425,63 @@ class AuthService {
   }
 
   /**
-   * Initialize auth service (call on app startup)
+   * Parse authentication errors and provide user-friendly messages
    */
-  init(): void {
-    this.getCurrentUser();
+  private parseAuthError(error: any, operation: 'login' | 'signup'): string {
+    const message = error?.message || '';
+
+    // Common error patterns
+    if (message.includes('Invalid credentials') || message.includes('invalid_credentials')) {
+      return 'Invalid email or password. Please check your credentials and try again.';
+    }
+
+    if (message.includes('User not found') || message.includes('user_not_found')) {
+      return 'No account found with this email address. Please check your email or sign up for a new account.';
+    }
+
+    if (message.includes('Email already exists') || message.includes('duplicate') || message.includes('UQ_')) {
+      return 'An account with this email already exists. Please try logging in instead.';
+    }
+
+    if (message.includes('Password') && (message.includes('weak') || message.includes('strength'))) {
+      return 'Password is too weak. Please use a stronger password with at least 8 characters, including uppercase, lowercase, and numbers.';
+    }
+
+    if (message.includes('password') && message.includes('incorrect')) {
+      return 'Incorrect password. Please check your password and try again.';
+    }
+
+    if (message.includes('Email not verified') || message.includes('email_not_verified')) {
+      return 'Please verify your email address before signing in.';
+    }
+
+    if (message.includes('Account locked') || message.includes('account_locked')) {
+      return 'Your account has been temporarily locked due to too many failed login attempts. Please try again later or reset your password.';
+    }
+
+    if (message.includes('Account suspended') || message.includes('account_suspended')) {
+      return 'Your account has been suspended. Please contact support for assistance.';
+    }
+
+    // Network and server errors
+    if (message.includes('Network') || message.includes('fetch')) {
+      return 'Network error. Please check your internet connection and try again.';
+    }
+
+    if (message.includes('timeout') || message.includes('Timeout')) {
+      return 'Request timed out. Please try again.';
+    }
+
+    if (message.includes('500') || message.includes('Internal server error')) {
+      return 'Server error. Please try again later or contact support if the problem persists.';
+    }
+
+    // Default messages based on operation
+    if (operation === 'login') {
+      return 'Unable to sign in. Please check your email and password.';
+    } else {
+      return 'Unable to create account. Please check your information and try again.';
+    }
   }
 }
 

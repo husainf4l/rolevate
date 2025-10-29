@@ -3,8 +3,8 @@ module.exports = {
     {
       name: 'rolevate-v6',
       script: 'npm',
-      args: 'run dev -- -p 3005',
-      cwd: '/Users/husain/Desktop/rolevate/rolevatev6',
+      args: 'run start',
+      cwd: '/home/husain/rolevate/rolevatev6',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
@@ -12,6 +12,10 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'development',
+        PORT: 3005
+      },
+      env_production: {
+        NODE_ENV: 'production',
         PORT: 3005
       },
       error_file: './logs/pm2-error.log',

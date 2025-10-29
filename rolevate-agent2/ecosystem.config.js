@@ -1,13 +1,13 @@
 module.exports = {
   apps: [
     {
-      name: 'rolevate-cv-agent',
+      name: 'cv-agent',
       script: './.venv/bin/uvicorn',
-      args: 'main:app --reload --host 0.0.0.0 --port 8000',
-      cwd: '/Users/husain/Desktop/rolevate/rolevate-agent2',
+      args: 'main:app --reload --host 0.0.0.0 --port 8005',
+      cwd: '/home/husain/rolevate/rolevate-agent2',
       interpreter: 'none',
       env: {
-        PYTHONPATH: '/Users/husain/Desktop/rolevate/rolevate-agent2',
+        PYTHONPATH: '/home/husain/rolevate/rolevate-agent2',
       },
       error_file: './logs/pm2-error.log',
       out_file: './logs/pm2-out.log',

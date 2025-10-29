@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authService } from "@/services";
+import { validatePassword, getPasswordStrengthColor, getPasswordStrengthText } from "@/lib/utils";
 
 export default function SignupPage() {
   const [accountType, setAccountType] = useState<'individual' | 'corporate'>('individual');
@@ -19,19 +20,43 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState<{
+    isValid: boolean;
+    errors: string[];
+    strength: 'weak' | 'medium' | 'strong';
+  } | null>(null);
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    // Validate password in real-time
+    if (name === 'password') {
+      if (value.length > 0) {
+        const validation = validatePassword(value);
+        setPasswordValidation(validation);
+      } else {
+        setPasswordValidation(null);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Validate password strength
+    const passwordValidationResult = validatePassword(formData.password);
+    if (!passwordValidationResult.isValid) {
+      setError(`Password requirements not met: ${passwordValidationResult.errors.join(', ')}`);
+      setLoading(false);
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
@@ -41,7 +66,7 @@ export default function SignupPage() {
 
     try {
       const userType = accountType === 'individual' ? 'CANDIDATE' : 'BUSINESS';
-      
+
       await authService.signup({
         name: formData.name.trim(),
         email: formData.email,
@@ -172,6 +197,23 @@ export default function SignupPage() {
                   required
                   className="block w-full rounded-sm border border-gray-200 bg-white px-4 py-4 text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 focus:outline-none transition-all"
                 />
+                {passwordValidation && (
+                  <div className="mt-2">
+                    <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPasswordStrengthColor(passwordValidation.strength)}`}>
+                      {getPasswordStrengthText(passwordValidation.strength)}
+                    </div>
+                    {passwordValidation.errors.length > 0 && (
+                      <ul className="mt-2 text-xs text-red-600 space-y-1">
+                        {passwordValidation.errors.map((error, index) => (
+                          <li key={index}>• {error}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+                <div className="mt-2 text-xs text-gray-500">
+                  Password must contain at least 8 characters with uppercase, lowercase, and numbers.
+                </div>
               </div>
 
               <div>

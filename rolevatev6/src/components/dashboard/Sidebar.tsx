@@ -12,7 +12,6 @@ import {
   UsersIcon,
   BuildingOfficeIcon,
   BellIcon,
-  DocumentChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 interface NavigationItem {
@@ -36,11 +35,6 @@ const navigationItems: NavigationItem[] = [
     icon: UsersIcon,
     label: "Candidates",
     href: "/dashboard/candidates",
-  },
-  {
-    icon: DocumentChartBarIcon,
-    label: "Reports",
-    href: "/dashboard/reports",
   },
   {
     icon: BellIcon,
