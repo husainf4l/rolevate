@@ -13,7 +13,6 @@ import { CandidateModule } from './candidate/candidate.module';
 import { ApplicationModule } from './application/application.module';
 import { InterviewModule } from './interview/interview.module';
 import { CommunicationModule } from './communication/communication.module';
-import { ReportModule } from './report/report.module';
 import { SecurityModule } from './security/security.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { ServicesModule } from './services/services.module';
@@ -68,7 +67,6 @@ import { AuditService } from './audit.service';
     ApplicationModule,
     InterviewModule,
     CommunicationModule,
-    ReportModule,
     SecurityModule,
     WhatsAppModule,
     LiveKitModule,

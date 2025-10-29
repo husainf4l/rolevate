@@ -10,8 +10,8 @@ export class CreateInterviewInput {
   @Field()
   interviewerId: string;
 
-  @Field()
-  scheduledAt: Date;
+  @Field({ nullable: true })
+  scheduledAt?: Date;
 
   @Field({ nullable: true })
   duration?: number;

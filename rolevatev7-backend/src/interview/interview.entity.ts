@@ -49,9 +49,9 @@ export class Interview {
   @Field(() => User)
   interviewer: User;
 
-  @Column({ type: 'timestamp' })
-  @Field()
-  scheduledAt: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  @Field({ nullable: true })
+  scheduledAt?: Date;
 
   @Column({ type: 'int', nullable: true })
   @Field({ nullable: true })
