@@ -1,0 +1,30 @@
+# Rolevate Interview Agent Dependencies - v2.0 (Simplified)
+
+# Core Dependencies
+livekit-agents[openai]
+python-dotenv
+
+# LiveKit Plugins
+livekit-plugins-soniox              # Soniox STT (Arabic & English)
+livekit-plugins-elevenlabs          # ElevenLabs TTS
+livekit-plugins-silero              # Silero VAD
+livekit-plugins-openai              # OpenAI GPT-4
+
+# HTTP Client
+aiohttp                             # Async HTTP client for GraphQL
+
+# AWS S3 for video storage
+boto3                               # AWS SDK for S3 uploads
+
+# Image Processing for Vision Tool
+Pillow                              # PIL for image processing
+
+# Tokenization
+# blingfire>=0.1.8                           # Fast sentence tokenization (commented out as not used)
+
+# Development Dependencies (optional - install with: pip install -r requirements.txt -r requirements-dev.txt)
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.5.0
