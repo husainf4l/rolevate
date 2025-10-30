@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { UserType } from '../user/user.entity';
@@ -14,7 +14,9 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    if (!requiredRoles) {
+    console.log('[RolesGuard] Required roles:', requiredRoles);
+
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
 
@@ -22,10 +24,24 @@ export class RolesGuard implements CanActivate {
     const { req } = ctx.getContext();
     const user = req.user;
 
+    console.log('[RolesGuard] User:', user?.userType, 'Allowed roles:', requiredRoles);
+
     if (!user) {
-      return false;
+      throw new ForbiddenException('User not authenticated');
     }
 
-    return requiredRoles.some((role) => user.userType === role);
+    if (!user.userType) {
+      throw new ForbiddenException('User type not found');
+    }
+
+    const hasRequiredRole = requiredRoles.some((role) => user.userType === role);
+    
+    if (!hasRequiredRole) {
+      throw new ForbiddenException(
+        `Access denied. Required roles: ${requiredRoles.join(', ')}. User role: ${user.userType}`
+      );
+    }
+
+    return true;
   }
 }

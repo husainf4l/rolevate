@@ -8,6 +8,9 @@ yarn.lock
 
 # Build output
 dist/
+
+# Temp files
+temp-backups/
 build/
 
 # Environment files

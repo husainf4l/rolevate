@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApplicationService } from './application.service';
 import { ApplicationResolver } from './application.resolver';
+import { ApplicationAnalysisScheduler } from './application-analysis.scheduler';
 import { Application } from './application.entity';
 import { ApplicationNote } from './application-note.entity';
 import { User } from '../user/user.entity';
@@ -22,7 +23,7 @@ import { ServicesModule } from '../services/services.module';
     NotificationModule,
     ServicesModule,
   ],
-  providers: [ApplicationService, ApplicationResolver, AuditService],
+  providers: [ApplicationService, ApplicationResolver, ApplicationAnalysisScheduler, AuditService],
   exports: [ApplicationService],
 })
 export class ApplicationModule {}

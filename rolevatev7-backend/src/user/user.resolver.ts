@@ -6,14 +6,17 @@ import { CreateUserInput } from './create-user.input';
 import { UpdateUserInput } from './update-user.input';
 import { ChangePasswordInput } from './change-password.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiKeyGuard } from '../auth/api-key.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { UserType } from './user.entity';
 
 @Resolver(() => UserDto)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Query(() => [UserDto])
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.SYSTEM)
   async users(): Promise<UserDto[]> {
     const users = await this.userService.findAll();
     return users.map(user => ({
@@ -81,8 +84,9 @@ export class UserResolver {
     };
   }
 
-    @Query(() => UserDto, { nullable: true })
-  @UseGuards(ApiKeyGuard)
+  @Query(() => UserDto, { nullable: true })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.SYSTEM)
   async user(@Args('id') id: string): Promise<UserDto | null> {
     const user = await this.userService.findOne(id);
     if (!user) return null;
@@ -115,6 +119,8 @@ export class UserResolver {
   }
 
   @Mutation(() => UserDto)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.SYSTEM)
   async createUser(@Args('input') input: CreateUserInput): Promise<UserDto> {
     const user = await this.userService.create(input.userType, input.email, input.password, input.name, input.phone);
     return {
@@ -146,20 +152,12 @@ export class UserResolver {
   }
 
   @Mutation(() => UserDto)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.SYSTEM)
   async updateUser(
     @Args('id') id: string,
     @Args('input') input: UpdateUserInput,
-    @Context() context: any,
   ): Promise<UserDto> {
-    // Optional: Add authorization check to ensure user can only update themselves
-    // or is an admin
-    const currentUserId = context.request.user.id;
-    if (currentUserId !== id) {
-      // You might want to check if user is admin here
-      // For now, we'll allow it, but you can add stricter checks
-    }
-
     const user = await this.userService.update(id, input);
     return {
       id: user.id,

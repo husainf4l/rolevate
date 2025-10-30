@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies (including dev dependencies for building)
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -27,19 +27,16 @@ FROM node:20-alpine
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
-# Create app user for security
-RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
-
 # Set working directory
 WORKDIR /app
 
 # Copy built application from builder
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
 
-# Switch to non-root user
-USER nestjs
+# Create temp-backups directory
+RUN mkdir -p /app/temp-backups
 
 # Expose port
 EXPOSE 4005

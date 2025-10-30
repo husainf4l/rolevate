@@ -8,6 +8,9 @@ import { CreateCandidateProfileInput } from './create-candidate-profile.input';
 import { UpdateCandidateProfileInput } from './update-candidate-profile.input';
 import { CV } from './cv.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { UserType } from '../user/user.entity';
 import { CheckOwnership } from '../common/decorators/check-ownership.decorator';
 import { OwnershipGuard } from '../common/guards/ownership.guard';
 
@@ -20,22 +23,37 @@ export class CandidateProfileResolver {
   ) {}
 
   @Mutation(() => CandidateProfile)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.SYSTEM)
   async createCandidateProfile(@Args('input') createCandidateProfileInput: CreateCandidateProfileInput): Promise<CandidateProfile> {
     return this.candidateProfileService.create(createCandidateProfileInput);
   }
 
   @Query(() => [CandidateProfile], { name: 'candidateProfiles' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.SYSTEM)
   async findAll(): Promise<CandidateProfile[]> {
     return this.candidateProfileService.findAll();
   }
 
   @Query(() => CandidateProfile, { name: 'candidateProfile', nullable: true })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.SYSTEM)
   async findOne(@Args('id', { type: () => ID }) id: string): Promise<CandidateProfile | null> {
     return this.candidateProfileService.findOne(id);
   }
 
   @Query(() => CandidateProfile, { name: 'candidateProfileByUser', nullable: true })
-  async findByUserId(@Args('userId', { type: () => ID }) userId: string): Promise<CandidateProfile | null> {
+  @UseGuards(JwtAuthGuard)
+  async findByUserId(@Args('userId', { type: () => ID }) userId: string, @Context() context: any): Promise<CandidateProfile | null> {
+    // Only allow users to view their own profile or admins/system users
+    const currentUserId = context.request?.user?.id;
+    const currentUserType = context.request?.user?.userType;
+    
+    if (userId !== currentUserId && currentUserType !== UserType.ADMIN && currentUserType !== UserType.SYSTEM) {
+      throw new Error('Unauthorized: You can only view your own profile');
+    }
+    
     return this.candidateProfileService.findByUserId(userId);
   }
 

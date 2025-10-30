@@ -9,6 +9,7 @@ import { ApiKey } from './api-key.entity';
 import { ApiKeyService } from './api-key.service';
 import { ApiKeyResolver } from './api-key.resolver';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
 import { AuditService } from '../audit.service';
 import { AUTH } from '../common/constants/config.constants';
 import { CandidateProfile } from '../candidate/candidate-profile.entity';
@@ -25,7 +26,7 @@ import { CandidateProfile } from '../candidate/candidate-profile.entity';
       inject: [ConfigService],
     }),
   ],
-  providers: [UserService, UserResolver, ApiKeyService, ApiKeyResolver, AuditService, JwtAuthGuard],
+  providers: [UserService, UserResolver, ApiKeyService, ApiKeyResolver, AuditService, JwtAuthGuard, RolesGuard],
   exports: [UserService, ApiKeyService],
 })
 export class UserModule {}

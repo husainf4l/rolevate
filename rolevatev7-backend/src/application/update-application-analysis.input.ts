@@ -1,27 +1,37 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
+import { IsString, IsInt, IsOptional, IsObject } from 'class-validator';
 
 @InputType()
 export class UpdateApplicationAnalysisInput {
   @Field()
+  @IsString()
   applicationId: string;
 
   @Field(() => Int, { nullable: true })
+  @IsInt()
+  @IsOptional()
   cvAnalysisScore?: number;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   cvAnalysisResults?: string; // JSON string
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   aiCvRecommendations?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   aiInterviewRecommendations?: string;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsObject()
+  @IsOptional()
   candidateInfo?: {
-    firstName?: string;
-    lastName?: string;
     name?: string;
     email?: string;
     phone?: string;

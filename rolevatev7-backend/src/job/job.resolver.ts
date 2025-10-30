@@ -37,7 +37,8 @@ export class JobResolver {
     @Context() context: any,
   ): Promise<JobDto> {
     const userId = context.request.user.id;
-    return this.jobService.updateJob(input, userId);
+    const userType = context.request.user.userType;
+    return this.jobService.updateJob(input, userId, userType);
   }
 
   @Mutation(() => Boolean)
@@ -48,7 +49,8 @@ export class JobResolver {
     @Context() context: any,
   ): Promise<boolean> {
     const userId = context.request.user.id;
-    return this.jobService.deleteJob(id, userId);
+    const userType = context.request.user.userType;
+    return this.jobService.deleteJob(id, userId, userType);
   }
 
   @Mutation(() => Boolean)
@@ -59,7 +61,8 @@ export class JobResolver {
     @Context() context: any,
   ): Promise<boolean> {
     const userId = context.request.user.id;
-    return this.jobService.hardDeleteJob(id, userId);
+    const userType = context.request.user.userType;
+    return this.jobService.hardDeleteJob(id, userId, userType);
   }
 
   @Query(() => [JobDto])

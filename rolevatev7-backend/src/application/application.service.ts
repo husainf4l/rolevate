@@ -152,6 +152,19 @@ export class ApplicationService {
         }
       }
 
+      // ✅ CHECK FOR DUPLICATE EMAIL - Prevent password hijacking
+      if (createApplicationInput.email) {
+        const existingUser = await this.userRepository.findOne({
+          where: { email: createApplicationInput.email }
+        });
+
+        if (existingUser) {
+          throw new BadRequestException(
+            'A user with this email already exists. Please login to your account to apply for this job.'
+          );
+        }
+      }
+
       // Generate anonymous candidate info - FastAPI will extract real data later
       console.log('🆕 Creating anonymous candidate with placeholder data...');
       const timestamp = Date.now();
@@ -163,8 +176,7 @@ export class ApplicationService {
       const phone = createApplicationInput.phone || `+962${timestamp.toString().slice(-9)}`;
       
       const candidateInfo = {
-        firstName: createApplicationInput.firstName || 'Anonymous',
-        lastName: createApplicationInput.lastName || anonymousId,
+        name: createApplicationInput.name || 'Anonymous',
         email: email,
         phone: phone,
         linkedin: createApplicationInput.linkedin || null,
@@ -208,6 +220,10 @@ export class ApplicationService {
       const application = queryRunner.manager.create(Application, {
         ...createApplicationInput,
         candidateId: candidateId,
+        applicantName: createApplicationInput.name,
+        applicantEmail: createApplicationInput.email,
+        applicantPhone: createApplicationInput.phone,
+        applicantLinkedin: createApplicationInput.linkedin,
       });
       const savedApplication = await queryRunner.manager.save(application);
 
@@ -297,74 +313,36 @@ export class ApplicationService {
 
     const manager = queryRunner.manager;
     
-    // Check if user already exists with this email
-    let user = await manager.findOne(User, {
-      where: { email: candidateInfo.email }
+    // ✅ NOTE: Duplicate emails are now rejected early in createAnonymousApplication()
+    // So this method will only be called with unique emails
+    
+    // Create new user
+    console.log('🆕 Creating new user with email:', candidateInfo.email);
+    const user = await manager.save(User, {
+      email: candidateInfo.email,
+      name: candidateInfo.name,
+      password: hashedPassword,
+      userType: UserType.CANDIDATE,
+      phone: candidateInfo.phone,
+      isActive: true,
     });
-
-    if (user) {
-      console.log('ℹ️ User already exists with email:', candidateInfo.email);
-      // Update user info if needed
-      await manager.update(User, { id: user.id }, {
-        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
-        password: hashedPassword,
-        phone: candidateInfo.phone,
-      });
-      user = await manager.findOne(User, { where: { email: candidateInfo.email } });
-    } else {
-      // Create new user
-      console.log('🆕 Creating new user with email:', candidateInfo.email);
-      user = await manager.save(User, {
-        email: candidateInfo.email,
-        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
-        password: hashedPassword,
-        userType: UserType.CANDIDATE,
-        phone: candidateInfo.phone,
-        isActive: true,
-      });
-    }
 
     if (!user) {
-      throw new InternalServerErrorException('Failed to create or find user');
+      throw new InternalServerErrorException('Failed to create user');
     }
 
-    // Check if candidate profile already exists for this user
-    let candidateProfile = await manager.findOne(CandidateProfile, {
-      where: { userId: user.id }
+    // Create new candidate profile
+    console.log('🆕 Creating new candidate profile with basic info...');
+    const candidateProfile = await manager.save(CandidateProfile, {
+      userId: user.id,
+      name: candidateInfo.name,
+      phone: candidateInfo.phone,
+      resumeUrl: resumeUrl,
+      skills: [],
     });
 
-    if (candidateProfile) {
-      console.log('ℹ️ Candidate profile already exists, updating basic info...');
-      const fullName = [candidateInfo.firstName, candidateInfo.lastName]
-        .filter(Boolean)
-        .join(' ')
-        .trim() || undefined;
-        
-      await manager.update(CandidateProfile, { userId: user.id }, {
-        name: fullName,
-        phone: candidateInfo.phone,
-        resumeUrl: resumeUrl,
-      });
-      candidateProfile = await manager.findOne(CandidateProfile, { where: { userId: user.id } });
-    } else {
-      // Create new candidate profile
-      console.log('🆕 Creating new candidate profile with basic info...');
-      const fullName = [candidateInfo.firstName, candidateInfo.lastName]
-        .filter(Boolean)
-        .join(' ')
-        .trim() || undefined;
-        
-      candidateProfile = await manager.save(CandidateProfile, {
-        userId: user.id,
-        name: fullName,
-        phone: candidateInfo.phone,
-        resumeUrl: resumeUrl,
-        skills: [],
-      });
-    }
-
     if (!candidateProfile) {
-      throw new InternalServerErrorException('Failed to create or find candidate profile');
+      throw new InternalServerErrorException('Failed to create candidate profile');
     }
 
     return { user, candidateProfile };
@@ -382,73 +360,37 @@ export class ApplicationService {
 
     const manager = queryRunner.manager;
     
-    // Check if user already exists with this email
-    let user = await manager.findOne(User, {
-      where: { email: candidateInfo.email }
+    // ✅ NOTE: Duplicate emails are now rejected early in createAnonymousApplication()
+    // So this method will only be called with unique emails
+    
+    // Create new user
+    console.log('🆕 Creating new user with email:', candidateInfo.email);
+    const user = await manager.save(User, {
+      email: candidateInfo.email,
+      name: candidateInfo.name,
+      password: hashedPassword,
+      userType: UserType.CANDIDATE,
+      phone: candidateInfo.phone,
+      isActive: true,
     });
-
-    if (user) {
-      console.log('ℹ️ User already exists with email:', candidateInfo.email);
-      await manager.update(User, { id: user.id }, {
-        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
-        password: hashedPassword,
-        phone: candidateInfo.phone,
-      });
-      user = await manager.findOne(User, { where: { email: candidateInfo.email } });
-    } else {
-      console.log('🆕 Creating new user with email:', candidateInfo.email);
-      user = await manager.save(User, {
-        email: candidateInfo.email,
-        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
-        password: hashedPassword,
-        userType: UserType.CANDIDATE,
-        phone: candidateInfo.phone,
-        isActive: true,
-      });
-    }
 
     if (!user) {
-      throw new InternalServerErrorException('Failed to create or find user');
+      throw new InternalServerErrorException('Failed to create user');
     }
 
-    // Check if candidate profile already exists
-    let candidateProfile = await manager.findOne(CandidateProfile, {
-      where: { userId: user.id }
+    // Create new candidate profile
+    console.log('🆕 Creating new candidate profile...');
+    const candidateProfile = await manager.save(CandidateProfile, {
+      userId: user.id,
+      name: candidateInfo.name,
+      phone: candidateInfo.phone,
+      linkedinUrl: candidateInfo.linkedin,
+      portfolioUrl: candidateInfo.portfolioUrl,
+      skills: [],
     });
 
-    if (candidateProfile) {
-      console.log('ℹ️ Candidate profile already exists, updating basic info...');
-      const fullName = [candidateInfo.firstName, candidateInfo.lastName]
-        .filter(Boolean)
-        .join(' ')
-        .trim() || undefined;
-        
-      await manager.update(CandidateProfile, { userId: user.id }, {
-        name: fullName,
-        phone: candidateInfo.phone,
-        linkedinUrl: candidateInfo.linkedin,
-        portfolioUrl: candidateInfo.portfolioUrl,
-      });
-      candidateProfile = await manager.findOne(CandidateProfile, { where: { userId: user.id } });
-    } else {
-      console.log('🆕 Creating new candidate profile...');
-      const fullName = [candidateInfo.firstName, candidateInfo.lastName]
-        .filter(Boolean)
-        .join(' ')
-        .trim() || undefined;
-        
-      candidateProfile = await manager.save(CandidateProfile, {
-        userId: user.id,
-        name: fullName,
-        phone: candidateInfo.phone,
-        linkedinUrl: candidateInfo.linkedin,
-        portfolioUrl: candidateInfo.portfolioUrl,
-        skills: [],
-      });
-    }
-
     if (!candidateProfile) {
-      throw new InternalServerErrorException('Failed to create or find candidate profile');
+      throw new InternalServerErrorException('Failed to create candidate profile');
     }
 
     return { user, candidateProfile };
@@ -531,12 +473,16 @@ export class ApplicationService {
 
         // Also save a summary to the experience field
         const experienceSummary = experienceData
+          .filter(exp => exp && (exp.position || exp.title) && (exp.company || exp.organization))
           .map(exp => `${exp.position || exp.title} at ${exp.company || exp.organization}`)
           .join('; ');
         
-        await manager.update(CandidateProfile, candidateProfileId, {
+        
+        if (experienceSummary) {
+          await manager.update(CandidateProfile, candidateProfileId, {
           experience: experienceSummary
         });
+        }
 
         console.log(`✅ Created ${experienceData.length} work experience records`);
       }
@@ -593,12 +539,16 @@ export class ApplicationService {
 
         // Also save a summary to the education field
         const educationSummary = educationData
+          .filter(edu => edu && (edu.degree || edu.qualification) && (edu.institution || edu.school))
           .map(edu => `${edu.degree || edu.qualification} in ${edu.fieldOfStudy || edu.field_of_study || 'General'} from ${edu.institution || edu.school}`)
           .join('; ');
         
-        await manager.update(CandidateProfile, candidateProfileId, {
+        
+        if (educationSummary) {
+          await manager.update(CandidateProfile, candidateProfileId, {
           education: educationSummary
         });
+        }
 
         console.log(`✅ Created ${educationData.length} education records`);
       }
@@ -744,7 +694,7 @@ export class ApplicationService {
         }
         if (filter.search) {
           queryBuilder.andWhere(
-            '(application.coverLetter ILIKE :search OR application.notes ILIKE :search OR candidate.firstName ILIKE :search OR candidate.lastName ILIKE :search OR job.title ILIKE :search)',
+            '(application.coverLetter ILIKE :search OR application.notes ILIKE :search OR candidate.name ILIKE :search OR job.title ILIKE :search)',
             { search: `%${filter.search}%` }
           );
         }
@@ -978,18 +928,26 @@ export class ApplicationService {
       if (input.aiSecondInterviewRecommendations !== undefined) updateData.aiSecondInterviewRecommendations = input.aiSecondInterviewRecommendations;
       if (input.aiAnalysis !== undefined) updateData.aiAnalysis = input.aiAnalysis;
 
+      // Update status to ANALYZED once analysis is complete
+      updateData.status = ApplicationStatus.ANALYZED;
+
       // Update application with analysis results
       await this.applicationRepository.update(input.applicationId, updateData);
+
+      // Load full application with all relations for further processing
+      const application = await this.applicationRepository.findOne({
+        where: { id: input.applicationId },
+        relations: ['candidate', 'candidate.candidateProfile', 'job', 'job.company'],
+      });
+
+      if (!application) {
+        throw new Error(`Application ${input.applicationId} not found`);
+      }
 
       // If FastAPI extracted candidate info from CV, update the candidate profile
       if (input.candidateInfo) {
         console.log('👤 Updating candidate profile with data extracted from CV...');
         
-        const application = await this.applicationRepository.findOne({
-          where: { id: input.applicationId },
-          relations: ['candidate', 'candidate.candidateProfile'],
-        });
-
         if (application?.candidate) {
           const candidateInfo = input.candidateInfo;
           
@@ -997,7 +955,7 @@ export class ApplicationService {
           if (application.candidate.email?.includes('@placeholder.temp') && candidateInfo.email) {
             await this.userRepository.update(application.candidate.id, {
               email: candidateInfo.email,
-              name: candidateInfo.name || `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+              name: candidateInfo.name || application.candidate.name,
             });
             console.log('✅ Updated user email from placeholder to:', candidateInfo.email);
           }
@@ -1007,15 +965,9 @@ export class ApplicationService {
             // Create new candidate profile if it doesn't exist
             console.log('🆕 Creating new candidate profile...');
             
-            // Combine firstName and lastName into name
-            const fullName = [candidateInfo.firstName, candidateInfo.lastName]
-              .filter(Boolean)
-              .join(' ')
-              .trim() || undefined;
-            
             const newProfile = this.applicationRepository.manager.getRepository(CandidateProfile).create({
               userId: application.candidate.id,
-              name: fullName,
+              name: candidateInfo.name,
               phone: candidateInfo.phone,
               location: candidateInfo.location,
               bio: candidateInfo.bio,

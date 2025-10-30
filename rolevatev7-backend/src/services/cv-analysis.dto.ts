@@ -66,10 +66,7 @@ export class CVAnalysisResult {
 @ObjectType()
 export class CandidateInfo {
   @Field()
-  firstName: string;
-
-  @Field()
-  lastName: string;
+  name: string;
 
   @Field()
   email: string;

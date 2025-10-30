@@ -68,12 +68,7 @@ export class CreateApplicationInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  firstName?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  lastName?: string;
+  name?: string;
 
   @Field({ nullable: true })
   @IsOptional()

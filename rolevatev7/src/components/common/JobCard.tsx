@@ -162,7 +162,7 @@ export default function JobCard({
 
         {/* Deadline */}
         {job.deadline && (
-          <div className={`text-xs mb-3 font-medium ${
+          <div className={`text-xs mb-4 font-medium ${
             new Date(job.deadline) < new Date() 
               ? 'text-red-600' 
               : new Date(job.deadline).getTime() - new Date().getTime() < 7 * 24 * 60 * 60 * 1000
@@ -170,29 +170,6 @@ export default function JobCard({
                 : 'text-slate-600'
           }`}>
             {formatDeadlineDate(job.deadline)}
-          </div>
-        )}
-
-        {/* Skills preview */}
-        {job.skills && job.skills.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-4">
-            {job.skills.slice(0, 3).map((skill, index) => (
-              <Badge
-                key={index}
-                variant="outline"
-                className="text-xs px-2 py-0.5 bg-slate-50 text-slate-600 border-slate-200 rounded-sm"
-              >
-                {skill}
-              </Badge>
-            ))}
-            {job.skills.length > 3 && (
-              <Badge
-                variant="outline"
-                className="text-xs px-2 py-0.5 bg-slate-50 text-slate-600 border-slate-200 rounded-sm"
-              >
-                +{job.skills.length - 3}
-              </Badge>
-            )}
           </div>
         )}
 

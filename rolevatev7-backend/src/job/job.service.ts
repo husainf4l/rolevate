@@ -7,7 +7,7 @@ import { UpdateJobInput } from './update-job.input';
 import { JobDto } from './job.dto';
 import { JobFilterInput } from './job-filter.input';
 import { PaginationInput } from '../common/pagination.dto';
-import { User } from '../user/user.entity';
+import { User, UserType } from '../user/user.entity';
 import { SavedJob } from './saved-job.entity';
 import { SavedJobDto } from './saved-job.dto';
 import { AuditService } from '../audit.service';
@@ -282,7 +282,7 @@ export class JobService {
     }
   }
 
-  async updateJob(input: UpdateJobInput, userId: string): Promise<JobDto> {
+  async updateJob(input: UpdateJobInput, userId: string, userType?: string): Promise<JobDto> {
     const job = await this.jobRepository.findOne({
       where: { id: input.id },
       relations: ['postedBy', 'company'],
@@ -290,6 +290,15 @@ export class JobService {
 
     if (!job) {
       throw new NotFoundException('Job not found');
+    }
+
+    // ADMIN and SYSTEM users can update any job
+    if (userType === UserType.ADMIN || userType === UserType.SYSTEM) {
+      const { id, ...updateData } = input;
+      Object.assign(job, updateData);
+      const updatedJob = await this.jobRepository.save(job);
+      this.auditService.logJobCreation(userId, updatedJob.id);
+      return this.findOne(updatedJob.id) as Promise<JobDto>;
     }
 
     // Check if user has permission to update (must be the job poster or from the same company)
@@ -307,7 +316,7 @@ export class JobService {
     return this.findOne(updatedJob.id) as Promise<JobDto>;
   }
 
-  async deleteJob(id: string, userId: string): Promise<boolean> {
+  async deleteJob(id: string, userId: string, userType?: string): Promise<boolean> {
     const job = await this.jobRepository.findOne({
       where: { id },
       relations: ['postedBy'],
@@ -315,6 +324,14 @@ export class JobService {
 
     if (!job) {
       throw new NotFoundException('Job not found');
+    }
+
+    // ADMIN and SYSTEM users can delete any job
+    if (userType === UserType.ADMIN || userType === UserType.SYSTEM) {
+      job.status = JobStatus.DELETED;
+      await this.jobRepository.save(job);
+      this.auditService.logJobCreation(userId, id);
+      return true;
     }
 
     // Check if user has permission to delete (must be the job poster or from the same company)
@@ -332,7 +349,7 @@ export class JobService {
     return true;
   }
 
-  async hardDeleteJob(id: string, userId: string): Promise<boolean> {
+  async hardDeleteJob(id: string, userId: string, userType?: string): Promise<boolean> {
     const job = await this.jobRepository.findOne({
       where: { id },
       relations: ['postedBy'],
@@ -340,6 +357,13 @@ export class JobService {
 
     if (!job) {
       throw new NotFoundException('Job not found');
+    }
+
+    // ADMIN and SYSTEM users can hard delete any job
+    if (userType === UserType.ADMIN || userType === UserType.SYSTEM) {
+      await this.jobRepository.delete(id);
+      this.auditService.logJobCreation(userId, id);
+      return true;
     }
 
     // Check if user has permission to delete (must be the job poster or from the same company)

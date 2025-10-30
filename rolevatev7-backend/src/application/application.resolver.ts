@@ -1,5 +1,6 @@
 import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { ApplicationService } from './application.service';
+import { ApplicationAnalysisScheduler } from './application-analysis.scheduler';
 import { Application } from './application.entity';
 import { ApplicationNote } from './application-note.entity';
 import { CreateApplicationInput } from './create-application.input';
@@ -20,7 +21,10 @@ import { OwnershipGuard } from '../common/guards/ownership.guard';
 
 @Resolver(() => Application)
 export class ApplicationResolver {
-  constructor(private readonly applicationService: ApplicationService) {}
+  constructor(
+    private readonly applicationService: ApplicationService,
+    private readonly analysisScheduler: ApplicationAnalysisScheduler,
+  ) {}
 
   @Public()
   @Mutation(() => ApplicationResponse)
@@ -171,5 +175,15 @@ export class ApplicationResolver {
   ): Promise<Application> {
     console.log('📊 Received CV analysis results from FastAPI service for application:', input.applicationId);
     return this.applicationService.updateApplicationAnalysis(input);
+  }
+
+  /**
+   * Manual trigger to run unanalyzed applications check
+   * Finds applications with resume but no CV analysis score and submits them for analysis
+   */
+  @Mutation(() => String, { name: 'triggerApplicationAnalysis' })
+  @UseGuards(ApiKeyGuard)
+  async triggerApplicationAnalysis(): Promise<string> {
+    return await this.analysisScheduler.runAnalysisCheckManually();
   }
 }

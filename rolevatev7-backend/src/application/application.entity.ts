@@ -128,6 +128,23 @@ export class Application {
   @Field({ nullable: true })
   notes?: string;
 
+  // Anonymous application fields
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  applicantName?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  applicantEmail?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  applicantPhone?: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  applicantLinkedin?: string;
+
   @Column({ type: 'json', nullable: true })
   @Field(() => GraphQLJSONObject, { nullable: true })
   aiAnalysis?: any;

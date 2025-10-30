@@ -29,10 +29,21 @@ export class OwnershipGuard implements CanActivate {
       throw new ForbiddenException('Authentication required');
     }
 
+    // ADMIN and SYSTEM users bypass ownership checks
+    if (user.userType === 'ADMIN' || user.userType === 'SYSTEM') {
+      return true;
+    }
+
     // Get the resource ID from the request arguments
     const args = ctx.getArgs();
     const resourceIdParam = ownershipOptions.resourceIdParam || 'id';
-    const resourceId = args[resourceIdParam] || args.input?.[resourceIdParam];
+    
+    // Helper function to get nested property from object
+    const getNestedProperty = (obj: any, path: string): any => {
+      return path.split('.').reduce((current, prop) => current?.[prop], obj);
+    };
+    
+    const resourceId = getNestedProperty(args, resourceIdParam);
 
     if (!resourceId) {
       throw new ForbiddenException(`Resource ID parameter '${resourceIdParam}' not found`);

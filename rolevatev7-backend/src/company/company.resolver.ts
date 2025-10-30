@@ -6,6 +6,9 @@ import { CompanyDto } from './company.dto';
 import { CreateCompanyInput } from './create-company.input';
 import { UpdateCompanyInput } from './update-company.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { UserType } from '../user/user.entity';
 import { InvitationDto, CreateInvitationInput } from './invitation.dto';
 import { Invitation } from './invitation.entity';
 
@@ -46,6 +49,8 @@ export class CompanyResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.SYSTEM)
   async removeCompany(@Args('id', { type: () => ID }) id: string): Promise<boolean> {
     return this.companyService.remove(id);
   }
