@@ -9,6 +9,7 @@ import {
   UsersIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
+import { companyService } from "@/services/company.service";
 
 interface Company {
   id: string;
@@ -30,61 +31,15 @@ export default function CompaniesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterIndustry, setFilterIndustry] = useState("All Industries");
 
-  // Mock data for now - replace with actual API call
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
         setLoading(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const mockCompanies: Company[] = [
-          {
-            id: "1",
-            name: "Tech Solutions Inc",
-            description: "Leading technology company focused on innovative software solutions",
-            industry: "Technology",
-            numberOfEmployees: 150,
-            location: "San Francisco, CA",
-            website: "https://techsolutions.com",
-            jobCount: 12
-          },
-          {
-            id: "2", 
-            name: "Global Finance Corp",
-            description: "International financial services and consulting firm",
-            industry: "Finance",
-            numberOfEmployees: 500,
-            location: "New York, NY",
-            website: "https://globalfinance.com",
-            jobCount: 8
-          },
-          {
-            id: "3",
-            name: "Creative Design Studio",
-            description: "Award-winning design agency specializing in digital experiences",
-            industry: "Design",
-            numberOfEmployees: 75,
-            location: "Los Angeles, CA",
-            website: "https://creativedesign.com",
-            jobCount: 5
-          },
-          {
-            id: "4",
-            name: "HealthTech Innovations",
-            description: "Revolutionary healthcare technology solutions",
-            industry: "Healthcare",
-            numberOfEmployees: 200,
-            location: "Boston, MA",
-            website: "https://healthtech.com",
-            jobCount: 15
-          }
-        ];
-        
-        setCompanies(mockCompanies);
-      } catch (err) {
+        const data = await companyService.getAllCompanies();
+        setCompanies(data);
+      } catch (err: any) {
         console.error("Error fetching companies:", err);
-        setError("Failed to fetch companies");
+        setError(err?.message || "Failed to fetch companies");
       } finally {
         setLoading(false);
       }

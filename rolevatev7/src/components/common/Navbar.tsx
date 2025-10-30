@@ -93,6 +93,17 @@ export default function Navbar() {
             </Link>
 
             <Link
+              href="/companies"
+              className={`transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
+                isActivePage("/companies")
+                  ? "text-primary-600 after:w-full"
+                  : "text-gray-700 hover:text-primary-600"
+              }`}
+            >
+              Companies
+            </Link>
+
+            <Link
               href="/employers"
               className={`transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary-600 after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full ${
                 isActivePage("/employers")
@@ -283,6 +294,18 @@ export default function Navbar() {
                   onClick={closeMenu}
                 >
                   Jobs
+                </Link>
+
+                <Link
+                  href="/companies"
+                  className={`hover:bg-gray-50/80 transition-all duration-200 py-4 px-4 text-lg font-medium rounded-xl ${
+                    isActivePage("/companies")
+                      ? "text-primary-600 bg-primary-50/80"
+                      : "text-gray-700 hover:text-primary-600"
+                  }`}
+                  onClick={closeMenu}
+                >
+                  Companies
                 </Link>
 
                 <Link

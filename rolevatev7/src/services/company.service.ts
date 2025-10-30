@@ -96,6 +96,37 @@ export class CompanyService {
     }
   `;
 
+  private GET_ALL_COMPANIES_QUERY = gql`
+    query GetAllCompanies {
+      companies {
+        id
+        name
+        description
+        industry
+        website
+        logo
+        size
+        location
+        createdAt
+      }
+    }
+  `;
+
+  private GET_COMPANY_JOBS_QUERY = gql`
+    query GetCompanyJobs($companyId: String!) {
+      jobs(filter: { companyId: $companyId }) {
+        id
+        title
+        description
+        location
+        type
+        salary
+        createdAt
+        slug
+      }
+    }
+  `;
+
   private UPDATE_COMPANY_MUTATION = gql`
     mutation UpdateCompany($id: ID!, $input: UpdateCompanyInput!) {
       updateCompany(id: $id, input: $input) {
@@ -189,6 +220,150 @@ export class CompanyService {
     } catch (error: any) {
       console.error('[CompanyService] Error fetching company profile:', error);
       throw new Error(error?.message || 'Failed to fetch company profile');
+    }
+  }
+
+  async getAllCompanies(): Promise<any[]> {
+    try {
+      const result = await apolloClient.query<{ companies: any[] }>({
+        query: this.GET_ALL_COMPANIES_QUERY,
+        fetchPolicy: 'network-only',
+        context: {
+          headers: {
+            'x-forwarded-for': '127.0.0.1',
+          },
+        },
+      });
+
+      if (result.error) {
+        console.error('[CompanyService] GraphQL error:', result.error);
+        throw result.error;
+      }
+
+      if (!result.data?.companies) {
+        return [];
+      }
+
+      return result.data.companies.map((company: any) => ({
+        id: company.id,
+        name: company.name,
+        description: company.description,
+        industry: company.industry,
+        location: company.location,
+        website: company.website,
+        logo: company.logo,
+        numberOfEmployees: this.parseEmployeeCount(company.size),
+        jobCount: 0, // This would need to come from jobs query
+      }));
+    } catch (error: any) {
+      console.error('[CompanyService] Error fetching all companies:', error);
+      
+      // Provide more detailed error message
+      if (error.message?.includes('ip')) {
+        throw new Error('Unable to fetch companies at this time. Please try again later.');
+      }
+      
+      throw new Error(error?.message || 'Failed to fetch companies');
+    }
+  }
+
+  private parseEmployeeCount(size?: string): number | undefined {
+    if (!size) return undefined;
+    
+    // Parse employee size ranges like "1-10", "11-50", etc.
+    const match = size.match(/(\d+)/);
+    if (match) {
+      return parseInt(match[1]);
+    }
+    return undefined;
+  }
+
+  async getCompanyById(id: string): Promise<any | null> {
+    try {
+      const result = await apolloClient.query<{ company: any }>({
+        query: this.GET_COMPANY_QUERY,
+        variables: { id },
+        fetchPolicy: 'network-only',
+        context: {
+          headers: {
+            'x-forwarded-for': '127.0.0.1',
+          },
+        },
+      });
+
+      if (result.error) {
+        console.error('[CompanyService] GraphQL error:', result.error);
+        throw result.error;
+      }
+
+      if (!result.data?.company) {
+        return null;
+      }
+
+      const company = result.data.company;
+      return {
+        id: company.id,
+        name: company.name,
+        description: company.description,
+        industry: company.industry,
+        location: company.location,
+        website: company.website,
+        logo: company.logo,
+        numberOfEmployees: this.parseEmployeeCount(company.size),
+        foundedYear: company.founded ? new Date(company.founded).getFullYear() : undefined,
+      };
+    } catch (error: any) {
+      console.error('[CompanyService] Error fetching company by ID:', error);
+      
+      if (error.message?.includes('ip')) {
+        throw new Error('Unable to fetch company details at this time. Please try again later.');
+      }
+      
+      throw new Error(error?.message || 'Failed to fetch company');
+    }
+  }
+
+  async getCompanyJobs(companyId: string): Promise<any[]> {
+    try {
+      const result = await apolloClient.query<{ jobs: any[] }>({
+        query: this.GET_COMPANY_JOBS_QUERY,
+        variables: { companyId },
+        fetchPolicy: 'network-only',
+        context: {
+          headers: {
+            'x-forwarded-for': '127.0.0.1',
+          },
+        },
+      });
+
+      if (result.error) {
+        console.error('[CompanyService] GraphQL error:', result.error);
+        throw result.error;
+      }
+
+      if (!result.data?.jobs) {
+        return [];
+      }
+
+      return result.data.jobs.map((job: any) => ({
+        id: job.id,
+        title: job.title,
+        description: job.description,
+        location: job.location,
+        type: job.type,
+        salary: job.salary,
+        postedAt: job.createdAt,
+        slug: job.slug,
+        requirements: [], // Would need to come from job requirements field if available
+      }));
+    } catch (error: any) {
+      console.error('[CompanyService] Error fetching company jobs:', error);
+      
+      if (error.message?.includes('ip')) {
+        throw new Error('Unable to fetch company jobs at this time. Please try again later.');
+      }
+      
+      throw new Error(error?.message || 'Failed to fetch company jobs');
     }
   }
 

@@ -13,6 +13,7 @@ import {
   CalendarIcon,
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
+import { companyService } from "@/services/company.service";
 
 interface Company {
   id: string;
@@ -55,64 +56,18 @@ export default function CompanyPage() {
 
       try {
         setLoading(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Mock company data
-        const mockCompany: Company = {
-          id: companyId,
-          name: "Tech Solutions Inc",
-          description: "We are a leading technology company focused on innovative software solutions that transform businesses and improve lives. Our team of passionate engineers and designers work together to create cutting-edge products that make a real difference in the world.",
-          industry: "Technology",
-          numberOfEmployees: 150,
-          location: "San Francisco, CA",
-          website: "https://techsolutions.com",
-          foundedYear: 2015,
-          specialties: ["Web Development", "Mobile Apps", "Cloud Computing", "AI/ML", "DevOps"]
-        };
-
-        // Mock jobs data
-        const mockJobs: Job[] = [
-          {
-            id: "1",
-            title: "Senior Frontend Developer",
-            location: "San Francisco, CA",
-            type: "Full-time",
-            salary: "$120,000 - $160,000",
-            postedAt: "2024-01-15",
-            description: "Join our frontend team to build amazing user experiences",
-            requirements: ["React", "TypeScript", "Next.js", "Tailwind CSS"],
-            slug: "senior-frontend-developer"
-          },
-          {
-            id: "2",
-            title: "Backend Engineer",
-            location: "Remote",
-            type: "Full-time",
-            salary: "$110,000 - $150,000",
-            postedAt: "2024-01-12",
-            description: "Help us scale our backend infrastructure",
-            requirements: ["Node.js", "Python", "PostgreSQL", "AWS"],
-            slug: "backend-engineer"
-          },
-          {
-            id: "3",
-            title: "Product Designer",
-            location: "San Francisco, CA",
-            type: "Full-time",
-            salary: "$100,000 - $140,000",
-            postedAt: "2024-01-10",
-            description: "Design beautiful and intuitive user interfaces",
-            requirements: ["Figma", "UI/UX Design", "Prototyping", "User Research"],
-            slug: "product-designer"
-          }
-        ];
+        // Fetch company details and jobs in parallel
+        const [companyData, jobsData] = await Promise.all([
+          companyService.getCompanyById(companyId),
+          companyService.getCompanyJobs(companyId)
+        ]);
         
-        setCompany(mockCompany);
-        setJobs(mockJobs);
-      } catch (err) {
+        setCompany(companyData);
+        setJobs(jobsData);
+      } catch (err: any) {
         console.error("Error fetching company data:", err);
-        setError("Failed to fetch company information");
+        setError(err?.message || "Failed to fetch company information");
       } finally {
         setLoading(false);
       }
@@ -254,23 +209,6 @@ export default function CompanyPage() {
                 )}
               </div>
             </div>
-
-            {/* Specialties */}
-            {company.specialties && company.specialties.length > 0 && (
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Specialties</h3>
-                <div className="flex flex-wrap gap-2">
-                  {company.specialties.map((specialty, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded"
-                    >
-                      {specialty}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
