@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  cv-agent:
+    build: .
+    container_name: rolevate-cv-agent
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./cvagent:/app/cvagent
+      - ./main.py:/app/main.py
+      - ./logs:/app/logs
+      - /tmp:/tmp  # For CV file downloads
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GRAPHQL_API_URL=http://host.docker.internal:4005/api/graphql
+    restart: unless-stopped
+    networks:
+      - rolevate-network
+
+networks:
+  rolevate-network:
+    driver: bridge
