@@ -96,11 +96,11 @@ const GENERATE_AI_CONFIGURATION = gql`
   }
 `;
 
-// Types// Types
+// Types
 type FormStep = "basic" | "details" | "interview" | "ai-config" | "preview";
-type JobType = "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP";
-type JobLevel = "ENTRY" | "MID" | "SENIOR" | "LEAD" | "EXECUTIVE";
-type WorkType = "REMOTE" | "HYBRID" | "ONSITE";
+type JobType = "FULL_TIME" | "PART_TIME" | "CONTRACT" | "REMOTE";
+type JobLevel = "ENTRY" | "MID" | "SENIOR" | "EXECUTIVE";
+type WorkType = "ONSITE" | "REMOTE" | "HYBRID";
 
 interface JobFormData {
   title: string;
@@ -138,13 +138,38 @@ export default function CreateJobPage() {
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
+  
+  // Calculate default deadline (30 days from today)
+  const getDefaultDeadline = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+    return date.toISOString().split('T')[0];
+  };
+
+  // Get company industry from user data
+  const getDefaultIndustry = () => {
+    const companyIndustry = user?.company?.industry;
+    if (!companyIndustry) return "";
+    
+    const industryMap: { [key: string]: string } = {
+      HEALTHCARE: "healthcare",
+      TECHNOLOGY: "technology",
+      FINANCE: "finance",
+      EDUCATION: "education",
+      RETAIL: "retail",
+      MANUFACTURING: "manufacturing",
+      CONSULTING: "consulting",
+    };
+    return industryMap[companyIndustry] || "";
+  };
+
   const [formData, setFormData] = useState<JobFormData>({
     title: "",
     department: "",
-    location: "",
+    location: "Amman, Jordan",
     salary: "",
     type: "FULL_TIME",
-    deadline: "",
+    deadline: getDefaultDeadline(),
     description: "",
     shortDescription: "",
     responsibilities: "",
@@ -156,7 +181,7 @@ export default function CreateJobPage() {
     interviewQuestions: "",
     jobLevel: "MID",
     workType: "ONSITE",
-    industry: "",
+    industry: getDefaultIndustry(),
     interviewLanguage: "english",
     aiCvAnalysisPrompt: "",
     aiFirstInterviewPrompt: "",
@@ -689,7 +714,7 @@ export default function CreateJobPage() {
             <option value="FULL_TIME">Full Time</option>
             <option value="PART_TIME">Part Time</option>
             <option value="CONTRACT">Contract</option>
-            <option value="INTERNSHIP">Internship</option>
+            <option value="REMOTE">Remote</option>
           </select>
         </div>
 
@@ -701,8 +726,8 @@ export default function CreateJobPage() {
             className="w-full mt-1.5 px-3 py-2 border border-gray-300 rounded-lg"
           >
             <option value="ONSITE">On-site</option>
-            <option value="REMOTE">Remote</option>
             <option value="HYBRID">Hybrid</option>
+            <option value="REMOTE">Remote</option>
           </select>
         </div>
 
@@ -716,7 +741,6 @@ export default function CreateJobPage() {
             <option value="ENTRY">Entry</option>
             <option value="MID">Mid</option>
             <option value="SENIOR">Senior</option>
-            <option value="LEAD">Lead</option>
             <option value="EXECUTIVE">Executive</option>
           </select>
         </div>

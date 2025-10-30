@@ -8,6 +8,13 @@ import { AuthContext, User } from "@/hooks/useAuth";
 let globalFetchPromise: Promise<User | null> | null = null;
 let globalFetchCompleted = false;
 
+// Function to reset global state (called when auth token is stored)
+function resetGlobalAuthState() {
+  console.log('[AuthProvider] Resetting global auth state for token refetch');
+  globalFetchPromise = null;
+  globalFetchCompleted = false;
+}
+
 interface AuthProviderProps {
   children: React.ReactNode;
 }
@@ -100,6 +107,20 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     isMounted.current = true;
     loadUser();
 
+    // Listen for token storage events (from application form)
+    const handleTokenStored = () => {
+      console.log('[AuthProvider] Token stored event received - resetting auth state');
+      resetGlobalAuthState();
+      // Force reload user data after a short delay
+      setTimeout(() => {
+        if (isMounted.current) {
+          loadUser();
+        }
+      }, 100);
+    };
+
+    window.addEventListener('auth-token-stored', handleTokenStored);
+
     // Set up periodic check for token validity (every 5 minutes)
     const intervalId = setInterval(() => {
       if (isMounted.current && user) {
@@ -115,6 +136,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       isMounted.current = false;
       clearInterval(intervalId);
+      window.removeEventListener('auth-token-stored', handleTokenStored);
     };
   }, [user]);
 

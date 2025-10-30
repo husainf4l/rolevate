@@ -281,21 +281,22 @@ class JobService {
     }
   }
 
-  async updateJob(id: string, input: Omit<UpdateJobInput, 'id'>): Promise<Job> {
+  async updateJob(id: string, updateInput: Omit<UpdateJobInput, 'id'>): Promise<Job> {
     try {
-      const { data } = await apolloClient.mutate<{ updateJob: Job }>({
+      const input: UpdateJobInput = {
+        id,
+        ...updateInput
+      };
+
+      const result = await apolloClient.mutate<{ updateJob: Job }>({
         mutation: this.UPDATE_JOB_MUTATION,
-        variables: { 
-          input: {
-            id,
-            ...input
-          }
-        }
+        variables: { input }
       });
-      if (!data?.updateJob) {
-        throw new Error('Failed to update job');
+
+      if (!result.data?.updateJob) {
+        throw new Error('Failed to update job - no data returned');
       }
-      return data.updateJob;
+      return result.data.updateJob;
     } catch (error: any) {
       throw new Error(error?.message || 'Failed to update job');
     }

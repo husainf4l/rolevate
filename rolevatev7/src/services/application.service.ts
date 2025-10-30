@@ -68,7 +68,7 @@ export interface PaginationInput {
 class ApplicationService {
   private GET_APPLICATIONS_QUERY = gql`
   query GetApplications($jobId: ID, $status: ApplicationStatus, $limit: Int, $offset: Int) {
-    applications(jobId: $jobId, status: $status, limit: $limit, offset: $offset) {
+    applications(filter: { jobId: $jobId, status: $status }, limit: $limit, offset: $offset) {
       id
       job {
         id
@@ -206,8 +206,8 @@ class ApplicationService {
     try {
       const { data } = await apolloClient.query<{ applications: Application[] }>({
         query: gql`
-          query GetApplicationsByJob($jobId: ID!) {
-            applications(jobId: $jobId) {
+          query GetApplicationsByJob($jobId: String!) {
+            applications(filter: { jobId: $jobId }) {
               id
               job {
                 id

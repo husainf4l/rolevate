@@ -18,6 +18,9 @@ export default function CompanyProfilePage() {
     null
   );
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editData, setEditData] = useState<Partial<CompanyProfile> | null>(null);
   const [invitationCode, setInvitationCode] = useState<string>("");
   const [generatingInvite, setGeneratingInvite] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -47,6 +50,52 @@ export default function CompanyProfilePage() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const handleEditMode = useCallback(() => {
+    if (isEditMode) {
+      // Exiting edit mode, discard changes
+      setEditData(null);
+      setIsEditMode(false);
+    } else {
+      // Entering edit mode, initialize editData
+      setEditData({ ...companyProfile });
+      setIsEditMode(true);
+    }
+  }, [isEditMode, companyProfile]);
+
+  const handleSaveProfile = useCallback(async () => {
+    if (!companyProfile || !editData) return;
+
+    try {
+      setIsSaving(true);
+      const updateInput = {
+        name: editData.name,
+        description: editData.description,
+        industry: editData.industry,
+        website: editData.website,
+        email: editData.email,
+        phone: editData.phone,
+        founded: editData.founded,
+        mission: editData.mission,
+      };
+
+      const updatedCompany = await companyService.updateCompany(companyProfile.id, updateInput);
+      setCompanyProfile(updatedCompany);
+      setEditData(null);
+      setIsEditMode(false);
+      toast.success("Company profile updated successfully!");
+    } catch (error: any) {
+      console.error("Error updating company profile:", error);
+      toast.error(error.message || "Failed to update company profile");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [companyProfile, editData]);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditData(null);
+    setIsEditMode(false);
   }, []);
 
   const generateInvitationCode = useCallback(async () => {
@@ -319,47 +368,80 @@ export default function CompanyProfilePage() {
 
         {/* Navigation Tabs */}
         <div className="bg-white/80 backdrop-blur-xl rounded-sm shadow-xl border border-white/20 mb-6">
-          <div className="flex gap-1 p-2">
-            <button
-              className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                tab === "company"
-                  ? "bg-primary-600 text-white shadow-lg"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-              }`}
-              onClick={() => setTab("company")}
-            >
-              Company Details
-            </button>
-            <button
-              className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                tab === "users"
-                  ? "bg-primary-600 text-white shadow-lg"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-              }`}
-              onClick={() => setTab("users")}
-            >
-              Team Members
-            </button>
-            <button
-              className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                tab === "subscription"
-                  ? "bg-primary-600 text-white shadow-lg"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-              }`}
-              onClick={() => setTab("subscription")}
-            >
-              Subscription
-            </button>
-            <button
-              className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                tab === "security"
-                  ? "bg-primary-600 text-white shadow-lg"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-              }`}
-              onClick={() => setTab("security")}
-            >
-              Security
-            </button>
+          <div className="flex gap-1 p-2 items-center justify-between">
+            <div className="flex gap-1 flex-1">
+              <button
+                className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                  tab === "company"
+                    ? "bg-primary-600 text-white shadow-lg"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                }`}
+                onClick={() => setTab("company")}
+              >
+                Company Details
+              </button>
+              <button
+                className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                  tab === "users"
+                    ? "bg-primary-600 text-white shadow-lg"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                }`}
+                onClick={() => setTab("users")}
+              >
+                Team Members
+              </button>
+              <button
+                className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                  tab === "subscription"
+                    ? "bg-primary-600 text-white shadow-lg"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                }`}
+                onClick={() => setTab("subscription")}
+              >
+                Subscription
+              </button>
+              <button
+                className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                  tab === "security"
+                    ? "bg-primary-600 text-white shadow-lg"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                }`}
+                onClick={() => setTab("security")}
+              >
+                Security
+              </button>
+            </div>
+            {tab === "company" && (
+              <div className="flex gap-2 ml-4">
+                {!isEditMode ? (
+                  <Button
+                    onClick={handleEditMode}
+                    className="bg-primary-600 hover:bg-primary-700 text-white"
+                    size="sm"
+                  >
+                    Edit Profile
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={handleSaveProfile}
+                      disabled={isSaving}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      size="sm"
+                    >
+                      {isSaving ? "Saving..." : "Save Changes"}
+                    </Button>
+                    <Button
+                      onClick={handleCancelEdit}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -447,9 +529,14 @@ export default function CompanyProfilePage() {
                       </label>
                       <input
                         type="email"
-                        value={companyProfile.email || ""}
-                        disabled
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 text-gray-900 font-medium focus:outline-none"
+                        value={isEditMode && editData ? editData.email || "" : (companyProfile.email || "")}
+                        onChange={(e) => isEditMode && setEditData(prev => prev ? { ...prev, email: e.target.value } : null)}
+                        disabled={!isEditMode}
+                        className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 font-medium ${
+                          isEditMode
+                            ? "bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                            : "bg-gray-50/50 focus:outline-none"
+                        }`}
                         placeholder="No email provided"
                       />
                     </div>
@@ -459,9 +546,14 @@ export default function CompanyProfilePage() {
                       </label>
                       <input
                         type="tel"
-                        value={companyProfile.phone || ""}
-                        disabled
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 text-gray-900 font-medium focus:outline-none"
+                        value={isEditMode && editData ? editData.phone || "" : (companyProfile.phone || "")}
+                        onChange={(e) => isEditMode && setEditData(prev => prev ? { ...prev, phone: e.target.value } : null)}
+                        disabled={!isEditMode}
+                        className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 font-medium ${
+                          isEditMode
+                            ? "bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                            : "bg-gray-50/50 focus:outline-none"
+                        }`}
                         placeholder="No phone provided"
                       />
                     </div>
@@ -471,9 +563,14 @@ export default function CompanyProfilePage() {
                       </label>
                       <input
                         type="url"
-                        value={companyProfile.website || ""}
-                        disabled
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 text-gray-900 font-medium focus:outline-none"
+                        value={isEditMode && editData ? editData.website || "" : (companyProfile.website || "")}
+                        onChange={(e) => isEditMode && setEditData(prev => prev ? { ...prev, website: e.target.value } : null)}
+                        disabled={!isEditMode}
+                        className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 font-medium ${
+                          isEditMode
+                            ? "bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                            : "bg-gray-50/50 focus:outline-none"
+                        }`}
                         placeholder="No website provided"
                       />
                     </div>
@@ -492,9 +589,14 @@ export default function CompanyProfilePage() {
                       </label>
                       <input
                         type="text"
-                        value={companyProfile.founded || ""}
-                        disabled
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 text-gray-900 font-medium focus:outline-none"
+                        value={isEditMode && editData ? editData.founded || "" : (companyProfile.founded || "")}
+                        onChange={(e) => isEditMode && setEditData(prev => prev ? { ...prev, founded: e.target.value } : null)}
+                        disabled={!isEditMode}
+                        className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 font-medium ${
+                          isEditMode
+                            ? "bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                            : "bg-gray-50/50 focus:outline-none"
+                        }`}
                         placeholder="No founding date provided"
                       />
                     </div>
@@ -503,14 +605,57 @@ export default function CompanyProfilePage() {
                         Mission
                       </label>
                       <textarea
-                        value={companyProfile.mission || ""}
-                        disabled
+                        value={isEditMode && editData ? editData.mission || "" : (companyProfile.mission || "")}
+                        onChange={(e) => isEditMode && setEditData(prev => prev ? { ...prev, mission: e.target.value } : null)}
+                        disabled={!isEditMode}
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 text-gray-900 font-medium focus:outline-none resize-none"
+                        className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 font-medium resize-none ${
+                          isEditMode
+                            ? "bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                            : "bg-gray-50/50 focus:outline-none"
+                        }`}
                         placeholder="No mission statement provided"
                       />
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Description and Industry Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Description
+                  </label>
+                  <textarea
+                    value={isEditMode && editData ? editData.description || "" : (companyProfile.description || "")}
+                    onChange={(e) => isEditMode && setEditData(prev => prev ? { ...prev, description: e.target.value } : null)}
+                    disabled={!isEditMode}
+                    rows={4}
+                    className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 font-medium resize-none ${
+                      isEditMode
+                        ? "bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                        : "bg-gray-50/50 focus:outline-none"
+                    }`}
+                    placeholder="No company description provided"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Industry
+                  </label>
+                  <input
+                    type="text"
+                    value={isEditMode && editData ? editData.industry || "" : (companyProfile.industry || "")}
+                    onChange={(e) => isEditMode && setEditData(prev => prev ? { ...prev, industry: e.target.value } : null)}
+                    disabled={!isEditMode}
+                    className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 font-medium ${
+                      isEditMode
+                        ? "bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                        : "bg-gray-50/50 focus:outline-none"
+                    }`}
+                    placeholder="No industry provided"
+                  />
                 </div>
               </div>
 

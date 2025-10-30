@@ -401,6 +401,56 @@ export class CompanyService {
     }
   }
 
+  async updateCompany(companyId: string, input: Partial<CompanyProfile>): Promise<CompanyProfile> {
+    try {
+      const updateInput = {
+        name: input.name,
+        description: input.description,
+        industry: input.industry,
+        website: input.website,
+        email: input.email,
+        phone: input.phone,
+        founded: input.founded,
+      };
+
+      const { data } = await apolloClient.mutate<{ updateCompany: any }>({
+        mutation: this.UPDATE_COMPANY_MUTATION,
+        variables: {
+          id: companyId,
+          input: updateInput
+        }
+      });
+
+      if (!data?.updateCompany) {
+        throw new Error('Failed to update company');
+      }
+
+      const company = data.updateCompany;
+      return {
+        id: company.id,
+        name: company.name,
+        logo: company.logo,
+        industry: company.industry,
+        founded: company.founded ? new Date(company.founded).getFullYear().toString() : undefined,
+        employees: company.size,
+        headquarters: company.location,
+        website: company.website,
+        description: company.description,
+        mission: company.description,
+        email: company.email,
+        phone: company.phone,
+        values: [],
+        benefits: [],
+        stats: [],
+        subscription: undefined,
+        users: [],
+      };
+    } catch (error: any) {
+      console.error('[CompanyService] Error updating company:', error);
+      throw new Error(error?.message || 'Failed to update company');
+    }
+  }
+
   async uploadLogo(file: File): Promise<string> {
     try {
       console.log('[CompanyService] Starting logo upload for file:', file.name, file.type, file.size);

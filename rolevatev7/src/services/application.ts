@@ -316,8 +316,8 @@ export interface CreateNoteData {
 
 export const getApplicationsByJob = async (jobId: string): Promise<Application[]> => {
   const GET_APPLICATIONS_BY_JOB_QUERY = gql`
-    query GetApplicationsByJob($jobId: ID!) {
-      applications(jobId: $jobId) {
+    query GetApplicationsByJob($jobId: String!) {
+      applications(filter: { jobId: $jobId }) {
         id
         appliedAt
         candidate {

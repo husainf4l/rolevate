@@ -58,12 +58,14 @@ export default function JobApplicationPage() {
   const [credentials, setCredentials] = useState<CandidateCredentials | null>(null);
   const [redirectCountdown, setRedirectCountdown] = useState(5);
 
-  // Handle redirect when countdown reaches 0
+  // Handle redirect when countdown reaches 0 AND user is loaded
   useEffect(() => {
-    if (redirectCountdown === 0 && success) {
-      router.push("/userdashboard/applications");
+    if (redirectCountdown === 0 && success && !authLoading) {
+      console.log('[Apply] Countdown complete and user loaded, redirecting to dashboard');
+      console.log('[Apply] User loaded:', !!user);
+      router.push("/userdashboard");
     }
-  }, [redirectCountdown, success, router]);
+  }, [redirectCountdown, success, router, authLoading, user]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -342,6 +344,11 @@ export default function JobApplicationPage() {
         // Store token for auto-login
         localStorage.setItem('access_token', applicationResponse.candidateCredentials.token);
         console.log('✅ New account created and logged in automatically');
+        console.log('✅ Token stored:', applicationResponse.candidateCredentials.token.substring(0, 20) + '...');
+        
+        // Reset global auth state to force refetch
+        // Dispatch a custom event to notify AuthProvider
+        window.dispatchEvent(new Event('auth-token-stored'));
       }
 
       setSuccess(true);
@@ -551,7 +558,7 @@ export default function JobApplicationPage() {
               <div className="space-y-3">
                 {credentials || isAuthenticated ? (
                   <>
-                    <Link href="/userdashboard/applications" className="block">
+                    <Link href="/userdashboard" className="block">
                       <Button className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white py-6 text-base font-semibold rounded-xl shadow-lg shadow-primary-200 transition-all duration-200 hover:shadow-xl">
                         {credentials && redirectCountdown > 0
                           ? `Redirecting to Dashboard in ${redirectCountdown}s...`
