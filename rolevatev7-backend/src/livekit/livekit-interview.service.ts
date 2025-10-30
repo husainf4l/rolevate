@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LiveKitRoom } from './livekit-room.entity';
@@ -6,8 +6,6 @@ import { Application } from '../application/application.entity';
 import { ConfigService } from '@nestjs/config';
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { CreateRoomResponse, RoomTokenResponse } from './livekit.dto';
 
 @Injectable()
@@ -20,7 +18,6 @@ export class LiveKitInterviewService {
     @InjectRepository(Application)
     private readonly applicationRepository: Repository<Application>,
     private readonly configService: ConfigService,
-    private readonly whatsappService: WhatsAppService,
   ) {
     const apiKey = this.configService.get<string>('LIVEKIT_API_KEY');
     const apiSecret = this.configService.get<string>('LIVEKIT_API_SECRET');

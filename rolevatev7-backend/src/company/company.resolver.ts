@@ -2,11 +2,11 @@ import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { Company } from './company.entity';
-import { CompanyDto, CompanyUserDto } from './company.dto';
+import { CompanyDto } from './company.dto';
 import { CreateCompanyInput } from './create-company.input';
 import { UpdateCompanyInput } from './update-company.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { InvitationDto, CreateInvitationInput, AcceptInvitationInput } from './invitation.dto';
+import { InvitationDto, CreateInvitationInput } from './invitation.dto';
 import { Invitation } from './invitation.entity';
 
 @Resolver(() => CompanyDto)

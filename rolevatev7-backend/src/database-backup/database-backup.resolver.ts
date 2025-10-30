@@ -72,7 +72,7 @@ export class DatabaseBackupResolver {
     @Args('input') input: RestoreBackupInput,
   ): Promise<RestoreOperationResponse> {
     try {
-      const backup = await this.backupService.restoreBackup(input.backupId, input.targetDatabaseName);
+      await this.backupService.restoreBackup(input.backupId, input.targetDatabaseName);
       return {
         success: true,
         message: 'Database restored successfully',

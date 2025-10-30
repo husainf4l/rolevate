@@ -1,7 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { Application } from '../application/application.entity';
-import { User } from '../user/user.entity';
 
 export enum CommunicationType {
   EMAIL = 'EMAIL',

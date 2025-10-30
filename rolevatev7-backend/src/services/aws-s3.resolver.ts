@@ -25,7 +25,7 @@ export class AwsS3Resolver {
   async uploadFileToS3(
     @Args('base64File', { description: 'Base64 encoded file content' }) base64File: string,
     @Args('filename', { description: 'Original filename with extension' }) filename: string,
-    @Args('mimetype', { description: 'File MIME type (e.g., application/pdf, image/jpeg)' }) mimetype: string,
+    @Args('mimetype', { description: 'File MIME type (e.g., application/pdf, image/jpeg)' }) _mimetype: string,
     @Args('folder', { nullable: true, description: 'Optional S3 folder path' }) folder?: string,
   ): Promise<S3UploadResponse> {
     try {
@@ -53,7 +53,7 @@ export class AwsS3Resolver {
   async uploadCVToS3(
     @Args('base64File', { description: 'Base64 encoded file content' }) base64File: string,
     @Args('filename', { description: 'Original filename with extension' }) filename: string,
-    @Args('mimetype', { description: 'File MIME type' }) mimetype: string,
+    @Args('mimetype', { description: 'File MIME type' }) _mimetype: string,
     @Args('candidateId', { nullable: true, description: 'Candidate ID for organizing CVs' }) candidateId?: string,
   ): Promise<S3UploadResponse> {
     try {

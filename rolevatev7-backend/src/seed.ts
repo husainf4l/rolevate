@@ -7,7 +7,6 @@ import { Address } from '../src/address/address.entity';
 import { Job, JobType, JobLevel, WorkType, JobStatus } from '../src/job/job.entity';
 import { CandidateProfile } from '../src/candidate/candidate-profile.entity';
 import { Application, ApplicationStatus } from '../src/application/application.entity';
-import { Communication } from '../src/communication/communication.entity';
 import * as bcrypt from 'bcrypt';
 
 async function seed() {

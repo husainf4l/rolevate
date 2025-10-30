@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsNumber, Min, Max } from 'class-validator';
 
 @InputType()
 export class CreateTranscriptInput {

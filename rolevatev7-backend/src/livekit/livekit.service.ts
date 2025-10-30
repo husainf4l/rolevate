@@ -1,14 +1,9 @@
-import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LiveKitRoom } from './livekit-room.entity';
-import { Application } from '../application/application.entity';
 import { ConfigService } from '@nestjs/config';
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import { WhatsAppService } from '../whatsapp/whatsapp.service';
-import { CreateRoomResponse, RoomTokenResponse } from './livekit.dto';
 
 @Injectable()
 export class LiveKitService {
@@ -182,7 +177,7 @@ export class LiveKitService {
   async generateTokenWithDuration(
     roomName: string,
     participantName: string,
-    userId: string,
+    _userId: string,
     durationSeconds: number = 60 * 60 // Default 1 hour
   ): Promise<string> {
     const apiKey = this.configService.get<string>('LIVEKIT_API_KEY');

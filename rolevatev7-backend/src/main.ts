@@ -58,7 +58,7 @@ async function bootstrap() {
   });
   
   // Set Referrer-Policy header
-  app.getHttpAdapter().getInstance().addHook('onSend', (request, reply, payload, done) => {
+  app.getHttpAdapter().getInstance().addHook('onSend', (_request, reply, _payload, done) => {
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     done();
   });

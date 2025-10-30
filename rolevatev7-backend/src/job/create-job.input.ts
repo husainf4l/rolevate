@@ -1,5 +1,5 @@
-import { InputType, Field, Int, registerEnumType } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsEnum, IsDateString, IsArray, IsBoolean } from 'class-validator';
+import { InputType, Field, registerEnumType } from '@nestjs/graphql';
+import { IsString, IsNotEmpty, IsOptional, IsEnum, IsDateString, IsArray, IsBoolean } from 'class-validator';
 import { JobType, JobLevel, WorkType, JobStatus } from './job.entity';
 
 // Register enums for GraphQL

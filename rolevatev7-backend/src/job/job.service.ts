@@ -8,7 +8,6 @@ import { JobDto } from './job.dto';
 import { JobFilterInput } from './job-filter.input';
 import { PaginationInput } from '../common/pagination.dto';
 import { User } from '../user/user.entity';
-import { Company } from '../company/company.entity';
 import { SavedJob } from './saved-job.entity';
 import { SavedJobDto } from './saved-job.dto';
 import { AuditService } from '../audit.service';
@@ -22,8 +21,6 @@ export class JobService {
     private jobRepository: Repository<Job>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(Company)
-    private companyRepository: Repository<Company>,
     @InjectRepository(SavedJob)
     private savedJobRepository: Repository<SavedJob>,
     private auditService: AuditService,

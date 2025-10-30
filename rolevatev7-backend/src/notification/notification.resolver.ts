@@ -6,7 +6,6 @@ import { NotificationSettingsDto } from './notification-settings.dto';
 import { CreateNotificationInput } from './create-notification.input';
 import { UpdateNotificationSettingsInput } from './update-notification-settings.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiKeyGuard } from '../auth/api-key.guard';
 
 @Resolver(() => NotificationDto)
 export class NotificationResolver {
@@ -16,7 +15,7 @@ export class NotificationResolver {
   @UseGuards(JwtAuthGuard) // Only authenticated users can create notifications (admin/system)
   async createNotification(
     @Args('input') input: CreateNotificationInput,
-    @Context() context: any,
+    @Context() _context: any,
   ): Promise<NotificationDto> {
     // In production, check if user has admin role
     return this.notificationService.createNotification(input);

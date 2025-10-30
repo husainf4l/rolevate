@@ -13,7 +13,6 @@ import { ApplicationResponse } from './application-response.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
-import { BusinessOrApiKeyGuard } from '../auth/business-or-api-key.guard';
 import { JwtOrApiKeyGuard } from '../auth/jwt-or-api-key.guard';
 import { Public } from '../auth/public.decorator';
 
