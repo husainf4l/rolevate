@@ -4,9 +4,16 @@ import { onError } from '@apollo/client/link/error';
 import { logout } from '@/services/auth';
 import { API_CONFIG } from './config';
 
+if (typeof window !== 'undefined') {
+  console.log('🚀 Apollo Client connecting to:', `${API_CONFIG.API_BASE_URL}/graphql`);
+}
+
 const httpLink = new HttpLink({
   uri: `${API_CONFIG.API_BASE_URL}/graphql`,
   credentials: 'include',
+  fetchOptions: {
+    mode: 'cors',
+  },
 });
 
 const authLink = setContext((_, { headers }) => {

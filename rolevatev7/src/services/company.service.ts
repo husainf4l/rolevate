@@ -127,6 +127,24 @@ export class CompanyService {
     }
   `;
 
+  private UPLOAD_LOGO_TO_S3_MUTATION = gql`
+    mutation UploadCVToS3(
+      $base64File: String!
+      $filename: String!
+      $mimetype: String!
+    ) {
+      uploadCVToS3(
+        base64File: $base64File
+        filename: $filename
+        mimetype: $mimetype
+      ) {
+        url
+        key
+        bucket
+      }
+    }
+  `;
+
   private UPDATE_COMPANY_MUTATION = gql`
     mutation UpdateCompany($id: ID!, $input: UpdateCompanyInput!) {
       updateCompany(id: $id, input: $input) {
@@ -228,11 +246,6 @@ export class CompanyService {
       const result = await apolloClient.query<{ companies: any[] }>({
         query: this.GET_ALL_COMPANIES_QUERY,
         fetchPolicy: 'network-only',
-        context: {
-          headers: {
-            'x-forwarded-for': '127.0.0.1',
-          },
-        },
       });
 
       if (result.error) {
@@ -284,11 +297,6 @@ export class CompanyService {
         query: this.GET_COMPANY_QUERY,
         variables: { id },
         fetchPolicy: 'network-only',
-        context: {
-          headers: {
-            'x-forwarded-for': '127.0.0.1',
-          },
-        },
       });
 
       if (result.error) {
@@ -329,11 +337,6 @@ export class CompanyService {
         query: this.GET_COMPANY_JOBS_QUERY,
         variables: { companyId },
         fetchPolicy: 'network-only',
-        context: {
-          headers: {
-            'x-forwarded-for': '127.0.0.1',
-          },
-        },
       });
 
       if (result.error) {
@@ -402,10 +405,40 @@ export class CompanyService {
     try {
       console.log('[CompanyService] Starting logo upload for file:', file.name, file.type, file.size);
       
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('File must be an image');
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        throw new Error('Image size must be less than 5MB');
+      }
+
       // Convert file to base64
-      const base64 = await this.fileToBase64(file);
+      const base64File = await this.fileToBase64(file);
       console.log('[CompanyService] File converted to base64');
       
+      // Upload to S3 via GraphQL
+      const { data: uploadData } = await apolloClient.mutate<{
+        uploadCVToS3: { url: string; key: string; bucket: string };
+      }>({
+        mutation: this.UPLOAD_LOGO_TO_S3_MUTATION,
+        variables: {
+          base64File,
+          filename: file.name,
+          mimetype: file.type
+        }
+      });
+
+      if (!uploadData?.uploadCVToS3?.url) {
+        throw new Error('Failed to upload logo to S3');
+      }
+
+      const logoUrl = uploadData.uploadCVToS3.url;
+      console.log('[CompanyService] Logo uploaded to S3:', logoUrl);
+
       // Get current user's company ID
       const me = await apolloClient.query<{ me: any }>({
         query: this.GET_MY_PROFILE_QUERY,
@@ -418,19 +451,19 @@ export class CompanyService {
         throw new Error('Company ID not found');
       }
 
-      console.log('[CompanyService] Updating company with base64 logo...');
+      console.log('[CompanyService] Updating company with logo URL...');
 
-      // Update the company with the base64 logo
+      // Update the company with the S3 logo URL
       const { data: updateData } = await apolloClient.mutate<{ updateCompany: { id: string; logo: string } }>({
         mutation: this.UPDATE_COMPANY_MUTATION,
         variables: { 
           id: companyId,
-          input: { logo: base64 }
+          input: { logo: logoUrl }
         },
       });
 
       console.log('[CompanyService] Logo updated successfully');
-      return updateData?.updateCompany?.logo || base64;
+      return updateData?.updateCompany?.logo || logoUrl;
     } catch (error: any) {
       console.error('[CompanyService] Error uploading logo:', error);
       throw new Error(error?.message || 'Failed to upload logo');

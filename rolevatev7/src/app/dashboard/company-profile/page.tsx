@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import Header from "@/components/dashboard/Header";
 import { Button } from "@/components/ui/button";
 import { CameraIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
+import { API_CONFIG } from "@/lib/config";
 import { 
   companyService, 
   CompanyProfile, 
@@ -84,30 +84,126 @@ export default function CompanyProfilePage() {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error("Please select a valid image file");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
+      toast.error("Please upload an image smaller than 5MB");
       return;
     }
 
     try {
       setLoading(true);
-      const logoUrl = await companyService.uploadLogo(file);
-      setCompanyProfile((prev) =>
-        prev ? { ...prev, logo: logoUrl } : null
-      );
-      toast.success("Company logo updated successfully!");
+      const token = localStorage.getItem("access_token");
+
+      // Convert file to base64
+      const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => {
+            const result = reader.result as string;
+            // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+            const base64 = result.split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = error => reject(error);
+        });
+      };
+
+      const base64File = await fileToBase64(file);
+
+      // Upload file to S3 using GraphQL mutation with base64
+      const uploadResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation UploadCVToS3($base64File: String!, $filename: String!, $mimetype: String!) {
+              uploadCVToS3(base64File: $base64File, filename: $filename, mimetype: $mimetype) {
+                url
+                key
+              }
+            }
+          `,
+          variables: {
+            base64File,
+            filename: file.name,
+            mimetype: file.type
+          }
+        }),
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload logo");
+      }
+
+      const uploadResult = await uploadResponse.json();
+      const logoUrl = uploadResult.data?.uploadCVToS3?.url;
+
+      if (logoUrl) {
+        // Get company ID from profile
+        const companyId = companyProfile?.id;
+        
+        if (!companyId) {
+          throw new Error("Company ID not found");
+        }
+
+        // Update company profile with new logo URL in database
+        const updateCompanyResponse = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            query: `
+              mutation UpdateCompany($id: ID!, $input: UpdateCompanyInput!) {
+                updateCompany(id: $id, input: $input) {
+                  id
+                  logo
+                }
+              }
+            `,
+            variables: {
+              id: companyId,
+              input: {
+                logo: logoUrl
+              }
+            }
+          }),
+        });
+
+        if (!updateCompanyResponse.ok) {
+          throw new Error("Failed to update company profile");
+        }
+
+        const updateCompanyResult = await updateCompanyResponse.json();
+        
+        if (updateCompanyResult.errors) {
+          throw new Error(updateCompanyResult.errors[0].message);
+        }
+
+        // Update local state
+        setCompanyProfile((prev) =>
+          prev ? { ...prev, logo: logoUrl } : null
+        );
+        toast.success("Company logo updated successfully!");
+      } else {
+        throw new Error("Failed to get logo URL");
+      }
     } catch (error: any) {
       console.error("Error uploading logo:", error);
       toast.error(error.message || "Failed to upload logo");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [companyProfile]);
 
   if (loading) {
     return (
@@ -144,24 +240,21 @@ export default function CompanyProfilePage() {
               <div className="relative">
                 <div className="w-24 h-24 bg-primary-600 rounded-sm flex items-center justify-center text-3xl font-bold text-white shadow-lg overflow-hidden">
                   {companyProfile.logo ? (
-                    <Image
-                      src={companyProfile.logo}
+                    <img
+                      src={
+                        companyProfile.logo.startsWith('http') 
+                          ? companyProfile.logo 
+                          : `/api/proxy-image?url=${encodeURIComponent(
+                              `${API_CONFIG.UPLOADS_URL}/${companyProfile.logo}`
+                            )}`
+                      }
                       alt="Company Logo"
-                      width={96}
-                      height={96}
                       className="w-full h-full object-cover rounded-sm"
-                      onError={() => {
-                        console.error(
-                          "Image failed to load:",
-                          companyProfile.logo
-                        );
-                      }}
-                      onLoad={() => {
-                        console.log("Image loaded successfully!");
-                      }}
                     />
                   ) : (
-                    companyProfile.name?.charAt(0) || "C"
+                    <span className="text-3xl font-bold text-white">
+                      {companyProfile.name?.charAt(0) || "C"}
+                    </span>
                   )}
                 </div>
                 <label className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full shadow-lg cursor-pointer flex items-center justify-center hover:bg-gray-50 transition-colors border-2 border-white">
@@ -284,26 +377,21 @@ export default function CompanyProfilePage() {
                   <div className="relative">
                     <div className="w-20 h-20 bg-primary-600 rounded-sm flex items-center justify-center text-2xl font-bold text-white shadow-lg overflow-hidden">
                       {companyProfile.logo ? (
-                        <Image
-                          src={companyProfile.logo}
+                        <img
+                          src={
+                            companyProfile.logo.startsWith('http') 
+                              ? companyProfile.logo 
+                              : `/api/proxy-image?url=${encodeURIComponent(
+                                  `${API_CONFIG.UPLOADS_URL}/${companyProfile.logo}`
+                                )}`
+                          }
                           alt="Company Logo"
-                          width={80}
-                          height={80}
                           className="w-full h-full object-cover rounded-sm"
-                          onError={() => {
-                            console.error(
-                              "Logo section image failed to load:",
-                              companyProfile.logo
-                            );
-                          }}
-                          onLoad={() => {
-                            console.log(
-                              "Logo section image loaded successfully!"
-                            );
-                          }}
                         />
                       ) : (
-                        companyProfile.name?.charAt(0) || "C"
+                        <span className="text-2xl font-bold text-white">
+                          {companyProfile.name?.charAt(0) || "C"}
+                        </span>
                       )}
                     </div>
                     <label className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full shadow-lg cursor-pointer flex items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200">
