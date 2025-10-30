@@ -4,8 +4,7 @@ import { createContext, useContext } from "react";
 
 interface CandidateProfile {
   id: string;
-  firstName: string;
-  lastName: string;
+  name?: string;
   email: string;
   phone: string;
   dateOfBirth: string | null;

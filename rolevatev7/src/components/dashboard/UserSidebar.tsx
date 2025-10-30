@@ -11,6 +11,7 @@ import {
   XMarkIcon,
   ClipboardDocumentListIcon,
   BookmarkIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import { logout } from "@/services/auth";
 import UserProfileSection from "./UserProfileSection";
@@ -31,6 +32,11 @@ const navigationItems = [
     icon: ClipboardDocumentListIcon,
     label: "Applications",
     href: "/userdashboard/applications",
+  },
+  {
+    icon: CalendarDaysIcon,
+    label: "Interviews",
+    href: "/userdashboard/interviews",
   },
   {
     icon: BookmarkIcon,
@@ -96,12 +102,18 @@ export default function UserSidebar() {
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
           <div className="flex justify-center items-center px-4 py-6 border-b border-gray-100">
-            <img
-              src="/logo/Rolevate-icon.webp"
-              alt="Rolevate Icon"
-              className="object-contain"
-              style={{ width: 48, height: 48 }}
-            />
+            <Link 
+              href="/" 
+              className="transition-opacity hover:opacity-80"
+              title="Go to homepage"
+            >
+              <img
+                src="/logo/Rolevate-icon.webp"
+                alt="Rolevate Icon"
+                className="object-contain"
+                style={{ width: 48, height: 48 }}
+              />
+            </Link>
           </div>
 
           {/* Navigation */}

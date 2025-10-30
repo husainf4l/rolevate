@@ -300,12 +300,12 @@ export default function ProfilePage() {
   // user is now the CandidateProfile directly
   const profile = user;
   const userEmail = profile.user?.email || '';
-  const fullName = `${profile.firstName} ${profile.lastName}`.trim() || userEmail;
+  const fullName = profile.name || userEmail;
   const initials = fullName.split(' ').map((n: string) => n.charAt(0)).join('').toUpperCase();
 
   // Calculate profile completeness
   const completedFields = [
-    !!profile.firstName,
+    !!profile.name,
     !!userEmail,
     profile.phone && profile.phone !== "a", // Exclude placeholder phone
     profile.profileSummary && !profile.profileSummary.includes("CV parsing failed"),
@@ -954,7 +954,7 @@ export default function ProfilePage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {[
-                  { label: "First name provided", completed: !!profile.firstName },
+                  { label: "Full name provided", completed: !!profile.name },
                   { label: "Email provided", completed: !!profile.email },
                   { label: "Phone number added", completed: profile.phone && profile.phone !== "a" },
                   { label: "Professional summary added", completed: profile.profileSummary && !profile.profileSummary.includes("CV parsing failed") },

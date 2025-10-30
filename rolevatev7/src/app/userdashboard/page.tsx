@@ -120,7 +120,7 @@ export default function UserDashboardPage() {
           className="bg-white rounded-sm p-6 border border-gray-200 shadow-sm"
         >
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.candidateProfile?.firstName || user?.name || "Candidate"}! 
+            Welcome back, {user?.candidateProfile?.name || user?.name || "Candidate"}! 
           </h1>
           <p className="text-gray-600">
             Here's what's happening with your job search today.

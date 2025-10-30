@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import {
   CalendarDaysIcon,
   ClockIcon,
@@ -11,6 +13,7 @@ import {
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import { Card, CardContent } from "@/components/ui/card";
+import { getAllInterviews, Interview as APIInterview } from "@/services/interview.service";
 
 interface Interview {
   id: string;
@@ -29,78 +32,41 @@ interface Interview {
   meetingLink?: string;
 }
 
-const mockInterviews: Interview[] = [
-  {
-    id: "1",
-    jobTitle: "Senior Frontend Developer",
-    company: "TechCorp Inc.",
-    date: "2025-01-10",
-    time: "10:00 AM",
-    type: "video",
-    interviewer: "Sarah Johnson",
-    interviewerRole: "Engineering Manager",
-    status: "upcoming",
-    round: 1,
-    duration: "60 minutes",
-    meetingLink: "https://meet.google.com/abc-def-ghi",
-  },
-  {
-    id: "2",
-    jobTitle: "UI/UX Designer",
-    company: "DesignHub",
-    date: "2025-01-12",
-    time: "2:00 PM",
-    type: "in-person",
-    location: "123 Design St, New York, NY",
-    interviewer: "Mike Chen",
-    interviewerRole: "Design Director",
-    status: "upcoming",
-    round: 2,
-    duration: "90 minutes",
-    notes: "Bring portfolio and design samples",
-  },
-  {
-    id: "3",
-    jobTitle: "Full Stack Developer",
-    company: "StartupXYZ",
-    date: "2025-01-08",
-    time: "11:30 AM",
-    type: "phone",
-    interviewer: "Alex Rodriguez",
-    interviewerRole: "CTO",
-    status: "completed",
-    round: 1,
-    duration: "45 minutes",
-  },
-  {
-    id: "4",
-    jobTitle: "React Developer",
-    company: "WebSolutions",
-    date: "2025-01-15",
-    time: "3:00 PM",
-    type: "video",
-    interviewer: "Emily Davis",
-    interviewerRole: "Senior Developer",
-    status: "upcoming",
-    round: 3,
-    duration: "120 minutes",
-    notes: "Technical coding round",
-    meetingLink: "https://zoom.us/j/123456789",
-  },
-  {
-    id: "5",
-    jobTitle: "Frontend Engineer",
-    company: "Innovation Labs",
-    date: "2025-01-05",
-    time: "9:00 AM",
-    type: "video",
-    interviewer: "David Wilson",
-    interviewerRole: "Team Lead",
-    status: "cancelled",
-    round: 1,
-    duration: "60 minutes",
-  },
-];
+// Helper function to convert API Interview to display format
+const convertToDisplayFormat = (apiInterview: APIInterview): Interview => {
+  const scheduledDate = new Date(apiInterview.scheduledAt);
+  
+  // Map API status to display status
+  const statusMap: Record<string, Interview["status"]> = {
+    SCHEDULED: "upcoming",
+    COMPLETED: "completed",
+    CANCELLED: "cancelled",
+    NO_SHOW: "cancelled",
+  };
+
+  // Map API type to display type
+  const typeMap: Record<string, Interview["type"]> = {
+    VIDEO: "video",
+    PHONE: "phone",
+    IN_PERSON: "in-person",
+  };
+
+  return {
+    id: apiInterview.id,
+    jobTitle: apiInterview.application.job.title,
+    company: apiInterview.application.job.company?.name || "Unknown Company",
+    date: scheduledDate.toISOString().split('T')[0],
+    time: scheduledDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+    type: typeMap[apiInterview.type] || "video",
+    interviewer: apiInterview.interviewer.name || apiInterview.interviewer.email,
+    interviewerRole: "Interviewer", // API doesn't provide role
+    status: statusMap[apiInterview.status] || "upcoming",
+    round: 1, // API doesn't provide round number
+    duration: apiInterview.duration ? `${apiInterview.duration} minutes` : "60 minutes",
+    notes: apiInterview.notes || undefined,
+    meetingLink: apiInterview.roomId ? `/room?roomId=${apiInterview.roomId}` : undefined,
+  };
+};
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -149,14 +115,201 @@ const isUpcoming = (date: string) => {
   return new Date(date) > new Date();
 };
 
+// Calendar View Component
+const CalendarView = ({ interviews }: { interviews: Interview[] }) => {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  const firstDayOfMonth = new Date(year, month, 1);
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const daysInMonth = lastDayOfMonth.getDate();
+  const startingDayOfWeek = firstDayOfMonth.getDay();
+  
+  const monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+  
+  const goToPreviousMonth = () => {
+    setCurrentDate(new Date(year, month - 1, 1));
+  };
+  
+  const goToNextMonth = () => {
+    setCurrentDate(new Date(year, month + 1, 1));
+  };
+  
+  const goToToday = () => {
+    setCurrentDate(new Date());
+  };
+  
+  // Group interviews by date
+  const interviewsByDate = interviews.reduce((acc, interview) => {
+    const date = interview.date;
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(interview);
+    return acc;
+  }, {} as Record<string, Interview[]>);
+  
+  const renderCalendarDays = () => {
+    const days = [];
+    
+    // Empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(<div key={`empty-${i}`} className="h-24 bg-gray-50"></div>);
+    }
+    
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dayInterviews = interviewsByDate[dateStr] || [];
+      const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+      
+      days.push(
+        <div
+          key={day}
+          className={`h-24 border border-gray-200 p-2 overflow-hidden ${
+            isToday ? 'bg-blue-50 border-[#0fc4b5]' : 'bg-white'
+          }`}
+        >
+          <div className={`text-sm font-medium mb-1 ${isToday ? 'text-[#0fc4b5]' : 'text-gray-700'}`}>
+            {day}
+          </div>
+          <div className="space-y-1">
+            {dayInterviews.slice(0, 2).map((interview) => (
+              <div
+                key={interview.id}
+                className={`text-xs p-1 rounded truncate ${
+                  interview.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
+                  interview.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  'bg-red-100 text-red-800'
+                }`}
+                title={`${interview.time} - ${interview.jobTitle}`}
+              >
+                {interview.time} {interview.jobTitle}
+              </div>
+            ))}
+            {dayInterviews.length > 2 && (
+              <div className="text-xs text-gray-500">+{dayInterviews.length - 2} more</div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    return days;
+  };
+  
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {monthNames[month]} {year}
+          </h2>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={goToPreviousMonth}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={goToToday}
+              className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Today
+            </button>
+            <button
+              onClick={goToNextMonth}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-7 gap-0 border border-gray-200">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            <div key={day} className="bg-gray-50 p-2 text-center text-sm font-medium text-gray-700 border-b border-gray-200">
+              {day}
+            </div>
+          ))}
+          {renderCalendarDays()}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function InterviewsPage() {
-  const upcomingInterviews = mockInterviews.filter(
+  const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+
+  useEffect(() => {
+    const fetchInterviews = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const apiInterviews = await getAllInterviews();
+        const displayInterviews = apiInterviews.map(convertToDisplayFormat);
+        setInterviews(displayInterviews);
+      } catch (err) {
+        console.error("Error fetching interviews:", err);
+        setError(err instanceof Error ? err.message : "Failed to fetch interviews");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInterviews();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0fc4b5]"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="text-red-600 font-medium mb-2">Error loading interviews</div>
+            <div className="text-red-500 text-sm">{error}</div>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const upcomingInterviews = interviews.filter(
     (interview) => interview.status === "upcoming" && isUpcoming(interview.date)
   );
-  const completedInterviews = mockInterviews.filter(
+  const completedInterviews = interviews.filter(
     (interview) => interview.status === "completed"
   );
-  const cancelledInterviews = mockInterviews.filter(
+  const cancelledInterviews = interviews.filter(
     (interview) => interview.status === "cancelled"
   );
 
@@ -183,7 +336,7 @@ export default function InterviewsPage() {
                   Total Interviews
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {mockInterviews.length}
+                  {interviews.length}
                 </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -239,18 +392,37 @@ export default function InterviewsPage() {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="mb-8 flex items-center space-x-4">
-          <button className="inline-flex items-center space-x-2 px-4 py-2 bg-[#0fc4b5] text-white rounded-lg hover:bg-[#0ba399] transition-colors">
-            <PlusIcon className="w-4 h-4" />
-            <span>Add Interview</span>
-          </button>
-          <button className="inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-            <CalendarDaysIcon className="w-4 h-4" />
-            <span>Calendar View</span>
-          </button>
+        {/* View Toggle */}
+        <div className="mb-8 flex items-center justify-end">
+          <div className="inline-flex rounded-lg border border-gray-300 bg-white">
+            <button
+              onClick={() => setViewMode("list")}
+              className={`inline-flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-l-lg transition-colors ${
+                viewMode === "list"
+                  ? "bg-[#0fc4b5] text-white"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <span>List View</span>
+            </button>
+            <button
+              onClick={() => setViewMode("calendar")}
+              className={`inline-flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-r-lg transition-colors ${
+                viewMode === "calendar"
+                  ? "bg-[#0fc4b5] text-white"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <CalendarDaysIcon className="w-4 h-4" />
+              <span>Calendar View</span>
+            </button>
+          </div>
         </div>
 
+        {viewMode === "calendar" ? (
+          <CalendarView interviews={interviews} />
+        ) : (
+          <>
         {/* Upcoming Interviews */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -377,7 +549,7 @@ export default function InterviewsPage() {
               </div>
             </div>
             <div className="divide-y divide-gray-200">
-              {mockInterviews.map((interview) => (
+              {interviews.map((interview) => (
                 <div
                   key={interview.id}
                   className="px-6 py-4 hover:bg-gray-50 transition-colors"
@@ -424,6 +596,8 @@ export default function InterviewsPage() {
             </div>
           </Card>
         </div>
+        </>
+        )}
 
         {/* Interview Tips */}
         <div className="mt-8 bg-blue-50 rounded-lg p-6">

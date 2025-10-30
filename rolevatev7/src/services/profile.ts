@@ -29,8 +29,7 @@ export interface CandidateProfile {
     email: string;
     name: string;
   };
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   phone?: string;
   location?: string;
   bio?: string;
@@ -50,8 +49,7 @@ export interface CandidateProfile {
 }
 
 export interface UpdateProfileInput {
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   phone?: string;
   location?: string;
   bio?: string;
@@ -87,8 +85,7 @@ class ProfileService {
           email
           name
         }
-        firstName
-        lastName
+        name
         phone
         location
         bio
@@ -135,8 +132,7 @@ class ProfileService {
           email
           name
         }
-        firstName
-        lastName
+        name
         phone
         location
         bio

@@ -101,6 +101,59 @@ class InterviewService {
     }
   `;
 
+  private GET_ALL_INTERVIEWS_QUERY = gql`
+    query GetAllInterviews {
+      interviews {
+        id
+        application {
+          id
+          candidate {
+            id
+            name
+            email
+          }
+          job {
+            id
+            title
+            company {
+              name
+            }
+          }
+        }
+        interviewer {
+          id
+          name
+          email
+        }
+        scheduledAt
+        duration
+        type
+        status
+        notes
+        feedback
+        rating
+        aiAnalysis
+        recordingUrl
+        roomId
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  async getAllInterviews(): Promise<Interview[]> {
+    try {
+      const { data } = await apolloClient.query<{ interviews: Interview[] }>({
+        query: this.GET_ALL_INTERVIEWS_QUERY,
+        fetchPolicy: 'network-only'
+      });
+      return data?.interviews || [];
+    } catch (error: any) {
+      console.error('Failed to fetch interviews:', error);
+      return [];
+    }
+  }
+
   async getInterviewsByApplication(applicationId: string): Promise<Interview[]> {
     try {
       const { data } = await apolloClient.query<{ interviewsByApplication: Interview[] }>({
@@ -119,7 +172,11 @@ class InterviewService {
 
 export const interviewService = new InterviewService();
 
-// Export the function for direct use
+// Export the functions for direct use
+export const getAllInterviews = (): Promise<Interview[]> => {
+  return interviewService.getAllInterviews();
+};
+
 export const getInterviewsByApplication = (applicationId: string): Promise<Interview[]> => {
   return interviewService.getInterviewsByApplication(applicationId);
 };

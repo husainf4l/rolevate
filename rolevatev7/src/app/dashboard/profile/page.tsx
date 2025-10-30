@@ -18,8 +18,7 @@ import {
 
 interface UserProfile {
   id: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   phone?: string;
   avatar?: string;
@@ -52,8 +51,7 @@ export default function UserProfilePage() {
 
   const [userProfile, setUserProfile] = useState<UserProfile>({
     id: "",
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     phone: "",
     avatar: "",
@@ -163,8 +161,7 @@ export default function UserProfilePage() {
                   query GetCandidateProfile($userId: ID!) {
                     candidateProfileByUser(userId: $userId) {
                       id
-                      firstName
-                      lastName
+                      name
                       phone
                       location
                       bio
@@ -196,8 +193,7 @@ export default function UserProfilePage() {
           // Map GraphQL response to the interface expected by the component
           setUserProfile({
             id: userData.id || "",
-            firstName: candidateProfile?.firstName || userData.name?.split(' ')[0] || "",
-            lastName: candidateProfile?.lastName || userData.name?.split(' ').slice(1).join(' ') || "",
+            name: candidateProfile?.name || userData.name || "",
             email: userData.email || "",
             phone: candidateProfile?.phone || userData.phone || "",
             avatar: userData.avatar || "",
@@ -290,8 +286,7 @@ export default function UserProfilePage() {
                   mutation UpdateCandidateProfile($id: ID!, $input: UpdateCandidateProfileInput!) {
                     updateCandidateProfile(id: $id, input: $input) {
                       id
-                      firstName
-                      lastName
+                      name
                       phone
                       bio
                     }
@@ -300,8 +295,7 @@ export default function UserProfilePage() {
                 variables: {
                   id: candidateProfileId,
                   input: {
-                    firstName: userProfile.firstName,
-                    lastName: userProfile.lastName,
+                    name: userProfile.name,
                     phone: userProfile.phone,
                     bio: userProfile.bio,
                   }
@@ -539,8 +533,7 @@ export default function UserProfilePage() {
                   />
                 ) : (
                   <span className="text-3xl font-bold text-white">
-                    {userProfile.firstName?.charAt(0)}
-                    {userProfile.lastName?.charAt(0)}
+                    {userProfile.name?.split(' ').map(n => n.charAt(0)).join('')}
                   </span>
                 )}
               </div>
@@ -556,7 +549,7 @@ export default function UserProfilePage() {
             </div>
             <div className="text-center sm:text-left">
               <h1 className="text-3xl font-bold text-gray-900">
-                {userProfile.firstName} {userProfile.lastName}
+                {userProfile.name}
               </h1>
               <p className="text-lg text-gray-600 mt-1">
                 {userProfile.userType === "CANDIDATE" ? "Job Seeker" : "Employer"}
@@ -604,45 +597,26 @@ export default function UserProfilePage() {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      First Name
+                      Full Name
                     </label>
                     <input
                       type="text"
-                      value={userProfile.firstName}
+                      value={userProfile.name}
                       onChange={(e) =>
                         setUserProfile({
                           ...userProfile,
-                          firstName: e.target.value,
+                          name: e.target.value,
                         })
                       }
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                      placeholder="Enter your first name"
+                      placeholder="Enter your full name"
                       disabled={userProfile.userType === "BUSINESS"}
                     />
                     {userProfile.userType === "BUSINESS" && (
                       <p className="text-xs text-gray-500 mt-1">
-                        Business users: Please update your name in the full name field
+                        Business users: Update name in user settings
                       </p>
                     )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      value={userProfile.lastName}
-                      onChange={(e) =>
-                        setUserProfile({
-                          ...userProfile,
-                          lastName: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                      placeholder="Enter your last name"
-                      disabled={userProfile.userType === "BUSINESS"}
-                    />
                   </div>
 
                   <div>

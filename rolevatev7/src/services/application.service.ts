@@ -3,9 +3,13 @@ import { gql } from '@apollo/client';
 
 export interface Application {
   id: string;
+  jobId?: string; // Add jobId field
   job: {
     id: string;
     title: string;
+    company?: {
+      name: string;
+    };
   };
   candidate: {
     id: string;
@@ -69,6 +73,9 @@ class ApplicationService {
       job {
         id
         title
+        company {
+          name
+        }
       }
       candidate {
         id
@@ -112,6 +119,43 @@ class ApplicationService {
     }
   }
 `;
+
+  private GET_CANDIDATE_APPLICATIONS_QUERY = gql`
+    query GetCandidateApplications {
+      applicationsByCandidate {
+        id
+        job {
+          id
+          title
+          company {
+            name
+          }
+        }
+        candidate {
+          id
+          name
+          email
+        }
+        status
+        appliedAt
+        coverLetter
+        resumeUrl
+        expectedSalary
+        noticePeriod
+        cvAnalysisScore
+        cvAnalysisResults
+        analyzedAt
+        aiCvRecommendations
+        companyNotes
+        source
+        notes
+        interviewScheduled
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
   private CREATE_APPLICATION_MUTATION = gql`
     mutation CreateApplication($input: CreateApplicationInput!) {
       createApplication(input: $input) {
@@ -194,9 +238,23 @@ class ApplicationService {
 
   // Add missing function for candidate applications
   async getCandidateApplications(): Promise<Application[]> {
-    // For now, return empty array - this would need a different GraphQL query
-    // that fetches applications for the authenticated candidate
-    return [];
+    try {
+      const { data } = await apolloClient.query<{ applicationsByCandidate: Application[] }>({
+        query: this.GET_CANDIDATE_APPLICATIONS_QUERY,
+        fetchPolicy: 'network-only'
+      });
+      
+      // Add jobId from job.id for easier access
+      const applications = (data?.applicationsByCandidate || []).map(app => ({
+        ...app,
+        jobId: app.job.id
+      }));
+      
+      return applications;
+    } catch (error: any) {
+      console.error('Failed to fetch candidate applications:', error);
+      throw new Error(error?.message || 'Failed to fetch applications');
+    }
   }
 }
 
