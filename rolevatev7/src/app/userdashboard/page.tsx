@@ -69,9 +69,17 @@ export default function UserDashboardPage() {
     (completedCount / profileSections.length) * 100
   );
 
+  // Fetch dashboard data when the authenticated user becomes available.
+  // This ensures the dashboard retries after login/token is stored and AuthProvider finishes loading.
   useEffect(() => {
+    if (!user) {
+      console.log('[UserDashboard] No user yet, skipping dashboard fetch');
+      return;
+    }
+    console.log('[UserDashboard] User detected, fetching dashboard data for', user?.id || user?.email);
     fetchDashboardData();
-  }, []);
+    // Re-run when user changes (e.g., after login or token refresh)
+  }, [user?.id]);
 
   const fetchDashboardData = async () => {
     try {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,8 @@ import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("next");
   const [isMounted, setIsMounted] = useState(false);
 
   // Form state
@@ -42,7 +44,13 @@ export default function LoginPage() {
 
     try {
       const response = await authService.login({ email, password });
-      authService.redirectAfterLogin(response.user);
+      
+      // If there's a next URL, redirect there; otherwise use default redirect
+      if (nextUrl) {
+        window.location.href = nextUrl;
+      } else {
+        authService.redirectAfterLogin(response.user);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

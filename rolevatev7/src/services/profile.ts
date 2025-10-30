@@ -105,8 +105,6 @@ class ProfileService {
           id
           company
           position
-          startDate
-          endDate
           description
           isCurrent
         }
@@ -115,12 +113,8 @@ class ProfileService {
           degree
           institution
           fieldOfStudy
-          startDate
-          endDate
           grade
         }
-        createdAt
-        updatedAt
       }
     }
   `;
@@ -149,7 +143,6 @@ class ProfileService {
         availability
         salaryExpectation
         preferredWorkType
-        updatedAt
       }
     }
   `;

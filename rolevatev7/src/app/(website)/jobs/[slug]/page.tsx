@@ -2,20 +2,26 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { jobsService, Job } from "@/services";
+import { useAuth } from "@/hooks/useAuth";
+import { savedJobsService } from "@/services/savedJobs";
 
 export default function JobDetailPage() {
   const params = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
   const slug = params?.slug as string;
 
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const fetchJobDetail = async () => {
@@ -25,6 +31,12 @@ export default function JobDetailPage() {
 
         const jobDetail = await jobsService.getJobBySlug(slug);
         setJob(jobDetail);
+
+        // Check if job is already saved
+        if (user && jobDetail?.id) {
+          const saved = await savedJobsService.isJobSaved(String(jobDetail.id));
+          setIsSaved(saved);
+        }
       } catch (err) {
         console.error("Failed to fetch job details:", err);
         setError("Job not found. Please check your connection and try again.");
@@ -36,7 +48,37 @@ export default function JobDetailPage() {
     if (slug) {
       fetchJobDetail();
     }
-  }, [slug]);
+  }, [slug, user]);
+
+  // Handle Save/Unsave Job
+  const handleSaveJob = async () => {
+    if (!user) {
+      const currentUrl = window.location.pathname + window.location.search;
+      router.push(`/login?next=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const jobId = job?.id ? String(job.id) : "";
+      if (jobId) {
+        if (isSaved) {
+          // Unsave the job
+          await savedJobsService.unsaveJob(jobId);
+          setIsSaved(false);
+        } else {
+          // Save the job
+          await savedJobsService.saveJob(jobId);
+          setIsSaved(true);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to save/unsave job:", err);
+      // Could show a toast error here
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Format posted date
   const formatPostedDate = (dateString: string) => {
@@ -94,6 +136,9 @@ export default function JobDetailPage() {
                  trimmedLine.toLowerCase().includes('qualifications')) {
         if (currentSection.content.trim()) sections.push(currentSection);
         currentSection = { title: 'Requirements', content: '' };
+      } else if (trimmedLine.toLowerCase().includes('required skills')) {
+        if (currentSection.content.trim()) sections.push(currentSection);
+        currentSection = { title: 'Required Skills', content: '' };
       } else if (trimmedLine.toLowerCase().includes('benefits') || 
                  trimmedLine.toLowerCase().includes('what we offer')) {
         if (currentSection.content.trim()) sections.push(currentSection);
@@ -342,120 +387,110 @@ export default function JobDetailPage() {
         </nav>
 
         {/* Header */}
-        <div className="mb-12">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+        <div className="mb-12 pb-12 border-b border-gray-200">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            {/* Left Section: Company & Title */}
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">
+              {/* Company Header */}
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-16 h-16 bg-gray-100 rounded-sm flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-200">
+                  {job.companyLogo ? (
+                    <img 
+                      src={job.companyLogo} 
+                      alt={job.companyData?.name || job.company}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-gray-600 font-bold text-xl">
+                      {job.companyData?.name.charAt(0).toUpperCase() || job.company.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">Company</div>
+                  <div className="text-2xl font-semibold text-gray-900">
+                    {job.companyData?.name || job.company}
+                  </div>
+                </div>
+              </div>
+
+              {/* Job Title */}
+              <h1 className="text-4xl font-bold text-gray-900 mb-8 tracking-tight leading-tight">
                 {job.title}
               </h1>
 
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-primary-100 rounded-sm flex items-center justify-center">
-                  <span className="text-primary-600 font-bold text-lg">
-                    {job.companyData?.name.charAt(0).toUpperCase() || job.company.charAt(0).toUpperCase()}
-                  </span>
+              {/* Job Key Details - Grid layout */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Location</div>
+                  <div className="text-gray-900 font-medium">{job.location || "Not specified"}</div>
                 </div>
                 <div>
-                  <div className="text-lg font-semibold text-gray-900">
-                    {job.companyData?.name || job.company}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {job.companyData?.description || "Leading company in the industry"}
-                  </div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Salary</div>
+                  <div className="text-gray-900 font-medium">{job.salary || "Competitive"}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Job Type</div>
+                  <div className="text-gray-900 font-medium">{formatJobType(job.type)}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Experience</div>
+                  <div className="text-gray-900 font-medium">{formatJobLevel(job.level)}</div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="flex items-center gap-2 text-gray-600 text-sm">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>{job.location}</span>
+              {/* Quick Info Row */}
+              <div className="flex flex-wrap gap-6 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400">•</span>
+                  <span>Posted {formatPostedDate(job.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                  <span>{job.salary || "Competitive"}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0H8m8 0v2a2 2 0 01-2 2H10a2 2 0 01-2-2V6m8 0H8" />
-                  </svg>
-                  <span>{formatJobType(job.type)}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>{formatJobLevel(job.level)}</span>
-                </div>
+                {job.deadline && (
+                  <div className="flex items-center gap-2">
+                    <span className={`text-gray-400 ${new Date(job.deadline) < new Date() ? 'text-red-400' : ''}`}>•</span>
+                    <span className={new Date(job.deadline) < new Date() ? 'text-red-600 font-medium' : ''}>
+                      {formatDeadlineDate(job.deadline)}
+                    </span>
+                  </div>
+                )}
               </div>
-
-              <p className="text-gray-600 leading-relaxed">
-                {job.description}
-              </p>
             </div>
 
+            {/* Right Section: Action Buttons */}
             <div className="lg:w-80 flex-shrink-0">
-              <div className="bg-gray-50 rounded-sm p-6 border border-gray-100">
-                <div className="flex flex-col space-y-3">
-                  <Link href={`/jobs/${slug}/apply`}>
-                    <Button
-                      size="lg"
-                      className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                    >
-                      Apply Now
-                    </Button>
-                  </Link>
-
+              <div className="space-y-2 flex flex-col">
+                <Link href={`/jobs/${slug}/apply`}>
                   <Button
-                    variant="outline"
                     size="lg"
-                    className="w-full border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                    className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow-md transition-all duration-300"
                   >
-                    Save Job
+                    Apply Now
                   </Button>
-                </div>
+                </Link>
 
-                <div className="mt-6 pt-6 border-t border-gray-200 space-y-4">
-                  <div className="flex items-center gap-3 text-sm">
-                    <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <div className="text-gray-500 text-xs">Posted</div>
-                      <div className="text-gray-900 font-medium">
-                        {formatPostedDate(job.createdAt)}
-                      </div>
-                    </div>
-                  </div>
+                <Button
+                  onClick={handleSaveJob}
+                  disabled={isSaving}
+                  variant={isSaved ? "default" : "outline"}
+                  size="lg"
+                  className={`w-full transition-all ${
+                    isSaved 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                      : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                  }`}
+                >
+                  {isSaving ? "Processing..." : isSaved ? "✓ Saved" : "Save Job"}
+                </Button>
+              </div>
 
-                  {job.deadline && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <svg className="w-4 h-4 text-orange-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <div>
-                        <div className="text-gray-500 text-xs">Application Deadline</div>
-                        <div className={`font-medium ${new Date(job.deadline) < new Date() ? 'text-red-600' : 'text-orange-600'}`}>
-                          {formatDeadlineDate(job.deadline)}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3 text-sm">
-                    <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <div className="text-gray-500 text-xs">Updated</div>
-                      <div className="text-gray-900 font-medium">
-                        {new Date(job.updatedAt).toLocaleDateString()}
-                      </div>
-                    </div>
+              {/* Additional Info Card */}
+              <div className="mt-6 p-4 bg-gray-50 rounded-sm border border-gray-200">
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">About Company</div>
+                    <p className="text-gray-600 leading-relaxed">
+                      {job.companyData?.description || "Leading company in the industry"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -466,6 +501,14 @@ export default function JobDetailPage() {
         <div className="grid lg:grid-cols-3 gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
+            {/* Job Description Overview */}
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Overview</h2>
+              <p className="text-gray-700 leading-relaxed text-lg">
+                {job.description}
+              </p>
+            </div>
+
             {/* Dynamic Job Description Sections */}
             {parseJobDescription(job.description).map((section, index) => (
               <div key={index}>
@@ -477,70 +520,16 @@ export default function JobDetailPage() {
                 </div>
               </div>
             ))}
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-12">
-            {/* Job Details */}
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Job Details</h3>
-              <div className="space-y-5">
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0H8m8 0v2a2 2 0 01-2 2H10a2 2 0 01-2-2V6m8 0H8" />
-                  </svg>
-                  <div>
-                    <div className="text-sm text-gray-500">Job Type</div>
-                    <div className="text-gray-900 font-medium">{formatJobType(job.type)}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <div>
-                    <div className="text-sm text-gray-500">Experience Level</div>
-                    <div className="text-gray-900 font-medium">{formatJobLevel(job.level)}</div>
-                  </div>
-                </div>
-
-                {job.deadline && (
-                  <div className="flex items-center gap-3">
-                    <svg className={`w-5 h-5 flex-shrink-0 ${new Date(job.deadline) < new Date() ? 'text-red-400' : 'text-orange-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <div className="text-sm text-gray-500">Application Deadline</div>
-                      <div className={`font-medium ${new Date(job.deadline) < new Date() ? 'text-red-600' : 'text-orange-600'}`}>
-                        {formatDeadlineDate(job.deadline)}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <div>
-                    <div className="text-sm text-gray-500">Industry</div>
-                    <div className="text-gray-900 font-medium">Technology</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Required Skills */}
+            {/* Required Skills from job data */}
             {job.skills && job.skills.length > 0 && (
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Required Skills</h3>
-                <div className="flex flex-wrap gap-2">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">Required Skills</h2>
+                <div className="flex flex-wrap gap-3">
                   {job.skills.map((skill, index) => (
                     <Badge
                       key={index}
-                      variant="secondary"
-                      className="text-sm bg-gray-100 text-gray-700 border border-gray-200"
+                      className="text-sm bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-colors"
                     >
                       {skill}
                     </Badge>
@@ -548,47 +537,55 @@ export default function JobDetailPage() {
                 </div>
               </div>
             )}
+          </div>
 
-            {/* Company Info */}
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">About {job.companyData?.name || job.company}</h3>
-              <div className="space-y-5">
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
+          {/* Sidebar */}
+          <div className="space-y-8">
+            {/* Quick Stats */}
+            <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-sm border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Position Details</h3>
+              <div className="space-y-6">
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Employment Type</div>
+                  <div className="text-gray-900 font-medium">{formatJobType(job.type)}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Seniority Level</div>
+                  <div className="text-gray-900 font-medium">{formatJobLevel(job.level)}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Salary Range</div>
+                  <div className="text-gray-900 font-medium">{job.salary || "Competitive"}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Company Overview */}
+            <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-sm border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">About the Company</h3>
+              <div className="space-y-4">
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {job.companyData?.description || "A leading organization in the industry with a commitment to excellence and innovation."}
+                </p>
+              </div>
+            </div>
+
+            {/* Application Info */}
+            <div className="bg-blue-50 p-6 rounded-sm border border-blue-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Application Info</h3>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Job Posted</div>
+                  <p className="text-gray-900 font-medium">{formatPostedDate(job.createdAt)}</p>
+                </div>
+                {job.deadline && (
                   <div>
-                    <div className="text-sm text-gray-500">Industry</div>
-                    <div className="text-gray-900 font-medium">Technology</div>
+                    <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Application Deadline</div>
+                    <p className={`font-medium ${new Date(job.deadline) < new Date() ? 'text-red-600' : 'text-gray-900'}`}>
+                      {formatDeadlineDate(job.deadline)}
+                    </p>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <div>
-                    <div className="text-sm text-gray-500">Company Size</div>
-                    <div className="text-gray-900 font-medium">50-200 employees</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <div>
-                    <div className="text-sm text-gray-500">Location</div>
-                    <div className="text-gray-900 font-medium">{job.location}</div>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {job.companyData?.description || 'Company description not available.'}
-                  </p>
-                </div>
+                )}
               </div>
             </div>
           </div>

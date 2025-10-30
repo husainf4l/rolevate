@@ -103,13 +103,13 @@ export default function CompaniesPage() {
       <div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center mb-4">
-            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-thin text-gray-900 mb-2 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-light text-gray-900 mb-4 sm:mb-6 ">
               Explore{" "}
               <span className="text-primary-600">
                 Companies
               </span>
             </h1>
-            <p className="font-text text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto px-4">
               Discover amazing companies and their job opportunities
             </p>
           </div>

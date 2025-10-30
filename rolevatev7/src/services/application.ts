@@ -175,29 +175,19 @@ export const getApplicationById = async (id: string): Promise<Application> => {
         noticePeriod
         cvAnalysisScore
         cvAnalysisResults
-        analyzedAt
         aiCvRecommendations
         aiInterviewRecommendations
         aiSecondInterviewRecommendations
-        recommendationsGeneratedAt
         companyNotes
         source
         notes
         aiAnalysis
         interviewScheduled
-        reviewedAt
-        interviewScheduledAt
-        interviewedAt
-        rejectedAt
-        acceptedAt
         applicationNotes {
           id
           note
           isPrivate
-          createdAt
         }
-        createdAt
-        updatedAt
       }
     }
   `;
@@ -342,8 +332,6 @@ export const getApplicationsByJob = async (jobId: string): Promise<Application[]
         aiInterviewRecommendations
         aiSecondInterviewRecommendations
         interviewScheduled
-        createdAt
-        updatedAt
       }
     }
   `;
@@ -383,8 +371,6 @@ export const getCandidateApplicationDetails = async (jobId: string): Promise<App
         aiCvRecommendations
         aiInterviewRecommendations
         aiSecondInterviewRecommendations
-        createdAt
-        updatedAt
       }
     }
   `;
@@ -434,8 +420,6 @@ export const getCandidateApplications = async (): Promise<Application[]> => {
         coverLetter
         expectedSalary
         resumeUrl
-        createdAt
-        updatedAt
       }
     }
   `;

@@ -2,6 +2,7 @@ export interface Company {
   id: string;
   name: string;
   description?: string;
+  logo?: string;
 }
 
 export interface Job {
@@ -10,6 +11,7 @@ export interface Job {
   description: string;
   company: string; // Keep as string for backward compatibility, but we can enhance this later
   companyData?: Company; // Add optional company object
+  companyLogo?: string; // Add optional company logo URL
   department?: string; // Add department field
   location: string;
   salary?: string;

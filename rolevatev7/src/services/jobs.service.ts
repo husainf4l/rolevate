@@ -21,6 +21,7 @@ class JobsService {
           id
           name
           description
+          logo
         }
         department
         location
@@ -116,6 +117,7 @@ class JobsService {
           id
           name
           description
+          logo
         }
         department
         location
@@ -140,6 +142,7 @@ class JobsService {
           id
           name
           description
+          logo
         }
         department
         location
@@ -227,8 +230,10 @@ class JobsService {
         companyData: job.company ? {
           id: job.company.id,
           name: job.company.name,
-          description: job.company.description
+          description: job.company.description,
+          logo: job.company.logo
         } : undefined,
+        companyLogo: job.company?.logo, // Add company logo directly
         location: job.location,
         salary: job.salary,
         type: job.type,
@@ -310,8 +315,10 @@ class JobsService {
         companyData: job.company ? {
           id: job.company.id,
           name: job.company.name,
-          description: job.company.description
+          description: job.company.description,
+          logo: job.company.logo
         } : undefined,
+        companyLogo: job.company?.logo, // Add company logo directly
         location: job.location,
         salary: job.salary,
         type: job.type,
@@ -361,8 +368,10 @@ class JobsService {
         companyData: job.company ? {
           id: job.company.id,
           name: job.company.name,
-          description: job.company.description
+          description: job.company.description,
+          logo: job.company.logo
         } : undefined,
+        companyLogo: job.company?.logo, // Add company logo directly
         department: job.department, // Add department field
         location: job.location,
         salary: job.salary,
@@ -411,6 +420,13 @@ class JobsService {
         title: job.title,
         description: job.description || '',
         company: job.company?.name || 'Company',
+        companyData: job.company ? {
+          id: job.company.id,
+          name: job.company.name,
+          description: job.company.description,
+          logo: job.company.logo
+        } : undefined,
+        companyLogo: job.company?.logo, // Add company logo directly
         location: job.location || '',
         salary: job.salary || '',
         type: job.type || 'FULL_TIME',

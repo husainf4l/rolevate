@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, Heart } from "lucide-react";
 import { Job } from "@/types/jobs";
 
@@ -36,6 +37,21 @@ export default function JobCard({
       setIsSaving(false);
     }
   };
+
+  // Get company logo from job data
+  const getCompanyLogo = (): string | undefined => {
+    // Check for companyLogo property first
+    if ((job as any).companyLogo) {
+      return (job as any).companyLogo;
+    }
+    // Then check for company object with logo
+    if ((job as any).company?.logo) {
+      return (job as any).company.logo;
+    }
+    return undefined;
+  };
+
+  const companyLogo = getCompanyLogo();
 
   // Format posted date
   const formatPostedDate = (dateString: string) => {
@@ -79,8 +95,15 @@ export default function JobCard({
         {/* Header with company and save */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <Avatar className="w-10 h-10">
-              <AvatarFallback className="bg-[#0891b2] text-white font-semibold text-sm">
+            <Avatar className="w-10 h-10 rounded-sm">
+              {companyLogo ? (
+                <AvatarImage 
+                  src={companyLogo} 
+                  alt={job.company}
+                  className="object-cover"
+                />
+              ) : null}
+              <AvatarFallback className="bg-[#0891b2] text-white font-semibold text-sm rounded-sm">
                 {job.company.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>

@@ -9,8 +9,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      # Add your environment variables here
-      # - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_API_HOST=http://host.docker.internal:4005
+      - NEXT_PUBLIC_BACKEND_URL=http://host.docker.internal:4005
     restart: unless-stopped
     networks:
       - rolevate-network
