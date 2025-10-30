@@ -19,7 +19,7 @@ export class CompanyResolver {
     @Args('input') createCompanyInput: CreateCompanyInput,
     @Context() context: any,
   ): Promise<CompanyDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     const company = await this.companyService.create(createCompanyInput, userId);
     return this.mapToDto(company);
   }
@@ -96,8 +96,8 @@ export class CompanyResolver {
     @Args('input') input: CreateInvitationInput,
     @Context() context: any,
   ): Promise<InvitationDto> {
-    const userId = context.req.user.id;
-    const userCompanyId = context.req.user.companyId;
+    const userId = context.request.user.id;
+    const userCompanyId = context.request.user.companyId;
     
     if (!userCompanyId) {
       throw new Error('You must be associated with a company to create invitations');
@@ -136,7 +136,7 @@ export class CompanyResolver {
     @Args('code') code: string,
     @Context() context: any,
   ): Promise<InvitationDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     const invitation = await this.companyService.acceptInvitation(code, userId);
     return this.mapInvitationToDto(invitation);
   }
@@ -148,7 +148,7 @@ export class CompanyResolver {
   async listCompanyInvitations(
     @Context() context: any,
   ): Promise<InvitationDto[]> {
-    const userCompanyId = context.req.user.companyId;
+    const userCompanyId = context.request.user.companyId;
     
     if (!userCompanyId) {
       throw new Error('You must be associated with a company to view invitations');
@@ -166,7 +166,7 @@ export class CompanyResolver {
     @Args('invitationId', { type: () => ID }) invitationId: string,
     @Context() context: any,
   ): Promise<InvitationDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     const invitation = await this.companyService.cancelInvitation(invitationId, userId);
     return this.mapInvitationToDto(invitation);
   }

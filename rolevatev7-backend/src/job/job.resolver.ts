@@ -9,6 +9,8 @@ import { CreateJobInput } from './create-job.input';
 import { UpdateJobInput } from './update-job.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserService } from '../user/user.service';
+import { CheckOwnership } from '../common/decorators/check-ownership.decorator';
+import { OwnershipGuard } from '../common/guards/ownership.guard';
 
 @Resolver(() => JobDto)
 export class JobResolver {
@@ -23,37 +25,40 @@ export class JobResolver {
     @Args('input') input: CreateJobInput,
     @Context() context: any,
   ): Promise<JobDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.jobService.createJob(input, userId);
   }
 
   @Mutation(() => JobDto)
-  @UseGuards(JwtAuthGuard) // Only authenticated users can update jobs
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'job', resourceIdParam: 'input.id', isModification: true })
   async updateJob(
     @Args('input') input: UpdateJobInput,
     @Context() context: any,
   ): Promise<JobDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.jobService.updateJob(input, userId);
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthGuard) // Only authenticated users can delete jobs
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'job', resourceIdParam: 'id', isModification: true })
   async deleteJob(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.jobService.deleteJob(id, userId);
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthGuard) // Only authenticated users can hard delete jobs
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'job', resourceIdParam: 'id', isModification: true })
   async hardDeleteJob(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.jobService.hardDeleteJob(id, userId);
   }
 
@@ -78,7 +83,7 @@ export class JobResolver {
   @Query(() => [JobDto])
   @UseGuards(JwtAuthGuard)
   async companyJobs(@Context() context: any): Promise<JobDto[]> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     const user = await this.userService.findOne(userId);
     if (!user || !user.companyId) {
       return [];
@@ -101,7 +106,7 @@ export class JobResolver {
     @Args('notes', { type: () => String, nullable: true }) notes: string | undefined,
     @Context() context: any,
   ): Promise<SavedJobDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.jobService.saveJob(userId, jobId, notes);
   }
 
@@ -117,7 +122,7 @@ export class JobResolver {
     @Args('jobId', { type: () => ID }) jobId: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.jobService.unsaveJob(userId, jobId);
   }
 
@@ -133,7 +138,7 @@ export class JobResolver {
     @Args('jobId', { type: () => ID }) jobId: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.jobService.isJobSaved(userId, jobId);
   }
 
@@ -148,7 +153,7 @@ export class JobResolver {
   async savedJobs(
     @Context() context: any,
   ): Promise<SavedJobDto[]> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.jobService.getSavedJobs(userId);
   }
 }

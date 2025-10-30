@@ -15,14 +15,14 @@ export class ApiKeyResolver {
     @Args('input') input: CreateApiKeyInput,
     @Context() context: any,
   ): Promise<ApiKeyDto> {
-    const userId = context.req.user.id; // From user object
+    const userId = context.request.user.id; // From user object
     return this.apiKeyService.generateApiKey(userId, input);
   }
 
   @Query(() => [ApiKeyDto])
   @UseGuards(JwtAuthGuard)
   async myApiKeys(@Context() context: any): Promise<ApiKeyDto[]> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.apiKeyService.findAllByUser(userId);
   }
 
@@ -32,7 +32,7 @@ export class ApiKeyResolver {
     @Args('keyId') keyId: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.apiKeyService.revokeApiKey(userId, keyId);
   }
 }

@@ -18,7 +18,7 @@ export class SavedJobResolver {
     @Args('jobId', { type: () => ID, description: 'ID of the job to save' }) jobId: string,
     @Context() context: any,
   ): Promise<SavedJobDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     const savedJob = await this.savedJobService.saveJob(userId, jobId);
     return this.mapToDto(savedJob);
   }
@@ -31,7 +31,7 @@ export class SavedJobResolver {
     @Args('jobId', { type: () => ID, description: 'ID of the job to unsave' }) jobId: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.savedJobService.unsaveJob(userId, jobId);
   }
 
@@ -41,7 +41,7 @@ export class SavedJobResolver {
   })
   @UseGuards(JwtAuthGuard)
   async getMySavedJobs(@Context() context: any): Promise<SavedJobDto[]> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     const savedJobs = await this.savedJobService.findAllByUser(userId);
     return savedJobs.map(savedJob => this.mapToDto(savedJob));
   }
@@ -55,7 +55,7 @@ export class SavedJobResolver {
     @Args('jobId', { type: () => ID }) jobId: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.savedJobService.isSaved(userId, jobId);
   }
 
@@ -65,7 +65,7 @@ export class SavedJobResolver {
   })
   @UseGuards(JwtAuthGuard)
   async getSavedJobsCount(@Context() context: any): Promise<number> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.savedJobService.countByUser(userId);
   }
 

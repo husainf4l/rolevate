@@ -12,6 +12,7 @@ import { ApiKeyGuard } from './api-key.guard';
 import { BusinessOrApiKeyGuard } from './business-or-api-key.guard';
 import { JwtOrApiKeyGuard } from './jwt-or-api-key.guard';
 import { AuditService } from '../audit.service';
+import { AUTH } from '../common/constants/config.constants';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { AuditService } from '../audit.service';
         return {
           secret,
           signOptions: { 
-            expiresIn: '1h',
+            expiresIn: AUTH.JWT_EXPIRY,
             issuer: 'rolevate-api',
             audience: 'rolevate-client',
           },

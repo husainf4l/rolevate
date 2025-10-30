@@ -8,6 +8,7 @@ import { UpdateNotificationSettingsInput } from './update-notification-settings.
 import { NotificationDto } from './notification.dto';
 import { NotificationSettingsDto } from './notification-settings.dto';
 import { AuditService } from '../audit.service';
+import { NOTIFICATION } from '../common/constants/config.constants';
 
 @Injectable()
 export class NotificationService {
@@ -43,7 +44,7 @@ export class NotificationService {
     userId: string,
     options: { limit?: number; offset?: number; unreadOnly?: boolean } = {}
   ): Promise<{ notifications: NotificationDto[]; total: number }> {
-    const { limit = 20, offset = 0, unreadOnly = false } = options;
+    const { limit = NOTIFICATION.BATCH_FETCH_SIZE, offset = 0, unreadOnly = false } = options;
 
     const queryBuilder = this.notificationRepository
       .createQueryBuilder('notification')

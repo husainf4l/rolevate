@@ -19,12 +19,17 @@ export class AuthResolver {
   ) {}
 
   @Mutation(() => LoginResponseDto)
-  async login(@Args('input') input: LoginInput): Promise<LoginResponseDto> {
+  async login(
+    @Args('input') input: LoginInput,
+    @Context() context: any,
+  ): Promise<LoginResponseDto> {
     const user = await this.authService.validateUser(input.email, input.password);
     if (!user) {
       throw new Error('Invalid credentials');
     }
-    const token = await this.authService.login(user);
+    // Extract IP from Fastify request context
+    const ip = context.request?.ip || context.request?.socket?.remoteAddress;
+    const token = await this.authService.login(user, ip);
     return token;
   }
 
@@ -36,7 +41,7 @@ export class AuthResolver {
     @Args('input') input: ChangePasswordInput,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.userService.changePassword(
       userId,
       input.currentPassword,
@@ -47,7 +52,7 @@ export class AuthResolver {
   @Mutation(() => Boolean, { description: 'Logout user' })
   @UseGuards(JwtAuthGuard)
   async logout(@Context() context: any): Promise<boolean> {
-    const user = context.req.user;
+    const user = context.request.user;
     this.auditService.logUserLogout(user.sub, user.email);
     return true;
   }

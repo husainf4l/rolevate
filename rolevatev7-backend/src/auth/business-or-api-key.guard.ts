@@ -15,7 +15,7 @@ export class BusinessOrApiKeyGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    const request = ctx.getContext().request;
 
     // First try API key authentication
     const apiKey = request.headers['x-api-key'];

@@ -18,7 +18,7 @@ export class SystemApiKeyGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    const request = ctx.getContext().request;
     
     const apiKey = request.headers['x-api-key'];
     const systemApiKey = this.configService.get<string>('SYSTEM_API_KEY');

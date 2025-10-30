@@ -47,7 +47,7 @@ export class UserResolver {
   @Query(() => UserDto)
   @UseGuards(JwtAuthGuard)
   async me(@Context() context: any): Promise<UserDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     const user = await this.userService.findOne(userId);
     if (!user) throw new Error('User not found');
     
@@ -154,7 +154,7 @@ export class UserResolver {
   ): Promise<UserDto> {
     // Optional: Add authorization check to ensure user can only update themselves
     // or is an admin
-    const currentUserId = context.req.user.id;
+    const currentUserId = context.request.user.id;
     if (currentUserId !== id) {
       // You might want to check if user is admin here
       // For now, we'll allow it, but you can add stricter checks
@@ -201,7 +201,7 @@ export class UserResolver {
     @Args('input') input: ChangePasswordInput,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.userService.changePassword(
       userId,
       input.currentPassword,

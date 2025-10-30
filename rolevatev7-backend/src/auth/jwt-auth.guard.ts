@@ -12,19 +12,25 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    const gqlContext = ctx.getContext();
+    const request = gqlContext.request;
+    
+    if (!request) {
+      console.error('JwtAuthGuard: No request object in GraphQL context');
+      return false;
+    }
     
     let token: string | undefined;
 
     // First try to get from Authorization header
-    const authHeader = request.headers.authorization;
+    const authHeader = request?.headers?.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.substring(7);
     }
 
     // If not found in header, try cookie
     if (!token) {
-      const cookieHeader = request.headers.cookie;
+      const cookieHeader = request?.headers?.cookie;
       if (cookieHeader) {
         const cookies = cookieHeader.split(';').reduce((acc: Record<string, string>, cookie: string) => {
           const [key, value] = cookie.trim().split('=');
@@ -36,6 +42,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     if (!token) {
+      console.error('JwtAuthGuard: No token found in Authorization header or cookie');
       return false;
     }
 
@@ -46,7 +53,9 @@ export class JwtAuthGuard implements CanActivate {
         request.user = user;
         return true;
       }
+      console.error('JwtAuthGuard: User not found for token payload');
     } catch (error) {
+      console.error('JwtAuthGuard: Token verification failed:', error instanceof Error ? error.message : error);
       return false;
     }
     return false;

@@ -35,7 +35,7 @@ export class AuthService {
     return this.userService.validatePassword(email, password);
   }
 
-  async login(user: User): Promise<LoginResponseDto> {
+  async login(user: User, ip?: string): Promise<LoginResponseDto> {
     // Fetch user with company relation first to get companyId
     const fullUser = await this.userService.findOne(user.id);
     
@@ -48,7 +48,7 @@ export class AuthService {
     const access_token = this.jwtService.sign(payload);
 
     if (user.email) {
-      this.auditService.logLoginAttempt(user.email, true);
+      this.auditService.logLoginAttempt(user.email, true, ip);
     }
 
     return {

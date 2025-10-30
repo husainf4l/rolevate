@@ -15,6 +15,7 @@ import { SMSResolver } from './sms.resolver';
 import { Job } from '../job/job.entity';
 import { Communication } from '../communication/communication.entity';
 import { UserModule } from '../user/user.module';
+import { AUTH } from '../common/constants/config.constants';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { UserModule } from '../user/user.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'defaultSecret',
-        signOptions: { expiresIn: '60m' },
+        signOptions: { expiresIn: AUTH.JWT_EXPIRY },
       }),
       inject: [ConfigService],
     }),

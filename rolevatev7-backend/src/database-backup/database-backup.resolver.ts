@@ -20,7 +20,7 @@ export class DatabaseBackupResolver {
     @Context() context: any,
   ): Promise<BackupOperationResponse> {
     try {
-      const userId = context.req.user.id;
+      const userId = context.request.user.id;
       const backup = await this.backupService.createBackup(userId, input?.description);
       return {
         success: true,

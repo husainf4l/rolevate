@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { JobModule } from './job/job.module';
@@ -19,22 +20,30 @@ import { ServicesModule } from './services/services.module';
 import { LiveKitModule } from './livekit/livekit.module';
 import { DatabaseBackupModule } from './database-backup/database-backup.module';
 import { AuditService } from './audit.service';
+import { CommonModule } from './common/common.module';
+import { RATE_LIMIT } from './common/constants/config.constants';
+import { QueueModule } from './queue/queue.module';
+import { RedisCacheModule } from './cache/redis-cache.module';
+import { CacheService } from './cache/cache.service';
 
 @Module({
   imports: [
+    CommonModule, // Global module for shared services
+    RedisCacheModule, // Global Redis caching
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(), // Enable cron jobs for audit log cleanup
     ThrottlerModule.forRoot([
       {
         name: 'default',
-        ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per minute for general use
+        ttl: RATE_LIMIT.DEFAULT.TTL,
+        limit: RATE_LIMIT.DEFAULT.LIMIT,
       },
       {
         name: 'auth',
-        ttl: 60000, // 1 minute
-        limit: 5, // 5 authentication attempts per minute
+        ttl: RATE_LIMIT.AUTH.TTL,
+        limit: RATE_LIMIT.AUTH.LIMIT,
       },
     ]),
     TypeOrmModule.forRootAsync({
@@ -56,10 +65,28 @@ import { AuditService } from './audit.service';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
-      path: '/api/graphql', // Explicit full path
+      path: '/api/graphql',
       playground: process.env.NODE_ENV !== 'production',
       introspection: process.env.NODE_ENV !== 'production',
-      context: ({ req, reply }: { req: any; reply: any }) => ({ req, reply }),
+      context: (args: any) => {
+        // Fastify provides the request directly as the first argument
+        // Not as an object with {req, reply}
+        let request = args;
+        let reply = undefined;
+        
+        // If args is an object with req/reply properties, use those
+        if (args && typeof args === 'object' && !args.raw) {
+          request = args.req || args.request;
+          reply = args.reply || args.res;
+        }
+        
+        return {
+          request,
+          reply,
+          req: request,
+          res: reply,
+        };
+      },
       csrfPrevention: {
         requestHeaders: ['x-apollo-operation-name', 'apollo-require-preflight'],
       },
@@ -78,7 +105,12 @@ import { AuditService } from './audit.service';
     SecurityModule,
     WhatsAppModule,
     LiveKitModule,
+    QueueModule,
   ],
-  providers: [AuditService],
+  providers: [
+    AuditService,
+    CacheService,
+  ],
 })
 export class AppModule {}
+

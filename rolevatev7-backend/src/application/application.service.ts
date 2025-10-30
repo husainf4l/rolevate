@@ -1,6 +1,6 @@
-import { Injectable, InternalServerErrorException, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, BadRequestException, Logger, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { Application, ApplicationStatus } from './application.entity';
 import { ApplicationNote } from './application-note.entity';
 import { CreateApplicationInput } from './create-application.input';
@@ -23,6 +23,8 @@ import { CandidateProfile } from '../candidate/candidate-profile.entity';
 import { WorkExperience } from '../candidate/work-experience.entity';
 import { Education } from '../candidate/education.entity';
 import { JwtService } from '@nestjs/jwt';
+import { ResourceOwnershipService } from '../common/services/resource-ownership.service';
+import { AUTH, VALIDATION, PAGINATION } from '../common/constants/config.constants';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -43,13 +45,18 @@ export class ApplicationService {
     private notificationService: NotificationService,
     private smsService: SMSService,
     private jwtService: JwtService,
+    private resourceOwnershipService: ResourceOwnershipService,
+    private dataSource: DataSource,
   ) {}
 
   async create(createApplicationInput: CreateApplicationInput, userId?: string): Promise<Application> {
-    // Validate that the candidate is applying for themselves or is authorized
+    // Validate that the candidate is applying for themselves
+    // Business users and admins can apply on behalf of candidates if needed
     if (userId && createApplicationInput.candidateId !== userId) {
-      // TODO: Add role-based check for recruiters/admins
-      throw new Error('Unauthorized: Can only apply on behalf of yourself');
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user || (user.userType !== UserType.BUSINESS && user.userType !== UserType.ADMIN)) {
+        throw new ForbiddenException('You can only apply on behalf of yourself');
+      }
     }
 
     // Check if user has already applied to this job
@@ -61,7 +68,7 @@ export class ApplicationService {
     });
 
     if (existingApplication) {
-      throw new Error('You have already applied to this job');
+      throw new BadRequestException('You have already applied to this job');
     }
 
     const application = this.applicationRepository.create(createApplicationInput);
@@ -69,7 +76,7 @@ export class ApplicationService {
 
     // Log audit event
     if (userId) {
-      this.auditService.logApplicationCreation(userId, savedApplication.id, createApplicationInput.jobId);
+      await this.auditService.logApplicationCreation(userId, savedApplication.id, createApplicationInput.jobId);
     }
 
     // Notify company users about new application
@@ -98,263 +105,356 @@ export class ApplicationService {
   ): Promise<ApplicationResponse> {
     console.log('🔄 Processing anonymous application...');
 
-    // Resume URL is optional for now - allow applications without resumes
-    // Later we can make it required after implementing file upload
-    const resumeUrl = createApplicationInput.resumeUrl || null;
+    // Use transaction for atomic operation - if any step fails, rollback everything
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // Get job details to verify it exists and is active
-    const job = await this.applicationRepository.manager.findOne(Job, {
-      where: { id: createApplicationInput.jobId },
-      relations: ['company'],
-    });
+    try {
+      // Resume URL is optional for now - allow applications without resumes
+      // Later we can make it required after implementing file upload
+      const resumeUrl = createApplicationInput.resumeUrl || null;
 
-    if (!job) {
-      throw new Error('Job not found');
-    }
-
-    // Allow applications for ACTIVE and PAUSED jobs
-    if (job.status === 'CLOSED' || job.status === 'EXPIRED' || job.status === 'DELETED') {
-      throw new Error(`Job is ${job.status.toLowerCase()} and not accepting applications`);
-    }
-
-    if (new Date() > job.deadline) {
-      throw new Error('Job application deadline has passed');
-    }
-
-    // Validate required candidate information
-    // Email and phone are optional - they can be extracted from CV or provided by user
-    if (createApplicationInput.email) {
-      // Validate email format only if provided
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(createApplicationInput.email.trim())) {
-        throw new BadRequestException('Invalid email format');
-      }
-    }
-
-    if (createApplicationInput.phone) {
-      // Validate phone number format only if provided
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-      const cleanPhone = createApplicationInput.phone.replace(/[\s\-\(\)]/g, '');
-      if (!phoneRegex.test(cleanPhone)) {
-        throw new BadRequestException('Invalid phone number format');
-      }
-    }
-
-    // Generate anonymous candidate info - FastAPI will extract real data later
-    console.log('🆕 Creating anonymous candidate with placeholder data...');
-    const timestamp = Date.now();
-    const anonymousId = `anonymous-${timestamp}`;
-    
-    // If email is not provided, generate a placeholder email
-    // FastAPI will update it with the real email from the CV
-    const email = createApplicationInput.email || `${anonymousId}@placeholder.temp`;
-    const phone = createApplicationInput.phone || `+962${timestamp.toString().slice(-9)}`;
-    
-    const candidateInfo = {
-      firstName: createApplicationInput.firstName || 'Anonymous',
-      lastName: createApplicationInput.lastName || anonymousId,
-      email: email,
-      phone: phone,
-      linkedin: createApplicationInput.linkedin || null,
-      portfolioUrl: createApplicationInput.portfolioUrl,
-    };
-
-    // Always create new anonymous candidate - FastAPI will update with real data later
-    console.log('🆕 Creating new anonymous candidate account...');
-
-    // Generate random password
-    const randomPassword = this.generateRandomPassword();
-    const hashedPassword = await bcrypt.hash(randomPassword, 10);
-
-    // Create user and candidate profile with or without CV
-    const result = resumeUrl 
-      ? await this.createCandidateFromCV(candidateInfo, hashedPassword, resumeUrl)
-      : await this.createCandidateWithoutCV(candidateInfo, hashedPassword);
-    const candidateId = result.user.id;
-
-    // Generate JWT token for the new candidate
-    const payload = { 
-      email: result.user.email, 
-      sub: result.user.id, 
-      userType: result.user.userType,
-      companyId: null
-    };
-    const token = this.jwtService.sign(payload);
-
-    const candidateCredentials = {
-      email: candidateInfo.email,
-      password: randomPassword,
-      token: token
-    };
-
-    console.log('✅ Created anonymous candidate account with ID:', candidateId);
-    console.log('📧 Email:', candidateInfo.email, candidateInfo.email.includes('@placeholder.temp') ? '(placeholder - will be extracted from CV)' : '(provided)');
-    console.log('📱 Phone:', candidateInfo.phone, createApplicationInput.phone ? '(provided)' : '(placeholder - will be extracted from CV)');
-    console.log('🔄 FastAPI will update with real candidate data from CV');
-
-    // Create the application
-    const application = this.applicationRepository.create({
-      ...createApplicationInput,
-      candidateId: candidateId,
-    });
-    const savedApplication = await this.applicationRepository.save(application);
-
-    // Increment job applicants count
-    await this.applicationRepository.manager.update(Job, job.id, {
-      applicants: job.applicants + 1,
-    });
-
-    // Trigger CV analysis via FastAPI service if resume is available
-    if (createApplicationInput.resumeUrl) {
-      this.triggerCVAnalysis(
-        savedApplication.id, 
-        savedApplication.candidateId,
-        createApplicationInput.jobId,
-        createApplicationInput.resumeUrl
-      ).catch(error => {
-        console.error('Failed to trigger CV analysis:', error);
+      // Get job details to verify it exists and is active
+      const job = await queryRunner.manager.findOne(Job, {
+        where: { id: createApplicationInput.jobId },
+        relations: ['company'],
       });
-    }
 
-    // Send interview room link to candidate (room will be created on-demand)
-    this.sendInterviewLinkToCandidate(savedApplication);
+      if (!job) {
+        throw new BadRequestException('Job not found');
+      }
 
-    // Send login credentials via WhatsApp to candidate if phone number is available
-    if (candidateInfo.phone && !candidateInfo.phone.includes('timestamp')) {
-      console.log('📱 Sending login credentials via WhatsApp to candidate...');
-      await this.sendLoginCredentialsWhatsApp(
-        candidateInfo.phone,
-        candidateInfo.email,
-        randomPassword,
-        job.title
+      // Allow applications for ACTIVE and PAUSED jobs
+      if (job.status === 'CLOSED' || job.status === 'EXPIRED' || job.status === 'DELETED') {
+        throw new BadRequestException(`Job is ${job.status.toLowerCase()} and not accepting applications`);
+      }
+
+      if (new Date() > job.deadline) {
+        throw new BadRequestException('Job application deadline has passed');
+      }
+
+      // Validate required candidate information
+      // Email and phone are optional - they can be extracted from CV or provided by user
+      if (createApplicationInput.email) {
+        // Validate email format only if provided
+        if (!VALIDATION.EMAIL.REGEX.test(createApplicationInput.email.trim())) {
+          throw new BadRequestException('Invalid email format');
+        }
+      }
+
+      if (createApplicationInput.phone) {
+        // Validate phone number format only if provided
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        const cleanPhone = createApplicationInput.phone.replace(/[\s\-\(\)]/g, '');
+        if (!phoneRegex.test(cleanPhone)) {
+          throw new BadRequestException('Invalid phone number format');
+        }
+      }
+
+      // Generate anonymous candidate info - FastAPI will extract real data later
+      console.log('🆕 Creating anonymous candidate with placeholder data...');
+      const timestamp = Date.now();
+      const anonymousId = `anonymous-${timestamp}`;
+      
+      // If email is not provided, generate a placeholder email
+      // FastAPI will update it with the real email from the CV
+      const email = createApplicationInput.email || `${anonymousId}@placeholder.temp`;
+      const phone = createApplicationInput.phone || `+962${timestamp.toString().slice(-9)}`;
+      
+      const candidateInfo = {
+        firstName: createApplicationInput.firstName || 'Anonymous',
+        lastName: createApplicationInput.lastName || anonymousId,
+        email: email,
+        phone: phone,
+        linkedin: createApplicationInput.linkedin || null,
+        portfolioUrl: createApplicationInput.portfolioUrl,
+      };
+
+      // Always create new anonymous candidate - FastAPI will update with real data later
+      console.log('🆕 Creating new anonymous candidate account...');
+
+      // Generate random password
+      const randomPassword = this.generateRandomPassword();
+      const hashedPassword = await bcrypt.hash(randomPassword, AUTH.BCRYPT_ROUNDS);
+
+      // Create user and candidate profile with or without CV (using transaction manager)
+      const result = resumeUrl 
+        ? await this.createCandidateFromCVWithTransaction(candidateInfo, hashedPassword, resumeUrl, queryRunner)
+        : await this.createCandidateWithoutCVWithTransaction(candidateInfo, hashedPassword, queryRunner);
+      const candidateId = result.user.id;
+
+      // Generate JWT token for the new candidate
+      const payload = { 
+        email: result.user.email, 
+        sub: result.user.id, 
+        userType: result.user.userType,
+        companyId: null
+      };
+      const token = this.jwtService.sign(payload);
+
+      const candidateCredentials = {
+        email: candidateInfo.email,
+        password: randomPassword,
+        token: token
+      };
+
+      console.log('✅ Created anonymous candidate account with ID:', candidateId);
+      console.log('📧 Email:', candidateInfo.email, candidateInfo.email.includes('@placeholder.temp') ? '(placeholder - will be extracted from CV)' : '(provided)');
+      console.log('📱 Phone:', candidateInfo.phone, createApplicationInput.phone ? '(provided)' : '(placeholder - will be extracted from CV)');
+      console.log('🔄 FastAPI will update with real candidate data from CV');
+
+      // Create the application
+      const application = queryRunner.manager.create(Application, {
+        ...createApplicationInput,
+        candidateId: candidateId,
+      });
+      const savedApplication = await queryRunner.manager.save(application);
+
+      // Increment job applicants count
+      await queryRunner.manager.update(Job, job.id, {
+        applicants: job.applicants + 1,
+      });
+
+      // Commit transaction - all operations succeeded
+      await queryRunner.commitTransaction();
+
+      // Trigger CV analysis via FastAPI service if resume is available (after transaction commits)
+      if (createApplicationInput.resumeUrl) {
+        this.triggerCVAnalysis(
+          savedApplication.id, 
+          savedApplication.candidateId,
+          createApplicationInput.jobId,
+          createApplicationInput.resumeUrl
+        ).catch(error => {
+          console.error('Failed to trigger CV analysis:', error);
+        });
+      }
+
+      // Send interview room link to candidate (room will be created on-demand)
+      this.sendInterviewLinkToCandidate(savedApplication);
+
+      // Send login credentials via WhatsApp to candidate if phone number is available
+      if (candidateInfo.phone && !candidateInfo.phone.includes('timestamp')) {
+        console.log('📱 Sending login credentials via WhatsApp to candidate...');
+        await this.sendLoginCredentialsWhatsApp(
+          candidateInfo.phone,
+          candidateInfo.email,
+          randomPassword,
+          job.title
+        );
+      } else {
+        console.log('⚠️ No valid phone number available for WhatsApp, skipping login credentials message');
+      }
+
+      // Notify company users about new application
+      await this.notifyCompanyAboutNewApplication(savedApplication);
+
+      // Reload application with all relations for GraphQL response
+      const applicationWithRelations = await this.applicationRepository.findOne({
+        where: { id: savedApplication.id },
+        relations: ['job', 'job.company', 'candidate', 'candidate.candidateProfile'],
+      });
+
+      if (!applicationWithRelations) {
+        throw new InternalServerErrorException('Failed to load application after creation');
+      }
+
+      // Return response with anonymous credentials
+      return {
+        application: applicationWithRelations,
+        candidateCredentials,
+        message: 'Application submitted successfully! Anonymous account created. We will extract your details from the CV and update your profile.'
+      };
+    } catch (error) {
+      // Rollback transaction on any error
+      await queryRunner.rollbackTransaction();
+      console.error('❌ Failed to create anonymous application:', error);
+      
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      
+      throw new InternalServerErrorException(
+        `Failed to create application: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
-    } else {
-      console.log('⚠️ No valid phone number available for WhatsApp, skipping login credentials message');
+    } finally {
+      // Release query runner
+      await queryRunner.release();
     }
-
-    // Notify company users about new application
-    await this.notifyCompanyAboutNewApplication(savedApplication);
-
-    // Reload application with all relations for GraphQL response
-    const applicationWithRelations = await this.applicationRepository.findOne({
-      where: { id: savedApplication.id },
-      relations: ['job', 'job.company', 'candidate', 'candidate.candidateProfile'],
-    });
-
-    if (!applicationWithRelations) {
-      throw new Error('Failed to load application after creation');
-    }
-
-    // Return response with anonymous credentials
-    return {
-      application: applicationWithRelations,
-      candidateCredentials,
-      message: 'Application submitted successfully! Anonymous account created. We will extract your details from the CV and update your profile.'
-    };
   }
 
-  private async createCandidateFromCV(
+  /**
+   * Transaction-aware version of createCandidateFromCV
+   */
+  private async createCandidateFromCVWithTransaction(
     candidateInfo: any,
     hashedPassword: string,
-    resumeUrl: string
+    resumeUrl: string,
+    queryRunner: QueryRunner
   ) {
     console.log('🏗️ Creating user and empty candidate profile from basic CV data...');
 
-    return await this.applicationRepository.manager.transaction(async (manager) => {
-      // Check if user already exists with this email
-      let user = await manager.findOne(User, {
-        where: { email: candidateInfo.email }
-      });
-
-      if (user) {
-        console.log('ℹ️ User already exists with email:', candidateInfo.email);
-        // Update user info if needed
-        await manager.update(User, { id: user.id }, {
-          name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
-          password: hashedPassword, // Update password
-          phone: candidateInfo.phone, // Save phone to User entity
-        });
-        // Reload user
-        user = await manager.findOne(User, {
-          where: { email: candidateInfo.email }
-        });
-      } else {
-        // Create new user
-        console.log('🆕 Creating new user with email:', candidateInfo.email);
-        user = await manager.save(User, {
-          email: candidateInfo.email,
-          name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
-          password: hashedPassword,
-          userType: UserType.CANDIDATE,
-          phone: candidateInfo.phone, // Save phone to User entity
-          isActive: true,
-        });
-      }
-
-      if (!user) {
-        throw new Error('Failed to create or find user');
-      }
-
-      // Check if candidate profile already exists for this user
-      let candidateProfile = await manager.findOne(CandidateProfile, {
-        where: { userId: user.id }
-      });
-
-      if (candidateProfile) {
-        console.log('ℹ️ Candidate profile already exists, updating basic info...');
-        // Update existing profile with basic info only
-        // Combine firstName and lastName into name
-        const fullName = [candidateInfo.firstName, candidateInfo.lastName]
-          .filter(Boolean)
-          .join(' ')
-          .trim() || undefined;
-          
-        await manager.update(CandidateProfile, { userId: user.id }, {
-          name: fullName,
-          phone: candidateInfo.phone,
-          resumeUrl: resumeUrl,
-          // Leave CV analysis fields empty - FastAPI will fill them
-        });
-        // Reload to get updated profile
-        candidateProfile = await manager.findOne(CandidateProfile, {
-          where: { userId: user.id }
-        });
-      } else {
-        // Create new candidate profile with basic info only
-        console.log('🆕 Creating new candidate profile with basic info...');
-        // Combine firstName and lastName into name
-        const fullName = [candidateInfo.firstName, candidateInfo.lastName]
-          .filter(Boolean)
-          .join(' ')
-          .trim() || undefined;
-          
-        candidateProfile = await manager.save(CandidateProfile, {
-          userId: user.id,
-          name: fullName,
-          phone: candidateInfo.phone,
-          resumeUrl: resumeUrl,
-          // Leave all CV analysis fields empty - FastAPI will populate them
-          skills: [],
-          experience: undefined,
-          education: undefined,
-          bio: undefined,
-          location: undefined,
-          linkedinUrl: undefined,
-          githubUrl: undefined,
-          portfolioUrl: undefined,
-        });
-      }
-
-      if (!candidateProfile) {
-        throw new Error('Failed to create or find candidate profile');
-      }
-
-      return {
-        user,
-        candidateProfile
-      };
+    const manager = queryRunner.manager;
+    
+    // Check if user already exists with this email
+    let user = await manager.findOne(User, {
+      where: { email: candidateInfo.email }
     });
+
+    if (user) {
+      console.log('ℹ️ User already exists with email:', candidateInfo.email);
+      // Update user info if needed
+      await manager.update(User, { id: user.id }, {
+        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+        password: hashedPassword,
+        phone: candidateInfo.phone,
+      });
+      user = await manager.findOne(User, { where: { email: candidateInfo.email } });
+    } else {
+      // Create new user
+      console.log('🆕 Creating new user with email:', candidateInfo.email);
+      user = await manager.save(User, {
+        email: candidateInfo.email,
+        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+        password: hashedPassword,
+        userType: UserType.CANDIDATE,
+        phone: candidateInfo.phone,
+        isActive: true,
+      });
+    }
+
+    if (!user) {
+      throw new InternalServerErrorException('Failed to create or find user');
+    }
+
+    // Check if candidate profile already exists for this user
+    let candidateProfile = await manager.findOne(CandidateProfile, {
+      where: { userId: user.id }
+    });
+
+    if (candidateProfile) {
+      console.log('ℹ️ Candidate profile already exists, updating basic info...');
+      const fullName = [candidateInfo.firstName, candidateInfo.lastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim() || undefined;
+        
+      await manager.update(CandidateProfile, { userId: user.id }, {
+        name: fullName,
+        phone: candidateInfo.phone,
+        resumeUrl: resumeUrl,
+      });
+      candidateProfile = await manager.findOne(CandidateProfile, { where: { userId: user.id } });
+    } else {
+      // Create new candidate profile
+      console.log('🆕 Creating new candidate profile with basic info...');
+      const fullName = [candidateInfo.firstName, candidateInfo.lastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim() || undefined;
+        
+      candidateProfile = await manager.save(CandidateProfile, {
+        userId: user.id,
+        name: fullName,
+        phone: candidateInfo.phone,
+        resumeUrl: resumeUrl,
+        skills: [],
+      });
+    }
+
+    if (!candidateProfile) {
+      throw new InternalServerErrorException('Failed to create or find candidate profile');
+    }
+
+    return { user, candidateProfile };
   }
+
+  /**
+   * Transaction-aware version of createCandidateWithoutCV
+   */
+  private async createCandidateWithoutCVWithTransaction(
+    candidateInfo: any,
+    hashedPassword: string,
+    queryRunner: QueryRunner
+  ) {
+    console.log('🏗️ Creating user and candidate profile without CV...');
+
+    const manager = queryRunner.manager;
+    
+    // Check if user already exists with this email
+    let user = await manager.findOne(User, {
+      where: { email: candidateInfo.email }
+    });
+
+    if (user) {
+      console.log('ℹ️ User already exists with email:', candidateInfo.email);
+      await manager.update(User, { id: user.id }, {
+        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+        password: hashedPassword,
+        phone: candidateInfo.phone,
+      });
+      user = await manager.findOne(User, { where: { email: candidateInfo.email } });
+    } else {
+      console.log('🆕 Creating new user with email:', candidateInfo.email);
+      user = await manager.save(User, {
+        email: candidateInfo.email,
+        name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
+        password: hashedPassword,
+        userType: UserType.CANDIDATE,
+        phone: candidateInfo.phone,
+        isActive: true,
+      });
+    }
+
+    if (!user) {
+      throw new InternalServerErrorException('Failed to create or find user');
+    }
+
+    // Check if candidate profile already exists
+    let candidateProfile = await manager.findOne(CandidateProfile, {
+      where: { userId: user.id }
+    });
+
+    if (candidateProfile) {
+      console.log('ℹ️ Candidate profile already exists, updating basic info...');
+      const fullName = [candidateInfo.firstName, candidateInfo.lastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim() || undefined;
+        
+      await manager.update(CandidateProfile, { userId: user.id }, {
+        name: fullName,
+        phone: candidateInfo.phone,
+        linkedinUrl: candidateInfo.linkedin,
+        portfolioUrl: candidateInfo.portfolioUrl,
+      });
+      candidateProfile = await manager.findOne(CandidateProfile, { where: { userId: user.id } });
+    } else {
+      console.log('🆕 Creating new candidate profile...');
+      const fullName = [candidateInfo.firstName, candidateInfo.lastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim() || undefined;
+        
+      candidateProfile = await manager.save(CandidateProfile, {
+        userId: user.id,
+        name: fullName,
+        phone: candidateInfo.phone,
+        linkedinUrl: candidateInfo.linkedin,
+        portfolioUrl: candidateInfo.portfolioUrl,
+        skills: [],
+      });
+    }
+
+    if (!candidateProfile) {
+      throw new InternalServerErrorException('Failed to create or find candidate profile');
+    }
+
+    return { user, candidateProfile };
+  }
+
+ 
 
   private generateRandomPassword(): string {
     // Use cryptographically secure random bytes
@@ -385,68 +485,6 @@ export class ApplicationService {
     return chars.join('');
   }
 
-  /**
-   * Create candidate without CV (basic registration only)
-   */
-  private async createCandidateWithoutCV(
-    candidateInfo: any,
-    hashedPassword: string
-  ) {
-    console.log('🏗️ Creating user and candidate profile without CV...');
-
-    return await this.applicationRepository.manager.transaction(async (manager) => {
-      // Check if user already exists with this email
-      let user = await manager.findOne(User, {
-        where: { email: candidateInfo.email }
-      });
-
-      if (user) {
-        console.log('ℹ️ User already exists with email:', candidateInfo.email);
-      } else {
-        // Create new user
-        console.log('🆕 Creating new user with email:', candidateInfo.email);
-        user = await manager.save(User, {
-          email: candidateInfo.email,
-          name: `${candidateInfo.firstName} ${candidateInfo.lastName}`,
-          password: hashedPassword,
-          userType: UserType.CANDIDATE,
-          phone: candidateInfo.phone,
-          isActive: true,
-        });
-      }
-
-      if (!user) {
-        throw new Error('Failed to create or find user');
-      }
-
-      // Check if candidate profile already exists
-      let candidateProfile = await manager.findOne(CandidateProfile, {
-        where: { userId: user.id }
-      });
-
-      if (!candidateProfile) {
-        console.log('🆕 Creating new candidate profile without CV...');
-        candidateProfile = await manager.save(CandidateProfile, {
-          userId: user.id,
-          firstName: candidateInfo.firstName,
-          lastName: candidateInfo.lastName,
-          phone: candidateInfo.phone,
-          linkedinUrl: candidateInfo.linkedin || undefined,
-          portfolioUrl: candidateInfo.portfolioUrl || undefined,
-          skills: [],
-        });
-      }
-
-      if (!candidateProfile) {
-        throw new Error('Failed to create candidate profile');
-      }
-
-      return {
-        user,
-        candidateProfile
-      };
-    });
-  }
 
   /**
    * Process and save work experience data from CV analysis
@@ -714,7 +752,7 @@ export class ApplicationService {
 
       // Apply pagination and sorting
       if (pagination) {
-        const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'DESC' } = pagination;
+        const { page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT, sortBy = 'createdAt', sortOrder = 'DESC' } = pagination;
         const skip = (page - 1) * limit;
 
         queryBuilder
@@ -796,7 +834,22 @@ export class ApplicationService {
       return null;
     }
 
-    // TODO: Add authorization check - only allow updates by the candidate or authorized personnel
+    // Authorization check - verify user can update this application
+    if (userId) {
+      const user = await this.userRepository.findOne({ 
+        where: { id: userId },
+        relations: ['company']
+      });
+      
+      if (user) {
+        await this.resourceOwnershipService.verifyApplicationOwnership(
+          id, 
+          userId, 
+          user.userType,
+          user.company?.id
+        );
+      }
+    }
 
     // Handle status transitions with timestamp updates
     if (updateApplicationInput.status && updateApplicationInput.status !== application.status) {
@@ -824,7 +877,7 @@ export class ApplicationService {
 
       // Log status change
       if (userId) {
-        this.auditService.logApplicationStatusChange(userId, id, application.status, updateApplicationInput.status);
+        await this.auditService.logApplicationStatusChange(userId, id, application.status, updateApplicationInput.status);
       }
 
       // Notify candidate about status change
@@ -847,12 +900,28 @@ export class ApplicationService {
   }
 
   async remove(id: string, userId?: string): Promise<boolean> {
-    // TODO: Add authorization check - only allow deletion by the candidate or authorized personnel
+    // Authorization check - verify user can delete this application
+    if (userId) {
+      const user = await this.userRepository.findOne({ 
+        where: { id: userId },
+        relations: ['company']
+      });
+      
+      if (user) {
+        await this.resourceOwnershipService.verifyApplicationOwnership(
+          id, 
+          userId, 
+          user.userType,
+          user.company?.id
+        );
+      }
+    }
+    
     const result = await this.applicationRepository.delete(id);
 
     // Log deletion
     if (userId && (result.affected ?? 0) > 0) {
-      this.auditService.logApplicationDeletion(userId, id);
+      await this.auditService.logApplicationDeletion(userId, id);
     }
 
     return (result.affected ?? 0) > 0;
@@ -1004,7 +1073,7 @@ export class ApplicationService {
           if (candidateInfo.phone && candidateInfo.email && !application.candidate.email?.includes('@placeholder.temp')) {
             // Check if this is a real phone number (not a generated placeholder)
             const isRealPhone = !candidateInfo.phone.includes('timestamp') && 
-                               candidateInfo.phone.length >= 10 && 
+                               candidateInfo.phone.length >= VALIDATION.PHONE.MIN_LENGTH && 
                                /^\+?\d+$/.test(candidateInfo.phone.replace(/\s/g, ''));
             
             if (isRealPhone) {
@@ -1056,13 +1125,29 @@ If you don't remember your password, please use the "Forgot Password" feature on
 
   // Application Notes CRUD
   async createApplicationNote(createNoteInput: CreateApplicationNoteInput, userId?: string): Promise<ApplicationNote> {
-    // TODO: Add authorization check - only allow notes by authorized personnel or the candidate
+    // Authorization check - verify user can access the application to add notes
+    if (userId) {
+      const user = await this.userRepository.findOne({ 
+        where: { id: userId },
+        relations: ['company']
+      });
+      
+      if (user) {
+        await this.resourceOwnershipService.verifyApplicationOwnership(
+          createNoteInput.applicationId, 
+          userId, 
+          user.userType,
+          user.company?.id
+        );
+      }
+    }
+    
     const note = this.applicationNoteRepository.create(createNoteInput);
     const savedNote = await this.applicationNoteRepository.save(note);
 
     // Log audit event
     if (userId) {
-      this.auditService.logApplicationNoteCreation(userId, savedNote.id, createNoteInput.applicationId);
+      await this.auditService.logApplicationNoteCreation(userId, savedNote.id, createNoteInput.applicationId);
     }
 
     return savedNote;
@@ -1084,26 +1169,58 @@ If you don't remember your password, please use the "Forgot Password" feature on
   }
 
   async updateApplicationNote(id: string, updateNoteInput: UpdateApplicationNoteInput, userId?: string): Promise<ApplicationNote | null> {
-    // TODO: Add authorization check - only allow updates by the note author or authorized personnel
+    // Authorization check - verify user can update this note
+    if (userId) {
+      const user = await this.userRepository.findOne({ 
+        where: { id: userId },
+        relations: ['company']
+      });
+      
+      if (user) {
+        await this.resourceOwnershipService.verifyApplicationNoteOwnership(
+          id, 
+          userId, 
+          user.userType,
+          user.company?.id
+        );
+      }
+    }
+    
     await this.applicationNoteRepository.update(id, updateNoteInput);
     const updatedNote = await this.findApplicationNote(id);
 
     // Log audit event
     if (userId && updatedNote) {
-      this.auditService.logApplicationNoteUpdate(userId, id, updatedNote.applicationId);
+      await this.auditService.logApplicationNoteUpdate(userId, id, updatedNote.applicationId);
     }
 
     return updatedNote;
   }
 
   async removeApplicationNote(id: string, userId?: string): Promise<boolean> {
-    // TODO: Add authorization check - only allow deletion by the note author or authorized personnel
+    // Authorization check - verify user can delete this note
+    if (userId) {
+      const user = await this.userRepository.findOne({ 
+        where: { id: userId },
+        relations: ['company']
+      });
+      
+      if (user) {
+        await this.resourceOwnershipService.verifyApplicationNoteOwnership(
+          id, 
+          userId, 
+          user.userType,
+          user.company?.id
+        );
+      }
+    }
+    
     const note = await this.findApplicationNote(id);
     const result = await this.applicationNoteRepository.delete(id);
 
     // Log deletion
     if (userId && note && (result.affected ?? 0) > 0) {
-      this.auditService.logApplicationNoteDeletion(userId, id, note.applicationId);
+      await this.auditService.logApplicationNoteDeletion(userId, id, note.applicationId);
     }
 
     return (result.affected ?? 0) > 0;

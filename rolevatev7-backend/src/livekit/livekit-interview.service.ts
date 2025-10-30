@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 import * as bcrypt from 'bcrypt';
 import { CreateRoomResponse, RoomTokenResponse } from './livekit.dto';
+import { LIVEKIT } from '../common/constants/config.constants';
 
 @Injectable()
 export class LiveKitInterviewService {
@@ -67,8 +68,8 @@ export class LiveKitInterviewService {
 
     const newRoom = await this.roomServiceClient.createRoom({
       name: roomName,
-      emptyTimeout: 600, // 10 minutes
-      maxParticipants: 10,
+      emptyTimeout: LIVEKIT.ROOM_EMPTY_TIMEOUT_MINUTES * 60,
+      maxParticipants: LIVEKIT.MAX_PARTICIPANTS,
       metadata: JSON.stringify(metadata),
     });
 

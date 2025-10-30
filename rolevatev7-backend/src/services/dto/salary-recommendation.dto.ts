@@ -1,38 +1,60 @@
 import { ObjectType, Field, InputType } from '@nestjs/graphql';
+import { IsString, IsOptional } from 'class-validator';
 
 @InputType()
 export class SalaryRecommendationRequestDto {
   @Field()
+  @IsString()
   jobTitle: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   experience?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   location?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   industry?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   companySize?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   skills?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   department?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   employeeType?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   jobLevel?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   workType?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   country?: string;
 }
 
@@ -143,3 +165,4 @@ export class SalaryRecommendationResponseDto {
   @Field()
   disclaimer: string;
 }
+

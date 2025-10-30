@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { LiveKitRoom } from './livekit-room.entity';
 import { ConfigService } from '@nestjs/config';
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
+import { LIVEKIT } from '../common/constants/config.constants';
 
 @Injectable()
 export class LiveKitService {
@@ -68,8 +69,8 @@ export class LiveKitService {
       const liveKitRoom = await roomService.createRoom({
         name: name,
         metadata: metadataJson,
-        emptyTimeout: 10 * 60, // 10 minutes
-        maxParticipants: 10,
+        emptyTimeout: LIVEKIT.ROOM_EMPTY_TIMEOUT_MINUTES * 60,
+        maxParticipants: LIVEKIT.MAX_PARTICIPANTS,
       });
       
       console.log(`✅ NEW LiveKit room created: ${liveKitRoom.name} with fresh metadata`);
@@ -85,36 +86,6 @@ export class LiveKitService {
     }
 
     // 3. Create or update room in our DB
-
-    // 3. Create or update room in our DB
-    try {
-      // Convert metadata to JSON string for LiveKit
-      const metadataJson = JSON.stringify(metadata);
-      
-      console.log(`🏗️ Creating NEW LiveKit room: ${name}`);
-      console.log(`📋 Metadata size: ${metadataJson.length} characters`);
-      console.log(`📦 Full Metadata being sent to LiveKit:`);
-      console.log(JSON.stringify(metadata, null, 2));
-      
-      // Create brand new room on LiveKit server with fresh metadata
-      const liveKitRoom = await roomService.createRoom({
-        name: name,
-        metadata: metadataJson,
-        emptyTimeout: 10 * 60, // 10 minutes
-        maxParticipants: 10,
-      });
-      
-      console.log(`✅ NEW LiveKit room created: ${liveKitRoom.name} with fresh metadata`);
-      console.log(`🔍 Room metadata stored on LiveKit server (${liveKitRoom.metadata?.length || 0} chars):`, liveKitRoom.metadata?.substring(0, 200));
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const errorStack = error instanceof Error ? error.stack : undefined;
-      console.error(`❌ CRITICAL: LiveKit room creation FAILED: ${errorMessage}`);
-      console.error(`❌ Stack:`, errorStack);
-      console.error(`❌ This means the agent will NOT receive metadata - continuing anyway`);
-      // Don't throw - let it continue, but log the error prominently
-    }
 
     // 3. Create or update room in our DB
     let room: LiveKitRoom = {} as LiveKitRoom;

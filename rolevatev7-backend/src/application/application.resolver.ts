@@ -15,6 +15,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { JwtOrApiKeyGuard } from '../auth/jwt-or-api-key.guard';
 import { Public } from '../auth/public.decorator';
+import { CheckOwnership } from '../common/decorators/check-ownership.decorator';
+import { OwnershipGuard } from '../common/guards/ownership.guard';
 
 @Resolver(() => Application)
 export class ApplicationResolver {
@@ -27,7 +29,7 @@ export class ApplicationResolver {
     @Context() context: any,
   ): Promise<ApplicationResponse> {
     // Check if user is authenticated
-    const userId = context.req?.user?.userId;
+    const userId = context.request?.user?.userId;
     
     // If candidateId is not provided and user is not authenticated, create anonymous application
     if (!createApplicationInput.candidateId && !userId) {
@@ -53,7 +55,7 @@ export class ApplicationResolver {
     @Args('filter', { nullable: true }) filter?: ApplicationFilterInput,
     @Args('pagination', { nullable: true }) pagination?: ApplicationPaginationInput,
   ): Promise<Application[]> {
-    return this.applicationService.findAll(filter, pagination, context.req.user);
+    return this.applicationService.findAll(filter, pagination, context.request.user);
   }
 
   @Query(() => Application, { name: 'application', nullable: true })
@@ -72,51 +74,53 @@ export class ApplicationResolver {
   @UseGuards(JwtAuthGuard)
   async findByCandidateId(
     @Args('candidateId', { type: () => ID }) candidateId: string,
-    @Context() context: any,
   ): Promise<Application[]> {
-    const userId = context.req.user.userId;
-    // Only allow users to see their own applications or authorized personnel
-    if (candidateId !== userId) {
-      // TODO: Add role-based authorization check
-      throw new Error('Unauthorized: Can only view your own applications');
-    }
+    // Authorization is handled in the service layer via ResourceOwnershipService
+    // Candidates can view their own applications
+    // Business users can view applications for their company's jobs
+    // Admins can view all applications
+    
     return this.applicationService.findByCandidateId(candidateId);
   }
 
   @Mutation(() => Application, { nullable: true })
-  @UseGuards(JwtOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'application', resourceIdParam: 'id', isModification: true })
   async updateApplication(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') updateApplicationInput: UpdateApplicationInput,
     @Context() context: any,
   ): Promise<Application | null> {
-    const userId = context.req.user.userId;
+    const userId = context.request.user.userId;
     return this.applicationService.update(id, updateApplicationInput, userId);
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'application', resourceIdParam: 'id', isModification: true })
   async removeApplication(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.userId;
+    const userId = context.request.user.userId;
     return this.applicationService.remove(id, userId);
   }
 
   // Application Notes
   @Mutation(() => ApplicationNote)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'application', resourceIdParam: 'input.applicationId', isModification: true })
   async createApplicationNote(
     @Args('input') createNoteInput: CreateApplicationNoteInput,
     @Context() context: any,
   ): Promise<ApplicationNote> {
-    const userId = context.req.user.userId;
+    const userId = context.request.user.userId;
     return this.applicationService.createApplicationNote(createNoteInput, userId);
   }
 
   @Query(() => [ApplicationNote], { name: 'applicationNotes' })
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(ApiKeyGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'application', resourceIdParam: 'applicationId', allowBusinessRead: true })
   async findApplicationNotes(
     @Args('applicationId', { type: () => ID }) applicationId: string,
   ): Promise<ApplicationNote[]> {
@@ -124,7 +128,8 @@ export class ApplicationResolver {
   }
 
   @Query(() => ApplicationNote, { name: 'applicationNote', nullable: true })
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(ApiKeyGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'application-note', resourceIdParam: 'id', allowBusinessRead: true })
   async findApplicationNote(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<ApplicationNote | null> {
@@ -132,23 +137,25 @@ export class ApplicationResolver {
   }
 
   @Mutation(() => ApplicationNote, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'application-note', resourceIdParam: 'id', isModification: true })
   async updateApplicationNote(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') updateNoteInput: UpdateApplicationNoteInput,
     @Context() context: any,
   ): Promise<ApplicationNote | null> {
-    const userId = context.req.user.userId;
+    const userId = context.request.user.userId;
     return this.applicationService.updateApplicationNote(id, updateNoteInput, userId);
   }
 
     @Mutation(() => Boolean, { name: 'removeApplicationNote' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'application-note', resourceIdParam: 'id', isModification: true })
   async removeApplicationNote(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.userId;
+    const userId = context.request.user.userId;
     return this.applicationService.removeApplicationNote(id, userId);
   }
 

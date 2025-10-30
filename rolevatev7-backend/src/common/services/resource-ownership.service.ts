@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { Application } from '../../application/application.entity';
 import { ApplicationNote } from '../../application/application-note.entity';
 import { Job } from '../../job/job.entity';
-import { User } from '../../user/user.entity';
 import { CandidateProfile } from '../../candidate/candidate-profile.entity';
 
 export interface OwnershipCheckResult {
@@ -22,8 +21,6 @@ export class ResourceOwnershipService {
     private applicationNoteRepository: Repository<ApplicationNote>,
     @InjectRepository(Job)
     private jobRepository: Repository<Job>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
     @InjectRepository(CandidateProfile)
     private candidateProfileRepository: Repository<CandidateProfile>,
   ) {}

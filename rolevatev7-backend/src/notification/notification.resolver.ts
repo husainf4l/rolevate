@@ -29,7 +29,7 @@ export class NotificationResolver {
     @Args('offset', { type: () => Int, nullable: true }) offset?: number,
     @Args('unreadOnly', { type: () => Boolean, nullable: true }) unreadOnly?: boolean,
   ): Promise<NotificationDto[]> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     const result = await this.notificationService.findAllByUser(userId, { limit, offset, unreadOnly });
     return result.notifications;
   }
@@ -37,7 +37,7 @@ export class NotificationResolver {
   @Query(() => Int)
   @UseGuards(JwtAuthGuard)
   async unreadNotificationCount(@Context() context: any): Promise<number> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.notificationService.getUnreadCount(userId);
   }
 
@@ -47,14 +47,14 @@ export class NotificationResolver {
     @Args('notificationId') notificationId: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.notificationService.markAsRead(userId, notificationId);
   }
 
   @Mutation(() => Int)
   @UseGuards(JwtAuthGuard)
   async markAllNotificationsAsRead(@Context() context: any): Promise<number> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.notificationService.markAllAsRead(userId);
   }
 
@@ -64,7 +64,7 @@ export class NotificationResolver {
     @Args('notificationId') notificationId: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.notificationService.deleteNotification(userId, notificationId);
   }
 
@@ -81,7 +81,7 @@ export class NotificationResolver {
   async notificationSettings(
     @Context() context: any,
   ): Promise<NotificationSettingsDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.notificationService.getNotificationSettings(userId);
   }
 
@@ -97,7 +97,7 @@ export class NotificationResolver {
     @Args('input') input: UpdateNotificationSettingsInput,
     @Context() context: any,
   ): Promise<NotificationSettingsDto> {
-    const userId = context.req.user.id;
+    const userId = context.request.user.id;
     return this.notificationService.updateNotificationSettings(userId, input);
   }
 }

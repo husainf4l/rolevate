@@ -10,7 +10,7 @@ export class ApiKeyGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    const request = ctx.getContext().request;
     const apiKey = request.headers['x-api-key'];
     if (!apiKey) return false;
     return this.apiKeyService.validateApiKey(apiKey);

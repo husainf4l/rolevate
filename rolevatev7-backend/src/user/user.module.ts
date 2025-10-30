@@ -10,15 +10,17 @@ import { ApiKeyService } from './api-key.service';
 import { ApiKeyResolver } from './api-key.resolver';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AuditService } from '../audit.service';
+import { AUTH } from '../common/constants/config.constants';
+import { CandidateProfile } from '../candidate/candidate-profile.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, ApiKey]),
+    TypeOrmModule.forFeature([User, ApiKey, CandidateProfile]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'defaultSecret',
-        signOptions: { expiresIn: '60m' },
+        signOptions: { expiresIn: AUTH.JWT_EXPIRY },
       }),
       inject: [ConfigService],
     }),

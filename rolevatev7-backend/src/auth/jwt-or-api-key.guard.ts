@@ -20,10 +20,16 @@ export class JwtOrApiKeyGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    const gqlContext = ctx.getContext();
+    const request = gqlContext.request;
+
+    if (!request) {
+      console.error('JwtOrApiKeyGuard: No request object in GraphQL context');
+      return false;
+    }
 
     // First try API key authentication (including system API key)
-    const apiKey = request.headers['x-api-key'];
+    const apiKey = request.headers?.['x-api-key'];
     if (apiKey) {
       console.log('🔑 API Key detected in x-api-key header');
       
@@ -65,14 +71,14 @@ export class JwtOrApiKeyGuard implements CanActivate {
     let token: string | undefined;
 
     // Get token from Authorization header
-    const authHeader = request.headers.authorization;
+    const authHeader = request.headers?.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.substring(7);
     }
 
     // Or from cookie
     if (!token) {
-      const cookieHeader = request.headers.cookie;
+      const cookieHeader = request.headers?.cookie;
       if (cookieHeader) {
         const cookies = cookieHeader.split(';').reduce((acc: Record<string, string>, cookie: string) => {
           const [key, value] = cookie.trim().split('=');

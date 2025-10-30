@@ -1,6 +1,7 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsEmail, IsEnum, IsOptional, IsString, Matches, MinLength } from 'class-validator';
 import { UserType } from './user.entity';
+import { SanitizeEmail, TrimString } from '../common/decorators/sanitize.decorator';
 
 @InputType()
 export class CreateUserInput {
@@ -11,6 +12,7 @@ export class CreateUserInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsEmail()
+  @SanitizeEmail()
   email?: string;
 
   @Field({ nullable: true })
@@ -25,10 +27,12 @@ export class CreateUserInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
+  @TrimString()
   name?: string;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
+  @TrimString()
   phone?: string;
 }

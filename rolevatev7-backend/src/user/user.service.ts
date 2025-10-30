@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User, UserType } from './user.entity';
 import { AuditService } from '../audit.service';
+import { CandidateProfile } from '../candidate/candidate-profile.entity';
 
 @Injectable()
 export class UserService {
@@ -14,6 +15,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(CandidateProfile)
+    private candidateProfileRepository: Repository<CandidateProfile>,
     private auditService: AuditService,
     private configService: ConfigService,
   ) {
@@ -34,6 +37,24 @@ export class UserService {
     if (email) {
       this.auditService.logUserRegistration(savedUser.id, email);
     }
+
+    // Automatically create a candidate profile if user type is CANDIDATE
+    if (userType === UserType.CANDIDATE) {
+      try {
+        const candidateProfile = this.candidateProfileRepository.create({
+          userId: savedUser.id,
+          name: name,
+          phone: phone,
+          skills: [],
+        });
+        await this.candidateProfileRepository.save(candidateProfile);
+        this.logger.log(`Candidate profile created automatically for user ${savedUser.id}`);
+      } catch (error) {
+        this.logger.error(`Failed to create candidate profile for user ${savedUser.id}:`, error);
+        // Don't throw - user creation was successful, profile creation is secondary
+      }
+    }
+
     return savedUser;
   }
 

@@ -33,7 +33,10 @@
     "@aws-sdk/client-s3": "^3.910.0",
     "@aws-sdk/client-ses": "^3.910.0",
     "@aws-sdk/s3-request-presigner": "^3.910.0",
+    "@fastify/helmet": "^13.0.2",
     "@nestjs/apollo": "^13.0.1",
+    "@nestjs/bullmq": "^11.0.4",
+    "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.6",
@@ -51,6 +54,9 @@
     "@types/pdfkit": "^0.17.3",
     "axios": "^1.12.2",
     "bcrypt": "^5.1.1",
+    "bullmq": "^5.62.1",
+    "cache-manager": "^7.2.4",
+    "cache-manager-ioredis-yet": "^2.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "dotenv": "^17.2.3",
@@ -59,6 +65,7 @@
     "googleapis": "^162.0.0",
     "graphql": "^16.9.0",
     "graphql-type-json": "^0.3.2",
+    "ioredis": "^5.8.2",
     "joi": "^18.0.1",
     "livekit-server-sdk": "^2.14.0",
     "mailgun.js": "^12.1.1",
@@ -98,22 +105,5 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.2"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   }
 }

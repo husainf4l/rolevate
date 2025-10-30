@@ -1,8 +1,10 @@
 import { InputType, ObjectType, Field } from '@nestjs/graphql';
+import { IsString } from 'class-validator';
 
 @InputType()
 export class JobDescriptionRewriteInput {
   @Field()
+  @IsString()
   jobDescription: string;
 }
 
@@ -14,3 +16,4 @@ export class JobDescriptionRewriteResponse {
   @Field()
   rewrittenShortDescription: string;
 }
+

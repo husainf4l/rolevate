@@ -7,6 +7,7 @@ import { Address } from '../src/address/address.entity';
 import { Job, JobType, JobLevel, WorkType, JobStatus } from '../src/job/job.entity';
 import { CandidateProfile } from '../src/candidate/candidate-profile.entity';
 import { Application, ApplicationStatus } from '../src/application/application.entity';
+import { AUTH } from '../src/common/constants/config.constants';
 import * as bcrypt from 'bcrypt';
 
 async function seed() {
@@ -109,7 +110,7 @@ async function seed() {
         phone: '+1-555-1001',
         companyId: companies[0].id,
         isActive: true,
-        password: await bcrypt.hash('TT%%oo77', 10),
+        password: await bcrypt.hash('TT%%oo77', AUTH.BCRYPT_ROUNDS),
       },
       {
         userType: UserType.BUSINESS,
@@ -118,7 +119,7 @@ async function seed() {
         phone: '+1-555-1002',
         companyId: companies[1].id,
         isActive: true,
-        password: await bcrypt.hash('TT%%oo77', 10),
+        password: await bcrypt.hash('TT%%oo77', AUTH.BCRYPT_ROUNDS),
       },
       {
         userType: UserType.BUSINESS,
@@ -127,7 +128,7 @@ async function seed() {
         phone: '+1-555-1003',
         companyId: companies[2].id,
         isActive: true,
-        password: await bcrypt.hash('TT%%oo77', 10),
+        password: await bcrypt.hash('TT%%oo77', AUTH.BCRYPT_ROUNDS),
       },
       // Candidates
       {

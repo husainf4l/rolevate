@@ -8,6 +8,8 @@ import { CreateCandidateProfileInput } from './create-candidate-profile.input';
 import { UpdateCandidateProfileInput } from './update-candidate-profile.input';
 import { CV } from './cv.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CheckOwnership } from '../common/decorators/check-ownership.decorator';
+import { OwnershipGuard } from '../common/guards/ownership.guard';
 
 @Resolver(() => CandidateProfile)
 export class CandidateProfileResolver {
@@ -38,6 +40,8 @@ export class CandidateProfileResolver {
   }
 
   @Mutation(() => CandidateProfile, { nullable: true })
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'candidate-profile', resourceIdParam: 'id', isModification: true })
   async updateCandidateProfile(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') updateCandidateProfileInput: UpdateCandidateProfileInput,
@@ -46,6 +50,8 @@ export class CandidateProfileResolver {
   }
 
     @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @CheckOwnership({ resourceType: 'candidate-profile', resourceIdParam: 'id', isModification: true })
   async removeCandidateProfile(@Args('id', { type: () => ID }) id: string): Promise<boolean> {
     return this.candidateProfileService.remove(id);
   }
@@ -56,7 +62,7 @@ export class CandidateProfileResolver {
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req?.user?.id;
+    const userId = context.request?.user?.id;
     if (!userId) {
       throw new Error('User not authenticated');
     }
@@ -88,7 +94,7 @@ export class CandidateProfileResolver {
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req?.user?.id;
+    const userId = context.request?.user?.id;
     if (!userId) {
       throw new Error('User not authenticated');
     }

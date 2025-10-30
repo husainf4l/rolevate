@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
+import { COMMUNICATION } from '../common/constants/config.constants';
 
 /**
  * JOSMS Gateway Service
@@ -339,7 +340,7 @@ export class JOSMSService {
 
       // Build URL
       const senderIdToUse = senderId || this.senderId;
-      const url = `${this.baseUrl}/sms/api/SendBulkMessages.cfm?numbers=${numbersString}&senderid=${senderIdToUse}&AccName=${this.accName}&AccPass=${this.accPass}&msg=${encodedMessage}&requesttimeout=5000000`;
+      const url = `${this.baseUrl}/sms/api/SendBulkMessages.cfm?numbers=${numbersString}&senderid=${senderIdToUse}&AccName=${this.accName}&AccPass=${this.accPass}&msg=${encodedMessage}&requesttimeout=${COMMUNICATION.SMS.REQUEST_TIMEOUT_MS}`;
 
       // Send request
       const response = await this.httpClient.get(url);
