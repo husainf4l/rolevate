@@ -19,7 +19,8 @@ export function parseJsonSafely<T = any>(
   try {
     return JSON.parse(jsonString) as T;
   } catch (error) {
-    logger.error(`Invalid JSON for ${fieldName}: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(`Invalid JSON for ${fieldName}: ${errorMessage}`);
     throw new BadRequestException(`Invalid JSON format for ${fieldName}`);
   }
 }
@@ -37,7 +38,8 @@ export function stringifyJsonSafely(obj: any): string | null {
   try {
     return JSON.stringify(obj);
   } catch (error) {
-    logger.error(`Failed to stringify object: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(`Failed to stringify object: ${errorMessage}`);
     return null;
   }
 }

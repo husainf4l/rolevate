@@ -55,7 +55,8 @@ export class CommunicationService {
         console.log(`WhatsApp message sent successfully. Message ID: ${whatsappId}`);
 
       } catch (error) {
-        console.error('Failed to send WhatsApp message:', error.message);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Failed to send WhatsApp message:', errorMessage);
         communicationStatus = CommunicationStatus.FAILED;
         // Continue to create the record but mark as failed
       }
@@ -90,7 +91,8 @@ export class CommunicationService {
         console.log(`Email sent successfully to ${createCommunicationInput.email}`);
 
       } catch (error) {
-        console.error('Failed to send email:', error.message);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Failed to send email:', errorMessage);
         communicationStatus = CommunicationStatus.FAILED;
         // Continue to create the record but mark as failed
       }
@@ -126,7 +128,8 @@ export class CommunicationService {
         console.log(`SMS sent successfully to ${createCommunicationInput.phoneNumber}. Message ID: ${smsResult.messageId}`);
 
       } catch (error) {
-        console.error('Failed to send SMS:', error.message);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Failed to send SMS:', errorMessage);
         communicationStatus = CommunicationStatus.FAILED;
         // Continue to create the record but mark as failed
       }

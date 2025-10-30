@@ -39,9 +39,11 @@ export class InterviewNotificationService {
         `Feedback sent to candidate ${candidate.name} (${candidate.phone}) for interview ${interview.id}`
       );
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Failed to send feedback to candidate for interview ${interview.id}: ${error.message}`,
-        error.stack
+        `Failed to send feedback to candidate for interview ${interview.id}: ${errorMessage}`,
+        errorStack
       );
       throw error;
     }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Application, ApplicationStatus } from './application.entity';
@@ -15,7 +15,6 @@ import { LiveKitService } from '../livekit/livekit.service';
 import { CommunicationService } from '../communication/communication.service';
 import { NotificationService } from '../notification/notification.service';
 import { CommunicationType, CommunicationDirection } from '../communication/communication.entity';
-import { NotificationType, NotificationCategory } from '../notification/notification.entity';
 import { SMSService } from '../services/sms.service';
 import { SMSMessageType } from '../services/sms.input';
 import { Job } from '../job/job.entity';
@@ -25,6 +24,7 @@ import { WorkExperience } from '../candidate/work-experience.entity';
 import { Education } from '../candidate/education.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class ApplicationService {
@@ -37,8 +37,6 @@ export class ApplicationService {
     private applicationNoteRepository: Repository<ApplicationNote>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(CandidateProfile)
-    private candidateProfileRepository: Repository<CandidateProfile>,
     private auditService: AuditService,
     private liveKitService: LiveKitService,
     private communicationService: CommunicationService,
@@ -359,28 +357,32 @@ export class ApplicationService {
   }
 
   private generateRandomPassword(): string {
-    const length = 12; // Minimum 12 characters for security
+    // Use cryptographically secure random bytes
+    const buffer = crypto.randomBytes(12);
+    const password = buffer.toString('base64').slice(0, 12);
+    
+    // Ensure it has required character types
     const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const lowercase = 'abcdefghijklmnopqrstuvwxyz';
     const numbers = '0123456789';
     const symbols = '@$!%*?&';
-    const allChars = uppercase + lowercase + numbers + symbols;
     
-    let password = '';
-    
-    // Ensure at least one character from each category
-    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
-    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
-    password += symbols.charAt(Math.floor(Math.random() * symbols.length));
-    
-    // Fill the rest with random characters
-    for (let i = 4; i < length; i++) {
-      password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+    // Replace some characters to ensure variety
+    const chars = password.split('');
+    if (chars.length >= 4) {
+      chars[0] = uppercase[crypto.randomInt(0, uppercase.length)];
+      chars[1] = lowercase[crypto.randomInt(0, lowercase.length)];
+      chars[2] = numbers[crypto.randomInt(0, numbers.length)];
+      chars[3] = symbols[crypto.randomInt(0, symbols.length)];
     }
     
-    // Shuffle the password to avoid predictable patterns
-    return password.split('').sort(() => Math.random() - 0.5).join('');
+    // Shuffle using crypto
+    for (let i = chars.length - 1; i > 0; i--) {
+      const j = crypto.randomInt(0, i + 1);
+      [chars[i], chars[j]] = [chars[j], chars[i]];
+    }
+    
+    return chars.join('');
   }
 
   /**
@@ -501,7 +503,8 @@ export class ApplicationService {
         console.log(`✅ Created ${experienceData.length} work experience records`);
       }
     } catch (error) {
-      console.error('❌ Error processing work experience:', error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('❌ Error processing work experience:', errorMessage);
       // Continue execution - don't fail the whole process
     }
   }
@@ -562,7 +565,8 @@ export class ApplicationService {
         console.log(`✅ Created ${educationData.length} education records`);
       }
     } catch (error) {
-      console.error('❌ Error processing education:', error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('❌ Error processing education:', errorMessage);
       // Continue execution - don't fail the whole process
     }
   }
@@ -645,7 +649,8 @@ export class ApplicationService {
       console.log('✅ Login credentials WhatsApp message sent successfully to:', cleanPhone);
 
     } catch (error) {
-      console.error('❌ Failed to send login credentials WhatsApp:', error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('❌ Failed to send login credentials WhatsApp:', errorMessage);
       // Don't throw error - WhatsApp failure shouldn't block application creation
     }
   }
@@ -725,7 +730,9 @@ export class ApplicationService {
       
       return applications;
     } catch (error) {
-      this.logger.error(`Failed to find applications: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find applications: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve applications');
     }
   }
@@ -744,7 +751,9 @@ export class ApplicationService {
       
       return application;
     } catch (error) {
-      this.logger.error(`Failed to find application ${id}: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find application ${id}: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve application');
     }
   }
@@ -758,7 +767,9 @@ export class ApplicationService {
         order: { createdAt: 'DESC' },
       });
     } catch (error) {
-      this.logger.error(`Failed to find applications for job ${jobId}: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find applications for job ${jobId}: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve job applications');
     }
   }
@@ -772,7 +783,9 @@ export class ApplicationService {
         order: { createdAt: 'DESC' },
       });
     } catch (error) {
-      this.logger.error(`Failed to find applications for candidate ${candidateId}: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find applications for candidate ${candidateId}: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve candidate applications');
     }
   }
@@ -1096,12 +1109,6 @@ If you don't remember your password, please use the "Forgot Password" feature on
     return (result.affected ?? 0) > 0;
   }
 
-  private async analyzeCVInBackground(applicationId: string, resumeUrl: string, analysisPrompt: string, job: any): Promise<void> {
-    // This method is deprecated and replaced by triggerCVAnalysis
-    // Kept for backward compatibility during migration
-    console.warn('⚠️ analyzeCVInBackground is deprecated. Use triggerCVAnalysis instead.');
-  }
-
   /**
    * Trigger CV analysis by calling FastAPI service
    * The FastAPI service will handle the analysis and post results back via GraphQL
@@ -1141,21 +1148,10 @@ If you don't remember your password, please use the "Forgot Password" feature on
       console.log('✅ CV analysis triggered successfully');
 
     } catch (error) {
-      console.error('❌ Error triggering CV analysis:', error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('❌ Error triggering CV analysis:', errorMessage);
       // Don't throw - this is a background process, we don't want to fail the application creation
     }
-  }
-
-  private async generateCVRecommendations(analysisResult: any, job: any): Promise<string> {
-    // This method is deprecated and will be handled by FastAPI service
-    console.warn('⚠️ generateCVRecommendations is deprecated. Handled by CV analysis service.');
-    return '';
-  }
-
-  private async generateInterviewRecommendations(analysisResult: any, job: any): Promise<string> {
-    // This method is deprecated and will be handled by FastAPI service
-    console.warn('⚠️ generateInterviewRecommendations is deprecated. Handled by CV analysis service.');
-    return '';
   }
 
   /**
@@ -1187,9 +1183,6 @@ If you don't remember your password, please use the "Forgot Password" feature on
       console.log('📱 Sending WhatsApp interview link to candidate...');
 
       const candidateName = fullApplication.candidate.name || 'Candidate';
-
-      // Clean phone number (remove + and any spaces/special chars)
-      const cleanPhone = candidatePhone.replace(/[+\s\-()]/g, '');
 
       // Create query parameters for the interview room link
       // Room will be created on-demand when user accesses this link
@@ -1226,11 +1219,12 @@ If you don't remember your password, please use the "Forgot Password" feature on
       console.log('🎬 Interview link notification completed successfully!');
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('❌ Failed to send interview link:', error);
 
       // Log the error but don't fail the application creation
       await this.applicationRepository.update(application.id, {
-        companyNotes: `Error sending interview link: ${error.message}`,
+        companyNotes: `Error sending interview link: ${errorMessage}`,
       });
     }
   }
@@ -1301,9 +1295,6 @@ If you don't remember your password, please use the "Forgot Password" feature on
         console.log('⚠️ Application not found, skipping candidate notification');
         return;
       }
-
-      // Get candidate name for notification
-      const candidateName = fullApplication.candidate.name || 'Unknown Candidate';
 
       let notificationTitle = '';
       let notificationMessage = '';
@@ -1448,11 +1439,12 @@ If you don't remember your password, please use the "Forgot Password" feature on
       console.log('🎬 Interview room setup completed successfully!');
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('❌ Failed to create interview room:', error);
 
       // Log the error but don't fail the status update
       await this.applicationRepository.update(application.id, {
-        companyNotes: `Error creating interview room: ${error.message}`,
+        companyNotes: `Error creating interview room: ${errorMessage}`,
       });
     }
   }

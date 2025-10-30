@@ -54,7 +54,8 @@ export class LiveKitService {
         console.log(`✅ No existing room found, will create new one: ${name}`);
       }
     } catch (error) {
-      console.log(`⚠️ Room check/delete failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.log(`⚠️ Room check/delete failed: ${errorMessage}`);
       // Continue anyway - we'll try to create the room
     }
     
@@ -80,8 +81,10 @@ export class LiveKitService {
       console.log(`🔍 Room metadata stored on LiveKit server (${liveKitRoom.metadata?.length || 0} chars):`, liveKitRoom.metadata?.substring(0, 200));
       
     } catch (error) {
-      console.error(`❌ CRITICAL: LiveKit room creation FAILED: ${error.message}`);
-      console.error(`❌ Stack:`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      console.error(`❌ CRITICAL: LiveKit room creation FAILED: ${errorMessage}`);
+      console.error(`❌ Stack:`, errorStack);
       console.error(`❌ This means the agent will NOT receive metadata - continuing anyway`);
       // Don't throw - let it continue, but log the error prominently
     }
@@ -107,11 +110,13 @@ export class LiveKitService {
       });
       
       console.log(`✅ NEW LiveKit room created: ${liveKitRoom.name} with fresh metadata`);
-      console.log(`� Room metadata stored on LiveKit server (${liveKitRoom.metadata?.length || 0} chars):`, liveKitRoom.metadata?.substring(0, 200));
+      console.log(`🔍 Room metadata stored on LiveKit server (${liveKitRoom.metadata?.length || 0} chars):`, liveKitRoom.metadata?.substring(0, 200));
       
     } catch (error) {
-      console.error(`❌ CRITICAL: LiveKit room creation FAILED: ${error.message}`);
-      console.error(`❌ Stack:`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      console.error(`❌ CRITICAL: LiveKit room creation FAILED: ${errorMessage}`);
+      console.error(`❌ Stack:`, errorStack);
       console.error(`❌ This means the agent will NOT receive metadata - continuing anyway`);
       // Don't throw - let it continue, but log the error prominently
     }
@@ -263,10 +268,11 @@ export class LiveKitService {
       };
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Error getting LiveKit room status:', error);
       return {
         exists: false,
-        error: error.message || 'Failed to connect to LiveKit server'
+        error: errorMessage || 'Failed to connect to LiveKit server'
       };
     }
   }
@@ -328,7 +334,8 @@ export class LiveKitService {
               await roomService.removeParticipant(room.name, participant.identity);
               console.log(`👋 Removed participant: ${participant.identity} from ${room.name}`);
             } catch (participantError) {
-              console.error(`❌ Failed to remove participant ${participant.identity}:`, participantError.message);
+              const participantErrorMessage = participantError instanceof Error ? participantError.message : String(participantError);
+              console.error(`❌ Failed to remove participant ${participant.identity}:`, participantErrorMessage);
             }
           }
 
@@ -346,13 +353,14 @@ export class LiveKitService {
           console.log(`✅ Successfully closed room: ${room.name}`);
           
         } catch (roomError) {
-          console.error(`❌ Failed to close room ${room.name}:`, roomError.message);
+          const roomErrorMessage = roomError instanceof Error ? roomError.message : String(roomError);
+          console.error(`❌ Failed to close room ${room.name}:`, roomErrorMessage);
           
           closedRooms.push({
             name: room.name,
             sid: room.sid,
             status: 'error',
-            error: roomError.message
+            error: roomErrorMessage
           });
           
           errorCount++;
@@ -372,10 +380,11 @@ export class LiveKitService {
       };
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('❌ Error closing all sessions:', error);
       return {
         success: false,
-        error: error.message || 'Failed to close all sessions',
+        error: errorMessage || 'Failed to close all sessions',
         timestamp: new Date().toISOString()
       };
     }

@@ -74,7 +74,7 @@ export class JwtOrApiKeyGuard implements CanActivate {
     if (!token) {
       const cookieHeader = request.headers.cookie;
       if (cookieHeader) {
-        const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+        const cookies = cookieHeader.split(';').reduce((acc: Record<string, string>, cookie: string) => {
           const [key, value] = cookie.trim().split('=');
           acc[key] = value;
           return acc;
@@ -101,7 +101,8 @@ export class JwtOrApiKeyGuard implements CanActivate {
         return true;
       }
     } catch (error) {
-      console.log('❌ JWT verification failed:', error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.log('❌ JWT verification failed:', errorMessage);
       // JWT verification failed
     }
 

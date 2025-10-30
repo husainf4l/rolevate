@@ -125,8 +125,9 @@ export class AwsS3Service {
 
       return buffer;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('❌ Failed to download file from S3:', error);
-      throw new InternalServerErrorException(`Failed to download file from S3: ${error.message}`);
+      throw new InternalServerErrorException(`Failed to download file from S3: ${errorMessage}`);
     }
   }
 

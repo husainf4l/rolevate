@@ -45,9 +45,10 @@ export class LiveKitController {
         url: process.env.LIVEKIT_URL,
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return {
         success: false,
-        error: error.message || 'Failed to generate room token',
+        error: errorMessage || 'Failed to generate room token',
       };
     }
   }

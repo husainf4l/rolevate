@@ -103,7 +103,9 @@ export class InterviewService {
     try {
       await this.notificationService.sendFeedbackToCandidate(updatedInterview);
     } catch (error) {
-      this.logger.error(`Failed to send feedback notification: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to send feedback notification: ${errorMessage}`, errorStack);
     }
 
     this.logger.log(`Feedback submitted for interview: ${interviewId}`);

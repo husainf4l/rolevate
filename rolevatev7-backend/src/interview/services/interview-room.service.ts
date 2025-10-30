@@ -56,10 +56,12 @@ export class InterviewRoomService {
         error: 'Please provide either interviewId, (jobId + phone), or roomName to join a room',
       };
     } catch (error) {
-      this.logger.error('Error generating room access token', error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error('Error generating room access token', errorStack);
       return {
         success: false,
-        error: error.message || 'Failed to generate access token',
+        error: errorMessage || 'Failed to generate access token',
       };
     }
   }
@@ -278,7 +280,8 @@ export class InterviewRoomService {
 
       this.logger.log(`Room created/verified: ${roomName}`);
     } catch (error) {
-      this.logger.warn(`Room creation note: ${error.message} (continuing with token generation)`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Room creation note: ${errorMessage} (continuing with token generation)`);
     }
   }
 

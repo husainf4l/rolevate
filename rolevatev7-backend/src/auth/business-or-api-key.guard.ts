@@ -45,7 +45,7 @@ export class BusinessOrApiKeyGuard implements CanActivate {
     if (!token) {
       const cookieHeader = request.headers.cookie;
       if (cookieHeader) {
-        const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+        const cookies = cookieHeader.split(';').reduce((acc: Record<string, string>, cookie: string) => {
           const [key, value] = cookie.trim().split('=');
           acc[key] = value;
           return acc;

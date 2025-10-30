@@ -94,8 +94,12 @@ Return ONLY the optimized company description without any additional text, expla
         generatedDescription: truncatedDescription
       };
     } catch (error) {
-      console.error('OpenAI API error:', error);
-      throw new InternalServerErrorException('Failed to generate company description');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      console.error('OpenAI API error in generateCompanyDescription:', errorMessage);
+      console.error('Error stack:', errorStack);
+      console.error('Full error object:', error);
+      throw new InternalServerErrorException(`Failed to generate company description: ${errorMessage}`);
     }
   }
 

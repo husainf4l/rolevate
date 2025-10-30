@@ -1,24 +1,27 @@
 import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User, UserType } from './user.entity';
 import { AuditService } from '../audit.service';
 
-const BCRYPT_ROUNDS = 12; // Increased from 10 for better security
-
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
+  private readonly bcryptRounds: number;
 
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private auditService: AuditService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.bcryptRounds = this.configService.get<number>('BCRYPT_ROUNDS', 12);
+  }
 
   async create(userType: UserType, email?: string, password?: string, name?: string, phone?: string): Promise<User> {
-    const hashedPassword = password ? await bcrypt.hash(password, BCRYPT_ROUNDS) : undefined;
+    const hashedPassword = password ? await bcrypt.hash(password, this.bcryptRounds) : undefined;
     const user = this.userRepository.create({
       userType,
       email,
@@ -54,7 +57,7 @@ export class UserService {
 
     // If password is being updated, hash it
     if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, BCRYPT_ROUNDS);
+      updateData.password = await bcrypt.hash(updateData.password, this.bcryptRounds);
     }
 
     // Update user
@@ -115,7 +118,7 @@ export class UserService {
     }
 
     // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    const hashedPassword = await bcrypt.hash(newPassword, this.bcryptRounds);
 
     // Update password
     await this.userRepository.update(userId, { password: hashedPassword });

@@ -178,7 +178,9 @@ export class JobService {
       updatedAt: job.updatedAt,
     }));
     } catch (error) {
-      this.logger.error(`Failed to find jobs: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find jobs: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve jobs');
     }
   }
@@ -255,7 +257,9 @@ export class JobService {
       updatedAt: job.updatedAt,
     };
     } catch (error) {
-      this.logger.error(`Failed to find job ${id}: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find job ${id}: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve job');
     }
   }
@@ -274,7 +278,9 @@ export class JobService {
 
       return this.findOne(job.id);
     } catch (error) {
-      this.logger.error(`Failed to find job by slug ${slug}: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find job by slug ${slug}: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve job');
     }
   }

@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './global-exception.filter';
 
@@ -37,7 +38,10 @@ async function bootstrap() {
       enableImplicitConversion: true,
     },
   }));
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  
+  // Get ConfigService for GlobalExceptionFilter
+  const configService = app.get(ConfigService);
+  app.useGlobalFilters(new GlobalExceptionFilter(configService));
   
   // CORS Configuration - Secure setup with environment-based origins
   const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];

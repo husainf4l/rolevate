@@ -85,10 +85,12 @@ export class SMSService {
         status: result.success ? SMSStatus.SENT : SMSStatus.FAILED,
       };
     } catch (error) {
-      this.logger.error(`Failed to send SMS: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to send SMS: ${errorMessage}`, errorStack);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
         status: SMSStatus.FAILED,
       };
     }
@@ -112,10 +114,12 @@ export class SMSService {
         candidateId: input.candidateId,
       });
     } catch (error) {
-      this.logger.error(`Failed to send OTP SMS: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to send OTP SMS: ${errorMessage}`, errorStack);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
         status: SMSStatus.FAILED,
       };
     }
@@ -182,11 +186,13 @@ export class SMSService {
         },
       };
     } catch (error) {
-      this.logger.error(`Failed to send bulk SMS: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to send bulk SMS: ${errorMessage}`, errorStack);
       return {
         success: false,
         totalRecipients: input.phoneNumbers.length,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }
@@ -198,10 +204,12 @@ export class SMSService {
     try {
       return await this.josmsService.getBalance();
     } catch (error) {
-      this.logger.error(`Failed to get SMS balance: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to get SMS balance: ${errorMessage}`, errorStack);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }
@@ -230,7 +238,7 @@ export class SMSService {
     candidateId?: string,
     applicationId?: string,
   ): Promise<SMSResponse> {
-    const messages = {
+    const messages: Record<string, string> = {
       REVIEWED: `Hi ${candidateName}, your application for ${jobTitle} is under review. We'll get back to you soon!`,
       SHORTLISTED: `Congratulations ${candidateName}! You've been shortlisted for ${jobTitle}. We'll contact you with next steps.`,
       INTERVIEWED: `Hi ${candidateName}, your interview for ${jobTitle} has been scheduled. Check your WhatsApp for details.`,

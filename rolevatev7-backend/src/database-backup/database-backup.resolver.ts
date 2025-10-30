@@ -28,9 +28,10 @@ export class DatabaseBackupResolver {
         backup,
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return {
         success: false,
-        message: `Failed to create backup: ${error.message}`,
+        message: `Failed to create backup: ${errorMessage}`,
       };
     }
   }
@@ -78,9 +79,10 @@ export class DatabaseBackupResolver {
         restoredDatabase: input.targetDatabaseName || 'current database',
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return {
         success: false,
-        message: `Failed to restore database: ${error.message}`,
+        message: `Failed to restore database: ${errorMessage}`,
       };
     }
   }
@@ -97,9 +99,10 @@ export class DatabaseBackupResolver {
         message: 'Backup deleted successfully',
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return {
         success: false,
-        message: `Failed to delete backup: ${error.message}`,
+        message: `Failed to delete backup: ${errorMessage}`,
       };
     }
   }

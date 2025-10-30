@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
+import { PasswordReset } from './password-reset.entity';
 import { UserModule } from '../user/user.module';
 import { CommunicationModule } from '../communication/communication.module';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -13,6 +15,7 @@ import { AuditService } from '../audit.service';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([PasswordReset]),
     UserModule,
     CommunicationModule,
     JwtModule.registerAsync({

@@ -7,10 +7,16 @@ import {
   Logger,
 } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
+import { ConfigService } from '@nestjs/config';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name);
+  private readonly isDevelopment: boolean;
+
+  constructor(configService: ConfigService) {
+    this.isDevelopment = configService.get('NODE_ENV') !== 'production';
+  }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -19,6 +25,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
+    let stack: string | undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -28,19 +35,37 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
         message = (exceptionResponse as any).message || message;
       }
-    } else {
-      // Log unknown errors but don't expose details
-      this.logger.error(`Unhandled exception: ${exception}`, exception instanceof Error ? exception.stack : '');
+      stack = exception.stack;
+    } else if (exception instanceof Error) {
+      message = this.isDevelopment ? exception.message : 'Internal server error';
+      stack = exception.stack;
     }
 
-    // Don't expose stack traces or sensitive information
+    // Always log the full error server-side
+    this.logger.error(
+      `HTTP ${status} Error: ${message}`,
+      stack,
+      `Path: ${(request as any)?.url || request?.raw?.url || 'unknown'}`
+    );
+
+    // Prepare response
+    const errorResponse: any = {
+      statusCode: status,
+      message: status === HttpStatus.INTERNAL_SERVER_ERROR && !this.isDevelopment
+        ? 'Internal server error'
+        : message,
+      timestamp: new Date().toISOString(),
+      path: (request as any)?.url || request?.raw?.url || 'unknown',
+    };
+
+    // Include stack trace only in development
+    if (this.isDevelopment && stack) {
+      errorResponse.stack = stack;
+    }
+
+    // Send response
     if (typeof response.code === 'function') {
-      response.code(status).send({
-        statusCode: status,
-        message: status === HttpStatus.INTERNAL_SERVER_ERROR ? 'Internal server error' : message,
-        timestamp: new Date().toISOString(),
-        path: (request as any)?.url || request?.raw?.url || 'unknown',
-      });
+      response.code(status).send(errorResponse);
     } else {
       // For GraphQL or other non-HTTP contexts, rethrow the exception
       throw exception;

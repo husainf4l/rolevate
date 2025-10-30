@@ -137,12 +137,14 @@ export class DatabaseBackupService {
       // Cleanup old backups based on retention policy
       await this.cleanupOldBackups(backupType);
     } catch (error) {
-      this.logger.error(`Backup execution failed: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Backup execution failed: ${errorMessage}`, errorStack);
 
       // Update backup record to failed
       await this.backupRepository.update(backupId, {
         status: BackupStatus.FAILED,
-        errorMessage: error.message,
+        errorMessage: errorMessage,
         executionTime: Date.now() - startTime,
       });
 
@@ -166,7 +168,8 @@ export class DatabaseBackupService {
       );
       return result[0]?.size || 'Unknown';
     } catch (error) {
-      this.logger.warn(`Failed to get database size: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Failed to get database size: ${errorMessage}`);
       return 'Unknown';
     }
   }
@@ -185,7 +188,9 @@ export class DatabaseBackupService {
         order: { createdAt: 'DESC' },
       });
     } catch (error) {
-      this.logger.error(`Failed to list backups: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to list backups: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve backups');
     }
   }
@@ -251,14 +256,16 @@ export class DatabaseBackupService {
 
       return backup;
     } catch (error) {
-      this.logger.error(`Database restore failed: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Database restore failed: ${errorMessage}`, errorStack);
 
       // Cleanup local file
       if (localFilePath && fs.existsSync(localFilePath)) {
         fs.unlinkSync(localFilePath);
       }
 
-      throw new InternalServerErrorException(`Failed to restore database: ${error.message}`);
+      throw new InternalServerErrorException(`Failed to restore database: ${errorMessage}`);
     }
   }
 
@@ -281,7 +288,9 @@ export class DatabaseBackupService {
 
       this.logger.log(`Backup marked as deleted: ${backupId}`);
     } catch (error) {
-      this.logger.error(`Failed to delete backup: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to delete backup: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to delete backup');
     }
   }
@@ -311,7 +320,9 @@ export class DatabaseBackupService {
         failedBackups,
       };
     } catch (error) {
-      this.logger.error(`Failed to get backup stats: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to get backup stats: ${errorMessage}`, errorStack);
       throw new InternalServerErrorException('Failed to retrieve backup statistics');
     }
   }
@@ -359,7 +370,9 @@ export class DatabaseBackupService {
         this.logger.log(`Cleaned up ${oldBackups.length} old backups`);
       }
     } catch (error) {
-      this.logger.error(`Failed to cleanup old backups: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to cleanup old backups: ${errorMessage}`, errorStack);
     }
   }
 
@@ -384,7 +397,9 @@ export class DatabaseBackupService {
       await this.backupRepository.save(backup);
       await this.executeBackup(backup.id, BackupType.SCHEDULED_DAILY);
     } catch (error) {
-      this.logger.error(`Scheduled daily backup failed: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Scheduled daily backup failed: ${errorMessage}`, errorStack);
     }
   }
 
@@ -409,7 +424,9 @@ export class DatabaseBackupService {
       await this.backupRepository.save(backup);
       await this.executeBackup(backup.id, BackupType.SCHEDULED_WEEKLY);
     } catch (error) {
-      this.logger.error(`Scheduled weekly backup failed: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Scheduled weekly backup failed: ${errorMessage}`, errorStack);
     }
   }
 
@@ -434,7 +451,9 @@ export class DatabaseBackupService {
       await this.backupRepository.save(backup);
       await this.executeBackup(backup.id, BackupType.SCHEDULED_MONTHLY);
     } catch (error) {
-      this.logger.error(`Scheduled monthly backup failed: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Scheduled monthly backup failed: ${errorMessage}`, errorStack);
     }
   }
 

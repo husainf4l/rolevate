@@ -59,7 +59,7 @@ import { AuditService } from './audit.service';
       path: '/api/graphql', // Explicit full path
       playground: process.env.NODE_ENV !== 'production',
       introspection: process.env.NODE_ENV !== 'production',
-      context: ({ req, reply }) => ({ req, reply }),
+      context: ({ req, reply }: { req: any; reply: any }) => ({ req, reply }),
       csrfPrevention: {
         requestHeaders: ['x-apollo-operation-name', 'apollo-require-preflight'],
       },

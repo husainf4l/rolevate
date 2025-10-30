@@ -42,7 +42,8 @@ export class AwsS3Resolver {
         bucket: process.env.AWS_BUCKET_NAME,
       };
     } catch (error) {
-      throw new Error(`File upload failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`File upload failed: ${errorMessage}`);
     }
   }
 
@@ -69,7 +70,8 @@ export class AwsS3Resolver {
         bucket: process.env.AWS_BUCKET_NAME,
       };
     } catch (error) {
-      throw new Error(`CV upload failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`CV upload failed: ${errorMessage}`);
     }
   }
 

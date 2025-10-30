@@ -185,10 +185,12 @@ export class JOSMSService {
         currency: 'JOD', // Assuming Jordanian Dinar
       };
     } catch (error) {
-      this.logger.error(`Failed to get balance: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to get balance: ${errorMessage}`, errorStack);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }
@@ -235,10 +237,12 @@ export class JOSMSService {
         statusCode: response.status,
       };
     } catch (error) {
-      this.logger.error(`Failed to send OTP SMS: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to send OTP SMS: ${errorMessage}`, errorStack);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }
@@ -286,10 +290,12 @@ export class JOSMSService {
         statusCode: response.status,
       };
     } catch (error) {
-      this.logger.error(`Failed to send General SMS: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to send General SMS: ${errorMessage}`, errorStack);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }
@@ -347,10 +353,12 @@ export class JOSMSService {
         statusCode: response.status,
       };
     } catch (error) {
-      this.logger.error(`Failed to send Bulk SMS: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to send Bulk SMS: ${errorMessage}`, errorStack);
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }
