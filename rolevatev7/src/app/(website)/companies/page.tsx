@@ -103,7 +103,7 @@ export default function CompaniesPage() {
       <div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center mb-4">
-            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-thin text-gray-900 mb-2 tracking-tight">
               Explore{" "}
               <span className="text-primary-600">
                 Companies

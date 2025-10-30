@@ -127,25 +127,54 @@ export default function UserDashboardPage() {
           </p>
         </motion.div>
 
-        {/* Modern Banner */}
+        {/* Modern Apple-Style Banner */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="bg-[url('/images/cv.jpg')] bg-cover bg-center rounded-xl p-6 text-white shadow-lg relative overflow-hidden"
+          className="relative rounded-xl p-6 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-white/10"
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-xl"></div>
-          <div className="text-center relative z-10">
-            <h2 className="text-2xl font-bold mb-3 drop-shadow-lg">Need a new CV?</h2>
-            <p className="text-lg text-gray-100 mb-6 drop-shadow-md">Try our partners at rolekits.com</p>
-            <a
-              href="https://rolekits.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-primary-600 text-white px-8 py-3 rounded-sm font-semibold hover:bg-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              Visit rolekits.com
-            </a>
+          {/* Subtle animated background elements */}
+          <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500/20 rounded-full blur-3xl -mr-20 -mt-20 opacity-50"></div>
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl -ml-20 -mb-20 opacity-30"></div>
+          
+          {/* Content */}
+          <div className="relative z-10 text-center">
+            {/* Coming Soon Badge */}
+            <div className="inline-flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-1 bg-white/5 border border-white/10 backdrop-blur-xl rounded-full px-3 py-1">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-500"></span>
+                </span>
+                <span className="text-xs font-medium text-white tracking-wide">Coming Jan 1, 2026</span>
+              </div>
+            </div>
+
+            {/* Main Headline */}
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-white mb-2 leading-tight">
+              Create Professional CVs
+            </h2>
+            
+            {/* Subheading */}
+            <p className="text-sm md:text-base text-gray-300 font-light mb-4 leading-relaxed max-w-xl mx-auto">
+              Rolekit brings everything you need to build a standout resume. Crafted by Rolevate.
+            </p>
+
+            {/* CTA Button */}
+            <div className="flex justify-center">
+              <a
+                href="https://rolekits.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative inline-flex items-center gap-2 px-6 py-2 bg-white text-slate-900 font-semibold rounded-full hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-white/20 transform hover:scale-105 text-sm"
+              >
+                Learn More
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+            </div>
           </div>
         </motion.div>
 

@@ -493,10 +493,25 @@ export class CompanyService {
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {
-      // This endpoint might not exist in the current GraphQL schema
-      // Log for now until backend implements it
-      console.log('[CompanyService] Password change requested');
-      throw new Error('Password change not yet implemented in GraphQL API');
+      const mutation = gql`
+        mutation ChangePassword($input: ChangePasswordInput!) {
+          changePassword(input: $input)
+        }
+      `;
+
+      const { data } = await apolloClient.mutate<{ changePassword: boolean }>({
+        mutation,
+        variables: {
+          input: {
+            currentPassword,
+            newPassword
+          }
+        }
+      });
+
+      if (!data?.changePassword) {
+        throw new Error('Failed to change password');
+      }
     } catch (error: any) {
       console.error('[CompanyService] Error changing password:', error);
       throw new Error(error?.message || 'Failed to change password');

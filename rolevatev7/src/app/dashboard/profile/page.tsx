@@ -348,12 +348,81 @@ export default function UserProfilePage() {
   };
 
   const changePassword = async () => {
-    // TODO: Implement when changePassword mutation is added to GraphQL
-    setSaveStatus({
-      type: "error",
-      message: "Password change not available via GraphQL yet",
-    });
-    setTimeout(() => setSaveStatus(null), 3000);
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setSaveStatus({
+        type: "error",
+        message: "Passwords do not match",
+      });
+      setTimeout(() => setSaveStatus(null), 3000);
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      setSaveStatus({
+        type: "error",
+        message: "Password must be at least 8 characters long",
+      });
+      setTimeout(() => setSaveStatus(null), 3000);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("access_token");
+
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}/graphql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation ChangePassword($input: ChangePasswordInput!) {
+              changePassword(input: $input)
+            }
+          `,
+          variables: {
+            input: {
+              currentPassword: passwordData.currentPassword,
+              newPassword: passwordData.newPassword
+            }
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to change password");
+      }
+
+      const result = await response.json();
+
+      if (result.errors) {
+        throw new Error(result.errors[0]?.message || "Failed to change password");
+      }
+
+      if (result.data?.changePassword) {
+        setSaveStatus({
+          type: "success",
+          message: "Password changed successfully!",
+        });
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else {
+        throw new Error("Failed to change password");
+      }
+    } catch (error: any) {
+      setSaveStatus({
+        type: "error",
+        message: error.message || "Failed to change password",
+      });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setSaveStatus(null), 3000);
+    }
   };
 
   const handleAvatarUpload = async (

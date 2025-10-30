@@ -81,6 +81,15 @@ class CVService {
     }
   `;
 
+  private UPDATE_CANDIDATE_PROFILE_MUTATION = gql`
+    mutation UpdateCandidateProfile($id: ID!, $input: UpdateCandidateProfileInput!) {
+      updateCandidateProfile(id: $id, input: $input) {
+        id
+        resumeUrl
+      }
+    }
+  `;
+
   async getCVs(): Promise<CVData[]> {
     try {
       // First, get the current user's ID
@@ -138,6 +147,53 @@ class CVService {
       // Convert file to base64
       const base64File = await this.fileToBase64(file);
 
+      // Get user ID for profile updates
+      let userId: string | null = null;
+      let finalCandidateId = candidateId;
+
+      try {
+        // First get user ID
+        const { data: userData } = await apolloClient.query<{
+          me: { id: string }
+        }>({
+          query: this.GET_USER_ID_QUERY,
+          fetchPolicy: 'network-only'
+        });
+
+        if (userData?.me?.id) {
+          userId = userData.me.id;
+
+          // Then get candidate profile ID if not provided
+          if (!finalCandidateId) {
+            try {
+              const { data: profileData } = await apolloClient.query<{
+                candidateProfileByUser: { id: string }
+              }>({
+                query: gql`
+                  query GetCandidateProfileId($userId: ID!) {
+                    candidateProfileByUser(userId: $userId) {
+                      id
+                    }
+                  }
+                `,
+                variables: { userId: userData.me.id },
+                fetchPolicy: 'network-only'
+              });
+
+              if (profileData?.candidateProfileByUser?.id) {
+                finalCandidateId = profileData.candidateProfileByUser.id;
+              }
+            } catch (error) {
+              console.error('[uploadCV] Error getting candidate profile ID:', error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[uploadCV] Error getting user ID:', error);
+      }
+
+      console.log('[uploadCV] Uploading with userId:', userId, 'candidateId:', finalCandidateId);
+
       // Upload to S3 via GraphQL
       const { data } = await apolloClient.mutate<{
         uploadCVToS3: { url: string; key: string; bucket: string };
@@ -147,7 +203,7 @@ class CVService {
           base64File,
           filename: file.name,
           mimetype: file.type,
-          candidateId
+          candidateId: finalCandidateId
         }
       });
 
@@ -155,13 +211,40 @@ class CVService {
         throw new Error('Failed to upload CV');
       }
 
-      return data.uploadCVToS3.url;
+      const uploadUrl = data.uploadCVToS3.url;
+      console.log('[uploadCV] Success, URL:', uploadUrl);
+
+      // Now update the candidate profile with the resume URL
+      if (finalCandidateId) {
+        try {
+          console.log('[uploadCV] Updating candidate profile with resume URL...');
+          const { data: updateData } = await apolloClient.mutate({
+            mutation: this.UPDATE_CANDIDATE_PROFILE_MUTATION,
+            variables: {
+              id: finalCandidateId,
+              input: {
+                userId: userId,
+                resumeUrl: uploadUrl
+              }
+            }
+          });
+          console.log('[uploadCV] Updated profile with resume URL:', updateData);
+        } catch (updateError) {
+          console.error('[uploadCV] Error updating profile:', updateError);
+          // Don't throw - CV is already uploaded to S3, this is just metadata
+        }
+      }
+
+      return uploadUrl;
     } catch (error: any) {
       console.error('Error uploading CV:', error);
       throw new Error(error?.message || 'Failed to upload CV');
     }
   }
 
+  /**
+   * Delete CV file from candidate profile
+   */
   async deleteCV(id: string): Promise<boolean> {
     if (!id) {
       throw new Error('CV ID is required');

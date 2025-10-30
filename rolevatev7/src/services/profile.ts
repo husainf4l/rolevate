@@ -4,8 +4,8 @@ import { gql } from '@apollo/client';
 
 export interface WorkExperience {
   id?: string;
-  company: string;
   position: string;
+  company: string;
   startDate: string;
   endDate?: string;
   description?: string;
@@ -30,6 +30,7 @@ export interface CandidateProfile {
     name: string;
   };
   name?: string;
+  email?: string;
   phone?: string;
   location?: string;
   bio?: string;
@@ -39,6 +40,7 @@ export interface CandidateProfile {
   linkedinUrl?: string;
   githubUrl?: string;
   portfolioUrl?: string;
+  resumeUrl?: string;
   availability?: string;
   salaryExpectation?: string;
   preferredWorkType?: string;
@@ -95,6 +97,7 @@ class ProfileService {
         linkedinUrl
         githubUrl
         portfolioUrl
+        resumeUrl
         availability
         salaryExpectation
         preferredWorkType
@@ -142,6 +145,7 @@ class ProfileService {
         linkedinUrl
         githubUrl
         portfolioUrl
+        resumeUrl
         availability
         salaryExpectation
         preferredWorkType
@@ -153,11 +157,11 @@ class ProfileService {
   /**
    * Get current user's candidate profile
    * This uses a workaround by first getting the user ID from 'me' query,
-   * then fetching the candidate profile
+   * then fetching the candidate profile, and merging with user data
    */
   async getProfile(): Promise<CandidateProfile | null> {
     try {
-      // First get the current user to get their ID
+      // First get the current user to get their ID and basic info
       const { data: userData } = await apolloClient.query<{ me: { id: string; email: string; name: string } }>({
         query: this.GET_MY_PROFILE_QUERY,
         fetchPolicy: 'network-only'
@@ -174,7 +178,25 @@ class ProfileService {
         fetchPolicy: 'network-only'
       });
 
-      return profileData?.candidateProfileByUser || null;
+      const candidateProfile = profileData?.candidateProfileByUser;
+
+      // If candidate profile exists, merge with user data
+      if (candidateProfile) {
+        return {
+          ...candidateProfile,
+          user: userData.me,
+          name: candidateProfile.name || userData.me.name, // Use profile name or fallback to user name
+          email: userData.me.email
+        };
+      }
+
+      // If candidate profile doesn't exist yet, return user data as fallback
+      return {
+        id: userData.me.id,
+        user: userData.me,
+        name: userData.me.name,
+        email: userData.me.email
+      };
     } catch (error: any) {
       console.error('Error fetching profile:', error);
       throw new Error(error?.message || 'Failed to fetch profile');

@@ -115,12 +115,26 @@ const isUpcoming = (date: string) => {
   return new Date(date) > new Date();
 };
 
+// Helper function to get today's date as YYYY-MM-DD string
+const getTodayDateString = () => {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+};
+
 // Calendar View Component
 const CalendarView = ({ interviews }: { interviews: Interview[] }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const todayDateString = getTodayDateString();
+  
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
   
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+  
+  // Check if currently viewing the current month
+  const isCurrentMonth = year === currentYear && month === currentMonth;
   
   const firstDayOfMonth = new Date(year, month, 1);
   const lastDayOfMonth = new Date(year, month + 1, 0);
@@ -164,7 +178,8 @@ const CalendarView = ({ interviews }: { interviews: Interview[] }) => {
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const dayInterviews = interviewsByDate[dateStr] || [];
-      const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+      // Only show "today" styling if viewing the current month AND it's today's date
+      const isToday = isCurrentMonth && dateStr === todayDateString;
       
       days.push(
         <div

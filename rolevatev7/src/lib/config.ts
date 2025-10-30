@@ -1,18 +1,15 @@
-// API Configuration - Development URL (using Next.js proxy to avoid CORS)
-// Base API URL Configuration
-// In Docker, use host.docker.internal to access host machine for SSR
-// But in browser, always use localhost:4005 since browser runs on host machine
+// API Configuration - Using Next.js API proxy to avoid CORS issues
+// The proxy routes requests to the actual backend
 const getApiHost = () => {
-  // Server-side (Node.js in Docker)
-  if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:4005';
-  }
-  // Client-side (Browser) - always use localhost since browser runs on host
-  return 'http://localhost:4005';
+  // Always use the Next.js API proxy route (client and server)
+  // This proxies to the actual backend: http://192.168.1.210:4005
+  return typeof window === 'undefined' 
+    ? process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:3000'
+    : '';
 };
 
 const API_HOST = getApiHost();
-const BASE_API_URL = `${API_HOST}/api`;
+const BASE_API_URL = API_HOST ? `${API_HOST}/api` : '/api';
 
 export const API_CONFIG = {
   BASE_URL: BASE_API_URL,
