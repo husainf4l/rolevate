@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany, Index } from 'typeorm';
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { User } from '../user/user.entity';
 import { WorkExperience } from './work-experience.entity';
@@ -33,13 +33,10 @@ export class CandidateProfile {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  firstName?: string;
+  name?: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
-  lastName?: string;
-
-  @Column({ nullable: true })
+  @Index('IDX_candidate_profile_phone')
   @Field({ nullable: true })
   phone?: string;
 
@@ -84,6 +81,7 @@ export class CandidateProfile {
     enum: AvailabilityStatus,
     nullable: true,
   })
+  @Index('IDX_candidate_profile_availability')
   @Field(() => AvailabilityStatus, { nullable: true })
   availability?: AvailabilityStatus;
 

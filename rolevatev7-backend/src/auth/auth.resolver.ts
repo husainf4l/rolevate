@@ -1,6 +1,5 @@
 import { Resolver, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginInput } from './login.input';
 import { LoginResponseDto } from './login-response.dto';
@@ -20,7 +19,6 @@ export class AuthResolver {
   ) {}
 
   @Mutation(() => LoginResponseDto)
-  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 attempts per 5 minutes
   async login(@Args('input') input: LoginInput): Promise<LoginResponseDto> {
     const user = await this.authService.validateUser(input.email, input.password);
     if (!user) {
@@ -57,7 +55,6 @@ export class AuthResolver {
   @Mutation(() => Boolean, {
     description: 'Request password reset - sends 6-digit code via WhatsApp',
   })
-  @Throttle({ default: { limit: 3, ttl: 300000 } }) // 3 attempts per 5 minutes
   async forgotPassword(
     @Args('input') input: ForgotPasswordInput,
   ): Promise<boolean> {
@@ -70,7 +67,6 @@ export class AuthResolver {
   @Mutation(() => Boolean, {
     description: 'Reset password using token received via WhatsApp',
   })
-  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 attempts per 5 minutes
   async resetPassword(
     @Args('input') input: ResetPasswordInput,
   ): Promise<boolean> {

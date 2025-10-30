@@ -305,9 +305,14 @@ export class ApplicationService {
       if (candidateProfile) {
         console.log('ℹ️ Candidate profile already exists, updating basic info...');
         // Update existing profile with basic info only
+        // Combine firstName and lastName into name
+        const fullName = [candidateInfo.firstName, candidateInfo.lastName]
+          .filter(Boolean)
+          .join(' ')
+          .trim() || undefined;
+          
         await manager.update(CandidateProfile, { userId: user.id }, {
-          firstName: candidateInfo.firstName,
-          lastName: candidateInfo.lastName,
+          name: fullName,
           phone: candidateInfo.phone,
           resumeUrl: resumeUrl,
           // Leave CV analysis fields empty - FastAPI will fill them
@@ -319,10 +324,15 @@ export class ApplicationService {
       } else {
         // Create new candidate profile with basic info only
         console.log('🆕 Creating new candidate profile with basic info...');
+        // Combine firstName and lastName into name
+        const fullName = [candidateInfo.firstName, candidateInfo.lastName]
+          .filter(Boolean)
+          .join(' ')
+          .trim() || undefined;
+          
         candidateProfile = await manager.save(CandidateProfile, {
           userId: user.id,
-          firstName: candidateInfo.firstName,
-          lastName: candidateInfo.lastName,
+          name: fullName,
           phone: candidateInfo.phone,
           resumeUrl: resumeUrl,
           // Leave all CV analysis fields empty - FastAPI will populate them
@@ -914,10 +924,16 @@ export class ApplicationService {
           if (!application.candidate.candidateProfile) {
             // Create new candidate profile if it doesn't exist
             console.log('🆕 Creating new candidate profile...');
+            
+            // Combine firstName and lastName into name
+            const fullName = [candidateInfo.firstName, candidateInfo.lastName]
+              .filter(Boolean)
+              .join(' ')
+              .trim() || undefined;
+            
             const newProfile = this.applicationRepository.manager.getRepository(CandidateProfile).create({
               userId: application.candidate.id,
-              firstName: candidateInfo.firstName,
-              lastName: candidateInfo.lastName,
+              name: fullName,
               phone: candidateInfo.phone,
               location: candidateInfo.location,
               bio: candidateInfo.bio,

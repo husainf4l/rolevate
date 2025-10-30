@@ -4,52 +4,52 @@ import { JobType, JobLevel, WorkType, JobStatus } from './job.entity';
 
 @InputType()
 export class JobFilterInput {
-  @Field(() => JobStatus, { nullable: true, description: 'Filter by job status' })
+  @Field(() => JobStatus, { nullable: true })
   @IsOptional()
   @IsEnum(JobStatus)
   status?: JobStatus;
 
-  @Field(() => JobType, { nullable: true, description: 'Filter by job type' })
+  @Field(() => JobType, { nullable: true })
   @IsOptional()
   @IsEnum(JobType)
   type?: JobType;
 
-  @Field(() => JobLevel, { nullable: true, description: 'Filter by job level' })
+  @Field(() => JobLevel, { nullable: true })
   @IsOptional()
   @IsEnum(JobLevel)
   jobLevel?: JobLevel;
 
-  @Field(() => WorkType, { nullable: true, description: 'Filter by work type' })
+  @Field(() => WorkType, { nullable: true })
   @IsOptional()
   @IsEnum(WorkType)
   workType?: WorkType;
 
-  @Field({ nullable: true, description: 'Filter by industry (partial match)' })
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   industry?: string;
 
-  @Field({ nullable: true, description: 'Filter by location (partial match)' })
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   location?: string;
 
-  @Field({ nullable: true, description: 'Filter by department (partial match)' })
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   department?: string;
 
-  @Field({ nullable: true, description: 'Filter by user who posted the job' })
+  @Field({ nullable: true })
   @IsOptional()
   @IsUUID()
   postedById?: string;
 
-  @Field({ nullable: true, description: 'Filter by company ID' })
+  @Field({ nullable: true })
   @IsOptional()
   @IsUUID()
   companyId?: string;
 
-  @Field({ nullable: true, description: 'Filter by featured status' })
+  @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
   featured?: boolean;

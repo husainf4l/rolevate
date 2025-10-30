@@ -4,7 +4,6 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './global-exception.filter';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 /**
  * BEST PRACTICE FOR APOLLO SERVER 5 + FASTIFY:
@@ -28,9 +27,6 @@ async function bootstrap() {
 
   // Use the local logger instance instead of resolving Logger from DI
   app.useLogger(logger);
-  
-  // Apply global interceptors
-  app.useGlobalInterceptors(new LoggingInterceptor());
   
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({

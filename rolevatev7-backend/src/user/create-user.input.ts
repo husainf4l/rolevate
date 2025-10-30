@@ -27,8 +27,8 @@ export class CreateUserInput {
   @IsString()
   name?: string;
 
-  @Field()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsString()
-  @IsPhoneNumber(undefined, { message: 'Please provide a valid phone number' })
-  phone: string;
+  phone?: string;
 }

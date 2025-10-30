@@ -1,27 +1,23 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
-import { PasswordReset } from './password-reset.entity';
 import { LoginResponseDto } from './login-response.dto';
 import { AuditService } from '../audit.service';
 import { CommunicationService } from '../communication/communication.service';
 import { CommunicationType, CommunicationDirection } from '../communication/communication.entity';
-import { AUTH_CONSTANTS } from './auth.constants';
+import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+  private resetTokens: Map<string, { email: string; expiresAt: Date }> = new Map();
 
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
     private auditService: AuditService,
     private communicationService: CommunicationService,
-    @InjectRepository(PasswordReset)
-    private passwordResetRepository: Repository<PasswordReset>,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -96,26 +92,17 @@ export class AuthService {
       throw new BadRequestException('User does not have a phone number registered. Please contact support.');
     }
 
-    // Generate reset token (6-digit code)
-    const resetToken = Math.floor(
-      AUTH_CONSTANTS.RESET_TOKEN_MIN + 
-      Math.random() * (AUTH_CONSTANTS.RESET_TOKEN_MAX - AUTH_CONSTANTS.RESET_TOKEN_MIN)
-    ).toString();
+    // Generate reset token (6-digit code for simplicity)
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Store token with expiration in database
-    const expiresAt = new Date(Date.now() + AUTH_CONSTANTS.RESET_TOKEN_EXPIRY_MINUTES * 60 * 1000);
-    
-    await this.passwordResetRepository.save({
-      email: user.email!,
-      token: resetToken,
-      expiresAt,
-      used: false,
-    });
+    // Store token with 15 minute expiration
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    this.resetTokens.set(resetToken, { email: user.email, expiresAt });
 
     console.log(`✅ Generated reset token: ${resetToken} for ${user.email} (phone: ${user.phone}), expires at ${expiresAt.toISOString()}`);
 
     // Clean up expired tokens
-    await this.cleanupExpiredTokens();
+    this.cleanupExpiredTokens();
 
     // Send reset token via WhatsApp using temppassword template
     try {
@@ -148,39 +135,34 @@ export class AuthService {
    */
   async resetPassword(token: string, newPassword: string): Promise<boolean> {
     console.log(`🔍 Attempting to reset password with token: ${token}`);
+    console.log(`📋 Available tokens:`, Array.from(this.resetTokens.keys()));
     
-    // Find valid, unused token from database
-    const resetRecord = await this.passwordResetRepository.findOne({
-      where: {
-        token,
-        used: false,
-      },
-    });
-    
-    if (!resetRecord) {
+    // Validate token
+    const tokenData = this.resetTokens.get(token);
+    if (!tokenData) {
       throw new BadRequestException('Invalid or expired reset code');
     }
 
     // Check if token has expired
-    if (new Date() > resetRecord.expiresAt) {
-      await this.passwordResetRepository.update(resetRecord.id, { used: true });
+    if (new Date() > tokenData.expiresAt) {
+      this.resetTokens.delete(token);
       throw new BadRequestException('Reset code has expired. Please request a new one.');
     }
 
     // Find user
-    const user = await this.userService.findByEmail(resetRecord.email);
+    const user = await this.userService.findByEmail(tokenData.email);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, AUTH_CONSTANTS.BCRYPT_ROUNDS);
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
 
     // Update user password
     await this.userService.updatePassword(user.id, hashedPassword);
 
-    // Mark token as used
-    await this.passwordResetRepository.update(resetRecord.id, { used: true });
+    // Delete used token
+    this.resetTokens.delete(token);
 
     // Log audit event
     console.log(`Password reset completed for: ${user.email}`);
@@ -189,12 +171,14 @@ export class AuthService {
   }
 
   /**
-   * Clean up expired reset tokens from database
+   * Clean up expired reset tokens
    */
-  private async cleanupExpiredTokens(): Promise<void> {
+  private cleanupExpiredTokens(): void {
     const now = new Date();
-    await this.passwordResetRepository.delete({
-      expiresAt: LessThan(now),
-    });
+    for (const [token, data] of this.resetTokens.entries()) {
+      if (now > data.expiresAt) {
+        this.resetTokens.delete(token);
+      }
+    }
   }
 }

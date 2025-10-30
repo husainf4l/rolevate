@@ -1,12 +1,32 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { JobDto } from './job.dto';
-import { PaginationMeta } from '../common/pagination.dto';
 
 @ObjectType()
-export class PaginatedJobsResponse {
-  @Field(() => [JobDto], { description: 'List of jobs' })
+export class PaginationMeta {
+  @Field(() => Int)
+  total: number;
+
+  @Field(() => Int)
+  page: number;
+
+  @Field(() => Int)
+  limit: number;
+
+  @Field(() => Int)
+  totalPages: number;
+
+  @Field()
+  hasNextPage: boolean;
+
+  @Field()
+  hasPreviousPage: boolean;
+}
+
+@ObjectType()
+export class PaginatedJobs {
+  @Field(() => [JobDto])
   data: JobDto[];
 
-  @Field(() => PaginationMeta, { description: 'Pagination metadata' })
+  @Field(() => PaginationMeta)
   meta: PaginationMeta;
 }

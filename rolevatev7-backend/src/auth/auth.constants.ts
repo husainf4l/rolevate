@@ -1,19 +1,23 @@
-/**
- * Authentication-related constants
- */
 export const AUTH_CONSTANTS = {
-  // Password Reset
-  RESET_TOKEN_EXPIRY_MINUTES: 15,
-  RESET_TOKEN_LENGTH: 6,
-  RESET_TOKEN_MIN: 100000,
-  RESET_TOKEN_MAX: 900000,
-  
-  // Password Requirements
-  MIN_PASSWORD_LENGTH: 12,
-  PASSWORD_CHARSET: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@$!%*?&',
-  
-  // Security
+  JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key',
+  JWT_EXPIRATION: '24h',
   BCRYPT_ROUNDS: 12,
-  MAX_LOGIN_ATTEMPTS: 5,
-  LOCKOUT_DURATION_MINUTES: 15,
+  PASSWORD_MIN_LENGTH: 8,
+  PASSWORD_RESET_EXPIRATION: 3600000, // 1 hour in milliseconds
+  TEMP_PASSWORD_LENGTH: 12,
+} as const;
+
+export const RATE_LIMIT = {
+  LOGIN: {
+    TTL: 300000, // 5 minutes
+    LIMIT: 5,
+  },
+  FORGOT_PASSWORD: {
+    TTL: 300000, // 5 minutes
+    LIMIT: 3,
+  },
+  RESET_PASSWORD: {
+    TTL: 300000, // 5 minutes
+    LIMIT: 5,
+  },
 } as const;

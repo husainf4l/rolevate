@@ -18,7 +18,6 @@ import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { ServicesModule } from './services/services.module';
 import { LiveKitModule } from './livekit/livekit.module';
 import { DatabaseBackupModule } from './database-backup/database-backup.module';
-import { HealthModule } from './health/health.module';
 import { AuditService } from './audit.service';
 
 @Module({
@@ -64,32 +63,9 @@ import { AuditService } from './audit.service';
       csrfPrevention: {
         requestHeaders: ['x-apollo-operation-name', 'apollo-require-preflight'],
       },
-      formatError: (error) => {
-        const originalError = error.extensions?.originalError as any;
-        
-        // Handle validation errors from class-validator
-        if (originalError?.message && Array.isArray(originalError.message)) {
-          return {
-            message: originalError.message.join(', '),
-            extensions: {
-              code: error.extensions?.code || 'BAD_USER_INPUT',
-              validationErrors: originalError.message,
-            },
-          };
-        }
-        
-        return {
-          message: error.message,
-          extensions: {
-            code: error.extensions?.code,
-            ...error.extensions,
-          },
-        };
-      },
     }),
     UserModule,
     AuthModule,
-    HealthModule,
     ServicesModule,
     DatabaseBackupModule, // Must come after AuthModule and ServicesModule
     JobModule,

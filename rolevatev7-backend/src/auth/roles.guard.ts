@@ -4,10 +4,6 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { UserType } from '../user/user.entity';
 import { ROLES_KEY } from './roles.decorator';
 
-/**
- * Guard to check if the authenticated user has the required role(s)
- * Works with @Roles() decorator
- */
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -18,20 +14,18 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    // If no roles are required, allow access
-    if (!requiredRoles || requiredRoles.length === 0) {
+    if (!requiredRoles) {
       return true;
     }
 
-    // Get user from request context
     const ctx = GqlExecutionContext.create(context);
-    const { user } = ctx.getContext().req;
+    const { req } = ctx.getContext();
+    const user = req.user;
 
     if (!user) {
       return false;
     }
 
-    // Check if user has any of the required roles
     return requiredRoles.some((role) => user.userType === role);
   }
 }
