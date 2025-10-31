@@ -252,13 +252,16 @@ export function AudioVisualizer3D({
       renderer.setSize(width, height);
       renderer.setClearColor(0x000000, 0);
       
-      // Style the canvas
+      // Style the canvas - ensure no borders or backgrounds
       renderer.domElement.style.position = 'absolute';
       renderer.domElement.style.top = '0';
       renderer.domElement.style.left = '0';
       renderer.domElement.style.width = '100%';
       renderer.domElement.style.height = '100%';
       renderer.domElement.style.pointerEvents = 'none';
+      renderer.domElement.style.border = 'none';
+      renderer.domElement.style.outline = 'none';
+      renderer.domElement.style.background = 'transparent';
       
       mountRef.current.appendChild(renderer.domElement);
 

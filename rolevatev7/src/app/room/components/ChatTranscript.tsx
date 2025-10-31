@@ -36,6 +36,9 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
   const [isInterim, setIsInterim] = useState<boolean>(false);
   const lastFinalTextRef = useRef<string>('');
 
+  // Check if this is mobile CC mode
+  const isMobileCC = className.includes('mobile-cc');
+
   // Detect text direction
   const textDirection = useMemo(() => {
     return detectTextDirection(currentParagraph);
@@ -88,6 +91,44 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
 
   const hasContent = currentParagraph;
 
+  // Mobile CC Mode - Clean captions only
+  if (isMobileCC) {
+    return (
+      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+        {hasContent ? (
+          <p 
+            dir={textDirection}
+            className={`text-white text-sm leading-5 ${
+              textDirection === 'rtl' ? 'text-right' : 'text-left'
+            }`}
+            lang={textDirection === 'rtl' ? 'ar' : 'en'}
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
+            <span className={isInterim ? 'text-white/90' : 'text-white/95'}>
+              {currentParagraph}
+            </span>
+            {/* Typing cursor when speaking and interim */}
+            {isInterim && agentState === 'speaking' && (
+              <motion.span 
+                className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 h-3 bg-[#0891b2] rounded-full`}
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+              />
+            )}
+          </p>
+        ) : (
+          <p className="text-white/40 text-sm text-center py-1">Waiting for conversation...</p>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop Mode - Full layout with containers
   return (
     <div className={className}>
       {/* Current Paragraph Display - Optimized for mobile */}

@@ -13,6 +13,7 @@ import {
 } from '@livekit/components-react';
 import { cn } from '@/lib/utils';
 import { ChatTranscript } from './ChatTranscript';
+import { AudioVisualizer3D } from '@/components/room/AudioVisualizer3D';
 
 const MotionContainer = motion.div;
 
@@ -33,7 +34,11 @@ export function useLocalTrackRef(source: Track.Source) {
   return trackRef;
 }
 
-export function TileLayout() {
+interface TileLayoutProps {
+  showVisualizer?: boolean;
+}
+
+export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
   const [isMounted, setIsMounted] = useState(false);
   const {
     state: agentState,
@@ -63,105 +68,184 @@ export function TileLayout() {
   }
 
   return (
-    <div className="h-full w-full relative">
-      {/* Full-Screen User Video Background */}
-      <AnimatePresence>
-        {((cameraTrack && isCameraEnabled) || (screenShareTrack && isScreenShareEnabled)) && (
-          <MotionContainer
-            key="user-video"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 z-0"
-          >
-            <VideoTrack
-              trackRef={cameraTrack || screenShareTrack}
-              width={(cameraTrack || screenShareTrack)?.publication.dimensions?.width ?? 0}
-              height={(cameraTrack || screenShareTrack)?.publication.dimensions?.height ?? 0}
-              className="w-full h-full object-cover"
-            />
-            {/* Dark overlay for better contrast with overlaid elements */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50"></div>
-          </MotionContainer>
-        )}
-      </AnimatePresence>
+    <div className="h-full w-full flex flex-col lg:flex-row relative overflow-hidden">
+      {/* Main Area - Mobile: Full screen with overlay captions, Desktop: Left 65% */}
+      <div className="flex-1 lg:w-[65%] relative bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        {/* Mobile User Camera Overlay */}
+        <div className="lg:hidden absolute top-4 right-4 z-20 w-24 h-32 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
+          <AnimatePresence>
+            {((cameraTrack && isCameraEnabled) || (screenShareTrack && isScreenShareEnabled)) ? (
+              <VideoTrack
+                trackRef={cameraTrack || screenShareTrack}
+                width={(cameraTrack || screenShareTrack)?.publication.dimensions?.width ?? 0}
+                height={(cameraTrack || screenShareTrack)?.publication.dimensions?.height ?? 0}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                <svg className="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
 
-      {/* Fallback when camera is off */}
-      {!isCameraEnabled && !isScreenShareEnabled && (
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-white/5 border-2 border-white/10 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-12 h-12 md:w-16 md:h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <p className="text-white/40 text-sm md:text-base">Camera is off</p>
+        {/* Mobile CC-Style Transcript Overlay */}
+        <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
+          <div className="px-4 pb-4 max-h-24 overflow-hidden">
+            <ChatTranscript className="mobile-cc" />
           </div>
         </div>
-      )}
-
-      {/* Overlaid Content */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-4 md:p-6 pb-24 md:pb-28">
-        {/* Main Agent Display */}
-        <AnimatePresence mode="wait">
-          {!isAvatar && (
-            // Audio Agent - Bars with transcript overlaid on video
-            <MotionContainer
-              key="agent-audio"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={ANIMATION_TRANSITION}
-              className="flex flex-col items-center justify-end w-full max-w-2xl gap-4 md:gap-6"
-            >
-              {/* Audio Visualization - Simple status text when 3D visualizer is active */}
-              <div className="w-full">
-                {/* Just show status without bars - 3D visualizer handles the visual */}
-                <div className="h-16 md:h-24 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className={cn([
-                      'w-4 h-4 rounded-full mx-auto mb-2 transition-all duration-300',
-                      agentState === 'speaking' && 'bg-green-400 animate-pulse shadow-lg shadow-green-400/50',
-                      agentState === 'listening' && 'bg-blue-400 animate-pulse shadow-lg shadow-blue-400/50',
-                      agentState === 'thinking' && 'bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50',
-                      !agentState && 'bg-gray-400'
-                    ])}>
-                    </div>
-                    <p className="text-white/80 text-xs md:text-sm font-medium">
-                      {agentState === 'speaking' ? '🎙️ AI Speaking' : 
-                       agentState === 'listening' ? '👂 AI Listening' : 
-                       agentState === 'thinking' ? '🤔 AI Thinking' : 
-                       '⏸️ Standby'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Transcript Below Audio Bar */}
-              <div className="w-full max-h-[200px] md:max-h-[300px] overflow-y-auto">
-                <ChatTranscript />
-              </div>
-            </MotionContainer>
+        {/* Mobile: Full screen 3D visualizer + status */}
+        <div className="lg:hidden h-full flex flex-col items-center justify-center p-4 space-y-6">
+          {/* Large 3D Audio Visualizer for Mobile */}
+          {showVisualizer && !isAvatar && (
+            <div className="w-full h-96 max-w-lg">
+              <AudioVisualizer3D 
+                isVisible={showVisualizer}
+                className="w-full h-full"
+              />
+            </div>
           )}
 
+          {/* Avatar for Mobile */}
           {isAvatar && (
-            // Avatar Agent (if ever used) - also overlaid
-            <MotionContainer
-              key="agent-avatar"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={ANIMATION_TRANSITION}
-              className="overflow-hidden rounded-2xl md:rounded-3xl border border-white/20 shadow-2xl max-w-md w-full aspect-video bg-black/40 backdrop-blur-xl"
-            >
+            <div className="w-full max-w-md aspect-video">
               <VideoTrack
                 width={videoWidth}
                 height={videoHeight}
                 trackRef={agentVideoTrack}
+                className="w-full h-full object-cover rounded-2xl border border-white/20 shadow-2xl"
+              />
+            </div>
+          )}
+
+          {/* Audio Visualization Status - Under the 3D */}
+          <div className="flex-shrink-0">
+            <p className="text-white/80 text-sm font-medium text-center">
+              {agentState === 'speaking' ? 'AI Speaking' : 
+               agentState === 'listening' ? 'AI Listening' : 
+               agentState === 'thinking' ? 'AI Thinking' : 
+               'AI Standby'}
+            </p>
+          </div>
+        </div>
+
+        {/* Desktop: Split layout */}
+        <div className="hidden lg:flex h-full flex-col items-center justify-start p-6 space-y-6 overflow-y-auto">
+          {/* Audio Visualization Status */}
+          <div className="w-full text-center flex-shrink-0">
+            <p className="text-white/80 text-base font-medium">
+              {agentState === 'speaking' ? 'AI Speaking' : 
+               agentState === 'listening' ? 'AI Listening' : 
+               agentState === 'thinking' ? 'AI Thinking' : 
+               'AI Standby'}
+            </p>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {!isAvatar && (
+              // Desktop: Audio Agent with 3D Visualizer
+              <React.Fragment>
+                {/* 3D Audio Visualizer */}
+                {showVisualizer && (
+                  <MotionContainer
+                    key="visualizer"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={ANIMATION_TRANSITION}
+                    className="w-full max-w-2xl h-96 flex-shrink-0"
+                  >
+                    <AudioVisualizer3D 
+                      isVisible={showVisualizer}
+                      className="w-full h-full"
+                    />
+                  </MotionContainer>
+                )}
+
+                {/* Desktop Transcript */}
+                <MotionContainer
+                  key="transcript"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={ANIMATION_TRANSITION}
+                  className="w-full max-w-2xl flex-1 min-h-0"
+                >
+                  <div className="h-full overflow-y-auto">
+                    <ChatTranscript />
+                  </div>
+                </MotionContainer>
+              </React.Fragment>
+            )}
+
+            {isAvatar && (
+              // Avatar Agent Video
+              <MotionContainer
+                key="agent-avatar"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={ANIMATION_TRANSITION}
+                className="w-full max-w-2xl aspect-video flex-shrink-0"
+              >
+                <VideoTrack
+                  width={videoWidth}
+                  height={videoHeight}
+                  trackRef={agentVideoTrack}
+                  className="w-full h-full object-cover rounded-2xl border border-white/20 shadow-2xl"
+                />
+              </MotionContainer>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* User Video Area - Desktop Only: Right 35% */}
+      <div className="hidden lg:block lg:w-[35%] relative bg-gradient-to-bl from-slate-900 via-slate-800 to-slate-900 border-l border-white/10">
+        <AnimatePresence>
+          {((cameraTrack && isCameraEnabled) || (screenShareTrack && isScreenShareEnabled)) ? (
+            // User Video
+            <MotionContainer
+              key="user-video"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-full h-full"
+            >
+              <VideoTrack
+                trackRef={cameraTrack || screenShareTrack}
+                width={(cameraTrack || screenShareTrack)?.publication.dimensions?.width ?? 0}
+                height={(cameraTrack || screenShareTrack)?.publication.dimensions?.height ?? 0}
                 className="w-full h-full object-cover"
               />
+              {/* Subtle overlay for text readability */}
+              <div className="absolute inset-0 bg-black/20"></div>
+              
+              {/* User Video Label */}
+              <div className="absolute bottom-4 left-4 right-4">
+                <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                  <p className="text-white/90 text-sm font-medium">
+                    {screenShareTrack && isScreenShareEnabled ? '📱 Screen Share' : '🎥 Your Camera'}
+                  </p>
+                </div>
+              </div>
             </MotionContainer>
+          ) : (
+            // Camera Off State
+            <div className="w-full h-full flex items-center justify-center p-6">
+              <div className="text-center">
+                <div className="w-24 h-24 rounded-full bg-white/5 border-2 border-white/10 flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-12 h-12 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <p className="text-white/40 text-base">Camera is off</p>
+              </div>
+            </div>
           )}
         </AnimatePresence>
       </div>
