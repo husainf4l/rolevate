@@ -36,6 +36,18 @@ function RoomContent() {
     let isMounted = true;
     let retryTimeoutId: NodeJS.Timeout | null = null;
 
+    // Prevent media autoplay warnings
+    const preventAutoplayWarnings = () => {
+      const mediaElements = document.querySelectorAll('audio, video');
+      mediaElements.forEach((element) => {
+        if (element instanceof HTMLMediaElement) {
+          element.addEventListener('loadstart', () => {
+            element.muted = true;
+          });
+        }
+      });
+    };
+
     const connectToRoom = async (retryCount = 0) => {
       try {
         setIsLoading(true);
@@ -82,7 +94,7 @@ function RoomContent() {
 
         if (data?.createInterviewRoom?.token) {
           const token = data.createInterviewRoom.token;
-          const serverUrl = 'wss://role-cohb2u30.livekit.cloud';
+          const serverUrl = 'wss://rolevate-pf7kl7to.livekit.cloud';
           
           setRoomToken(token);
           setWSURL(serverUrl);
@@ -118,6 +130,7 @@ function RoomContent() {
     };
 
     connectToRoom();
+    preventAutoplayWarnings();
 
     // Cleanup function
     return () => {
@@ -125,6 +138,16 @@ function RoomContent() {
       if (retryTimeoutId) {
         clearTimeout(retryTimeoutId);
       }
+      
+      // Clean up media elements to prevent AbortError
+      const mediaElements = document.querySelectorAll('audio, video');
+      mediaElements.forEach((element) => {
+        if (element instanceof HTMLMediaElement) {
+          element.pause();
+          element.src = '';
+          element.load();
+        }
+      });
     };
   }, [searchParams, setupComplete]);
 

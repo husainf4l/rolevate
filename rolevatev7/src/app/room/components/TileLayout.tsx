@@ -115,30 +115,26 @@ export function TileLayout() {
               transition={ANIMATION_TRANSITION}
               className="flex flex-col items-center justify-end w-full max-w-2xl gap-4 md:gap-6"
             >
-              {/* Audio Visualization */}
+              {/* Audio Visualization - Simple status text when 3D visualizer is active */}
               <div className="w-full">
-                <BarVisualizer
-                  barCount={5}
-                  state={agentState}
-                  options={{ minHeight: 6 }}
-                  trackRef={agentAudioTrack}
-                  className={cn('flex h-16 md:h-24 items-center justify-center gap-1.5 md:gap-2')}
-                >
-                  <span
-                    className={cn([
-                      'bg-white/20 min-h-2.5 w-2.5 md:min-h-3 md:w-3 rounded-full',
-                      'origin-center transition-all duration-200 ease-out',
-                      'data-[lk-highlighted=true]:bg-gradient-to-t data-[lk-highlighted=true]:from-[#0891b2] data-[lk-highlighted=true]:to-[#06b6d4] data-[lk-highlighted=true]:shadow-lg data-[lk-highlighted=true]:shadow-[#0891b2]/50',
-                      'data-[lk-muted=true]:bg-white/10',
-                    ])}
-                  />
-                </BarVisualizer>
-                <div className="mt-3 md:mt-4 text-center">
-                  <p className="text-white/80 text-xs md:text-sm font-medium">
-                    {agentState === 'speaking' ? ' AI Speaking' : 
-                     agentState === 'listening' ? ' AI Listening' : 
-                     '⏸ Standby'}
-                  </p>
+                {/* Just show status without bars - 3D visualizer handles the visual */}
+                <div className="h-16 md:h-24 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className={cn([
+                      'w-4 h-4 rounded-full mx-auto mb-2 transition-all duration-300',
+                      agentState === 'speaking' && 'bg-green-400 animate-pulse shadow-lg shadow-green-400/50',
+                      agentState === 'listening' && 'bg-blue-400 animate-pulse shadow-lg shadow-blue-400/50',
+                      agentState === 'thinking' && 'bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50',
+                      !agentState && 'bg-gray-400'
+                    ])}>
+                    </div>
+                    <p className="text-white/80 text-xs md:text-sm font-medium">
+                      {agentState === 'speaking' ? '🎙️ AI Speaking' : 
+                       agentState === 'listening' ? '👂 AI Listening' : 
+                       agentState === 'thinking' ? '🤔 AI Thinking' : 
+                       '⏸️ Standby'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
