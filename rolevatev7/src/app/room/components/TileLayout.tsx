@@ -69,7 +69,7 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
 
   return (
     <div className="h-full w-full flex flex-col lg:flex-row relative overflow-hidden">
-      {/* Main Area - Mobile: Full screen with overlay captions, Desktop: Left 65% */}
+      {/* AI Agent Area - Mobile: Full screen, Desktop: Left 65% */}
       <div className="flex-1 lg:w-[65%] relative bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         {/* Mobile User Camera Overlay */}
         <div className="lg:hidden absolute top-4 right-4 z-20 w-24 h-32 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
@@ -132,21 +132,11 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
           </div>
         </div>
 
-        {/* Desktop: Split layout */}
-        <div className="hidden lg:flex h-full flex-col items-center justify-start p-6 space-y-6 overflow-y-auto">
-          {/* Audio Visualization Status */}
-          <div className="w-full text-center flex-shrink-0">
-            <p className="text-white/80 text-base font-medium">
-              {agentState === 'speaking' ? 'AI Speaking' : 
-               agentState === 'listening' ? 'AI Listening' : 
-               agentState === 'thinking' ? 'AI Thinking' : 
-               'AI Standby'}
-            </p>
-          </div>
-
+        {/* Desktop: AI Agent Area with 3D visualizer */}
+        <div className="hidden lg:flex h-full flex-col items-center justify-center p-6 space-y-6">
           <AnimatePresence mode="wait">
             {!isAvatar && (
-              // Desktop: Audio Agent with 3D Visualizer
+              // Audio Agent with 3D Visualizer
               <React.Fragment>
                 {/* 3D Audio Visualizer */}
                 {showVisualizer && (
@@ -156,7 +146,7 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={ANIMATION_TRANSITION}
-                    className="w-full max-w-2xl h-96 flex-shrink-0"
+                    className="w-full max-w-4xl h-[500px] flex-shrink-0"
                   >
                     <AudioVisualizer3D 
                       isVisible={showVisualizer}
@@ -165,19 +155,15 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
                   </MotionContainer>
                 )}
 
-                {/* Desktop Transcript */}
-                <MotionContainer
-                  key="transcript"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={ANIMATION_TRANSITION}
-                  className="w-full max-w-2xl flex-1 min-h-0"
-                >
-                  <div className="h-full overflow-y-auto">
-                    <ChatTranscript />
-                  </div>
-                </MotionContainer>
+                {/* Audio Visualization Status - Under the 3D */}
+                <div className="flex-shrink-0">
+                  <p className="text-white/80 text-sm font-medium text-center">
+                    {agentState === 'speaking' ? 'AI Speaking' : 
+                     agentState === 'listening' ? 'AI Listening' : 
+                     agentState === 'thinking' ? 'AI Thinking' : 
+                     'AI Standby'}
+                  </p>
+                </div>
               </React.Fragment>
             )}
 
@@ -189,21 +175,28 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={ANIMATION_TRANSITION}
-                className="w-full max-w-2xl aspect-video flex-shrink-0"
+                className="w-full max-w-xl aspect-video flex-shrink-0"
               >
                 <VideoTrack
                   width={videoWidth}
                   height={videoHeight}
                   trackRef={agentVideoTrack}
-                  className="w-full h-full object-cover rounded-2xl border border-white/20 shadow-2xl"
+                  className="w-full h-full object-cover rounded-xl border border-white/20 shadow-xl"
                 />
               </MotionContainer>
             )}
           </AnimatePresence>
         </div>
+
+        {/* Desktop CC-Style Transcript Overlay */}
+        <div className="hidden lg:block absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
+          <div className="px-6 pb-6 max-h-32 overflow-hidden">
+            <ChatTranscript className="desktop-cc" />
+          </div>
+        </div>
       </div>
 
-      {/* User Video Area - Desktop Only: Right 35% */}
+      {/* User Video Area - Desktop: Right 35% */}
       <div className="hidden lg:block lg:w-[35%] relative bg-gradient-to-bl from-slate-900 via-slate-800 to-slate-900 border-l border-white/10">
         <AnimatePresence>
           {((cameraTrack && isCameraEnabled) || (screenShareTrack && isScreenShareEnabled)) ? (
@@ -225,14 +218,16 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
               {/* Subtle overlay for text readability */}
               <div className="absolute inset-0 bg-black/20"></div>
               
-              {/* User Video Label */}
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
-                  <p className="text-white/90 text-sm font-medium">
-                    {screenShareTrack && isScreenShareEnabled ? '📱 Screen Share' : '🎥 Your Camera'}
-                  </p>
+              {/* User Video Label - Only for Screen Share */}
+              {screenShareTrack && isScreenShareEnabled && (
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                    <p className="text-white/90 text-sm font-medium">
+                      📱 Screen Share
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </MotionContainer>
           ) : (
             // Camera Off State

@@ -36,8 +36,10 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
   const [isInterim, setIsInterim] = useState<boolean>(false);
   const lastFinalTextRef = useRef<string>('');
 
-  // Check if this is mobile CC mode
+  // Check if this is CC mode (mobile or desktop)
   const isMobileCC = className.includes('mobile-cc');
+  const isDesktopCC = className.includes('desktop-cc');
+  const isCCMode = isMobileCC || isDesktopCC;
 
   // Detect text direction
   const textDirection = useMemo(() => {
@@ -91,20 +93,22 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
 
   const hasContent = currentParagraph;
 
-  // Mobile CC Mode - Clean captions only
-  if (isMobileCC) {
+  // CC Mode - Clean captions only (both mobile and desktop)
+  if (isCCMode) {
     return (
-      <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+      <div className={`bg-black/60 backdrop-blur-sm rounded-lg border border-white/20 ${
+        isDesktopCC ? 'px-4 py-3' : 'px-3 py-2'
+      }`}>
         {hasContent ? (
           <p 
             dir={textDirection}
-            className={`text-white text-sm leading-5 ${
-              textDirection === 'rtl' ? 'text-right' : 'text-left'
-            }`}
+            className={`text-white leading-5 ${
+              isDesktopCC ? 'text-base' : 'text-sm'
+            } ${textDirection === 'rtl' ? 'text-right' : 'text-left'}`}
             lang={textDirection === 'rtl' ? 'ar' : 'en'}
             style={{
               display: '-webkit-box',
-              WebkitLineClamp: 3,
+              WebkitLineClamp: isDesktopCC ? 4 : 3,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden'
             }}
@@ -115,14 +119,18 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
             {/* Typing cursor when speaking and interim */}
             {isInterim && agentState === 'speaking' && (
               <motion.span 
-                className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 h-3 bg-[#0891b2] rounded-full`}
+                className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 ${
+                  isDesktopCC ? 'h-4' : 'h-3'
+                } bg-[#0891b2] rounded-full`}
                 animate={{ opacity: [1, 0.3, 1] }}
                 transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
               />
             )}
           </p>
         ) : (
-          <p className="text-white/40 text-sm text-center py-1">Waiting for conversation...</p>
+          <p className={`text-white/40 text-center py-1 ${
+            isDesktopCC ? 'text-base' : 'text-sm'
+          }`}>Waiting for conversation...</p>
         )}
       </div>
     );

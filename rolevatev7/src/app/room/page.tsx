@@ -36,16 +36,29 @@ function RoomContent() {
     let isMounted = true;
     let retryTimeoutId: NodeJS.Timeout | null = null;
 
-    // Prevent media autoplay warnings
+    // Prevent media autoplay warnings - but be gentle with LiveKit elements
     const preventAutoplayWarnings = () => {
-      const mediaElements = document.querySelectorAll('audio, video');
-      mediaElements.forEach((element) => {
-        if (element instanceof HTMLMediaElement) {
-          element.addEventListener('loadstart', () => {
-            element.muted = true;
+      // Use a MutationObserver to handle dynamically added media elements
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node instanceof HTMLMediaElement) {
+              // Only apply muting to non-LiveKit elements to prevent interference
+              if (!node.hasAttribute('data-lk-audio') && !node.hasAttribute('data-lk-video')) {
+                try {
+                  node.muted = true;
+                } catch (e) {
+                  console.debug('Mute error (expected):', e);
+                }
+              }
+            }
           });
-        }
+        });
       });
+      
+      observer.observe(document.body, { childList: true, subtree: true });
+      
+      return () => observer.disconnect();
     };
 
     const connectToRoom = async (retryCount = 0) => {
@@ -130,7 +143,7 @@ function RoomContent() {
     };
 
     connectToRoom();
-    preventAutoplayWarnings();
+    const cleanupObserver = preventAutoplayWarnings();
 
     // Cleanup function
     return () => {
@@ -139,13 +152,24 @@ function RoomContent() {
         clearTimeout(retryTimeoutId);
       }
       
-      // Clean up media elements to prevent AbortError
-      const mediaElements = document.querySelectorAll('audio, video');
+      // Cleanup mutation observer
+      if (cleanupObserver) {
+        cleanupObserver();
+      }
+      
+      // Gentle cleanup - only cleanup non-LiveKit media elements
+      const mediaElements = document.querySelectorAll('audio:not([data-lk-audio]), video:not([data-lk-video])');
       mediaElements.forEach((element) => {
         if (element instanceof HTMLMediaElement) {
-          element.pause();
-          element.src = '';
-          element.load();
+          try {
+            // Only pause if not already paused to prevent interruption errors
+            if (!element.paused) {
+              element.pause();
+            }
+          } catch (e) {
+            // Ignore AbortError and other cleanup errors
+            console.debug('Media cleanup error (expected):', e);
+          }
         }
       });
     };

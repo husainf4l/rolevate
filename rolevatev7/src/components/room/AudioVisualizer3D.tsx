@@ -154,8 +154,19 @@ export function AudioVisualizer3D({
   useEffect(() => {
     const setupAudioAnalysis = async () => {
       try {
-        // Create audio context
+        // Clean up existing context first
+        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+          await audioContextRef.current.close();
+          audioContextRef.current = null;
+        }
+
+        // Create audio context with better error handling
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        
+        // Resume context if suspended
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
         
         // Create analyzer
         analyzerRef.current = audioContextRef.current.createAnalyser();
@@ -166,14 +177,41 @@ export function AudioVisualizer3D({
         const bufferLength = analyzerRef.current.frequencyBinCount;
         dataArrayRef.current = new Uint8Array(bufferLength);
 
-        // Only analyze agent audio, not microphone
-        if (agentAudioTrack?.publication.track) {
-          const mediaStream = new MediaStream([agentAudioTrack.publication.track.mediaStreamTrack]);
-          const agentSource = audioContextRef.current.createMediaStreamSource(mediaStream);
-          agentSource.connect(analyzerRef.current);
-          console.log('✅ Agent audio analysis connected (microphone disabled)');
+        // Only analyze agent audio if track is available and ready
+        if (agentAudioTrack?.publication.track?.mediaStreamTrack) {
+          try {
+            const mediaStreamTrack = agentAudioTrack.publication.track.mediaStreamTrack;
+            
+            // Check if the MediaStreamTrack is ready and not ended
+            if (mediaStreamTrack.readyState === 'live' && !mediaStreamTrack.muted) {
+              // Create a new MediaStream without affecting the original track
+              const clonedTrack = mediaStreamTrack.clone();
+              const mediaStream = new MediaStream([clonedTrack]);
+              
+              // Ensure the stream is ready before creating source
+              if (mediaStream.active && audioContextRef.current) {
+                const agentSource = audioContextRef.current.createMediaStreamSource(mediaStream);
+                agentSource.connect(analyzerRef.current);
+                console.log('✅ Agent audio analysis connected (microphone disabled)');
+              } else {
+                console.log('⚠️ Media stream not active or audio context not ready');
+              }
+            } else {
+              console.log('⚠️ Agent audio track not ready:', { 
+                readyState: mediaStreamTrack.readyState, 
+                muted: mediaStreamTrack.muted 
+              });
+            }
+          } catch (streamError) {
+            // This error is expected when tracks are being recreated
+            if (streamError instanceof DOMException && streamError.name === 'AbortError') {
+              console.debug('🔄 Audio track is being recreated (expected)');
+            } else {
+              console.warn('⚠️ Could not connect to agent audio stream:', streamError);
+            }
+          }
         } else {
-          console.log('⚠️ No agent audio track available for analysis');
+          console.log('⚠️ Agent audio track not available for analysis');
         }
 
       } catch (error) {
@@ -181,16 +219,33 @@ export function AudioVisualizer3D({
       }
     };
 
-    if (isVisible && isInitialized) {
-      setupAudioAnalysis();
+    if (isVisible && isInitialized && agentAudioTrack) {
+      // Small delay to prevent race conditions with media loading
+      const timer = setTimeout(() => {
+        setupAudioAnalysis();
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
 
     return () => {
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-      }
+      // Improved cleanup
+      const cleanup = async () => {
+        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+          try {
+            await audioContextRef.current.close();
+          } catch (error) {
+            console.warn('Audio context cleanup warning:', error);
+          }
+          audioContextRef.current = null;
+        }
+        analyzerRef.current = null;
+        dataArrayRef.current = null;
+      };
+      
+      cleanup();
     };
-  }, [isVisible, isInitialized, agentAudioTrack]);
+  }, [isVisible, isInitialized, agentAudioTrack?.publication.track?.sid]);
 
   // Audio analysis loop
   useEffect(() => {
@@ -266,15 +321,15 @@ export function AudioVisualizer3D({
       mountRef.current.appendChild(renderer.domElement);
 
       // Create single mesh with moderate vertex displacement (less aggressive than before)
-      const geometry = new THREE.IcosahedronGeometry(1.3, 4); // Good detail for deformation
+      const geometry = new THREE.IcosahedronGeometry(1.8, 4); // Larger size for better zoom effect
       
       // Create shader uniforms for controlled vertex displacement
       const uniforms = {
         u_time: { value: 0.0 },
         u_frequency: { value: 30.0 }, // Lower base frequency
-        u_red: { value: 0.0 },
-        u_green: { value: 0.5 },
-        u_blue: { value: 1.0 }
+        u_red: { value: 0.031 },   // Brand color #0891b2 - Red component
+        u_green: { value: 0.569 }, // Brand color #0891b2 - Green component
+        u_blue: { value: 0.698 }   // Brand color #0891b2 - Blue component
       };
 
       const material = new THREE.ShaderMaterial({
@@ -289,7 +344,7 @@ export function AudioVisualizer3D({
       const mesh = new THREE.Mesh(geometry, material);
       scene.add(mesh);
 
-      camera.position.z = 8;
+      camera.position.z = 6;
 
       // Store references for animation
       const clock = new THREE.Clock();
@@ -361,9 +416,9 @@ export function AudioVisualizer3D({
       uniforms.u_time.value = time;
 
       // Keep your brand color always
-      uniforms.u_red.value = 0.0;
-      uniforms.u_green.value = 0.5;
-      uniforms.u_blue.value = 1.0;
+      uniforms.u_red.value = 0.031;   // Brand color #0891b2 - Red component
+      uniforms.u_green.value = 0.569; // Brand color #0891b2 - Green component
+      uniforms.u_blue.value = 0.698;  // Brand color #0891b2 - Blue component
 
       // Use real audio level for MODERATE vertex displacement (less aggressive than before)
       const audioLevel = audioLevelRef.current;

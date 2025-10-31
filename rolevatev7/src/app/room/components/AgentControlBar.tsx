@@ -124,7 +124,7 @@ export function AgentControlBar({ onChatOpenChange, showVisualizer = true, onVis
             'relative h-11 w-11 md:h-12 md:w-12 rounded-full flex items-center justify-center transition-all duration-200',
             'hover:bg-white/10 active:scale-95',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            isScreenSharing ? 'bg-blue-500/90 shadow-lg shadow-blue-500/30' : 'bg-white/5'
+            isScreenSharing ? 'bg-[#0891b2]/90 shadow-lg shadow-[#0891b2]/30' : 'bg-white/5'
           )}
           aria-label={isScreenSharing ? 'Stop screen share' : 'Start screen share'}
         >
@@ -142,7 +142,7 @@ export function AgentControlBar({ onChatOpenChange, showVisualizer = true, onVis
             className={cn(
               'relative h-11 w-11 md:h-12 md:w-12 rounded-full flex items-center justify-center transition-all duration-200',
               'hover:bg-white/10 active:scale-95',
-              showVisualizer ? 'bg-blue-500/90 shadow-lg shadow-blue-500/30' : 'bg-white/5'
+              showVisualizer ? 'bg-[#0891b2]/90 shadow-lg shadow-[#0891b2]/30' : 'bg-white/5'
             )}
             aria-label={showVisualizer ? 'Hide Audio Visualizer' : 'Show Audio Visualizer'}
           >
