@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { TileLayout } from './TileLayout';
 import { AgentControlBar } from './AgentControlBar';
 import { AudioVisualizer3D } from '@/components/room/AudioVisualizer3D';
+import { ChatTranscript } from './ChatTranscript';
+
 
 const MotionBottom = motion.div;
 
@@ -39,7 +41,7 @@ export function SessionView() {
 
   if (!isMounted) {
     return (
-      <section className="relative z-10 h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <section className="h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 select-none">
         <div className="h-full w-full flex items-center justify-center">
           <div className="w-16 h-16 border-3 border-white/20 border-t-white rounded-full animate-spin"></div>
         </div>
@@ -48,31 +50,36 @@ export function SessionView() {
   }
 
   return (
-    <section className="relative z-10 h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Main Layout Container */}
-      <div className="h-screen w-full flex flex-col relative z-10">
-        {/* Main Content Area - Reserve space for bottom controls */}
-        <div className="flex-1 relative min-h-0 pb-24 md:pb-32">
-          <TileLayout showVisualizer={showVisualizer} />
-        </div>
-
-        {/* Bottom Control Bar - Fixed at bottom */}
-        <MotionBottom
-          {...BOTTOM_VIEW_MOTION_PROPS}
-          className="absolute bottom-0 left-0 right-0 z-50 pointer-events-none"
-        >
-          <div className="relative px-3 md:px-8 pb-3 md:pb-8 pointer-events-auto">
-            {/* Gradient fade */}
-            <div className="absolute inset-x-0 bottom-0 h-24 md:h-32 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none -z-10"></div>
-            <AgentControlBar 
-              showVisualizer={showVisualizer}
-              onVisualizerToggle={() => setShowVisualizer(!showVisualizer)}
-            />
+    <section className="h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 select-none relative">
+      {/* Main Content Area - Account for fixed controller */}
+      <div className="h-full w-full pb-24 lg:pb-20">
+        <div className="h-full flex flex-col">
+          {/* TileLayout Content */}
+          <div className="flex-1 relative min-h-0">
+            <TileLayout showVisualizer={showVisualizer} />
           </div>
-        </MotionBottom>
+
+          {/* Transcript Section - Mobile Only, positioned above fixed controller */}
+          <div className="lg:hidden flex-shrink-0 px-4 md:px-6 pb-4">
+            <div className="w-full max-w-md mx-auto">
+              <ChatTranscript className="mobile-transcript text-center" />
+            </div>
+          </div>
+        </div>
       </div>
 
-
+      {/* Controller Section - Fixed at bottom of screen */}
+      <MotionBottom
+        {...BOTTOM_VIEW_MOTION_PROPS}
+        className="fixed bottom-0 left-0 right-0 z-50 px-4 md:px-6 pb-6 md:pb-8 pt-4 bg-gradient-to-t from-slate-950 via-slate-900/90 to-transparent"
+      >
+        <div className="w-full flex justify-center">
+          <AgentControlBar 
+            showVisualizer={showVisualizer}
+            onVisualizerToggle={() => setShowVisualizer(!showVisualizer)}
+          />
+        </div>
+      </MotionBottom>
     </section>
   );
 }

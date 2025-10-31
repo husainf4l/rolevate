@@ -7,10 +7,13 @@ import { SessionView } from './components/SessionView';
 import { PreRoomSetup } from './components/PreRoomSetup';
 import { apolloClient } from '@/lib/apollo';
 import { gql } from '@apollo/client';
+import './mobile-fixes.css';
+
+
 
 function LoadingScreen({ message = 'Connecting to interview room...' }: { message?: string }) {
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="text-center">
         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="text-gray-600 dark:text-gray-400">{message}</p>
@@ -105,6 +108,18 @@ function RoomContent() {
           roomName: data?.createInterviewRoom?.roomName,
         });
 
+        // Debug audio environment for production compatibility
+        if (typeof window !== 'undefined') {
+          console.group('🎵 Audio Environment Debug (Room Creation)');
+          console.log('Protocol:', window.location.protocol);
+          console.log('Hostname:', window.location.hostname);
+          console.log('Is Production:', window.location.hostname !== 'localhost');
+          console.log('User Agent:', navigator.userAgent);
+          console.log('Has getUserMedia:', !!navigator.mediaDevices?.getUserMedia);
+          console.log('Has AudioContext:', !!(window.AudioContext || (window as any).webkitAudioContext));
+          console.groupEnd();
+        }
+
         if (data?.createInterviewRoom?.token) {
           const token = data.createInterviewRoom.token;
           const serverUrl = 'wss://rolevate-pf7kl7to.livekit.cloud';
@@ -187,8 +202,8 @@ function RoomContent() {
 
   if (error) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center p-8 max-w-md">
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+        <div className="text-center p-8 max-w-md w-full">
           <h2 className="text-xl font-semibold text-red-600 mb-2">Connection Error</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
           <button
@@ -214,7 +229,7 @@ function RoomContent() {
       audio={true}
       video={true}
       onDisconnected={handleDisconnected}
-      className="h-screen w-screen"
+      className="h-screen w-screen overflow-hidden"
     >
       <SessionView />
       <RoomAudioRenderer />

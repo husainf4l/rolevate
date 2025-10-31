@@ -372,7 +372,7 @@ export function AudioVisualizer3D({
     console.log('🔍 3D Visualizer Effect Called');
     
     if (!mountRef.current || !isVisible || isInitialized) {
-      console.log('❌ Setup conditions not met:', { 
+      console.log('⏭️ Skipping setup:', { 
         hasMount: !!mountRef.current, 
         isVisible,
         isInitialized

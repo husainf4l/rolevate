@@ -71,57 +71,56 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
     <div className="h-full w-full flex flex-col lg:flex-row relative overflow-hidden">
       {/* AI Agent Area - Mobile: Full screen, Desktop: Left 65% */}
       <div className="flex-1 lg:w-[65%] relative bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        {/* Mobile User Camera Overlay */}
-        <div className="lg:hidden absolute top-4 right-4 z-20 w-24 h-32 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
-          <AnimatePresence>
-            {((cameraTrack && isCameraEnabled) || (screenShareTrack && isScreenShareEnabled)) ? (
-              <VideoTrack
-                trackRef={cameraTrack || screenShareTrack}
-                width={(cameraTrack || screenShareTrack)?.publication.dimensions?.width ?? 0}
-                height={(cameraTrack || screenShareTrack)?.publication.dimensions?.height ?? 0}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                <svg className="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+        {/* Mobile: Vertical centered layout */}
+        <div className="lg:hidden h-full flex flex-col items-center justify-start p-4 space-y-6">
+          {/* 1. User Video - Top right positioned */}
+          <div className="w-full flex justify-end">
+            <div className="w-24 h-32 md:w-28 md:h-36 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
+              <AnimatePresence>
+                {((cameraTrack && isCameraEnabled) || (screenShareTrack && isScreenShareEnabled)) ? (
+                  <VideoTrack
+                    trackRef={cameraTrack || screenShareTrack}
+                    width={(cameraTrack || screenShareTrack)?.publication.dimensions?.width ?? 0}
+                    height={(cameraTrack || screenShareTrack)?.publication.dimensions?.height ?? 0}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* 2. Animation - Center */}
+          <div className="flex-shrink-0 w-full flex justify-center">
+            {/* Smaller 3D Audio Visualizer for Mobile */}
+            {showVisualizer && !isAvatar && (
+              <div className="w-full max-w-sm h-48">
+                <AudioVisualizer3D 
+                  isVisible={showVisualizer}
+                  className="w-full h-full"
+                />
               </div>
             )}
-          </AnimatePresence>
-        </div>
 
-        {/* Mobile CC-Style Transcript Overlay */}
-        <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-          <div className="px-4 pb-4 max-h-24 overflow-hidden">
-            <ChatTranscript className="mobile-cc" />
+            {/* Avatar for Mobile */}
+            {isAvatar && (
+              <div className="w-full max-w-md aspect-video">
+                <VideoTrack
+                  width={videoWidth}
+                  height={videoHeight}
+                  trackRef={agentVideoTrack}
+                  className="w-full h-full object-cover rounded-2xl border border-white/20 shadow-2xl"
+                />
+              </div>
+            )}
           </div>
-        </div>
-        {/* Mobile: Full screen 3D visualizer + status */}
-        <div className="lg:hidden h-full flex flex-col items-center justify-center p-4 space-y-6">
-          {/* Large 3D Audio Visualizer for Mobile */}
-          {showVisualizer && !isAvatar && (
-            <div className="w-full h-96 max-w-lg">
-              <AudioVisualizer3D 
-                isVisible={showVisualizer}
-                className="w-full h-full"
-              />
-            </div>
-          )}
 
-          {/* Avatar for Mobile */}
-          {isAvatar && (
-            <div className="w-full max-w-md aspect-video">
-              <VideoTrack
-                width={videoWidth}
-                height={videoHeight}
-                trackRef={agentVideoTrack}
-                className="w-full h-full object-cover rounded-2xl border border-white/20 shadow-2xl"
-              />
-            </div>
-          )}
-
-          {/* Audio Visualization Status - Under the 3D */}
+          {/* 3. Thinking Status - Center */}
           <div className="flex-shrink-0">
             <p className="text-white/80 text-sm font-medium text-center">
               {agentState === 'speaking' ? 'AI Speaking' : 
@@ -164,6 +163,11 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
                      'AI Standby'}
                   </p>
                 </div>
+
+                {/* Desktop Transcript - Under the thinking status */}
+                <div className="flex-shrink-0 w-full max-w-4xl px-6">
+                  <ChatTranscript className="desktop-transcript" />
+                </div>
               </React.Fragment>
             )}
 
@@ -188,12 +192,6 @@ export function TileLayout({ showVisualizer = true }: TileLayoutProps) {
           </AnimatePresence>
         </div>
 
-        {/* Desktop CC-Style Transcript Overlay */}
-        <div className="hidden lg:block absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-          <div className="px-6 pb-6 max-h-32 overflow-hidden">
-            <ChatTranscript className="desktop-cc" />
-          </div>
-        </div>
       </div>
 
       {/* User Video Area - Desktop: Right 35% */}

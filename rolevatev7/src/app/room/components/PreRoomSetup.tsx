@@ -25,14 +25,15 @@ export function PreRoomSetup({ onComplete }: PreRoomSetupProps) {
     console.log('Video ref callback called:', !!videoElement, 'stream:', !!stream);
     if (videoElement && stream) {
       console.log('Setting srcObject in callback ref');
-      videoElement.srcObject = stream;
-      videoElement.play().then(() => {
-        console.log('Video playing from callback');
+      
+      // Prevent multiple play attempts by checking if already playing
+      if (videoElement.srcObject !== stream) {
+        videoElement.srcObject = stream;
+        // Don't manually call play() since autoPlay is set on the element
+        // The autoPlay attribute will handle playback automatically
+        console.log('srcObject set, autoPlay will handle playback');
         setIsVideoReady(true);
-      }).catch(err => {
-        console.error('Play error in callback:', err);
-        setIsVideoReady(true);
-      });
+      }
     }
   }, [stream]);
 

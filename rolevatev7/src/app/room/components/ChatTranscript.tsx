@@ -32,19 +32,22 @@ const detectTextDirection = (text: string): 'rtl' | 'ltr' => {
 export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
   const room = useRoomContext();
   const { state: agentState } = useVoiceAssistant();
+  const [transcriptLines, setTranscriptLines] = useState<string[]>([]);
   const [currentParagraph, setCurrentParagraph] = useState<string>('');
   const [isInterim, setIsInterim] = useState<boolean>(false);
   const lastFinalTextRef = useRef<string>('');
 
-  // Check if this is CC mode (mobile or desktop)
+  // Check if this is CC mode (mobile or desktop) or mobile transcript
   const isMobileCC = className.includes('mobile-cc');
   const isDesktopCC = className.includes('desktop-cc');
+  const isMobileTranscript = className.includes('mobile-transcript');
   const isCCMode = isMobileCC || isDesktopCC;
 
-  // Detect text direction
+  // Detect text direction for current text
   const textDirection = useMemo(() => {
-    return detectTextDirection(currentParagraph);
-  }, [currentParagraph]);
+    const allText = transcriptLines.join(' ') + ' ' + currentParagraph;
+    return detectTextDirection(allText);
+  }, [transcriptLines, currentParagraph]);
 
   // Listen to transcription events from LiveKit
   useEffect(() => {
@@ -63,13 +66,19 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
           const trimmedText = segment.text.trim();
           
           if (segment.final) {
-            // Final segment - if it's different from last, start new paragraph
+            // Final segment - add to transcript history (keep up to 5 lines)
             console.log('📝 Agent transcript (final):', trimmedText);
             
             // Check if this is a new paragraph (different from last final text)
-            if (trimmedText !== lastFinalTextRef.current) {
-              setCurrentParagraph(trimmedText);
+            if (trimmedText !== lastFinalTextRef.current && trimmedText.length > 0) {
+              // Add new line and keep only the last 5 lines
+              setTranscriptLines(prev => {
+                const updated = [...prev, trimmedText];
+                return updated.slice(-5); // Keep only last 5 lines
+              });
+              
               lastFinalTextRef.current = trimmedText;
+              setCurrentParagraph(''); // Clear current as it's now in history
               setIsInterim(false);
             }
           } else {
@@ -91,7 +100,7 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
     };
   }, [room]);
 
-  const hasContent = currentParagraph;
+  const hasContent = transcriptLines.length > 0 || currentParagraph;
 
   // CC Mode - Clean captions only (both mobile and desktop)
   if (isCCMode) {
@@ -100,37 +109,77 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
         isDesktopCC ? 'px-4 py-3' : 'px-3 py-2'
       }`}>
         {hasContent ? (
-          <p 
+          <div 
             dir={textDirection}
             className={`text-white leading-5 ${
               isDesktopCC ? 'text-base' : 'text-sm'
             } ${textDirection === 'rtl' ? 'text-right' : 'text-left'}`}
             lang={textDirection === 'rtl' ? 'ar' : 'en'}
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: isDesktopCC ? 4 : 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
-            }}
           >
-            <span className={isInterim ? 'text-white/90' : 'text-white/95'}>
-              {currentParagraph}
-            </span>
-            {/* Typing cursor when speaking and interim */}
-            {isInterim && agentState === 'speaking' && (
-              <motion.span 
-                className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 ${
-                  isDesktopCC ? 'h-4' : 'h-3'
-                } bg-[#0891b2] rounded-full`}
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-              />
+            {/* Previous lines (faded) */}
+            {transcriptLines.map((line, index) => (
+              <p key={index} className="text-white/70 mb-1">
+                {line}
+              </p>
+            ))}
+            
+            {/* Current line (active) */}
+            {currentParagraph && (
+              <p className="text-white/95">
+                <span className={isInterim ? 'text-white/90' : 'text-white/95'}>
+                  {currentParagraph}
+                </span>
+                {/* Typing cursor when speaking and interim */}
+                {isInterim && agentState === 'speaking' && (
+                  <motion.span 
+                    className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 ${
+                      isDesktopCC ? 'h-4' : 'h-3'
+                    } bg-[#0891b2] rounded-full`}
+                    animate={{ opacity: [1, 0.3, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
+              </p>
             )}
-          </p>
+          </div>
         ) : (
           <p className={`text-white/40 text-center py-1 ${
             isDesktopCC ? 'text-base' : 'text-sm'
           }`}>Waiting for conversation...</p>
+        )}
+      </div>
+    );
+  }
+
+  // Mobile Transcript Mode - Compact bottom section
+  if (isMobileTranscript) {
+    return (
+      <div className={className}>
+        {hasContent ? (
+          <div className="backdrop-blur-xl rounded-xl px-4 py-3 border border-white/10 bg-white/5 max-h-20 overflow-hidden">
+            <div 
+              dir={textDirection}
+              className={`text-white/95 text-sm leading-relaxed font-medium ${
+                textDirection === 'rtl' ? 'text-right' : 'text-center'
+              }`}
+              lang={textDirection === 'rtl' ? 'ar' : 'en'}
+            >
+              {/* Show only the current/latest message */}
+              {currentParagraph || transcriptLines[transcriptLines.length - 1]}
+              {/* Typing cursor when speaking and interim */}
+              {isInterim && agentState === 'speaking' && currentParagraph && (
+                <motion.span 
+                  className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 h-4 bg-[#0891b2] rounded-full`}
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="text-white/40 text-center text-sm py-2">
+            Waiting for AI response...
+          </div>
         )}
       </div>
     );
@@ -158,28 +207,44 @@ export function ChatTranscript({ className = '' }: ChatTranscriptProps) {
             className="w-full"
           >
             <div className="backdrop-blur-xl rounded-xl md:rounded-2xl lg:rounded-3xl px-2.5 md:px-5 lg:px-6 py-2.5 md:py-4 lg:py-6 border border-white/10 bg-white/5">
-              {/* Text Content - current paragraph with bidirectional support */}
-              <div className="w-full">
-                <p 
-                  dir={textDirection}
-                  className={`text-white/95 text-[13px] leading-[1.5] md:text-sm md:leading-relaxed lg:text-base xl:text-lg font-medium ${
-                    textDirection === 'rtl' ? 'text-right' : 'text-left'
-                  }`}
-                  lang={textDirection === 'rtl' ? 'ar' : 'en'}
-                >
-                  {/* Current paragraph */}
-                  <span className={isInterim ? 'text-white/90' : 'text-white/95'}>
-                    {currentParagraph}
-                  </span>
-                  {/* Typing cursor when speaking and interim */}
-                  {isInterim && agentState === 'speaking' && (
-                    <motion.span 
-                      className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 h-3 md:h-4 lg:h-5 bg-[#0891b2] rounded-full`}
-                      animate={{ opacity: [1, 0.3, 1] }}
-                      transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                  )}
-                </p>
+              {/* Text Content - transcript history with bidirectional support */}
+              <div className="w-full space-y-2">
+                {/* Previous lines (faded) */}
+                {transcriptLines.map((line, index) => (
+                  <p 
+                    key={index}
+                    dir={textDirection}
+                    className={`text-white/70 text-[13px] leading-[1.5] md:text-sm md:leading-relaxed lg:text-base xl:text-lg font-medium ${
+                      textDirection === 'rtl' ? 'text-right' : 'text-left'
+                    }`}
+                    lang={textDirection === 'rtl' ? 'ar' : 'en'}
+                  >
+                    {line}
+                  </p>
+                ))}
+                
+                {/* Current paragraph (active) */}
+                {currentParagraph && (
+                  <p 
+                    dir={textDirection}
+                    className={`text-white/95 text-[13px] leading-[1.5] md:text-sm md:leading-relaxed lg:text-base xl:text-lg font-medium ${
+                      textDirection === 'rtl' ? 'text-right' : 'text-left'
+                    }`}
+                    lang={textDirection === 'rtl' ? 'ar' : 'en'}
+                  >
+                    <span className={isInterim ? 'text-white/90' : 'text-white/95'}>
+                      {currentParagraph}
+                    </span>
+                    {/* Typing cursor when speaking and interim */}
+                    {isInterim && agentState === 'speaking' && (
+                      <motion.span 
+                        className={`inline-block ${textDirection === 'rtl' ? 'mr-1' : 'ml-1'} w-0.5 h-3 md:h-4 lg:h-5 bg-[#0891b2] rounded-full`}
+                        animate={{ opacity: [1, 0.3, 1] }}
+                        transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                      />
+                    )}
+                  </p>
+                )}
               </div>
             </div>
           </MotionDiv>

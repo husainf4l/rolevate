@@ -18,6 +18,69 @@ import {
   ExclamationTriangleIcon,
   ComputerDesktopIcon,
 } from "@heroicons/react/24/outline";
+import { debugAudioEnvironment, unlockAudioContext, testAudioPlayback, isProductionSSL } from "@/lib/audio-utils";
+
+// Global audio manager to prevent simultaneous play attempts
+class AudioManager {
+  private static instance: AudioManager;
+  private activePlayPromises = new Map<HTMLAudioElement, Promise<void>>();
+  
+  static getInstance(): AudioManager {
+    if (!AudioManager.instance) {
+      AudioManager.instance = new AudioManager();
+    }
+    return AudioManager.instance;
+  }
+
+  async safePlay(audioElement: HTMLAudioElement): Promise<boolean> {
+    try {
+      // Cancel any existing play attempt on this element
+      if (this.activePlayPromises.has(audioElement)) {
+        console.log("⚠️ Cancelling previous play attempt");
+        audioElement.pause();
+        this.activePlayPromises.delete(audioElement);
+        await new Promise(resolve => setTimeout(resolve, 50)); // Small delay
+      }
+
+      // Check if audio element is ready
+      if (audioElement.readyState < 2) {
+        console.warn("⚠️ Audio element not ready for playback, readyState:", audioElement.readyState);
+        return false;
+      }
+
+      // Check if already playing
+      if (!audioElement.paused) {
+        console.log("⚠️ Audio already playing, skipping");
+        return true;
+      }
+
+      const playPromise = audioElement.play();
+      if (playPromise !== undefined) {
+        this.activePlayPromises.set(audioElement, playPromise);
+        await playPromise;
+        this.activePlayPromises.delete(audioElement);
+        console.log("✅ Audio played successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      this.activePlayPromises.delete(audioElement);
+      if (error.name === 'AbortError') {
+        console.warn("⚠️ Audio play aborted (likely interrupted by new request):", error.message);
+      } else if (error.name === 'NotAllowedError') {
+        console.warn("⚠️ Audio play not allowed (user interaction required):", error.message);
+      } else {
+        console.warn("⚠️ Audio play failed:", error);
+      }
+      return false;
+    }
+  }
+}
+
+// Utility to safely handle audio play operations and prevent AbortError
+const safeAudioPlay = async (audioElement: HTMLAudioElement): Promise<boolean> => {
+  return AudioManager.getInstance().safePlay(audioElement);
+};
 
 // Custom CSS for enhanced animations
 const customStyles = `
@@ -98,6 +161,24 @@ export default function InterviewRoom({
     speaker: true,
     screenShare: false,
   });
+
+  // Debug audio environment on component mount
+  useEffect(() => {
+    debugAudioEnvironment();
+    
+    // Test if we're in production SSL and need special handling
+    if (isProductionSSL()) {
+      console.warn('🚨 Production SSL detected - implementing enhanced audio compatibility');
+      unlockAudioContext().then(success => {
+        if (success) {
+          console.log('✅ Audio context unlocked for production');
+          testAudioPlayback().then(canPlay => {
+            console.log('🎵 Audio playback test result:', canPlay);
+          });
+        }
+      });
+    }
+  }, []);
 
   // Memoized audio unlock handler for better performance
   const unlockAudioHandler = useCallback(() => {
@@ -397,41 +478,44 @@ export default function InterviewRoom({
               mediaTrack.enabled = true;
             }
 
-            // Create a temporary audio element to force audio context creation
+            // Create a single temporary audio element to force audio context creation
             const tempAudio = new Audio();
             tempAudio.srcObject = new MediaStream([mediaTrack]);
             tempAudio.muted = false;
             tempAudio.volume = 1.0;
             document.body.appendChild(tempAudio); // Explicitly add to DOM
 
-            // Create a second audio element with different approach
-            const tempAudio2 = document.createElement("audio");
-            tempAudio2.srcObject = new MediaStream([mediaTrack]);
-            tempAudio2.autoplay = true;
-            tempAudio2.muted = false;
-            tempAudio2.volume = 1.0;
-            document.body.appendChild(tempAudio2);
-
-            // Try to play it to kick-start audio context
-            const playPromise = tempAudio.play();
-            if (playPromise !== undefined) {
-              playPromise
-                .then(() => {
-                  console.log("✅ Successfully forced audio track playback");
-                  // Keep playing longer to ensure audio is heard
-                  setTimeout(() => {
+            // Try to play it to kick-start audio context using safe play function
+            safeAudioPlay(tempAudio).then((success) => {
+              if (success) {
+                console.log("✅ Successfully forced audio track playback");
+                // Keep playing longer to ensure audio is heard
+                setTimeout(() => {
+                  try {
                     tempAudio.pause();
                     tempAudio.srcObject = null;
-                    tempAudio2.pause();
-                    tempAudio2.srcObject = null;
+                    if (document.body.contains(tempAudio)) {
+                      document.body.removeChild(tempAudio);
+                    }
+                  } catch (cleanupErr) {
+                    console.warn("⚠️ Audio cleanup warning:", cleanupErr);
+                  }
+                }, 2000);
+              } else {
+                console.warn("⚠️ Could not force audio playback - cleaning up");
+                // Clean up on failure
+                try {
+                  if (tempAudio.srcObject) {
+                    tempAudio.srcObject = null;
+                  }
+                  if (document.body.contains(tempAudio)) {
                     document.body.removeChild(tempAudio);
-                    document.body.removeChild(tempAudio2);
-                  }, 5000);
-                })
-                .catch((err) => {
-                  console.warn("⚠️ Could not force audio playback:", err);
-                });
-            }
+                  }
+                } catch (cleanupErr) {
+                  console.warn("⚠️ Audio cleanup error:", cleanupErr);
+                }
+              }
+            });
           }
 
           // Refresh the RoomAudioRenderer
@@ -671,6 +755,48 @@ export default function InterviewRoom({
       }
     };
   }, [connectToRoom]);
+
+  // Debug AbortError and other media errors
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      if (event.reason?.name === 'AbortError') {
+        console.group('🚨 AbortError Debug Info');
+        console.log('Error:', event.reason);
+        console.log('Message:', event.reason.message);
+        console.log('Stack:', event.reason.stack);
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('Room state:', room.state);
+        console.log('Audio elements count:', document.querySelectorAll('audio').length);
+        console.log('Video elements count:', document.querySelectorAll('video').length);
+        console.groupEnd();
+        
+        // Don't prevent the default behavior, just log for debugging
+      }
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      if (event.error?.name === 'AbortError' || event.message?.includes('AbortError')) {
+        console.group('🚨 AbortError via Error Event');
+        console.log('Error event:', event);
+        console.log('Audio elements:', Array.from(document.querySelectorAll('audio')).map(el => ({
+          src: el.src,
+          srcObject: !!el.srcObject,
+          readyState: el.readyState,
+          paused: el.paused,
+          muted: el.muted
+        })));
+        console.groupEnd();
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleError);
+    };
+  }, [room]);
 
   // Connection status indicator
   const getConnectionStatus = () => {
@@ -1074,7 +1200,17 @@ export default function InterviewRoom({
           id="audio-container"
           className="fixed top-0 left-0 w-0 h-0 overflow-visible"
         >
-          <RoomAudioRenderer volume={1.0} muted={false} />
+          <RoomAudioRenderer 
+            volume={1.0} 
+            muted={false}
+            // Enhanced settings for production SSL environments
+            {...(isProductionSSL() && {
+              // Force audio to be unmuted for production
+              muted: false,
+              // Set higher volume for production environments
+              volume: 1.0
+            })}
+          />
         </div>
       </div>
     </RoomContext.Provider>
