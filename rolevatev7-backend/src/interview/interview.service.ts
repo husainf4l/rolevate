@@ -116,16 +116,42 @@ export class InterviewService {
       this.logger.error(`Failed to send feedback notification: ${errorMessage}`, errorStack);
     }
 
+    // Automatically trigger AI analysis when interview feedback is submitted
+    // Fire and forget - we don't want to block the feedback submission if analysis fails
+    this.generateAndSaveAnalysis(interviewId).catch(error => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to auto-generate analysis for interview ${interviewId}: ${errorMessage}`);
+    });
+
     this.logger.log(`Feedback submitted for interview: ${interviewId}`);
     return updatedInterview;
   }
 
   /**
-   * Complete an interview
+   * Start an interview
+   */
+  async startInterview(interviewId: string): Promise<Interview | null> {
+    await this.interviewRepository.update(interviewId, {
+      status: InterviewStatus.STARTED,
+    });
+
+    this.logger.log(`Interview started: ${interviewId}`);
+    return this.findOne(interviewId);
+  }
+
+  /**
+   * Complete an interview and trigger AI analysis
    */
   async completeInterview(interviewId: string): Promise<Interview | null> {
     await this.interviewRepository.update(interviewId, {
       status: InterviewStatus.COMPLETED,
+    });
+
+    // Automatically trigger AI analysis when interview is completed
+    // Fire and forget - we don't want to block the completion if analysis fails
+    this.generateAndSaveAnalysis(interviewId).catch(error => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to auto-generate analysis for completed interview ${interviewId}: ${errorMessage}`);
     });
 
     return this.findOne(interviewId);
@@ -221,5 +247,64 @@ export class InterviewService {
       phone,
       roomName,
     );
+  }
+
+  /**
+   * Generate and save AI analysis for an interview
+   * Calls the FastAPI interview analysis service and stores the result
+   */
+  async generateAndSaveAnalysis(interviewId: string): Promise<Interview | null> {
+    try {
+      this.logger.log(`Starting AI analysis for interview: ${interviewId}`);
+      
+      // Check if interview exists
+      const interview = await this.findOne(interviewId);
+      if (!interview) {
+        this.logger.error(`Interview not found: ${interviewId}`);
+        return null;
+      }
+
+      // Call the FastAPI analysis service
+      const fastApiUrl = process.env.INTERVIEW_ANALYSIS_API_URL || 'http://localhost:8005';
+      const axios = await import('axios');
+      const response = await axios.default.post(`${fastApiUrl}/interview-analysis`, {
+        interview_id: interviewId,
+        analyze: true
+      }, {
+        timeout: 30000, // 30 seconds - interview analysis can take time
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const analysisData = response.data;
+      
+      // Check if analysis was generated
+      if (!analysisData.analysis || Object.keys(analysisData.analysis).length === 0) {
+        this.logger.warn(`No analysis data received for interview: ${interviewId}`);
+        return interview;
+      }
+
+      // Update the interview with the AI analysis
+      await this.interviewRepository.update(interviewId, {
+        aiAnalysis: analysisData.analysis,
+      });
+
+      this.logger.log(`AI analysis saved for interview: ${interviewId}`);
+      return this.findOne(interviewId);
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to generate AI analysis for interview ${interviewId}: ${errorMessage}`, errorStack);
+      return null;
+    }
+  }
+
+  /**
+   * Get AI analysis for an interview
+   * Returns the stored analysis data
+   */
+  async getAnalysis(interviewId: string): Promise<any | null> {
+    const interview = await this.findOne(interviewId);
+    return interview?.aiAnalysis || null;
   }
 }

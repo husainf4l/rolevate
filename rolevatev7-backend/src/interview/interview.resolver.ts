@@ -1,4 +1,5 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { GraphQLJSONObject } from 'graphql-type-json';
 import { InterviewService } from './interview.service';
 import { Interview } from './interview.entity';
 import { CreateInterviewInput } from './create-interview.input';
@@ -51,6 +52,11 @@ export class InterviewResolver {
   }
 
   @Mutation(() => Interview, { nullable: true })
+  async startInterview(@Args('id', { type: () => ID }) id: string): Promise<Interview | null> {
+    return this.interviewService.startInterview(id);
+  }
+
+  @Mutation(() => Interview, { nullable: true })
   async completeInterview(@Args('id', { type: () => ID }) id: string): Promise<Interview | null> {
     return this.interviewService.completeInterview(id);
   }
@@ -94,5 +100,15 @@ export class InterviewResolver {
       phone,
       roomName,
     );
+  }
+
+  @Mutation(() => Interview, { nullable: true })
+  async generateInterviewAnalysis(@Args('id', { type: () => ID }) id: string): Promise<Interview | null> {
+    return this.interviewService.generateAndSaveAnalysis(id);
+  }
+
+  @Query(() => GraphQLJSONObject, { name: 'interviewAnalysis', nullable: true })
+  async getInterviewAnalysis(@Args('id', { type: () => ID }) id: string): Promise<any> {
+    return this.interviewService.getAnalysis(id);
   }
 }

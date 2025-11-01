@@ -817,155 +817,176 @@ export default function CandidateProfile() {
                 </div>
               )}
 
-              {/* Interview History Section - Moved from right column */}
+              {/* Interview History Section - Modern Clean Style */}
               {interviews.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-primary-600 px-6 py-4">
+                <div className="bg-white rounded-3xl shadow-lg border-0 overflow-hidden">
+                  {/* Header - Modern Minimal */}
+                  <div className="px-8 py-6 border-b border-gray-100">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                          <ChatBubbleLeftRightIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-white">
-                            Interview History
-                          </h3>
-                          <p className="text-sm text-white/80">
-                            {interviews.length} interview
-                            {interviews.length !== 1 ? "s" : ""} completed
-                          </p>
-                        </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Interview Sessions
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-0.5">
+                          {interviews.length} session{interviews.length !== 1 ? "s" : ""} completed
+                        </p>
                       </div>
-                      <div className="text-white/80 text-sm">
-                        {interviews[0]?.scheduledAt
-                          ? `Latest: ${new Date(
-                              interviews[0].scheduledAt
-                            ).toLocaleDateString()}`
-                          : "No recent interviews"}
+                      <div className="flex items-center gap-8">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-600">
+                            {interviews.filter(i => i.status === "COMPLETED").length} Complete
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span className="text-sm text-gray-600">
+                            {interviews.filter(i => i.recordingUrl).length} Recorded
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Interview Summary Cards - More compact version */}
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                      {interviews.slice(0, 2).map((interview) => (
-                        <div
-                          key={interview.id}
-                          className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200"
-                        >
-                          {/* Interview Header - Compact */}
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-start gap-3">
-                              <div
-                                className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                  interview.status === "COMPLETED"
-                                    ? "bg-green-100 text-green-600"
-                                    : interview.status === "IN_PROGRESS"
-                                    ? "bg-blue-100 text-blue-600"
-                                    : interview.status === "SCHEDULED"
-                                    ? "bg-yellow-100 text-yellow-600"
-                                    : "bg-gray-100 text-gray-600"
-                                }`}
-                              >
-                                <CalendarDaysIcon className="w-5 h-5" />
+                  {/* Interview List - Modern Clean Rows */}
+                  <div className="divide-y divide-gray-50">
+                    {interviews.map((interview, index) => (
+                      <div
+                        key={interview.id}
+                        className="px-8 py-5 hover:bg-gray-50/50 transition-colors duration-150 group"
+                      >
+                        <div className="flex items-center justify-between">
+                          {/* Left Side - Session Info */}
+                          <div className="flex items-center gap-6 flex-1">
+                            {/* Session Number & Status */}
+                            <div className="flex items-center gap-4">
+                              <div className="relative">
+                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-700">
+                                  {index + 1}
+                                </div>
+                                {interview.status === "COMPLETED" && (
+                                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                                )}
                               </div>
+                              
+                              {/* Session Details */}
                               <div>
-                                <h4 className="text-lg font-bold text-gray-900 mb-1">
-                                  Interview {interview.type.replace("_", " ")}
-                                </h4>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                  <span>
-                                    {interview.type.replace("_", " ")}
-                                  </span>
-                                  <span>•</span>
-                                  <span>
-                                    {new Date(
-                                      interview.scheduledAt
-                                    ).toLocaleDateString()}
-                                  </span>
+                                <div className="text-base font-medium text-gray-900">
+                                  Session {index + 1}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {interview.createdAt 
+                                    ? new Date(interview.createdAt).toLocaleDateString('en-US', { 
+                                        month: 'short', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })
+                                    : "No date"}
                                 </div>
                               </div>
                             </div>
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                interview.status === "COMPLETED"
-                                  ? "bg-green-100 text-green-700"
-                                  : interview.status === "IN_PROGRESS"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : interview.status === "SCHEDULED"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-gray-100 text-gray-700"
-                              }`}
-                            >
-                              {interview.status.replace("_", " ")}
-                            </span>
-                          </div>
 
-                          {/* AI Score - Compact */}
-                          {interview.aiAnalysis && typeof interview.aiAnalysis === 'object' && 'score' in interview.aiAnalysis && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-200 mb-3">
-                              <div className="flex items-center justify-between">
+                            {/* Metrics */}
+                            <div className="flex items-center gap-12">
+                              {/* AI Score */}
+                              {interview.aiAnalysis && typeof interview.aiAnalysis === 'object' && 'score' in interview.aiAnalysis ? (
                                 <div className="flex items-center gap-3">
-                                  <ChartBarIcon className="w-5 h-5 text-blue-600" />
-                                  <div>
-                                    <div className="text-lg font-bold text-gray-900">
+                                  <div className="text-right">
+                                    <div className="text-lg font-semibold text-gray-900">
                                       {interview.aiAnalysis.score}%
                                     </div>
-                                    <div className="text-xs text-gray-600">
-                                      AI Score
-                                    </div>
+                                    <div className="text-xs text-gray-500">AI Score</div>
+                                  </div>
+                                  <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                                    <div
+                                      className={`h-1.5 rounded-full ${
+                                        interview.aiAnalysis.score >= 70
+                                          ? "bg-green-500"
+                                          : interview.aiAnalysis.score >= 40
+                                          ? "bg-yellow-500"
+                                          : "bg-red-500"
+                                      }`}
+                                      style={{
+                                        width: `${Math.min(interview.aiAnalysis.score, 100)}%`,
+                                      }}
+                                    ></div>
                                   </div>
                                 </div>
-                                {interview.aiAnalysis.recommendation && (
-                                  <span
-                                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      interview.aiAnalysis.recommendation === "SECOND_INTERVIEW"
-                                        ? "bg-green-100 text-green-700"
-                                        : interview.aiAnalysis.recommendation === "REJECT"
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-yellow-100 text-yellow-700"
-                                    }`}
-                                  >
-                                    {interview.aiAnalysis.recommendation.replace("_", " ")}
+                              ) : (
+                                <div className="text-right">
+                                  <div className="text-lg font-semibold text-gray-300">—</div>
+                                  <div className="text-xs text-gray-400">No Score</div>
+                                </div>
+                              )}
+
+                              {/* Transcript Count */}
+                              <div className="text-right">
+                                <div className="text-lg font-semibold text-gray-900">
+                                  {interview.transcripts?.length || 0}
+                                </div>
+                                <div className="text-xs text-gray-500">Exchanges</div>
+                              </div>
+
+                              {/* Status Badge */}
+                              <div>
+                                {interview.status === "COMPLETED" ? (
+                                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                                    ✓ Complete
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
+                                    {interview.status.replace("_", " ")}
                                   </span>
                                 )}
                               </div>
                             </div>
-                          )}
+                          </div>
 
-                          {/* Quick Actions - Compact */}
-                          <div className="flex gap-2">
+                          {/* Right Side - Actions */}
+                          <div className="flex items-center gap-2">
                             {interview.recordingUrl && (
                               <a
                                 href={interview.recordingUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors duration-150"
                               >
                                 <EyeIcon className="w-4 h-4" />
-                                View
+                                Watch
                               </a>
                             )}
-                            <button className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm">
+                            
+                            <Link
+                              href={`/dashboard/candidates/${candidate.id}/interviews/${interview.id}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors duration-150"
+                            >
                               <DocumentTextIcon className="w-4 h-4" />
                               Details
-                            </button>
+                            </Link>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
+                  </div>
 
-                    {/* Show More Button if there are more interviews */}
-                    {interviews.length > 2 && (
-                      <div className="text-center">
-                        <button className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                  {/* Footer */}
+                  <div className="px-8 py-4 border-t border-gray-100 bg-gray-50/30">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-500">
+                        {interviews.length} session{interviews.length !== 1 ? "s" : ""}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-150">
                           <ChartBarIcon className="w-4 h-4" />
-                          View All {interviews.length} Interviews
+                          Export
+                        </button>
+                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors duration-150">
+                          <DocumentTextIcon className="w-4 h-4" />
+                          Download
                         </button>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1155,298 +1176,55 @@ export default function CandidateProfile() {
                 </div>
               </div>
 
-              {/* Interview Details Section */}
+              {/* Interview Summary for Right Column */}
               {interviews.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-primary-600 px-6 py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                          <ChatBubbleLeftRightIcon className="w-5 h-5 text-white" />
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Interview Summary
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {interviews.filter(i => i.status === "COMPLETED").length}
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-white">
-                            Interview History
-                          </h3>
-                          <p className="text-sm text-white/80">
-                            {interviews.length} interview
-                            {interviews.length !== 1 ? "s" : ""} completed
-                          </p>
-                        </div>
+                        <div className="text-xs text-green-700 font-medium">Completed</div>
                       </div>
-                      <div className="text-white/80 text-sm">
-                        Total: {interviews.length}
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {interviews.filter(i => i.recordingUrl).length}
+                        </div>
+                        <div className="text-xs text-blue-700 font-medium">Recorded</div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Interview Cards */}
-                  <div className="p-6 space-y-6">
-                    {interviews.map((interview) => (
-                      <div
-                        key={interview.id}
-                        className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-all duration-200"
-                      >
-                        {/* Interview Header */}
-                        <div className="flex items-start justify-between mb-6">
-                          <div className="flex items-start gap-4">
-                            <div
-                              className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                interview.status === "COMPLETED"
-                                  ? "bg-green-100 text-green-600"
-                                  : interview.status === "IN_PROGRESS"
-                                  ? "bg-blue-100 text-blue-600"
-                                  : interview.status === "SCHEDULED"
-                                  ? "bg-yellow-100 text-yellow-600"
-                                  : "bg-gray-100 text-gray-600"
-                              }`}
-                            >
-                              <CalendarDaysIcon className="w-6 h-6" />
-                            </div>
-                            <div>
-                              <h4 className="text-xl font-bold text-gray-900 mb-1">
-                                Interview {interview.type.replace("_", " ")}
-                              </h4>
-                              <div className="flex items-center gap-3 text-sm text-gray-600">
-                                <span className="font-medium">
-                                  {interview.type.replace("_", " ")}
-                                </span>
-                                <span>•</span>
-                                <span>
-                                  {interview.application.job?.company?.name || "N/A"}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
-                                interview.status === "COMPLETED"
-                                  ? "bg-green-100 text-green-700 border border-green-200"
-                                  : interview.status === "IN_PROGRESS"
-                                  ? "bg-blue-100 text-blue-700 border border-blue-200"
-                                  : interview.status === "SCHEDULED"
-                                  ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                                  : "bg-gray-100 text-gray-700 border border-gray-200"
-                              }`}
-                            >
-                              {interview.status.replace("_", " ")}
+                    
+                    {/* Latest Interview */}
+                    {interviews[0] && (
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="text-sm font-medium text-gray-900 mb-2">
+                          Latest Session
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          Interview #{interviews.length} • {interviews[0].createdAt 
+                            ? new Date(interviews[0].createdAt).toLocaleDateString()
+                            : "Recent"}
+                        </div>
+                        {interviews[0].aiAnalysis && typeof interviews[0].aiAnalysis === 'object' && 'score' in interviews[0].aiAnalysis && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-xs text-gray-600">AI Score:</span>
+                            <span className="text-sm font-bold text-primary-600">
+                              {interviews[0].aiAnalysis.score}%
                             </span>
                           </div>
-                        </div>
-
-                        {/* Interview Timeline */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                          <div className="bg-white rounded-lg p-4 border border-gray-200">
-                            <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
-                              Scheduled
-                            </div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {new Date(interview.scheduledAt).toLocaleString()}
-                            </div>
-                          </div>
-                          {interview.duration && (
-                            <div className="bg-white rounded-lg p-4 border border-gray-200">
-                              <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
-                                Duration
-                              </div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {interview.duration} minutes
-                              </div>
-                            </div>
-                          )}
-                          <div className="bg-white rounded-lg p-4 border border-gray-200">
-                            <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
-                              Status
-                            </div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {interview.status.replace("_", " ")}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* AI Analysis Section */}
-                        {(interview.aiAnalysis ||
-                          interview.notes ||
-                          interview.feedback) && (
-                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100">
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <ChartBarIcon className="w-5 h-5 text-blue-600" />
-                              </div>
-                              <h5 className="text-lg font-semibold text-gray-900">
-                                AI Performance Analysis
-                              </h5>
-                            </div>
-
-                            {interview.aiAnalysis && typeof interview.aiAnalysis === 'object' && 'score' in interview.aiAnalysis && (
-                              <div className="mb-6">
-                                <div className="flex items-center justify-between mb-3">
-                                  <div className="flex items-center gap-4">
-                                    <div className="text-3xl font-bold text-gray-900">
-                                      {interview.aiAnalysis.score}%
-                                    </div>
-                                    {interview.aiAnalysis.recommendation && (
-                                      <span
-                                        className={`px-3 py-1.5 rounded-full text-sm font-semibold ${
-                                          interview.aiAnalysis.recommendation === "SECOND_INTERVIEW"
-                                            ? "bg-green-100 text-green-700 border border-green-200"
-                                            : interview.aiAnalysis.recommendation === "REJECT"
-                                            ? "bg-red-100 text-red-700 border border-red-200"
-                                            : "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                                        }`}
-                                      >
-                                        {interview.aiAnalysis.recommendation.replace("_", " ")}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* Progress Bar */}
-                                <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                                  <div
-                                    className={`h-2.5 rounded-full ${
-                                      interview.aiAnalysis.score >= 70
-                                        ? "bg-green-500"
-                                        : interview.aiAnalysis.score >= 40
-                                        ? "bg-yellow-500"
-                                        : "bg-red-500"
-                                    }`}
-                                    style={{
-                                      width: `${Math.min(
-                                        interview.aiAnalysis.score,
-                                        100
-                                      )}%`,
-                                    }}
-                                  ></div>
-                                </div>
-                              </div>
-                            )}
-
-                            {(interview.notes || interview.feedback) && (
-                              <div>
-                                <h6 className="text-sm font-semibold text-gray-900 mb-3">
-                                  Interview Notes
-                                </h6>
-                                <div className="bg-white rounded-lg p-4 border border-gray-200 max-h-64 overflow-y-auto">
-                                  <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                    {interview.notes || interview.feedback}
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
                         )}
-
-                        {/* Interview Transcript */}
-                        {interview.transcripts &&
-                          interview.transcripts.length > 0 && (
-                            <div className="bg-gray-50 rounded-xl p-5 mb-6 border border-gray-200">
-                              <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-                                    <DocumentTextIcon className="w-5 h-5 text-gray-600" />
-                                  </div>
-                                  <h5 className="text-lg font-semibold text-gray-900">
-                                    Interview Transcript
-                                  </h5>
-                                </div>
-                                <div className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
-                                  {
-                                    interview.transcripts.filter(
-                                      (t) => t.speaker !== "SYSTEM"
-                                    ).length
-                                  }{" "}
-                                  exchanges
-                                </div>
-                              </div>
-
-                              <div className="space-y-4 max-h-80 overflow-y-auto">
-                                {interview.transcripts
-                                  .filter(
-                                    (transcript) =>
-                                      transcript.speaker !== "SYSTEM"
-                                  )
-                                  .slice(0, 8)
-                                  .map((transcript) => (
-                                    <div
-                                      key={transcript.id}
-                                      className="flex gap-3"
-                                    >
-                                      <div
-                                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-                                          transcript.speaker ===
-                                          "AI_ASSISTANT"
-                                            ? "bg-purple-100 text-purple-700"
-                                            : "bg-blue-100 text-blue-700"
-                                        }`}
-                                      >
-                                        {transcript.speaker ===
-                                        "AI_ASSISTANT"
-                                          ? "AI"
-                                          : "C"}
-                                      </div>
-                                      <div className="flex-1 bg-white rounded-lg p-3 border border-gray-200">
-                                        <div className="text-sm text-gray-900 leading-relaxed">
-                                          {transcript.content}
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-2">
-                                          {new Date(
-                                            transcript.timestamp
-                                          ).toLocaleTimeString()}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-
-                                {interview.transcripts.filter(
-                                  (t) => t.speaker !== "SYSTEM"
-                                ).length > 8 && (
-                                  <div className="text-center py-3">
-                                    <span className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
-                                      +
-                                      {interview.transcripts.filter(
-                                        (t) => t.speaker !== "SYSTEM"
-                                      ).length - 8}{" "}
-                                      more exchanges
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
-                          {interview.recordingUrl && (
-                            <a
-                              href={interview.recordingUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                            >
-                              <EyeIcon className="w-4 h-4" />
-                              Watch Recording
-                            </a>
-                          )}
-                          {interview.roomId &&
-                            interview.status === "IN_PROGRESS" && (
-                              <a
-                                href={`/room/${interview.roomId}`}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                              >
-                                <CalendarDaysIcon className="w-4 h-4" />
-                                Join Live Interview
-                              </a>
-                            )}
-                          <button className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
-                            <DocumentTextIcon className="w-4 h-4" />
-                            Download Report
-                          </button>
-                        </div>
                       </div>
-                    ))}
+                    )}
+
+                    <div className="pt-3 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 text-center">
+                        See full interview history in main section
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}

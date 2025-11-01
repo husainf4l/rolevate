@@ -34,7 +34,7 @@ interface Interview {
 
 // Helper function to convert API Interview to display format
 const convertToDisplayFormat = (apiInterview: APIInterview): Interview => {
-  const scheduledDate = new Date(apiInterview.scheduledAt);
+  const scheduledDate = apiInterview.scheduledAt ? new Date(apiInterview.scheduledAt) : new Date();
   
   // Map API status to display status
   const statusMap: Record<string, Interview["status"]> = {
@@ -53,13 +53,13 @@ const convertToDisplayFormat = (apiInterview: APIInterview): Interview => {
 
   return {
     id: apiInterview.id,
-    jobTitle: apiInterview.application.job.title,
-    company: apiInterview.application.job.company?.name || "Unknown Company",
+    jobTitle: "Interview Session", // Default since we don't have job data
+    company: "Rolevate Platform", // Default company name
     date: scheduledDate.toISOString().split('T')[0],
     time: scheduledDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
     type: typeMap[apiInterview.type] || "video",
-    interviewer: apiInterview.interviewer.name || apiInterview.interviewer.email,
-    interviewerRole: "Interviewer", // API doesn't provide role
+    interviewer: "AI Interviewer", // Since interviewer field is removed, use AI as default
+    interviewerRole: "AI Assistant", // Default role for AI interviewer
     status: statusMap[apiInterview.status] || "upcoming",
     round: 1, // API doesn't provide round number
     duration: apiInterview.duration ? `${apiInterview.duration} minutes` : "60 minutes",

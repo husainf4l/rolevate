@@ -755,14 +755,14 @@ export default function JobCandidateProfile() {
                             </div>
                             <div>
                               <h4 className="text-xl font-bold text-gray-900 mb-1">
-                                {interview.application?.job?.title || 'Interview'}
+                                Interview Session
                               </h4>
                               <div className="flex items-center gap-3 text-sm text-gray-600">
                                 <span className="font-medium">
                                   {interview.type.replace("_", " ")}
                                 </span>
                                 <span>•</span>
-                                <span>{interview.application?.job?.company?.name || "N/A"}</span>
+                                <span>Rolevate Platform</span>
                               </div>
                             </div>
                           </div>
@@ -788,7 +788,7 @@ export default function JobCandidateProfile() {
                               Scheduled
                             </div>
                             <div className="text-sm font-medium text-gray-900">
-                              {new Date(interview.scheduledAt).toLocaleString()}
+                              {interview.scheduledAt ? new Date(interview.scheduledAt).toLocaleString() : "Not scheduled"}
                             </div>
                           </div>
                           {interview.duration && (

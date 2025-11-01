@@ -22,11 +22,6 @@ const CREATE_INTERVIEW_MUTATION = gql`
           }
         }
       }
-      interviewer {
-        id
-        name
-        email
-      }
       scheduledAt
       duration
       type
@@ -42,7 +37,6 @@ const CREATE_INTERVIEW_MUTATION = gql`
 // TypeScript Interfaces
 export interface CreateInterviewInput {
   applicationId: string;
-  interviewerId: string;
   scheduledAt: string; // ISO date string
   duration?: number;
   type?: InterviewType;
@@ -89,11 +83,6 @@ export interface Interview {
       };
     };
   };
-  interviewer: {
-    id: string;
-    name: string;
-    email: string;
-  };
   scheduledAt: string;
   duration?: number;
   type: InterviewType;
@@ -107,7 +96,7 @@ export interface Interview {
 class RoomService {
   /**
    * Create a new interview with LiveKit room
-   * @param input - Interview creation input (applicationId, interviewerId, etc.)
+   * @param input - Interview creation input (applicationId, etc.)
    * @returns Interview object with roomId for LiveKit
    */
   async createInterviewRoom(input: CreateInterviewInput): Promise<Interview> {
@@ -146,7 +135,6 @@ class RoomService {
                 candidate { name }
                 job { title company { name } }
               }
-              interviewer { name }
               scheduledAt
             }
           }
