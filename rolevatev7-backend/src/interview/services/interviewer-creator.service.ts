@@ -35,17 +35,29 @@ export class InterviewerCreatorService {
   private async createAIInterviewer(interviewerId: string): Promise<User> {
     this.logger.log(`Creating AI interviewer with ID: ${interviewerId}`);
 
-    const aiInterviewer = this.userRepository.create({
-      id: interviewerId,
-      userType: UserType.SYSTEM,
-      name: 'AI Interviewer',
-      email: `ai-interviewer-${interviewerId}@rolevate.ai`,
-      isActive: true,
-    });
+    try {
+      const aiInterviewer = this.userRepository.create({
+        id: interviewerId,
+        userType: UserType.SYSTEM,
+        name: 'AI Interviewer',
+        email: `ai-interviewer@rolevate.ai`,
+        isActive: true,
+      });
 
-    const saved = await this.userRepository.save(aiInterviewer);
-    this.logger.log(`AI interviewer created: ${saved.name} (${saved.id})`);
+      const saved = await this.userRepository.save(aiInterviewer);
+      this.logger.log(`AI interviewer created: ${saved.name} (${saved.id})`);
 
-    return saved;
+      return saved;
+    } catch (error: any) {
+      // If user already exists with this ID, that's fine for system users
+      if (error?.code === '23505') { // Unique constraint violation
+        this.logger.log(`AI interviewer with ID ${interviewerId} already exists`);
+        const existingUser = await this.userRepository.findOne({ where: { id: interviewerId } });
+        if (existingUser) {
+          return existingUser;
+        }
+      }
+      throw error;
+    }
   }
 }

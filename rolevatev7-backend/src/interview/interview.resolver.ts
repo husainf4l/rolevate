@@ -32,11 +32,6 @@ export class InterviewResolver {
     return this.interviewService.findByApplicationId(applicationId);
   }
 
-  @Query(() => [Interview], { name: 'interviewsByInterviewer' })
-  async findByInterviewerId(@Args('interviewerId', { type: () => ID }) interviewerId: string): Promise<Interview[]> {
-    return this.interviewService.findByInterviewerId(interviewerId);
-  }
-
   @Mutation(() => Interview, { nullable: true })
   async updateInterview(
     @Args('id', { type: () => ID }) id: string,

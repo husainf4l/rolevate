@@ -2,7 +2,6 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { Application } from '../application/application.entity';
-import { User } from '../user/user.entity';
 import { Transcript } from './transcript.entity';
 
 export enum InterviewType {
@@ -41,13 +40,7 @@ export class Interview {
   @Field(() => Application)
   application: Application;
 
-  @Column()
-  interviewerId: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'interviewerId' })
-  @Field(() => User)
-  interviewer: User;
 
   @Column({ type: 'timestamp', nullable: true })
   @Field({ nullable: true })

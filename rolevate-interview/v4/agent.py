@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Type
 from livekit.agents import JobContext, WorkerOptions, cli
 from livekit.agents.llm import function_tool
 from livekit.agents.voice import Agent, AgentSession
-from livekit.plugins import openai, elevenlabs, soniox
+from livekit.plugins import silero, openai, elevenlabs, soniox
 from livekit import api
 
 # Load environment and configure logger
@@ -50,7 +50,7 @@ class BaseAgent(Agent):
             ),
             llm=openai.LLM(model="gpt-4o-mini"),
             tts=elevenlabs.TTS(voice_id="u0TsaWvt0v8migutHM3M"),
-            vad=openai.VAD()
+            vad=silero.VAD.load()
         )
 
     async def transition(self) -> Optional[Agent]:

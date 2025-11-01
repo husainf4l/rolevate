@@ -58,9 +58,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       throw new HttpException(errorResponse, errorResponse.statusCode);
     }
 
-    // For HTTP, send the response
+    // For HTTP, send the response (Fastify style)
     const response = host.switchToHttp().getResponse();
-    response.status(errorResponse.statusCode).json(errorResponse);
+    response.status(errorResponse.statusCode).send(errorResponse);
   }
 
   /**

@@ -37,6 +37,10 @@ export class Transcript {
   @Field()
   language: string;
 
+  @Column({ type: 'int', nullable: true })
+  @Field({ nullable: true })
+  sequenceNumber?: number;
+
   @CreateDateColumn()
   @Field()
   createdAt: Date;

@@ -8,7 +8,6 @@ import { SubmitInterviewFeedbackInput } from './submit-interview-feedback.input'
 import { TranscriptService } from './transcript.service';
 import { InterviewWithTranscriptSummary } from './interview-with-transcript-summary.dto';
 import { RoomAccess } from './room-access.dto';
-import { InterviewerCreatorService } from './services/interviewer-creator.service';
 import { InterviewNotificationService } from './services/interview-notification.service';
 import { InterviewRoomService } from './services/interview-room.service';
 
@@ -24,22 +23,38 @@ export class InterviewService {
     @InjectRepository(Interview)
     private readonly interviewRepository: Repository<Interview>,
     private readonly transcriptService: TranscriptService,
-    private readonly interviewerCreatorService: InterviewerCreatorService,
     private readonly notificationService: InterviewNotificationService,
     private readonly roomService: InterviewRoomService,
   ) {}
 
   /**
    * Create a new interview
-   * Delegates AI interviewer creation to InterviewerCreatorService
+   * No interviewer needed - interviews are always conducted by AI
+   * Optionally creates transcript messages if provided
    */
   async create(createInterviewInput: CreateInterviewInput): Promise<Interview> {
-    await this.interviewerCreatorService.ensureInterviewerExists(
-      createInterviewInput.interviewerId
-    );
-
-    const interview = this.interviewRepository.create(createInterviewInput);
+    const { transcriptMessages, ...interviewData } = createInterviewInput;
+    
+    const interview = this.interviewRepository.create(interviewData);
     const saved = await this.interviewRepository.save(interview);
+    
+    // Create transcript messages if provided
+    if (transcriptMessages && transcriptMessages.length > 0) {
+      // Process messages with proper interview ID and sequence
+      const transcriptPromises = transcriptMessages.map((message, index) => 
+        this.transcriptService.create({
+          interviewId: saved.id, // Set the correct interview ID
+          content: message.content,
+          speaker: message.speaker,
+          timestamp: new Date(message.timestamp),
+          confidence: message.confidence,
+          language: message.language || 'english',
+          sequenceNumber: message.sequenceNumber !== undefined ? message.sequenceNumber : index,
+        })
+      );
+      
+      await Promise.all(transcriptPromises);
+    }
     
     this.logger.log(`Interview created: ${saved.id}`);
     return saved;
@@ -47,28 +62,21 @@ export class InterviewService {
 
   async findAll(): Promise<Interview[]> {
     return this.interviewRepository.find({
-      relations: ['application', 'interviewer', 'transcripts'],
+      relations: ['application', 'transcripts'],
     });
   }
 
   async findOne(id: string): Promise<Interview | null> {
     return this.interviewRepository.findOne({
       where: { id },
-      relations: ['application', 'interviewer', 'transcripts'],
+      relations: ['application', 'transcripts'],
     });
   }
 
   async findByApplicationId(applicationId: string): Promise<Interview[]> {
     return this.interviewRepository.find({
       where: { applicationId },
-      relations: ['application', 'interviewer', 'transcripts'],
-    });
-  }
-
-  async findByInterviewerId(interviewerId: string): Promise<Interview[]> {
-    return this.interviewRepository.find({
-      where: { interviewerId },
-      relations: ['application', 'interviewer', 'transcripts'],
+      relations: ['application', 'transcripts'],
     });
   }
 
@@ -150,7 +158,6 @@ export class InterviewService {
     return {
       id: interview.id,
       applicationId: interview.applicationId,
-      interviewerId: interview.interviewerId,
       scheduledAt: interview.scheduledAt,
       duration: interview.duration,
       type: interview.type,
@@ -177,7 +184,6 @@ export class InterviewService {
         return {
           id: interview.id,
           applicationId: interview.applicationId,
-          interviewerId: interview.interviewerId,
           scheduledAt: interview.scheduledAt,
           duration: interview.duration,
           type: interview.type,

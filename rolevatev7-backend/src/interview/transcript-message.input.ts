@@ -1,11 +1,17 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsNumber, Min, Max, IsEnum, IsDateString, IsUUID } from 'class-validator';
+
+export enum SpeakerType {
+  AI = 'AI',
+  CANDIDATE = 'CANDIDATE',
+  SYSTEM = 'SYSTEM'
+}
 
 @InputType()
-export class CreateTranscriptInput {
+export class TranscriptMessageInput {
   @Field()
   @IsNotEmpty()
-  @IsString()
+  @IsUUID()
   interviewId: string;
 
   @Field()
@@ -13,14 +19,15 @@ export class CreateTranscriptInput {
   @IsString()
   content: string;
 
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
-  @IsString()
-  speaker: string;
+  @IsEnum(SpeakerType)
+  speaker: SpeakerType;
 
   @Field()
   @IsNotEmpty()
-  timestamp: Date;
+  @IsDateString()
+  timestamp: string;
 
   @Field({ nullable: true })
   @IsOptional()

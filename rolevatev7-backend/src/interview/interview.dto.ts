@@ -10,9 +10,6 @@ export class InterviewDto {
   @Field()
   applicationId: string;
 
-  @Field()
-  interviewerId: string;
-
   @Field({ nullable: true })
   scheduledAt?: Date;
 

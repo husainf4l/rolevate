@@ -10,9 +10,6 @@ export class InterviewWithTranscriptSummary {
   @Field()
   applicationId: string;
 
-  @Field()
-  interviewerId: string;
-
   @Field({ nullable: true })
   scheduledAt?: Date;
 
