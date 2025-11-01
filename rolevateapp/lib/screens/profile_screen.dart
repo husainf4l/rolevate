@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show CircleAvatar;
 import 'package:get/get.dart';
 import 'package:rolevateapp/controllers/auth_controller.dart';
 import 'package:rolevateapp/core/theme/app_colors.dart';
